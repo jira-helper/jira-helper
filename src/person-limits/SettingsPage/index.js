@@ -42,6 +42,7 @@ export default class PersonalWIPLimit extends PageModification {
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter(i => !i.isKanPlanColumn);
     this.boardDataSwimlanes = this.boardData.swimlanesConfig.swimlanes;
     this.personLimits = personLimits;
+    this.personLimitsRecovery = window.structuredClone(personLimits);
 
     this.renderEditButton();
     this.onDOMChange('#columns', () => {
@@ -112,6 +113,12 @@ export default class PersonalWIPLimit extends PageModification {
 
   handleSubmit = async unmountPopup => {
     await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
+    this.personLimitsRecovery = window.structuredClone(this.personLimits);
+    unmountPopup();
+  };
+
+  handleClose = async unmountPopup => {
+    this.personLimits = window.structuredClone(this.personLimitsRecovery);
     unmountPopup();
   };
 
@@ -184,7 +191,7 @@ export default class PersonalWIPLimit extends PageModification {
       },
     };
 
-    await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
+    // await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
 
     this.renderAllRow();
 
@@ -194,7 +201,7 @@ export default class PersonalWIPLimit extends PageModification {
 
   onDeleteLimit = async id => {
     this.personLimits.limits = this.personLimits.limits.filter(limit => limit.id !== id);
-    await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
+    // await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
   };
 
   onEdit = async id => {
@@ -218,7 +225,7 @@ export default class PersonalWIPLimit extends PageModification {
       option.selected = selectedSwimlanesIds.indexOf(option.value) > -1;
     });
 
-    await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
+    // await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
   };
 
   showRowsTable() {
