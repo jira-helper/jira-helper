@@ -1,3 +1,5 @@
+import { throttle } from 'lodash';
+
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { settingsJiraDOM as DOM } from '../../swimlane/constants';
@@ -33,7 +35,24 @@ const getAssignee = avatar => {
   return getNameFromTooltip(label);
 };
 
-export default class extends PageModification {
+export default class PersonLimitsOnBoardPage extends PageModification {
+  static jiraSelectors = {
+    swimlane: '.ghx-swimlane',
+    swimlanePool: '#ghx-pool',
+    // One swimlane
+    swimlaneJiraCloud: '[data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]', // '[data-testid="platform-board-kit.ui.swimlane.swimlane-content"]',
+    // Container of all swimlanes
+    swimlanePoolJiraCloud: '[data-testid="platform-board-kit.ui.board.scroll.board-scroll"]',
+    column: '.ghx-column',
+    // Element to get column title from
+    columnCloud: '[data-component-selector="platform-board-kit.ui.column-title"] > div:first-child',
+    issue: '.ghx-issue',
+    // Issue card selector
+    issueCloud: '[data-testid="software-board.board-container.board.card-container.card-with-icc"]',
+    // Real column with issues inside
+    issueWrapperCloud: '[data-component-selector="platform-board-kit.ui.column.draggable-column"]',
+  };
+
   shouldApply() {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -94,35 +113,71 @@ export default class extends PageModification {
         .ghx-parent-group.no-visibility {
             display: none!important;
         }
+
+        .jh-person-limit, .jh-person-limit [data-test-id="platform-card.ui.card.focus-container"] {
+            background: #ff5630 !important;
+        }
     </style>
     `;
   }
 
   waitForLoading() {
-    return this.waitForElement('.ghx-swimlane');
+    return this.waitForFirstElement([
+      PersonLimitsOnBoardPage.jiraSelectors.swimlane,
+      PersonLimitsOnBoardPage.jiraSelectors.swimlaneJiraCloud,
+    ]);
   }
 
   loadData() {
-    return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS)]);
+    return Promise.all([
+      this.getBoardEditData(),
+      this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS),
+      // Only fetch for jira cloud
+      document.querySelector(PersonLimitsOnBoardPage.jiraSelectors.swimlaneJiraCloud) ? this.getBoardLatest() : null,
+    ]);
   }
+
+  modifiedIssues = []; // HTML elements we applied custom styles to
 
   apply(data) {
     if (!data) return;
-    const [editData = {}, personLimits] = data;
+    const [editData = {}, personLimits, boardLatest] = data;
     if (!personLimits || !personLimits.limits.length) return;
 
+    this.boardLatest = boardLatest;
     this.cssSelectorOfIssues = this.getCssSelectorOfIssues(editData);
+
+    const throttledApply = throttle(this.applyLimits.bind(this, personLimits), 2000);
+
+    const params = { childList: true, subtree: true };
+    this.onDOMChange(PersonLimitsOnBoardPage.jiraSelectors.swimlanePool, throttledApply, params);
+    /**
+     * This is too much but appears there is no better way atm
+     * Triggers reload of latest data on every issue hover, that's why we throttle it
+     * We could observe column headers only, but it wouldn't update limits on issue update
+     * Maybe it could work with issue observing, needs investigation
+     */
+    this.onDOMChange(PersonLimitsOnBoardPage.jiraSelectors.swimlanePoolJiraCloud, throttledApply, params);
+
     this.applyLimits(personLimits);
-    this.onDOMChange('#ghx-pool', () => this.applyLimits(personLimits), { childList: true, subtree: true });
   }
 
   applyLimits(personLimits) {
     const stats = this.getLimitsStats(personLimits);
 
+    while (this.modifiedIssues.length > 0) {
+      const issue = this.modifiedIssues.pop();
+      issue.classList.remove('jh-person-limit');
+    }
+
     stats.forEach(personLimit => {
       if (personLimit.issues.length > personLimit.limit) {
         personLimit.issues.forEach(issue => {
-          issue.style.backgroundColor = '#ff5630';
+          if (!issue) {
+            return;
+          }
+          issue.classList.add('jh-person-limit');
+          this.modifiedIssues.push(issue);
         });
       }
     });
@@ -146,7 +201,11 @@ export default class extends PageModification {
       this.avatarsList.innerHTML = html;
 
       this.addEventListener(this.avatarsList, 'click', event => this.onClickAvatar(event));
-      document.querySelector('#subnav-title').insertBefore(this.avatarsList, null);
+      const subNav =
+        document.querySelector('#subnav-title') ??
+        document.querySelector('[data-testid="filters.ui.filters.assignee.stateless.assignee-filter"]');
+
+      subNav.insertBefore(this.avatarsList, null);
     }
 
     this.avatarsList.querySelectorAll('.limit-stats').forEach((stat, index) => {
@@ -261,10 +320,60 @@ export default class extends PageModification {
     });
   }
 
+  countAmountPersonalIssuesInColumnCloud(stats) {
+    const allIssues = this.boardLatest?.columns?.flatMap(column => {
+      return column.issues.map(issue => {
+        const swimlaneId = this.boardLatest?.swimlaneInfo?.swimlanes?.find(swimlane => {
+          return swimlane.issueIds?.includes(issue?.id);
+        })?.id;
+        return {
+          ...issue,
+          /**
+           * Enrich issue data for easier status filtration later
+           * Stored in board property as string but returned
+           * From jira api as numbers, convert once here
+           */
+          swimlaneId: swimlaneId ? String(swimlaneId) : null,
+          columnId: String(column.id),
+          columnName: String(column.name),
+        };
+      });
+    });
+    allIssues.forEach(issue => {
+      const assigneeId = issue?.assigneeAccountId ?? issue?.assigneeKey;
+      const currentLimit = stats.find(stat => {
+        // We now store accountId in limit itself for easier user lookup
+        const matchesAssignee =
+          (stat.person.accountId && stat.person.accountId === assigneeId) ||
+          // fallback to previous saved settings, not reliable
+          stat.person.avatar.includes(assigneeId) ||
+          stat.person.self.includes(assigneeId);
+
+        return matchesAssignee;
+      });
+      const matchesColumn = currentLimit?.columns?.some(column => column.id === issue?.columnId);
+      const matchesSwimlane = currentLimit?.swimlanes.some(swimlane => swimlane.id === issue?.swimlaneId);
+
+      const shouldCountInLimit = matchesSwimlane && matchesColumn;
+
+      if (shouldCountInLimit) {
+        const issueElement = document.querySelector(`#card-${issue.key}`);
+
+        /**
+         *
+         * Issue card is not always in the dom
+         * But we push it anyway because we want counters to be valid
+         */
+        currentLimit.issues.push(issueElement);
+      }
+    });
+    return stats;
+  }
+
   getLimitsStats(personLimits) {
     const stats = personLimits.limits.map(personLimit => ({
       ...personLimit,
-      issues: [],
+      issues: [], // html elements to apply limit styling to
     }));
 
     if (this.hasCustomswimlanes()) {
@@ -282,6 +391,10 @@ export default class extends PageModification {
     document.querySelectorAll('.ghx-column').forEach(column => {
       this.countAmountPersonalIssuesInColumn(column, stats);
     });
+
+    if (document.querySelectorAll(PersonLimitsOnBoardPage.jiraSelectors.columnCloud)) {
+      this.countAmountPersonalIssuesInColumnCloud(stats);
+    }
 
     return stats;
   }

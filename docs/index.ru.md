@@ -9,13 +9,13 @@
 При наведении курсора мыши на bar всплывает подсказка (title) в которой показывается название
 ассоциированной колонки доски с bar и количество задач в этой колонке для этого swimlane.
 
-![Chart Bar](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_ChartBar.gif)
+![Chart Bar](./images/jirahelper_ChartBar.gif)
 
 Удобно использовать при большом количестве swimlane.
 
 Например, когда swimlane используются для отображения задач по Epic или Stories или Assigne.
 
-![Settings Base swimlane on](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_swimlane_base_swimlanes_on.gif)
+![Settings Base swimlane on](./images/jirahelper_swimlane_base_swimlanes_on.gif)
 
 
 ## Flag on Issue panel
@@ -28,11 +28,11 @@
 
 Пример JIRA Cloud:
 
-![issue flag jira cloud](https://github.com/pavelpower/jira-helper/raw/images/features/jirahelper_issue_flag.gif)
+![issue flag jira cloud](./images/jirahelper_issue_flag.gif)
 
 Пример JIRA v7.\*.\*:
 
-![issue flag jira 7](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_issue_flag_jira7.gif)
+![issue flag jira 7](./images/jirahelper_issue_flag_jira7.gif)
 
 
 ## Template for Description
@@ -41,7 +41,7 @@
 
 При помощи которых можно сохранить Template для этого типа задач к себе в localStorage браузера (шаблон сохранится к на вашем компьютере).
 
-![description template](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_description_template.gif)
+![description template](./images/jirahelper_description_template.gif)
 
 ## WIP-limits for several columns (CONWIP)
 _WIP – work in progress_
@@ -58,7 +58,7 @@ _WIP – work in progress_
 
 _"Board Settings -> Columns"_
 
-![settings wip-limit for column](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/group-wip-limit.gif)
+![settings wip-limit for column](./images/group-wip-limit.gif)
 
 При этом, можно пользоваться функциональностью ограничений колонок предоставленной JIRA!
 
@@ -69,7 +69,7 @@ _"Board Settings -> Columns"_
 С версии [2.1.0](https://github.com/pavelpower/jira-helper/releases/tag/2.1.0) возможно учитывать или не учитывать запросы типа sub-task в CONWIP лимитах.
 
 Для этого нужно выбрать соответствующую настройку "Column Constraint"
-![sub-task & CONWIP](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_CONWIP_with_sub-task.gif)
+![sub-task & CONWIP](./images/jirahelper_CONWIP_with_sub-task.gif)
 
 
 ## WIP-limits for Swimlanes
@@ -85,7 +85,7 @@ _"Board Settings -> Columns"_
 Сохранять значение может только Администратор board.
 
 _"Board Settings -> Swimlane"_
-![swimlane wip-limits](https://github.com/pavelpower/jira-helper/blob/images/features/jirahelper_wip_limit_settings_swim_ex.gif)
+![swimlane wip-limits](./images/jirahelper_wip_limit_settings_swim_ex.gif)
 
 Используя комбинацию wip-ограничений колонок и swimlane вы можете визуализировать управление сложной системой с разными типами и классами задач.
 
@@ -198,11 +198,11 @@ _Control Chart - это наверное то, за что можно любит
 
 Значение SLA указано в днях.
 
-![sla-line for control chart](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jirahelper_sla_for_controlchart.gif)
+![sla-line for control chart](./images/jirahelper_sla_for_controlchart.gif)
 
 А возле линии SLA, начиная с версии [2.6.0](https://github.com/pavelpower/jira-helper/releases/tag/2.6.0)
 вы можете видите процентиль, рассчитанный по количеству событий на контрольной диаграмме.
-![sla-line for control chart](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/control_chart_sla_with_percentile.png)
+![sla-line for control chart](./images/control_chart_sla_with_percentile.png)
 
 ## Ruler of measuring for control chart
 
@@ -215,20 +215,20 @@ _Control Chart - это наверное то, за что можно любит
 Выбирите функцию в выпадающем поле `Ruler`, рядом с полем `SLA`, и укажите исследуемую размерность.
 
 _На картинке использована функция Фиббоначи, размерность "6"_
-![Fibonacci distribution](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/control_chart_ruler_selected_type.png)
+![Fibonacci distribution](./images/control_chart_ruler_selected_type.png)
 
 Можем видеть как время затраченное на выполнение здач **не** соответсвует размерности, функция Фиббоначи не подходит для оценки задач.
-![Fibonacci distribution](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/control_chart_ruler_switch_on.png)
+![Fibonacci distribution](./images/control_chart_ruler_switch_on.png)
 
 ## Blurring of secret data
 
 Если вам необходимо скрыть данные о ваших задачах, но показать модель вашей визуализации коллегам,
 то вы можете размыть эти данные через контекстное меню включив функцию "blur secret data"
 
-![the blurring of secret data](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/call_context_menu_use_blurre_secret_data.png)
+![the blurring of secret data](./images/call_context_menu_use_blurre_secret_data.png)
 
 Результат
-![secret data is blurred](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/blurred_secret_data.png)
+![secret data is blurred](./images/blurred_secret_data.png)
 
 
 ## Identity request from Jira-Helper
@@ -236,7 +236,7 @@ _На картинке использована функция Фиббонач�
 Your administrators of JIRA can identify requests from jira-helper by the special request header
 "browser-plugin: jira-helper/{version}".
 
-![jira-helper-reques](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/jira-helper-request_300px.png)
+![jira-helper-reques](./images/jira-helper-request_300px.png)
 
 ## Wip limit on cell
 
