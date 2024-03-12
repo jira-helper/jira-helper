@@ -133,7 +133,7 @@ export default class PersonLimitsOnBoardPage extends PageModification {
       this.getBoardEditData(),
       this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS),
       // Only fetch for jira cloud
-      document.querySelector(PersonLimitsOnBoardPage.jiraSelectors.swimlaneJiraCloud) ? this.getBoardLatest() : null,
+      this.getBoardLatest().catch(() => null),
     ]);
   }
 

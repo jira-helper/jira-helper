@@ -100,7 +100,7 @@ export class PageModification {
         hideCardExtraFields: true,
         includeHidden: false,
         moduleKey: 'agile-mobile-board-service',
-        skipEtag: false,
+        skipEtag: true,
         skipExtraFields: true,
       },
     });

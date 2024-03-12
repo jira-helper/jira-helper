@@ -38,7 +38,7 @@ export default class extends PageModification {
         this.getBoardProperty(BOARD_PROPERTIES.OLD_SWIMLANE_SETTINGS),
       ]).then(mergeSwimlaneSettings),
       // Only fetch for jira cloud
-      document.querySelector(DOM.swimlaneCloud) ? this.getBoardLatest() : null,
+      this.getBoardLatest().catch(() => null),
     ]);
   }
 

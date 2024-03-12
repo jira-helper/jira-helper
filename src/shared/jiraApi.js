@@ -176,9 +176,6 @@ export const getLatestForBoard = (boardId, params = {}) => {
   return requestJira({
     url: boardLatestURL(boardId),
     type: 'json',
-    memoryCache: true,
-    memoryCacheTtl: 1000,
-    memoryCacheForce: true,
     ...params,
   });
 };

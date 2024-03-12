@@ -45,7 +45,7 @@ export default class extends PageModification {
       this.getBoardEditData(),
       this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS),
       // Only fetch for jira cloud
-      document.querySelector(DOM.swimlaneCloudWrapper) ? this.getBoardLatest() : null,
+      this.getBoardLatest().catch(() => null),
     ]);
   }
 
