@@ -321,24 +321,25 @@ export default class PersonLimitsOnBoardPage extends PageModification {
   }
 
   countAmountPersonalIssuesInColumnCloud(stats) {
-    const allIssues = this.boardLatest?.columns?.flatMap(column => {
-      return column.issues.map(issue => {
-        const swimlaneId = this.boardLatest?.swimlaneInfo?.swimlanes?.find(swimlane => {
-          return swimlane.issueIds?.includes(issue?.id);
-        })?.id;
-        return {
-          ...issue,
-          /**
-           * Enrich issue data for easier status filtration later
-           * Stored in board property as string but returned
-           * From jira api as numbers, convert once here
-           */
-          swimlaneId: swimlaneId ? String(swimlaneId) : null,
-          columnId: String(column.id),
-          columnName: String(column.name),
-        };
-      });
-    });
+    const allIssues =
+      this.boardLatest?.columns?.flatMap(column => {
+        return column.issues.map(issue => {
+          const swimlaneId = this.boardLatest?.swimlaneInfo?.swimlanes?.find(swimlane => {
+            return swimlane.issueIds?.includes(issue?.id);
+          })?.id;
+          return {
+            ...issue,
+            /**
+             * Enrich issue data for easier status filtration later
+             * Stored in board property as string but returned
+             * From jira api as numbers, convert once here
+             */
+            swimlaneId: swimlaneId ? String(swimlaneId) : null,
+            columnId: String(column.id),
+            columnName: String(column.name),
+          };
+        });
+      }) ?? [];
     allIssues.forEach(issue => {
       const assigneeId = issue?.assigneeAccountId ?? issue?.assigneeKey;
       const currentLimit = stats.find(stat => {

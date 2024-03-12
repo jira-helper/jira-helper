@@ -5,12 +5,15 @@ import { BOARD_PROPERTIES } from '../../shared/constants';
 import { mergeSwimlaneSettings } from '../../swimlane/utils';
 import { findGroupByColumnId, generateColorByFirstChars } from '../shared/utils';
 import { boardPageColumnHeaderBadge } from './htmlTemplates';
+import styles from './styles.css';
 
 export default class ColumnLimitsBoardPage extends PageModification {
   static jiraSelectors = {
     swimlanePool: '#ghx-pool',
     // Jira Cloud
     columnHeaderCloud: '[data-testid="platform-board-kit.common.ui.column-header.header.column-header-container"]',
+    issueWrapperCloud: '[data-component-selector="platform-board-kit.ui.card-container"]',
+    swimlanePoolJiraCloud: '[data-testid="platform-board-kit.ui.board.scroll.board-scroll"]',
   };
 
   shouldApply() {
@@ -62,6 +65,11 @@ export default class ColumnLimitsBoardPage extends PageModification {
       childList: false,
       subtree: false,
     });
+    const virtualBoard = document.querySelector(ColumnLimitsBoardPage.jiraSelectors.swimlanePoolJiraCloud);
+    if (virtualBoard) {
+      virtualBoard.addEventListener('scroll', throttledStyle);
+      this.sideEffects.push(() => virtualBoard.removeEventListener('scroll', throttledStyle));
+    }
 
     this.applyStyles();
   }
@@ -136,9 +144,17 @@ export default class ColumnLimitsBoardPage extends PageModification {
     ).length;
   }
 
+  /** @type {HTMLElement[]} */
   insertedBadges = [];
 
+  /** @type {HTMLElement[]} */
+  modifiedIssues = [];
+
   styleColumnsWithLimitations() {
+    const ignoredSwimlanes = Object.keys(this.swimlanesSettings).filter(
+      swimlaneId => this.swimlanesSettings[swimlaneId].ignoreWipInColumns
+    );
+
     const columnElements = document.querySelectorAll(ColumnLimitsBoardPage.jiraSelectors.columnHeaderCloud);
     const isJiraCloud = columnElements.length > 0;
 
@@ -147,6 +163,13 @@ export default class ColumnLimitsBoardPage extends PageModification {
       if (!isJiraCloud) {
         return;
       }
+      /** @type string[] */
+      const ignoredIssues = this.boardLatest.swimlaneInfo.swimlanes.reduce((acc, swimlane) => {
+        if (ignoredSwimlanes.includes(String(swimlane.id))) {
+          acc = acc.concat(swimlane.issueIds.map(String));
+        }
+        return acc;
+      }, []);
       /**
        * Jira cloud only mutations, do not query dom for issues etc
        * Update columns based on board latest data and subgroups response
@@ -156,40 +179,57 @@ export default class ColumnLimitsBoardPage extends PageModification {
         // Clear previously added badges so column doesn't stay busted after update
         badge.remove();
       }
+      while (this.modifiedIssues.length > 0) {
+        const issueElement = this.modifiedIssues.pop();
+        issueElement.classList.remove(styles.issueOverLimit);
+      }
       Object.values(this.boardGroups).forEach(group => {
         const { columns: groupColumns, max: groupLimit } = group;
         if (!groupColumns || !groupLimit) return;
 
-        const amountOfGroupTasks = groupColumns.reduce((acc, columnId) => {
+        const groupTasks = groupColumns.reduce((acc, columnId) => {
           const column = this.boardLatest?.columns?.find(boardColumn => {
             return boardColumn.id && String(boardColumn.id) === columnId;
           });
-          return acc + column.issues.length;
-        }, 0);
+          const issuesWithoutExpedite =
+            column?.issues.filter(issue => {
+              return !ignoredIssues.includes(String(issue.id));
+            }) ?? [];
+          acc = acc.concat(issuesWithoutExpedite);
+          return acc;
+        }, []);
 
         groupColumns.forEach(groupColumnId => {
           const index = this.boardLatest?.columns?.findIndex(column => {
             return String(column.id) === String(groupColumnId);
           });
           if (index > -1) {
+            // Badge over column title
             const insertedElement = this.insertHTML(
               columnElements[index],
               'beforeend',
               boardPageColumnHeaderBadge({
                 isCloud: true,
-                amountOfGroupTasks,
+                amountOfGroupTasks: groupTasks.length,
                 groupLimit,
               })
             );
             this.insertedBadges.push(insertedElement);
           }
         });
+        const isOverLimit = groupLimit < groupTasks.length;
+        if (isOverLimit) {
+          groupTasks.forEach(task => {
+            const issueElement = document.querySelector(`#card-${task.key}`);
+            if (issueElement) {
+              issueElement.classList.add(styles.issueOverLimit);
+              this.modifiedIssues.push(issueElement);
+            }
+          });
+        }
       });
     }
 
-    const ignoredSwimlanes = Object.keys(this.swimlanesSettings).filter(
-      swimlaneId => this.swimlanesSettings[swimlaneId].ignoreWipInColumns
-    );
     const swimlanesFilter = ignoredSwimlanes.map(swimlaneId => `:not([swimlane-id="${swimlaneId}"])`).join('');
 
     Object.values(this.boardGroups).forEach(group => {

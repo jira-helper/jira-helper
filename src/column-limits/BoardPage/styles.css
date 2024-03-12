@@ -74,3 +74,8 @@
   z-index: 100000;
   transition-delay: 200ms;
 }
+
+.issueOverLimit,
+.issueOverLimit [data-test-id="platform-card.ui.card.focus-container"] {
+  background: #ff5630;
+}
