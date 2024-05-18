@@ -3,7 +3,7 @@ import keys from '@tinkoff/utils/object/keys';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES, btnGroupIdForColumnsSettingsPage } from '../../shared/constants';
-import { mapColumnsToGroups } from '../shared/utils';
+import { getColumnId, mapColumnsToGroups } from '../shared/utils';
 import { Popup } from '../../shared/getPopup';
 import {
   formTemplate,
@@ -38,8 +38,12 @@ export default class SettingsWIPLimits extends PageModification {
     allColumns: '.ghx-column-wrapper:not(.ghx-fixed-column).ghx-mapped',
     allColumnsInner: '.ghx-column-wrapper:not(.ghx-fixed-column) > .ghx-mapped',
     allColumnsJira7: '.ghx-mapped.ui-droppable[data-column-id]',
+    allColumnsJiraCloud: '[data-testid="column.header.data.test.id"]',
     columnsConfigLastChild: '#ghx-config-columns > *:last-child',
+    columnsConfigLastChildJiraCloud:
+      'div[role="presentation"]:has([data-testid="platform-board-kit.ui.column.column-create.button.styled-button"])',
     columnHeaderName: '.ghx-header-name',
+    columnHeaderNameJiraCloud: '[data-testid="column.header.title.data.test.id"]',
   };
 
   async shouldApply() {
@@ -85,6 +89,11 @@ export default class SettingsWIPLimits extends PageModification {
     // JIRA 7.1.x not have the "ul.ghx-column-wrapper"
     if (!allColumns || allColumns.length === 0) {
       allColumns = document.querySelectorAll(SettingsWIPLimits.jiraSelectors.allColumnsJira7);
+    }
+
+    // for JIRA Cloud
+    if (!allColumns || allColumns.length === 0) {
+      allColumns = document.querySelectorAll(SettingsWIPLimits.jiraSelectors.allColumnsJiraCloud);
     }
 
     return allColumns;
@@ -142,17 +151,25 @@ export default class SettingsWIPLimits extends PageModification {
   };
 
   renderSettingsButton() {
-    this.insertHTML(
-      document.querySelector(SettingsWIPLimits.jiraSelectors.columnsConfigLastChild),
-      'beforebegin',
-      groupSettingsBtnTemplate({
-        openEditorBtn: SettingsWIPLimits.ids.openEditorButton,
-        groupOfBtnsId: btnGroupIdForColumnsSettingsPage,
-      })
-    );
+    this.waitForFirstElement([
+      SettingsWIPLimits.jiraSelectors.columnsConfigLastChild,
+      SettingsWIPLimits.jiraSelectors.columnsConfigLastChildJiraCloud,
+    ]).then(container => {
+      const isJiraCloud = container.matches(SettingsWIPLimits.jiraSelectors.columnsConfigLastChildJiraCloud);
 
-    const openModalBtn = document.querySelector(`#${SettingsWIPLimits.ids.openEditorButton}`);
-    this.addEventListener(openModalBtn, 'click', this.openGroupSettingsPopup);
+      this.insertHTML(
+        container,
+        'beforebegin',
+        groupSettingsBtnTemplate({
+          openEditorBtn: SettingsWIPLimits.ids.openEditorButton,
+          groupOfBtnsId: btnGroupIdForColumnsSettingsPage,
+          vertical: isJiraCloud,
+        })
+      );
+
+      const openModalBtn = document.querySelector(`#${SettingsWIPLimits.ids.openEditorButton}`);
+      this.addEventListener(openModalBtn, 'click', this.openGroupSettingsPopup);
+    });
   }
 
   openGroupSettingsPopup = () => {
@@ -196,8 +213,18 @@ export default class SettingsWIPLimits extends PageModification {
   }
 
   columnHtml(id, column, groupId) {
-    const columnHeader = column.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName);
-    const columnTitle = columnHeader.getAttribute('title');
+    const columnHeader =
+      column.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName) ||
+      column.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderNameJiraCloud);
+
+    /**
+     * Columns in jira cloud do not have title attribute
+     * but keep the column name inside text node
+     */
+    const columnTitle = columnHeader.matches(SettingsWIPLimits.jiraSelectors.columnHeaderNameJiraCloud)
+      ? columnHeader.innerText
+      : columnHeader.getAttribute('title');
+
     return columnTemplate({
       columnTitle,
       columnId: id,
@@ -283,7 +310,7 @@ export default class SettingsWIPLimits extends PageModification {
   };
 
   getWipLimitsForOnlyExistsColumns() {
-    const columns = Array.from(this.getColumns()).map(el => el.getAttribute('data-column-id'));
+    const columns = Array.from(this.getColumns()).map(el => getColumnId(el));
     const wipLimits = {};
 
     Object.keys(this.wipLimits).forEach(key => {

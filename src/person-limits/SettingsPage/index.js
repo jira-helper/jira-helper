@@ -154,6 +154,7 @@ export default class PersonalWIPLimit extends PageModification {
     const personLimit = {
       id: Date.now(),
       person: {
+        accountId: fullPerson.accountId,
         name: fullPerson.name ?? fullPerson.displayName,
         displayName: fullPerson.displayName,
         self: fullPerson.self,

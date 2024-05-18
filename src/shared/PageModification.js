@@ -8,6 +8,7 @@ import {
   getBoardConfiguration,
   updateBoardProperty,
   searchIssues,
+  getLatestForBoard,
 } from './jiraApi';
 
 export class PageModification {
@@ -51,6 +52,13 @@ export class PageModification {
     return promise;
   }
 
+  /**
+   * Waits for first element matching one of the selectors
+   */
+  waitForFirstElement(selectors, container) {
+    return Promise.race(selectors.map(selector => this.waitForElement(selector, container)));
+  }
+
   getBoardProperty(property) {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
@@ -80,6 +88,22 @@ export class PageModification {
     this.sideEffects.push(cancelRequest);
 
     return getBoardEditData(getBoardIdFromURL(), { abortPromise });
+  }
+
+  getBoardLatest() {
+    const { cancelRequest, abortPromise } = this.createAbortPromise();
+    this.sideEffects.push(cancelRequest);
+
+    return getLatestForBoard(getBoardIdFromURL(), {
+      abortPromise,
+      query: {
+        hideCardExtraFields: true,
+        includeHidden: false,
+        moduleKey: 'agile-mobile-board-service',
+        skipEtag: true,
+        skipExtraFields: true,
+      },
+    });
   }
 
   getBoardEstimationData() {
@@ -116,12 +140,20 @@ export class PageModification {
     this.sideEffects.push(() => target.removeEventListener(event, cb));
   };
 
-  onDOMChange(selector, cb, params = { childList: true }) {
-    const element = document.querySelector(selector);
-    if (!element) return;
+  /**
+   * @param selector
+   * @param cb
+   * @param {import('lib.dom.d.ts').MutationObserverInit} params
+   */
+  onDOMChange(selector, cb, params = { childList: true, subtree: false }) {
+    const elements = document.querySelectorAll(selector);
+
+    if (!elements || !elements.length) return;
 
     const observer = new MutationObserver(cb);
-    observer.observe(element, params);
+    elements.forEach(element => {
+      observer.observe(element, params);
+    });
     this.sideEffects.push(() => observer.disconnect());
   }
 
@@ -139,28 +171,36 @@ export class PageModification {
   }
 
   insertHTML(container, position, html) {
-    container.insertAdjacentHTML(position, html.trim());
+    try {
+      container.insertAdjacentHTML(position, html.trim());
 
-    let insertedElement;
-    switch (position) {
-      case 'beforebegin':
-        insertedElement = container.previousElementSibling;
-        break;
-      case 'afterbegin':
-        insertedElement = container.firstElementChild;
-        break;
-      case 'beforeend':
-        insertedElement = container.lastElementChild;
-        break;
-      case 'afterend':
-        insertedElement = container.nextElementSibling;
-        break;
-      default:
-        throw Error('Wrong position');
+      let insertedElement;
+      switch (position) {
+        case 'beforebegin':
+          insertedElement = container.previousElementSibling;
+          break;
+        case 'afterbegin':
+          insertedElement = container.firstElementChild;
+          break;
+        case 'beforeend':
+          insertedElement = container.lastElementChild;
+          break;
+        case 'afterend':
+          insertedElement = container.nextElementSibling;
+          break;
+        default:
+          throw Error('Wrong position');
+      }
+
+      this.sideEffects.push(() => insertedElement.remove());
+      return insertedElement;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('jira-helper: Insertion error: ', e);
+      // eslint-disable-next-line no-console
+      console.error('jira-helper: ', container, position, html);
+      throw e;
     }
-
-    this.sideEffects.push(() => insertedElement.remove());
-    return insertedElement;
   }
 
   setDataAttr(element, attr, value) {

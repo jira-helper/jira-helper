@@ -11,6 +11,16 @@ export const settingsJiraDOM = {
   swimlane: '.ghx-swimlane',
   swimlaneHeaderContainer: '.ghx-swimlane-header',
   swimlaneHeader: '.ghx-heading',
+  // swimlane row contents
+  swimlaneCloud: '[data-test-id="platform-board-kit.ui.swimlane.swimlane-wrapper"]',
+  // swimlane row name
+  swimlaneHeaderContainerCloud: '[data-testid="platform-board-kit.ui.swimlane.summary-section"]',
+  // board with all swimlanes
+  swimlaneCloudWrapper: '[data-testid="platform-board-kit.ui.board.scroll.board-scroll"]',
+  // swimlane header content (name, issue count)
+  swimlaneContentCloud: '[data-testid="platform-board-kit.ui.swimlane.swimlane-content"]',
+  // swimlane container for entire column with issues
+  swimlaneColumnCloud: '[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]',
 };
 
 export const settingsEditBtnTemplate = btnId => `<div style="margin-top: 1rem">
@@ -44,6 +54,6 @@ export const settingsPopupTableRowTemplate = ({ id, name, limit, isIgnored, rowC
         <input class="text" type="number" value="${limit}"/>
       </td>
       <td>
-        <input type="checkbox" ${isIgnored ? 'checked' : ''} /> 
+        <input type="checkbox" ${isIgnored ? 'checked' : ''} />
       </td>
   </tr>`;
