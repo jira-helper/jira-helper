@@ -16,7 +16,7 @@ const plugins = [
 
 module.exports = merge(common, {
   mode: 'development',
-  devtool: 'source-map',
+  devtool: 'cheap-module-eval-source-map',
   plugins,
   watch: true,
 });

@@ -1,34 +1,10 @@
-import { throttle } from 'lodash';
+// import { getIssueDataFromServer } from '../shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { BOARD_PROPERTIES } from '../shared/constants';
-import { settingsJiraDOM as DOM } from '../swimlane/constants';
-import { getIssueIdsBySwimlaneIdAndColumnId, getSwimlaneById } from '../shared/boardLatestHelpers';
 
-/**
- * @typedef WipLimitData
- * @type {object}
- * @property {string} name
- * @property {number} wipLimit
- * Required fields we get from api call, optional fields in cells we add later
- * @property {Array<{
- *  swimlane: string,
- *  column: string,
- *  showBadge: boolean,
- *  notFoundOnBoard?: boolean,
- *  DOM?: HTMLElement,
- *  x?: number,
- *  y?: number,
- *  border?: string,
- * }>} cells
- * @property {Array<Array<number>>} matrixRange
- */
-
-/**
- * @property {Array<WipLimitData>} wip
- */
 export default class extends PageModification {
   waitForLoading() {
-    return this.waitForFirstElement(['.ghx-swimlane', DOM.swimlaneCloudWrapper]);
+    return this.waitForElement('.ghx-swimlane');
   }
 
   getModificationId() {
@@ -41,40 +17,21 @@ export default class extends PageModification {
   }
 
   loadData() {
-    return Promise.all([
-      this.getBoardEditData(),
-      this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS),
-      // Only fetch for jira cloud
-      this.getBoardLatest().catch(() => null),
-    ]);
+    return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS)]);
   }
 
   async apply(data) {
     if (!data) return;
-    const [editData, WipLimitSetting, boardLatest] = data;
+    const [editData, WipLimitSetting] = data;
 
     if (!WipLimitSetting) {
       return;
     }
 
     this.wip = WipLimitSetting;
-    this.boardLatest = boardLatest;
     this.counterCssSelector = this.getCssSelectorOfIssues(editData);
-
-    // These methods mutate a lot of data, so it's not safe to call both
-    const isJiraCloud = document.querySelector(DOM.swimlaneCloudWrapper) !== null;
-    if (isJiraCloud) {
-      this.renderWipLimitCloud();
-
-      const throttledRender = throttle(this.renderWipLimitCloud.bind(this), 2000);
-      this.onDOMChange(DOM.swimlaneCloudWrapper, throttledRender, {
-        subtree: true,
-        childList: true,
-      });
-    } else {
-      this.renderWipLimitCells();
-      this.onDOMChange('#ghx-pool', () => this.renderWipLimitCells());
-    }
+    this.renderWipLimitCells();
+    this.onDOMChange('#ghx-pool', () => this.renderWipLimitCells());
   }
 
   renderWipLimitCells() {
@@ -120,81 +77,6 @@ export default class extends PageModification {
             cell.DOM.insertAdjacentHTML('afterbegin', this.getGetRengeDOM(countIssues, range.wipLimit, colorBadge));
           }
         }
-      }
-    }
-  }
-
-  renderWipLimitCloud() {
-    // Remove prevously added badge
-    document.querySelectorAll('.WipLimitCellsBadge.field-issues-count').forEach(badge => {
-      badge.remove();
-    });
-
-    for (const range of this.wip) {
-      // issue count by column and swimlane
-      for (const cell of range.cells) {
-        const issuesInCell = getIssueIdsBySwimlaneIdAndColumnId(this.boardLatest, cell.swimlane, cell.column).length;
-
-        this.markCell(cell, range, issuesInCell);
-      }
-    }
-  }
-
-  getSwimlaneColumn(swimlaneId, columnId) {
-    const swimlaneText = getSwimlaneById(this.boardLatest, swimlaneId)?.name;
-    if (!swimlaneText) {
-      return null;
-    }
-
-    const swimlaneHeader = [...document.querySelectorAll(DOM.swimlaneHeaderContainerCloud)].find(swimlaneElement => {
-      return swimlaneElement.textContent === swimlaneText;
-    });
-
-    if (!swimlaneHeader) {
-      return null;
-    }
-
-    const swimlaneContent = swimlaneHeader?.closest(DOM.swimlaneCloud);
-    if (!swimlaneContent) {
-      return null;
-    }
-
-    const index = this.boardLatest?.columns?.findIndex(column => {
-      return String(column.id) === columnId;
-    });
-    const swimlaneColumn = [...swimlaneContent.querySelectorAll(DOM.swimlaneColumnCloud)]?.[index];
-    return swimlaneColumn;
-  }
-
-  markCell(cell, range, issuesInCell) {
-    const domElement = this.getSwimlaneColumn(cell.swimlane, cell.column);
-
-    if (!domElement) {
-      return;
-    }
-
-    if (!cell.notFoundOnBoard) {
-      if (range.disable) {
-        domElement.classList.add('WipLimitCells_disable');
-      }
-
-      if (issuesInCell > range.wipLimit) {
-        domElement.classList.add('WipLimit_NotRespected');
-        domElement.classList.remove('WipLimit_Respected');
-      } else {
-        domElement.classList.remove('WipLimit_NotRespected');
-        domElement.classList.add('WipLimit_Respected');
-      }
-
-      let colorBadge;
-      if (issuesInCell === range.wipLimit) {
-        colorBadge = '#ffd700"';
-      } else if (issuesInCell > range.wipLimit) {
-        colorBadge = '#ff5630"';
-      }
-
-      if (cell.showBadge) {
-        this.insertHTML(domElement, 'afterbegin', this.getGetRengeDOM(issuesInCell, range.wipLimit, colorBadge));
       }
     }
   }
@@ -374,7 +256,7 @@ export default class extends PageModification {
       border-bottom: 0.15rem #1663e5 dashed;
     }
 
-    .WipLimit_NotRespected{
+    .WipLimitNotRespected{
         background-color: #ff563070;
       }
 

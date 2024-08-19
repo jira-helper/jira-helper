@@ -56,23 +56,6 @@ export const generateColorByFirstChars = str => {
   return colors[generatedColorIndex];
 };
 
-export const getColumnId = column => {
-  const { columnId, announcedId } = column.dataset;
-
-  /**
-   * Jira Cloud doesn't have column-id data attribute
-   * but we can fallback to another one
-   * e.g. announceId: `COLUMN::1828::1`
-   */
-  const realColumnId = columnId ?? announcedId.split('::')[1] ?? null;
-
-  if (!realColumnId) {
-    throw new Error('No column id for ', column);
-  }
-
-  return realColumnId;
-};
-
 export const mapColumnsToGroups = ({ columnsHtmlNodes = [], wipLimits = {}, withoutGroupId = 'Without group' }) => {
   const resultGroupsMap = {
     allGroupIds: [...keys(wipLimits), withoutGroupId],
@@ -80,7 +63,7 @@ export const mapColumnsToGroups = ({ columnsHtmlNodes = [], wipLimits = {}, with
   };
 
   columnsHtmlNodes.forEach(column => {
-    const columnId = getColumnId(column);
+    const { columnId } = column.dataset;
     let { name } = findGroupByColumnId(columnId, wipLimits);
 
     if (!name) name = withoutGroupId;
