@@ -72,7 +72,7 @@
     "build": "cross-env NODE_ENV=production webpack -p --config webpack/webpack.config.prod.js",
     "prod": "npm run build && zip -r dist.zip ./dist",
     "clear": "rm -rf dist",
-    "dev": "cross-env NODE_ENV=development webpack --config webpack/webpack.config.dev.js",
+    "dev": "cross-env NODE_ENV=development webpack -d --config webpack/webpack.config.dev.js",
     "lint": "lint-staged"
   },
   "husky": {
@@ -97,7 +97,6 @@
     "core-js": "^3.8.3",
     "cross-env": "^5.2.0",
     "gsap": "^3.6.0",
-    "lodash": "^4.17.21",
     "simple-color-picker": "^1.0.4"
   },
   "devDependencies": {
@@ -128,8 +127,8 @@
     "raw-loader": "0.5.1",
     "style-loader": "0.20.3",
     "terser-webpack-plugin": "^2.3.8",
-    "webpack": "4.46.0",
-    "webpack-cli": "3.3.12",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12",
     "webpack-merge": "^4.2.2",
     "webpackbar": "^4.0.0",
     "ws": "^7.4.6"

@@ -24,7 +24,6 @@ export default class extends PageModification {
         return container;
       }
     }
-    return undefined;
   }
 
   apply() {
