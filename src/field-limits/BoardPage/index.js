@@ -10,6 +10,7 @@ const TYPE_CALC = {
   BY_CARD: 0,
   BY_SUM_VALUE: 1,
   BY_SUM_NUMBERS: 2,
+  BY_MULTIPLE_VALUES: 3,
 };
 export default class FieldLimitsSettingsPage extends PageModification {
   static jiraSelectors = {
@@ -216,6 +217,20 @@ export default class FieldLimitsSettingsPage extends PageModification {
     return result;
   }
 
+  getHasOneOfValuesFromExtraField(exField, value) {
+    let result = false;
+    const pattern = /\s*\|\|\s*/;
+    const values = value.split(pattern);
+
+    if (exField.childNodes instanceof NodeList) {
+      exField.childNodes.forEach(el => {
+        result =
+          result || el.innerText.split(',').reduce((acc, val) => values.some(v => v === val.trim()) || acc, false);
+      });
+    }
+    return result ? 1 : 0;
+  }
+
   countAmountPersonalIssuesInColumn(column, stats, swimlaneId) {
     const { columnId } = column.dataset;
 
@@ -239,6 +254,9 @@ export default class FieldLimitsSettingsPage extends PageModification {
         if (/∑\([A-Za-z0-9]]*\)/gim.test(stat.fieldValue)) {
           typeCalc = TYPE_CALC.BY_SUM_NUMBERS;
         }
+        if (/([A-Za-z0-9-.]+)(\s*\|\|\s*([A-Za-z0-9-.]+))*/gim.test(stat.fieldValue)) {
+          typeCalc = TYPE_CALC.BY_MULTIPLE_VALUES;
+        }
 
         for (const exField of extraFieldsForIssue) {
           const tooltipAttr = exField.getAttribute('data-tooltip');
@@ -251,6 +269,9 @@ export default class FieldLimitsSettingsPage extends PageModification {
               break;
             case TYPE_CALC.BY_SUM_NUMBERS:
               countValues = this.getSumNumberValueFromExtraField(exField);
+              break;
+            case TYPE_CALC.BY_MULTIPLE_VALUES:
+              countValues = this.getHasOneOfValuesFromExtraField(exField, fieldValue);
               break;
             default:
               // TYPE_CALC.BY_CARD
