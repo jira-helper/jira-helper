@@ -34,6 +34,15 @@
   background-color: #1b855c;
 }
 
+.limitBadge_OnTheLimit,
+.swimlane_OnTheLimit {
+  background-color: #ffd700;
+}
+
+.limitBadge_NotRespected,
+.swimlane_NotRespected {
+  background-color: #ff5630;
+}
 
 .loader {
   display: block !important;

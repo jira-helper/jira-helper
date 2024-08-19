@@ -1,8 +1,10 @@
 import style from './styles.css';
 import { generateColorByFirstChars as generateColor } from '../shared/utils';
 
-export const groupSettingsBtnTemplate = ({ groupOfBtnsId = '', openEditorBtn = '' }) =>
-  `<div id="${groupOfBtnsId}" class="aui-buttons ${style.jhGroupOfBtns}"><button id="${openEditorBtn}" class="aui-button">Group Settings</button></div>`;
+export const groupSettingsBtnTemplate = ({ groupOfBtnsId = '', openEditorBtn = '', vertical = false }) =>
+  `<div id="${groupOfBtnsId}" class="${
+    vertical ? style.jhGroupOfBtnsVertical : style.jhGroupOfBtns
+  }"><button id="${openEditorBtn}" class="aui-button">Group Settings</button></div>`;
 
 export const formTemplate = ({ leftBlock = '', rightBlock = '', id = 'jh-wip-limits-id' }) =>
   `<form class="aui ${style.form}" id="${id}">

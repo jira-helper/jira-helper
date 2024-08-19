@@ -19,6 +19,9 @@ export default class SwimlaneSettingsLimit extends PageModification {
     swimlanes: '#swimlanes',
     swimlaneConfig: '#ghx-swimlane-strategy-config',
     swimlaneSelect: '#ghx-swimlanestrategy-select',
+    swimlanesCloud: '[data-testid="software-board-settings-sortable-table.ui.sortable-table.table"]',
+    swimlaneSelectCloud:
+      '[data-testid="software-board-settings-swimlanes.ui.swimlanes-settings-page.swimlane-strategy-field.select"]',
   };
 
   async shouldApply() {
@@ -31,8 +34,14 @@ export default class SwimlaneSettingsLimit extends PageModification {
 
   waitForLoading() {
     return Promise.all([
-      this.waitForElement(SwimlaneSettingsLimit.jiraSelectors.swimlanes),
-      this.waitForElement(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect),
+      this.waitForFirstElement([
+        SwimlaneSettingsLimit.jiraSelectors.swimlanes,
+        SwimlaneSettingsLimit.jiraSelectors.swimlanesCloud,
+      ]),
+      this.waitForFirstElement([
+        SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect,
+        SwimlaneSettingsLimit.jiraSelectors.swimlaneSelectCloud,
+      ]),
     ]);
   }
 
@@ -54,23 +63,35 @@ export default class SwimlaneSettingsLimit extends PageModification {
 
     if (!(boardData && boardData.canEdit)) return;
 
-    this.swimlaneSelect = document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect);
-    if (this.swimlaneSelect.value === 'custom') {
+    this.swimlaneSelect =
+      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect) ??
+      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelectCloud);
+
+    if (
+      this.swimlaneSelect.matches(
+        SwimlaneSettingsLimit.jiraSelectors.swimlaneSelectCloud || this.swimlaneSelect.value === 'custom'
+      )
+    ) {
       this.renderEditButton();
     }
 
     this.addEventListener(this.swimlaneSelect, 'change', event => {
-      if (event.target.value === 'custom') this.renderEditButton();
-      else this.removeEditBtn();
+      if (
+        this.swimlaneSelect.matches(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelectCloud) ||
+        event.target.value === 'custom'
+      ) {
+        this.renderEditButton();
+      } else {
+        this.removeEditBtn();
+      }
     });
   }
 
   renderEditButton() {
-    this.insertHTML(
-      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneConfig),
-      'beforebegin',
-      settingsEditBtnTemplate(SwimlaneSettingsLimit.ids.editLimitsBtn)
-    );
+    const target =
+      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneConfig) ??
+      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlanesCloud);
+    this.insertHTML(target, 'beforebegin', settingsEditBtnTemplate(SwimlaneSettingsLimit.ids.editLimitsBtn));
 
     this.popup = new Popup({
       title: 'Edit swimlane limits',

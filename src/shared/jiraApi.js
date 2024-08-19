@@ -21,6 +21,7 @@ const boardPropertiesUrl = boardId => `agile/1.0/board/${boardId}/properties`;
 const boardConfigurationURL = boardId => `agile/1.0/board/${boardId}/configuration`;
 const boardEditDataURL = 'greenhopper/1.0/rapidviewconfig/editmodel.json?rapidViewId=';
 const boardEstimationDataURL = 'greenhopper/1.0/rapidviewconfig/estimation.json?rapidViewId=';
+const boardLatestURL = boardId => `boards/latest/board/${boardId}`;
 
 const invalidatedProperties = {};
 
@@ -136,6 +137,48 @@ export const searchIssues = (jql, params = {}) =>
     type: 'json',
     ...params,
   });
+
+/**
+ * @typedef BoardLatestIssue
+ * @property {number} id
+ * @property {string | undefined} assigneeAccountId
+ * @property {string | undefined} assigneeKey
+ */
+
+/**
+ * Only properties we are using are listed
+ * @typedef BoardLatestSwimlane
+ * @type {object}
+ * @property {number} id
+ * @property {Array<number>} issueIds
+ * @property {string} name
+ */
+
+/**
+ * Only properties we are using are listed
+ * @typedef BoardLatest
+ * @type {object}
+ * @property {Array<{
+ *  id: number,
+ *  name: string,
+ *  issues: Array<BoardLatestIssue>,
+ * }>} columns
+ * @property {object} swimlaneInfo
+ * @property {Array<BoardLatestSwimlane>} swimlanes
+ */
+
+/**
+ * @param boardId
+ * @param params
+ * @returns {MakeRequestResult<BoardLatest>}
+ */
+export const getLatestForBoard = (boardId, params = {}) => {
+  return requestJira({
+    url: boardLatestURL(boardId),
+    type: 'json',
+    ...params,
+  });
+};
 
 export const loadNewIssueViewEnabled = (params = {}) =>
   requestJira({
