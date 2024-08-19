@@ -1,21 +1,15 @@
 {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "useBuiltIns": "usage",
-          "targets": ["chrome > 88"],
-          "corejs": "3.2",
-          "include": [ "proposal-optional-chaining", "proposal-nullish-coalescing-operator"]
-        }
-      ]
-    ],
-    "plugins": [
-      [
-        "@babel/plugin-proposal-class-properties",
-        {
-          "loose": true
-        }
-      ]
-    ]
-  }
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "chrome": "55"
+      },
+      "useBuiltIns": "usage",
+      "corejs": 3
+    }]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    "@babel/plugin-proposal-class-properties"
+  ]
+}
