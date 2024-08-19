@@ -190,7 +190,7 @@ _"Board Settings -> Swimlane"_
 Чтобы использвоать этот режим, вам надо в поле `Field Value` между значениями ставить `||`.
 
 Пример:
-`Field Value` = `Frontend || Frontend-Team || ReactTeam || AngularTeam` 
+`Field Value` = `Frontend || Front-Team || ReactTeam || AngularTeam` 
 
 * карточка 1: `Frontend, Backend, Design`
 * карточка 1: `Backend, Design`
