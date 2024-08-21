@@ -253,8 +253,7 @@ export default class FieldLimitsSettingsPage extends PageModification {
         }
         if (/∑\([A-Za-z0-9]]*\)/gim.test(stat.fieldValue)) {
           typeCalc = TYPE_CALC.BY_SUM_NUMBERS;
-        }
-        if (/([A-Za-z0-9-.]+)(\s*\|\|\s*([A-Za-z0-9-.]+))*/gim.test(stat.fieldValue)) {
+        } else if (/([A-Za-z0-9-.]+)\s*\|\|\s*([A-Za-z0-9-.]+)*/gim.test(stat.fieldValue)) {
           typeCalc = TYPE_CALC.BY_MULTIPLE_VALUES;
         }
 
