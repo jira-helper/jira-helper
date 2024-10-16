@@ -3,7 +3,7 @@ import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { mergeSwimlaneSettings } from '../../swimlane/utils';
 import { findGroupByColumnId, generateColorByFirstChars } from '../shared/utils';
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 export default class extends PageModification {
   shouldApply() {

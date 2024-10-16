@@ -1,0 +1,51 @@
+{
+    "manifest_version": 3,
+    "name": "jira-helper",
+    "short_name": "jira-helper",
+    "version": "2.18.2",
+    "author": "pavel.power@gmail.com",
+    "description": "jira-helper",
+    "icons": {
+        "16": "src/assets/jira_helper_16x16.png",
+        "32": "src/assets/jira_helper_32x32.png",
+        "48": "src/assets/jira_helper_48x48.png",
+        "64": "src/assets/jira_helper_64x64.png",
+        "128": "src/assets/jira_helper_128x128.png"
+    },
+    "minimum_chrome_version": "88",
+    "action": {
+        "default_icon": {
+            "16": "src/assets/jira_helper_16x16.png",
+            "32": "src/assets/jira_helper_32x32.png",
+            "48": "src/assets/jira_helper_48x48.png",
+            "64": "src/assets/jira_helper_64x64.png",
+            "128": "src/assets/jira_helper_128x128.png"
+        },
+        "default_title": "Jira Helper"
+    },
+    "background": {
+        "service_worker": "src/background/background.js",
+        "type": "module"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["img/*"],
+            "use_dynamic_url": true
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "content_scripts": [
+        {
+            "matches": [ "*://*/*" ],
+            "js": [ "src/content.js" ]
+        }
+    ],
+    "permissions": [
+        "storage",
+        "tabs",
+        "contextMenus"
+    ],
+    "host_permissions": ["http://*/*", "https://*/*"]
+}

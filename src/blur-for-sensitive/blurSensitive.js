@@ -1,4 +1,5 @@
 import { extensionApiService } from '../shared/ExtensionApiService';
+import './blurSensitive.css';
 
 // change blur
 /* eslint-disable */

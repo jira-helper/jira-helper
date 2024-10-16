@@ -1,7 +1,14 @@
 import { PageModification } from '../shared/PageModification';
-import style from './styles.css';
+import style from './styles.module.css';
 
-import defaultIframeTemplate from './template.html';
+const defaultIframeTemplate = `Device: <br />
+OS: <br />
+Account: <br />
+Condition: <br /> <br />
+Playback Steps: <br /> <br />
+Actual result: <br />
+Expected Result: <br /> <br />
+TK:`;
 
 const defaultTextareaTemplate = defaultIframeTemplate.replace(/<br \/>/g, '\n');
 const createIssueDialogIdentifiers = ['#create-issue-dialog', '#issue-create', '#create-subtask-dialog'];

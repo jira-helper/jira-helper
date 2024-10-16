@@ -4,6 +4,7 @@
   "description": "jira-helper: Elements for visualizations, button template, swimlane-viz",
   "repository": "https://github.com/Tinkoff/jira-helper.git",
   "license": "ISC",
+  "type": "module",
   "contributors": [
     {
       "name": "Pavel Akhmetchanov",
@@ -67,13 +68,14 @@
   ],
   "scripts": {
     "bootstrap": "npm i --no-save",
-    "test": "npx jest",
-    "coverage": "npx jest --collectCoverage",
-    "build": "cross-env NODE_ENV=production webpack -p --config webpack/webpack.config.prod.js",
+    "test": "vitest",
+    "coverage": "vitest --collectCoverage",
+    "build": "vite build",
     "prod": "npm run build && zip -r dist.zip ./dist",
     "clear": "rm -rf dist",
-    "dev": "cross-env NODE_ENV=development webpack -d --config webpack/webpack.config.dev.js",
-    "lint": "lint-staged"
+    "dev": "vite preview",
+    "lint": "lint-staged",
+    "knip": "knip"
   },
   "husky": {
     "hooks": {
@@ -95,46 +97,32 @@
     "@tinkoff/request-plugin-transform-url": "^0.9.3",
     "@tinkoff/utils": "^2.1.3",
     "core-js": "^3.8.3",
-    "cross-env": "^5.2.0",
     "gsap": "^3.6.0",
     "simple-color-picker": "^1.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.13",
-    "@babel/plugin-proposal-class-properties": "^7.12.13",
-    "@babel/plugin-transform-runtime": "^7.12.13",
     "@babel/preset-env": "^7.12.13",
+    "@crxjs/vite-plugin": "2.0.0-beta.23",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.2.2",
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.1.2",
-    "css-loader": "^3.6.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^6.15.0",
-    "eslint-loader": "^3.0.4",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react": "^7.24.0",
-    "html-loader": "^0.5.5",
-    "html-webpack-plugin": "3.0.4",
+    "happy-dom": "^15.7.4",
     "husky": "^4.3.8",
-    "jest": "26.6.3",
-    "jest-each": "26.6.2",
+    "knip": "^5.33.3",
     "lint-staged": "^10.5.3",
     "prettier": "^1.19.1",
-    "raw-loader": "0.5.1",
-    "style-loader": "0.20.3",
-    "terser-webpack-plugin": "^2.3.8",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-merge": "^4.2.2",
-    "webpackbar": "^4.0.0",
-    "ws": "^7.4.6"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
+    "vitest": "^2.1.3"
   },
   "engines": {
-    "node": ">=10.0.0",
-    "npm": ">=5.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=8.0.0"
   }
 }

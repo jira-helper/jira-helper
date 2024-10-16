@@ -3,7 +3,7 @@ import filter from '@tinkoff/utils/array/filter';
 import { PageModification } from '../shared/PageModification';
 import { settingsJiraDOM as DOM } from './constants';
 import { BOARD_PROPERTIES } from '../shared/constants';
-import style from './styles.css';
+import style from './styles.module.css';
 import { mergeSwimlaneSettings } from './utils';
 
 export default class extends PageModification {

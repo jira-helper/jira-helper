@@ -1,4 +1,4 @@
-import s from './styles.css';
+import s from './styles.module.css';
 
 export const fieldLimitsTemplate = ({ listBody }) => `<div class="${s.fieldLimitsList}">${listBody}</div>`;
 

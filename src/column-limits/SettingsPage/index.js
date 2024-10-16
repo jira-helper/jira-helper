@@ -13,7 +13,7 @@ import {
   dragOverHereTemplate,
   groupsTemplate,
 } from './htmlTemplates';
-import styles from './styles.css';
+import styles from './styles.module.css';
 import { getRandomString } from '../../shared/utils';
 import { ColorPickerTooltip } from '../../shared/colorPickerTooltip';
 

@@ -1,7 +1,8 @@
+import { describe, it, expect } from 'vitest';
 import { getRandomString } from '../../../src/shared/utils';
 
 describe('Utils should', () => {
-  test('return random number by given length', () => {
+  it('return random number by given length', () => {
     const randomString1 = getRandomString(10);
     const randomString2 = getRandomString(10);
 

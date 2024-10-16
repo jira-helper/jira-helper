@@ -2,7 +2,7 @@
 import ColorPicker from 'simple-color-picker';
 import noop from '@tinkoff/utils/function/noop';
 import { colorPickerTooltipTemplate } from './htmlTemplates';
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 /*
  * Usage:

@@ -2,7 +2,7 @@ import map from '@tinkoff/utils/array/map';
 import each from '@tinkoff/utils/array/each';
 import { PageModification } from '../shared/PageModification';
 import { toPx } from '../shared/utils';
-import style from './styles.css';
+import style from './styles.module.css';
 
 export default class extends PageModification {
   shouldApply() {
