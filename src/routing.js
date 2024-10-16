@@ -45,20 +45,6 @@ export const getBoardIdFromURL = () => {
   return null;
 };
 
-export const getProjectKeyFromURL = () => {
-  if (window.location.href.indexOf('projectKey') > 0) {
-    return getSearchParam('projectKey');
-  }
-
-  // eslint-disable-next-line no-useless-escape
-  const matchProjectKey = window.location.pathname.match(/projects\/([^\/]+)/im);
-  if (matchProjectKey != null) {
-    return matchProjectKey[1];
-  }
-
-  return null;
-};
-
 /*
 cloud update 2021-09-30
 https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=filter
