@@ -1,4 +1,4 @@
-import style from './styles.css';
+import style from './styles.module.css';
 
 export const settingsEditBtnTemplate = btnId => `<div class="${style.settingsEditBtn}">
             <button id="${btnId}" class="aui-button" type="button">Edit WIP limits by field</button>

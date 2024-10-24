@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import Draggable from 'gsap/Draggable';
+import { TweenLite, gsap } from 'gsap';
 import { PageModification } from '../shared/PageModification';
 import { extensionApiService } from '../shared/ExtensionApiService';
 import { getChartLinePosition, getChartTics, getChartValueByPosition } from './utils';
@@ -49,7 +50,6 @@ class ResizableDraggableGrid {
 
     // gsap don't work in firefox, so we load library only when we create this chart
     // eslint-disable-next-line global-require
-    const { TweenLite, gsap } = require('gsap');
 
     this.tweenLite = TweenLite;
     this.gsap = gsap;

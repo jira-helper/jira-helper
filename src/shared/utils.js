@@ -26,7 +26,3 @@ export const waitForElement = (selector, container = document) => {
     cancel: () => clearInterval(intervalId),
   };
 };
-
-export const formatTemplateForInserting = str => {
-  return `'${str.replace(/\r?\n?/g, '').trim()}'`;
-};

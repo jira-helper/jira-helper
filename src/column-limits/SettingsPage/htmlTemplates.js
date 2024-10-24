@@ -1,4 +1,4 @@
-import style from './styles.css';
+import style from './styles.module.css';
 import { generateColorByFirstChars as generateColor } from '../shared/utils';
 
 export const groupSettingsBtnTemplate = ({ groupOfBtnsId = '', openEditorBtn = '' }) =>

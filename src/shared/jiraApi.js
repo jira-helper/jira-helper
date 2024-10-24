@@ -14,7 +14,7 @@ import pathOr from '@tinkoff/utils/object/pathOr';
 import { defaultHeaders } from './defaultHeaders';
 import { getBoardIdFromURL } from '../routing';
 
-export const configVersion = 'v1';
+const configVersion = 'v1';
 const getPropName = property => `${property}${configVersion}`;
 
 const boardPropertiesUrl = boardId => `agile/1.0/board/${boardId}/properties`;
@@ -147,14 +147,13 @@ export const loadNewIssueViewEnabled = (params = {}) =>
     () => false
   );
 
-export const getAllFields = () =>
+const getAllFields = () =>
   requestJira({
     url: 'api/2/field',
     type: 'json',
   });
 
-export const getFlaggedField = async () =>
-  getAllFields().then(fields => fields.find(field => field.name === 'Flagged').id);
+const getFlaggedField = async () => getAllFields().then(fields => fields.find(field => field.name === 'Flagged').id);
 
 const getFlaggedIssues = flagField =>
   compose(map(prop('key')), filter(compose(complement(isNil), path(['fields', flagField]))), pathOr(['issues'], []));
