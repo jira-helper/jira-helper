@@ -21,7 +21,7 @@ const getToggle = sidebarHidden => {
   toggle.textContent = toggleMap[sidebarHidden].text;
   toggle.title = toggleMap[sidebarHidden].title;
   toggle.setAttribute('class', 'aui-button');
-  toggle.addEventListener('click', function() {
+  toggle.addEventListener('click', () => {
     changeHiddenSidebar(toggle);
   });
   return toggle;

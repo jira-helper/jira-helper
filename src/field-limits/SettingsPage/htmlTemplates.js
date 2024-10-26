@@ -29,8 +29,8 @@ export const fieldLimitsTableTemplate = ({
                <div class="field-group">
                 <label for="field-name" title="two related fields as one key" style="cursor: help;"><b>Field<sup>*</sup></b></label>
                 <select id="${selectFieldId}" class="select" name="field-name" defaultValue="${
-  selectFieldOptions[0]?.value
-}">
+                  selectFieldOptions[0]?.value
+                }">
                     ${selectFieldOptions.map(
                       (option, i) =>
                         `<option ${i === 0 ? 'selected="selected"' : ''} value="${option.value}">${

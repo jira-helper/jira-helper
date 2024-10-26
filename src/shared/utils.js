@@ -3,10 +3,7 @@ export function toPx(...args) {
   return `${sum}px`;
 }
 
-export const getRandomString = length =>
-  Math.random()
-    .toString(36)
-    .substring(length);
+export const getRandomString = length => Math.random().toString(36).substring(length);
 
 export const isJira = document.body.id === 'jira';
 

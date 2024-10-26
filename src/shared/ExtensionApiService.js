@@ -1,4 +1,4 @@
-/* global browser chrome navigator */
+/* global browser chrome */
 
 class ExtensionApiService {
   constructor() {

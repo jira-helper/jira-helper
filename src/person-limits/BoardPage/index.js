@@ -18,10 +18,7 @@ const isPersonLimitAppliedToIssue = (personLimit, assignee, columnId, swimlaneId
 };
 
 const getNameFromTooltip = tooltip => {
-  return tooltip
-    .split(':')[1]
-    .split('[')[0]
-    .trim(); // Assignee: Pavel [x]
+  return tooltip.split(':')[1].split('[')[0].trim(); // Assignee: Pavel [x]
 };
 
 const getAssignee = avatar => {

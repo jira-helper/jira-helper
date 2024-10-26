@@ -148,8 +148,9 @@ class ResizableDraggableGrid {
     lines.innerHTML = linesStops
       .map(
         number =>
-          `<div style="bottom: ${getPositionOfLine(number)}px">${number} SP, ${Math.round(getLineValue(number) * 10) /
-            10} days</div>`
+          `<div style="bottom: ${getPositionOfLine(number)}px">${number} SP, ${
+            Math.round(getLineValue(number) * 10) / 10
+          } days</div>`
       )
       .join('');
     this.gridDraggable.append(lines);

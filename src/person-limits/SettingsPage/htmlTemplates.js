@@ -67,8 +67,8 @@ export const formPersonalWipLimit = () => {
 export const addPersonalWipLimit = ({ id, person, limit, columns, swimlanes }, isChecked) => {
   return `<tr id="row-${id}" class="person-row">
       <td><input type="checkbox" class="checkbox select-user-chb" data-id="${id}" ${
-    isChecked ? 'checked="checked"' : ''
-  }></td>
+        isChecked ? 'checked="checked"' : ''
+      }></td>
       <td>${person.displayName}</td>
       <td>${limit}</td>
       <td>${columns.map(c => c.name).join(', ')}</td>
