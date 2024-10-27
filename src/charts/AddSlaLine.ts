@@ -1,6 +1,6 @@
 import { PageModification } from '../shared/PageModification';
 import { BOARD_PROPERTIES } from '../shared/constants';
-import { getChartLinePosition, getChartTics } from './utils';
+import { getChartLinePosition, getChartTicks } from './utils';
 
 const SLA_COLOR = 'green';
 const CHANGING_SLA_COLOR = '#91cd53';
@@ -208,7 +208,7 @@ const findRangeForSlaRectPosition = ({
 };
 
 const renderSlaLine = (sla: number, chartElement: SVGElement, changingSlaValue: number = sla): void => {
-  const ticsVals = getChartTics(chartElement);
+  const ticsVals = getChartTicks(chartElement);
 
   const issues = Array.from(chartElement.querySelectorAll('g.layer.issues circle.issue')) as SVGCircleElement[];
   const issuesCluster = Array.from(

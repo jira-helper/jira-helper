@@ -3,7 +3,7 @@ import Draggable from 'gsap/Draggable';
 import { TweenLite, gsap } from 'gsap';
 import { PageModification } from '../shared/PageModification';
 import { extensionApiService } from '../shared/ExtensionApiService';
-import { getChartLinePosition, getChartTics, getChartValueByPosition } from './utils';
+import { getChartLinePosition, getChartTicks, getChartValueByPosition } from './utils';
 
 interface GridOptions {
   fibonacci: number[][];
@@ -159,7 +159,7 @@ class ResizableDraggableGrid {
     const oldLines = document.getElementById(ResizableDraggableGrid.ids.gridLines);
     if (oldLines) oldLines.remove();
 
-    const ticsVals = getChartTics(this.chartElement);
+    const ticsVals = getChartTicks(this.chartElement);
 
     const maxNumber = Math.max(...linesStops);
     const chartHeight = this.gridContainer!.getBoundingClientRect().height;
