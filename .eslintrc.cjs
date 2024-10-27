@@ -1,19 +1,13 @@
 module.exports = {
   extends: ['airbnb', 'prettier'],
-  plugins: ['prettier'],
+  plugins: ['prettier', '@typescript-eslint/eslint-plugin'],
   env: {
     browser: true,
     jest: true,
   },
-  parser: '@babel/eslint-parser',
-  parserOptions: {
-    ecmaVersion: 6,
-    sourceType: 'module',
-    ecmaFeatures: {
-      modules: true,
-      experimentalObjectRestSpread: true,
-    },
-    requireConfigFile: false,
+  parser: '@typescript-eslint/parser',
+  settings: {
+    'import/resolver': 'typescript',
   },
   rules: {
     'no-console': 'error',
@@ -30,5 +24,11 @@ module.exports = {
     'no-param-reassign': 'off',
     'arrow-body-style': 'off',
     'no-promise-executor-return': 'off',
+    'import/extensions': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
+    'no-undef': 'off',
+    'max-classes-per-file': 'off',
+    'no-continue': 'off',
   },
 };

@@ -13,12 +13,17 @@ const SLA_QUERY_PARAMETER = 'sla';
 
 const SLA_INPUT_FIELD_ID = 'jira-helper-sla-input';
 
-const log10 = x => Math.log(x) / Math.log(10);
+const log10 = (x: number): number => Math.log(x) / Math.log(10);
 
-const getBasicSlaRect = (chartElement, slaPathElementIdentifier, strokeColor) => {
+const getBasicSlaRect = (
+  chartElement: SVGElement,
+  slaPathElementIdentifier: string,
+  strokeColor?: string
+): SVGRectElement => {
   const rectId = `${slaPathElementIdentifier}-rect`;
-  if (document.getElementById(rectId)) {
-    return document.getElementById(rectId);
+  const existingRect = document.getElementById(rectId) as SVGRectElement | null;
+  if (existingRect) {
+    return existingRect;
   }
 
   const namespace = chartElement.namespaceURI;
@@ -34,14 +39,19 @@ const getBasicSlaRect = (chartElement, slaPathElementIdentifier, strokeColor) =>
   slaRect.setAttributeNS(null, 'width', '0');
   slaRect.setAttributeNS(null, 'height', '0');
 
-  chartElement.querySelector('.layer.mean').appendChild(slaRect);
+  chartElement.querySelector('.layer.mean')?.appendChild(slaRect);
 
-  return slaRect;
+  return slaRect as SVGRectElement;
 };
 
-const getBasicSlaPath = (chartElement, slaPathElementIdentifier, strokeColor) => {
-  if (document.getElementById(slaPathElementIdentifier)) {
-    return document.getElementById(slaPathElementIdentifier);
+const getBasicSlaPath = (
+  chartElement: SVGElement,
+  slaPathElementIdentifier: string,
+  strokeColor?: string
+): SVGPathElement => {
+  const existingPath = document.getElementById(slaPathElementIdentifier) as SVGPathElement | null;
+  if (existingPath) {
+    return existingPath;
   }
 
   const namespace = chartElement.namespaceURI;
@@ -52,15 +62,20 @@ const getBasicSlaPath = (chartElement, slaPathElementIdentifier, strokeColor) =>
   slaPath.setAttributeNS(null, 'stroke', strokeColor || SLA_COLOR);
   slaPath.setAttributeNS(null, 'stroke-width', '3');
 
-  chartElement.querySelector('.layer.mean').appendChild(slaPath);
+  chartElement.querySelector('.layer.mean')?.appendChild(slaPath);
 
-  return slaPath;
+  return slaPath as SVGPathElement;
 };
 
-const getSlaLabel = (chartElement, slaPathElementIdentifier, fillColor) => {
+const getSlaLabel = (
+  chartElement: SVGElement,
+  slaPathElementIdentifier: string,
+  fillColor?: string
+): SVGTextElement => {
   const slaLabelElementIdentifier = `${slaPathElementIdentifier}-label`;
-  if (document.getElementById(slaLabelElementIdentifier)) {
-    return document.getElementById(slaLabelElementIdentifier);
+  const existingLabel = document.getElementById(slaLabelElementIdentifier) as SVGTextElement | null;
+  if (existingLabel) {
+    return existingLabel;
   }
 
   const namespace = chartElement.namespaceURI;
@@ -77,20 +92,30 @@ const getSlaLabel = (chartElement, slaPathElementIdentifier, fillColor) => {
     slaLabelText.appendChild(tspan);
   });
 
-  chartElement.querySelector('.layer.mean').appendChild(slaLabelText);
+  chartElement.querySelector('.layer.mean')?.appendChild(slaLabelText);
 
-  return slaLabelText;
+  return slaLabelText as SVGTextElement;
 };
 
-const calculateSlaPercentile = ({ slaPosition, issues, issuesCluster }) => {
-  const singleIssuesUnderSlaCount = issues.filter(issue => issue.attributes.cy.value >= slaPosition).length;
+const calculateSlaPercentile = ({
+  slaPosition,
+  issues,
+  issuesCluster,
+}: {
+  slaPosition: number;
+  issues: SVGCircleElement[];
+  issuesCluster: SVGCircleElement[];
+}): number => {
+  const singleIssuesUnderSlaCount = issues.filter(
+    issue => issue.getAttribute('cy') && Number(issue.getAttribute('cy')) >= slaPosition
+  ).length;
 
   const issuesInClustersUnderSlaCount = issuesCluster
-    .filter(issue => issue.attributes.cy.value >= slaPosition)
+    .filter(issue => issue.getAttribute('cy') && Number(issue.getAttribute('cy')) >= slaPosition)
     .map(cluster =>
       Math.round(
         Math.exp(
-          (((cluster.attributes.r.value - MIN_ISSUE_CLUSTER_RADIUS) *
+          (((Number(cluster.getAttribute('r')) - MIN_ISSUE_CLUSTER_RADIUS) *
             (MIN_ISSUE_CLUSTER_COUNT - log10(MIN_ISSUE_CLUSTER_COUNT))) /
             ISSUE_CLUSTER_RADIUS_FACTOR +
             log10(MIN_ISSUE_CLUSTER_COUNT)) *
@@ -100,7 +125,9 @@ const calculateSlaPercentile = ({ slaPosition, issues, issuesCluster }) => {
     )
     .reduce((a, b) => a + b, 0);
 
-  const totalIssuesCount = document.querySelector('.js-chart-snapshot-issue-count').innerText.replace(',', '');
+  const totalIssuesCount = Number(
+    document.querySelector('.js-chart-snapshot-issue-count')?.textContent?.replace(',', '')
+  );
 
   const percentUnderSla = Math.round(
     ((singleIssuesUnderSlaCount + issuesInClustersUnderSlaCount) / totalIssuesCount) * 100
@@ -109,17 +136,42 @@ const calculateSlaPercentile = ({ slaPosition, issues, issuesCluster }) => {
   return percentUnderSla;
 };
 
-const renderSlaPercentageLabel = ({ chartElement, value, slaPercentile, slaPosition, pathId, strokeColor }) => {
+const renderSlaPercentageLabel = ({
+  chartElement,
+  value,
+  slaPercentile,
+  slaPosition,
+  pathId,
+  strokeColor,
+}: {
+  chartElement: SVGElement;
+  value: number;
+  slaPercentile: number;
+  slaPosition: number;
+  pathId: string;
+  strokeColor?: string;
+}): void => {
   const slaLabel = getSlaLabel(chartElement, pathId, strokeColor);
 
-  slaLabel.firstChild.innerHTML = `${value}d`;
-  slaLabel.lastChild.innerHTML = `${slaPercentile}%`;
-  slaLabel.setAttributeNS(null, 'y', slaPosition + 12);
+  // TODO: retest it. It was innerHTML before rewriting
+  slaLabel.firstChild!.textContent = `${value}d`;
+  slaLabel.lastChild!.textContent = `${slaPercentile}%`;
+  slaLabel.setAttributeNS(null, 'y', (slaPosition + 12).toString());
 };
 
-const findRangeForSlaRectPosition = ({ slaPercentile, ticsVals, issues, issuesCluster }) => {
+const findRangeForSlaRectPosition = ({
+  slaPercentile,
+  ticsVals,
+  issues,
+  issuesCluster,
+}: {
+  slaPercentile: number;
+  ticsVals: any[];
+  issues: SVGCircleElement[];
+  issuesCluster: SVGCircleElement[];
+}): [number, number] => {
   const maxDay = ticsVals[ticsVals.length - 1].value;
-  const slaPosition = [0, 0];
+  const slaPosition: [number, number] = [0, 0];
   const step = maxDay < 50 ? 0.5 : 1;
   let pIn = 0;
   let day = ticsVals[0].value;
@@ -138,7 +190,6 @@ const findRangeForSlaRectPosition = ({ slaPercentile, ticsVals, issues, issuesCl
       if (pIn === 0) {
         pIn += 1;
         slaPosition[pIn] = valPosition; // if one step on the one Percentile
-        // eslint-disable-next-line no-continue
         continue;
       }
     }
@@ -156,17 +207,28 @@ const findRangeForSlaRectPosition = ({ slaPercentile, ticsVals, issues, issuesCl
   return slaPosition;
 };
 
-const renderSlaLine = (sla, chartElement, changingSlaValue = sla) => {
+const renderSlaLine = (sla: number, chartElement: SVGElement, changingSlaValue: number = sla): void => {
   const ticsVals = getChartTics(chartElement);
 
-  const issues = [...chartElement.querySelectorAll('g.layer.issues circle.issue')];
-  const issuesCluster = [...chartElement.querySelectorAll('g.layer.issue-clusters circle.cluster')];
+  const issues = Array.from(chartElement.querySelectorAll('g.layer.issues circle.issue')) as SVGCircleElement[];
+  const issuesCluster = Array.from(
+    chartElement.querySelectorAll('g.layer.issue-clusters circle.cluster')
+  ) as SVGCircleElement[];
 
   const meanLine = chartElement.querySelector('.control-chart-mean');
-  const [, rightPoint] = meanLine.getAttribute('d').split('L');
+  if (!meanLine) return;
+  const [, rightPoint] = meanLine.getAttribute('d')!.split('L');
   const [lineLength] = rightPoint.split(',');
 
-  const renderSvgLine = ({ value, pathId, strokeColor }) => {
+  const renderSvgLine = ({
+    value,
+    pathId,
+    strokeColor,
+  }: {
+    value: number;
+    pathId: string;
+    strokeColor: string;
+  }): void => {
     const slaPosition = getChartLinePosition(ticsVals, value);
     if (Number.isNaN(slaPosition)) return;
 
@@ -183,9 +245,9 @@ const renderSlaLine = (sla, chartElement, changingSlaValue = sla) => {
 
     const slaRect = getBasicSlaRect(chartElement, pathId, strokeColor);
     const slaRectHeight = minSlaPosition - maxSlaPosition;
-    slaRect.setAttributeNS(null, 'y', maxSlaPosition);
+    slaRect.setAttributeNS(null, 'y', maxSlaPosition.toString());
     slaRect.setAttributeNS(null, 'width', lineLength);
-    slaRect.setAttributeNS(null, 'height', slaRectHeight);
+    slaRect.setAttributeNS(null, 'height', slaRectHeight.toString());
 
     renderSlaPercentageLabel({ chartElement, value, slaPercentile, slaPosition, pathId, strokeColor });
   };
@@ -212,7 +274,7 @@ const renderSlaLine = (sla, chartElement, changingSlaValue = sla) => {
   }
 };
 
-const renderSlaLegend = () => {
+const renderSlaLegend = (): void => {
   const legendList = document.querySelector('.ghx-legend-column:last-child');
 
   const slaLegend = document.createElement('ul');
@@ -222,10 +284,15 @@ const renderSlaLegend = () => {
   <li class="ghx-legend-value">SLA</li>
   `;
 
-  legendList.appendChild(slaLegend);
+  legendList?.appendChild(slaLegend);
 };
 
-const renderSlaInput = (initialValue, canEdit, addEventListener, { onChange, onSave }) => {
+const renderSlaInput = (
+  initialValue: number,
+  canEdit: boolean,
+  addEventListener: (element: HTMLElement, type: string, listener: (e: Event) => void) => void,
+  { onChange, onSave }: { onChange: (newValue: number) => void; onSave: () => void }
+): void => {
   const optionsColumn = document.querySelector('#ghx-chart-options-view');
   const slaInputWrapper = document.createElement('div');
   slaInputWrapper.innerHTML = `
@@ -244,22 +311,23 @@ const renderSlaInput = (initialValue, canEdit, addEventListener, { onChange, onS
     </form>
   `;
 
-  optionsColumn.appendChild(slaInputWrapper);
+  optionsColumn?.appendChild(slaInputWrapper);
 
-  const slaInput = document.getElementById(SLA_INPUT_FIELD_ID);
-  slaInput.value = initialValue;
+  const slaInput = document.getElementById(SLA_INPUT_FIELD_ID) as HTMLInputElement;
+  slaInput.value = initialValue.toString();
 
-  const saveButton = document.getElementById('jira-helper-sla-save');
+  const saveButton = document.getElementById('jira-helper-sla-save') as HTMLInputElement | null;
 
-  addEventListener(slaInput, 'input', e => {
-    onChange(Number(e.target.value) || 0);
+  addEventListener(slaInput, 'input', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    onChange(Number(target.value) || 0);
 
     if (saveButton) {
       saveButton.disabled = false;
     }
   });
 
-  if (canEdit) {
+  if (canEdit && saveButton) {
     addEventListener(saveButton, 'click', () => {
       onSave();
       saveButton.disabled = true;
@@ -267,24 +335,25 @@ const renderSlaInput = (initialValue, canEdit, addEventListener, { onChange, onS
   }
 };
 
-export default class extends PageModification {
-  shouldApply() {
+// TODO: any[]
+export default class extends PageModification<any[], Element> {
+  shouldApply(): boolean {
     return this.getSearchParam('chart') === 'controlChart' || this.getReportNameFromURL() === 'control-chart';
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `add-sla-${this.getBoardId()}`;
   }
 
-  waitForLoading() {
+  waitForLoading(): Promise<Element> {
     return this.waitForElement('#control-chart svg');
   }
 
-  loadData() {
+  loadData(): Promise<any[]> {
     return Promise.all([this.getBoardProperty(BOARD_PROPERTIES.SLA_CONFIG), this.getBoardEditData()]);
   }
 
-  async apply(data, chartElement) {
+  async apply(data: any[], chartElement: Element): Promise<void> {
     if (!data) return;
     const [{ value = 0 } = {}, { canEdit }] = data;
     await this.waitForElement('.tick', chartElement);
@@ -294,28 +363,28 @@ export default class extends PageModification {
     window.onpopstate = () => {
       const slaQueryParam = this.getSearchParam(SLA_QUERY_PARAMETER);
       if (slaQueryParam !== null) {
-        document.getElementById(SLA_INPUT_FIELD_ID).value = slaQueryParam;
-        renderSlaLine(slaValue, chartElement, Number(slaQueryParam));
+        (document.getElementById(SLA_INPUT_FIELD_ID) as HTMLInputElement).value = slaQueryParam;
+        renderSlaLine(slaValue, chartElement as SVGElement, Number(slaQueryParam));
       }
     };
 
     const slaQueryParam = this.getSearchParam(SLA_QUERY_PARAMETER);
     let changingValue = slaQueryParam !== null ? Number(slaQueryParam) : slaValue;
 
-    renderSlaLine(slaValue, chartElement, changingValue);
+    renderSlaLine(slaValue, chartElement as SVGElement, changingValue);
     renderSlaLegend();
     renderSlaInput(changingValue, canEdit, this.addEventListener, {
-      onChange(newValue) {
+      onChange: (newValue: number) => {
         changingValue = newValue;
         const queryParams = new URLSearchParams(window.location.search);
-        queryParams.set(SLA_QUERY_PARAMETER, newValue);
-        window.history.pushState(window.history.state, null, `?${queryParams.toString()}`);
-        renderSlaLine(slaValue, chartElement, changingValue);
+        queryParams.set(SLA_QUERY_PARAMETER, newValue.toString());
+        window.history.pushState(window.history.state, '', `?${queryParams.toString()}`);
+        renderSlaLine(slaValue, chartElement as SVGElement, changingValue);
       },
       onSave: () => {
         slaValue = changingValue;
         this.updateBoardProperty(BOARD_PROPERTIES.SLA_CONFIG, { value: slaValue });
-        renderSlaLine(slaValue, chartElement, changingValue);
+        renderSlaLine(slaValue, chartElement as SVGElement, changingValue);
       },
     });
   }

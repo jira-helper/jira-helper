@@ -68,23 +68,3 @@ export const cellsAdd = (swimlanes, collums) => {
     </div >
     <hr/>`;
 };
-
-export const settingsPopupTableTemplate = tableBody => `
-   <form class="aui">
-     <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Range name</th>
-            <th>WIP limit</th>
-            <th>Disable range</th>
-            <th>Cells</th>
-          </tr>
-        </thead>
-        <tbody>
-        <tr class="aui-row-subtle"> </tr>
-          ${tableBody}
-        </tbody>
-      </table>
-  </form>
-`;

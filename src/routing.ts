@@ -11,20 +11,18 @@ export const Routes = {
   ALL: 'ALL',
 };
 
-export const getSearchParam = param => {
+type Route = (typeof Routes)[keyof typeof Routes];
+
+export const getSearchParam = (param: string): string | null => {
   return new URLSearchParams(window.location.search).get(param);
 };
 
 /*
   sheme new 2022: https://companyname.atlassian.net/jira/software/c/projects/{KEY}/boards/41/reports/control-chart?days=0
 */
-export const getReportNameFromURL = () => {
-  // eslint-disable-next-line no-useless-escape
-  const matchRapidView = window.location.pathname.match(/reports\/([^\/\?]*)/im);
-  if (matchRapidView != null) {
-    return matchRapidView[1];
-  }
-  return null;
+export const getReportNameFromURL = (): string | null => {
+  const matchRapidView = window.location.pathname.match(/reports\/([^/?]*)/im);
+  return matchRapidView ? matchRapidView[1] : null;
 };
 
 /*
@@ -32,17 +30,13 @@ export const getReportNameFromURL = () => {
   sheme new https://companyname.atlassian.net/jira/software/c/projects/{KEY}/boards/12
   sheme new 2022: https://companyname.atlassian.net/jira/software/c/projects/{KEY}/boards/41/reports/control-chart?days=0
 */
-export const getBoardIdFromURL = () => {
-  if (window.location.href.indexOf('rapidView') > 0) {
+export const getBoardIdFromURL = (): string | null => {
+  if (window.location.href.includes('rapidView')) {
     return getSearchParam('rapidView');
   }
 
   const matchRapidView = window.location.pathname.match(/boards\/(\d+)/im);
-  if (matchRapidView != null) {
-    return matchRapidView[1];
-  }
-
-  return null;
+  return matchRapidView ? matchRapidView[1] : null;
 };
 
 /*
@@ -57,8 +51,7 @@ https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=ca
 https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=detailView
 https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=roadmapConfig
 */
-
-export const getCurrentRoute = () => {
+export const getCurrentRoute = (): Route | null => {
   const { pathname, search } = window.location;
   const params = new URLSearchParams(search);
 
@@ -91,29 +84,35 @@ export const getCurrentRoute = () => {
   return null;
 };
 
-export const getSettingsTab = () => {
+export const getSettingsTab = (): Promise<string | null> => {
   const search = new URLSearchParams(window.location.search);
 
   const tabFromUrl = search.get('tab') || search.get('config');
 
   return tabFromUrl
     ? Promise.resolve(tabFromUrl)
-    : waitForElement('.aui-nav-selected').promise.then(selectedNav => selectedNav.dataset.tabitem);
+    : waitForElement('.aui-nav-selected').promise.then(
+        selectedNav =>
+          // @ts-expect-error dataset по типам не существует
+          selectedNav?.dataset.tabitem || null
+      );
 };
 
-export const getIssueId = () => {
+export const getIssueId = (): string | null => {
   if (window.location.pathname.startsWith('/browse') || window.location.pathname.startsWith('/jira/browse')) {
     return window.location.pathname.split('/browse/')[1];
   }
 
-  if (getSearchParam('selectedIssue') && (getSearchParam('view') || getSearchParam('modal')))
-    return getSearchParam('selectedIssue');
+  const selectedIssue = getSearchParam('selectedIssue');
+  if (selectedIssue && (getSearchParam('view') || getSearchParam('modal'))) {
+    return selectedIssue;
+  }
 
   return null;
 };
 
-export const onUrlChange = cb => {
-  extensionApiService.onMessage((request, sender, sendResponse) => {
+export const onUrlChange = (cb: (url: string) => void): void => {
+  extensionApiService.onMessage((request: { type: string; url: string }, sender, sendResponse) => {
     if (!sender.tab && request.type === types.TAB_URL_CHANGE) {
       cb(request.url);
       sendResponse({ message: 'change event received' });

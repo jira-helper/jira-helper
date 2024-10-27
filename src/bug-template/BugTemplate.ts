@@ -16,14 +16,14 @@ const descriptionInDialogSelector = '.jira-wikifield';
 const buttonAddCls = style.buttonJiraAddTemplateForBug;
 const buttonSaveCls = style.buttonJiraSaveTemplateForBug;
 const localStorageTemplateTextarea = 'jira_helper_textarea_bug_template';
-const textToHtml = text => text.replace(/\n/g, '<br />');
+const textToHtml = (text: string) => text.replace(/\n/g, '<br />');
 
 export default class extends PageModification {
   getModificationId() {
     return 'bug-template';
   }
 
-  getTextareaContainer() {
+  getTextareaContainer(): Element | undefined {
     for (const dialogId of createIssueDialogIdentifiers) {
       const container = document.querySelector(`${dialogId} ${descriptionInDialogSelector}`);
 
@@ -45,6 +45,7 @@ export default class extends PageModification {
     this.onDOMChange('body', mutationEvents => {
       mutationEvents.forEach(event => {
         event.removedNodes.forEach(node => {
+          // @ts-expect-error not every node has an id
           if (createIssueDialogIdentifiers.includes(`#${node.id}`)) {
             this.clear();
             this.apply();
@@ -74,28 +75,39 @@ export default class extends PageModification {
     });
   };
 
-  makeButton({ text, title, handleClick, cls }) {
+  makeButton({ text, title, handleClick, cls }: { text: string; title: string; handleClick: () => void; cls: string }) {
     const btn = this.insertHTML(
-      this.getTextareaContainer(),
+      this.getTextareaContainer()!,
       'beforeend',
       `<button class="${cls}" title="${title}">${text}</button>`
     );
+    if (!btn) return;
     this.addEventListener(btn, 'click', handleClick);
   }
 
   addTemplate = () => {
-    const iframe = createIssueDialogIdentifiers.reduce((acc, selector) => {
-      return acc || document.querySelector(`${selector} ${descriptionInDialogSelector} iframe`);
-    }, null);
-    const textarea = createIssueDialogIdentifiers.reduce((acc, selector) => {
-      return acc || document.querySelector(`${selector} ${descriptionInDialogSelector} textarea#description`);
-    }, null);
+    let iframe: Element | null = null;
+    for (const dialogId of createIssueDialogIdentifiers) {
+      iframe = document.querySelector(`${dialogId} ${descriptionInDialogSelector} iframe`);
+      if (iframe) {
+        break;
+      }
+    }
+
+    let textarea: HTMLTextAreaElement | null = null;
+    for (const dialogId of createIssueDialogIdentifiers) {
+      textarea = document.querySelector(`${dialogId} ${descriptionInDialogSelector} textarea#description`);
+      if (textarea) {
+        break;
+      }
+    }
 
     const textTextarea = localStorage.getItem(localStorageTemplateTextarea);
     const templateIframe = textTextarea ? textToHtml(textTextarea) : defaultIframeTemplate;
     const templateTextarea = textTextarea || defaultTextareaTemplate;
 
     if (iframe) {
+      // @ts-expect-error contentDocument is not always available
       const text = iframe.contentDocument.getElementById('tinymce').firstChild;
       text.innerHTML = text.innerHTML.length > 0 ? `${text.innerHTML}<br />${templateIframe}` : templateIframe;
     }
@@ -106,9 +118,14 @@ export default class extends PageModification {
   };
 
   saveTemplate = () => {
-    const textarea = createIssueDialogIdentifiers.reduce((acc, selector) => {
-      return acc || document.querySelector(`${selector} ${descriptionInDialogSelector} textarea#description`);
-    }, null);
+    let textarea: HTMLTextAreaElement | null = null;
+    for (const dialogId of createIssueDialogIdentifiers) {
+      textarea = document.querySelector(`${dialogId} ${descriptionInDialogSelector} textarea#description`);
+      if (textarea) {
+        break;
+      }
+    }
+    if (!textarea) return;
 
     if (!window.confirm(`Are you sure you want to save the text "${textarea.value}" in the template?`)) {
       return;

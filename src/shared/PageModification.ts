@@ -10,113 +10,121 @@ import {
   searchIssues,
 } from './jiraApi';
 
-export class PageModification {
-  sideEffects = [];
+type SideEffect = () => void;
+
+export class PageModification<InitData = undefined, TargetElement extends Element | undefined = undefined> {
+  sideEffects: SideEffect[] = [];
 
   // life-cycle methods
 
-  shouldApply() {
+  shouldApply(): boolean {
     return true;
   }
 
-  getModificationId() {
-    return null;
+  getModificationId(): string {
+    // TODO: невалидно выглядит
+    return '';
   }
 
-  appendStyles() {}
+  appendStyles(): string | undefined {
+    return undefined;
+  }
 
-  preloadData() {
+  preloadData(): Promise<any> {
     return Promise.resolve();
   }
 
-  waitForLoading() {
-    return Promise.resolve();
+  waitForLoading(): Promise<TargetElement> {
+    // @ts-expect-error
+    return Promise.resolve(undefined);
   }
 
-  loadData() {
-    return Promise.resolve();
+  loadData(): Promise<InitData | undefined> {
+    return Promise.resolve(undefined);
   }
 
-  apply() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  apply(_?: InitData, __?: Element): any {}
 
-  clear() {
+  clear(): void {
     this.sideEffects.forEach(se => se());
   }
 
   // methods with side-effects
 
-  waitForElement(selector, container) {
+  waitForElement(selector: string, container?: Document | HTMLElement | Element): Promise<Element> {
     const { promise, cancel } = waitForElement(selector, container);
     this.sideEffects.push(cancel);
     return promise;
   }
 
-  getBoardProperty(property) {
+  getBoardProperty(property: string): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardProperty(getBoardIdFromURL(), property, { abortPromise });
+    return getBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
   }
 
-  getBoardConfiguration() {
+  getBoardConfiguration(): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardConfiguration(getBoardIdFromURL(), { abortPromise });
+    return getBoardConfiguration(getBoardIdFromURL()!, { abortPromise });
   }
 
-  updateBoardProperty(property, value) {
+  updateBoardProperty(property: string, value: any): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return updateBoardProperty(getBoardIdFromURL(), property, value, { abortPromise });
+    // TODO: solve before merge
+    // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
+    return updateBoardProperty(getBoardIdFromURL()!, property, value, { abortPromise });
   }
 
-  deleteBoardProperty(property) {
+  deleteBoardProperty(property: string): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return deleteBoardProperty(getBoardIdFromURL(), property, { abortPromise });
+    // TODO: solve before merge
+    // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
+    return deleteBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
   }
 
-  getBoardEditData() {
+  getBoardEditData(): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-
-    return getBoardEditData(getBoardIdFromURL(), { abortPromise });
+    return getBoardEditData(getBoardIdFromURL()!, { abortPromise });
   }
 
-  getBoardEstimationData() {
+  getBoardEstimationData(): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-
-    return getBoardEstimationData(getBoardIdFromURL(), { abortPromise });
+    return getBoardEstimationData(getBoardIdFromURL()!, { abortPromise });
   }
 
-  searchIssues(jql, params = {}) {
+  searchIssues(jql: string, params: Record<string, any> = {}): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
 
     return searchIssues(jql, { ...params, abortPromise });
   }
 
-  createAbortPromise() {
-    let cancelRequest;
-    const abortPromise = new Promise(resolve => {
+  createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
+    let cancelRequest: () => void;
+    const abortPromise = new Promise<void>(resolve => {
       cancelRequest = resolve;
     });
-
-    return { cancelRequest, abortPromise };
+    return { cancelRequest: cancelRequest!, abortPromise };
   }
 
-  setTimeout(func, time) {
+  setTimeout(func: () => void, time: number): number {
     const timeoutID = setTimeout(func, time);
     this.sideEffects.push(() => clearTimeout(timeoutID));
     return timeoutID;
   }
 
-  addEventListener = (target, event, cb) => {
+  addEventListener(target: EventTarget, event: string, cb: EventListener): void {
     target.addEventListener(event, cb);
     this.sideEffects.push(() => target.removeEventListener(event, cb));
-  };
+  }
 
-  onDOMChange(selector, cb, params = { childList: true }) {
+  onDOMChange(selector: string, cb: MutationCallback, params: MutationObserverInit = { childList: true }): void {
     const element = document.querySelector(selector);
     if (!element) return;
 
@@ -125,23 +133,10 @@ export class PageModification {
     this.sideEffects.push(() => observer.disconnect());
   }
 
-  onDOMChangeOnce(selectorOrElement, cb, params = { childList: true }) {
-    const element =
-      selectorOrElement instanceof HTMLElement ? selectorOrElement : document.querySelector(selectorOrElement);
-    if (!element) return;
-
-    const observer = new MutationObserver(() => {
-      observer.disconnect();
-      cb();
-    });
-    observer.observe(element, params);
-    this.sideEffects.push(() => observer.disconnect());
-  }
-
-  insertHTML(container, position, html) {
+  insertHTML(container: Element, position: InsertPosition, html: string): Element | null {
     container.insertAdjacentHTML(position, html.trim());
 
-    let insertedElement;
+    let insertedElement: Element | null = null;
     switch (position) {
       case 'beforebegin':
         insertedElement = container.previousElementSibling;
@@ -156,14 +151,17 @@ export class PageModification {
         insertedElement = container.nextElementSibling;
         break;
       default:
-        throw Error('Wrong position');
+        throw new Error('Wrong position');
     }
 
-    this.sideEffects.push(() => insertedElement.remove());
+    if (insertedElement) {
+      this.sideEffects.push(() => insertedElement!.remove());
+    }
+
     return insertedElement;
   }
 
-  setDataAttr(element, attr, value) {
+  setDataAttr(element: HTMLElement, attr: string, value: string): void {
     element.dataset[attr] = value;
     this.sideEffects.push(() => {
       delete element.dataset[attr];
@@ -171,25 +169,25 @@ export class PageModification {
   }
 
   // helpers
-  getCssSelectorNotIssueSubTask(editData) {
+  getCssSelectorNotIssueSubTask(editData: any): string {
     const constraintType = editData?.rapidListConfig?.currentStatisticsField?.typeId ?? '';
     return constraintType === 'issueCountExclSubs' ? ':not(.ghx-issue-subtask)' : '';
   }
 
-  getCssSelectorOfIssues(editData) {
+  getCssSelectorOfIssues(editData: any): string {
     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
     return `.ghx-issue${cssNotIssueSubTask}`;
   }
 
-  getSearchParam(param) {
+  getSearchParam(param: string): string | null {
     return getSearchParam(param);
   }
 
-  getReportNameFromURL() {
+  getReportNameFromURL(): string | null {
     return getReportNameFromURL();
   }
 
-  getBoardId() {
+  getBoardId(): string | null {
     return getBoardIdFromURL();
   }
 }
