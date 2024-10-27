@@ -1,17 +1,28 @@
-export const getChartTics = chartElement => {
-  const ticks = [...chartElement.querySelectorAll('.tick')].filter(
-    elem => elem.lastChild.attributes.y.value === '0' && elem.lastChild.textContent
+interface Tick {
+  position: number;
+  value: number;
+}
+
+// Gets chart ticks based on specific conditions
+export const getChartTicks = (chartElement: Element): Tick[] => {
+  const ticks = Array.from(chartElement.querySelectorAll('.tick')).filter(
+    elem =>
+      elem.lastChild instanceof HTMLElement &&
+      elem.lastChild.attributes.getNamedItem('y')?.value === '0' &&
+      elem.lastChild.textContent
   );
+
   return ticks.map(elem => {
-    const [, transform] = elem.attributes.transform.value.split(',');
+    const [, transform] = elem.attributes.getNamedItem('transform')?.value.split(',') || ['', ''];
     return {
       position: Number(transform.slice(0, -1)),
-      value: Number(elem.lastChild.textContent),
+      value: Number(elem.lastChild?.textContent),
     };
   });
 };
 
-export const getChartLinePosition = (ticksVals, value) => {
+// Calculates chart line position based on ticks and a given value
+export const getChartLinePosition = (ticksVals: Tick[], value: number): number => {
   let nextTick = ticksVals[ticksVals.length - 1];
   for (let i = 0; i < ticksVals.length; i++) {
     if (ticksVals[i].value >= value) {
@@ -47,7 +58,8 @@ export const getChartLinePosition = (ticksVals, value) => {
   return prevTick.position - percentDistance * (prevTick.position - nextTick.position);
 };
 
-export const getChartValueByPosition = (ticksVals, position) => {
+// Calculates chart value by given position
+export const getChartValueByPosition = (ticksVals: Tick[], position: number): number => {
   let nextTick = ticksVals[ticksVals.length - 1];
   for (let i = 0; i < ticksVals.length; i++) {
     if (ticksVals[i].position <= position) {
