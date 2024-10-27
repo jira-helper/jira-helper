@@ -1,7 +1,19 @@
 import keys from '@tinkoff/utils/object/keys';
 
-export function findGroupByColumnId(columnId, groupsFromAPI) {
-  let result = {};
+type GroupData = {
+  columns?: string[];
+};
+
+type GroupsFromAPI = Record<string, GroupData>;
+
+interface GroupResult {
+  name?: string;
+  value?: string[];
+}
+
+// Function to find a group by column ID
+export function findGroupByColumnId(columnId: string, groupsFromAPI: GroupsFromAPI): GroupResult {
+  let result: GroupResult = {};
 
   Object.entries(groupsFromAPI || {}).forEach(([group, data]) => {
     if (data.columns && data.columns.indexOf(columnId) > -1) {
@@ -15,7 +27,8 @@ export function findGroupByColumnId(columnId, groupsFromAPI) {
   return result;
 }
 
-const colors = [
+// Array of colors used for color generation
+const colors: string[] = [
   '#70cde0',
   '#d3d1ff',
   '#f9aa9b',
@@ -42,7 +55,8 @@ const colors = [
 
 const strLengthForGenerating = 5;
 
-export const generateColorByFirstChars = str => {
+// Function to generate color based on the first characters of a string
+export const generateColorByFirstChars = (str: string): string => {
   const integerCharCodes = str
     .replace(/[^а-яёА-ЯЁA-Za-z0-9]/gi, '') // exclude all symbols except а-яёА-ЯЁА-Za-z0-9
     .split('')
@@ -56,8 +70,44 @@ export const generateColorByFirstChars = str => {
   return colors[generatedColorIndex];
 };
 
-export const mapColumnsToGroups = ({ columnsHtmlNodes = [], wipLimits = {}, withoutGroupId = 'Without group' }) => {
-  const resultGroupsMap = {
+interface ColumnHtmlNode {
+  dataset: {
+    columnId: string;
+  };
+}
+
+interface WipLimits {
+  [groupId: string]: GroupData;
+}
+
+interface MapColumnsToGroupsParams {
+  columnsHtmlNodes?: ColumnHtmlNode[];
+  wipLimits?: WipLimits;
+  withoutGroupId?: string;
+}
+
+interface GroupMap {
+  allGroupIds: string[];
+  byGroupId: {
+    [groupId: string]: {
+      allColumnIds: string[];
+      byColumnId: {
+        [columnId: string]: {
+          column: ColumnHtmlNode;
+          id: string;
+        };
+      };
+    };
+  };
+}
+
+// Function to map columns to their respective groups
+export const mapColumnsToGroups = ({
+  columnsHtmlNodes = [],
+  wipLimits = {},
+  withoutGroupId = 'Without group',
+}: MapColumnsToGroupsParams): GroupMap => {
+  const resultGroupsMap: GroupMap = {
     allGroupIds: [...keys(wipLimits), withoutGroupId],
     byGroupId: {},
   };
@@ -67,7 +117,9 @@ export const mapColumnsToGroups = ({ columnsHtmlNodes = [], wipLimits = {}, with
     let { name } = findGroupByColumnId(columnId, wipLimits);
 
     if (!name) name = withoutGroupId;
-    if (!resultGroupsMap.byGroupId[name]) resultGroupsMap.byGroupId[name] = { allColumnIds: [], byColumnId: {} };
+    if (!resultGroupsMap.byGroupId[name]) {
+      resultGroupsMap.byGroupId[name] = { allColumnIds: [], byColumnId: {} };
+    }
 
     resultGroupsMap.byGroupId[name].allColumnIds.push(columnId);
     resultGroupsMap.byGroupId[name].byColumnId[columnId] = { column, id: columnId };
