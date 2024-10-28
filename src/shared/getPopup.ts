@@ -10,8 +10,6 @@ interface PopupProps {
 }
 
 export class Popup {
-  private isOpened: boolean;
-
   private initialProps: PopupProps;
 
   private popupIdentifiers: {
@@ -21,7 +19,7 @@ export class Popup {
     cancelBtnId: string;
   };
 
-  private htmlElement: HTMLElement | null;
+  public htmlElement: HTMLElement | null;
 
   public contentBlock: HTMLElement | null;
 
@@ -37,8 +35,6 @@ export class Popup {
     okButtonText = 'Ok',
     size = 'medium', // large, medium, small
   }: PopupProps) {
-    this.isOpened = false;
-
     this.initialProps = {
       title,
       initialContentInnerHTML,
@@ -130,7 +126,6 @@ export class Popup {
 
   // Renders the popup
   render(): void {
-    this.isOpened = true;
     document.body.insertAdjacentHTML('beforeend', this.html());
 
     this.htmlElement = document.getElementById(this.popupIdentifiers.wrapperId);
@@ -145,8 +140,6 @@ export class Popup {
   // Unmounts the popup
   unmount = (): void => {
     if (this.htmlElement) {
-      this.isOpened = false;
-
       this.deattachButtonHandlers();
       this.removeDarkBackground();
 
