@@ -1,14 +1,6 @@
 import { getBoardIdFromURL, getSearchParam, getReportNameFromURL } from '../routing';
 import { waitForElement } from './utils';
-import {
-  deleteBoardProperty,
-  getBoardEditData,
-  getBoardEstimationData,
-  getBoardProperty,
-  getBoardConfiguration,
-  updateBoardProperty,
-  searchIssues,
-} from './jiraApi';
+import { deleteBoardProperty, getBoardEditData, getBoardProperty, updateBoardProperty } from './jiraApi';
 
 type SideEffect = () => void;
 
@@ -64,12 +56,6 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return getBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
   }
 
-  getBoardConfiguration(): Promise<any> {
-    const { cancelRequest, abortPromise } = this.createAbortPromise();
-    this.sideEffects.push(cancelRequest);
-    return getBoardConfiguration(getBoardIdFromURL()!, { abortPromise });
-  }
-
   updateBoardProperty(property: string, value: any): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
@@ -90,19 +76,6 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     return getBoardEditData(getBoardIdFromURL()!, { abortPromise });
-  }
-
-  getBoardEstimationData(): Promise<any> {
-    const { cancelRequest, abortPromise } = this.createAbortPromise();
-    this.sideEffects.push(cancelRequest);
-    return getBoardEstimationData(getBoardIdFromURL()!, { abortPromise });
-  }
-
-  searchIssues(jql: string, params: Record<string, any> = {}): Promise<any> {
-    const { cancelRequest, abortPromise } = this.createAbortPromise();
-    this.sideEffects.push(cancelRequest);
-
-    return searchIssues(jql, { ...params, abortPromise });
   }
 
   createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
@@ -159,13 +132,6 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     }
 
     return insertedElement;
-  }
-
-  setDataAttr(element: HTMLElement, attr: string, value: string): void {
-    element.dataset[attr] = value;
-    this.sideEffects.push(() => {
-      delete element.dataset[attr];
-    });
   }
 
   // helpers

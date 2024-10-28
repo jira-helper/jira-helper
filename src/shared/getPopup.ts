@@ -167,15 +167,4 @@ export class Popup {
       }
     }
   }
-
-  // Toggles the availability of the confirm button
-  toggleConfirmAvailability(isAvailable: boolean): void {
-    if (!this.confirmBtn) return;
-
-    if (isAvailable) {
-      this.confirmBtn.removeAttribute('disabled');
-    } else {
-      this.confirmBtn.setAttribute('disabled', 'true');
-    }
-  }
 }

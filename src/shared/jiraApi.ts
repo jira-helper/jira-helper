@@ -133,26 +133,8 @@ export const getBoardEditData = (boardId: string, params: Record<string, any> = 
   });
 };
 
-// Fetch configuration data for a board
-export const getBoardConfiguration = async (boardId: string, params: Record<string, any> = {}): Promise<any> => {
-  return requestJira({
-    url: boardConfigurationURL(boardId),
-    type: 'json',
-    ...params,
-  });
-};
-
-// Fetch estimation data for a board
-export const getBoardEstimationData = (boardId: string, params: Record<string, any> = {}): Promise<any> => {
-  return requestJira({
-    url: `${boardEstimationDataURL}${boardId}`,
-    type: 'json',
-    ...params,
-  });
-};
-
 // Search issues based on JQL query
-export const searchIssues = (jql: string, params: Record<string, any> = {}): Promise<any> =>
+const searchIssues = (jql: string, params: Record<string, any> = {}): Promise<any> =>
   requestJira({
     url: `api/2/search?jql=${jql}`,
     type: 'json',
