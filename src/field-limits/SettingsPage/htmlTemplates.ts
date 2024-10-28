@@ -1,8 +1,28 @@
 import style from './styles.module.css';
 
-export const settingsEditBtnTemplate = btnId => `<div class="${style.settingsEditBtn}">
+// Generates settings edit button template
+export const settingsEditBtnTemplate = (btnId: string): string => `<div class="${style.settingsEditBtn}">
             <button id="${btnId}" class="aui-button" type="button">Edit WIP limits by field</button>
         </div>`;
+
+// Generates field limits table template
+export interface FieldLimitsTableTemplateProps {
+  tableId: string;
+  tableBodyId: string;
+  addLimitBtnId: string;
+  editLimitBtnId: string;
+  fieldValueInputId: string;
+  visualNameInputId: string;
+  columnsSelectId: string;
+  swimlanesSelectId: string;
+  wipLimitInputId: string;
+  applySwimlanesId: string;
+  applyColumnsId: string;
+  selectFieldId: string;
+  selectFieldOptions?: { value: string; text: string }[];
+  swimlaneOptions?: { value: string; text: string }[];
+  columnOptions?: { value: string; text: string }[];
+}
 
 export const fieldLimitsTableTemplate = ({
   tableId,
@@ -20,7 +40,7 @@ export const fieldLimitsTableTemplate = ({
   selectFieldOptions = [],
   swimlaneOptions = [],
   columnOptions = [],
-}) => `
+}: FieldLimitsTableTemplateProps): string => `
    <form class="aui" onsubmit="return false;">
       <fieldset>
         <table>
@@ -29,14 +49,16 @@ export const fieldLimitsTableTemplate = ({
                <div class="field-group">
                 <label for="field-name" title="two related fields as one key" style="cursor: help;"><b>Field<sup>*</sup></b></label>
                 <select id="${selectFieldId}" class="select" name="field-name" defaultValue="${
-                  selectFieldOptions[0]?.value
+                  selectFieldOptions[0]?.value || ''
                 }">
-                    ${selectFieldOptions.map(
-                      (option, i) =>
-                        `<option ${i === 0 ? 'selected="selected"' : ''} value="${option.value}">${
-                          option.text
-                        }</option>`
-                    )}
+                    ${selectFieldOptions
+                      .map(
+                        (option, i) =>
+                          `<option ${i === 0 ? 'selected="selected"' : ''} value="${option.value}">${
+                            option.text
+                          }</option>`
+                      )
+                      .join('')}
                 </select>
               </div>
               <div class="field-group">
@@ -56,14 +78,14 @@ export const fieldLimitsTableTemplate = ({
               <div class="field-group" style="display: flex">
                 <label>Columns</label>
                 <select id="${columnsSelectId}" class="select2" multiple style="margin: 0 12px; width: 195px;" size="4">
-                  ${columnOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`)}
+                  ${columnOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`).join('')}
                 </select>
                 <button type="button" id="${applyColumnsId}" class="aui-button aui-button-link">Apply columns<br/>for selected users</button>
               </div>
               <div class="field-group" style="display: flex">
                 <label>Swimlanes</label>
                 <select id="${swimlanesSelectId}" class="select2" multiple style="margin: 0 12px; width: 195px;" size="5">
-                  ${swimlaneOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`)}
+                  ${swimlaneOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`).join('')}
                 </select>
                 <button type="button" id="${applySwimlanesId}" class="aui-button aui-button-link">Apply swimlanes<br/>for selected users</button>
               </div>
@@ -106,25 +128,40 @@ export const fieldLimitsTableTemplate = ({
   </form>
 `;
 
+// Generates field row template
+export interface FieldRowTemplateProps {
+  limitKey: string;
+  fieldId: string;
+  fieldName: string;
+  fieldValue: string;
+  visualValue: string;
+  bkgColor?: string;
+  limit: string;
+  columns?: { name: string }[];
+  swimlanes?: { name: string }[];
+  editClassBtn: string;
+  deleteClassBtn: string;
+}
+
 export const fieldRowTemplate = ({
   limitKey,
   fieldId,
   fieldName,
   fieldValue,
   visualValue,
-  bkgColor,
+  bkgColor = 'none',
   limit,
   columns = [],
   swimlanes = [],
   editClassBtn,
   deleteClassBtn,
-}) => `
+}: FieldRowTemplateProps): string => `
     <tr data-field-project-row="${limitKey}">
       <td><input type="checkbox" class="checkbox" data-id="${limitKey}"></td>
       <td data-type="field-name" data-value="${fieldId}">${fieldName}</td>
       <td data-type="field-value">${fieldValue}</td>
       <td data-type="visual-name"><div colorpicker-data-id="${limitKey}"
-          class="${style.visualName}" style="background-color:${bkgColor || 'none'}">${visualValue}</div></td>
+          class="${style.visualName}" style="background-color:${bkgColor}">${visualValue}</div></td>
       <td data-type="field-limit">${limit}</td>
       <td data-type="field-columns">${columns.map(c => c.name).join(', ')}</td>
       <td data-type="field-swimlanes">${swimlanes.map(s => s.name).join(', ')}</td>
@@ -133,4 +170,4 @@ export const fieldRowTemplate = ({
         <button class="aui-button ${deleteClassBtn} ${style.jhControlRowBtn}">Delete</button>
       </td>
     </tr>
-  `;
+`;

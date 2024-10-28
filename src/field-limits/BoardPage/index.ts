@@ -11,8 +11,29 @@ const TYPE_CALC = {
   BY_SUM_VALUE: 1,
   BY_SUM_NUMBERS: 2,
   BY_MULTIPLE_VALUES: 3,
+} as const;
+
+type LimitStats = {
+  columns: string[];
+  swimlanes: string[];
+  fieldId: string;
+  fieldValue: string;
+  limit: number;
+  issues: Array<{ issue: HTMLElement; countValues: number }>;
+  typeCalc?: number;
+  visualValue: string;
+  bkgColor: string;
 };
-export default class FieldLimitsSettingsPage extends PageModification {
+
+type BoardData = {
+  cardLayoutConfig: { currentFields: any[] };
+};
+
+type FieldLimits = {
+  limits: Record<string, LimitStats>;
+};
+
+export default class FieldLimitsSettingsPage extends PageModification<[BoardData, FieldLimits], Element> {
   static jiraSelectors = {
     subnavTitle: '#subnav-title',
     extraField: '.ghx-extra-field',
@@ -27,28 +48,36 @@ export default class FieldLimitsSettingsPage extends PageModification {
     issuesCount: 'field-issues-count',
   };
 
-  shouldApply() {
+  private fieldLimits?: FieldLimits;
+
+  private cssSelectorOfIssues: string | null = null;
+
+  private normalizedExtraFields: any;
+
+  private fieldLimitsList?: Element | null;
+
+  shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `board-page-field-limits-${this.getBoardId()}`;
   }
 
-  waitForLoading() {
+  waitForLoading(): Promise<Element> {
     return this.waitForElement(FieldLimitsSettingsPage.jiraSelectors.swimlane);
   }
 
-  async loadData() {
-    const boardData = await this.getBoardEditData();
-    const fieldLimits = (await this.getBoardProperty(BOARD_PROPERTIES.FIELD_LIMITS)) || { limits: {} };
+  async loadData(): Promise<[BoardData, FieldLimits]> {
+    const boardData = (await this.getBoardEditData()) as BoardData;
+    const fieldLimits = ((await this.getBoardProperty(BOARD_PROPERTIES.FIELD_LIMITS)) || { limits: {} }) as FieldLimits;
     return [boardData, fieldLimits];
   }
 
-  apply(data) {
+  apply(data: [BoardData, FieldLimits]): void {
     if (!data) return;
-    const [boardData = {}, fieldLimits] = data;
+    const [boardData, fieldLimits] = data;
     if (isEmpty(fieldLimits) || isEmpty(fieldLimits.limits)) return;
     this.fieldLimits = fieldLimits;
     this.cssSelectorOfIssues = this.getCssSelectorOfIssues(boardData);
@@ -66,46 +95,48 @@ export default class FieldLimitsSettingsPage extends PageModification {
     });
   }
 
-  applyLimits() {
+  applyLimits(): void {
     const limitsStats = this.getLimitsStats();
 
     this.doColorCardsIssue(limitsStats);
     this.applyLimitsList(limitsStats);
   }
 
-  getSumValues(stat) {
+  getSumValues(stat: LimitStats): number {
     return stat.issues.reduce((acc, issue) => acc + issue.countValues, 0);
   }
 
-  doColorCardsIssue(limitsStats) {
+  doColorCardsIssue(limitsStats: Record<string, LimitStats>): void {
     Object.keys(limitsStats).forEach(limitKey => {
       const stat = limitsStats[limitKey];
       if (isEmpty(stat.issues)) return;
 
       const sumCountValues = this.getSumValues(stat);
 
-      if (sumCountValues > stat.limit)
+      if (sumCountValues > stat.limit) {
         stat.issues.forEach(({ issue, countValues }) => {
           if (countValues === 0) return;
           issue.style.backgroundColor = COLORS.OVER_WIP_LIMITS;
         });
+      }
     });
   }
 
-  checkIfLimitsAreApplied() {
-    if (!document.body.contains(this.fieldLimitsList)) {
+  checkIfLimitsAreApplied(): void {
+    if (!document.body.contains(this.fieldLimitsList!)) {
       const limitsStats = this.getLimitsStats();
       this.applyLimitsList(limitsStats);
     }
   }
 
-  applyLimitsList(limitsStats) {
+  applyLimitsList(limitsStats: Record<string, LimitStats>): void {
     if (!this.fieldLimitsList || !document.body.contains(this.fieldLimitsList)) {
-      if (!document.querySelector(FieldLimitsSettingsPage.jiraSelectors.subnavTitle)) {
+      const subnavTitle = document.querySelector(FieldLimitsSettingsPage.jiraSelectors.subnavTitle);
+      if (!subnavTitle) {
         return;
       }
       this.fieldLimitsList = this.insertHTML(
-        document.querySelector(FieldLimitsSettingsPage.jiraSelectors.subnavTitle),
+        subnavTitle,
         'beforeend',
         fieldLimitsTemplate({
           listBody: Object.keys(limitsStats)
@@ -117,7 +148,8 @@ export default class FieldLimitsSettingsPage extends PageModification {
                 dataFieldLimitKey: limitKey,
                 bkgColor,
                 innerText: visualValue,
-                limitValue: limitsStats[limitKey].limit,
+                // TODO: limitValue is not used in template. Is it bug or feature?
+                // limitValue: limitsStats[limitKey].limit,
                 issuesCountClass: FieldLimitsSettingsPage.classes.issuesCount,
               });
             })
@@ -126,66 +158,71 @@ export default class FieldLimitsSettingsPage extends PageModification {
       );
     }
 
-    this.fieldLimitsList.getElementsByClassName(FieldLimitsSettingsPage.classes.fieldLimitsBlock).forEach(fieldNode => {
-      const limitKey = fieldNode.getAttribute('data-field-limit-key');
-      const { fieldValue, fieldId } = limitsKey.decode(limitKey);
-      const stat = limitsStats[limitKey];
-      const currentIssueNode = fieldNode.querySelector(`.${FieldLimitsSettingsPage.classes.issuesCount}`);
+    this.fieldLimitsList!.querySelectorAll(`.${FieldLimitsSettingsPage.classes.fieldLimitsBlock}`).forEach(
+      fieldNode => {
+        const limitKey = fieldNode.getAttribute('data-field-limit-key');
+        if (!limitKey) return;
+        const { fieldValue, fieldId } = limitsKey.decode(limitKey);
+        const stat = limitsStats[limitKey];
+        const currentIssueNode = fieldNode.querySelector(`.${FieldLimitsSettingsPage.classes.issuesCount}`);
 
-      if (!fieldId || !fieldValue) return;
+        if (!fieldId || !fieldValue || !currentIssueNode) return;
 
-      const sumValues = this.getSumValues(stat);
-      const limitOfFieldIssuesOnBoard = stat.limit;
+        const sumValues = this.getSumValues(stat);
+        const limitOfFieldIssuesOnBoard = stat.limit;
 
-      switch (Math.sign(limitOfFieldIssuesOnBoard - sumValues)) {
-        case -1:
-          currentIssueNode.style.backgroundColor = COLORS.OVER_WIP_LIMITS;
-          break;
-        case 0:
-          currentIssueNode.style.backgroundColor = COLORS.ON_THE_LIMIT;
-          break;
-        default:
-          currentIssueNode.style.backgroundColor = COLORS.BELOW_THE_LIMIT;
-          break;
+        switch (Math.sign(limitOfFieldIssuesOnBoard - sumValues)) {
+          case -1:
+            // @ts-expect-error - we are sure that currentIssueNode is HTMLElement
+            currentIssueNode.style.backgroundColor = COLORS.OVER_WIP_LIMITS;
+            break;
+          case 0:
+            // @ts-expect-error - we are sure that currentIssueNode is HTMLElement
+            currentIssueNode.style.backgroundColor = COLORS.ON_THE_LIMIT;
+            break;
+          default:
+            // @ts-expect-error - we are sure that currentIssueNode is HTMLElement
+            currentIssueNode.style.backgroundColor = COLORS.BELOW_THE_LIMIT;
+            break;
+        }
+
+        currentIssueNode.innerHTML = `${sumValues}/${limitOfFieldIssuesOnBoard}`;
+
+        fieldNode.setAttribute(
+          'title',
+          fieldLimitTitleTemplate({
+            limit: limitOfFieldIssuesOnBoard,
+            current: sumValues,
+            fieldValue,
+            fieldName: this.normalizedExtraFields.byId[fieldId]?.name,
+          })
+        );
       }
-
-      currentIssueNode.innerHTML = `${sumValues}/${limitOfFieldIssuesOnBoard}`;
-
-      fieldNode.setAttribute(
-        'title',
-        fieldLimitTitleTemplate({
-          limit: limitOfFieldIssuesOnBoard,
-          current: sumValues,
-          fieldValue,
-          fieldName: this.normalizedExtraFields.byId[fieldId].name,
-        })
-      );
-    });
+    );
   }
 
-  hasCustomswimlanes() {
+  hasCustomswimlanes(): boolean {
     const someswimlane = document.querySelector(DOM.swimlaneHeaderContainer);
 
     if (someswimlane == null) {
       return false;
     }
 
-    return someswimlane.getAttribute('aria-label').indexOf('custom:') !== -1;
+    return someswimlane.getAttribute('aria-label')?.indexOf('custom:') !== -1;
   }
 
   // Pro, Pro^2
-  getCountValuesFromExtraField(exField, value) {
-    // find all variants this value
+  getCountValuesFromExtraField(exField: HTMLElement, value: string): number {
+    // Find all variants of this value
     let result = 0;
     if (exField.childNodes instanceof NodeList) {
       exField.childNodes.forEach(el => {
-        const search = el.innerText.split(',');
+        const search = (el as HTMLElement).innerText.split(',');
         search.forEach(txt => {
-          // sample: Team^2 - it is count = 2, Team it is count = 1
+          // Sample: Team^2 - count = 2, Team - count = 1
           const itemVal = txt.trim().split('^');
           const type = itemVal[0].trim();
-          // eslint-disable-next-line prefer-template
-          const numb = (itemVal[1] + '').trim();
+          const numb = `${itemVal[1]}`.trim();
           const count = /^[0-9]*$/.test(numb) ? Number(numb) : 1;
           if (value === type) {
             result += count;
@@ -196,28 +233,29 @@ export default class FieldLimitsSettingsPage extends PageModification {
     return result;
   }
 
-  getHasValueFromExtraField(exField, value) {
+  getHasValueFromExtraField(exField: HTMLElement, value: string): number {
     let result = false;
     if (exField.childNodes instanceof NodeList) {
       exField.childNodes.forEach(el => {
-        result = result || el.innerText.split(',').reduce((acc, val) => acc || val.trim() === value, false);
+        result =
+          result || (el as HTMLElement).innerText.split(',').reduce((acc, val) => acc || val.trim() === value, false);
       });
     }
     return result ? 1 : 0;
   }
 
-  getSumNumberValueFromExtraField(exField) {
+  getSumNumberValueFromExtraField(exField: HTMLElement): number {
     let result = 0;
     if (exField.childNodes instanceof NodeList) {
       exField.childNodes.forEach(el => {
-        const val = Number.parseFloat(el.innerText);
+        const val = Number.parseFloat((el as HTMLElement).innerText);
         result += Number.isNaN(val) ? 0 : val;
       });
     }
     return result;
   }
 
-  getHasOneOfValuesFromExtraField(exField, value) {
+  getHasOneOfValuesFromExtraField(exField: HTMLElement, value: string): number {
     let result = false;
     const pattern = /\s*\|\|\s*/;
     const values = value.split(pattern);
@@ -225,28 +263,31 @@ export default class FieldLimitsSettingsPage extends PageModification {
     if (exField.childNodes instanceof NodeList) {
       exField.childNodes.forEach(el => {
         result =
-          result || el.innerText.split(',').reduce((acc, val) => values.some(v => v === val.trim()) || acc, false);
+          result ||
+          (el as HTMLElement).innerText
+            .split(',')
+            .reduce((acc, val) => values.some(v => v === val.trim()) || acc, false);
       });
     }
     return result ? 1 : 0;
   }
 
-  countAmountPersonalIssuesInColumn(column, stats, swimlaneId) {
+  countAmountPersonalIssuesInColumn(column: HTMLElement, stats: Record<string, LimitStats>, swimlaneId?: string): void {
     const { columnId } = column.dataset;
 
-    column.querySelectorAll(this.cssSelectorOfIssues).forEach(issue => {
-      const extraFieldsForIssue = issue.querySelectorAll(FieldLimitsSettingsPage.jiraSelectors.extraField);
+    column.querySelectorAll(this.cssSelectorOfIssues!).forEach(issue => {
+      const extraFieldsForIssue = Array.from(issue.querySelectorAll(FieldLimitsSettingsPage.jiraSelectors.extraField));
 
       Object.keys(stats).forEach(fieldLimitKey => {
         const stat = stats[fieldLimitKey];
 
-        if (!stat.columns.includes(columnId)) return;
+        if (!stat.columns.includes(columnId!)) return;
         if (swimlaneId && !stat.swimlanes.includes(swimlaneId)) return;
 
-        const fieldNameSt = this.normalizedExtraFields.byId[stat.fieldId].name;
+        const fieldNameSt = this.normalizedExtraFields.byId[stat.fieldId]?.name;
         const fieldValue = stat.fieldValue.replace(/^∑/, '');
 
-        let typeCalc = TYPE_CALC.BY_CARD;
+        let typeCalc: number = TYPE_CALC.BY_CARD;
         window.console.info('countAmountPersonalIssuesInColumn:', stat.fieldValue);
         if (stat.fieldValue[0] === '∑') {
           typeCalc = TYPE_CALC.BY_SUM_VALUE;
@@ -259,30 +300,29 @@ export default class FieldLimitsSettingsPage extends PageModification {
 
         for (const exField of extraFieldsForIssue) {
           const tooltipAttr = exField.getAttribute('data-tooltip');
-          const fieldName = tooltipAttr.split(':')[0];
-          let countValues;
+          const fieldName = tooltipAttr?.split(':')[0];
+          let countValues: number;
 
           switch (typeCalc) {
             case TYPE_CALC.BY_SUM_VALUE:
-              countValues = this.getCountValuesFromExtraField(exField, fieldValue);
+              countValues = this.getCountValuesFromExtraField(exField as HTMLElement, fieldValue);
               break;
             case TYPE_CALC.BY_SUM_NUMBERS:
-              countValues = this.getSumNumberValueFromExtraField(exField);
+              countValues = this.getSumNumberValueFromExtraField(exField as HTMLElement);
               break;
             case TYPE_CALC.BY_MULTIPLE_VALUES:
-              countValues = this.getHasOneOfValuesFromExtraField(exField, fieldValue);
+              countValues = this.getHasOneOfValuesFromExtraField(exField as HTMLElement, fieldValue);
               break;
             default:
               // TYPE_CALC.BY_CARD
-              countValues = this.getHasValueFromExtraField(exField, fieldValue);
+              countValues = this.getHasValueFromExtraField(exField as HTMLElement, fieldValue);
               break;
           }
 
           if (fieldName === fieldNameSt) {
             stats[fieldLimitKey].issues.push({
-              // eslint-disable-next-line no-nested-ternary, prettier/prettier
               countValues,
-              issue,
+              issue: issue as HTMLElement,
             });
             stats[fieldLimitKey].typeCalc = typeCalc;
           }
@@ -291,18 +331,18 @@ export default class FieldLimitsSettingsPage extends PageModification {
     });
   }
 
-  getLimitsStats() {
-    const stats = mapObj(value => ({
+  getLimitsStats(): Record<string, LimitStats> {
+    const stats = mapObj((value: LimitStats) => ({
       ...value,
       issues: [],
-    }))(this.fieldLimits.limits);
+    }))(this.fieldLimits!.limits) as Record<string, LimitStats>;
 
     if (this.hasCustomswimlanes()) {
       document.querySelectorAll(DOM.swimlane).forEach(swimlane => {
         const swimlaneId = swimlane.getAttribute('swimlane-id');
 
         swimlane.querySelectorAll(FieldLimitsSettingsPage.jiraSelectors.column).forEach(column => {
-          this.countAmountPersonalIssuesInColumn(column, stats, swimlaneId);
+          this.countAmountPersonalIssuesInColumn(column as HTMLElement, stats, swimlaneId!);
         });
       });
 
@@ -310,7 +350,7 @@ export default class FieldLimitsSettingsPage extends PageModification {
     }
 
     document.querySelectorAll(FieldLimitsSettingsPage.jiraSelectors.column).forEach(column => {
-      this.countAmountPersonalIssuesInColumn(column, stats);
+      this.countAmountPersonalIssuesInColumn(column as HTMLElement, stats);
     });
 
     return stats;
