@@ -17,9 +17,8 @@ const configVersion = 'v1';
 const getPropName = (property: string): string => `${property}${configVersion}`;
 
 const boardPropertiesUrl = (boardId: string): string => `agile/1.0/board/${boardId}/properties`;
-const boardConfigurationURL = (boardId: string): string => `agile/1.0/board/${boardId}/configuration`;
+
 const boardEditDataURL = 'greenhopper/1.0/rapidviewconfig/editmodel.json?rapidViewId=';
-const boardEstimationDataURL = 'greenhopper/1.0/rapidviewconfig/estimation.json?rapidViewId=';
 
 const invalidatedProperties: Record<string, boolean> = {};
 
