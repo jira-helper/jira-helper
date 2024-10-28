@@ -13,12 +13,13 @@ export const settingsJiraDOM = {
   idTableHeadColumns: 'edit-person-wip-limit-head-columns',
   idTableHeadSwimlanes: 'edit-person-wip-limit-head-swimlanes',
   idTableHeadDelete: 'edit-person-wip-limit-head-delete',
+  idTableHeadLimits: 'edit-person-wip-limit-head-limits',
 };
 
-export const groupSettingsBtnTemplate = () =>
+export const groupSettingsBtnTemplate = (): string =>
   `<button id="${settingsJiraDOM.openEditorBtn}" class="aui-button">Manage per-person WIP-limits</button>`;
 
-export const formPersonalWipLimit = () => {
+export const formPersonalWipLimit = (): string => {
   return `<form class="aui">
     <fieldset>
       <table>
@@ -64,7 +65,21 @@ export const formPersonalWipLimit = () => {
   </form>`;
 };
 
-export const addPersonalWipLimit = ({ id, person, limit, columns, swimlanes }, isChecked) => {
+// Define types for input parameters
+interface PersonalWipLimit {
+  id: string;
+  person: {
+    displayName: string;
+  };
+  limit: number;
+  columns: { name: string }[];
+  swimlanes: { name: string }[];
+}
+
+export const addPersonalWipLimit = (
+  { id, person, limit, columns, swimlanes }: PersonalWipLimit,
+  isChecked: boolean
+): string => {
   return `<tr id="row-${id}" class="person-row">
       <td><input type="checkbox" class="checkbox select-user-chb" data-id="${id}" ${
         isChecked ? 'checked="checked"' : ''
@@ -78,7 +93,7 @@ export const addPersonalWipLimit = ({ id, person, limit, columns, swimlanes }, i
   `;
 };
 
-export const tablePersonalWipLimit = () => {
+export const tablePersonalWipLimit = (): string => {
   return `<table class="aui">
     <thead>
     <tr>
