@@ -2,7 +2,7 @@
 
 type ExtensionAPI = typeof chrome | typeof browser;
 
-export type MessageCallback = (
+type MessageCallback = (
   request: any,
   sender: { tab?: { id?: number } },
   sendResponse: (response?: any) => void
@@ -10,7 +10,7 @@ export type MessageCallback = (
 
 type TabsActivatedCallback = (activeInfo: chrome.tabs.TabActiveInfo) => void;
 
-export type ContextMenuCallback = (info: { checked?: boolean }, tab?: { id?: number }) => void;
+type ContextMenuCallback = (info: { checked?: boolean }, tab?: { id?: number }) => void;
 export interface TabChangeInfo {
   status?: string;
   url?: string;

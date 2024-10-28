@@ -17,7 +17,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
 
   // life-cycle methods
 
-  shouldApply(): boolean {
+  shouldApply(): Promise<boolean> | boolean {
     return true;
   }
 

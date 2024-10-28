@@ -70,30 +70,24 @@ export const generateColorByFirstChars = (str: string): string => {
   return colors[generatedColorIndex];
 };
 
-interface ColumnHtmlNode {
-  dataset: {
-    columnId: string;
-  };
-}
-
 interface WipLimits {
   [groupId: string]: GroupData;
 }
 
 interface MapColumnsToGroupsParams {
-  columnsHtmlNodes?: ColumnHtmlNode[];
+  columnsHtmlNodes?: HTMLElement[];
   wipLimits?: WipLimits;
   withoutGroupId?: string;
 }
 
-interface GroupMap {
+export interface GroupMap {
   allGroupIds: string[];
   byGroupId: {
     [groupId: string]: {
       allColumnIds: string[];
       byColumnId: {
         [columnId: string]: {
-          column: ColumnHtmlNode;
+          column: HTMLElement;
           id: string;
         };
       };
@@ -114,15 +108,15 @@ export const mapColumnsToGroups = ({
 
   columnsHtmlNodes.forEach(column => {
     const { columnId } = column.dataset;
-    let { name } = findGroupByColumnId(columnId, wipLimits);
+    let { name } = findGroupByColumnId(columnId!, wipLimits);
 
     if (!name) name = withoutGroupId;
     if (!resultGroupsMap.byGroupId[name]) {
       resultGroupsMap.byGroupId[name] = { allColumnIds: [], byColumnId: {} };
     }
 
-    resultGroupsMap.byGroupId[name].allColumnIds.push(columnId);
-    resultGroupsMap.byGroupId[name].byColumnId[columnId] = { column, id: columnId };
+    resultGroupsMap.byGroupId[name].allColumnIds.push(columnId!);
+    resultGroupsMap.byGroupId[name].byColumnId[columnId!] = { column, id: columnId! };
   });
 
   return resultGroupsMap;
