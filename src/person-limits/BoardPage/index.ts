@@ -2,7 +2,24 @@ import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { settingsJiraDOM as DOM } from '../../swimlane/constants';
 
-const isPersonLimitAppliedToIssue = (personLimit, assignee, columnId, swimlaneId) => {
+interface PersonLimit {
+  person: {
+    displayName: string;
+    name: string;
+    avatar: string;
+  };
+  columns: Array<{ id: string }>;
+  swimlanes: Array<{ id: string }>;
+  limit: number;
+  issues: HTMLElement[];
+}
+
+const isPersonLimitAppliedToIssue = (
+  personLimit: PersonLimit,
+  assignee: string | null,
+  columnId: string,
+  swimlaneId?: string | null
+): boolean => {
   if (swimlaneId == null) {
     return (
       (personLimit.person.displayName === assignee || personLimit.person.name === assignee) &&
@@ -17,11 +34,11 @@ const isPersonLimitAppliedToIssue = (personLimit, assignee, columnId, swimlaneId
   );
 };
 
-const getNameFromTooltip = tooltip => {
+const getNameFromTooltip = (tooltip: string): string => {
   return tooltip.split(':')[1].split('[')[0].trim(); // Assignee: Pavel [x]
 };
 
-const getAssignee = avatar => {
+const getAssignee = (avatar: HTMLImageElement | null): string | null => {
   if (!avatar) return null;
 
   const label = avatar.alt ?? avatar.dataset.tooltip;
@@ -30,17 +47,21 @@ const getAssignee = avatar => {
   return getNameFromTooltip(label);
 };
 
-export default class extends PageModification {
-  shouldApply() {
+export default class extends PageModification<[any, any], Element> {
+  private cssSelectorOfIssues: string | null = null;
+
+  private avatarsList: null | Element = null;
+
+  shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `add-person-limits-${this.getBoardId()}`;
   }
 
-  appendStyles() {
+  appendStyles(): string {
     return `
     <style type="text/css">
         #avatars-limits {
@@ -95,15 +116,15 @@ export default class extends PageModification {
     `;
   }
 
-  waitForLoading() {
+  waitForLoading(): Promise<Element> {
     return this.waitForElement('.ghx-swimlane');
   }
 
-  loadData() {
+  loadData(): Promise<[any, any]> {
     return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS)]);
   }
 
-  apply(data) {
+  apply(data: [any, any]): void {
     if (!data) return;
     const [editData = {}, personLimits] = data;
     if (!personLimits || !personLimits.limits.length) return;
@@ -113,7 +134,7 @@ export default class extends PageModification {
     this.onDOMChange('#ghx-pool', () => this.applyLimits(personLimits), { childList: true, subtree: true });
   }
 
-  applyLimits(personLimits) {
+  applyLimits(personLimits: { limits: PersonLimit[] }): void {
     const stats = this.getLimitsStats(personLimits);
 
     stats.forEach(personLimit => {
@@ -142,33 +163,36 @@ export default class extends PageModification {
       this.avatarsList.id = 'avatars-limits';
       this.avatarsList.innerHTML = html;
 
+      // @ts-expect-error
       this.addEventListener(this.avatarsList, 'click', event => this.onClickAvatar(event));
-      document.querySelector('#subnav-title').insertBefore(this.avatarsList, null);
+      document.querySelector('#subnav-title')?.insertBefore(this.avatarsList, null);
     }
 
     this.avatarsList.querySelectorAll('.limit-stats').forEach((stat, index) => {
-      if (stats[index].issues.length > stats[index].limit) stat.style.background = '#ff5630';
-      else if (stats[index].issues.length === stats[index].limit) stat.style.background = '#ffd700';
-      else stat.style.background = '#1b855c';
+      const { style } = stat as HTMLElement;
+      if (stats[index].issues.length > stats[index].limit) style.background = '#ff5630';
+      else if (stats[index].issues.length === stats[index].limit) style.background = '#ffd700';
+      else style.background = '#1b855c';
 
-      stat.querySelector('.stats-current').textContent = stats[index].issues.length;
+      stat.querySelector('.stats-current')!.textContent = stats[index].issues.length.toString();
     });
   }
 
-  onClickAvatar(event) {
-    if (event.target.nodeName !== 'IMG') return;
-    const cardsVisibility = event.target.getAttribute('view-my-cards');
+  onClickAvatar(event: MouseEvent): void {
+    const target = event.target as HTMLImageElement;
+    if (target.nodeName !== 'IMG') return;
+    const cardsVisibility = target.getAttribute('view-my-cards');
 
     if (!cardsVisibility) {
-      event.target.setAttribute('view-my-cards', 'block');
+      target.setAttribute('view-my-cards', 'block');
     } else {
-      event.target.removeAttribute('view-my-cards');
+      target.removeAttribute('view-my-cards');
     }
 
     this.showOnlyChosen();
   }
 
-  showOnlyChosen() {
+  showOnlyChosen(): void {
     const cards = Array.from(document.querySelectorAll('.ghx-issue'));
     const isHaveChoose = document.querySelectorAll('[view-my-cards="block"]').length > 0;
 
@@ -181,7 +205,7 @@ export default class extends PageModification {
     }
 
     const avatar = Array.from(document.querySelectorAll('[view-my-cards]'));
-    const avaTitles = avatar.map(el => el.title);
+    const avaTitles = avatar.map(el => (el as HTMLImageElement).title);
 
     cards.forEach(node => {
       const img = node.querySelector('.ghx-avatar img');
@@ -190,7 +214,7 @@ export default class extends PageModification {
         return;
       }
 
-      const name = getNameFromTooltip(img.getAttribute('data-tooltip'));
+      const name = getNameFromTooltip(img.getAttribute('data-tooltip')!);
       if (avaTitles.indexOf(name) > -1) {
         node.classList.remove('no-visibility');
       } else {
@@ -200,26 +224,26 @@ export default class extends PageModification {
     this.showOrHideTaskAggregations();
   }
 
-  showOrHideTaskAggregations() {
+  showOrHideTaskAggregations(): void {
     this.showOrHideSubTaskParentGroup();
     this.showOrHideEmptySwimlanes();
   }
 
-  showOrHideSubTaskParentGroup() {
+  showOrHideSubTaskParentGroup(): void {
     const parentGroup = Array.from(document.querySelectorAll('.ghx-parent-group'));
     parentGroup.forEach(el => {
       this.showOrHideElementByVisibleIssueCards(el);
     });
   }
 
-  showOrHideEmptySwimlanes() {
+  showOrHideEmptySwimlanes(): void {
     const swimlanes = Array.from(document.querySelectorAll(DOM.swimlane));
     swimlanes.forEach(el => {
       this.showOrHideElementByVisibleIssueCards(el);
     });
   }
 
-  showOrHideElementByVisibleIssueCards(el) {
+  showOrHideElementByVisibleIssueCards(el: Element): void {
     const lenNoVisibleCards = el.querySelectorAll('.ghx-issue.no-visibility').length;
     const lenCard = el.querySelectorAll('.ghx-issue').length;
 
@@ -230,7 +254,7 @@ export default class extends PageModification {
     }
   }
 
-  hasCustomswimlanes() {
+  hasCustomswimlanes(): boolean {
     const someswimlane = document.querySelector(DOM.swimlaneHeaderContainer);
 
     if (someswimlane == null) {
@@ -238,30 +262,30 @@ export default class extends PageModification {
     }
 
     // TODO: Shouldn't work for any other language except English, so we have to think about it. F.e., in Russian, it is "Дорожка для custom"
-    return someswimlane.getAttribute('aria-label').indexOf('Swimlane for custom') !== -1;
+    return someswimlane.getAttribute('aria-label')?.indexOf('Swimlane for custom') !== -1;
   }
 
-  countAmountPersonalIssuesInColumn(column, stats, swimlaneId) {
-    const { columnId } = column.dataset;
+  countAmountPersonalIssuesInColumn(column: Element, stats: PersonLimit[], swimlaneId?: string | null): void {
+    const { columnId } = (column as HTMLElement).dataset;
 
-    column.querySelectorAll(this.cssSelectorOfIssues).forEach(issue => {
-      const avatar = issue.querySelector('.ghx-avatar-img');
+    column.querySelectorAll(this.cssSelectorOfIssues!).forEach(issue => {
+      const avatar = issue.querySelector('.ghx-avatar-img') as HTMLImageElement;
       const assignee = getAssignee(avatar);
 
       if (assignee) {
         stats.forEach(personLimit => {
-          if (isPersonLimitAppliedToIssue(personLimit, assignee, columnId, swimlaneId)) {
-            personLimit.issues.push(issue);
+          if (isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId)) {
+            personLimit.issues.push(issue as HTMLElement);
           }
         });
       }
     });
   }
 
-  getLimitsStats(personLimits) {
+  getLimitsStats(personLimits: { limits: PersonLimit[] }): PersonLimit[] {
     const stats = personLimits.limits.map(personLimit => ({
       ...personLimit,
-      issues: [],
+      issues: [] as HTMLElement[],
     }));
 
     if (this.hasCustomswimlanes()) {
