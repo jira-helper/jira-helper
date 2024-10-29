@@ -1,8 +1,3 @@
-export function toPx(...args: number[]): string {
-  const sum = args.reduce((acc, i) => acc + i, 0);
-  return `${sum}px`;
-}
-
 export const getRandomString = (length: number): string => {
   return Math.random().toString(36).substring(length);
 };
