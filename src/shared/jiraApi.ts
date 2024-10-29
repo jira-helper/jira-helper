@@ -12,6 +12,9 @@ import isNil from '@tinkoff/utils/is/nil';
 import path from '@tinkoff/utils/object/path';
 import pathOr from '@tinkoff/utils/object/pathOr';
 import { defaultHeaders } from './defaultHeaders';
+import manifest from '../../manifest.json';
+
+const PACKAGE_VERSION = manifest.version;
 
 const configVersion = 'v1';
 const getPropName = (property: string): string => `${property}${configVersion}`;
@@ -43,9 +46,7 @@ const getContextPath = (() => {
 // Configure the Jira request with base plugins
 const requestJira = request([
   defaultHeaders({
-    // TODO: solve before merge
-    // @ts-expect-error need to solve version injection by another way
-    'browser-plugin': `jira-helper/${process.env.PACKAGE_VERSION}`,
+    'browser-plugin': `jira-helper/${PACKAGE_VERSION}`,
   }),
   transformUrl({
     baseUrl: `${getContextPath}/rest/`,
