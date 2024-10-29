@@ -5,10 +5,42 @@ import { Popup } from '../shared/getPopup';
 import { cellsAdd, ClearDataButton, RangeName, settingsEditWipLimitOnCells, settingsJiraDOM } from './constants';
 import { TableRangeWipLimit } from './table';
 
-export default class WipLimitOnCells extends PageModification {
+interface BoardData {
+  swimlanesConfig: {
+    swimlanes: Array<{ id: string; name: string }>;
+  };
+  rapidListConfig: {
+    mappedColumns: Array<{ id: string; name: string; isKanPlanColumn: boolean }>;
+  };
+  canEdit: boolean;
+}
+
+interface WipLimitSettings {
+  cells: Array<{ column: string; showBadge: boolean; swimlane: string }>;
+  name: string;
+  wipLimit: number;
+}
+
+export default class WipLimitOnCells extends PageModification<[BoardData, WipLimitSettings[][]], Element> {
   static jiraSelectors = {
     panelConfig: `#${btnGroupIdForColumnsSettingsPage}`,
   };
+
+  private popup: Popup | null = null;
+
+  private editBtn: HTMLElement | null = null;
+
+  private input: HTMLInputElement | null = null;
+
+  private table: TableRangeWipLimit | null = null;
+
+  private data: WipLimitSettings[] = [];
+
+  private boardData: BoardData | null = null;
+
+  private swimlane: Array<{ id: string; name: string }> = [];
+
+  private column: Array<{ id: string; name: string; isKanPlanColumn: boolean }> = [];
 
   getModificationId() {
     return `WipLimitByCells-settings-${this.getBoardId()}`;
@@ -20,7 +52,7 @@ export default class WipLimitOnCells extends PageModification {
 
   waitForLoading() {
     // after button column button
-    return Promise.all([this.waitForElement(WipLimitOnCells.jiraSelectors.panelConfig)]);
+    return this.waitForElement(WipLimitOnCells.jiraSelectors.panelConfig);
   }
 
   loadData() {
@@ -30,7 +62,7 @@ export default class WipLimitOnCells extends PageModification {
     ]);
   }
 
-  apply(data) {
+  async apply(data: [BoardData, WipLimitSettings[][]]) {
     if (!data) return;
     const boardData = data[0];
     let [settings] = data[1];
@@ -44,12 +76,15 @@ export default class WipLimitOnCells extends PageModification {
 
     // TODO: with fixed error saved settings name "swimline" => "swimlane"
     settings = settings.map(limit => {
-      const cells = [];
+      const cells: WipLimitSettings['cells'] = [];
       limit.cells.forEach(cell => {
         cells.push({
           column: cell.column,
           showBadge: cell.showBadge,
-          swimlane: cell.swimlane ?? cell.swimline,
+          swimlane:
+            cell.swimlane ??
+            // @ts-expect-error backward compatibility
+            cell.swimline,
         });
       });
       limit.cells = cells;
@@ -57,7 +92,7 @@ export default class WipLimitOnCells extends PageModification {
     });
 
     this.data = settings;
-    const handleGetNameLabel = (swimlaneId, columnid) => {
+    const handleGetNameLabel = (swimlaneId: string, columnid: string) => {
       const swimlane = this.swimlane.find(element => element.id.toString() === swimlaneId.toString());
       const column = this.column.find(element => element.id.toString() === columnid.toString());
 
@@ -86,7 +121,7 @@ export default class WipLimitOnCells extends PageModification {
 
   renderEditButton() {
     const editBtn = this.insertHTML(
-      document.getElementById(btnGroupIdForColumnsSettingsPage),
+      document.getElementById(btnGroupIdForColumnsSettingsPage)!,
       'beforeend',
       settingsEditWipLimitOnCells()
     );
@@ -98,88 +133,90 @@ export default class WipLimitOnCells extends PageModification {
       okButtonText: 'Save',
     });
 
-    this.addEventListener(editBtn, 'click', this.handleEditClick);
+    this.addEventListener(editBtn!, 'click', this.handleEditClick);
   }
 
   handleEditClick = async () => {
-    await this.popup.render();
+    await this.popup!.render();
 
-    await this.popup.appendToContent(RangeName());
-    await this.popup.appendToContent(cellsAdd(this.swimlane, this.column));
-    await this.popup.appendToContent(`<div id=${settingsJiraDOM.table}></div>`);
+    await this.popup!.appendToContent(RangeName());
+    await this.popup!.appendToContent(cellsAdd(this.swimlane, this.column));
+    await this.popup!.appendToContent(`<div id=${settingsJiraDOM.table}></div>`);
 
-    await this.popup.appendToContent(ClearDataButton(settingsJiraDOM.ClearData));
+    await this.popup!.appendToContent(ClearDataButton(settingsJiraDOM.ClearData));
 
     this.editBtn = document.getElementById(settingsJiraDOM.buttonRange);
-    this.addEventListener(this.editBtn, 'click', this.handleOnClickAddRange);
+    this.addEventListener(this.editBtn!, 'click', this.handleOnClickAddRange);
 
     const clearBtn = document.getElementById(settingsJiraDOM.ClearData);
-    this.addEventListener(clearBtn, 'click', this.handleClearSettings);
+    this.addEventListener(clearBtn!, 'click', this.handleClearSettings);
 
-    this.input = document.getElementById(settingsJiraDOM.inputRange);
-    this.addEventListener(this.input, 'input', this.handleOnChangeRange);
+    this.input = document.getElementById(settingsJiraDOM.inputRange) as HTMLInputElement;
+    this.addEventListener(this.input!, 'input', this.handleOnChangeRange);
 
-    await this.table.setDiv(document.getElementById(settingsJiraDOM.table));
-    await this.table.render();
+    await this.table!.setDiv(document.getElementById(settingsJiraDOM.table)!);
+    await this.table!.render();
   };
 
   handleOnChangeRange = () => {
-    const { value: name } = document.getElementById(settingsJiraDOM.inputRange);
-    const haveRange = this.table.findRange(name);
+    const { value: name } = document.getElementById(settingsJiraDOM.inputRange) as HTMLInputElement;
+    const haveRange = this.table!.findRange(name);
     if (haveRange) {
-      this.editBtn.innerText = 'Add cell';
-      this.input.dataset.range = name;
+      this.editBtn!.innerText = 'Add cell';
+      this.input!.dataset.range = name;
     } else {
-      this.editBtn.innerText = 'Add range';
-      delete this.input.dataset.range;
+      this.editBtn!.innerText = 'Add range';
+      delete this.input!.dataset.range;
     }
   };
 
   handleOnClickAddRange = () => {
-    const { value: name, dataset } = document.getElementById(settingsJiraDOM.inputRange);
-    const { value: swimlane } = document.getElementById(`${settingsJiraDOM.swimlaneSelect}`).selectedOptions[0];
-    const { value: column } = document.getElementById(`${settingsJiraDOM.columnSelect}`).selectedOptions[0];
-    const { checked: showBadge } = document.getElementById(`${settingsJiraDOM.showBadge}`);
+    const { value: name, dataset } = document.getElementById(settingsJiraDOM.inputRange) as HTMLInputElement;
+    const { value: swimlane } = (document.getElementById(`${settingsJiraDOM.swimlaneSelect}`) as HTMLSelectElement)
+      .selectedOptions[0];
+    const { value: column } = (document.getElementById(`${settingsJiraDOM.columnSelect}`) as HTMLSelectElement)
+      .selectedOptions[0];
+    const { checked: showBadge } = document.getElementById(`${settingsJiraDOM.showBadge}`) as HTMLInputElement;
 
     if (swimlane === '-' || column === '-') {
       alert('need choose swimlane and column and try again.');
       return;
     }
 
-    if (dataset.range && this.table.findRange(dataset.range)) {
+    if (dataset.range && this.table!.findRange(dataset.range)) {
       const cells = {
         swimlane,
         column,
         showBadge,
       };
-      this.table.addCells(name, cells);
+      this.table!.addCells(name, cells);
     } else {
-      const addRangeResult = this.table.addRange(name);
+      const addRangeResult = this.table!.addRange(name);
       if (addRangeResult) {
         const cells = {
           swimlane,
           column,
           showBadge,
         };
-        this.table.addCells(name, cells);
+        this.table!.addCells(name, cells);
       }
       this.handleOnChangeRange();
     }
   };
 
   handleClearSettings = () => {
-    this.table.setData([]);
-    this.popup.unmount();
+    this.table!.setData([]);
+    this.popup!.unmount();
     this.handleEditClick();
     this.deleteBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS);
   };
 
   removeEditBtn() {
-    this.editBtn.remove();
+    this.editBtn!.remove();
   }
 
-  handleConfirmEditing = unmountCallback => {
-    const data = this.table.getData();
+  handleConfirmEditing = (unmountCallback: () => void) => {
+    const data = this.table!.getData();
     this.updateBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS, data);
     unmountCallback();
   };

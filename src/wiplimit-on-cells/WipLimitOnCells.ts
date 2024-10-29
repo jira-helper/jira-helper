@@ -1,26 +1,47 @@
-// import { getIssueDataFromServer } from '../shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { BOARD_PROPERTIES } from '../shared/constants';
 
-export default class extends PageModification {
-  waitForLoading() {
+interface Cell {
+  column: string;
+  showBadge: boolean;
+  swimlane: string;
+  DOM?: Element;
+  x?: number;
+  y?: number;
+  notFoundOnBoard?: boolean;
+  border?: string;
+}
+
+interface Range {
+  cells: Cell[];
+  wipLimit: number;
+  disable: boolean;
+  matrixRange?: any[];
+}
+
+export default class extends PageModification<any, Element> {
+  private wip: Range[] = [];
+
+  private counterCssSelector: string = '';
+
+  waitForLoading(): Promise<Element> {
     return this.waitForElement('.ghx-swimlane');
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `SLAIndicatorTitle-shows-${this.getBoardId()}`;
   }
 
-  shouldApply() {
+  shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
   }
 
-  loadData() {
+  async loadData(): Promise<[any, Range[]]> {
     return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS)]);
   }
 
-  async apply(data) {
+  async apply(data: [any, Range[]]): Promise<void> {
     if (!data) return;
     const [editData, WipLimitSetting] = data;
 
@@ -34,7 +55,7 @@ export default class extends PageModification {
     this.onDOMChange('#ghx-pool', () => this.renderWipLimitCells());
   }
 
-  renderWipLimitCells() {
+  renderWipLimitCells(): void {
     const ArrayOfCells = this.getCells();
     const emptyMartix = this.getEmptyMartix(ArrayOfCells);
     for (const range of this.wip) {
@@ -43,7 +64,7 @@ export default class extends PageModification {
       const matrixRange = this.arrayClone(emptyMartix);
       for (const cell of range.cells) {
         const selector = `[swimlane-id='${cell.swimlane}'] [data-column-id='${cell.column}']`;
-        const [cellsDOM] = document.querySelectorAll(selector);
+        const cellsDOM = document.querySelector(selector);
         if (cellsDOM) {
           const { length } = cellsDOM.querySelectorAll(this.counterCssSelector);
           countIssues += length;
@@ -67,49 +88,52 @@ export default class extends PageModification {
       for (const cell of range.cells) {
         if (!cell.notFoundOnBoard) {
           if (range.disable) {
-            cell.DOM.classList.add('WipLimitCells_disable');
+            (cell.DOM as HTMLElement).classList.add('WipLimitCells_disable');
           }
 
           cell.border = this.setBorderString(cell, range.matrixRange);
           this.cellAddClasses(cell, countIssues, range.wipLimit);
 
           if (cell.showBadge) {
-            cell.DOM.insertAdjacentHTML('afterbegin', this.getGetRengeDOM(countIssues, range.wipLimit, colorBadge));
+            (cell.DOM as HTMLElement).insertAdjacentHTML(
+              'afterbegin',
+              this.getGetRengeDOM(countIssues, range.wipLimit, colorBadge)
+            );
           }
         }
       }
     }
   }
 
-  setBorderString(cell, matrixRange) {
+  setBorderString(cell: Cell, matrixRange: any[]): string {
     let borderString = '';
 
-    if (cell.x !== 0) {
-      if (matrixRange[cell.x - 1][cell.y] === 0) {
+    if (cell.x !== undefined && cell.x !== 0) {
+      if (matrixRange[cell.x - 1][cell.y!] === 0) {
         borderString += 'T';
       }
     } else {
       borderString += 'T';
     }
 
-    if (cell.x !== matrixRange.length - 1) {
-      if (matrixRange[cell.x + 1][cell.y] === 0) {
+    if (cell.x !== undefined && cell.x !== matrixRange.length - 1) {
+      if (matrixRange[cell.x + 1][cell.y!] === 0) {
         borderString += 'B';
       }
     } else {
       borderString += 'B';
     }
 
-    if (cell.y !== 0) {
-      if (matrixRange[cell.x][cell.y - 1] === 0) {
+    if (cell.y !== undefined && cell.y !== 0) {
+      if (matrixRange[cell.x!][cell.y - 1] === 0) {
         borderString += 'L';
       }
     } else {
       borderString += 'L';
     }
 
-    if (cell.y !== matrixRange[cell.x].length - 1) {
-      if (matrixRange[cell.x][cell.y + 1] === 0) {
+    if (cell.y !== undefined && cell.y !== matrixRange[cell.x!].length - 1) {
+      if (matrixRange[cell.x!][cell.y + 1] === 0) {
         borderString += 'R';
       }
     } else {
@@ -118,7 +142,7 @@ export default class extends PageModification {
     return borderString;
   }
 
-  invertMatrix(ArrayOfCells, matrixRange, emptyMartix) {
+  invertMatrix(ArrayOfCells: any[], matrixRange: any[], emptyMartix: any[]): any[] {
     const matrixWithDom = this.arrayClone(emptyMartix);
     for (let s = 0; s < matrixRange.length; s++) {
       for (let c = 0; c < matrixRange[s].length; c++) {
@@ -130,17 +154,17 @@ export default class extends PageModification {
     return matrixWithDom;
   }
 
-  getEmptyMartix(matrixRange) {
-    const emptyMartix = [];
+  getEmptyMartix(matrixRange: any[]): any[] {
+    const emptyMartix: any[] = [];
     matrixRange.forEach(row => {
-      const newRow = [];
+      const newRow: number[] = [];
       row.forEach(() => newRow.push(0));
       emptyMartix.push(newRow);
     });
     return emptyMartix;
   }
 
-  arrayClone(arr) {
+  arrayClone(arr: any[]): any[] {
     let i;
     let copy;
 
@@ -155,10 +179,10 @@ export default class extends PageModification {
     return arr;
   }
 
-  excludeCells(ArrayOfCells, matrixRange, cellsDOM) {
+  excludeCells(ArrayOfCells: any[], matrixRange: any[], cellsDOM: Element): { s: number; c: number } {
     const result = {
-      s: null,
-      c: null,
+      s: 0,
+      c: 0,
     };
     for (let s = 0; s < ArrayOfCells.length; s++) {
       for (let c = 0; c < ArrayOfCells[s].length; c++) {
@@ -173,12 +197,12 @@ export default class extends PageModification {
     return result;
   }
 
-  getCells() {
-    const CellsArray = [];
-    const rows = document.querySelectorAll('.ghx-swimlane');
+  getCells(): Element[][] {
+    const CellsArray: Element[][] = [];
+    const rows = Array.from(document.querySelectorAll('.ghx-swimlane'));
     for (const row of rows) {
-      const rowCells = [];
-      const cells = row.querySelectorAll('.ghx-column');
+      const rowCells: Element[] = [];
+      const cells = Array.from(row.querySelectorAll('.ghx-column'));
       for (const cell of cells) {
         rowCells.push(cell);
       }
@@ -188,42 +212,36 @@ export default class extends PageModification {
     return CellsArray;
   }
 
-  cellAddClasses(cell, countIssues, wipLimit) {
-    if (cell.border.indexOf('L') !== -1) {
-      cell.DOM.classList.add('WipLimitCellsRange_left');
+  cellAddClasses(cell: Cell, countIssues: number, wipLimit: number): void {
+    if (cell.border?.indexOf('L') !== -1) {
+      cell.DOM!.classList.add('WipLimitCellsRange_left');
     }
 
-    if (cell.border.indexOf('R') !== -1) {
-      cell.DOM.classList.add('WipLimitCellsRange_right');
+    if (cell.border?.indexOf('R') !== -1) {
+      cell.DOM!.classList.add('WipLimitCellsRange_right');
     }
 
-    if (cell.border.indexOf('T') !== -1) {
-      cell.DOM.classList.add('WipLimitCellsRange_top');
+    if (cell.border?.indexOf('T') !== -1) {
+      cell.DOM!.classList.add('WipLimitCellsRange_top');
     }
 
-    if (cell.border.indexOf('B') !== -1) {
-      cell.DOM.classList.add('WipLimitCellsRange_bottom');
+    if (cell.border?.indexOf('B') !== -1) {
+      cell.DOM!.classList.add('WipLimitCellsRange_bottom');
     }
 
     if (countIssues > wipLimit) {
-      cell.DOM.style.backgroundColor = '#ff563070';
-      cell.DOM.classList.add('WipLimit_NotRespected');
+      (cell.DOM! as HTMLElement).style.backgroundColor = '#ff563070';
+      cell.DOM!.classList.add('WipLimit_NotRespected');
     } else {
-      cell.DOM.classList.add('WipLimit_Respected');
+      cell.DOM!.classList.add('WipLimit_Respected');
     }
   }
 
-  setTimeout(func, time) {
-    const timeoutID = setTimeout(func, time);
-    this.sideEffects.push(() => clearTimeout(timeoutID));
-    return timeoutID;
-  }
-
-  getGetRengeDOM(issueCount, wipLimit, colorBadge = '#1b855c') {
+  getGetRengeDOM(issueCount: number, wipLimit: number, colorBadge: string = '#1b855c'): string {
     return `<div class="WipLimitCellsBadge field-issues-count " style = "background-color: ${colorBadge}">${issueCount}/${wipLimit}</div>`;
   }
 
-  appendStyles() {
+  appendStyles(): string {
     return `
     <style type="text/css">
     .WipLimitCellsBadge{

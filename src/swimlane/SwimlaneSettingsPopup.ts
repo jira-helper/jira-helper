@@ -5,7 +5,34 @@ import { mergeSwimlaneSettings } from './utils';
 import { Popup } from '../shared/getPopup';
 import { settingsEditBtnTemplate, settingsPopupTableRowTemplate, settingsPopupTableTemplate } from './constants';
 
-export default class SwimlaneSettingsLimit extends PageModification {
+interface SwimlaneSettings {
+  [key: string]: {
+    limit?: number;
+    ignoreWipInColumns?: boolean;
+  };
+}
+
+interface BoardData {
+  canEdit: boolean;
+  swimlanesConfig: {
+    swimlanes: Array<{
+      id: string;
+      name: string;
+    }>;
+  };
+}
+
+export default class SwimlaneSettingsLimit extends PageModification<any, Element> {
+  private settings: SwimlaneSettings | null = null;
+
+  private boardData: BoardData | null = null;
+
+  private swimlaneSelect: HTMLSelectElement | null = null;
+
+  private popup: Popup | null = null;
+
+  private editBtn: HTMLElement | null = null;
+
   static ids = {
     editLimitsBtn: 'edit-limits-btn-jh',
     editTable: 'edit-table-jh',
@@ -21,22 +48,22 @@ export default class SwimlaneSettingsLimit extends PageModification {
     swimlaneSelect: '#ghx-swimlanestrategy-select',
   };
 
-  async shouldApply() {
+  async shouldApply(): Promise<boolean> {
     return (await getSettingsTab()) === 'swimlanes';
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `add-swimlane-settings-${this.getBoardId()}`;
   }
 
-  waitForLoading() {
+  waitForLoading(): Promise<Element> {
     return Promise.all([
       this.waitForElement(SwimlaneSettingsLimit.jiraSelectors.swimlanes),
       this.waitForElement(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect),
-    ]);
+    ]).then(([a]) => a);
   }
 
-  loadData() {
+  loadData(): Promise<[BoardData, SwimlaneSettings]> {
     return Promise.all([
       this.getBoardEditData(),
       Promise.all([
@@ -46,7 +73,7 @@ export default class SwimlaneSettingsLimit extends PageModification {
     ]);
   }
 
-  apply(data) {
+  async apply(data: [BoardData, SwimlaneSettings]): Promise<void> {
     if (!data) return;
     const [boardData, settings] = data;
     this.settings = settings;
@@ -55,19 +82,19 @@ export default class SwimlaneSettingsLimit extends PageModification {
     if (!(boardData && boardData.canEdit)) return;
 
     this.swimlaneSelect = document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneSelect);
-    if (this.swimlaneSelect.value === 'custom') {
+    if (this.swimlaneSelect!.value === 'custom') {
       this.renderEditButton();
     }
 
-    this.addEventListener(this.swimlaneSelect, 'change', event => {
-      if (event.target.value === 'custom') this.renderEditButton();
+    this.addEventListener(this.swimlaneSelect!, 'change', event => {
+      if ((event.target as HTMLSelectElement).value === 'custom') this.renderEditButton();
       else this.removeEditBtn();
     });
   }
 
-  renderEditButton() {
+  renderEditButton(): void {
     this.insertHTML(
-      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneConfig),
+      document.querySelector(SwimlaneSettingsLimit.jiraSelectors.swimlaneConfig)!,
       'beforebegin',
       settingsEditBtnTemplate(SwimlaneSettingsLimit.ids.editLimitsBtn)
     );
@@ -79,44 +106,42 @@ export default class SwimlaneSettingsLimit extends PageModification {
     });
 
     this.editBtn = document.getElementById(SwimlaneSettingsLimit.ids.editLimitsBtn);
-    this.addEventListener(this.editBtn, 'click', this.handleEditClick);
+    this.addEventListener(this.editBtn!, 'click', this.handleEditClick);
   }
 
-  handleEditClick = () => {
-    this.popup.render();
-    this.popup.appendToContent(
+  handleEditClick = (): void => {
+    this.popup!.render();
+    this.popup!.appendToContent(
       settingsPopupTableTemplate(
         SwimlaneSettingsLimit.ids.editTable,
-        this.boardData.swimlanesConfig.swimlanes
-          .map(item =>
-            settingsPopupTableRowTemplate({
-              id: item.id,
-              name: item.name,
-              limit: this.settings[item.id] ? this.settings[item.id].limit : 0,
-              isIgnored: this.settings[item.id] ? this.settings[item.id].ignoreWipInColumns : false,
-              rowClass: SwimlaneSettingsLimit.classes.editSwimlaneRow,
-            })
-          )
-          .join('')
+        this.boardData!.swimlanesConfig.swimlanes.map(item =>
+          settingsPopupTableRowTemplate({
+            id: item.id,
+            name: item.name,
+            limit: this.settings![item.id] ? this.settings![item.id].limit! : 0,
+            isIgnored: this.settings![item.id] ? this.settings![item.id].ignoreWipInColumns! : false,
+            rowClass: SwimlaneSettingsLimit.classes.editSwimlaneRow,
+          })
+        ).join('')
       )
     );
   };
 
-  removeEditBtn() {
-    this.editBtn.remove();
+  removeEditBtn(): void {
+    this.editBtn!.remove();
   }
 
-  handleConfirmEditing = unmountCallback => {
+  handleConfirmEditing = (unmountCallback: () => void): void => {
     const rows = document.querySelectorAll(
       `#${SwimlaneSettingsLimit.ids.editTable} .${SwimlaneSettingsLimit.classes.editSwimlaneRow}`
     );
-    const updatedSettings = {};
+    const updatedSettings: SwimlaneSettings = {};
 
     rows.forEach(row => {
-      const { value: rawLimitValue } = row.querySelector('input[type="number"]');
-      const { checked: isExpediteValue } = row.querySelector('input[type="checkbox"]');
+      const { value: rawLimitValue } = row.querySelector('input[type="number"]') as HTMLInputElement;
+      const { checked: isExpediteValue } = row.querySelector('input[type="checkbox"]') as HTMLInputElement;
 
-      const swimlaneId = row.getAttribute('data-swimlane-id');
+      const swimlaneId = row.getAttribute('data-swimlane-id')!;
       const limitValue = Number.parseInt(rawLimitValue, 10);
 
       updatedSettings[swimlaneId] = {

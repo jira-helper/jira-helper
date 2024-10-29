@@ -1,17 +1,44 @@
 import { settingsJiraDOM } from './constants';
 
+interface Cell {
+  swimlane: string;
+  column: string;
+  showBadge: boolean;
+}
+
+interface Range {
+  name: string;
+  wipLimit: number;
+  disable?: boolean;
+  cells: Cell[];
+  // Found only 1 usage of field
+  choose?: undefined;
+}
+
+interface TableRangeWipLimitProps {
+  dom?: HTMLElement;
+  data: Range[];
+  handleGetNameLabel: (swimlaneId: string, columnId: string) => string;
+}
+
 export class TableRangeWipLimit {
-  constructor(props) {
+  private tableDOM?: HTMLElement;
+
+  private ids: { tbody: string; table: string };
+
+  private data: Range[];
+
+  private getNameLabel: (swimlaneId: string, columnId: string) => string;
+
+  private tbody: HTMLElement | null = null;
+
+  constructor(props: TableRangeWipLimitProps) {
     this.tableDOM = props.dom;
     this.ids = {
       tbody: 'WipLimitCells_tbody',
       table: 'WipLimitCells_table',
     };
-    if (Array.isArray(props.data)) {
-      this.data = props.data;
-    } else {
-      this.data = [];
-    }
+    this.data = Array.isArray(props.data) ? props.data : [];
     this.getNameLabel = props.handleGetNameLabel;
   }
 
@@ -21,7 +48,7 @@ export class TableRangeWipLimit {
     }
   }
 
-  setData(data) {
+  setData(data: Range[]) {
     if (this.data === data) {
       return;
     }
@@ -38,7 +65,7 @@ export class TableRangeWipLimit {
     this.render();
   }
 
-  setDiv(div) {
+  setDiv(div: HTMLElement) {
     if (this.tableDOM === div) {
       return;
     }
@@ -60,7 +87,7 @@ export class TableRangeWipLimit {
       const spanchouse = document.createElement('span');
       spanchouse.id = `WIP_${id}_limitChoose`;
       spanchouse.addEventListener('click', () => {
-        const input = document.getElementById(settingsJiraDOM.inputRange);
+        const input = document.getElementById(settingsJiraDOM.inputRange) as HTMLInputElement;
         input.value = id;
         input.dataset.range = id;
       });
@@ -79,7 +106,7 @@ export class TableRangeWipLimit {
       input.type = 'text';
       input.style.maxWidth = '150px';
       input.addEventListener('blur', () => {
-        const { value } = document.getElementById(`Input_${id}`);
+        const { value } = document.getElementById(`Input_${id}`) as HTMLInputElement;
         this.changeField(element.name, 'name', value);
       });
 
@@ -102,10 +129,10 @@ export class TableRangeWipLimit {
       input.id = `Input_${id}_WIPLIMIT`;
       input.type = 'number';
       input.style.maxWidth = '75px';
-      input.value = element.wipLimit;
+      input.value = element.wipLimit.toString();
       input.addEventListener('blur', () => {
-        const { value } = document.getElementById(`Input_${id}_WIPLIMIT`);
-        this.changeField(id, 'wipLimit', value);
+        const { value } = document.getElementById(`Input_${id}_WIPLIMIT`) as HTMLInputElement;
+        this.changeField(id, 'wipLimit', parseInt(value, 10));
       });
       td.appendChild(input);
       tr.appendChild(td);
@@ -113,9 +140,9 @@ export class TableRangeWipLimit {
       input = document.createElement('input');
       input.id = `Input_${id}_Disable`;
       input.type = 'checkbox';
-      input.checked = element.disable;
+      input.checked = element.disable || false;
       input.addEventListener('input', () => {
-        const { checked } = document.getElementById(`Input_${id}_Disable`);
+        const { checked } = document.getElementById(`Input_${id}_Disable`) as HTMLInputElement;
         this.changeField(id, 'disable', checked);
       });
       td.appendChild(input);
@@ -151,34 +178,31 @@ export class TableRangeWipLimit {
         });
         tr.appendChild(td);
       }
-      this.tbody.appendChild(tr);
+      this.tbody?.appendChild(tr);
     });
   }
 
-  deleteRange(name) {
+  deleteRange(name: string) {
     this.data = this.data.filter(elem => elem.name !== name);
     this.refresh();
   }
 
-  changeField(name, field, value) {
+  changeField(name: string, field: keyof Range, value: any) {
     for (const range of this.data) {
       if (range.name === name) {
+        // @ts-expect-error any
         range[field] = value;
       }
     }
     this.refresh();
   }
 
-  findRange(name) {
+  findRange(name: string): boolean {
     const searchDouble = this.data.filter(element => element.name.toLowerCase() === name.toLowerCase());
-    if (searchDouble.length > 0) {
-      return true;
-    }
-
-    return false;
+    return searchDouble.length > 0;
   }
 
-  addRange(name) {
+  addRange(name: string): boolean {
     if (name === '') {
       alert('Enter range name');
       return false;
@@ -186,7 +210,7 @@ export class TableRangeWipLimit {
     const searchDouble = this.data.filter(element => element.name === name);
     if (searchDouble.length > 0) {
       alert('Enter unique range name');
-      return;
+      return false;
     }
 
     this.data.push({
@@ -200,7 +224,7 @@ export class TableRangeWipLimit {
     return true;
   }
 
-  deleteCells(id, swimlane, column) {
+  deleteCells(id: string, swimlane: string, column: string) {
     this.data.forEach(range => {
       if (range.name === id) {
         const newCells = range.cells.filter(
@@ -212,16 +236,16 @@ export class TableRangeWipLimit {
     this.refresh();
   }
 
-  getData() {
+  getData(): Range[] {
     const newData = [...this.data];
     for (const range of newData) {
-      range.wipLimit = parseInt(range.wipLimit, 10);
+      range.wipLimit = parseInt(range.wipLimit.toString(), 10);
       range.choose = undefined;
     }
     return newData;
   }
 
-  addCells(rangeName, cell) {
+  addCells(rangeName: string, cell: Cell) {
     const searchDouble = this.data.filter(element => element.name.toLowerCase() === rangeName.toLowerCase());
     if (searchDouble.length !== 1) {
       alert('Error two or more ranges have this name. Please delete one range');
@@ -267,7 +291,7 @@ export class TableRangeWipLimit {
     table.appendChild(thead);
     table.appendChild(tbody);
     form.appendChild(table);
-    this.tableDOM.appendChild(form);
+    this.tableDOM!.appendChild(form);
 
     this.tbody = tbody;
   }

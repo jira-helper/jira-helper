@@ -1,4 +1,3 @@
-// settings
 export const settingsJiraDOM = {
   swimlaneSelect: 'WIPLC_swimlane',
   columnSelect: 'WIPLC_Column',
@@ -12,15 +11,15 @@ export const settingsJiraDOM = {
   editLimitsBtn: 'edit-WipLimitOnCells-btn-jh',
 };
 
-export const settingsEditWipLimitOnCells = () => `
+export const settingsEditWipLimitOnCells = (): string => `
             <button id="${settingsJiraDOM.editLimitsBtn}" class="aui-button" type="button">Edit Wip limits by cells</button>
         `;
 
-export const ClearDataButton = btnId => `<div style="margin-top: 1rem">
+export const ClearDataButton = (btnId: string): string => `<div style="margin-top: 1rem">
             <button id="${btnId}" class="aui-button" type="button">Clear and save all data</button>
         </div>`;
 
-export const RangeName = () => `
+export const RangeName = (): string => `
 <form class="aui">
   <div class="field-group">
     <label for="${settingsJiraDOM.inputRange}">Add range </label>
@@ -28,20 +27,16 @@ export const RangeName = () => `
     <button id="${settingsJiraDOM.buttonRange}" class="aui-button" type="button">Add range</button>
   </div>
 </form>`;
-// <input type="checkbox" class="checkbox select-user-chb" data-id="${id}"></input>
 
-export const cellsAdd = (swimlanes, collums) => {
-  if (!Array.isArray(collums) || !Array.isArray(swimlanes)) {
+export const cellsAdd = (
+  swimlanes: { id: string; name: string }[],
+  columns: { id: string; name: string }[]
+): string => {
+  if (!Array.isArray(columns) || !Array.isArray(swimlanes)) {
     return '';
   }
-  const swimlanesHTML = [];
-  swimlanes.forEach(element => {
-    swimlanesHTML.push(`<option value=${element.id} >${element.name}</option>`);
-  });
-  const collumsHTML = [];
-  collums.forEach(element => {
-    collumsHTML.push(`<option value=${element.id} >${element.name}</option>`);
-  });
+  const swimlanesHTML = swimlanes.map(element => `<option value=${element.id} >${element.name}</option>`).join('');
+  const columnsHTML = columns.map(element => `<option value=${element.id} >${element.name}</option>`).join('');
   return `
     <div style="margin-top: 1rem">
               <form class="aui">
@@ -49,15 +44,15 @@ export const cellsAdd = (swimlanes, collums) => {
               <label for="${settingsJiraDOM.swimlaneSelect}">swimlane </label>
     <select id="${settingsJiraDOM.swimlaneSelect}" style="width:100%">
         <option>-</option>
-        ${swimlanesHTML.join('')}
+        ${swimlanesHTML}
     </select>
     </div>
 
     <div class="field-group">
-    <label for="${settingsJiraDOM.columnSelect}">Collumn </label>
+    <label for="${settingsJiraDOM.columnSelect}">Column </label>
     <select id="${settingsJiraDOM.columnSelect}" style="width:100%">
     <option>-</option>
-        ${collumsHTML.join('')}
+        ${columnsHTML}
     </select>
     </div>
     <div class="field-group">

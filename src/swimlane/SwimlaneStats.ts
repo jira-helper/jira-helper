@@ -1,42 +1,46 @@
 import map from '@tinkoff/utils/array/map';
 import each from '@tinkoff/utils/array/each';
 import { PageModification } from '../shared/PageModification';
-import { toPx } from '../shared/utils';
 import style from './styles.module.css';
 
-export default class extends PageModification {
-  shouldApply() {
+interface SwimlaneStats {
+  numberIssues: number;
+  arrNumberIssues: number[];
+}
+
+export default class extends PageModification<any, Element> {
+  private cssSelectorOfIssues: string | null = null;
+
+  shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
   }
 
-  getModificationId() {
+  getModificationId(): string {
     return `add-swimlane-stats-${this.getBoardId()}`;
   }
 
-  waitForLoading() {
+  waitForLoading(): Promise<Element> {
     return this.waitForElement('.ghx-swimlane');
   }
 
-  loadData() {
-    // get the board settings to check whether subtasks need to be taken
-    // into account in the total amount or not
+  async loadData(): Promise<any> {
     return this.getBoardEditData();
   }
 
-  apply(editData) {
+  async apply(editData: any): Promise<void> {
     this.cssSelectorOfIssues = this.getCssSelectorOfIssues(editData);
     this.calcSwimlaneStatsAndRender();
     this.onDOMChange('#ghx-pool', this.calcSwimlaneStatsAndRender);
   }
 
-  calcSwimlaneStatsAndRender = () => {
+  calcSwimlaneStatsAndRender = (): void => {
     const headers = map(
-      i => i.innerText,
+      i => i.textContent!,
       document.querySelectorAll('.ghx-column-title, #ghx-column-headers .ghx-column h2')
     );
 
-    const swimlanesStats = {};
+    const swimlanesStats: { [key: string]: SwimlaneStats } = {};
 
     each(sw => {
       const header = sw.getElementsByClassName('ghx-swimlane-header')[0];
@@ -45,15 +49,15 @@ export default class extends PageModification {
 
       const list = sw.getElementsByClassName('ghx-columns')[0].childNodes;
       let numberIssues = 0;
-      const arrNumberIssues = [];
+      const arrNumberIssues: number[] = [];
 
       list.forEach(column => {
-        const tasks = column.querySelectorAll(this.cssSelectorOfIssues);
+        const tasks = (column as HTMLElement).querySelectorAll(this.cssSelectorOfIssues!);
         arrNumberIssues.push(tasks.length);
         numberIssues += tasks.length;
       });
 
-      swimlanesStats[sw.getAttribute('swimlane-id')] = { numberIssues, arrNumberIssues };
+      swimlanesStats[sw.getAttribute('swimlane-id')!] = { numberIssues, arrNumberIssues };
       this.renderSwimlaneStats(header, headers, numberIssues, arrNumberIssues);
     }, document.querySelectorAll('.ghx-swimlane'));
 
@@ -65,11 +69,11 @@ export default class extends PageModification {
       const header = stalker.querySelector('.ghx-swimlane-header');
       const { numberIssues, arrNumberIssues } = swimlanesStats[swimlaneId];
 
-      this.renderSwimlaneStats(header, headers, numberIssues, arrNumberIssues);
+      this.renderSwimlaneStats(header!, headers, numberIssues, arrNumberIssues);
     }
   };
 
-  renderSwimlaneStats(header, headers, numberIssues, arrNumberIssues) {
+  renderSwimlaneStats(header: Element, headers: string[], numberIssues: number, arrNumberIssues: number[]): void {
     const stats = `
     <div class="${style.wrapper}">
       ${arrNumberIssues
@@ -78,9 +82,10 @@ export default class extends PageModification {
 
           return `
         <div title="${title}" class="${style.column}" style="background: ${currentNumberIssues ? '#999' : '#eee'}">
-          <div title="${title}" class="${style.bar}" style="height: ${toPx(
-            ((20 * currentNumberIssues) / numberIssues).toFixed(2)
-          )}"></div>
+          <div title="${title}" class="${style.bar}" style="height: ${(
+            (20 * currentNumberIssues) /
+            numberIssues
+          ).toFixed(2)}px"></div>
         </div>
       `;
         })

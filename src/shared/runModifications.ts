@@ -2,7 +2,7 @@
 import { getCurrentRoute, onUrlChange, Routes } from '../routing';
 import type { PageModification } from './PageModification';
 
-type ModificationsMap = Record<string, (new () => PageModification)[]>;
+export type ModificationsMap = Record<string, (new () => PageModification)[]>;
 
 const currentModifications: Map<new () => PageModification, { id: string; instance: PageModification }> = new Map();
 let route: string | null;

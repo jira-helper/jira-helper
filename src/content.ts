@@ -22,7 +22,7 @@ import WiplimitOnCellsSettings from './wiplimit-on-cells/WiplimitOnCellsSettings
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
   new Promise(resolve => {
-    if (document.readyState === 'interactive' || document.readyState === 'complete') return resolve();
+    if (document.readyState === 'interactive' || document.readyState === 'complete') return resolve(undefined);
     window.addEventListener('DOMContentLoaded', resolve);
   });
 
@@ -56,6 +56,7 @@ async function start() {
     [Routes.ALL]: [BugTemplate],
   };
 
+  // @ts-expect-error
   runModifications(modificationsMap);
 }
 
