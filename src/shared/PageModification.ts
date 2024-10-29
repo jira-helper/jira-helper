@@ -50,13 +50,13 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return promise;
   }
 
-  getBoardProperty(property: string): Promise<any> {
+  protected getBoardProperty(property: string): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     return getBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
   }
 
-  updateBoardProperty(property: string, value: any): Promise<any> {
+  protected updateBoardProperty(property: string, value: any): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
@@ -64,7 +64,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return updateBoardProperty(getBoardIdFromURL()!, property, value, { abortPromise });
   }
 
-  deleteBoardProperty(property: string): Promise<any> {
+  protected deleteBoardProperty(property: string): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
@@ -72,13 +72,13 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return deleteBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
   }
 
-  getBoardEditData(): Promise<any> {
+  protected getBoardEditData(): Promise<any> {
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     return getBoardEditData(getBoardIdFromURL()!, { abortPromise });
   }
 
-  createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
+  protected createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
     let cancelRequest: () => void;
     const abortPromise = new Promise<void>(resolve => {
       cancelRequest = resolve;
@@ -86,18 +86,22 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return { cancelRequest: cancelRequest!, abortPromise };
   }
 
-  setTimeout(func: () => void, time: number): number {
+  protected setTimeout(func: () => void, time: number): number {
     const timeoutID = setTimeout(func, time);
     this.sideEffects.push(() => clearTimeout(timeoutID));
     return timeoutID;
   }
 
-  addEventListener(target: EventTarget, event: string, cb: EventListener): void {
+  protected addEventListener(target: EventTarget, event: string, cb: EventListener): void {
     target.addEventListener(event, cb);
     this.sideEffects.push(() => target.removeEventListener(event, cb));
   }
 
-  onDOMChange(selector: string, cb: MutationCallback, params: MutationObserverInit = { childList: true }): void {
+  protected onDOMChange(
+    selector: string,
+    cb: MutationCallback,
+    params: MutationObserverInit = { childList: true }
+  ): void {
     const element = document.querySelector(selector);
     if (!element) return;
 
@@ -106,7 +110,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     this.sideEffects.push(() => observer.disconnect());
   }
 
-  insertHTML(container: Element, position: InsertPosition, html: string): Element | null {
+  protected insertHTML(container: Element, position: InsertPosition, html: string): Element | null {
     container.insertAdjacentHTML(position, html.trim());
 
     let insertedElement: Element | null = null;
@@ -135,25 +139,25 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   // helpers
-  getCssSelectorNotIssueSubTask(editData: any): string {
+  protected getCssSelectorNotIssueSubTask(editData: any): string {
     const constraintType = editData?.rapidListConfig?.currentStatisticsField?.typeId ?? '';
     return constraintType === 'issueCountExclSubs' ? ':not(.ghx-issue-subtask)' : '';
   }
 
-  getCssSelectorOfIssues(editData: any): string {
+  protected getCssSelectorOfIssues(editData: any): string {
     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
     return `.ghx-issue${cssNotIssueSubTask}`;
   }
 
-  getSearchParam(param: string): string | null {
+  protected getSearchParam(param: string): string | null {
     return getSearchParam(param);
   }
 
-  getReportNameFromURL(): string | null {
+  protected getReportNameFromURL(): string | null {
     return getReportNameFromURL();
   }
 
-  getBoardId(): string | null {
+  protected getBoardId(): string | null {
     return getBoardIdFromURL();
   }
 }
