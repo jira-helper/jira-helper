@@ -7,6 +7,15 @@ export const colorPickerTooltipTemplate = ({
   closeBtnId,
   btnWrpClass,
   colorPickerResultClass,
+}: {
+  tooltipClass: string;
+  id: string;
+  colorPickerId: string;
+  colorPickerResultId: string;
+  okBtnId: string;
+  closeBtnId: string;
+  btnWrpClass: string;
+  colorPickerResultClass: string;
 }) => `
   <div id="${id}" class="${tooltipClass}">
     <div class="${btnWrpClass}">
