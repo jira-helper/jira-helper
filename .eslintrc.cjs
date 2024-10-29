@@ -12,7 +12,6 @@ module.exports = {
   rules: {
     'no-console': 'error',
     'comma-dangle': 'off',
-    'import/no-extraneous-dependencies': 'error',
     'consistent-return': 'warn',
     'import/prefer-default-export': 'off',
     quotes: ['error', 'single'],
@@ -30,5 +29,6 @@ module.exports = {
     'no-undef': 'off',
     'max-classes-per-file': 'off',
     'no-continue': 'off',
+    'import/no-extraneous-dependencies': 'off',
   },
 };

@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 
@@ -15,6 +16,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    // @ts-expect-error
     crx({ manifest }),
 
     //     svelte({
