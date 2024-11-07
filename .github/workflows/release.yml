@@ -1,46 +1,38 @@
-name: Release
+---
+name: "pre-release"
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - "master"
+      - "pre-release-beta"
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v1
+      - name: Use Node.js 20
+        uses: actions/setup-node@v1
         with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run prod
-
-      - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@v1
+          node-version: 20
+      - name: Lint, Test & Build
+        run: |
+          npm i
+          npm run lint
+          npm test
+          npm run prod
+          mv jira-helper.zip jira-helper-canary.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: jira-extension ${{ github.ref }}
-          draft: false
-          prerelease: false
+          CI: true
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./jira-helper.zip
-          asset_name: jira-helper-chrome-${{ github.ref }}.zip
-          asset_content_type: application/zip
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "canary"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            jira-helper-canary.zip
