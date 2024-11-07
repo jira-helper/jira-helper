@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 
@@ -7,15 +8,18 @@ import { crx } from '@crxjs/vite-plugin';
 
 import manifest from './manifest.json';
 
+// @ts-expect-error
+const targetBrowser = process.env.BROWSER === 'FIREFOX' ? 'firefox' : 'chrome';
+
 export default defineConfig({
   build: {
-    outDir: 'dist',
+    outDir: targetBrowser === 'chrome' ? 'dist' : 'dist-firefox',
     commonjsOptions: {
       transformMixedEsModules: true,
     },
   },
   plugins: [
-    crx({ manifest }),
+    crx({ manifest, browser: targetBrowser }),
 
     //     svelte({
     //       compilerOptions: {

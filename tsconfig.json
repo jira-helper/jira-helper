@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+	"plugins": [{ "name": "typescript-plugin-css-modules" }],
+	  "target": "ES6",                        // Целевая версия JavaScript
+	  "module": "ESNext",                      // Тип модуля
+	  "lib": ["DOM", "ESNext"],                // Библиотеки для браузера и современных возможностей
+	  "allowJs": true,                         // Разрешить импорт файлов .js
+	  "checkJs": false,                        // Проверять файлы .js
+	  "jsx": "react",                          // Поддержка JSX, если используется React
+	  "strict": true,                          // Включает строгую проверку типов
+	  "esModuleInterop": true,                 // Поддержка импорта модулей CommonJS
+	  "skipLibCheck": true,                    // Пропустить проверку типов в зависимостях
+	  "forceConsistentCasingInFileNames": true, // Проверка регистра файлов
+	  "moduleResolution": "node",              // Разрешение модулей в стиле Node.js
+	  "isolatedModules": true,                 // Убедиться, что каждый файл обрабатывается отдельно
+	  "noEmit": true,                          // Отключить генерацию файлов .js
+	  "resolveJsonModule": true,               // Разрешить импорт JSON
+	  "baseUrl": "./"                         // Базовый путь
+	},
+	"include": [
+	  "src/**/*"                               // Включить все файлы из папки src
+	],
+	"exclude": [
+	  "node_modules",                          // Исключить node_modules
+	  "dist",                                  // Исключить выходную папку
+	]
+      }

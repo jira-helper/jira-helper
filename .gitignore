@@ -4,6 +4,9 @@ dev-utils.crx
 dist.crx
 main.pem
 dist.pem
+dist-firefox
+jira-helper.zip
+jira-helper-firefox.zip
 .DS_Store
 node_modules
 .vscode
