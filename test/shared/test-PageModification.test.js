@@ -8,8 +8,8 @@ describe('MarkFlaggedIssues', () => {
     expect(pageModification.shouldApply()).toBeTruthy();
   });
 
-  it('.getModificationId should return null', () => {
-    expect(pageModification.getModificationId()).toBeNull();
+  it('.getModificationId should throw Error', () => {
+    expect(() => pageModification.getModificationId()).toThrowError();
   });
 
   it('.appendStyles should return undefined', () => {

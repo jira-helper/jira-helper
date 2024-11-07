@@ -103,6 +103,8 @@
     "simple-color-picker": "^1.0.4"
   },
   "devDependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1",
     "@crxjs/vite-plugin": "2.0.0-beta.23",
     "@types/chrome": "^0.0.279",
     "@types/firefox-webext-browser": "^120.0.4",

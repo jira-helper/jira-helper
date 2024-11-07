@@ -14,8 +14,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   getModificationId(): string {
-    // TODO: невалидно выглядит
-    return '';
+    throw new Error('define modificationId');
   }
 
   appendStyles(): string | undefined {
