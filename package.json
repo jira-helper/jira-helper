@@ -71,8 +71,10 @@
     "test": "vitest",
     "coverage": "vitest --collectCoverage",
     "build": "vite build",
+    "postbuild": "node tools/fix-manifest.cjs",
     "prod": "npm run build && cd dist && zip -r ../jira-helper.zip . && cd ..",
-    "clear": "rm -rf dist",
+    "prod:firefox": "BROWSER=FIREFOX npm run build && cd dist-firefox && zip -r ../jira-helper-firefox.zip . && cd ..",
+    "clear": "rm -rf dist dist-firefox",
     "dev": "vite preview",
     "lint": "lint-staged",
     "knip": "knip"
@@ -97,7 +99,7 @@
     "@tinkoff/request-plugin-transform-url": "^0.9.3",
     "@tinkoff/utils": "^2.1.3",
     "core-js": "^3.8.3",
-    "gsap": "^3.6.0",
+    "gsap": "^3.12.5",
     "simple-color-picker": "^1.0.4"
   },
   "devDependencies": {
