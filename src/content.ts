@@ -18,6 +18,9 @@ import PersonLimitsSettings from './person-limits/SettingsPage';
 import PersonLimits from './person-limits/BoardPage';
 import WiplimitOnCells from './wiplimit-on-cells/WipLimitOnCells';
 import WiplimitOnCellsSettings from './wiplimit-on-cells/WiplimitOnCellsSettingsPopup';
+import { SettingsPage } from './page-objects/SettingsPage';
+import CardColorsSettingsPage from './card-colors/SettingsPage';
+import 'carbon-components-svelte/css/all.css';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -49,6 +52,7 @@ async function start() {
       PersonLimitsSettings,
       FieldLimitsSettingsPage,
       WiplimitOnCellsSettings,
+      CardColorsSettingsPage,
     ],
     [Routes.ISSUE]: [MarkFlaggedIssues, ToggleForRightSidebar],
     [Routes.SEARCH]: [MarkFlaggedIssues, ToggleForRightSidebar],
@@ -62,3 +66,6 @@ async function start() {
 
 initBlurSensitive();
 start();
+
+// @ts-expect-error
+window.SettingsPage = SettingsPage;
