@@ -2,7 +2,7 @@
 
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
-
+import tailwindcss from 'tailwindcss';
 import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 // import arraybuffer from 'vite-plugin-arraybuffer';
 
@@ -33,5 +33,10 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./test/setup.js'],
+  },
+  css: {
+    postcss: {
+      plugins: [tailwindcss()],
+    },
   },
 });

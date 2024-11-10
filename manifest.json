@@ -41,7 +41,7 @@
     "content_scripts": [
         {
             "matches": [ "*://*/*" ],
-            "js": [ "src/content.ts" ]
+            "js": ["src/content.ts" ]
         }
     ],
     "permissions": [
