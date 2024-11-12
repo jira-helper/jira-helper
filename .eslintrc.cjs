@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['airbnb', 'prettier'],
+  extends: ['airbnb', 'prettier', 'plugin:storybook/recommended'],
   plugins: ['prettier', '@typescript-eslint/eslint-plugin'],
   env: {
     browser: true,

@@ -1,7 +1,8 @@
-import { mount } from 'svelte';
+import { createRoot } from 'react-dom/client';
+import React from 'react'
 import { PageModification } from '../shared/PageModification';
 import { SettingsPage } from '../page-objects/SettingsPage';
-import CardColorsSettingsComponent from './CardColorsSettingsComponent.svelte';
+import { ColorCardSettingsComponent } from './CardColorsSettingsComponent';
 
 export default class CardColorsSettingsPage extends PageModification<undefined, Element> {
   getModificationId(): string {
@@ -29,8 +30,9 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
       console.error('Cant insert CardColors settings Component');
       return;
     }
+    console.log('kekprerender')
 
-    mount(CardColorsSettingsComponent, { target: el });
+    createRoot(el).render(<ColorCardSettingsComponent />);
     //     const settingsPage = SettingsPage.getInstance();
     //     const checkbox = settingsPage.getFillWholeCardCheckbox();
     //     checkbox.addEventListener('change', () => {

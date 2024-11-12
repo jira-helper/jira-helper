@@ -20,7 +20,6 @@ import WiplimitOnCells from './wiplimit-on-cells/WipLimitOnCells';
 import WiplimitOnCellsSettings from './wiplimit-on-cells/WiplimitOnCellsSettingsPopup';
 import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
-import 'tailwindcss/tailwind.css';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return

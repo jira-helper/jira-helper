@@ -2,8 +2,6 @@
 
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
-import tailwindcss from 'tailwindcss';
-import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 // import arraybuffer from 'vite-plugin-arraybuffer';
 
 import manifest from './manifest.json';
@@ -21,22 +19,9 @@ export default defineConfig({
   plugins: [
     // @ts-expect-error
     crx({ manifest, browser: targetBrowser }),
-
-    svelte({
-      compilerOptions: {
-        customElement: true,
-      },
-      preprocess: vitePreprocess(),
-    }),
-    // arraybuffer(),
   ],
   test: {
     environment: 'happy-dom',
     setupFiles: ['./test/setup.js'],
-  },
-  css: {
-    postcss: {
-      plugins: [tailwindcss()],
-    },
-  },
+  }
 });
