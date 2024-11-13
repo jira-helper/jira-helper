@@ -32,5 +32,6 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off',
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': 'error',
+    'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
   },
 };

@@ -3,10 +3,9 @@
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 // import arraybuffer from 'vite-plugin-arraybuffer';
-
+import * as path from 'path';
 import manifest from './manifest.json';
 
-// @ts-expect-error
 const targetBrowser = process.env.BROWSER === 'FIREFOX' ? 'firefox' : 'chrome';
 
 export default defineConfig({
@@ -23,5 +22,10 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./test/setup.js'],
-  }
+  },
+  resolve: {
+    alias: {
+      src: path.resolve(__dirname, '/src'),
+    },
+  },
 });
