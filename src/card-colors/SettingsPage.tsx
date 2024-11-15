@@ -1,8 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageModification } from '../shared/PageModification';
 import { SettingsPage } from '../page-objects/SettingsPage';
-import { ColorCardSettingsComponent } from './CardColorsSettingsComponent';
+import CardColorsSettingsContainer from './CardColorsSettingsContainer';
+import { getBoardProperty } from '../shared/jiraApi';
 
 export default class CardColorsSettingsPage extends PageModification<undefined, Element> {
   getModificationId(): string {
@@ -31,6 +32,8 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
       return;
     }
 
-    createRoot(el).render(<ColorCardSettingsComponent />);
+    createRoot(el).render(
+      <CardColorsSettingsContainer />
+    );
   }
 }

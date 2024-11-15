@@ -2,6 +2,7 @@ import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { onDOMChange } from 'src/shared/domUtils';
 import { hslFromRGB } from 'src/shared/utils';
 import { PageModification } from '../shared/PageModification';
+import { getBoardProperty } from 'src/shared/jiraApi';
 
 const excludeColors = {
   jiraHelperWIP: 'rgb(255, 86, 48)',
@@ -22,7 +23,12 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     return Promise.resolve(undefined);
   }
 
-  apply(): void {
+  async apply(): Promise<void> {
+    const cardColorsEnabled = await this.getCardColorsEnabled();
+    if (!cardColorsEnabled) {
+      return;
+    }
+
     this.fillCardWithColor();
 
     const interval = setInterval(() => {
@@ -121,5 +127,11 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
 
   private markCardAsProcessed(card: Element) {
     card.setAttribute(this.processedAttribute, '');
+  }
+
+  private async getCardColorsEnabled(): Promise<boolean> {
+    const boardId = this.getBoardId();
+    const cardColorsEnabled = await getBoardProperty(boardId, 'card-colors');
+    return cardColorsEnabled === true;
   }
 }

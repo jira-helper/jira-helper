@@ -1,32 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Image } from '../shared/components/Image';
-
-import beforeImg from '../assets/card-colors-before.jpg';
-import afterImg from '../assets/card-colors-after.jpg';
-
-
 import Checkbox from 'antd/es/checkbox';
 import Tooltip from 'antd/es/tooltip';
 import { InfoCircleFilled } from '@ant-design/icons/';
-import styles from './CardColorsSettingsComponent.module.css'
+import styles from './CardColorsSettingsComponent.module.css';
 
 type ColorCardFeatureProps = {
-  forceTooltipOpen?: boolean
-}
+  cardColorsEnabled: boolean;
+  onCardColorsEnabledChange: (newValue: boolean) => void;
+  forceTooltipOpen?: boolean;
+};
 
-export const ColorCardSettingsComponent: React.FC<ColorCardFeatureProps> = (props) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCount((prevCount) => prevCount + 1);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+export const CardColorsSettingsComponent: React.FC<ColorCardFeatureProps> = (props) => {
+  const handleCheckboxChange = (e: any) => {
+    props.onCardColorsEnabledChange(e.target.checked);
+  };
 
   return (
     <div className={styles.wrapper}>
-      <Checkbox>Fill whole card</Checkbox>
+      <Checkbox checked={props.cardColorsEnabled} onChange={handleCheckboxChange}>Fill whole card</Checkbox>
       <Tooltip
         open={props.forceTooltipOpen}
         overlayStyle={{
