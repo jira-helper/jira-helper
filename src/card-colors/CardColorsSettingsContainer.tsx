@@ -1,33 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { CardColorsSettingsComponentPure } from './CardColorsSettingsComponentPure';
-import { updateBoardProperty, getBoardProperty } from '../shared/jiraApi';
-import { getBoardIdFromURL } from '../shared/utils';
+import { CardColorsSettingsComponent } from './CardColorsSettingsComponent';
+import { PropertyValue } from './types';
 
-const CardColorsSettingsContainer: React.FC = () => {
+
+
+type FeatureProps = {
+  getBoardProperty: (prop: string) => Promise<PropertyValue>
+  updateBoardProperty: (prop: string, value: PropertyValue) => any
+  forceTooltipOpen?: boolean;
+}
+
+export const CardColorsSettingsContainer: React.FC<FeatureProps> = (props) => {
   const [cardColorsEnabled, setCardColorsEnabled] = useState(false);
 
   useEffect(() => {
     const fetchCardColorsEnabled = async () => {
-      const boardId = getBoardIdFromURL();
-      const cardColorsEnabled = await getBoardProperty(boardId, 'card-colors');
-      setCardColorsEnabled(cardColorsEnabled === true);
+      const cardColorsProperty = await props.getBoardProperty('card-colors');
+      setCardColorsEnabled(cardColorsProperty?.value === true);
     };
 
     fetchCardColorsEnabled();
   }, []);
 
   const handleCheckboxChange = async (newValue: boolean) => {
-    const boardId = getBoardIdFromURL();
+
     setCardColorsEnabled(newValue);
-    await updateBoardProperty(boardId, 'card-colors', newValue);
+    await props.updateBoardProperty('card-colors', {
+      value: newValue
+    });
   };
 
   return (
-    <CardColorsSettingsComponentPure
+    <CardColorsSettingsComponent
       cardColorsEnabled={cardColorsEnabled}
       onCardColorsEnabledChange={handleCheckboxChange}
+      forceTooltipOpen={props.forceTooltipOpen}
     />
   );
 };
 
-export default CardColorsSettingsContainer;
+

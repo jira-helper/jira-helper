@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/svelte';
+import type { Preview } from '@storybook/react';
  import '../src/shared/components/styles.css'
 const preview: Preview = {
   parameters: {
@@ -8,6 +8,7 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    actions: { argTypesRegex: '^on.*' },
   },
 };
 
