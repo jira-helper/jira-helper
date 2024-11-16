@@ -69,6 +69,7 @@
   "scripts": {
     "bootstrap": "npm i --no-save",
     "test": "vitest",
+    "test:ci": "vitest run --coverage",
     "coverage": "vitest --collectCoverage",
     "build": "vite build",
     "postbuild": "node tools/fix-manifest.cjs",
@@ -129,6 +130,7 @@
     "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
+    "@vitest/coverage-v8": "^2.1.3",
     "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",

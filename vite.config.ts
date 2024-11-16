@@ -22,7 +22,12 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
+    coverage: {
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      reporter: ['lcov'],
+    },
   },
+
   resolve: {
     alias: {
       src: path.resolve(__dirname, '/src'),
