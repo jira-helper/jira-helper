@@ -6,7 +6,7 @@ import { action } from '@storybook/addon-actions';
 type Args = React.ComponentProps<typeof CardColorsSettingsContainer>;
 
 export default {
-  title: 'Components/ColorCardFeature/Settings',
+  title: 'Features/Card Colors/Settings',
   component: CardColorsSettingsContainer,
   args: {
     getBoardProperty: () => Promise.resolve({ value: true }),
@@ -15,7 +15,6 @@ export default {
 
 } as Meta<Args>;
 type Story = StoryObj<typeof CardColorsSettingsContainer>;
-const Template: StoryFn<Args> = (args) => <CardColorsSettingsContainer {...args} />;
 
 export const Default: Story = {
   args: {

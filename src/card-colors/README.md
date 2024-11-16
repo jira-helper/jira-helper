@@ -1,5 +1,7 @@
 Plan:
-- [ ] firefox image loading
-- [ ] storybook stories
+- [x] firefox image loading
+- [x] storybook stories
 - [ ] storybook screenshots
-- [ ] unit tests for container
+- [x] unit tests for container
+- [ ] test of filling a card with colors
+- [ ] storybook with filled card

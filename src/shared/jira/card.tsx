@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 interface IssueCardProps {
   issueKey: string;
   summary: string;
+  grabberColor?: string;
 }
 
-const IssueCard: React.FC<IssueCardProps> = ({ issueKey: key, summary }: IssueCardProps) => {
-  console.log(key, summary)
+// states 
+// flagged
+// without color
+// with color
+
+const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
+  issueKey: key,
+  summary,
+  grabberColor
+}, ref) => {
   const [projectKey, issueNum] = key.split('-');
 
   return (
     <div
+      ref={ref}
       className="js-detailview ghx-issue js-issue ghx-has-avatar ghx-avatar-not-empty js-parent-drag ghx-days-3 ghx-type-6 ghx-observed ghx-selected"
       data-issue-id="11265152"
       data-issue-key="HTLS-2502"
@@ -110,7 +120,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ issueKey: key, summary }: IssueCa
       <div
         className="ghx-grabber ghx-grabber-transparent"
         style={{
-          backgroundColor: 'transparent',
+          backgroundColor: grabberColor || 'transparent',
           width: '3px',
           height: '100%',
           left: 0,
@@ -171,6 +181,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ issueKey: key, summary }: IssueCa
       </div>
     </div>
   );
-};
+}
+);
 
 export { IssueCard };

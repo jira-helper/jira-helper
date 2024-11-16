@@ -2,7 +2,9 @@ import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { PageModification } from '../shared/PageModification';
 import { SettingsPage } from '../page-objects/SettingsPage';
-import CardColorsSettingsContainer from './CardColorsSettingsContainer';
+import { CardColorsSettingsContainer } from './CardColorsSettingsContainer';
+import { getBoardProperty, updateBoardProperty } from 'src/shared/jiraApi';
+import { PropertyValue } from './types';
 
 export default class CardColorsSettingsPage extends PageModification<undefined, Element> {
   getModificationId(): string {
@@ -31,6 +33,23 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
       return;
     }
 
-    createRoot(el).render(<CardColorsSettingsContainer />);
+    const boardId = this.getBoardId();
+    if (!boardId) {
+      return;
+    }
+
+    const updateProperty = (property: string, value: PropertyValue) => {
+      updateBoardProperty(boardId, property, value);
+    };
+
+    const getProperty = (property: string): Promise<PropertyValue> => {
+      return getBoardProperty(boardId, property);
+    };
+
+    createRoot(el).render(<CardColorsSettingsContainer
+      updateBoardProperty={updateProperty}
+      getBoardProperty={getProperty}
+
+    />);
   }
 }

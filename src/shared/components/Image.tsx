@@ -1,4 +1,5 @@
 import React from 'react';
+import { extensionApiService } from '../ExtensionApiService';
 
 interface ImageProps {
   src: string;
@@ -7,7 +8,7 @@ interface ImageProps {
 
 export const Image: React.FC<ImageProps> = ({ src, width }) => {
   const isInStorybook = document.getElementById('storybook-root')
-  const url = isInStorybook ? src : chrome.runtime.getURL(src);
+  const url = isInStorybook ? src : extensionApiService.getUrl(src);
 
   return <img src={url} width={width} />;
 };
