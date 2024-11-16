@@ -6,16 +6,12 @@ interface IssueCardProps {
   grabberColor?: string;
 }
 
-// states 
+// states
 // flagged
 // without color
 // with color
 
-const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
-  issueKey: key,
-  summary,
-  grabberColor
-}, ref) => {
+const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({ issueKey: key, summary, grabberColor }, ref) => {
   const [projectKey, issueNum] = key.split('-');
 
   return (
@@ -25,6 +21,7 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
       data-issue-id="11265152"
       data-issue-key="HTLS-2502"
       role="listitem"
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
       aria-label={`${key} ${summary}`}
       style={{
@@ -45,7 +42,14 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
         <div className="ghx-issue-fields" style={{ margin: '2px 0 0', padding: '0 20px 0 0' }}>
           <div
             className="ghx-key"
-            style={{ margin: 0, padding: 0, display: 'inline-block', lineHeight: '12px', overflow: 'hidden', maxWidth: '100%' }}
+            style={{
+              margin: 0,
+              padding: 0,
+              display: 'inline-block',
+              lineHeight: '12px',
+              overflow: 'hidden',
+              maxWidth: '100%',
+            }}
           >
             <a
               href={`/browse/${key}`}
@@ -75,7 +79,13 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
           <div className="ghx-summary" title={summary} style={{ margin: 0, padding: 0 }}>
             <span
               className="ghx-inner"
-              style={{ lineHeight: '12px', maxHeight: '3.3em', display: 'block', paddingBottom: '1px', overflow: 'hidden' }}
+              style={{
+                lineHeight: '12px',
+                maxHeight: '3.3em',
+                display: 'block',
+                paddingBottom: '1px',
+                overflow: 'hidden',
+              }}
             >
               {summary}
             </span>
@@ -86,7 +96,12 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
             <span
               className="ghx-extra-field ghx-fa"
               data-tooltip="Issue Size: None"
-              style={{ display: 'inline-block', lineHeight: '17.1429px', color: 'rgb(151, 160, 175)', fontStyle: 'italic' }}
+              style={{
+                display: 'inline-block',
+                lineHeight: '17.1429px',
+                color: 'rgb(151, 160, 175)',
+                fontStyle: 'italic',
+              }}
             >
               <span className="ghx-extra-field-content" style={{ display: 'block', overflow: 'hidden' }}>
                 None
@@ -130,7 +145,7 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
           borderTopLeftRadius: '3px',
           borderBottomLeftRadius: '3px',
         }}
-      ></div>
+      />
       <div
         className="ghx-move-count"
         style={{
@@ -143,7 +158,15 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
           zIndex: 20,
         }}
       >
-        <b style={{ color: 'rgb(255, 255, 255)', fontSize: '12px', textAlign: 'center', lineHeight: '30px', width: '29px' }}></b>
+        <b
+          style={{
+            color: 'rgb(255, 255, 255)',
+            fontSize: '12px',
+            textAlign: 'center',
+            lineHeight: '30px',
+            width: '29px',
+          }}
+        />
       </div>
       <div className="ghx-card-footer" style={{ margin: '3px 0 0', padding: 0, display: 'flex', flexWrap: 'wrap' }}>
         <div className="ghx-avatar" style={{ margin: '0 4px 4px 0', padding: 0, display: 'flex' }}>
@@ -176,12 +199,11 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({
           </span>
         </div>
         <div className="ghx-days" title="3 days in this column" style={{ width: '100%' }}>
-          <b style={{ display: 'block', height: '4px', width: '37px' }}></b>
+          <b style={{ display: 'block', height: '4px', width: '37px' }} />
         </div>
       </div>
     </div>
   );
-}
-);
+});
 
 export { IssueCard };

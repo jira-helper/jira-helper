@@ -1,9 +1,8 @@
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { onDOMChange } from 'src/shared/domUtils';
-import { hslFromRGB } from 'src/shared/utils';
 import { getBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
-import { processCard } from './ColorPainer';
+import { processCard } from './processCard';
 
 const excludeColors = {
   jiraHelperWIP: 'rgb(255, 86, 48)',
@@ -62,7 +61,7 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     cards.forEach(card => {
       processCard({
         card: card as HTMLElement,
-        processedAttribute: this.processedAttribute
+        processedAttribute: this.processedAttribute,
       });
     });
   };

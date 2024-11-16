@@ -20,9 +20,7 @@ export const CardColorsSettingsComponent: React.FC<ColorCardFeatureProps> = prop
 
   return (
     <div className={styles.wrapper}>
-      <Checkbox
-
-        checked={props.cardColorsEnabled} onChange={handleCheckboxChange}>
+      <Checkbox checked={props.cardColorsEnabled} onChange={handleCheckboxChange}>
         Fill whole card
       </Checkbox>
       <Tooltip

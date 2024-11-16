@@ -36,5 +36,7 @@ module.exports = {
     'react/function-component-definition': 'off',
     'react/destructuring-assignment': 'off',
     'react/require-default-props': 'off',
+    'react/jsx-props-no-spreading': 'off',
+    'jsx-a11y/alt-text': 'off',
   },
 };

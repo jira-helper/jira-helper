@@ -10,24 +10,13 @@ interface ProcessCardOptions {
   processedAttribute: string;
 }
 
-export function processCard({ card, processedAttribute }: ProcessCardOptions): void {
-  const grabber = card.querySelector(BoardPagePageObject.selectors.grabber) as HTMLElement;
-  if (!grabber) {
-    return;
-  }
+function isAlreadyColoredByOtherTools(card: HTMLElement): boolean {
+  const color = card.style.backgroundColor;
+  return Object.values(excludeColors).some(c => c === color);
+}
 
-  const color = grabber.style.backgroundColor;
-  if (color === 'transparent' || color === 'rgba(0, 0, 0, 0)' || color === '') {
-    return;
-  }
-
-  markCardAsProcessed(card, processedAttribute);
-
-  if (isFlagged(card) || isAlreadyColoredByOtherTools(card)) {
-    return;
-  }
-
-  paintCard(card, grabber);
+function isFlagged(card: HTMLElement): boolean {
+  return card.classList.contains(BoardPagePageObject.classlist.flagged);
 }
 
 function paintCard(card: HTMLElement, grabber: HTMLElement): void {
@@ -50,15 +39,26 @@ function paintCard(card: HTMLElement, grabber: HTMLElement): void {
   card.style.backgroundColor = lighterColor;
 }
 
-function isAlreadyColoredByOtherTools(card: HTMLElement): boolean {
-  const color = card.style.backgroundColor;
-  return Object.values(excludeColors).some(c => c === color);
-}
-
-function isFlagged(card: HTMLElement): boolean {
-  return card.classList.contains(BoardPagePageObject.classlist.flagged);
-}
-
 function markCardAsProcessed(card: Element, processedAttribute: string): void {
   card.setAttribute(processedAttribute, '');
+}
+
+export function processCard({ card, processedAttribute }: ProcessCardOptions): void {
+  const grabber = card.querySelector(BoardPagePageObject.selectors.grabber) as HTMLElement;
+  if (!grabber) {
+    return;
+  }
+
+  const color = grabber.style.backgroundColor;
+  if (color === 'transparent' || color === 'rgba(0, 0, 0, 0)' || color === '') {
+    return;
+  }
+
+  markCardAsProcessed(card, processedAttribute);
+
+  if (isFlagged(card) || isAlreadyColoredByOtherTools(card)) {
+    return;
+  }
+
+  paintCard(card, grabber);
 }
