@@ -22,7 +22,7 @@ jobs:
         run: |
           npm i
           npm run lint
-          npm test:ci
+          npm run test:ci
           npm run build
         env:
           CI: true
