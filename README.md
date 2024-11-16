@@ -1,4 +1,4 @@
-![Build Status](https://github.com/pavelpower/jira-helper/workflows/Node%20CI/badge.svg)
+![Build Status](https://github.com/pavelpower/jira-helper/workflows/Node%20CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/jira-helper/jira-helper/badge.svg)](https://coveralls.io/github/jira-helper/jira-helper)
 
 ## “jira-helper” features
 
