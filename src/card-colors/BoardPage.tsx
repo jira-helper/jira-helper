@@ -4,10 +4,6 @@ import { getBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { processCard } from './processCard';
 
-const excludeColors = {
-  jiraHelperWIP: 'rgb(255, 86, 48)',
-};
-
 export class CardColorsBoardPage extends PageModification<undefined, Element> {
   private processedAttribute = 'jh-card-colors-processed';
 
@@ -65,19 +61,6 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
       });
     });
   };
-
-  private isFlagged(card: HTMLElement) {
-    return card.classList.contains(BoardPagePageObject.classlist.flagged);
-  }
-
-  private isAlreadyColoredByOtherTools = (card: HTMLElement) => {
-    const color = card.style.backgroundColor;
-    return Object.values(excludeColors).some(c => c === color);
-  };
-
-  private markCardAsProcessed(card: Element) {
-    card.setAttribute(this.processedAttribute, '');
-  }
 
   private async getCardColorsEnabled(): Promise<boolean> {
     const boardId = this.getBoardId();
