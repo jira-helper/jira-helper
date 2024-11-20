@@ -67,7 +67,9 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     if (!boardId) {
       return Promise.reject(new Error('no board id'));
     }
-    const cardColorsEnabled = await getBoardProperty(boardId, 'card-colors');
-    return cardColorsEnabled === true;
+
+    const cardColorsSettings = await getBoardProperty(boardId, 'card-colors');
+
+    return cardColorsSettings.value === true;
   }
 }
