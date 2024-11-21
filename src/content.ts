@@ -1,3 +1,4 @@
+import './firefoxFixes';
 import { Routes } from './routing';
 import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';

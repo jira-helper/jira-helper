@@ -52,7 +52,7 @@
     "host_permissions": ["http://*/*", "https://*/*"],
     "browser_specific_settings": {
         "gecko": {
-            "id": "jira-helper@jira-helper",
+            "id": "jira-helper-firefox@jira-helper",
             "strict_min_version": "58.0"
         }
     }
