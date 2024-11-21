@@ -1,0 +1,16 @@
+.exampleWithImages {
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
+}
+
+.example {
+	display: flex;
+	flex-direction: column;
+}
+
+.wrapper {
+	display: flex;
+	justify-content: start;
+	align-items: center;
+}

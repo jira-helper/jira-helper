@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['airbnb', 'prettier'],
+  extends: ['airbnb', 'prettier', 'plugin:storybook/recommended'],
   plugins: ['prettier', '@typescript-eslint/eslint-plugin'],
   env: {
     browser: true,
@@ -30,5 +30,13 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-continue': 'off',
     'import/no-extraneous-dependencies': 'off',
+    'no-use-before-define': 'off',
+    '@typescript-eslint/no-use-before-define': 'error',
+    'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
+    'react/function-component-definition': 'off',
+    'react/destructuring-assignment': 'off',
+    'react/require-default-props': 'off',
+    'react/jsx-props-no-spreading': 'off',
+    'jsx-a11y/alt-text': 'off',
   },
 };

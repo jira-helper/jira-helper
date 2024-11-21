@@ -14,3 +14,4 @@ dist
 .gitconfig
 coverage
 .history
+*storybook.log

@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "jira-helper",
     "short_name": "jira-helper",
-    "version": "2.23.2",
+    "version": "2.24.0",
     "author": "pavel.power@gmail.com",
     "description": "jira-helper",
     "icons": {
@@ -41,7 +41,7 @@
     "content_scripts": [
         {
             "matches": [ "*://*/*" ],
-            "js": [ "src/content.ts" ]
+            "js": ["src/content.ts" ]
         }
     ],
     "permissions": [
@@ -52,7 +52,7 @@
     "host_permissions": ["http://*/*", "https://*/*"],
     "browser_specific_settings": {
         "gecko": {
-            "id": "jira-helper@jira-helper",
+            "id": "jira-helper-firefox@jira-helper",
             "strict_min_version": "58.0"
         }
     }

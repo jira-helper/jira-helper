@@ -85,7 +85,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return { cancelRequest: cancelRequest!, abortPromise };
   }
 
-  protected setTimeout(func: () => void, time: number): number {
+  protected setTimeout(func: () => void, time: number): NodeJS.Timeout {
     const timeoutID = setTimeout(func, time);
     this.sideEffects.push(() => clearTimeout(timeoutID));
     return timeoutID;

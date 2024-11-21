@@ -18,7 +18,8 @@
 	  "baseUrl": "./"                         // Базовый путь
 	},
 	"include": [
-	  "src/**/*"                               // Включить все файлы из папки src
+	  "src/**/*",                               // Включить все файлы из папки src
+	  "./test/setup.ts"
 	],
 	"exclude": [
 	  "node_modules",                          // Исключить node_modules

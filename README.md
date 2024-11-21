@@ -1,4 +1,4 @@
-![Build Status](https://github.com/pavelpower/jira-helper/workflows/Node%20CI/badge.svg)
+![Build Status](https://github.com/pavelpower/jira-helper/workflows/Node%20CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/jira-helper/jira-helper/badge.svg)](https://coveralls.io/github/jira-helper/jira-helper)
 
 ## “jira-helper” features
 
@@ -66,14 +66,13 @@ After adding description, please specify the following attributes only:
 
 ## Installing the extension for development purposes
 
-Execute:
-
-```
-npm run bootstrap
-npm run dev
-```
+- install nodejs 20+
+- install packages `npm ci`
+- for local development of components you can use storybook `npm run storybook`
 
 In Chrome:
+
+Run `npm run build` to build the extension
 
 Open the menu, choose “More tools”, then ["Extensions"](chrome://extensions/)
 
@@ -83,6 +82,8 @@ Choose the folder where the extension was built, `~/jira-helper/dist`.
 
 In Firefox:
 
+Run `npm run prod:firefox` to build the extension
+
 Open the url - about:debugging#/runtime/this-firefox and click "Load Temporary Add-on".
 In the open file upload window, select manifest.json from the dist directory
 
@@ -91,9 +92,7 @@ After that, the plugin will be added to Firefox.
 
 ### During development
 
-When code changes Webpack will automatically update the codebase in the `dist` folder.
-
-Press “Update” in the ["Extensions"](chrome://extensions/) developer menu  and then reload the page, where the extension is being tested.
+Run `npm run build` after you change the code.  Then press “Update” in the ["Extensions"](chrome://extensions/) developer menu  and then reload the page, where the extension is being tested.
 
 
 ### Maintaining a git branch and git commits
@@ -112,7 +111,7 @@ Please use `english` language only to name branches and commits.
 
 The official version of the extension is published in ["Chrome WebStore"](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
 
-The extension is published after the release [is assembled at github](https://github.com/pavelpower/jira-helper/releases)
+The extension is published after the release [is assembled at github](https://github.com/jira-helper/jira-helper/releases)
 
 Release version is the same as the application version in package.json  [package.json](./package.json) and the version published in ["Chrome WebStore"](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
 
