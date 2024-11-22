@@ -70,11 +70,11 @@ const getBoardProperties = (boardId: string): Promise<any> => {
 };
 
 // Fetch a specific property of a board
-export const getBoardProperty = async (
+export const getBoardProperty = async <T>(
   boardId: string,
   property: string,
   params: Record<string, any> = {}
-): Promise<any | undefined> => {
+): Promise<T | undefined> => {
   const boardProps = await getBoardProperties(boardId);
   if (!boardProps.keys.find((boardProp: { key: string }) => boardProp.key === getPropName(property))) return undefined;
 
@@ -87,7 +87,7 @@ export const getBoardProperty = async (
     memoryCacheForce,
     type: 'json',
     ...params,
-  }).then(result => result.value);
+  }).then(result => result.value as T);
 };
 
 // Update a specific property of a board

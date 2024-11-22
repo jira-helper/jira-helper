@@ -1,6 +1,6 @@
 {
   "name": "jira-helper",
-  "version": "2.24.0",
+  "version": "2.24.1",
   "description": "jira-helper: Elements for visualizations, button template, swimlane-viz",
   "repository": "https://github.com/Tinkoff/jira-helper.git",
   "license": "ISC",

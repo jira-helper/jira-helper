@@ -69,7 +69,7 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
       return Promise.reject(new Error('no board id'));
     }
 
-    const cardColorsSettings: PropertyValue = await getBoardProperty(boardId, 'card-colors');
+    const cardColorsSettings = await getBoardProperty<PropertyValue>(boardId, 'card-colors');
 
     return cardColorsSettings?.value === true;
   }
