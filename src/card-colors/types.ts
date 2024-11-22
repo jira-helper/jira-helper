@@ -1,3 +1,5 @@
-export type PropertyValue = {
-	value: boolean
-} | undefined
+export type PropertyValue =
+  | {
+      value: boolean;
+    }
+  | undefined;
