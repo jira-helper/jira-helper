@@ -20,11 +20,13 @@ jobs:
           node-version: 20
       - name: Lint, Test & Build
         run: |
-          npm i
+          npm ci
           npm run lint
           npm test
           npm run prod
           mv jira-helper.zip jira-helper-canary.zip
+          npm run prod:firefox
+          mv jira-helper.zip jira-helper-firefox-canary.zip
         env:
           CI: true
 
@@ -36,3 +38,4 @@ jobs:
           title: "Development Build"
           files: |
             jira-helper-canary.zip
+            jira-helper-firefox-canary.zip
