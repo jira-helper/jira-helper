@@ -4,6 +4,8 @@ import { getCurrentRoute, getIssueId, Routes } from '../routing';
 import { loadFlaggedIssues, loadNewIssueViewEnabled } from '../shared/jiraApi';
 import { issueDOM } from './domSelectors';
 import { extensionApiService } from '../shared/ExtensionApiService';
+import flagNew from '../assets/flagNew.svg';
+import flagUrl from '../assets/flag.png';
 
 enum RelatedIssue {
   LINKED = 'LINKED',
@@ -14,7 +16,7 @@ enum RelatedIssue {
 
 const getFlag = (newIssueView: boolean): HTMLImageElement => {
   const flag = document.createElement('img');
-  flag.src = extensionApiService.getUrl(newIssueView ? '/img/flagNew.svg' : '/img/flag.png');
+  flag.src = extensionApiService.getUrl(newIssueView ? flagNew : flagUrl);
   flag.style.width = '16px';
   flag.style.height = '16px';
   return flag;

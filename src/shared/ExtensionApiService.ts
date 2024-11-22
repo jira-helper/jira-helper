@@ -34,6 +34,8 @@ class ExtensionApiService {
   }
 
   getUrl(resource: string): string {
+    const isInlineResource = resource.startsWith('data:');
+    if (isInlineResource) return resource;
     return this.extensionAPI.runtime.getURL(resource);
   }
 
