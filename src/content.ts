@@ -22,6 +22,7 @@ import WiplimitOnCellsSettings from './wiplimit-on-cells/WiplimitOnCellsSettings
 import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
+import { BoardSettingsBoardPage } from './board-settings/BoardPage';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -47,6 +48,7 @@ async function start() {
       FieldLimitsBoardPage,
       WiplimitOnCells,
       CardColorsBoardPage,
+      BoardSettingsBoardPage,
     ],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,
