@@ -14,6 +14,7 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    minify: false,
   },
   plugins: [
     // @ts-expect-error
