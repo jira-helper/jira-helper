@@ -208,14 +208,27 @@ export default class extends PageModification<[any, any], Element> {
     const avaTitles = avatar.map(el => (el as HTMLImageElement).title);
 
     cards.forEach(node => {
-      const img = node.querySelector('.ghx-avatar img');
-      if (!img) {
+      /** there are can be two types of nodes:
+       * 1. assigned to user with avatar
+       * 2. assigned to user without avatar
+       *
+       * Example of node with avatar
+       * <div class="ghx-avatar"><img src="https://jira.domain.com/secure/useravatar?ownerId=JIRAUSER1337&amp;avatarId=1337" class="ghx-avatar-img" alt="Assignee: Leet Elite" data-tooltip="Assignee: Leet Elite"></div>
+       *
+       * Example of node without avatar
+       * <div class="ghx-avatar"><span class="ghx-avatar-img ghx-auto-avatar" data-tooltip="Assignee: Leet Elite" original-title="">L</span></div>
+       *
+       * We need to check data-tooltip attribute for both cases
+       */
+      const tooltipHolder = node.querySelector('.ghx-avatar img') || node.querySelector('.ghx-avatar span');
+      if (!tooltipHolder) {
+        // card without assignee at all
         node.classList.add('no-visibility');
         return;
       }
 
-      const name = getNameFromTooltip(img.getAttribute('data-tooltip')!);
-      if (avaTitles.indexOf(name) > -1) {
+      const name = getNameFromTooltip(tooltipHolder.getAttribute('data-tooltip')!);
+      if (avaTitles.includes(name)) {
         node.classList.remove('no-visibility');
       } else {
         node.classList.add('no-visibility');
@@ -262,7 +275,7 @@ export default class extends PageModification<[any, any], Element> {
     }
 
     // TODO: Shouldn't work for any other language except English, so we have to think about it. F.e., in Russian, it is "Дорожка для custom"
-    return someswimlane.getAttribute('aria-label')?.indexOf('Swimlane for custom') !== -1;
+    return someswimlane.getAttribute('aria-label')?.includes('Swimlane for custom') ?? false;
   }
 
   countAmountPersonalIssuesInColumn(column: Element, stats: PersonLimit[], swimlaneId?: string | null): void {
