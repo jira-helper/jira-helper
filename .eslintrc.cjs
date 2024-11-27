@@ -17,7 +17,7 @@ module.exports = {
     quotes: ['error', 'single'],
     'import/no-unresolved': [2, { caseSensitive: false }],
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
-    'no-restricted-syntax': ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'],
+    'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
     'class-methods-use-this': 'off',
     'no-param-reassign': 'off',
@@ -40,5 +40,6 @@ module.exports = {
     'jsx-a11y/alt-text': 'off',
     'no-useless-constructor': 'off',
     'no-empty-function': 'off',
+    'guard-for-in': 'off',
   },
 };

@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyService } from 'src/shared/boardPropertyService';
 
-type BoardProperty = {
+export type BoardProperty = {
   columnsToTrack: string[];
 };
 
-const ColumnsSettingsPure = (props: {
+export const ColumnsSettingsPure = (props: {
   columns: { name: string; enabled: boolean }[];
   onUpdate: (columns: { name: string; enabled: boolean }[]) => void;
   loading?: boolean;
