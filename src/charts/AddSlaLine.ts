@@ -373,7 +373,7 @@ export default class extends PageModification<any[], Element> {
 
     renderSlaLine(slaValue, chartElement as SVGElement, changingValue);
     renderSlaLegend();
-    renderSlaInput(changingValue, canEdit, this.addEventListener, {
+    renderSlaInput(changingValue, canEdit, this.addEventListener.bind(this), {
       onChange: (newValue: number) => {
         changingValue = newValue;
         const queryParams = new URLSearchParams(window.location.search);
