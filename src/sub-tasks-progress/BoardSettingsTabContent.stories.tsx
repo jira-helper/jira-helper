@@ -5,11 +5,18 @@ import { BoardPropertyService } from 'src/shared/boardPropertyService';
 import { BoardProperty, BoardSettingsTabContent } from './BoardSettingsTabContent';
 
 const meta: Meta<typeof BoardSettingsTabContent> = {
-  title: 'Features/Sub-tasks Progress',
+  title: 'Features/Sub-tasks Progress/BoardSettingsTabContent',
   component: BoardSettingsTabContent,
   parameters: {
     layout: 'centered',
   },
+  decorators: [
+    Story => (
+      <div style={{ width: '800px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;

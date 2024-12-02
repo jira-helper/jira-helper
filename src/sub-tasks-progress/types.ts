@@ -1,4 +1,4 @@
-export type Status = 'backlog' | 'todo' | 'inProgress' | 'almostDone' | 'done';
+export type Status = 'backlog' | 'todo' | 'inProgress' | 'almostDone' | 'done' | 'blocked';
 export type SubTasksProgress = {
   [key in Status]: number;
 };
