@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "jira-helper",
     "short_name": "jira-helper",
-    "version": "2.24.3",
+    "version": "2.24.4",
     "author": "pavel.power@gmail.com",
     "description": "jira-helper",
     "icons": {
@@ -45,7 +45,6 @@
         }
     ],
     "permissions": [
-        "storage",
         "tabs",
         "contextMenus"
     ],
