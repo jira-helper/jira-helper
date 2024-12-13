@@ -108,6 +108,8 @@
     "core-js": "^3.8.3",
     "gsap": "^3.12.5",
     "react": "^18.3.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "simple-color-picker": "^1.0.4",
     "svelte": "^5.1.12"

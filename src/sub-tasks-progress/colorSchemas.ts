@@ -1,4 +1,14 @@
-import { ColorScheme } from './types';
+import { ColorScheme, Status } from './types';
+
+export const availableStatuses: Status[] = [
+  'unmapped',
+  'blocked',
+  'backlog',
+  'todo',
+  'inProgress',
+  'almostDone',
+  'done',
+];
 
 export const jiraColorScheme: ColorScheme = {
   blocked: 'red',
@@ -7,6 +17,7 @@ export const jiraColorScheme: ColorScheme = {
   inProgress: 'blue',
   almostDone: 'yellowgreen',
   done: 'green',
+  unmapped: 'black',
 };
 
 export const yellowGreenColorScheme: ColorScheme = {
@@ -16,6 +27,7 @@ export const yellowGreenColorScheme: ColorScheme = {
   inProgress: 'yellow',
   almostDone: 'yellowgreen',
   done: 'green',
+  unmapped: 'black',
 };
 
 export const availableColorSchemas: string[] = ['jira', 'yellowGreen'];

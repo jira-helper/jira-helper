@@ -5,7 +5,10 @@ import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyService } from 'src/shared/boardPropertyService';
 import Select from 'antd/es/select';
 import Tabs from 'antd/es/tabs';
-import { availableColorSchemas, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Tag, Tooltip } from 'antd';
+import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
 import { subTasksProgress } from './testData';
 import { Status } from './types';
@@ -74,14 +77,187 @@ const ColumnsSettingsContainer = () => {
 // storybook - component with mock
 // unit - mock board property and page object and see if component renders correctly
 
-const SubTasksSettings = () => {
-  /**
-   * Component show tab for each project
-   * In project tab - for every status shows little square with color, status name and selecto to choise subtaskprogresstatus
-   */
-  const [selectedProject, setSelectedProject] = useState('');
-  // const [projects, setProjects] = useState<string[]>([]);
+const SubTaskStatusMapping = (props: { group: string; status: string; progressStatus: Status; title: string }) => {
+  const [{ isDragging }, drag] = useDrag({
+    type: 'status',
+    item: {
+      group: props.group,
+      status: props.status,
+      progressStatus: props.progressStatus,
+    },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
 
+  const opacity = isDragging ? 0.4 : 1;
+
+  return (
+    <div
+      ref={drag}
+      style={{
+        opacity,
+        padding: '8px',
+        margin: '4px',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        backgroundColor: 'white',
+        cursor: 'move',
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <Tooltip
+        title={
+          <div>
+            <div>group: {props.group}</div>
+            <div>status: {props.status}</div>
+          </div>
+        }
+      >
+        <Tag
+          style={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'normal' }}
+          color={jiraColorScheme[props.progressStatus]}
+        >
+          {props.title}
+        </Tag>
+      </Tooltip>
+    </div>
+  );
+};
+
+const StatusColumn = ({
+  title,
+  statuses,
+  onDrop,
+  progressStatus,
+}: {
+  title: string;
+  statuses: { group: string; status: string; title: string }[];
+  progressStatus: Status;
+  onDrop: (item: { group: string; status: string; title: string }) => void;
+}) => {
+  const [{ isOver }, drop] = useDrop({
+    accept: 'status',
+    drop: (item: { group: string; status: string; title: string }) => {
+      onDrop(item);
+    },
+    collect: monitor => ({
+      isOver: monitor.isOver(),
+    }),
+  });
+
+  const borderTopColor = title === 'unmapped' ? '#ccc' : `${jiraColorScheme[title as Status]}`;
+
+  return (
+    <div
+      ref={drop}
+      style={{
+        padding: '8px',
+        backgroundColor: 'white',
+        border: `1px solid ${borderTopColor}`,
+        borderTop: `4px solid ${borderTopColor}`,
+        borderRadius: '4px',
+        minHeight: '200px',
+        minWidth: '100px',
+        width: '100px',
+        margin: '0 8px',
+        overflow: 'hidden',
+      }}
+    >
+      <h4>{title}</h4>
+      {statuses.map(status => {
+        return (
+          <SubTaskStatusMapping
+            key={`${status.group}-${status.status}`}
+            group={status.group}
+            status={status.status}
+            title={status.title}
+            progressStatus={progressStatus}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const DragDropContext = () => {
+  const [statusMappings, setStatusMappings] = useState<{
+    [key: string]: { group: string; status: string; progressStatus: Status }[];
+  }>({
+    unmapped: [
+      { group: 'THF', status: 'To Do', progressStatus: 'todo' },
+      { group: 'THF', status: 'Ready To Technical Specification', progressStatus: 'inProgress' },
+      { group: 'THF', status: 'Done', progressStatus: 'done' },
+      { group: 'Project 2', status: 'To Do', progressStatus: 'todo' },
+      { group: 'Project 2', status: 'In Progress', progressStatus: 'inProgress' },
+      { group: 'Project 2', status: 'Done', progressStatus: 'done' },
+    ],
+    blocked: [],
+    backlog: [],
+    todo: [],
+    inProgress: [],
+    almostDone: [],
+    done: [],
+  });
+
+  const prepareItemTitle = (item: { group: string; status: string; progressStatus: Status }) => {
+    const isUniqueStatus =
+      Object.values(statusMappings)
+        .flat()
+        .filter(s => s.status === item.status).length === 1;
+    return isUniqueStatus ? item.status : `${item.group}: ${item.status}`;
+  };
+
+  const handleDrop = (
+    targetColumn: Status | 'unmapped',
+    item: { group: string; status: string; progressStatus: Status; title: string }
+  ) => {
+    setStatusMappings(prev => {
+      const newMappings = { ...prev };
+
+      // Remove from old column
+      Object.keys(newMappings).forEach(key => {
+        newMappings[key] = newMappings[key].filter(
+          status => !(status.group === item.group && status.status === item.status)
+        );
+      });
+
+      // Add to new column
+      newMappings[targetColumn] = [
+        ...newMappings[targetColumn],
+        {
+          ...item,
+          progressStatus: targetColumn as Status,
+        },
+      ];
+
+      return newMappings;
+    });
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div style={{ display: 'flex', overflowX: 'auto', padding: '16px' }}>
+        {availableStatuses.map(status => (
+          <StatusColumn
+            key={status}
+            title={status}
+            statuses={statusMappings[status].map(item => ({
+              ...item,
+              title: prepareItemTitle(item),
+            }))}
+            progressStatus={status}
+            onDrop={item => handleDrop(status, { ...item, progressStatus: status })}
+          />
+        ))}
+      </div>
+    </DndProvider>
+  );
+};
+type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
+const SubTasksSettings = () => {
   const data: {
     [key: string]: { status: string; progressStatus: Status }[];
   } = {
@@ -111,37 +287,10 @@ const SubTasksSettings = () => {
   // if (loading) {
   //   return <Spin />;
   // }
-  const projects = Object.keys(data);
 
   return (
     <div>
-      <Tabs
-        type="card"
-        activeKey={selectedProject}
-        onChange={setSelectedProject}
-        items={projects.map(project => ({
-          label: project,
-          key: project,
-          children: (
-            <div>
-              {data[project].map(status => (
-                /**
-                 * span for color
-                 */
-                <div style={{ display: 'grid', gridTemplateColumns: '10px 1fr 100px', gap: 10 }}>
-                  <span style={{ backgroundColor: 'red', width: 10, height: 10, display: 'inline-block' }} />
-                  {status.status}
-                  <Select
-                    value={status.progressStatus}
-                    onChange={() => {}}
-                    options={availableColorSchemas.map(schema => ({ value: schema, label: <span>{schema}</span> }))}
-                  />
-                </div>
-              ))}
-            </div>
-          ),
-        }))}
-      />
+      <DragDropContext />
     </div>
   );
 };
