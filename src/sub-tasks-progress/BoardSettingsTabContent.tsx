@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyService } from 'src/shared/boardPropertyService';
 import Select from 'antd/es/select';
-import Tabs from 'antd/es/tabs';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tag, Tooltip } from 'antd';
+import { JiraIssue } from 'src/shared/jira/types';
+import { JiraService } from 'src/shared/jira/jiraService';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
 import { subTasksProgress } from './testData';
@@ -48,6 +49,28 @@ export const ColumnsSettingsPure = (props: {
       </div>
     </div>
   );
+};
+
+const useOnMount = (callback: () => void) => {
+  useEffect(() => {
+    callback();
+  }, []);
+};
+
+const useGetJiraIssuesFromBoard = () => {
+  const [issues, setIssues] = useState<JiraIssue[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useOnMount(() => {
+    JiraService.getInstance().subtasksEventEmitter.addListener(subtasks => {
+      const allSubTasks = subtasks.flatMap(subtask =>
+        [subtask.subtasks, subtask.tasksInEpic, subtask.linkedIssues, subtask.externalLinks].flat()
+      );
+      setIssues(allSubTasks);
+    });
+  });
+
+  useEffect(() => JiraService.watchIssuesLoading(loading => setLoading(loading)));
 };
 
 const ColumnsSettingsContainer = () => {
@@ -257,7 +280,23 @@ const DragDropContext = () => {
   );
 };
 type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
+const groupingFields: GroupFields[] = ['project', 'assignee', 'reporter', 'priority', 'creator', 'issueType'];
+
+const useGetData = () => {
+  return {
+    loading: false,
+    groupedStatuses: {
+      THF: [
+        { status: 'To Do', progressStatus: 'todo' },
+        { status: 'In Progress', progressStatus: 'inProgress' },
+        { status: 'Done', progressStatus: 'done' },
+      ],
+    },
+  };
+};
+
 const SubTasksSettings = () => {
+  const { groupedStatuses, loading } = useGetData();
   const data: {
     [key: string]: { status: string; progressStatus: Status }[];
   } = {
@@ -322,14 +361,34 @@ const ColorSchemeChooser = () => {
   );
 };
 
+const GroupingSettings = (props: { currentGrouping: GroupFields; onUpdate: (grouping: GroupFields) => void }) => {
+  const [currentGrouping, setCurrentGrouping] = useState(props.currentGrouping);
+
+  const handleUpdate = (grouping: GroupFields) => {
+    setCurrentGrouping(grouping);
+    props.onUpdate(grouping);
+  };
+
+  return (
+    <div>
+      <p>Select grouping field:</p>
+      <Select
+        style={{ minWidth: 140 }}
+        value={currentGrouping}
+        onChange={handleUpdate}
+        options={groupingFields.map(field => ({ value: field, label: field }))}
+      />
+    </div>
+  );
+};
+
 export const BoardSettingsTabContent = () => {
-  // eslint-disable-next-line no-console
-  console.log('!!!BoardSettingsTabContent mounted');
   return (
     <div>
       Sub-tasks progress
       <ColorSchemeChooser />
       <ColumnsSettingsContainer />
+      <GroupingSettings currentGrouping="project" onUpdate={() => {}} />
       <SubTasksSettings />
     </div>
   );

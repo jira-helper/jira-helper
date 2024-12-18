@@ -112,7 +112,8 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "simple-color-picker": "^1.0.4",
-    "svelte": "^5.1.12"
+    "svelte": "^5.1.12",
+    "ts-results": "^3.3.0"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",
