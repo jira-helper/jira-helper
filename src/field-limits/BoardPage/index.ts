@@ -299,7 +299,9 @@ export default class FieldLimitsSettingsPage extends PageModification<[BoardData
         }
 
         for (const exField of extraFieldsForIssue) {
-          const tooltipAttr = exField.getAttribute('data-tooltip');
+          // data-tooltip has been removed at some version and title attribute has been added
+          // so we need to get value from both attributes to work on different versions of jira
+          const tooltipAttr = exField.getAttribute('data-tooltip') || exField.getAttribute('title');
           const fieldName = tooltipAttr?.split(':')[0];
           let countValues: number;
 
