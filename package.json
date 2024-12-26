@@ -106,6 +106,7 @@
     "@types/react": "^18.3.12",
     "antd": "^5.22.0",
     "core-js": "^3.8.3",
+    "events": "^3.3.0",
     "gsap": "^3.12.5",
     "react": "^18.3.1",
     "react-dnd": "^16.0.1",
@@ -113,7 +114,8 @@
     "react-dom": "^18.3.1",
     "simple-color-picker": "^1.0.4",
     "svelte": "^5.1.12",
-    "ts-results": "^3.3.0"
+    "ts-results": "^3.3.0",
+    "typed-emitter": "^2.1.0"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",
