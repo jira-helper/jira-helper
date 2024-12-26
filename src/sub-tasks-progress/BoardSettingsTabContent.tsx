@@ -8,7 +8,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tag, Tooltip } from 'antd';
 import { JiraIssue } from 'src/shared/jira/types';
-import { JiraService } from 'src/shared/jira/jiraService';
+import { JiraService, Subtasks } from 'src/shared/jira/jiraService';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
 import { subTasksProgress } from './testData';
@@ -56,21 +56,18 @@ const useOnMount = (callback: () => void) => {
     callback();
   }, []);
 };
-
+const jiraService = JiraService.getInstance();
 const useGetJiraIssuesFromBoard = () => {
-  const [issues, setIssues] = useState<JiraIssue[]>([]);
+  const [issues, setIssues] = useState<Subtasks[]>(jiraService.subtasksService.getAllSubtasks());
   const [loading, setLoading] = useState(false);
 
   useOnMount(() => {
-    JiraService.getInstance().subtasksEventEmitter.addListener(subtasks => {
-      const allSubTasks = subtasks.flatMap(subtask =>
-        [subtask.subtasks, subtask.tasksInEpic, subtask.linkedIssues, subtask.externalLinks].flat()
-      );
-      setIssues(allSubTasks);
+    jiraService.subtasksService.addListener('subtasks-updated', (subtasks: Subtasks) => {
+      setIssues(state => [...state, subtasks]);
     });
   });
 
-  useEffect(() => JiraService.watchIssuesLoading(loading => setLoading(loading)));
+  useEffect(() => jiraService.isFetchingSubtasks(loading => setLoading(loading)));
 };
 
 const ColumnsSettingsContainer = () => {

@@ -1,13 +1,32 @@
 import { Err, Ok, Result } from 'ts-results';
+import EventEmitter from 'events';
+import TypedEmitter from 'typed-emitter';
 import { getJiraIssue, searchIssues } from '../jiraApi';
 import { JiraIssue } from './types';
 
-class CacheWithTTL<T> {
+// class EventEmitter {
+//   private listeners: { event: string; listener: (...args: any[]) => void }[] = [];
+
+//   addListener(event: string, listener: (...args: any[]) => void) {
+//     this.listeners.push({ event, listener });
+//     return () => this.removeListener(event, listener);
+//   }
+
+//   emit(event: string, ...args: any[]) {
+//     this.listeners.forEach(listener => listener.listener(...args));
+//   }
+
+//   removeListener(event: string, listener: (...args: any[]) => void) {
+//     this.listeners = this.listeners.filter(l => l.event === event && l.listener === listener);
+//   }
+// }
+class CacheWithTTL<T> extends EventEmitter {
   private cache: { [key: string]: { value: T; timestamp: number } } = {};
 
   private ttl: number;
 
   constructor(ttl: number) {
+    super();
     this.ttl = ttl;
   }
 
@@ -20,49 +39,17 @@ class CacheWithTTL<T> {
     return item.value;
   }
 
+  getValues() {
+    return Object.values(this.cache).map(item => item.value);
+  }
+
   set(key: string, value: T) {
     this.cache[key] = { value, timestamp: Date.now() };
-  }
-}
-
-class EventEmitter {
-  private listeners: ((...args: any[]) => void)[] = [];
-
-  addListener(listener: (...args: any[]) => void) {
-    this.listeners.push(listener);
-    return () => this.removeListener(listener);
+    this.emit('change', key, value);
   }
 
-  emit(...args: any[]) {
-    this.listeners.forEach(listener => listener(...args));
-  }
-
-  removeListener(listener: (...args: any[]) => void) {
-    this.listeners = this.listeners.filter(l => l !== listener);
-  }
-}
-
-class StatefullEventEmitter<T> extends EventEmitter {
-  private state: T;
-
-  constructor(initialState: T) {
-    super();
-    this.state = initialState;
-  }
-
-  getState() {
-    return this.state;
-  }
-
-  setState(state: T) {
-    this.state = state;
-    this.emit(state);
-  }
-
-  addListener(listener: (state: T) => void) {
-    const cleanup = super.addListener(listener);
-    listener(this.state);
-    return cleanup;
+  size() {
+    return Object.keys(this.cache).length;
   }
 }
 
@@ -76,7 +63,12 @@ type RegiseteredTask<T> = NewTask<T> & {
   promise: Promise<T>;
 };
 
-class TaskQueue {
+type TaskQueueEvents = {
+  'task-registered': (key: string) => void;
+  'task-done': (key: string) => void;
+};
+
+class TaskQueue extends (EventEmitter as new () => TypedEmitter<TaskQueueEvents>) {
   private queue: RegiseteredTask<any>[] = [];
 
   private concurrentTasks = 3;
@@ -94,11 +86,12 @@ class TaskQueue {
     task.abortSignal.addEventListener('abort', () => {
       this.queue = this.queue.filter(t => t.key !== task.key);
     });
+    this.emit('task-registered', task.key);
     this.run();
     return promise;
   }
 
-  async run() {
+  private async run() {
     if (this.runningTasksCount >= this.concurrentTasks) {
       return;
     }
@@ -109,12 +102,20 @@ class TaskQueue {
     this.runningTasksCount += 1;
     try {
       const result = await task.cb();
-      this.queue.push(task);
       return result;
     } finally {
       this.runningTasksCount -= 1;
+      this.emit('task-done', task.key);
       this.run();
     }
+  }
+
+  getQueueSize() {
+    return this.queue.length;
+  }
+
+  getTasksCount(keyPredicate: (key: string) => boolean) {
+    return this.queue.filter(task => keyPredicate(task.key)).length;
   }
 }
 
@@ -139,13 +140,62 @@ const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
   };
 };
 
-type Subtasks = {
+export type Subtasks = {
   subtasks: JiraIssueMapped[];
   externalLinks: JiraIssueMapped[];
 };
 const MINUTE = 1000 * 60;
-export class JiraService {
-  queue = new TaskQueue();
+
+type SubtasksServiceEvents = {
+  'subtasks-updated': (subtasks: Subtasks) => void;
+};
+class SubtasksService extends (EventEmitter as new () => TypedEmitter<SubtasksServiceEvents>) {
+  private cache = new CacheWithTTL<Subtasks>(30 * MINUTE);
+
+  updateSubtasks(issueId: string, subtasks: Subtasks) {
+    this.cache.set(issueId, subtasks);
+    this.emit('subtasks-updated', subtasks);
+  }
+
+  getSubtasks(issueId: string) {
+    return this.cache.get(issueId);
+  }
+
+  getAllSubtasks() {
+    return this.cache.getValues();
+  }
+}
+
+type JiraIssuesServiceEvents = {
+  'jira-issue-updated': (issue: JiraIssueMapped) => void;
+};
+
+class JiraIssuesService extends (EventEmitter as new () => TypedEmitter<JiraIssuesServiceEvents>) {
+  private cache = new CacheWithTTL<JiraIssueMapped>(30 * MINUTE);
+
+  updateJiraIssue(issueId: string, issue: JiraIssueMapped) {
+    this.cache.set(issueId, issue);
+    this.emit('jira-issue-updated', issue);
+  }
+
+  getJiraIssue(issueId: string) {
+    return this.cache.get(issueId);
+  }
+}
+
+type JiraServiceEvents = {
+  'fetching-issue-started': () => void;
+  'fetching-issue-done': () => void;
+  'fetching-subtasks-started': () => void;
+  'fetching-subtasks-done': () => void;
+};
+
+export class JiraService extends (EventEmitter as new () => TypedEmitter<JiraServiceEvents>) {
+  private queue = new TaskQueue();
+
+  public subtasksService = new SubtasksService();
+
+  public jiraIssuesService = new JiraIssuesService();
 
   static getInstance() {
     if (!JiraService.instance) {
@@ -156,19 +206,8 @@ export class JiraService {
 
   private static instance: JiraService;
 
-  caches = {
-    jiraIssuesCache: new CacheWithTTL<JiraIssueMapped>(30 * MINUTE),
-    subtasksCache: new CacheWithTTL<Subtasks>(30 * MINUTE),
-  };
-
-  jiraIssuesEventEmitter = new StatefullEventEmitter<JiraIssueMapped[]>([]);
-
-  issuesLoadingEventEmitter = new StatefullEventEmitter(false);
-
-  subtasksEventEmitter = new StatefullEventEmitter<Subtasks[]>([]);
-
   async fetchJiraIssue(issueId: string, abortSignal: AbortSignal): Promise<Result<JiraIssueMapped, Error>> {
-    const issue = this.caches.jiraIssuesCache.get(issueId);
+    const issue = this.jiraIssuesService.getJiraIssue(issueId);
     if (issue) {
       return Ok(issue);
     }
@@ -181,7 +220,7 @@ export class JiraService {
       });
 
       const mappedJiraIssue = mapJiraIssue(apiJiraIssue);
-      this.caches.jiraIssuesCache.set(issueId, mappedJiraIssue);
+      this.jiraIssuesService.updateJiraIssue(issueId, mappedJiraIssue);
       return Ok(mappedJiraIssue);
     } catch (error) {
       if (error instanceof Error) {
@@ -197,16 +236,18 @@ export class JiraService {
     const SUBTASK_JQL = `parent = ${issueId}`;
     const EPIC_TASKS_JQL = `"Epic Link" = ${issueId}`;
     const LINKED_ISSUES_JQL = `issue in linkedIssues(${issueId})`;
-    const subtasks = this.caches.subtasksCache.get(issueId);
+
+    const subtasks = this.subtasksService.getSubtasks(issueId);
     if (subtasks) {
       return Ok(subtasks);
     }
 
+    this.emit('fetching-subtasks-started');
     const subtasksResult = await this.queue.register({
       key: `fetchSubtasks-${issueId}`,
       cb: async () => {
         let jiraIssue: JiraIssueMapped | null = null;
-        jiraIssue = this.caches.jiraIssuesCache.get(issueId);
+        jiraIssue = this.jiraIssuesService.getJiraIssue(issueId);
 
         if (!jiraIssue) {
           const jiraIssueResult = await this.fetchJiraIssue(issueId, abortSignal);
@@ -235,7 +276,7 @@ export class JiraService {
 
         const allSubtasksData = await allSubtasksResponse.val.json();
         const allSubtasks = allSubtasksData.issues.map(mapJiraIssue);
-        this.caches.subtasksCache.set(issueId, {
+        this.subtasksService.updateSubtasks(issueId, {
           subtasks: allSubtasks,
           externalLinks: [],
         });
@@ -243,7 +284,12 @@ export class JiraService {
       },
       abortSignal,
     });
+    this.emit('fetching-subtasks-done');
 
     return subtasksResult;
+  }
+
+  isFetchingSubtasks() {
+    return !!this.queue.getTasksCount(key => key.startsWith('fetchSubtasks'));
   }
 }
