@@ -131,3 +131,12 @@ export type JiraIssue = {
     maxResults: number;
   };
 };
+
+export type JiraIssueMapped = JiraIssue & {
+  id: string;
+  project: string;
+  summary: string;
+  status: string;
+  assignee: string;
+  created: string;
+};

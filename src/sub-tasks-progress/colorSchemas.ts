@@ -30,4 +30,5 @@ export const yellowGreenColorScheme: ColorScheme = {
   unmapped: 'black',
 };
 
-export const availableColorSchemas: string[] = ['jira', 'yellowGreen'];
+export const availableColorSchemas = ['jira', 'yellowGreen'] as const;
+export type AvailableColorSchemas = (typeof availableColorSchemas)[number];

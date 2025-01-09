@@ -4,22 +4,6 @@ import TypedEmitter from 'typed-emitter';
 import { getJiraIssue, searchIssues } from '../jiraApi';
 import { JiraIssue } from './types';
 
-// class EventEmitter {
-//   private listeners: { event: string; listener: (...args: any[]) => void }[] = [];
-
-//   addListener(event: string, listener: (...args: any[]) => void) {
-//     this.listeners.push({ event, listener });
-//     return () => this.removeListener(event, listener);
-//   }
-
-//   emit(event: string, ...args: any[]) {
-//     this.listeners.forEach(listener => listener.listener(...args));
-//   }
-
-//   removeListener(event: string, listener: (...args: any[]) => void) {
-//     this.listeners = this.listeners.filter(l => l.event === event && l.listener === listener);
-//   }
-// }
 class CacheWithTTL<T> extends EventEmitter {
   private cache: { [key: string]: { value: T; timestamp: number } } = {};
 

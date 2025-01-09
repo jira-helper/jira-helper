@@ -1,5 +1,14 @@
 import { getBoardIdFromURL } from 'src/routing';
+import { Token, globalContainer } from 'dioma';
 import { deleteBoardProperty, getBoardProperty, updateBoardProperty } from './jiraApi';
+
+interface BoardPropertyServiceI {
+  getBoardProperty<T>(property: string): Promise<T | undefined>;
+  updateBoardProperty<T>(property: string, value: T, params: Record<string, any>): void;
+  deleteBoardProperty(property: string, params: Record<string, any>): void;
+}
+
+export const BoardPropertyServiceToken = new Token<BoardPropertyServiceI>('BoardPropertyService');
 
 /**
  * Service to manage board properties
@@ -29,3 +38,5 @@ export class BoardPropertyService {
     deleteBoardProperty(boardId, property, params);
   }
 }
+
+globalContainer.register({ token: BoardPropertyServiceToken, value: BoardPropertyService });

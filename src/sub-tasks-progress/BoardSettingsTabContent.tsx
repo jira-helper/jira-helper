@@ -1,21 +1,37 @@
 import Checkbox from 'antd/es/checkbox';
 import Spin from 'antd/es/spin';
-import React, { useEffect, useState } from 'react';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { BoardPropertyService } from 'src/shared/boardPropertyService';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { useShallow } from 'zustand/react/shallow';
 import Select from 'antd/es/select';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tag, Tooltip } from 'antd';
-import { JiraIssue } from 'src/shared/jira/types';
-import { JiraService, Subtasks } from 'src/shared/jira/jiraService';
-import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
+
+import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraBoardPropertiesStore } from 'src/shared/jira/stores/jiraBoardProperties/jiraBoardProperties';
+import { loadBoardProperty } from 'src/shared/jira/actions/loadBoardProperty';
+import { updateBoardProperty } from 'src/shared/jira/actions/updateBoardProperty';
+
+import { useDi } from 'src/shared/diContext';
+import {
+  AvailableColorSchemas,
+  availableColorSchemas,
+  availableStatuses,
+  jiraColorScheme,
+  yellowGreenColorScheme,
+} from './colorSchemas';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
 import { subTasksProgress } from './testData';
 import { Status } from './types';
+import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
 
+type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
 export type BoardProperty = {
-  columnsToTrack: string[];
+  columnsToTrack?: string[];
+  groupingField?: GroupFields;
+  statusMapping?: Record<string, Status>;
+  selectedColorScheme?: AvailableColorSchemas;
 };
 
 export const ColumnsSettingsPure = (props: {
@@ -56,52 +72,50 @@ const useOnMount = (callback: () => void) => {
     callback();
   }, []);
 };
-const jiraService = JiraService.getInstance();
-const useGetJiraIssuesFromBoard = () => {
-  const [issues, setIssues] = useState<Subtasks[]>(jiraService.subtasksService.getAllSubtasks());
-  const [loading, setLoading] = useState(false);
-
-  useOnMount(() => {
-    jiraService.subtasksService.addListener('subtasks-updated', (subtasks: Subtasks) => {
-      setIssues(state => [...state, subtasks]);
-    });
-  });
-
-  useEffect(() => jiraService.isFetchingSubtasks(loading => setLoading(loading)));
+const useGetAllSubtasks = () => {
+  const { data, loading } = useJiraSubtasksStore(
+    useShallow(state => {
+      return { data: state.data, loading: state.loading };
+    })
+  );
+  return { issues: data.flatMap(i => i.data.subtasks), loading };
 };
 
 const ColumnsSettingsContainer = () => {
-  const [columns, setColumns] = useState<{ name: string; enabled: boolean }[]>([]);
-  const [loading, setLoading] = useState(false);
+  const boardPagePageObject = useDi().inject(boardPagePageObjectToken) as typeof BoardPagePageObject;
+  const [columnsFromBoard] = useState<string[]>(boardPagePageObject.getColumns());
 
-  useEffect(() => {
-    const loadColumns = async () => {
-      setLoading(true);
-      const columnsFromBoard = BoardPagePageObject.getColumns();
-      const boardProperty = await BoardPropertyService.getBoardProperty<BoardProperty>('sub-task-progress');
-      const columnsToTrack = boardProperty?.columnsToTrack || [];
-      const columnsToState = columnsFromBoard.map(column => ({
-        name: column,
-        enabled: columnsToTrack.includes(column),
-      }));
-      setColumns(columnsToState);
-      setLoading(false);
-    };
-    loadColumns();
+  const propertyData = useJiraBoardPropertiesStore(state => state.properties['sub-task-progress']);
+  useOnMount(() => {
+    loadBoardProperty('sub-task-progress');
+  });
+
+  const columns = useMemo(() => {
+    const columnsToTrack = propertyData?.value?.columnsToTrack || [];
+    const columnsToState = columnsFromBoard.map(column => ({
+      name: column,
+      enabled: columnsToTrack.includes(column),
+    }));
+    return columnsToState;
+  }, [propertyData, columnsFromBoard]);
+
+  const setColumns = useCallback((newColumnsState: { name: string; enabled: boolean }[]) => {
+    const currentPropertyValue = propertyData?.value;
+    currentPropertyValue.columnsToTrack = newColumnsState.filter(c => c.enabled).map(c => c.name);
+    updateBoardProperty('sub-task-progress', currentPropertyValue);
   }, []);
 
-  return <ColumnsSettingsPure columns={columns} onUpdate={setColumns} loading={loading} />;
+  return <ColumnsSettingsPure columns={columns} onUpdate={setColumns} loading={propertyData?.loading ?? true} />;
 };
 
 // how to test it ?
 // storybook - component with mock
 // unit - mock board property and page object and see if component renders correctly
 
-const SubTaskStatusMapping = (props: { group: string; status: string; progressStatus: Status; title: string }) => {
+const SubTaskStatusMapping = (props: { status: string; progressStatus: Status }) => {
   const [{ isDragging }, drag] = useDrag({
     type: 'status',
     item: {
-      group: props.group,
       status: props.status,
       progressStatus: props.progressStatus,
     },
@@ -131,7 +145,6 @@ const SubTaskStatusMapping = (props: { group: string; status: string; progressSt
       <Tooltip
         title={
           <div>
-            <div>group: {props.group}</div>
             <div>status: {props.status}</div>
           </div>
         }
@@ -140,7 +153,7 @@ const SubTaskStatusMapping = (props: { group: string; status: string; progressSt
           style={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'normal' }}
           color={jiraColorScheme[props.progressStatus]}
         >
-          {props.title}
+          {props.status}
         </Tag>
       </Tooltip>
     </div>
@@ -154,21 +167,25 @@ const StatusColumn = ({
   progressStatus,
 }: {
   title: string;
-  statuses: { group: string; status: string; title: string }[];
+  statuses: string[];
   progressStatus: Status;
-  onDrop: (item: { group: string; status: string; title: string }) => void;
+  onDrop: (status: string) => void;
 }) => {
-  const [{ isOver }, drop] = useDrop({
+  const [, drop] = useDrop({
     accept: 'status',
-    drop: (item: { group: string; status: string; title: string }) => {
-      onDrop(item);
+    drop: (status: string) => {
+      onDrop(status);
     },
     collect: monitor => ({
       isOver: monitor.isOver(),
     }),
   });
 
-  const borderTopColor = title === 'unmapped' ? '#ccc' : `${jiraColorScheme[title as Status]}`;
+  const { settings } = useGetSettings();
+  const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
+  const colorScheme = selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme;
+
+  const borderTopColor = title === 'unmapped' ? '#ccc' : `${colorScheme[title as Status]}`;
 
   return (
     <div
@@ -188,137 +205,66 @@ const StatusColumn = ({
     >
       <h4>{title}</h4>
       {statuses.map(status => {
-        return (
-          <SubTaskStatusMapping
-            key={`${status.group}-${status.status}`}
-            group={status.group}
-            status={status.status}
-            title={status.title}
-            progressStatus={progressStatus}
-          />
-        );
+        return <SubTaskStatusMapping key={status} status={status} progressStatus={progressStatus} />;
       })}
     </div>
   );
 };
 
-const DragDropContext = () => {
-  const [statusMappings, setStatusMappings] = useState<{
-    [key: string]: { group: string; status: string; progressStatus: Status }[];
-  }>({
-    unmapped: [
-      { group: 'THF', status: 'To Do', progressStatus: 'todo' },
-      { group: 'THF', status: 'Ready To Technical Specification', progressStatus: 'inProgress' },
-      { group: 'THF', status: 'Done', progressStatus: 'done' },
-      { group: 'Project 2', status: 'To Do', progressStatus: 'todo' },
-      { group: 'Project 2', status: 'In Progress', progressStatus: 'inProgress' },
-      { group: 'Project 2', status: 'Done', progressStatus: 'done' },
-    ],
-    blocked: [],
-    backlog: [],
-    todo: [],
-    inProgress: [],
-    almostDone: [],
-    done: [],
-  });
-
-  const prepareItemTitle = (item: { group: string; status: string; progressStatus: Status }) => {
-    const isUniqueStatus =
-      Object.values(statusMappings)
-        .flat()
-        .filter(s => s.status === item.status).length === 1;
-    return isUniqueStatus ? item.status : `${item.group}: ${item.status}`;
-  };
-
-  const handleDrop = (
-    targetColumn: Status | 'unmapped',
-    item: { group: string; status: string; progressStatus: Status; title: string }
-  ) => {
-    setStatusMappings(prev => {
-      const newMappings = { ...prev };
-
-      // Remove from old column
-      Object.keys(newMappings).forEach(key => {
-        newMappings[key] = newMappings[key].filter(
-          status => !(status.group === item.group && status.status === item.status)
-        );
-      });
-
-      // Add to new column
-      newMappings[targetColumn] = [
-        ...newMappings[targetColumn],
-        {
-          ...item,
-          progressStatus: targetColumn as Status,
-        },
-      ];
-
-      return newMappings;
-    });
+const DragDropContext = (props: {
+  statusMapping: Record<string, Status>;
+  onUpdateStatusMapping: (statusMapping: Record<string, Status>) => void;
+}) => {
+  const { statusMapping } = props;
+  const handleDrop = (targetColumn: Status, status: string) => {
+    const newStatusMapping = { ...statusMapping };
+    newStatusMapping[status] = targetColumn;
+    props.onUpdateStatusMapping(newStatusMapping);
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div style={{ display: 'flex', overflowX: 'auto', padding: '16px' }}>
-        {availableStatuses.map(status => (
-          <StatusColumn
-            key={status}
-            title={status}
-            statuses={statusMappings[status].map(item => ({
-              ...item,
-              title: prepareItemTitle(item),
-            }))}
-            progressStatus={status}
-            onDrop={item => handleDrop(status, { ...item, progressStatus: status })}
-          />
-        ))}
+        {availableStatuses.map(status => {
+          const statuses = Object.keys(statusMapping).filter(key => statusMapping[key] === status);
+          return (
+            <StatusColumn
+              key={status}
+              title={status}
+              statuses={statuses}
+              progressStatus={status}
+              onDrop={issueStatus => handleDrop(status, issueStatus)}
+            />
+          );
+        })}
       </div>
     </DndProvider>
   );
 };
-type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
+
 const groupingFields: GroupFields[] = ['project', 'assignee', 'reporter', 'priority', 'creator', 'issueType'];
 
-const useGetData = () => {
-  return {
-    loading: false,
-    groupedStatuses: {
-      THF: [
-        { status: 'To Do', progressStatus: 'todo' },
-        { status: 'In Progress', progressStatus: 'inProgress' },
-        { status: 'Done', progressStatus: 'done' },
-      ],
-    },
-  };
+const useGetSettings = () => {
+  const propertyData = useJiraBoardPropertiesStore(state => state.properties['sub-task-progress']);
+  useOnMount(() => {
+    loadBoardProperty('sub-task-progress');
+  });
+  return { settings: propertyData?.value as BoardProperty | undefined, loading: propertyData?.loading ?? true };
 };
 
 const SubTasksSettings = () => {
-  const { groupedStatuses, loading } = useGetData();
-  const data: {
-    [key: string]: { status: string; progressStatus: Status }[];
-  } = {
-    THF: [
-      { status: 'To Do', progressStatus: 'todo' },
-      { status: 'In Progress', progressStatus: 'inProgress' },
-      { status: 'Done', progressStatus: 'done' },
-    ],
-    'Project 2': [
-      { status: 'To Do', progressStatus: 'todo' },
-      { status: 'In Progress', progressStatus: 'inProgress' },
-      { status: 'Done', progressStatus: 'done' },
-    ],
-  };
-  // const [loading, setLoading] = useState(false);
+  const { issues } = useGetAllSubtasks();
+  const { settings } = useGetSettings();
 
-  // useEffect(() => {
-  //   const loadProjects = async () => {
-  //     setLoading(true);
-  //     // TODO: Load projects from API
-  //     setProjects(['Project 1', 'Project 2']);
-  //     setLoading(false);
-  //   };
-  //   loadProjects();
-  // }, []);
+  const statuses = issues.map(issue => issue.fields.status.name);
+  const statusMapping = settings?.statusMapping ?? {};
+  const actualStatusMapping: Record<string, Status> = {
+    ...statusMapping,
+  };
+
+  statuses.forEach(status => {
+    actualStatusMapping[status] = statusMapping[status] ?? 'unmapped';
+  });
 
   // if (loading) {
   //   return <Spin />;
@@ -326,13 +272,21 @@ const SubTasksSettings = () => {
 
   return (
     <div>
-      <DragDropContext />
+      <DragDropContext
+        statusMapping={actualStatusMapping}
+        onUpdateStatusMapping={newStatusMapping => {
+          const currentPropertyValue = { ...settings };
+          currentPropertyValue.statusMapping = newStatusMapping;
+          updateBoardProperty('sub-task-progress', currentPropertyValue);
+        }}
+      />
     </div>
   );
 };
 
 const ColorSchemeChooser = () => {
-  const [selectedColorScheme, setSelectedColorScheme] = useState(availableColorSchemas[0]);
+  const { settings } = useGetSettings();
+  const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
   /**
    * use Select from antd
    */
