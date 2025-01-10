@@ -8,6 +8,7 @@ const smallMixedProgress: SubTasksProgress = {
   almostDone: 1,
   done: 2,
   blocked: 1,
+  unmapped: 1,
 };
 
 const largeMixedProgress: SubTasksProgress = {
@@ -17,6 +18,7 @@ const largeMixedProgress: SubTasksProgress = {
   almostDone: 7,
   done: 15,
   blocked: 2,
+  unmapped: 4,
 };
 
 const largeSameStatusProgress: SubTasksProgress = {
@@ -26,6 +28,7 @@ const largeSameStatusProgress: SubTasksProgress = {
   almostDone: 0,
   done: 0,
   blocked: 0,
+  unmapped: 0,
 };
 
 const smallSameStatusProgress: SubTasksProgress = {
@@ -35,6 +38,7 @@ const smallSameStatusProgress: SubTasksProgress = {
   almostDone: 0,
   done: 0,
   blocked: 0,
+  unmapped: 0,
 };
 
 const emptyProgress: SubTasksProgress = {
@@ -44,6 +48,7 @@ const emptyProgress: SubTasksProgress = {
   almostDone: 0,
   done: 0,
   blocked: 0,
+  unmapped: 0,
 };
 
 export const defaultColorScheme = jiraColorScheme;
