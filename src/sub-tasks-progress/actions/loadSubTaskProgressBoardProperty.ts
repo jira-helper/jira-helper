@@ -5,10 +5,6 @@ import { BoardProperty } from '../types';
 
 export const loadSubTaskProgressBoardProperty = async () => {
   // dont load if it loaded already
-  console.log(
-    '🚀 ~ loadSubTaskProgressBoardProperty ~ useSubTaskProgressBoardPropertyStore.getState().state:',
-    useSubTaskProgressBoardPropertyStore.getState().state
-  );
   if (
     useSubTaskProgressBoardPropertyStore.getState().state === 'loaded' ||
     useSubTaskProgressBoardPropertyStore.getState().state === 'loading'
@@ -17,10 +13,9 @@ export const loadSubTaskProgressBoardProperty = async () => {
   }
   useSubTaskProgressBoardPropertyStore.getState().actions.setState('loading');
   const propertyData = await globalContainer
-
     .inject(BoardPropertyServiceToken)
     .getBoardProperty<BoardProperty | undefined>('sub-task-progress');
-  console.log('🚀 ~ loadSubTaskProgressBoardProperty ~ propertyData:', propertyData);
+
   if (!propertyData) {
     return;
   }

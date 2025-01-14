@@ -1,5 +1,5 @@
 import { AvailableColorSchemas } from '../colorSchemas';
-import { BoardProperty } from '../types';
+import { BoardProperty, GroupFields } from '../types';
 
 export type State = {
   data: BoardProperty | undefined;
@@ -9,5 +9,6 @@ export type State = {
     setColumns: (columns: { name: string; enabled: boolean }[]) => void;
     setSelectedColorScheme: (colorScheme: AvailableColorSchemas) => void;
     setState: (state: 'initial' | 'loading' | 'loaded') => void;
+    setGroupingField: (groupingField: GroupFields) => void;
   };
 };

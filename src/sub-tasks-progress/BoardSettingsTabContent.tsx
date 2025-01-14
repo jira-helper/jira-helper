@@ -22,9 +22,9 @@ import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
 import { useSubTaskProgressBoardPropertyStore } from './stores/subTaskProgressBoardProperty';
 import { loadSubTaskProgressBoardProperty } from './actions/loadSubTaskProgressBoardProperty';
 import { setColumns } from './actions/setColumns';
+import { setGroupingField } from './actions/setGroupingField';
 
 const useGetSettings = () => {
-  console.log('useGetSettings render');
   const propertyData = useSubTaskProgressBoardPropertyStore(state => state.data);
   const propertyState = useSubTaskProgressBoardPropertyStore(state => state.state);
 
@@ -74,12 +74,10 @@ const useGetAllSubtasks = () => {
 };
 
 const ColumnsSettingsContainer = () => {
-  console.log('ColumnsSettingsContainer render');
   const boardPagePageObject = useDi().inject(boardPagePageObjectToken) as typeof BoardPagePageObject;
   const [columnsFromBoard] = useState<string[]>(boardPagePageObject.getColumns());
 
   const propertyData = useSubTaskProgressBoardPropertyStore(useShallow(state => state.data));
-  console.log('🚀 ~ ColumnsSettingsContainer ~ propertyData:', propertyData);
 
   const columns = useMemo(() => {
     const columnsToTrack = propertyData?.columnsToTrack || [];
@@ -89,7 +87,7 @@ const ColumnsSettingsContainer = () => {
     }));
     return columnsToState;
   }, [propertyData, columnsFromBoard]);
-  console.log('🚀 ~ columns ~ columns:', columns);
+
   const propertyState = useSubTaskProgressBoardPropertyStore(useShallow(state => state.state));
 
   return (
@@ -238,7 +236,6 @@ const DragDropContext = (props: {
 const groupingFields: GroupFields[] = ['project', 'assignee', 'reporter', 'priority', 'creator', 'issueType'];
 
 const SubTasksSettings = () => {
-  console.log('SubTasksSettings render');
   const { issues } = useGetAllSubtasks();
   const { settings } = useGetSettings();
 
@@ -267,7 +264,6 @@ const SubTasksSettings = () => {
 };
 
 const ColorSchemeChooser = () => {
-  console.log('ColorSchemeChooser render');
   const { settings } = useGetSettings();
   const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
   /**
@@ -278,10 +274,14 @@ const ColorSchemeChooser = () => {
       <p>Select color scheme:</p>
       <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
         <Select
+          data-testid="color-scheme-chooser"
           value={selectedColorScheme}
           onChange={setSelectedColorScheme}
           style={{ minWidth: 140 }} // Set min width to accommodate "yellowGreen"
-          options={availableColorSchemas.map(schema => ({ value: schema, label: <span>{schema}</span> }))}
+          options={availableColorSchemas.map(schema => ({
+            value: schema,
+            label: <span data-testid="color-scheme-chooser-option">{schema}</span>,
+          }))}
         />
         <span>
           Example:
@@ -295,23 +295,20 @@ const ColorSchemeChooser = () => {
   );
 };
 
-const GroupingSettings = (props: { currentGrouping: GroupFields; onUpdate: (grouping: GroupFields) => void }) => {
-  console.log('GroupingSettings render');
-  const [currentGrouping, setCurrentGrouping] = useState(props.currentGrouping);
-
-  const handleUpdate = (grouping: GroupFields) => {
-    setCurrentGrouping(grouping);
-    props.onUpdate(grouping);
-  };
+const GroupingSettings = () => {
+  const { settings } = useGetSettings();
 
   return (
     <div>
       <p>Select grouping field:</p>
       <Select
         style={{ minWidth: 140 }}
-        value={currentGrouping}
-        onChange={handleUpdate}
-        options={groupingFields.map(field => ({ value: field, label: field }))}
+        value={settings?.groupingField || 'project'}
+        onChange={setGroupingField}
+        options={groupingFields.map(field => ({
+          value: field,
+          label: <span data-testid="grouping-field-option">{field}</span>,
+        }))}
       />
     </div>
   );
@@ -326,7 +323,7 @@ export const BoardSettingsTabContent = () => {
       Sub-tasks progress
       <ColorSchemeChooser />
       <ColumnsSettingsContainer />
-      <GroupingSettings currentGrouping="project" onUpdate={() => {}} />
+      <GroupingSettings />
       <SubTasksSettings />
     </div>
   );

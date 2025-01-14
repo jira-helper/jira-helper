@@ -1,19 +1,27 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Container, globalContainer } from 'dioma';
+import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { useSubTaskProgressBoardPropertyStore } from './stores/subTaskProgressBoardProperty';
+import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
+
+import { AvailableColorSchemas } from './colorSchemas';
+import { BoardProperty, GroupFields } from './types';
 
 function setup({
   columnsOnBoard,
   columnsOnBoardProperty,
+  colorScheme,
+  groupingField,
 }: {
   columnsOnBoard: string[];
   columnsOnBoardProperty: string[];
+  colorScheme?: AvailableColorSchemas;
+  groupingField?: GroupFields;
 }) {
   const container = globalContainer;
   const getColumnsSpy = vi.fn(() => columnsOnBoard);
@@ -25,15 +33,24 @@ function setup({
     },
   });
 
-  const getBoardPropertySpy = vi.fn(() => ({
-    columnsToTrack: columnsOnBoardProperty,
-  }));
+  const getBoardPropertySpy = vi.fn(
+    () =>
+      ({
+        columnsToTrack: columnsOnBoardProperty,
+        selectedColorScheme: colorScheme,
+        groupingField,
+      }) as BoardProperty
+  );
+  const updateBoardPropertySpy = vi.fn();
   container.register({
     token: BoardPropertyServiceToken,
     value: {
       getBoardProperty: getBoardPropertySpy,
+      updateBoardProperty: updateBoardPropertySpy,
     },
   });
+
+  useSubTaskProgressBoardPropertyStore.setState(useSubTaskProgressBoardPropertyStore.getInitialState());
 
   return { container };
 }
@@ -67,7 +84,7 @@ describe('BoardSettingsTabContent', () => {
       </WithDi>
     );
   });
-  it('should render columns only preset in board', async () => {
+  it('should render columns only presented at board', async () => {
     const { container } = setup({
       columnsOnBoard: ['Column 1', 'Column 2'],
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
@@ -89,19 +106,205 @@ describe('BoardSettingsTabContent', () => {
       </WithDi>
     );
 
-    const columns = screen.getAllByTestId('sub-task-progress-column');
+    const columns = BoardSettingsTabContentPageObject.getColumns();
 
     // check that first colum is Column 1 and selected
-    expect(columns[0].querySelector('[data-testid="sub-task-progress-column-name"]')).toHaveTextContent('Column 1');
-    expect(columns[0].querySelector('[data-testid="sub-task-progress-column-checkbox"]')).toBeChecked();
-    // check that second column is Column 2 and not selected
-    expect(columns[1].querySelector('[data-testid="sub-task-progress-column-name"]')).toHaveTextContent('Column 2');
-    expect(columns[1].querySelector('[data-testid="sub-task-progress-column-checkbox"]')).not.toBeChecked();
-    // check that third column is not displayed
-    expect(columns[2]).toBeUndefined();
+    expect(columns.length).toEqual(2);
+
+    expect(columns[0]).toMatchObject({ name: 'Column 1', checked: true });
+    expect(columns[1]).toMatchObject({ name: 'Column 2', checked: false });
 
     // check that board property requested
     const boardPropertyService = container.inject(BoardPropertyServiceToken);
     expect(boardPropertyService.getBoardProperty).toHaveBeenCalledWith('sub-task-progress');
+  });
+
+  it('when coulumn changed should update property and rerender', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+    });
+
+    const { rerender } = render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+    });
+
+    const columns = BoardSettingsTabContentPageObject.getColumns();
+
+    // When user clicks on disabled column
+    const disabledColumn = columns.find(c => !c.checked);
+    if (!disabledColumn) {
+      throw new Error('Disabled column not found');
+    }
+    disabledColumn.click();
+
+    // Then it should update board property with new state of columns
+    const boardPropertyService = container.inject(BoardPropertyServiceToken);
+    expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
+      'sub-task-progress',
+      {
+        columnsToTrack: ['Column 1', 'Column 2'],
+      },
+      {}
+    );
+
+    // Then it should update inner state of columns
+    expect(useSubTaskProgressBoardPropertyStore.getState().data!.columnsToTrack).toEqual(['Column 1', 'Column 2']);
+
+    // Then it should rerender and columns should be updated
+    rerender(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    const updatedColumn = BoardSettingsTabContentPageObject.getColumns().find(c => c.name === disabledColumn.name);
+    expect(updatedColumn).toMatchObject({ name: disabledColumn.name, checked: true });
+  });
+
+  it.each([
+    { initialScheme: undefined, expectedScheme: 'jira' } as const,
+    { initialScheme: 'jira', expectedScheme: 'jira' } as const,
+    { initialScheme: 'yellowGreen', expectedScheme: 'yellowGreen' } as const,
+  ])(
+    'When board property has colorscheme with value $initialScheme, it should render $expectedScheme',
+    async ({ initialScheme, expectedScheme }) => {
+      const { container } = setup({
+        columnsOnBoard: ['Column 1', 'Column 2'],
+        columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+        colorScheme: initialScheme,
+      });
+
+      render(
+        <WithDi container={container}>
+          <BoardSettingsTabContent />
+        </WithDi>
+      );
+      await waitFor(() => {
+        expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+      });
+
+      const colorScheme = BoardSettingsTabContentPageObject.getColorScheme();
+      expect(colorScheme).toEqual(expectedScheme);
+    }
+  );
+
+  it('should update colorScheme', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+      colorScheme: 'yellowGreen',
+    });
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+    });
+
+    BoardSettingsTabContentPageObject.setColorScheme('jira');
+
+    // check current color scheme
+    await waitFor(() => {
+      const colorScheme = BoardSettingsTabContentPageObject.getColorScheme();
+      expect(colorScheme).toEqual('jira');
+    });
+
+    // check that board property updated
+    const boardPropertyService = container.inject(BoardPropertyServiceToken);
+    expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
+      'sub-task-progress',
+      {
+        columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
+        selectedColorScheme: 'jira',
+      },
+      {}
+    );
+
+    // check that board property in inner state is updated
+    expect(useSubTaskProgressBoardPropertyStore.getState().data!.selectedColorScheme).toEqual('jira');
+  });
+
+  it.each([
+    { initialGrouping: undefined, expectedGrouping: 'project' } as const,
+    { initialGrouping: 'project', expectedGrouping: 'project' } as const,
+    { initialGrouping: 'assignee', expectedGrouping: 'assignee' } as const,
+    { initialGrouping: 'reporter', expectedGrouping: 'reporter' } as const,
+    { initialGrouping: 'priority', expectedGrouping: 'priority' } as const,
+    { initialGrouping: 'creator', expectedGrouping: 'creator' } as const,
+    { initialGrouping: 'issueType', expectedGrouping: 'issueType' } as const,
+  ])(
+    'When board property has grouping field with value $initialGrouping, it should render $expectedGrouping',
+    async ({ initialGrouping, expectedGrouping }) => {
+      const { container } = setup({
+        columnsOnBoard: ['Column 1', 'Column 2'],
+        columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+        groupingField: initialGrouping,
+      });
+
+      render(
+        <WithDi container={container}>
+          <BoardSettingsTabContent />
+        </WithDi>
+      );
+
+      await waitFor(() => {
+        expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+      });
+
+      const groupingField = BoardSettingsTabContentPageObject.getGroupingField();
+      expect(groupingField).toEqual(expectedGrouping);
+    }
+  );
+
+  it('should update grouping field', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+      groupingField: 'project',
+    });
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+    });
+
+    BoardSettingsTabContentPageObject.setGroupingField('assignee');
+
+    await waitFor(() => {
+      // check that board property updated
+      const boardPropertyService = container.inject(BoardPropertyServiceToken);
+      expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
+        'sub-task-progress',
+        {
+          columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
+          groupingField: 'assignee',
+          selectedColorScheme: undefined,
+        },
+        {}
+      );
+    });
+
+    // check that inner state is updated
+    expect(useSubTaskProgressBoardPropertyStore.getState().data!.groupingField).toEqual('assignee');
+
+    // check that new grouping field is selected
+    const updatedGroupingField = BoardSettingsTabContentPageObject.getGroupingField();
+    expect(updatedGroupingField).toEqual('assignee');
   });
 });

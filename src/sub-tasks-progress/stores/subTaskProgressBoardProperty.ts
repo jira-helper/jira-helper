@@ -22,5 +22,12 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
         })
       ),
     setState: state => set({ state }),
+    setGroupingField: groupingField =>
+      set(
+        produce((state: State) => {
+          if (!state.data) return;
+          state.data.groupingField = groupingField;
+        })
+      ),
   },
 }));
