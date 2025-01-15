@@ -38,14 +38,15 @@ function setup({
 
   const getBoardPropertySpy = vi.fn(
     () =>
-      ({
+      Promise.resolve({
         columnsToTrack: columnsOnBoardProperty,
         selectedColorScheme: colorScheme,
         groupingField,
         statusMapping,
-      }) as BoardProperty
+      }) as Promise<BoardProperty>
   );
   const updateBoardPropertySpy = vi.fn();
+  // @ts-expect-error
   container.register({
     token: BoardPropertyServiceToken,
     value: {
@@ -69,6 +70,7 @@ describe('BoardSettingsTabContent', () => {
         getColumns: () => ['Column1', 'Column 2', 'Column 3', 'Column 5 (only in board)'],
       },
     });
+    // @ts-expect-error
     container.register({
       token: BoardPropertyServiceToken,
       value: {
