@@ -5,23 +5,26 @@ import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { moveBoardStatusToProgressStatus } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
-import { useSubTaskProgressBoardPropertyStore } from './stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
-import { AvailableColorSchemas } from './colorSchemas';
-import { BoardProperty, GroupFields } from './types';
+import { AvailableColorSchemas } from '../../colorSchemas';
+import { BoardProperty, GroupFields, Status } from '../../types';
 
 function setup({
   columnsOnBoard,
   columnsOnBoardProperty,
   colorScheme,
   groupingField,
+  statusMapping,
 }: {
   columnsOnBoard: string[];
   columnsOnBoardProperty: string[];
   colorScheme?: AvailableColorSchemas;
   groupingField?: GroupFields;
+  statusMapping?: Record<string, Status>;
 }) {
   const container = globalContainer;
   const getColumnsSpy = vi.fn(() => columnsOnBoard);
@@ -39,6 +42,7 @@ function setup({
         columnsToTrack: columnsOnBoardProperty,
         selectedColorScheme: colorScheme,
         groupingField,
+        statusMapping,
       }) as BoardProperty
   );
   const updateBoardPropertySpy = vi.fn();
@@ -306,5 +310,85 @@ describe('BoardSettingsTabContent', () => {
     // check that new grouping field is selected
     const updatedGroupingField = BoardSettingsTabContentPageObject.getGroupingField();
     expect(updatedGroupingField).toEqual('assignee');
+  });
+
+  it('should render status mapping', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+      colorScheme: 'jira',
+      statusMapping: {
+        status1: 'done',
+      },
+    });
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+    });
+
+    const statusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
+    expect(statusMapping).toEqual({
+      status1: 'done',
+    });
+  });
+
+  it('should update status mapping', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+      colorScheme: 'jira',
+      statusMapping: {
+        status1: 'done',
+      },
+    });
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
+    });
+
+    await moveBoardStatusToProgressStatus('status2', 'inProgress');
+
+    await waitFor(() => {
+      // check that board property updated
+      const boardPropertyService = container.inject(BoardPropertyServiceToken);
+      expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
+        'sub-task-progress',
+        {
+          columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
+          groupingField: undefined,
+          selectedColorScheme: 'jira',
+          statusMapping: {
+            status1: 'done',
+            status2: 'inProgress',
+          },
+        },
+        {}
+      );
+    });
+
+    // check that inner state is updated
+    expect(useSubTaskProgressBoardPropertyStore.getState().data!.statusMapping).toEqual({
+      status1: 'done',
+      status2: 'inProgress',
+    });
+
+    // check that new grouping field is selected
+    const updatedStatusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
+    expect(updatedStatusMapping).toEqual({
+      status1: 'done',
+      status2: 'inProgress',
+    });
   });
 });

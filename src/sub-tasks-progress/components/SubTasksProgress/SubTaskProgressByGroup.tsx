@@ -1,7 +1,7 @@
 import React from 'react';
 import { WarningFilled } from '@ant-design/icons';
 import Tooltip from 'antd/es/tooltip';
-import { SubTasksProgress, ColorScheme } from './types';
+import { SubTasksProgress, ColorScheme } from '../../types';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
 
 /**

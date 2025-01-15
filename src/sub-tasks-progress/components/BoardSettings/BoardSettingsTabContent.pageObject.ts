@@ -1,8 +1,8 @@
 import { fireEvent, screen } from '@testing-library/react';
-import { AvailableColorSchemas } from './colorSchemas';
-import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
-import { setGroupingField } from './actions/setGroupingField';
-import { GroupFields } from './types';
+import { AvailableColorSchemas } from '../../colorSchemas';
+import { setSelectedColorScheme } from '../../actions/setSelectedColorScheme';
+import { setGroupingField } from '../../actions/setGroupingField';
+import { GroupFields, Status } from '../../types';
 
 export const BoardSettingsTabContentPageObject = {
   getColumns: () => {
@@ -33,5 +33,20 @@ export const BoardSettingsTabContentPageObject = {
   getGroupingField: () => {
     const groupingField = screen.getByTestId('grouping-field-option');
     return groupingField.textContent;
+  },
+
+  getStatusMapping: (): Record<string, Status> => {
+    const columns = screen.getAllByTestId('status-mapping-column');
+
+    const statusMapping: Record<string, Status> = {};
+    columns.forEach(column => {
+      const columnName = column.querySelector('[data-testid="status-mapping-column-name"]')?.textContent || '';
+      const statuses = column.querySelectorAll('[data-testid="status-mapping-column-status-card"]');
+      statuses.forEach(status => {
+        if (!status.textContent) throw new Error('Status text content is empty');
+        statusMapping[status.textContent] = columnName as Status;
+      });
+    });
+    return statusMapping;
   },
 };

@@ -29,5 +29,15 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
           state.data.groupingField = groupingField;
         })
       ),
+    setStatusMapping: (boardStatus, progressStatus) =>
+      set(
+        produce((state: State) => {
+          if (!state.data) return;
+          if (!state.data.statusMapping) {
+            state.data.statusMapping = {};
+          }
+          state.data.statusMapping[boardStatus] = progressStatus;
+        })
+      ),
   },
 }));

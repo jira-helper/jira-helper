@@ -1,6 +1,6 @@
 import Tooltip from 'antd/es/tooltip';
 import React from 'react';
-import { ColorScheme, Status, SubTasksProgress } from './types';
+import { ColorScheme, Status, SubTasksProgress } from '../../types';
 
 export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; colorScheme: ColorScheme }) => {
   const { progress, colorScheme } = props;

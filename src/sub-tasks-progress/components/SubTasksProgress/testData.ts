@@ -1,5 +1,5 @@
-import { SubTasksProgress } from './types';
-import { jiraColorScheme } from './colorSchemas';
+import { SubTasksProgress } from '../../types';
+import { jiraColorScheme } from '../../colorSchemas';
 
 const smallMixedProgress: SubTasksProgress = {
   backlog: 1,

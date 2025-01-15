@@ -14,15 +14,15 @@ import { updateBoardProperty } from 'src/shared/jira/actions/updateBoardProperty
 
 import { useDi } from 'src/shared/diContext';
 import { useOnMount } from 'src/shared/hooks/useOnMount';
-import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from './colorSchemas';
-import { SubTasksProgressComponent } from './SubTasksProgressComponent';
-import { subTasksProgress } from './testData';
-import { GroupFields, Status } from './types';
-import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
-import { useSubTaskProgressBoardPropertyStore } from './stores/subTaskProgressBoardProperty';
-import { loadSubTaskProgressBoardProperty } from './actions/loadSubTaskProgressBoardProperty';
-import { setColumns } from './actions/setColumns';
-import { setGroupingField } from './actions/setGroupingField';
+import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
+import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
+import { subTasksProgress } from '../SubTasksProgress/testData';
+import { GroupFields, Status } from '../../types';
+import { setSelectedColorScheme } from '../../actions/setSelectedColorScheme';
+import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
+import { loadSubTaskProgressBoardProperty } from '../../actions/loadSubTaskProgressBoardProperty';
+import { setColumns } from '../../actions/setColumns';
+import { setGroupingField } from '../../actions/setGroupingField';
 
 const useGetSettings = () => {
   const propertyData = useSubTaskProgressBoardPropertyStore(state => state.data);
@@ -143,6 +143,7 @@ const SubTaskStatusMapping = (props: { status: string; progressStatus: Status })
         <Tag
           style={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'normal' }}
           color={jiraColorScheme[props.progressStatus]}
+          data-testid="status-mapping-column-status-card"
         >
           {props.status}
         </Tag>
@@ -181,6 +182,7 @@ const StatusColumn = ({
   return (
     <div
       ref={drop}
+      data-testid="status-mapping-column"
       style={{
         padding: '8px',
         backgroundColor: 'white',
@@ -194,7 +196,7 @@ const StatusColumn = ({
         overflow: 'hidden',
       }}
     >
-      <h4>{title}</h4>
+      <h4 data-testid="status-mapping-column-name">{title}</h4>
       {statuses.map(status => {
         return <SubTaskStatusMapping key={status} status={status} progressStatus={progressStatus} />;
       })}
