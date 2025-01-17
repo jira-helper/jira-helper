@@ -23,6 +23,7 @@ import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
 import { BoardSettingsBoardPage } from './board-settings/BoardPage';
+import { SubTasksProgressBoardPage } from './sub-tasks-progress/BoardPage';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -49,6 +50,7 @@ async function start() {
       WiplimitOnCells,
       CardColorsBoardPage,
       BoardSettingsBoardPage,
+      SubTasksProgressBoardPage,
     ],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,

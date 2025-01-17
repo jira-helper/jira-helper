@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "jira-helper",
     "short_name": "jira-helper",
-    "version": "2.24.3",
+    "version": "2.25.0",
     "author": "pavel.power@gmail.com",
     "description": "jira-helper",
     "icons": {
@@ -24,14 +24,20 @@
         "default_title": "Jira Helper"
     },
     "background": {
-        "scripts": ["src/background/background.ts"],
+        "scripts": [
+            "src/background/background.ts"
+        ],
         "service_worker": "src/background/background.ts",
         "type": "module"
     },
     "web_accessible_resources": [
         {
-            "resources": ["img/*"],
-            "matches": [ "*://*/*" ],
+            "resources": [
+                "img/*"
+            ],
+            "matches": [
+                "*://*/*"
+            ],
             "use_dynamic_url": false
         }
     ],
@@ -40,8 +46,12 @@
     },
     "content_scripts": [
         {
-            "matches": [ "*://*/*" ],
-            "js": ["src/content.ts" ]
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "src/content.ts"
+            ]
         }
     ],
     "permissions": [
@@ -49,7 +59,10 @@
         "tabs",
         "contextMenus"
     ],
-    "host_permissions": ["http://*/*", "https://*/*"],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
     "browser_specific_settings": {
         "gecko": {
             "id": "jira-helper-firefox@jira-helper",
