@@ -4,6 +4,7 @@ import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressB
 
 export const setColumns = (columns: { name: string; enabled: boolean }[]) => {
   useSubTaskProgressBoardPropertyStore.getState().actions.setColumns(columns);
+
   globalContainer
     .inject(BoardPropertyServiceToken)
     .updateBoardProperty('sub-task-progress', useSubTaskProgressBoardPropertyStore.getState().data, {});

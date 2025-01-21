@@ -1,6 +1,7 @@
 import { Err, Ok, Result } from 'ts-results';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
+import { globalContainer, Token } from 'dioma';
 import { getJiraIssue, searchIssues } from '../jiraApi';
 import { JiraIssue } from './types';
 
@@ -110,6 +111,10 @@ type JiraIssueMapped = JiraIssue & {
   status: string;
   assignee: string;
   created: string;
+  reporter: string;
+  priority: string;
+  creator: string;
+  issueType: string;
 };
 
 const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
@@ -119,8 +124,12 @@ const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
     project: jiraIssue.fields.project.key,
     summary: jiraIssue.fields.summary,
     status: jiraIssue.fields.status.name,
-    assignee: jiraIssue.fields.assignee?.displayName || '',
+    assignee: jiraIssue.fields.assignee?.displayName || 'none',
     created: jiraIssue.fields.created,
+    reporter: jiraIssue.fields.reporter?.displayName || 'none',
+    priority: jiraIssue.fields.priority?.name || 'none',
+    creator: jiraIssue.fields.creator?.displayName || 'none',
+    issueType: jiraIssue.fields.issuetype.name,
   };
 };
 
@@ -277,3 +286,6 @@ export class JiraService extends (EventEmitter as new () => TypedEmitter<JiraSer
     return !!this.queue.getTasksCount(key => key.startsWith('fetchSubtasks'));
   }
 }
+
+export const JiraServiceToken = new Token<JiraService>('JiraService');
+globalContainer.register({ token: JiraServiceToken, factory: () => JiraService.getInstance() });

@@ -32,3 +32,8 @@ export const yellowGreenColorScheme: ColorScheme = {
 
 export const availableColorSchemas = ['jira', 'yellowGreen'] as const;
 export type AvailableColorSchemas = (typeof availableColorSchemas)[number];
+
+export const colorSchemas: Record<AvailableColorSchemas, ColorScheme> = {
+  jira: jiraColorScheme,
+  yellowGreen: yellowGreenColorScheme,
+};

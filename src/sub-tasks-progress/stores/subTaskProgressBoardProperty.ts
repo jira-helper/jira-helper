@@ -10,14 +10,14 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
     setColumns: columns =>
       set(
         produce((state: State) => {
-          if (!state.data) return;
+          if (!state.data) state.data = {};
           state.data.columnsToTrack = columns.filter(c => c.enabled).map(c => c.name);
         })
       ),
     setSelectedColorScheme: colorScheme =>
       set(
         produce((state: State) => {
-          if (!state.data) return;
+          if (!state.data) state.data = {};
           state.data.selectedColorScheme = colorScheme;
         })
       ),
@@ -25,14 +25,14 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
     setGroupingField: groupingField =>
       set(
         produce((state: State) => {
-          if (!state.data) return;
+          if (!state.data) state.data = {};
           state.data.groupingField = groupingField;
         })
       ),
     setStatusMapping: (boardStatus, progressStatus) =>
       set(
         produce((state: State) => {
-          if (!state.data) return;
+          if (!state.data) state.data = {};
           if (!state.data.statusMapping) {
             state.data.statusMapping = {};
           }

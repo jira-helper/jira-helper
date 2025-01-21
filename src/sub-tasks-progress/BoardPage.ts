@@ -1,7 +1,8 @@
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 
 import { PageModification } from '../shared/PageModification';
-import { SubTasksProgressIssueCard } from './components/SubTasksProgress/SubTasksProgressIssueCard';
+
+import { IssuesSubTasksProgress } from './components/SubTasksProgress/IssuesSubTasksProgress';
 
 export class SubTasksProgressBoardPage extends PageModification<undefined, Element> {
   getModificationId(): string {
@@ -17,11 +18,12 @@ export class SubTasksProgressBoardPage extends PageModification<undefined, Eleme
   }
 
   async apply(): Promise<void> {
-    // maybe need to check if enabled
-    console.log('SubTasksProgressBoardPage.apply');
-    BoardPagePageObject.listenCards(cards => {
-      console.log('SubTasksProgressBoardPage.apply.cards', cards);
-      cards.forEach(card => card.attach(SubTasksProgressIssueCard, 'sub-tasks-progress'));
-    });
+    console.log('apply');
+    setTimeout(() => {
+      BoardPagePageObject.listenCards(cards => {
+        console.log('listenCards');
+        cards.forEach(card => card.attach(IssuesSubTasksProgress, 'sub-tasks-progress'));
+      });
+    }, 5000);
   }
 }

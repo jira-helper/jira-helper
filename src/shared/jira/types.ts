@@ -139,4 +139,8 @@ export type JiraIssueMapped = JiraIssue & {
   status: string;
   assignee: string;
   created: string;
+  reporter: string;
+  priority: string;
+  creator: string;
+  issueType: string;
 };

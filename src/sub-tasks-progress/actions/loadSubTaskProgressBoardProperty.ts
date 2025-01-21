@@ -17,6 +17,9 @@ export const loadSubTaskProgressBoardProperty = async () => {
     .getBoardProperty<BoardProperty | undefined>('sub-task-progress');
 
   if (!propertyData) {
+    // TODO: покрыть тестом
+    useSubTaskProgressBoardPropertyStore.getState().actions.setData({});
+    useSubTaskProgressBoardPropertyStore.getState().actions.setState('loaded');
     return;
   }
   useSubTaskProgressBoardPropertyStore.getState().actions.setData(propertyData);

@@ -8,12 +8,13 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tag, Tooltip } from 'antd';
 
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
 
 import { updateBoardProperty } from 'src/shared/jira/actions/updateBoardProperty';
 
 import { useDi } from 'src/shared/diContext';
 import { useOnMount } from 'src/shared/hooks/useOnMount';
+import { moveBoardStatusToProgressStatus } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -23,13 +24,8 @@ import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgre
 import { loadSubTaskProgressBoardProperty } from '../../actions/loadSubTaskProgressBoardProperty';
 import { setColumns } from '../../actions/setColumns';
 import { setGroupingField } from '../../actions/setGroupingField';
+import { useGetSettings } from '../../hooks/useGetSettings';
 
-const useGetSettings = () => {
-  const propertyData = useSubTaskProgressBoardPropertyStore(state => state.data);
-  const propertyState = useSubTaskProgressBoardPropertyStore(state => state.state);
-
-  return { settings: propertyData, state: propertyState };
-};
 export const ColumnsSettingsPure = (props: {
   columns: { name: string; enabled: boolean }[];
   onUpdate: (columns: { name: string; enabled: boolean }[]) => void;
@@ -65,12 +61,14 @@ export const ColumnsSettingsPure = (props: {
 };
 
 const useGetAllSubtasks = () => {
-  const { data, loading } = useJiraSubtasksStore(
+  const { data } = useJiraSubtasksStore(
     useShallow(state => {
-      return { data: state.data, loading: state.loading };
+      return { data: state.data };
     })
   );
-  return { issues: data.flatMap(i => i.data.subtasks), loading };
+  const loading = Object.values(data).some(item => item?.state === 'loading');
+  const issues = Object.values(data).flatMap(item => [...(item?.subtasks || []), ...(item?.externalLinks || [])]);
+  return { issues, loading };
 };
 
 const ColumnsSettingsContainer = () => {
@@ -165,8 +163,8 @@ const StatusColumn = ({
 }) => {
   const [, drop] = useDrop({
     accept: 'status',
-    drop: (status: string) => {
-      onDrop(status);
+    drop: (status: any) => {
+      onDrop(status.status);
     },
     collect: monitor => ({
       isOver: monitor.isOver(),
@@ -206,13 +204,13 @@ const StatusColumn = ({
 
 const DragDropContext = (props: {
   statusMapping: Record<string, Status>;
-  onUpdateStatusMapping: (statusMapping: Record<string, Status>) => void;
+  onUpdateStatusMapping: (boardStatus: string, progressStatus: Status) => void;
 }) => {
   const { statusMapping } = props;
   const handleDrop = (targetColumn: Status, status: string) => {
-    const newStatusMapping = { ...statusMapping };
-    newStatusMapping[status] = targetColumn;
-    props.onUpdateStatusMapping(newStatusMapping);
+    console.log('🚀 ~ handleDrop ~ status:', status);
+    console.log('🚀 ~ handleDrop ~ targetColumn:', targetColumn);
+    props.onUpdateStatusMapping(status, targetColumn);
   };
 
   return (
@@ -255,10 +253,8 @@ const SubTasksSettings = () => {
     <div>
       <DragDropContext
         statusMapping={actualStatusMapping}
-        onUpdateStatusMapping={newStatusMapping => {
-          const currentPropertyValue = { ...settings };
-          currentPropertyValue.statusMapping = newStatusMapping;
-          updateBoardProperty('sub-task-progress', currentPropertyValue);
+        onUpdateStatusMapping={(boardStatus, progressStatus) => {
+          moveBoardStatusToProgressStatus(boardStatus, progressStatus);
         }}
       />
     </div>

@@ -4,6 +4,8 @@ import { Status } from '../types';
 import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
 
 export const moveBoardStatusToProgressStatus = (boardStatus: string, progressStatus: Status) => {
+  console.log('🚀 ~ moveBoardStatusToProgressStatus ~ progressStatus:', progressStatus);
+  console.log('🚀 ~ moveBoardStatusToProgressStatus ~ boardStatus:', boardStatus);
   useSubTaskProgressBoardPropertyStore.getState().actions.setStatusMapping(boardStatus, progressStatus);
   globalContainer
     .inject(BoardPropertyServiceToken)
