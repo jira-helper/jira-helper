@@ -16,9 +16,9 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
     .map(([status]) => status as Status);
 
   // Calculate proportional widths based on counts
-  const totalWidth = 200;
-  const margin = 2;
-  const availableWidth = totalWidth - margin * activeStatuses.length;
+  const totalWidth = 100;
+
+  const availableWidth = 100;
 
   const title = Object.entries(progress)
     .filter(([, count]) => count > 0)
@@ -36,10 +36,11 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
 
   return (
     <Tooltip title={title}>
-      <div style={{ display: 'flex', gap: `${margin}px`, width: `${totalWidth}px` }}>
+      <div style={{ display: 'flex', gap: '0px', width: `${totalWidth}%` }}>
         {activeStatuses.map(status => {
           const proportion = progress[status] / totalCount;
-          const width = Math.max(availableWidth * proportion, 10);
+
+          const width = Math.ceil(availableWidth * proportion);
           const isFirst = activeStatuses.indexOf(status) === 0;
           const isLast = activeStatuses.indexOf(status) === activeStatuses.length - 1;
           return (
@@ -47,7 +48,7 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
               key={status}
               style={{
                 ...getProgressBarStyle(isFirst, isLast),
-                width: `${width}px`,
+                width: `${width}%`,
                 backgroundColor: colorScheme[status],
               }}
             />

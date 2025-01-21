@@ -15,6 +15,7 @@ import { updateBoardProperty } from 'src/shared/jira/actions/updateBoardProperty
 import { useDi } from 'src/shared/diContext';
 import { useOnMount } from 'src/shared/hooks/useOnMount';
 import { moveBoardStatusToProgressStatus } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
+import { InfoCircleFilled } from '@ant-design/icons';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -239,7 +240,16 @@ const SubTasksSettings = () => {
   const { issues } = useGetAllSubtasks();
   const { settings } = useGetSettings();
 
-  const statuses = issues.map(issue => issue.fields.status.name);
+  const statusProjectMap: Record<string, string[]> = {};
+  issues.forEach(issue => {
+    const project = issue.fields.project.key;
+    const status = issue.fields.status.name;
+    if (!statusProjectMap[status]) {
+      statusProjectMap[status] = [];
+    }
+    statusProjectMap[status].push(project);
+  });
+  const statuses = Object.keys(statusProjectMap);
   const statusMapping = settings?.statusMapping ?? {};
   const actualStatusMapping: Record<string, Status> = {
     ...statusMapping,
@@ -250,13 +260,34 @@ const SubTasksSettings = () => {
   });
 
   return (
-    <div>
-      <DragDropContext
-        statusMapping={actualStatusMapping}
-        onUpdateStatusMapping={(boardStatus, progressStatus) => {
-          moveBoardStatusToProgressStatus(boardStatus, progressStatus);
-        }}
-      />
+    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: 10, width: 'max-content' }}>
+      {statuses.map(status => {
+        return (
+          <>
+            <span> {status}</span>
+            <Tooltip title={`projects: ${statusProjectMap[status].join(', ')}`}>
+              <span>
+                <InfoCircleFilled style={{ color: '#1677ff' }} />
+              </span>
+            </Tooltip>
+            <Select
+              style={{ minWidth: 140 }}
+              value={statusMapping[status]}
+              onChange={value => {
+                moveBoardStatusToProgressStatus(status, value);
+              }}
+            >
+              {Object.keys(statusMapping).map(avStatus => {
+                return (
+                  <Select.Option key={avStatus} value={avStatus}>
+                    {avStatus}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </>
+        );
+      })}
     </div>
   );
 };

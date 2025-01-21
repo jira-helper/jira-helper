@@ -68,6 +68,7 @@ class TaskQueue extends (EventEmitter as new () => TypedEmitter<TaskQueueEvents>
       reject = rej;
     });
     this.queue.push({ ...task, cb: () => task.cb().then(resolve, reject), promise });
+    console.log('queue', this.queue.length);
     task.abortSignal.addEventListener('abort', () => {
       this.queue = this.queue.filter(t => t.key !== task.key);
     });
@@ -77,20 +78,26 @@ class TaskQueue extends (EventEmitter as new () => TypedEmitter<TaskQueueEvents>
   }
 
   private async run() {
+    console.log('run', this.runningTasksCount, this.concurrentTasks);
     if (this.runningTasksCount >= this.concurrentTasks) {
+      console.log('return by limit');
       return;
     }
     const task = this.queue.shift();
     if (!task) {
+      console.log('return by empty queue');
       return;
     }
     this.runningTasksCount += 1;
     try {
+      console.log('run task', task.key);
       const result = await task.cb();
+      console.log('task done', task.key);
       return result;
     } finally {
       this.runningTasksCount -= 1;
       this.emit('task-done', task.key);
+      console.log('run next task');
       this.run();
     }
   }
@@ -232,28 +239,32 @@ export class JiraService extends (EventEmitter as new () => TypedEmitter<JiraSer
 
     const subtasks = this.subtasksService.getSubtasks(issueId);
     if (subtasks) {
+      console.log('subtasks already fetched');
       return Ok(subtasks);
     }
 
     this.emit('fetching-subtasks-started');
-    const subtasksResult = await this.queue.register({
-      key: `fetchSubtasks-${issueId}`,
-      cb: async () => {
-        let jiraIssue: JiraIssueMapped | null = null;
-        jiraIssue = this.jiraIssuesService.getJiraIssue(issueId);
+    console.log('registersubtasks');
 
-        if (!jiraIssue) {
-          const jiraIssueResult = await this.fetchJiraIssue(issueId, abortSignal);
-          if (jiraIssueResult.err) {
-            return Err(jiraIssueResult.val);
-          }
-          jiraIssue = jiraIssueResult.val;
-        }
+    let jiraIssue: JiraIssueMapped | null = null;
+    jiraIssue = this.jiraIssuesService.getJiraIssue(issueId);
 
-        // TODO: сделать второй запрос на экстернал линками
-        const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;
+    console.log('jiraIssue', jiraIssue);
+    if (!jiraIssue) {
+      const jiraIssueResult = await this.fetchJiraIssue(issueId, abortSignal);
+      if (jiraIssueResult.err) {
+        return Err(jiraIssueResult.val);
+      }
+      jiraIssue = jiraIssueResult.val;
+    }
 
-        const allSubtasksResponse = await searchIssues(
+    // TODO: сделать второй запрос за экстернал линками
+    const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;
+
+    const allSubtasksResponse = await this.queue.register({
+      key: `fetchSubtasks-${issueId}-all`,
+      cb: () =>
+        searchIssues(
           JQL,
           {
             maxResults: 100,
@@ -262,24 +273,21 @@ export class JiraService extends (EventEmitter as new () => TypedEmitter<JiraSer
           {
             signal: abortSignal,
           }
-        );
-        if (allSubtasksResponse.err) {
-          return Err(allSubtasksResponse.val);
-        }
-
-        const allSubtasksData = await allSubtasksResponse.val.json();
-        const allSubtasks = allSubtasksData.issues.map(mapJiraIssue);
-        this.subtasksService.updateSubtasks(issueId, {
-          subtasks: allSubtasks,
-          externalLinks: [],
-        });
-        return Ok({ subtasks: allSubtasks, externalLinks: [] });
-      },
+        ),
       abortSignal,
     });
-    this.emit('fetching-subtasks-done');
 
-    return subtasksResult;
+    if (allSubtasksResponse.err) {
+      return Err(allSubtasksResponse.val);
+    }
+
+    const allSubtasksData = await allSubtasksResponse.val.json();
+    const allSubtasks = allSubtasksData.issues.map(mapJiraIssue);
+    this.subtasksService.updateSubtasks(issueId, {
+      subtasks: allSubtasks,
+      externalLinks: [],
+    });
+    return Ok({ subtasks: allSubtasks, externalLinks: [] });
   }
 
   isFetchingSubtasks() {
