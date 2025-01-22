@@ -2,6 +2,7 @@
 
 ## Todo
 
+- [ ] Should be turned off by default
 - [ ] Add texts multiple languages
 - [ ] Add remove status mapping button
 - [ ] Add logger and ability to check logs
