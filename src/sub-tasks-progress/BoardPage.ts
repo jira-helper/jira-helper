@@ -2,9 +2,10 @@ import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 
 import { PageModification } from '../shared/PageModification';
 
-import { IssuesSubTasksProgress } from './components/SubTasksProgress/IssuesSubTasksProgress';
+import { IssuesSubTasksProgressContainer } from './components/SubTasksProgress/IssuesSubTasksProgress';
+import { loadSubTaskProgressBoardProperty } from './actions/loadSubTaskProgressBoardProperty';
 
-export class SubTasksProgressBoardPage extends PageModification<undefined, Element> {
+export class SubTasksProgressBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
     return `sub-tasks-progress-board-${this.getBoardId()}`;
   }
@@ -14,16 +15,13 @@ export class SubTasksProgressBoardPage extends PageModification<undefined, Eleme
   }
 
   loadData() {
-    return Promise.resolve(undefined);
+    return loadSubTaskProgressBoardProperty();
   }
 
   async apply(): Promise<void> {
-    console.log('apply');
-    setTimeout(() => {
-      BoardPagePageObject.listenCards(cards => {
-        console.log('listenCards');
-        cards.forEach(card => card.attach(IssuesSubTasksProgress, 'sub-tasks-progress'));
-      });
-    }, 5000);
+    const unlisten = BoardPagePageObject.listenCards(cards => {
+      cards.forEach(card => card.attach(IssuesSubTasksProgressContainer, 'sub-tasks-progress'));
+    });
+    this.sideEffects.push(unlisten);
   }
 }

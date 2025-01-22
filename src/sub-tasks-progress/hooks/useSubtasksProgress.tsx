@@ -13,10 +13,13 @@ export const useSubtasksProgress = (
   const progress: Record<string, SubTasksProgress> = {};
 
   const mapIssue = (issue: JiraIssueMapped) => {
+    const status = statusMapping[issue.status] || 'unmapped';
+    if (status === 'ignored') {
+      return;
+    }
     const group = issue[groupingField];
     if (!progress[group]) {
       progress[group] = {
-        backlog: 0,
         todo: 0,
         inProgress: 0,
         almostDone: 0,
@@ -25,9 +28,8 @@ export const useSubtasksProgress = (
         unmapped: 0,
       };
     }
-    const status = statusMapping[issue.status] || 'unmapped';
+
     progress[group][status] += 1;
-    return progress;
   };
   subtasks.forEach(mapIssue);
   externalLinks.forEach(mapIssue);

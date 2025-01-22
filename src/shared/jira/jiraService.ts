@@ -1,7 +1,7 @@
 import { Err, Ok, Result } from 'ts-results';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { globalContainer, Token } from 'dioma';
+import { Container, Token } from 'dioma';
 import { getJiraIssue, searchIssues } from '../jiraApi';
 import { JiraIssue } from './types';
 
@@ -78,26 +78,22 @@ class TaskQueue extends (EventEmitter as new () => TypedEmitter<TaskQueueEvents>
   }
 
   private async run() {
-    console.log('run', this.runningTasksCount, this.concurrentTasks);
     if (this.runningTasksCount >= this.concurrentTasks) {
-      console.log('return by limit');
       return;
     }
     const task = this.queue.shift();
     if (!task) {
-      console.log('return by empty queue');
       return;
     }
     this.runningTasksCount += 1;
     try {
-      console.log('run task', task.key);
       const result = await task.cb();
-      console.log('task done', task.key);
+
       return result;
     } finally {
       this.runningTasksCount -= 1;
       this.emit('task-done', task.key);
-      console.log('run next task');
+
       this.run();
     }
   }
@@ -296,4 +292,6 @@ export class JiraService extends (EventEmitter as new () => TypedEmitter<JiraSer
 }
 
 export const JiraServiceToken = new Token<JiraService>('JiraService');
-globalContainer.register({ token: JiraServiceToken, factory: () => JiraService.getInstance() });
+export const registerJiraServiceInDI = (container: Container) => {
+  container.register({ token: JiraServiceToken, factory: () => JiraService.getInstance() });
+};

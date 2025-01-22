@@ -1,6 +1,7 @@
-import { globalContainer, Token } from 'dioma';
+import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { onDOMChange } from 'src/shared/domUtils';
 
 class CardPageObject {
   selectors = {
@@ -10,10 +11,10 @@ class CardPageObject {
   constructor(private readonly card: Element) {}
 
   getIssueId() {
-    return this.card.querySelector(this.selectors.issueKey)?.textContent?.trim();
+    return this.card.querySelector(this.selectors.issueKey)?.textContent?.trim() as string;
   }
 
-  attach(ComponentToAttach: () => React.ReactNode, key: string) {
+  attach(ComponentToAttach: React.ComponentType<{ issueId: string }>, key: string) {
     let div = this.card.querySelector(`[data-jh-attached-key="${key}"]`);
 
     if (div) {
@@ -51,18 +52,43 @@ export const BoardPagePageObject = {
   },
 
   listenCards(callback: (cards: CardPageObject[]) => void) {
-    const cards = Array.from(document.querySelectorAll(this.selectors.issue)).map(card => new CardPageObject(card));
-    callback(cards);
+    let currentCards = '';
+    const getCards = () => {
+      const cards = Array.from(document.querySelectorAll(this.selectors.issue)).map(card => new CardPageObject(card));
+      return cards;
+    };
+    const getCurrentCardsState = (cards: CardPageObject[]) => cards.map(card => card.getIssueId()).join(',');
+
+    const notifyIfNewCards = () => {
+      const cards = getCards();
+      const currentCardsState = getCurrentCardsState(cards);
+      if (currentCardsState !== currentCards) {
+        currentCards = currentCardsState;
+        callback(cards);
+      }
+    };
+
+    notifyIfNewCards();
+
+    const interval = setInterval(() => {
+      notifyIfNewCards();
+    }, 1000);
+
+    return () => clearInterval(interval);
   },
 
   getColumnOfIssue(issueId: string) {
     const issue = document.querySelector(`[data-issue-key="${issueId}"]`);
     const columnId = issue?.closest(this.selectors.column)?.getAttribute('data-column-id');
     if (!columnId) return '';
+
     const column = document.querySelector(this.selectors.columnHeader)?.querySelector(`[data-id="${columnId}"]`);
     return column?.querySelector(this.selectors.columnTitle)?.textContent?.trim() || '';
   },
 };
 
 export const boardPagePageObjectToken = new Token<typeof BoardPagePageObject>('boardPagePageObjectToken');
-globalContainer.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
+
+export const registerBoardPagePageObjectInDI = (container: Container) => {
+  container.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
+};

@@ -14,7 +14,7 @@ export const SubTaskProgressByGroup = (props: {
   warning?: React.ReactNode;
 }) => {
   const { groupName, progress, colorScheme, warning } = props;
-  const count = Object.values(progress).reduce((acc, count) => acc + count, 0);
+  const count = Object.values(progress).reduce((acc, c) => acc + c, 0);
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>

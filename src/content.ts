@@ -1,4 +1,5 @@
 import './firefoxFixes';
+import { globalContainer } from 'dioma';
 import { Routes } from './routing';
 import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';
@@ -24,6 +25,9 @@ import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
 import { BoardSettingsBoardPage } from './board-settings/BoardPage';
 import { SubTasksProgressBoardPage } from './sub-tasks-progress/BoardPage';
+import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
+import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
+import { registerJiraServiceInDI } from './shared/jira/jiraService';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -31,11 +35,19 @@ const domLoaded = () =>
     if (document.readyState === 'interactive' || document.readyState === 'complete') return resolve(undefined);
     window.addEventListener('DOMContentLoaded', resolve);
   });
+// TODO: comment
+function initDiContainer() {
+  const container = globalContainer;
+  registerBoardPagePageObjectInDI(container);
+  registerBoardPropertyServiceInDI(container);
+  registerJiraServiceInDI(container);
+}
 
 async function start() {
   if (!isJira) return;
 
   await domLoaded();
+  initDiContainer();
 
   setUpBlurSensitiveOnPage();
 

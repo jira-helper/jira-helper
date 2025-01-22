@@ -1,6 +1,6 @@
 import Tooltip from 'antd/es/tooltip';
 import React from 'react';
-import { ColorScheme, Status, SubTasksProgress } from '../../types';
+import { ActiveStatuses, ColorScheme, SubTasksProgress } from '../../types';
 
 export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; colorScheme: ColorScheme }) => {
   const { progress, colorScheme } = props;
@@ -13,7 +13,7 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
   // Filter out statuses with 0 count
   const activeStatuses = Object.entries(progress)
     .filter(([, count]) => count > 0)
-    .map(([status]) => status as Status);
+    .map(([status]) => status as ActiveStatuses);
 
   // Calculate proportional widths based on counts
   const totalWidth = 100;

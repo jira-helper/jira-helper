@@ -1,5 +1,5 @@
 import { getBoardIdFromURL } from 'src/routing';
-import { Token, globalContainer } from 'dioma';
+import { Container, Token } from 'dioma';
 import { deleteBoardProperty, getBoardProperty, updateBoardProperty } from './jiraApi';
 
 interface BoardPropertyServiceI {
@@ -39,4 +39,6 @@ export class BoardPropertyService {
   }
 }
 
-globalContainer.register({ token: BoardPropertyServiceToken, value: BoardPropertyService });
+export const registerBoardPropertyServiceInDI = (container: Container) => {
+  container.register({ token: BoardPropertyServiceToken, value: BoardPropertyService });
+};
