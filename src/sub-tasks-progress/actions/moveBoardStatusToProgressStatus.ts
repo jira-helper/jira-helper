@@ -9,3 +9,10 @@ export const moveBoardStatusToProgressStatus = (boardStatus: string, progressSta
     .inject(BoardPropertyServiceToken)
     .updateBoardProperty('sub-task-progress', useSubTaskProgressBoardPropertyStore.getState().data, {});
 };
+
+export const newMoveBoardStatusToProgressStatus = (boardStatus: number, statusName: string, progressStatus: Status) => {
+  useSubTaskProgressBoardPropertyStore.getState().actions.setNewStatusMapping(boardStatus, statusName, progressStatus);
+  globalContainer
+    .inject(BoardPropertyServiceToken)
+    .updateBoardProperty('sub-task-progress', useSubTaskProgressBoardPropertyStore.getState().data, {});
+};

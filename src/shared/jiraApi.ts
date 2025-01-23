@@ -61,6 +61,16 @@ const requestJira = request([
   http(),
 ]);
 
+const requestJiraViaFetch = (url: string, options: RequestInit = {}) => {
+  return fetch(`${BASE_URL}${url}`, {
+    headers: {
+      ...EXTENSION_HEADERS,
+      ...options.headers,
+    },
+    ...options,
+  });
+};
+
 // Fetch all properties of a board
 const getBoardProperties = (boardId: string): Promise<any> => {
   const cacheKey = `${boardId}_propertiesList`;
@@ -255,9 +265,21 @@ export const getUser = (query: string): Promise<any> =>
       return substringMatch || users[0];
     });
 
-export const getJiraIssue = (issueId: string): Promise<JiraIssue> => {
-  return requestJira({
-    url: `api/2/issue/${issueId}`,
-    type: 'json',
-  });
+export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<JiraIssue> => {
+  // retries 5 times with random delay on 429 error code
+  let counter = 0;
+  const maxRetries = 5;
+  // eslint-disable-next-line no-plusplus
+  while (counter++ < maxRetries) {
+    // eslint-disable-next-line no-await-in-loop
+    const response = await requestJiraViaFetch(`api/2/issue/${issueId}`, options);
+
+    if (response.status === 429) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      continue;
+    }
+    return response.json();
+  }
+  throw new Error('Too many retries');
 };

@@ -11,6 +11,7 @@ export type State = {
     setState: (state: 'initial' | 'loading' | 'loaded') => void;
     setGroupingField: (groupingField: GroupFields) => void;
     setStatusMapping: (boardStatus: string, progressStatus: Status) => void;
+    setNewStatusMapping: (boardStatus: number, statusName: string, progressStatus: Status) => void;
     changeCount: (countType: 'subtasks' | 'epics' | 'linkedIssues', value: boolean) => void;
   };
 };

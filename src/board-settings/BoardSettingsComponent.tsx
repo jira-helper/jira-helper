@@ -4,13 +4,14 @@ import { Tabs } from 'antd';
 import { BoardSettingsTabContent } from 'src/sub-tasks-progress/components/BoardSettings/BoardSettingsTabContent';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
+import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
 import { Image } from '../shared/components/Image';
 import logoUrl from '../assets/jira_helper_32x32.png';
 import styles from './BoardSettingsComponent.module.css';
 
 export const BoardSettingsComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log('🚀 ~ BoardSettingsComponent ~ isModalOpen:', isModalOpen);
+
   return (
     <WithDi container={globalContainer}>
       <div className={styles.wrapper} onClick={() => setIsModalOpen(true)}>
@@ -28,7 +29,9 @@ export const BoardSettingsComponent = () => {
             Content of tab 1
           </Tabs.TabPane>
           <Tabs.TabPane tab="Sub-tasks progress" key="2">
-            <BoardSettingsTabContent />
+            <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
+              <BoardSettingsTabContent />
+            </ErrorBoundary>
           </Tabs.TabPane>
         </Tabs>
       </Modal>

@@ -41,5 +41,7 @@ module.exports = {
     'no-useless-constructor': 'off',
     'no-empty-function': 'off',
     'guard-for-in': 'off',
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'jsx-a11y/no-static-element-interactions': 'off',
   },
 };

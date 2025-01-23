@@ -14,11 +14,14 @@ export type ColorScheme = {
   [key in ActiveStatuses]: string;
 };
 
+type StatusId = number;
+
 export type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
 export type BoardProperty = {
   columnsToTrack?: string[];
   groupingField?: GroupFields;
   statusMapping?: Record<string, Status>;
+  newStatusMapping?: Record<StatusId, { progressStatus: Status; name: string }>;
   selectedColorScheme?: AvailableColorSchemas;
   countSubtasksOfIssue?: boolean;
   countIssuesInEpic?: boolean;

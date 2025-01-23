@@ -7,6 +7,7 @@ const initialData: Required<BoardProperty> = {
   columnsToTrack: [],
   selectedColorScheme: 'jira',
   statusMapping: {},
+  newStatusMapping: {},
   countSubtasksOfIssue: true,
   countIssuesInEpic: true,
   countLinkedIssues: true,
@@ -40,7 +41,24 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
     setStatusMapping: (boardStatus, progressStatus) =>
       set(
         produce((state: State) => {
-          state.data.statusMapping[boardStatus] = progressStatus;
+          if (progressStatus === 'unmapped') {
+            delete state.data.statusMapping[boardStatus];
+          } else {
+            state.data.statusMapping[boardStatus] = progressStatus;
+          }
+        })
+      ),
+    setNewStatusMapping: (boardStatus, statusName, progressStatus) =>
+      set(
+        produce((state: State) => {
+          if (progressStatus === 'unmapped') {
+            delete state.data.newStatusMapping[boardStatus];
+          } else {
+            state.data.newStatusMapping[boardStatus] = {
+              progressStatus,
+              name: statusName,
+            };
+          }
         })
       ),
     changeCount: (countType, value) =>

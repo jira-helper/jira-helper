@@ -21,7 +21,14 @@ export type JiraIssue = {
       };
     }[];
     status: {
+      id: number;
       name: string;
+      statusCategory: {
+        id: number;
+        key: string;
+        colorName: string; // yellow for example
+        name: string;
+      };
     };
     issuelinks: {
       type: {
@@ -137,6 +144,9 @@ export type JiraIssueMapped = JiraIssue & {
   project: string;
   summary: string;
   status: string;
+  statusId: number;
+  statusCategory: string;
+  statusColor: string;
   assignee: string;
   created: string;
   reporter: string;

@@ -28,6 +28,7 @@ import { SubTasksProgressBoardPage } from './sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
+import { registerLogger } from './shared/Logger';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -41,6 +42,7 @@ function initDiContainer() {
   registerBoardPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
+  registerLogger(container);
 }
 
 async function start() {

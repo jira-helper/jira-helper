@@ -11,9 +11,13 @@ import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSu
 
 import { useDi } from 'src/shared/diContext';
 
-import { moveBoardStatusToProgressStatus } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
+import {
+  moveBoardStatusToProgressStatus,
+  newMoveBoardStatusToProgressStatus,
+} from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
 import { InfoCircleFilled } from '@ant-design/icons';
 import { changeCount } from 'src/sub-tasks-progress/actions/changeCount';
+import { resetBoardProperty } from 'src/sub-tasks-progress/actions/resetBoardProperty';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -102,35 +106,55 @@ const SubTasksSettings = () => {
   const { issues } = useGetAllSubtasks();
   const { settings } = useGetSettings();
 
-  const statusProjectMap: Record<string, string[] | undefined> = {};
+  const statusProjectMap: Record<number, string[] | undefined> = {};
+  const statusNameMap: Record<number, string | undefined> = {};
   issues.forEach(issue => {
     const project = issue.fields.project.key;
-    const status = issue.fields.status.name;
-    if (!statusProjectMap[status]) {
-      statusProjectMap[status] = [];
+    const statusName = issue.fields.status.name;
+    const statusId = issue.fields.status.id;
+    if (!statusProjectMap[statusId]) {
+      statusProjectMap[statusId] = [];
     }
-    if (!statusProjectMap[status].includes(project)) {
-      statusProjectMap[status].push(project);
+    if (!statusProjectMap[statusId].includes(project)) {
+      statusProjectMap[statusId].push(project);
     }
+    statusNameMap[statusId] = statusName;
   });
   const statuses = Object.keys(statusProjectMap);
-  const statusMapping = settings?.statusMapping ?? {};
-  const actualStatusMapping: Record<string, Status> = {
+  const statusMapping = settings.newStatusMapping;
+  const actualStatusMapping: Record<
+    number,
+    {
+      name: string;
+      progressStatus: Status;
+    }
+  > = {
     ...statusMapping,
   };
 
-  statuses.forEach(status => {
-    actualStatusMapping[status] = statusMapping[status] ?? 'unmapped';
+  statuses.forEach(statusId => {
+    const statusIdNumber = parseInt(statusId, 10);
+    if (Number.isNaN(statusIdNumber)) {
+      return;
+    }
+    actualStatusMapping[statusIdNumber] = statusMapping[statusIdNumber] ?? {
+      name: statusNameMap[statusIdNumber] ?? 'unknown',
+      progressStatus: 'unmapped',
+    };
   });
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: 10, width: 'max-content' }}>
-      {Object.keys(statusMapping).map(status => {
+      {Object.keys(actualStatusMapping).map(statusId => {
+        const statusIdNumber = parseInt(statusId, 10);
+        if (Number.isNaN(statusIdNumber)) {
+          return null;
+        }
         return (
           <>
-            <span> {status}</span>
-            {statusProjectMap[status] && statusProjectMap[status]?.length > 0 ? (
-              <Tooltip title={`projects: ${statusProjectMap[status].join(', ')}`}>
+            <span> {statusNameMap[statusIdNumber]}</span>
+            {statusProjectMap[statusIdNumber] && statusProjectMap[statusIdNumber]?.length > 0 ? (
+              <Tooltip title={`projects: ${statusProjectMap[statusIdNumber].join(', ')}`}>
                 <span>
                   <InfoCircleFilled style={{ color: '#1677ff' }} />
                 </span>
@@ -140,9 +164,9 @@ const SubTasksSettings = () => {
             )}
             <Select
               style={{ minWidth: 140 }}
-              value={statusMapping[status]}
+              value={actualStatusMapping[statusIdNumber].progressStatus}
               onChange={value => {
-                moveBoardStatusToProgressStatus(status, value);
+                newMoveBoardStatusToProgressStatus(statusIdNumber, statusNameMap[statusIdNumber] || 'unknown', value);
               }}
             >
               {availableStatuses.map(avStatus => {
@@ -248,6 +272,9 @@ export const BoardSettingsTabContent = () => {
   return (
     <div>
       Sub-tasks progress
+      <button type="button" onClick={resetBoardProperty}>
+        Reset
+      </button>
       <CountSettings />
       <ColorSchemeChooser />
       <ColumnsSettingsContainer />
