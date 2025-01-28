@@ -10,6 +10,7 @@
 - [x] Add Error Catcher over tabs of settings
 - [x] Add delay and 429 error handling
 - [ ] Architecture 
-- [ ] on Ru locale nothing works. Shoukd use status category info instead of name
-- [ ] fix name saving to settings
-- [ ] make option to use jira colors
+- [x] on Ru locale nothing works. Shoukd use status category info instead of name
+- [x] fix name saving to settings
+- [x] make option to use jira colors
+- [ ] fix loading subtasks. keep in mind that subtasks will be needed not only for progress-status, but in other features too? But maybe it should be made separate

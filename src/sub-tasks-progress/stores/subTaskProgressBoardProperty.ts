@@ -88,19 +88,7 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
     changeCount: (countType, value) =>
       set(
         produce((state: State) => {
-          switch (countType) {
-            case 'subtasks':
-              state.data.countSubtasksOfIssue = value;
-              break;
-            case 'epics':
-              state.data.countIssuesInEpic = value;
-              break;
-            case 'linkedIssues':
-              state.data.countLinkedIssues = value;
-              break;
-            default:
-              break;
-          }
+          state.data[countType] = value;
         })
       ),
   },

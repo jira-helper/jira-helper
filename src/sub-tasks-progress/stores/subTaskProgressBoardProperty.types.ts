@@ -1,5 +1,5 @@
 import { AvailableColorSchemas } from '../colorSchemas';
-import { BoardProperty, GroupFields, Status } from '../types';
+import { BoardProperty, CountType, GroupFields, Status } from '../types';
 
 export type State = {
   data: Required<BoardProperty>;
@@ -12,7 +12,7 @@ export type State = {
     setGroupingField: (groupingField: GroupFields) => void;
     setStatusMapping: (boardStatus: string, progressStatus: Status) => void;
     setNewStatusMapping: (boardStatus: number, statusName: string, progressStatus: Status) => void;
-    changeCount: (countType: 'subtasks' | 'epics' | 'linkedIssues', value: boolean) => void;
+    changeCount: (countType: CountType, value: boolean) => void;
     addIgnoredGroup: (group: string) => void;
     removeIgnoredGroup: (group: string) => void;
     setUseCustomColorScheme: (useCustomColorScheme: boolean) => void;

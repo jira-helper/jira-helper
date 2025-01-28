@@ -25,7 +25,22 @@ export type BoardProperty = {
   useCustomColorScheme?: boolean;
   ignoredGroups?: string[];
   selectedColorScheme?: AvailableColorSchemas;
-  countSubtasksOfIssue?: boolean;
-  countIssuesInEpic?: boolean;
-  countLinkedIssues?: boolean;
+  countEpicIssues?: boolean;
+  countEpicLinkedIssues?: boolean;
+  countEpicExternalLinks?: boolean;
+  countIssuesSubtasks?: boolean;
+  countIssuesLinkedIssues?: boolean;
+  countIssuesExternalLinks?: boolean;
+  countSubtasksLinkedIssues?: boolean;
+  countSubtasksExternalLinks?: boolean;
 };
+
+export type CountType =
+  | 'countEpicIssues'
+  | 'countEpicLinkedIssues'
+  | 'countEpicExternalLinks'
+  | 'countIssuesSubtasks'
+  | 'countIssuesLinkedIssues'
+  | 'countIssuesExternalLinks'
+  | 'countSubtasksLinkedIssues'
+  | 'countSubtasksExternalLinks';
