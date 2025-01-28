@@ -11,6 +11,8 @@ const initialData: Required<BoardProperty> = {
   countSubtasksOfIssue: true,
   countIssuesInEpic: true,
   countLinkedIssues: true,
+  useCustomColorScheme: false,
+  ignoredGroups: [],
   groupingField: 'project',
 };
 
@@ -25,6 +27,15 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
           state.data.columnsToTrack = columns.filter(c => c.enabled).map(c => c.name);
         })
       ),
+    setUseCustomColorScheme: (useCustomColorScheme: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.useCustomColorScheme = useCustomColorScheme;
+          if (!useCustomColorScheme) {
+            state.data.selectedColorScheme = 'jira';
+          }
+        })
+      ),
     setSelectedColorScheme: colorScheme =>
       set(
         produce((state: State) => {
@@ -36,6 +47,19 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.groupingField = groupingField;
+          state.data.ignoredGroups = [];
+        })
+      ),
+    addIgnoredGroup: (group: string) =>
+      set(
+        produce((state: State) => {
+          state.data.ignoredGroups.push(group);
+        })
+      ),
+    removeIgnoredGroup: (group: string) =>
+      set(
+        produce((state: State) => {
+          state.data.ignoredGroups = state.data.ignoredGroups.filter(g => g !== group);
         })
       ),
     setStatusMapping: (boardStatus, progressStatus) =>

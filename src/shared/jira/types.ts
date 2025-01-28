@@ -25,7 +25,7 @@ export type JiraIssue = {
       name: string;
       statusCategory: {
         id: number;
-        key: string;
+        key: 'new' | 'indeterminate' | 'done';
         colorName: string; // yellow for example
         name: string;
       };
@@ -145,7 +145,7 @@ export type JiraIssueMapped = JiraIssue & {
   summary: string;
   status: string;
   statusId: number;
-  statusCategory: string;
+  statusCategory: 'new' | 'indeterminate' | 'done';
   statusColor: string;
   assignee: string;
   created: string;

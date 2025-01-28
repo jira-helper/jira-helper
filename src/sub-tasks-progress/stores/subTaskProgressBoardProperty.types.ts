@@ -13,5 +13,8 @@ export type State = {
     setStatusMapping: (boardStatus: string, progressStatus: Status) => void;
     setNewStatusMapping: (boardStatus: number, statusName: string, progressStatus: Status) => void;
     changeCount: (countType: 'subtasks' | 'epics' | 'linkedIssues', value: boolean) => void;
+    addIgnoredGroup: (group: string) => void;
+    removeIgnoredGroup: (group: string) => void;
+    setUseCustomColorScheme: (useCustomColorScheme: boolean) => void;
   };
 };

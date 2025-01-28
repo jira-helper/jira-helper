@@ -5,7 +5,7 @@ import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/
 import { useShallow } from 'zustand/react/shallow';
 import Select from 'antd/es/select';
 
-import { Tooltip } from 'antd';
+import { Badge, Tag, Tooltip } from 'antd';
 
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
 
@@ -15,9 +15,11 @@ import {
   moveBoardStatusToProgressStatus,
   newMoveBoardStatusToProgressStatus,
 } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
-import { InfoCircleFilled } from '@ant-design/icons';
+import { CloseCircleFilled, InfoCircleFilled } from '@ant-design/icons';
 import { changeCount } from 'src/sub-tasks-progress/actions/changeCount';
 import { resetBoardProperty } from 'src/sub-tasks-progress/actions/resetBoardProperty';
+import { removeIgnoredGroup } from 'src/sub-tasks-progress/actions/removeIgnoredGroup';
+import { addIgnoredGroup } from 'src/sub-tasks-progress/actions/addIgnoredGroup';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -187,6 +189,10 @@ const SubTasksSettings = () => {
 const ColorSchemeChooser = () => {
   const { settings } = useGetSettings();
   const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
+  const isEnabled = settings?.useCustomColorScheme ?? false;
+  if (!isEnabled) {
+    return null;
+  }
   /**
    * use Select from antd
    */
@@ -216,21 +222,64 @@ const ColorSchemeChooser = () => {
   );
 };
 
+const useGetAvailableGroups = (groupingField: GroupFields) => {
+  const { issues } = useGetAllSubtasks();
+
+  const availableGroups = useMemo(() => {
+    const uniqueGroups = new Set<string>();
+    issues.forEach(issue => {
+      const value = issue[groupingField];
+      uniqueGroups.add(value);
+    });
+    return Array.from(uniqueGroups);
+  }, [issues, groupingField]);
+  return availableGroups;
+};
+
 const GroupingSettings = () => {
   const { settings } = useGetSettings();
+  const availableGroups = useGetAvailableGroups(settings.groupingField);
+  const ignoredGroups = settings.ignoredGroups || [];
+  const groupsAvailableToIgnore = availableGroups.filter(group => !ignoredGroups.includes(group));
 
   return (
     <div>
-      <p>Select grouping field:</p>
-      <Select
-        style={{ minWidth: 140 }}
-        value={settings?.groupingField || 'project'}
-        onChange={setGroupingField}
-        options={groupingFields.map(field => ({
-          value: field,
-          label: <span data-testid="grouping-field-option">{field}</span>,
-        }))}
-      />
+      <div>
+        <p>Select grouping field:</p>
+        <Select
+          style={{ minWidth: 140 }}
+          value={settings?.groupingField || 'project'}
+          onChange={setGroupingField}
+          options={groupingFields.map(field => ({
+            value: field,
+            label: <span data-testid="grouping-field-option">{field}</span>,
+          }))}
+        />
+      </div>
+      {ignoredGroups ? (
+        <div>
+          <p>ignored groups</p>
+          {ignoredGroups.map(group => (
+            <Tag key={group} color="blue" closable closeIcon onClose={() => removeIgnoredGroup(group)}>
+              {group}
+            </Tag>
+          ))}
+        </div>
+      ) : null}
+      {groupsAvailableToIgnore.length > 0 ? (
+        <div>
+          <p>Add group to ignore:</p>
+          <Select
+            style={{ minWidth: 140 }}
+            value="choose group to ignore"
+            onChange={addIgnoredGroup}
+            options={groupsAvailableToIgnore.map(group => ({
+              value: group,
+              label: <span data-testid="ignored-group-option">{group}</span>,
+            }))}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

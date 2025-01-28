@@ -32,7 +32,12 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
     return () => abortController.abort();
   }, [shouldTrackIssue]);
 
-  const subtasksProgressByGroup = useSubtasksProgress(data?.subtasks || [], data?.externalLinks || []);
+  const shouldUseCustomColorScheme = settings?.useCustomColorScheme;
+  const subtasksProgressByGroup = useSubtasksProgress(
+    data?.subtasks || [],
+    data?.externalLinks || [],
+    shouldUseCustomColorScheme
+  );
 
   if (!shouldTrackIssue) {
     return null;

@@ -113,7 +113,7 @@ const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
     summary: jiraIssue.fields.summary,
     status: jiraIssue.fields.status.name,
     statusId: jiraIssue.fields.status.id,
-    statusCategory: jiraIssue.fields.status.statusCategory.name,
+    statusCategory: jiraIssue.fields.status.statusCategory.key,
     statusColor: jiraIssue.fields.status.statusCategory.colorName,
     assignee: jiraIssue.fields.assignee?.displayName || 'none',
     created: jiraIssue.fields.created,

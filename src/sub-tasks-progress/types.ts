@@ -22,6 +22,8 @@ export type BoardProperty = {
   groupingField?: GroupFields;
   statusMapping?: Record<string, Status>;
   newStatusMapping?: Record<StatusId, { progressStatus: Status; name: string }>;
+  useCustomColorScheme?: boolean;
+  ignoredGroups?: string[];
   selectedColorScheme?: AvailableColorSchemas;
   countSubtasksOfIssue?: boolean;
   countIssuesInEpic?: boolean;
