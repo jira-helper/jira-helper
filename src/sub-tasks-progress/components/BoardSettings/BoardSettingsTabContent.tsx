@@ -5,7 +5,7 @@ import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/
 import { useShallow } from 'zustand/react/shallow';
 import Select from 'antd/es/select';
 
-import { Badge, Tag, Tooltip } from 'antd';
+import { Badge, Card, Divider, Tag, Tooltip } from 'antd';
 
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
 
@@ -20,6 +20,7 @@ import { changeCount } from 'src/sub-tasks-progress/actions/changeCount';
 import { resetBoardProperty } from 'src/sub-tasks-progress/actions/resetBoardProperty';
 import { removeIgnoredGroup } from 'src/sub-tasks-progress/actions/removeIgnoredGroup';
 import { addIgnoredGroup } from 'src/sub-tasks-progress/actions/addIgnoredGroup';
+import { changeUseCustomColorScheme } from 'src/sub-tasks-progress/actions/changeUseCustomColorScheme';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -37,8 +38,8 @@ export const ColumnsSettingsPure = (props: {
   loading?: boolean;
 }) => {
   return (
-    <div>
-      <p>Select columns where sub-tasks progress should be tracked:</p>
+    <Card title="Columns Settings" style={{ marginBottom: '16px' }} type="inner">
+      <p style={{ marginBottom: '16px' }}>Select columns where sub-tasks progress should be tracked:</p>
       {props.loading && <Spin />}
       <div style={{ display: 'flex', flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
         {props.columns.map(column => (
@@ -61,7 +62,7 @@ export const ColumnsSettingsPure = (props: {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -108,6 +109,9 @@ const SubTasksSettings = () => {
   const { issues } = useGetAllSubtasks();
   const { settings } = useGetSettings();
 
+  if (!settings.useCustomColorScheme) {
+    return null;
+  }
   const statusProjectMap: Record<number, string[] | undefined> = {};
   const statusNameMap: Record<number, string | undefined> = {};
   issues.forEach(issue => {
@@ -189,36 +193,47 @@ const SubTasksSettings = () => {
 const ColorSchemeChooser = () => {
   const { settings } = useGetSettings();
   const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
-  const isEnabled = settings?.useCustomColorScheme ?? false;
-  if (!isEnabled) {
-    return null;
-  }
-  /**
-   * use Select from antd
-   */
+
   return (
-    <div>
-      <p>Select color scheme:</p>
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
-        <Select
-          data-testid="color-scheme-chooser"
-          value={selectedColorScheme}
-          onChange={setSelectedColorScheme}
-          style={{ minWidth: 140 }} // Set min width to accommodate "yellowGreen"
-          options={availableColorSchemas.map(schema => ({
-            value: schema,
-            label: <span data-testid="color-scheme-chooser-option">{schema}</span>,
-          }))}
-        />
-        <span>
-          Example:
-          <SubTasksProgressComponent
-            progress={subTasksProgress.smallMixed}
-            colorScheme={selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme}
-          />
-        </span>
+    <Card title="Color Scheme" style={{ marginBottom: '16px' }} type="inner">
+      <div style={{ marginBottom: '16px' }}>
+        <Checkbox
+          checked={settings.useCustomColorScheme}
+          onChange={() => {
+            changeUseCustomColorScheme(!settings.useCustomColorScheme);
+          }}
+        >
+          Use custom color scheme
+        </Checkbox>
       </div>
-    </div>
+      {settings.useCustomColorScheme ? (
+        <>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ marginBottom: '8px' }}>Select color scheme:</p>
+            <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+              <Select
+                data-testid="color-scheme-chooser"
+                value={selectedColorScheme}
+                onChange={setSelectedColorScheme}
+                style={{ minWidth: 140 }} // Set min width to accommodate "yellowGreen"
+                options={availableColorSchemas.map(schema => ({
+                  value: schema,
+                  label: <span data-testid="color-scheme-chooser-option">{schema}</span>,
+                }))}
+              />
+              <span>
+                Example:
+                <SubTasksProgressComponent
+                  progress={subTasksProgress.smallMixed}
+                  colorScheme={selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme}
+                />
+              </span>
+            </div>
+          </div>
+          <SubTasksSettings />
+        </>
+      ) : null}
+    </Card>
   );
 };
 
@@ -243,9 +258,9 @@ const GroupingSettings = () => {
   const groupsAvailableToIgnore = availableGroups.filter(group => !ignoredGroups.includes(group));
 
   return (
-    <div>
-      <div>
-        <p>Select grouping field:</p>
+    <Card title="Grouping Settings" style={{ marginBottom: '16px' }} type="inner">
+      <div style={{ marginBottom: '24px' }}>
+        <p style={{ marginBottom: '16px' }}>Select grouping field:</p>
         <Select
           style={{ minWidth: 140 }}
           value={settings?.groupingField || 'project'}
@@ -256,9 +271,9 @@ const GroupingSettings = () => {
           }))}
         />
       </div>
-      {ignoredGroups ? (
-        <div>
-          <p>ignored groups</p>
+      {ignoredGroups.length > 0 ? (
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ marginBottom: '16px' }}>ignored groups</p>
           {ignoredGroups.map(group => (
             <Tag key={group} color="blue" closable closeIcon onClose={() => removeIgnoredGroup(group)}>
               {group}
@@ -267,8 +282,8 @@ const GroupingSettings = () => {
         </div>
       ) : null}
       {groupsAvailableToIgnore.length > 0 ? (
-        <div>
-          <p>Add group to ignore:</p>
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ marginBottom: '16px' }}>Add group to ignore:</p>
           <Select
             style={{ minWidth: 140 }}
             value="choose group to ignore"
@@ -280,14 +295,14 @@ const GroupingSettings = () => {
           />
         </div>
       ) : null}
-    </div>
+    </Card>
   );
 };
 
 const CountSettings = () => {
   const { settings } = useGetSettings();
   return (
-    <div>
+    <Card title="Count Settings" style={{ marginBottom: '16px' }} type="inner">
       <p>Count settings</p>
       <Checkbox
         checked={settings.countSubtasksOfIssue}
@@ -313,22 +328,25 @@ const CountSettings = () => {
       >
         Count linked issues
       </Checkbox>
-    </div>
+    </Card>
   );
 };
 
 export const BoardSettingsTabContent = () => {
   return (
-    <div>
-      Sub-tasks progress
+    <div style={{ padding: '16px' }}>
+      <h2 style={{ marginBottom: '16px' }}>Sub-tasks progress</h2>
       <button type="button" onClick={resetBoardProperty}>
         Reset
       </button>
-      <CountSettings />
-      <ColorSchemeChooser />
+
+      <Divider />
+
       <ColumnsSettingsContainer />
       <GroupingSettings />
-      <SubTasksSettings />
+      <CountSettings />
+
+      <ColorSchemeChooser />
     </div>
   );
 };
