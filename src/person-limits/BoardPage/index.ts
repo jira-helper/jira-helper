@@ -227,7 +227,12 @@ export default class extends PageModification<[any, any], Element> {
         return;
       }
 
-      const name = getNameFromTooltip(tooltipHolder.getAttribute('data-tooltip')!);
+      /**
+       * jira with version 8.x has tooltip text in attribute data-tooltip
+       * jira with version 9.x has tooltip text in attribute alt
+       */
+      const tooltipText = tooltipHolder.getAttribute('data-tooltip') || tooltipHolder.getAttribute('alt');
+      const name = getNameFromTooltip(tooltipText!);
       if (avaTitles.includes(name)) {
         node.classList.remove('no-visibility');
       } else {
