@@ -31,12 +31,87 @@ export type JiraIssue = {
       };
     };
     issuelinks: {
+      id: string;
+      self: string;
       type: {
-        invard: string;
+        id: string;
+        name: string;
+        inward: string;
+        outward: string;
+        self: string;
       };
-      invardIssue: {
+      outwardIssue?: {
+        id: string;
+        key: string;
+        self: string;
         fields: {
-          status: string;
+          summary: string;
+          status: {
+            self: string;
+            description: string;
+            iconUrl: string;
+            name: string;
+            id: string;
+            statusCategory: {
+              self: string;
+              id: number;
+              key: string;
+              colorName: string;
+              name: string;
+            };
+          };
+          priority: {
+            self: string;
+            iconUrl: string;
+            name: string;
+            id: string;
+          };
+          issuetype: {
+            self: string;
+            id: string;
+            description: string;
+            iconUrl: string;
+            name: string;
+            subtask: boolean;
+            avatarId: number;
+          };
+        };
+      };
+      inwardIssue?: {
+        id: string;
+        key: string;
+        self: string;
+        fields: {
+          summary: string;
+          status: {
+            self: string;
+            description: string;
+            iconUrl: string;
+            name: string;
+            id: string;
+            statusCategory: {
+              self: string;
+              id: number;
+              key: string;
+              colorName: string;
+              name: string;
+            };
+          };
+          priority: {
+            self: string;
+            iconUrl: string;
+            name: string;
+            id: string;
+          };
+          issuetype: {
+            self: string;
+            id: string;
+            description: string;
+            iconUrl: string;
+            name: string;
+            subtask: boolean;
+            avatarId: number;
+          };
         };
       };
     }[];
