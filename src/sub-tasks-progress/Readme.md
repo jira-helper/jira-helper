@@ -13,4 +13,8 @@
 - [x] on Ru locale nothing works. Shoukd use status category info instead of name
 - [x] fix name saving to settings
 - [x] make option to use jira colors
-- [ ] fix loading subtasks. keep in mind that subtasks will be needed not only for progress-status, but in other features too? But maybe it should be made separate
+- [ ] add option to ignore some statuses at all, even in status category view mode
+- [ ] add blocked issues mapping
+- [ ] add external links
+- [ ] add logger to all code
+- [ ] refactor feature 

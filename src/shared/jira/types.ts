@@ -227,5 +227,5 @@ export type JiraIssueMapped = JiraIssue & {
   reporter: string;
   priority: string;
   creator: string;
-  issueType: string;
+  issueType: 'Epic' | 'Task' | 'Sub-task';
 };

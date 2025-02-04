@@ -114,6 +114,7 @@ const SubTasksSettings = () => {
   }
   const statusProjectMap: Record<number, string[] | undefined> = {};
   const statusNameMap: Record<number, string | undefined> = {};
+  const colorScheme = settings.selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme;
   issues.forEach(issue => {
     const project = issue.fields.project.key;
     const statusName = issue.fields.status.name;
@@ -156,6 +157,9 @@ const SubTasksSettings = () => {
         if (Number.isNaN(statusIdNumber)) {
           return null;
         }
+        if (!statusNameMap[statusIdNumber]) {
+          return null;
+        }
         return (
           <>
             <span> {statusNameMap[statusIdNumber]}</span>
@@ -178,7 +182,24 @@ const SubTasksSettings = () => {
               {availableStatuses.map(avStatus => {
                 return (
                   <Select.Option key={avStatus} value={avStatus}>
-                    {avStatus}
+                    <span
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: '1em',
+                          height: '1em',
+                          backgroundColor: colorScheme[avStatus],
+                          marginRight: '0.5em',
+                        }}
+                      />
+                      {avStatus}
+                    </span>
                   </Select.Option>
                 );
               })}
@@ -221,7 +242,7 @@ const ColorSchemeChooser = () => {
                   label: <span data-testid="color-scheme-chooser-option">{schema}</span>,
                 }))}
               />
-              <span>
+              <span style={{ minWidth: 200 }}>
                 Example:
                 <SubTasksProgressComponent
                   progress={subTasksProgress.smallMixed}

@@ -105,10 +105,21 @@ class TaskQueue {
   }
 }
 
+const mapJiraIssueType = (jiraIssue: JiraIssue): JiraIssueMapped['issueType'] => {
+  if (jiraIssue.fields.issuetype.name === 'Epic') {
+    return 'Epic';
+  }
+  if (jiraIssue.fields.issuetype.subtask) {
+    return 'Sub-task';
+  }
+  return 'Task';
+};
+
 const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
   return {
     ...jiraIssue,
     id: jiraIssue.id,
+    key: jiraIssue.key,
     project: jiraIssue.fields.project.key,
     summary: jiraIssue.fields.summary,
     status: jiraIssue.fields.status.name,
@@ -120,7 +131,7 @@ const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
     reporter: jiraIssue.fields.reporter?.displayName || 'none',
     priority: jiraIssue.fields.priority?.name || 'none',
     creator: jiraIssue.fields.creator?.displayName || 'none',
-    issueType: jiraIssue.fields.issuetype.name,
+    issueType: mapJiraIssueType(jiraIssue),
   };
 };
 

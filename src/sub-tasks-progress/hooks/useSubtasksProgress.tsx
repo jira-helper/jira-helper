@@ -1,14 +1,20 @@
 import { JiraIssueMapped } from 'src/shared/jira/types';
-import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues';
+import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
 import { Status, SubTasksProgress } from '../types';
 import { useGetSettings } from './useGetSettings';
 
-export const useSubTasksProgress2 = (issueId: string) => {
+export const useGetSubtasksToCountProgress = (issueId: string) => {
   const { settings } = useGetSettings();
-  const issue = useJiraIssuesStore(useShallow(state => state.issues.find(i => i.data.id === issueId)));
+  const issue = useJiraIssuesStore(
+    useShallow(state => {
+      return state.issues.find(i => i.data.key === issueId);
+    })
+  );
+  console.log('🚀 ~ useGetSubtasksToCountProgress ~ issue:', issue);
   const subtasks = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
+  console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasks:', subtasks);
   const linkedIssuesKeys =
     issue?.data.fields.issuelinks
       .map(link => {
@@ -20,23 +26,26 @@ export const useSubTasksProgress2 = (issueId: string) => {
       })
       .filter(v => v !== undefined) || [];
   const subtasksKeys = issue?.data.fields.subtasks.map(s => s.key) || [];
+  console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasksKeys:', subtasksKeys);
 
   if (!subtasks) {
+    console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasks is undefined');
     return [];
   }
   const issueType = issue?.data.issueType;
+  console.log('🚀 ~ useGetSubtasksToCountProgress ~ issueType:', issueType);
   switch (issueType) {
-    case 'epic': {
+    case 'Epic': {
       const linkedIssues = settings.countEpicLinkedIssues
         ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
         : [];
-      const epicIssues = settings.countEpicLinkedIssues
+      const epicIssues = settings.countEpicIssues
         ? subtasks.subtasks.filter(subtask => !linkedIssuesKeys.includes(subtask.key))
         : [];
 
       return [...linkedIssues, ...epicIssues];
     }
-    case 'task': {
+    case 'Task': {
       const linkedIssues = settings.countIssuesLinkedIssues
         ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
         : [];
@@ -46,13 +55,13 @@ export const useSubTasksProgress2 = (issueId: string) => {
 
       return [...linkedIssues, ...issueSubtasks];
     }
-    case 'sub-task': {
+    case 'Sub-task': {
       return settings.countSubtasksLinkedIssues
         ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
         : [];
     }
     default:
-      logger.wwarn;
+      // logger.wwarn;
       return [];
   }
 };
@@ -64,15 +73,15 @@ export const useSubTasksProgress2 = (issueId: string) => {
  * @returns
  */
 
-export const useSubtasksProgress = (
+const useSubtasksProgressOld = (
   subtasks: JiraIssueMapped[],
-  externalLinks: JiraIssueMapped[],
-  shouldUseCustomColorScheme: boolean
+  externalLinks: JiraIssueMapped[]
 ): Record<string, SubTasksProgress> => {
   const { settings } = useGetSettings();
   const statusMapping = settings?.newStatusMapping || {};
   const groupingField = settings?.groupingField || 'project';
   const ignoredGroups = settings?.ignoredGroups || [];
+  const shouldUseCustomColorScheme = settings.useCustomColorScheme;
 
   const progress: Record<string, SubTasksProgress> = {};
   const set = new Set<string>();
@@ -116,5 +125,12 @@ export const useSubtasksProgress = (
   subtasks.forEach(mapIssue);
   externalLinks.forEach(mapIssue);
 
+  return progress;
+};
+
+export const useSubtasksProgress = (issueKey: string) => {
+  const subtasks = useGetSubtasksToCountProgress(issueKey);
+  console.log('🚀 ~ useSubtasksProgress ~ subtasks:', subtasks);
+  const progress = useSubtasksProgressOld(subtasks, []);
   return progress;
 };

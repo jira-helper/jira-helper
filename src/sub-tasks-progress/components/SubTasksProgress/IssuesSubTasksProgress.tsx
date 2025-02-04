@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { loadSubtasksForIssue } from 'src/sub-tasks-progress/actions/loadSubtasksForIssue';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
-import { useShallow } from 'zustand/react/shallow';
+
 import { useSubtasksProgress } from 'src/sub-tasks-progress/hooks/useSubtasksProgress';
 import { colorSchemas } from 'src/sub-tasks-progress/colorSchemas';
 import { useDi, WithDi } from 'src/shared/diContext';
@@ -20,7 +19,6 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
 
   const shouldTrackIssue = settings?.columnsToTrack?.includes(issueColumn);
 
-  const data = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
   useEffect(() => {
     if (!shouldTrackIssue) {
       return;
@@ -32,18 +30,9 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
     return () => abortController.abort();
   }, [shouldTrackIssue]);
 
-  const shouldUseCustomColorScheme = settings?.useCustomColorScheme;
-  const subtasksProgressByGroup = useSubtasksProgress(
-    data?.subtasks || [],
-    data?.externalLinks || [],
-    shouldUseCustomColorScheme
-  );
+  const subtasksProgressByGroup = useSubtasksProgress(issueId);
 
   if (!shouldTrackIssue) {
-    return null;
-  }
-
-  if (!data || data.state !== 'loaded') {
     return null;
   }
 
