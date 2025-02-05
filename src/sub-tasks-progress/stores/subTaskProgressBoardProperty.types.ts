@@ -16,5 +16,6 @@ export type State = {
     addIgnoredGroup: (group: string) => void;
     removeIgnoredGroup: (group: string) => void;
     setUseCustomColorScheme: (useCustomColorScheme: boolean) => void;
+    toggleIgnoredStatus: (statusId: number) => void;
   };
 };

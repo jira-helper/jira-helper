@@ -33,6 +33,7 @@ export type BoardProperty = {
   countIssuesExternalLinks?: boolean;
   countSubtasksLinkedIssues?: boolean;
   countSubtasksExternalLinks?: boolean;
+  ignoredStatuses?: number[];
 };
 
 export type CountType =

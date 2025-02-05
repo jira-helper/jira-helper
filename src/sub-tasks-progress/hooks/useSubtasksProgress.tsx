@@ -12,9 +12,9 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
       return state.issues.find(i => i.data.key === issueId);
     })
   );
-  console.log('🚀 ~ useGetSubtasksToCountProgress ~ issue:', issue);
+
   const subtasks = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
-  console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasks:', subtasks);
+
   const linkedIssuesKeys =
     issue?.data.fields.issuelinks
       .map(link => {
@@ -26,14 +26,12 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
       })
       .filter(v => v !== undefined) || [];
   const subtasksKeys = issue?.data.fields.subtasks.map(s => s.key) || [];
-  console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasksKeys:', subtasksKeys);
 
   if (!subtasks) {
-    console.log('🚀 ~ useGetSubtasksToCountProgress ~ subtasks is undefined');
     return [];
   }
   const issueType = issue?.data.issueType;
-  console.log('🚀 ~ useGetSubtasksToCountProgress ~ issueType:', issueType);
+
   switch (issueType) {
     case 'Epic': {
       const linkedIssues = settings.countEpicLinkedIssues
@@ -73,7 +71,7 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
  * @returns
  */
 
-const useSubtasksProgressOld = (
+const useCalcProgress = (
   subtasks: JiraIssueMapped[],
   externalLinks: JiraIssueMapped[]
 ): Record<string, SubTasksProgress> => {
@@ -81,6 +79,7 @@ const useSubtasksProgressOld = (
   const statusMapping = settings?.newStatusMapping || {};
   const groupingField = settings?.groupingField || 'project';
   const ignoredGroups = settings?.ignoredGroups || [];
+  const { ignoredStatuses } = settings;
   const shouldUseCustomColorScheme = settings.useCustomColorScheme;
 
   const progress: Record<string, SubTasksProgress> = {};
@@ -109,6 +108,10 @@ const useSubtasksProgressOld = (
       return;
     }
 
+    if (ignoredStatuses.includes(issue.statusId)) {
+      return;
+    }
+
     if (!progress[group]) {
       progress[group] = {
         todo: 0,
@@ -122,6 +125,7 @@ const useSubtasksProgressOld = (
 
     progress[group][status.progressStatus] += 1;
   };
+
   subtasks.forEach(mapIssue);
   externalLinks.forEach(mapIssue);
 
@@ -130,7 +134,6 @@ const useSubtasksProgressOld = (
 
 export const useSubtasksProgress = (issueKey: string) => {
   const subtasks = useGetSubtasksToCountProgress(issueKey);
-  console.log('🚀 ~ useSubtasksProgress ~ subtasks:', subtasks);
-  const progress = useSubtasksProgressOld(subtasks, []);
+  const progress = useCalcProgress(subtasks, []);
   return progress;
 };

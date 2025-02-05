@@ -21,7 +21,7 @@ export type JiraIssue = {
       };
     }[];
     status: {
-      id: number;
+      id: string;
       name: string;
       statusCategory: {
         id: number;

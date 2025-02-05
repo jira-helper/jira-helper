@@ -8,12 +8,18 @@ const initialData: Required<BoardProperty> = {
   selectedColorScheme: 'jira',
   statusMapping: {},
   newStatusMapping: {},
-  countSubtasksOfIssue: true,
-  countIssuesInEpic: true,
-  countLinkedIssues: true,
+  countEpicIssues: false,
+  countEpicLinkedIssues: false,
+  countEpicExternalLinks: false,
+  countIssuesSubtasks: false,
+  countIssuesLinkedIssues: false,
+  countIssuesExternalLinks: false,
+  countSubtasksLinkedIssues: false,
+  countSubtasksExternalLinks: false,
   useCustomColorScheme: false,
   ignoredGroups: [],
   groupingField: 'project',
+  ignoredStatuses: [],
 };
 
 export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
@@ -89,6 +95,16 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data[countType] = value;
+        })
+      ),
+    toggleIgnoredStatus: (statusId: number) =>
+      set(
+        produce((state: State) => {
+          if (state.data.ignoredStatuses.includes(statusId)) {
+            state.data.ignoredStatuses = state.data.ignoredStatuses.filter(id => id !== statusId);
+          } else {
+            state.data.ignoredStatuses.push(statusId);
+          }
         })
       ),
   },
