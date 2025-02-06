@@ -74,7 +74,7 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
 const useCalcProgress = (
   subtasks: JiraIssueMapped[],
   externalLinks: JiraIssueMapped[]
-): Record<string, SubTasksProgress> => {
+): Record<string, { progress: SubTasksProgress; comments: string[] }> => {
   const { settings } = useGetSettings();
   const statusMapping = settings?.newStatusMapping || {};
   const groupingField = settings?.groupingField || 'project';
@@ -82,8 +82,7 @@ const useCalcProgress = (
   const { ignoredStatuses } = settings;
   const shouldUseCustomColorScheme = settings.useCustomColorScheme;
 
-  const progress: Record<string, SubTasksProgress> = {};
-  const set = new Set<string>();
+  const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
 
   const mapStatusCategeoryToProgressStatus = (statusCategory: JiraIssueMapped['statusCategory']) => {
     if (statusCategory === 'new') {
@@ -95,16 +94,16 @@ const useCalcProgress = (
     return 'done';
   };
   const mapIssue = (issue: JiraIssueMapped) => {
-    set.add(issue.statusCategory);
+    const group = issue[groupingField];
+    if (ignoredGroups.includes(group)) {
+      return;
+    }
+
     const status: { name: string; progressStatus: Status } = shouldUseCustomColorScheme
       ? statusMapping[issue.statusId] || { name: issue.status, progressStatus: 'unmapped' }
       : { name: issue.status, progressStatus: mapStatusCategeoryToProgressStatus(issue.statusCategory) };
 
     if (status.progressStatus === 'ignored') {
-      return;
-    }
-    const group = issue[groupingField];
-    if (ignoredGroups.includes(group)) {
       return;
     }
 
@@ -114,16 +113,32 @@ const useCalcProgress = (
 
     if (!progress[group]) {
       progress[group] = {
-        todo: 0,
-        inProgress: 0,
-        almostDone: 0,
-        done: 0,
-        blocked: 0,
-        unmapped: 0,
+        progress: {
+          todo: 0,
+          inProgress: 0,
+          almostDone: 0,
+          done: 0,
+          blocked: 0,
+          unmapped: 0,
+        },
+        comments: [],
       };
     }
+    if (issue.isFlagged && settings.flagsAsBlocked) {
+      status.progressStatus = 'blocked';
+      progress[group].comments.push(`Flagged issue: ${issue.key}`);
+    }
 
-    progress[group][status.progressStatus] += 1;
+    if (issue.isBlockedByLinks && settings.blockedByLinksAsBlocked) {
+      status.progressStatus = 'blocked';
+      progress[group].comments.push(`Blocked by links: ${issue.key}`);
+    }
+
+    if (status.progressStatus === 'unmapped') {
+      progress[group].comments.push(`Unmapped issue: ${issue.key}`);
+    }
+
+    progress[group].progress[status.progressStatus] += 1;
   };
 
   subtasks.forEach(mapIssue);

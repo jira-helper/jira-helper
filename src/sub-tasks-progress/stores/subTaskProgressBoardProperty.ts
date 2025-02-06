@@ -20,6 +20,8 @@ const initialData: Required<BoardProperty> = {
   ignoredGroups: [],
   groupingField: 'project',
   ignoredStatuses: [],
+  flagsAsBlocked: true,
+  blockedByLinksAsBlocked: false,
 };
 
 export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
@@ -105,6 +107,18 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
           } else {
             state.data.ignoredStatuses.push(statusId);
           }
+        })
+      ),
+    toggleFlagsAsBlocked: () =>
+      set(
+        produce((state: State) => {
+          state.data.flagsAsBlocked = !state.data.flagsAsBlocked;
+        })
+      ),
+    toggleBlockedByLinksAsBlocked: () =>
+      set(
+        produce((state: State) => {
+          state.data.blockedByLinksAsBlocked = !state.data.blockedByLinksAsBlocked;
         })
       ),
   },

@@ -34,6 +34,8 @@ export type BoardProperty = {
   countSubtasksLinkedIssues?: boolean;
   countSubtasksExternalLinks?: boolean;
   ignoredStatuses?: number[];
+  flagsAsBlocked?: boolean;
+  blockedByLinksAsBlocked?: boolean;
 };
 
 export type CountType =

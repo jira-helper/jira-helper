@@ -14,7 +14,7 @@
 - [x] fix name saving to settings
 - [x] make option to use jira colors
 - [x] add option to ignore some statuses at all, even in status category view mode
-- [ ] add blocked issues mapping
+- [x] add blocked issues mapping
 - [ ] add external links
 - [ ] add logger to all code
 - [ ] refactor feature 

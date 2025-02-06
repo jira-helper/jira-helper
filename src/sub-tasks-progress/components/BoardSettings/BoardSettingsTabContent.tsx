@@ -19,6 +19,8 @@ import { removeIgnoredGroup } from 'src/sub-tasks-progress/actions/removeIgnored
 import { addIgnoredGroup } from 'src/sub-tasks-progress/actions/addIgnoredGroup';
 import { changeUseCustomColorScheme } from 'src/sub-tasks-progress/actions/changeUseCustomColorScheme';
 import { toggleIgnoreStatus } from 'src/sub-tasks-progress/actions/toggleIgnoreStatus';
+import { toggleFlagsAsBlocked } from 'src/sub-tasks-progress/actions/toggleFlagsAsBlocked';
+import { toggleBlockedByLinksAsBlocked } from 'src/sub-tasks-progress/actions/toggleBlockedByLinksAsBlocked';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -283,7 +285,7 @@ const ColorSchemeChooser = () => {
 
   return (
     <Card title="Color Scheme" style={{ marginBottom: '16px' }} type="inner">
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'row', gap: 10 }}>
         <Checkbox
           checked={settings.useCustomColorScheme}
           onChange={() => {
@@ -291,6 +293,22 @@ const ColorSchemeChooser = () => {
           }}
         >
           Use custom color scheme
+        </Checkbox>
+        <Checkbox
+          checked={settings.flagsAsBlocked}
+          onChange={() => {
+            toggleFlagsAsBlocked();
+          }}
+        >
+          Flags as blocked
+        </Checkbox>
+        <Checkbox
+          checked={settings.blockedByLinksAsBlocked}
+          onChange={() => {
+            toggleBlockedByLinksAsBlocked();
+          }}
+        >
+          Blocked by links as blocked
         </Checkbox>
       </div>
       <StatusCategorySettings />

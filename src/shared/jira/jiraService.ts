@@ -115,6 +115,36 @@ const mapJiraIssueType = (jiraIssue: JiraIssue): JiraIssueMapped['issueType'] =>
   return 'Task';
 };
 
+const getIsFlagged = (issue: JiraIssue) => {
+  if (issue.fields.status.statusCategory.key === 'done') {
+    return false;
+  }
+  return Object.values(issue.fields).some((field: unknown) => {
+    if (field == null) {
+      return false;
+    }
+    if (Array.isArray(field)) {
+      return field.some(item => item?.value === 'Impediment');
+    }
+    // @ts-expect-error
+    if (field?.value === 'Impediment') {
+      return true;
+    }
+    return false;
+  });
+};
+
+const getIsBlockedByLinks = (issue: JiraIssue) => {
+  if (issue.fields.status.statusCategory.key === 'done') {
+    return false;
+  }
+  return issue.fields.issuelinks.some(issueLink => {
+    return (
+      issueLink.type.inward === 'is blocked by' && issueLink.inwardIssue?.fields.status.statusCategory.key !== 'done'
+    );
+  });
+};
+
 const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
   return {
     ...jiraIssue,
@@ -132,6 +162,8 @@ const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
     priority: jiraIssue.fields.priority?.name || 'none',
     creator: jiraIssue.fields.creator?.displayName || 'none',
     issueType: mapJiraIssueType(jiraIssue),
+    isFlagged: getIsFlagged(jiraIssue),
+    isBlockedByLinks: getIsBlockedByLinks(jiraIssue),
   };
 };
 

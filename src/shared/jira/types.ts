@@ -228,4 +228,6 @@ export type JiraIssueMapped = JiraIssue & {
   priority: string;
   creator: string;
   issueType: 'Epic' | 'Task' | 'Sub-task';
+  isFlagged: boolean;
+  isBlockedByLinks: boolean;
 };

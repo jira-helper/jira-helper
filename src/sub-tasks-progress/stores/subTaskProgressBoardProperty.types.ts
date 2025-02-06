@@ -17,5 +17,7 @@ export type State = {
     removeIgnoredGroup: (group: string) => void;
     setUseCustomColorScheme: (useCustomColorScheme: boolean) => void;
     toggleIgnoredStatus: (statusId: number) => void;
+    toggleFlagsAsBlocked: () => void;
+    toggleBlockedByLinksAsBlocked: () => void;
   };
 };

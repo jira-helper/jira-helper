@@ -41,12 +41,21 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {Object.entries(subtasksProgressByGroup).map(([group, progress]) => (
         <SubTaskProgressByGroup
           key={group}
           groupName={group}
-          progress={progress}
+          progress={progress.progress}
+          warning={
+            progress.comments.length > 0 ? (
+              <div>
+                {progress.comments.map(comment => (
+                  <div key={comment}>{comment}</div>
+                ))}
+              </div>
+            ) : undefined
+          }
           colorScheme={colorSchemas[settings?.selectedColorScheme || 'jira']}
         />
       ))}
