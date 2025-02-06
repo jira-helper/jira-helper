@@ -16,5 +16,8 @@
 - [x] add option to ignore some statuses at all, even in status category view mode
 - [x] add blocked issues mapping
 - [ ] add external links
+	- all we know about external issues are summary, key and statusname
+	- external links should be grouped by project (part of issue key)
+	- external links should have own status name mapping to progress status
 - [ ] add logger to all code
 - [ ] refactor feature 
