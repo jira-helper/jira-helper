@@ -27,15 +27,15 @@ export type BoardProperty = {
   selectedColorScheme?: AvailableColorSchemas;
   countEpicIssues?: boolean;
   countEpicLinkedIssues?: boolean;
-  countEpicExternalLinks?: boolean;
   countIssuesSubtasks?: boolean;
   countIssuesLinkedIssues?: boolean;
-  countIssuesExternalLinks?: boolean;
   countSubtasksLinkedIssues?: boolean;
-  countSubtasksExternalLinks?: boolean;
   ignoredStatuses?: number[];
   flagsAsBlocked?: boolean;
   blockedByLinksAsBlocked?: boolean;
+  countIssuesExternalLinks?: boolean;
+  countSubtasksExternalLinks?: boolean;
+  countEpicExternalLinks?: boolean;
 };
 
 export type CountType =

@@ -216,6 +216,7 @@ export type JiraIssue = {
 
 export type JiraIssueMapped = JiraIssue & {
   id: string;
+  key: string;
   project: string;
   summary: string;
   status: string;
@@ -230,4 +231,36 @@ export type JiraIssueMapped = JiraIssue & {
   issueType: 'Epic' | 'Task' | 'Sub-task';
   isFlagged: boolean;
   isBlockedByLinks: boolean;
+};
+
+export type RemoteLink = {
+  id: number;
+  // "https://jira3.tcsbank.ru/rest/api/2/issue/AUTOB2B-6/remotelink/55350"
+  self: string;
+  globalId: string;
+  application: {
+    // "com.atlassian.jira",
+    type: string;
+    // "JIRA | TCS Bank"
+    name: string;
+  };
+  relationship: string;
+  object: {
+    url: string;
+    // "SMEDE-5372",
+    title: string;
+    icon: {};
+    status: {
+      icon: {};
+    };
+  };
+};
+
+export type ExternalIssueMapped = {
+  status: string;
+  project: string;
+  issueKey: string;
+  summary: string;
+  // @see https://developer.atlassian.com/server/jira/platform/jira-issue-statuses-as-lozenges/
+  statusColor: 'medium-gray' | 'green' | 'yellow' | 'brown' | 'warm-red' | 'blue-gray';
 };

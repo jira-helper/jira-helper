@@ -19,5 +19,6 @@ export type State = {
     toggleIgnoredStatus: (statusId: number) => void;
     toggleFlagsAsBlocked: () => void;
     toggleBlockedByLinksAsBlocked: () => void;
+    changeCountExternalLinks: (value: boolean) => void;
   };
 };

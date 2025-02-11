@@ -2,8 +2,8 @@ import { Err, Ok, Result } from 'ts-results';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import { Container, Token } from 'dioma';
-import { getJiraIssue, searchIssues } from '../jiraApi';
-import { JiraIssue, JiraIssueMapped } from './types';
+import { getExternalIssues, getJiraIssue, renderRemoteLink, searchIssues } from '../jiraApi';
+import { ExternalIssueMapped, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
 
 class CacheWithTTL<T> {
   private cache: { [key: string]: { value: T; timestamp: number } } = {};
@@ -173,19 +173,15 @@ export type Subtasks = {
 };
 const MINUTE = 1000 * 60;
 
-type SubtasksServiceEvents = {
-  'subtasks-updated': (subtasks: Subtasks) => void;
-};
-class SubtasksService extends (EventEmitter as new () => TypedEmitter<SubtasksServiceEvents>) {
+class SubtasksService {
   private cache = new CacheWithTTL<Subtasks>(30 * MINUTE);
 
-  updateSubtasks(issueId: string, subtasks: Subtasks) {
-    this.cache.set(issueId, subtasks);
-    this.emit('subtasks-updated', subtasks);
+  updateSubtasks(issueKey: string, subtasks: Subtasks) {
+    this.cache.set(issueKey, subtasks);
   }
 
-  getSubtasks(issueId: string) {
-    return this.cache.get(issueId);
+  getSubtasks(issueKey: string) {
+    return this.cache.get(issueKey);
   }
 
   getAllSubtasks() {
@@ -205,12 +201,30 @@ class JiraIssuesService {
   }
 }
 
+class ExternalIssuesService {
+  private cache = new CacheWithTTL<ExternalIssueMapped[]>(30 * MINUTE);
+
+  updateExternalIssues(issueKey: string, issues: ExternalIssueMapped[]) {
+    this.cache.set(issueKey, issues);
+  }
+
+  getExternalIssue(issueKey: string) {
+    return this.cache.get(issueKey);
+  }
+
+  getAllExternalIssues() {
+    return this.cache.getValues();
+  }
+}
+
 export class JiraService {
   private queue = new TaskQueue();
 
   public subtasksService = new SubtasksService();
 
   public jiraIssuesService = new JiraIssuesService();
+
+  private externalIssuesService = new ExternalIssuesService();
 
   static getInstance() {
     if (!JiraService.instance) {
@@ -237,7 +251,11 @@ export class JiraService {
         abortSignal,
       });
 
-      const mappedJiraIssue = mapJiraIssue(apiJiraIssue);
+      if (apiJiraIssue.err) {
+        return Err(apiJiraIssue.val);
+      }
+
+      const mappedJiraIssue = mapJiraIssue(apiJiraIssue.val);
       this.jiraIssuesService.updateJiraIssue(issueId, mappedJiraIssue);
       return Ok(mappedJiraIssue);
     } catch (error) {
@@ -271,7 +289,6 @@ export class JiraService {
       jiraIssue = jiraIssueResult.val;
     }
 
-    // TODO: сделать второй запрос за экстернал линками
     const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;
 
     const allSubtasksResponse = await this.queue.register({
@@ -301,6 +318,135 @@ export class JiraService {
       externalLinks: [],
     });
     return Ok({ subtasks: allSubtasks, externalLinks: [] });
+  }
+
+  async getExternalIssues(issueKey: string, signal: AbortSignal): Promise<Result<ExternalIssueMapped[], Error>> {
+    const externalIssues = this.externalIssuesService.getExternalIssue(issueKey);
+    if (externalIssues) {
+      return Ok(externalIssues);
+    }
+
+    const externalIssuesResult = await this.queue.register({
+      key: `getExternalIssues-${issueKey}`,
+      cb: () => getExternalIssues(issueKey, { signal }),
+      abortSignal: signal,
+    });
+
+    if (externalIssuesResult.err) {
+      return Err(externalIssuesResult.val);
+    }
+
+    const externalIssuesResponse = await externalIssuesResult.val;
+    const isRemoteLinksResponse = (response: any): response is RemoteLink[] => {
+      if (!Array.isArray(response)) {
+        return false;
+      }
+      return response.every(o => typeof o?.application?.type === 'string');
+    };
+    if (!isRemoteLinksResponse(externalIssuesResponse)) {
+      return Err(new Error('Invalid response, expected remoteLinks'));
+    }
+    const issues = externalIssuesResponse.filter(o => o.application.type === 'com.atlassian.jira');
+    if (!issues) {
+      return Ok([]);
+    }
+
+    const project = issues[0].object.title.split('-')[0];
+    const externalIssueKey = issues[0].object.title;
+
+    const result: ExternalIssueMapped[] = [];
+    for (const issue of issues) {
+      // eslint-disable-next-line no-await-in-loop
+      const render = await this.queue.register({
+        key: `renderRemoteLink-${issue.id}`,
+        cb: () => renderRemoteLink(issue.id, { signal }),
+        abortSignal: signal,
+      });
+      if (render.err) {
+        return Err(render.val);
+      }
+      const html = render.val;
+
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(html, 'text/html');
+
+      const status = dom.querySelector('.status')?.textContent;
+
+      const summary = dom.querySelector('.link-summary')?.textContent;
+
+      if (!status || !summary) {
+        continue;
+      }
+
+      // @see https://developer.atlassian.com/server/jira/platform/jira-issue-statuses-as-lozenges/
+      /** example
+       * 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p>
+            <img src="https://jira.tcsbank.ru/secure/viewavatar?size=xsmall&amp;avatarId=16518&amp;avatarType=issuetype" width="16" height="16" title="[JIRA | TCS Bank] Task - Basic.Default.A task that needs to be done." alt="[JIRA | TCS Bank] Task - Basic.Default.A task that needs to be done." />
+        <span title="[JIRA | TCS Bank] SCAT-414: Тест на пробуждение">
+        <a href="https://jira.tcsbank.ru/browse/SCAT-414"
+           class="link-title"
+            target="_blank"             rel="noopener"         >SCAT-414</a> <span class="link-summary">Тест на пробуждение</span>
+    </span>
+</p>
+<ul class="link-snapshot">
+            <li class="status">
+                <span class=" jira-issue-status-lozenge aui-lozenge jira-issue-status-lozenge-blue-gray jira-issue-status-lozenge-new aui-lozenge-subtle jira-issue-status-lozenge-max-width-short" data-tooltip="&lt;span class=&quot;jira-issue-status-tooltip-title&quot;&gt;New&lt;/span&gt;">New</span>
+                </li>
+    </ul>
+
+       * 
+       * 
+       */
+      const className = 'jira-issue-status-lozenge-blue-gray';
+      const statusTextElement = dom.querySelector(`.${className}`);
+      let statusColor: string | undefined;
+      if (statusTextElement) {
+        statusColor = statusTextElement
+          .getAttribute('class')
+          ?.split(' ')
+          .find(c => {
+            const isStatusLozenge = c.startsWith('jira-issue-status-lozenge-');
+            const availableStatuses = ['medium-gray', 'green', 'yellow', 'brown', 'warm-red', 'blue-gray'];
+            return isStatusLozenge && availableStatuses.some(st => c.includes(st));
+          })
+          ?.replace('jira-issue-status-lozenge-', '');
+      }
+
+      result.push({
+        status,
+        project,
+        issueKey: externalIssueKey,
+        summary,
+        statusColor: statusColor as 'medium-gray' | 'green' | 'yellow' | 'brown' | 'warm-red' | 'blue-gray',
+      });
+    }
+
+    this.externalIssuesService.updateExternalIssues(issueKey, result);
+
+    return Ok(result);
   }
 
   isFetchingSubtasks() {

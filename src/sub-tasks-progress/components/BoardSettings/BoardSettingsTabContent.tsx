@@ -21,6 +21,7 @@ import { changeUseCustomColorScheme } from 'src/sub-tasks-progress/actions/chang
 import { toggleIgnoreStatus } from 'src/sub-tasks-progress/actions/toggleIgnoreStatus';
 import { toggleFlagsAsBlocked } from 'src/sub-tasks-progress/actions/toggleFlagsAsBlocked';
 import { toggleBlockedByLinksAsBlocked } from 'src/sub-tasks-progress/actions/toggleBlockedByLinksAsBlocked';
+import { changeCountExternalLinks } from 'src/sub-tasks-progress/actions/changeCountExternalLinks';
 import { availableColorSchemas, availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../SubTasksProgress/testData';
@@ -484,6 +485,23 @@ const CountSettings = () => {
             checked={settings.countSubtasksExternalLinks}
             onChange={() => {
               changeCount('countSubtasksExternalLinks', !settings.countSubtasksExternalLinks);
+            }}
+          >
+            Count external links
+          </Checkbox>
+        </div>
+      </div>
+      <div style={{ marginBottom: '16px' }}>
+        <div>External links</div>
+        <div style={{ marginBottom: '16px' }}>
+          Attention: external links увеличивают нагрузку + имеют мало данных, поэтому группируются только по проекту и
+          не мапятся по статусам также как и обычные ссылки
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+          <Checkbox
+            checked={settings.countExternalLinks}
+            onChange={() => {
+              changeCountExternalLinks(!settings.countExternalLinks);
             }}
           >
             Count external links

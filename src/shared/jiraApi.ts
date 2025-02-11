@@ -11,7 +11,7 @@ import complement from '@tinkoff/utils/function/complement';
 import isNil from '@tinkoff/utils/is/nil';
 import path from '@tinkoff/utils/object/path';
 import pathOr from '@tinkoff/utils/object/pathOr';
-import { Ok, Err } from 'ts-results';
+import { Ok, Err, Result } from 'ts-results';
 import { defaultHeaders } from './defaultHeaders';
 import manifest from '../../manifest.json';
 import { JiraIssue } from './jira/types';
@@ -61,14 +61,29 @@ const requestJira = request([
   http(),
 ]);
 
-const requestJiraViaFetch = (url: string, options: RequestInit = {}) => {
-  return fetch(`${BASE_URL}${url}`, {
+const requestJiraViaFetch = async (
+  url: string,
+  options: RequestInit = {},
+  retries = 5
+): Promise<Result<Response, Error>> => {
+  const response = await fetch(`${BASE_URL}${url}`, {
     headers: {
       ...EXTENSION_HEADERS,
       ...options.headers,
     },
     ...options,
   });
+
+  if (response.status === 429 && retries > 0) {
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    return requestJiraViaFetch(url, options, retries - 1);
+  }
+
+  if (response.status !== 200) {
+    return Err(new Error(`${response.status} ${response.statusText}`));
+  }
+
+  return Ok(response);
 };
 
 // Fetch all properties of a board
@@ -265,21 +280,32 @@ export const getUser = (query: string): Promise<any> =>
       return substringMatch || users[0];
     });
 
-export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<JiraIssue> => {
-  // retries 5 times with random delay on 429 error code
-  let counter = 0;
-  const maxRetries = 5;
-  // eslint-disable-next-line no-plusplus
-  while (counter++ < maxRetries) {
-    // eslint-disable-next-line no-await-in-loop
-    const response = await requestJiraViaFetch(`api/2/issue/${issueId}`, options);
-
-    if (response.status === 429) {
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-      continue;
-    }
-    return response.json();
+export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> => {
+  const result = await requestJiraViaFetch(`api/2/issue/${issueId}`, options, 5);
+  if (result.err) {
+    return Err(result.val);
   }
-  throw new Error('Too many retries');
+
+  return Ok(await result.val.json());
+};
+
+export const getExternalIssues = async (issueKey: string, options: RequestInit = {}): Promise<Result<any, Error>> => {
+  const result = await requestJiraViaFetch(`api/2/issue/${issueKey}/remotelink`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  return Ok(await result.val.json());
+};
+
+export const renderRemoteLink = async (
+  remoteLinkId: number,
+  options: RequestInit = {}
+): Promise<Result<string, Error>> => {
+  const result = await requestJiraViaFetch(`rest/viewIssue/1/remoteIssueLink/render/${remoteLinkId}`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  return Ok(await result.val.text());
 };
