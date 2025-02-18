@@ -1,7 +1,6 @@
 import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { onDOMChange } from 'src/shared/domUtils';
 
 class CardPageObject {
   selectors = {
@@ -84,6 +83,10 @@ export const BoardPagePageObject = {
 
     const column = document.querySelector(this.selectors.columnHeader)?.querySelector(`[data-id="${columnId}"]`);
     return column?.querySelector(this.selectors.columnTitle)?.textContent?.trim() || '';
+  },
+
+  getHtml(): string {
+    return document.body.innerHTML;
   },
 };
 

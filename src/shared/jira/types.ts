@@ -262,5 +262,15 @@ export type ExternalIssueMapped = {
   issueKey: string;
   summary: string;
   // @see https://developer.atlassian.com/server/jira/platform/jira-issue-statuses-as-lozenges/
-  statusColor: 'medium-gray' | 'green' | 'yellow' | 'brown' | 'warm-red' | 'blue-gray';
+  // @see /rest/api/2/statuscategory/
+  statusColor: // no category => unmapped
+  | 'medium-gray'
+    // done
+    | 'green'
+    // in progress
+    | 'yellow'
+    | 'brown'
+    | 'warm-red'
+    // Todo\new
+    | 'blue-gray';
 };

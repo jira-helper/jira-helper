@@ -302,7 +302,7 @@ export const renderRemoteLink = async (
   remoteLinkId: number,
   options: RequestInit = {}
 ): Promise<Result<string, Error>> => {
-  const result = await requestJiraViaFetch(`rest/viewIssue/1/remoteIssueLink/render/${remoteLinkId}`, options, 5);
+  const result = await requestJiraViaFetch(`viewIssue/1/remoteIssueLink/render/${remoteLinkId}`, options, 5);
   if (result.err) {
     return Err(result.val);
   }

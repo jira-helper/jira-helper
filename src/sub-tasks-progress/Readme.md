@@ -19,7 +19,7 @@
 	- all we know about external issues are summary, key and statusname
 	- external links should be grouped by project (part of issue key)
 	- external links should have own status name mapping to progress status
-	- [ ] add check for issue type and load external issues only for that issue type
+	- [x] add check for issue type and load external issues only for that issue type
 	- [ ] add progress status able to external issues
 - [ ] add logger to all code
 - [ ] refactor feature 

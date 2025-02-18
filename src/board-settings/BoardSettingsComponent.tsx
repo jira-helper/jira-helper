@@ -5,6 +5,7 @@ import { BoardSettingsTabContent } from 'src/sub-tasks-progress/components/Board
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
+import { DiagnosticSettingsTabContent } from 'src/features/diagnostic/SettingsTab';
 import { Image } from '../shared/components/Image';
 import logoUrl from '../assets/jira_helper_32x32.png';
 import styles from './BoardSettingsComponent.module.css';
@@ -31,6 +32,11 @@ export const BoardSettingsComponent = () => {
           <Tabs.TabPane tab="Sub-tasks progress" key="2">
             <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
               <BoardSettingsTabContent />
+            </ErrorBoundary>
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Diagnostic" key="3">
+            <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
+              <DiagnosticSettingsTabContent />
             </ErrorBoundary>
           </Tabs.TabPane>
         </Tabs>

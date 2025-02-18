@@ -6,21 +6,21 @@ type Message = {
   timestamp: string;
 };
 
-type Level = 'info' | 'error' | 'warn';
-const levels: Level[] = ['info', 'error', 'warn'];
+export type LoggerLevel = 'info' | 'error' | 'warn';
+const levels: LoggerLevel[] = ['info', 'error', 'warn'];
 
 class Logger {
   private messagesSize: number = 2000;
 
   private messages: Message[] = [];
 
-  private level: Level = 'error';
+  private level: LoggerLevel = 'error';
 
-  setLevel(level: Level) {
+  setLevel(level: LoggerLevel) {
     this.level = level;
   }
 
-  log(message: string, level: Level = 'info') {
+  log(message: string, level: LoggerLevel = 'info') {
     this.messages.push({ message, level, timestamp: new Date().toISOString() });
     if (this.messages.length > this.messagesSize) {
       this.messages = this.messages.slice(-this.messagesSize);
@@ -53,6 +53,9 @@ class Logger {
   getMessages() {
     return this.messages;
   }
+
+  getPrefixedLog = (prefix: string) => (message: string, level?: LoggerLevel) =>
+    this.log(`${prefix}: ${message}`, level);
 }
 
 export const loggerToken = new Token<Logger>('logger');

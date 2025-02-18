@@ -1,6 +1,4 @@
 import { Err, Ok, Result } from 'ts-results';
-import EventEmitter from 'events';
-import TypedEmitter from 'typed-emitter';
 import { Container, Token } from 'dioma';
 import { getExternalIssues, getJiraIssue, renderRemoteLink, searchIssues } from '../jiraApi';
 import { ExternalIssueMapped, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
@@ -60,6 +58,7 @@ class TaskQueue {
       resolve = res;
       reject = rej;
     });
+
     this.queue.push({ ...task, cb: () => task.cb().then(resolve, reject), promise });
 
     task.abortSignal.addEventListener('abort', () => {
@@ -242,22 +241,28 @@ export class JiraService {
     }
 
     try {
-      const apiJiraIssue = await this.queue.register({
+      const mappedJiraIssue = await this.queue.register({
         key: `fetchJiraIssue-${issueId}`,
-        cb: () =>
-          getJiraIssue(issueId, {
+        cb: async () => {
+          // TODO: возможно что пока задача была в очереди, issue уже загрузили
+          const cachedIssue = this.jiraIssuesService.getJiraIssue(issueId);
+          if (cachedIssue) {
+            return Ok(cachedIssue);
+          }
+          const apiJiraIssue = await getJiraIssue(issueId, {
             signal: abortSignal,
-          }),
+          });
+          if (apiJiraIssue.err) {
+            return Err(apiJiraIssue.val);
+          }
+          const mappedIssue = mapJiraIssue(apiJiraIssue.val);
+          this.jiraIssuesService.updateJiraIssue(issueId, mappedIssue);
+          return Ok(mappedIssue);
+        },
         abortSignal,
       });
 
-      if (apiJiraIssue.err) {
-        return Err(apiJiraIssue.val);
-      }
-
-      const mappedJiraIssue = mapJiraIssue(apiJiraIssue.val);
-      this.jiraIssuesService.updateJiraIssue(issueId, mappedJiraIssue);
-      return Ok(mappedJiraIssue);
+      return mappedJiraIssue;
     } catch (error) {
       if (error instanceof Error) {
         const message = `Failed to fetch Jira issue ${issueId}: ${error.message}`;
@@ -276,17 +281,6 @@ export class JiraService {
     const subtasks = this.subtasksService.getSubtasks(issueId);
     if (subtasks) {
       return Ok(subtasks);
-    }
-
-    let jiraIssue: JiraIssueMapped | null = null;
-    jiraIssue = this.jiraIssuesService.getJiraIssue(issueId);
-
-    if (!jiraIssue) {
-      const jiraIssueResult = await this.fetchJiraIssue(issueId, abortSignal);
-      if (jiraIssueResult.err) {
-        return Err(jiraIssueResult.val);
-      }
-      jiraIssue = jiraIssueResult.val;
     }
 
     const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;
@@ -321,6 +315,7 @@ export class JiraService {
   }
 
   async getExternalIssues(issueKey: string, signal: AbortSignal): Promise<Result<ExternalIssueMapped[], Error>> {
+    console.log('start');
     const externalIssues = this.externalIssuesService.getExternalIssue(issueKey);
     if (externalIssues) {
       return Ok(externalIssues);
@@ -331,6 +326,7 @@ export class JiraService {
       cb: () => getExternalIssues(issueKey, { signal }),
       abortSignal: signal,
     });
+    console.log('no issues');
 
     if (externalIssuesResult.err) {
       return Err(externalIssuesResult.val);
@@ -347,7 +343,7 @@ export class JiraService {
       return Err(new Error('Invalid response, expected remoteLinks'));
     }
     const issues = externalIssuesResponse.filter(o => o.application.type === 'com.atlassian.jira');
-    if (!issues) {
+    if (!issues.length) {
       return Ok([]);
     }
 
@@ -370,7 +366,7 @@ export class JiraService {
       const parser = new DOMParser();
       const dom = parser.parseFromString(html, 'text/html');
 
-      const status = dom.querySelector('.status')?.textContent;
+      const status = dom.querySelector('.status span')?.textContent;
 
       const summary = dom.querySelector('.link-summary')?.textContent;
 
@@ -420,7 +416,7 @@ export class JiraService {
        * 
        * 
        */
-      const className = 'jira-issue-status-lozenge-blue-gray';
+      const className = 'jira-issue-status-lozenge';
       const statusTextElement = dom.querySelector(`.${className}`);
       let statusColor: string | undefined;
       if (statusTextElement) {

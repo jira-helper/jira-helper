@@ -2,8 +2,10 @@ import { JiraIssueMapped } from 'src/shared/jira/types';
 import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
+import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues/jiraExternalIssues';
 import { Status, SubTasksProgress } from '../types';
 import { useGetSettings } from './useGetSettings';
+import { mapStatusCategoryColorToProgressStatus } from '../colorSchemas';
 
 export const useGetSubtasksToCountProgress = (issueId: string) => {
   const { settings } = useGetSettings();
@@ -64,6 +66,18 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
   }
 };
 
+const createEmptyGroup = () => ({
+  progress: {
+    todo: 0,
+    inProgress: 0,
+    almostDone: 0,
+    done: 0,
+    blocked: 0,
+    unmapped: 0,
+  },
+  comments: [],
+});
+
 /**
  * Если задача - эпик, то в инфе о задаче есть прилинкованные задачи. Если в сабтасках есть задача эпика, но ее нет в прилинкованных - она задача эпика
  * Если задача - ишшуя, то в инфе о задаче есть и прилинкованные задачи и сабтаски, следует использовать эту инфу для определения типа связи
@@ -72,8 +86,7 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
  */
 
 const useCalcProgress = (
-  subtasks: JiraIssueMapped[],
-  externalLinks: JiraIssueMapped[]
+  subtasks: JiraIssueMapped[]
 ): Record<string, { progress: SubTasksProgress; comments: string[] }> => {
   const { settings } = useGetSettings();
   const statusMapping = settings?.newStatusMapping || {};
@@ -112,17 +125,7 @@ const useCalcProgress = (
     }
 
     if (!progress[group]) {
-      progress[group] = {
-        progress: {
-          todo: 0,
-          inProgress: 0,
-          almostDone: 0,
-          done: 0,
-          blocked: 0,
-          unmapped: 0,
-        },
-        comments: [],
-      };
+      progress[group] = createEmptyGroup();
     }
     if (issue.isFlagged && settings.flagsAsBlocked) {
       status.progressStatus = 'blocked';
@@ -142,13 +145,40 @@ const useCalcProgress = (
   };
 
   subtasks.forEach(mapIssue);
-  externalLinks.forEach(mapIssue);
 
+  return progress;
+};
+
+const useExternalIssuesProgress = (issueKey: string) => {
+  const { settings } = useGetSettings();
+
+  const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
+  const externalIssues = useJiraExternalIssuesStore(useShallow(state => state.data[issueKey]?.externalIssues));
+
+  if (!externalIssues) {
+    return progress;
+  }
+  const isEnabled =
+    settings?.countIssuesExternalLinks || settings.countIssuesExternalLinks || settings.countSubtasksExternalLinks;
+  if (!isEnabled) {
+    return progress;
+  }
+  console.log('🚀 ~ useExternalIssuesProgress ~ externalIssues:', externalIssues);
+  for (const externalIssue of externalIssues) {
+    const group = `ext: ${externalIssue.project}`;
+    if (!progress[group]) {
+      progress[group] = createEmptyGroup();
+    }
+
+    const progressStatus = mapStatusCategoryColorToProgressStatus(externalIssue.statusColor);
+    progress[group].progress[progressStatus] += 1;
+  }
   return progress;
 };
 
 export const useSubtasksProgress = (issueKey: string) => {
   const subtasks = useGetSubtasksToCountProgress(issueKey);
-  const progress = useCalcProgress(subtasks, []);
-  return progress;
+  const progress = useCalcProgress(subtasks);
+  const externalIssuesProgress = useExternalIssuesProgress(issueKey);
+  return { ...progress, ...externalIssuesProgress };
 };
