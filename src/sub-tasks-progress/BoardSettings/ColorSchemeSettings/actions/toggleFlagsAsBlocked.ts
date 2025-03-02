@@ -1,6 +1,6 @@
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { useSubTaskProgressBoardPropertyStore } from '../../../stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from '../../../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
 export const toggleFlagsAsBlocked = () => {
   useSubTaskProgressBoardPropertyStore.getState().actions.toggleFlagsAsBlocked();

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Card, Checkbox, Select } from 'antd';
-import { useGetSettings } from '../../hooks/useGetSettings';
+import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { availableColorSchemas, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
-import { SubTasksProgressComponent } from '../../components/SubTasksProgress/SubTasksProgressComponent';
-import { subTasksProgress } from '../../components/SubTasksProgress/testData';
+import { SubTasksProgressComponent } from '../../SubTasksProgress/SubTasksProgressComponent';
+import { subTasksProgress } from '../../SubTasksProgress/testData';
 import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
 import { changeUseCustomColorScheme } from './actions/changeUseCustomColorScheme';
 import { toggleFlagsAsBlocked } from './actions/toggleFlagsAsBlocked';

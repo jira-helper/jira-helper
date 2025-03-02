@@ -5,7 +5,7 @@ import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/
 import { withStore } from 'src/shared/testTools/storyWithStore';
 import { withDi } from 'src/shared/testTools/storyWithDi';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
-import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
 
 const meta: Meta<typeof BoardSettingsTabContent> = {
   title: 'Features/Sub-tasks Progress/BoardSettingsTabContent',

@@ -3,9 +3,9 @@ import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalI
 import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues';
 import { createAction } from 'src/shared/action';
 import { loggerToken } from 'src/shared/Logger';
-import { useJiraSubtasksStore } from '../../shared/jira/stores/jiraSubtasks/jiraSubtasks';
-import { loadIssue } from './loadIssue';
-import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
+import { useJiraSubtasksStore } from '../../../shared/jira/stores/jiraSubtasks/jiraSubtasks';
+import { loadIssue } from '../../actions/loadIssue';
+import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
 
 const innerLoadSubtasksForIssue = createAction({
   name: 'loadSubtasksForIssue',

@@ -5,7 +5,8 @@ import { useShallow } from 'zustand/react/shallow';
 import { Card } from 'antd';
 import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { useDi } from 'src/shared/diContext';
-import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
+
+import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { setColumns } from './actions/setColumns';
 
 export const ColumnsSettingsPure = (props: {

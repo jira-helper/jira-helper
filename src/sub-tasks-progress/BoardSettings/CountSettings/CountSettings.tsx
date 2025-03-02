@@ -1,7 +1,7 @@
 import React from 'react';
 import Checkbox from 'antd/es/checkbox';
 import { Card } from 'antd';
-import { useGetSettings } from '../../hooks/useGetSettings';
+import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { changeCount } from './actions/changeCount';
 
 export const CountSettings = () => {

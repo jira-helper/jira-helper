@@ -1,5 +1,5 @@
-import { AvailableColorSchemas } from '../colorSchemas';
-import { BoardProperty, CountType, GroupFields, Status } from '../types';
+import { AvailableColorSchemas } from '../../colorSchemas';
+import { BoardProperty, CountType, GroupFields, Status } from '../../types';
 
 export type State = {
   data: Required<BoardProperty>;
@@ -19,6 +19,5 @@ export type State = {
     toggleIgnoredStatus: (statusId: number) => void;
     toggleFlagsAsBlocked: () => void;
     toggleBlockedByLinksAsBlocked: () => void;
-    changeCountExternalLinks: (value: boolean) => void;
   };
 };

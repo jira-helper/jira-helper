@@ -3,9 +3,9 @@ import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
 import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues/jiraExternalIssues';
-import { Status, SubTasksProgress } from '../types';
-import { useGetSettings } from './useGetSettings';
-import { mapStatusCategoryColorToProgressStatus } from '../colorSchemas';
+import { Status, SubTasksProgress } from '../../types';
+import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
+import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
 
 export const useGetSubtasksToCountProgress = (issueId: string) => {
   const { settings } = useGetSettings();
@@ -163,7 +163,7 @@ const useExternalIssuesProgress = (issueKey: string) => {
   if (!isEnabled) {
     return progress;
   }
-  console.log('🚀 ~ useExternalIssuesProgress ~ externalIssues:', externalIssues);
+
   for (const externalIssue of externalIssues) {
     const group = `ext: ${externalIssue.project}`;
     if (!progress[group]) {

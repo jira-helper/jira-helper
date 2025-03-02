@@ -1,4 +1,4 @@
-import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
 
 export const useGetSettings = () => {
   const propertyData = useSubTaskProgressBoardPropertyStore(state => state.data);

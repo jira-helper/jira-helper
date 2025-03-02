@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Divider } from 'antd';
 
-import { resetBoardProperty } from 'src/sub-tasks-progress/actions/resetBoardProperty';
+import { resetBoardProperty } from 'src/sub-tasks-progress/BoardSettings/actions/resetBoardProperty';
 
 import { ColumnsSettingsContainer } from 'src/sub-tasks-progress/BoardSettings/ColumnSettings/ColumnSettings';
 import { CountSettings } from 'src/sub-tasks-progress/BoardSettings/CountSettings/CountSettings';

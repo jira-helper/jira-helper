@@ -1,6 +1,7 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { useGetSettings } from '../../hooks/useGetSettings';
+
+import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { jiraColorScheme } from '../../colorSchemas';
 import { useGetSubtasksForStatusSettings } from './hooks/useGetSubtasksForStatusSettings';
 import { toggleIgnoreStatus } from './actions/toggleIgnoreStatus';

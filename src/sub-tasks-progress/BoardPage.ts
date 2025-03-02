@@ -3,9 +3,9 @@ import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { registerSettings } from 'src/board-settings/actions/registerSettings';
 import { PageModification } from '../shared/PageModification';
 
-import { IssuesSubTasksProgressContainer } from './components/SubTasksProgress/IssuesSubTasksProgress';
-import { loadSubTaskProgressBoardProperty } from './actions/loadSubTaskProgressBoardProperty';
-import { BoardSettingsTabContent } from './components/BoardSettings/BoardSettingsTabContent';
+import { loadSubTaskProgressBoardProperty } from './SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
+import { BoardSettingsTabContent } from './BoardSettings/BoardSettingsTabContent';
+import { IssuesSubTasksProgressContainer } from './IssueCardSubTasksProgress/IssuesSubTasksProgress';
 
 export class SubTasksProgressBoardPage extends PageModification<void, Element> {
   getModificationId(): string {

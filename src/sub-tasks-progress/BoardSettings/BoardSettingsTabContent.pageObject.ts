@@ -1,8 +1,9 @@
 import { fireEvent, screen } from '@testing-library/react';
-import { AvailableColorSchemas } from '../../colorSchemas';
-import { setSelectedColorScheme } from '../../actions/setSelectedColorScheme';
-import { setGroupingField } from '../../actions/setGroupingField';
-import { GroupFields, Status } from '../../types';
+import { AvailableColorSchemas } from '../colorSchemas';
+
+import { GroupFields, Status } from '../types';
+import { setSelectedColorScheme } from './ColorSchemeSettings/actions/setSelectedColorScheme';
+import { setGroupingField } from './GroupingSettings/actions/setGroupingField';
 
 export const BoardSettingsTabContentPageObject = {
   getColumns: () => {

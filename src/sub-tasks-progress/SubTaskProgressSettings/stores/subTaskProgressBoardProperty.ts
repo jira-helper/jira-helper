@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { State } from './subTaskProgressBoardProperty.types';
-import { BoardProperty } from '../types';
+import { BoardProperty } from '../../types';
 
 const initialData: Required<BoardProperty> = {
   columnsToTrack: [],
@@ -22,7 +22,6 @@ const initialData: Required<BoardProperty> = {
   ignoredStatuses: [],
   flagsAsBlocked: true,
   blockedByLinksAsBlocked: false,
-  countExternalLinks: false,
 };
 
 export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
@@ -120,12 +119,6 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.blockedByLinksAsBlocked = !state.data.blockedByLinksAsBlocked;
-        })
-      ),
-    changeCountExternalLinks: (value: boolean) =>
-      set(
-        produce((state: State) => {
-          state.data.countExternalLinks = value;
         })
       ),
   },

@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
-import { loadSubtasksForIssue } from 'src/sub-tasks-progress/actions/loadSubtasksForIssue';
+import { loadSubtasksForIssue } from 'src/sub-tasks-progress/IssueCardSubTasksProgress/actions/loadSubtasksForIssue';
 
-import { useSubtasksProgress } from 'src/sub-tasks-progress/hooks/useSubtasksProgress';
+import { useSubtasksProgress } from 'src/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
 import { colorSchemas } from 'src/sub-tasks-progress/colorSchemas';
 import { useDi, WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 
 import { globalContainer } from 'dioma';
-import { useGetSettings } from '../../hooks/useGetSettings';
-import { SubTaskProgressByGroup } from './SubTaskProgressByGroup';
+import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
+import { SubTaskProgressByGroup } from '../SubTasksProgress/SubTaskProgressByGroup';
 
 const IssuesSubTasksProgress = (props: { issueId: string }) => {
   const { settings } = useGetSettings();

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, Select, Tag } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
-import { useGetSettings } from '../../hooks/useGetSettings';
+import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { GroupFields } from '../../types';
 import { setGroupingField } from './actions/setGroupingField';
 import { removeIgnoredGroup } from './actions/removeIgnoredGroup';

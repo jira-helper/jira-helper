@@ -1,10 +1,10 @@
 import React from 'react';
 import { Checkbox, Select, Tooltip } from 'antd';
 import { InfoCircleFilled } from '@ant-design/icons';
-import { useGetSettings } from '../../hooks/useGetSettings';
+import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { useGetSubtasksForStatusSettings } from './hooks/useGetSubtasksForStatusSettings';
-import { newMoveBoardStatusToProgressStatus } from './actions/newMoveBoardStatusToProgressStatus';
+import { moveBoardStatusToProgressStatus } from './actions/moveBoardStatusToProgressStatus';
 import { toggleIgnoreStatus } from './actions/toggleIgnoreStatus';
 
 export const SubTasksSettings = () => {
@@ -50,7 +50,7 @@ export const SubTasksSettings = () => {
               style={{ minWidth: 140 }}
               value={statusMapping[statusIdNumber]?.progressStatus || 'unmapped'}
               onChange={value => {
-                newMoveBoardStatusToProgressStatus(statusIdNumber, status.name, value);
+                moveBoardStatusToProgressStatus(statusIdNumber, status.name, value);
               }}
             >
               {availableStatuses.map(avStatus => {

@@ -5,13 +5,13 @@ import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { moveBoardStatusToProgressStatus } from 'src/sub-tasks-progress/actions/moveBoardStatusToProgressStatus';
+import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
-import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
-import { AvailableColorSchemas } from '../../colorSchemas';
-import { BoardProperty, GroupFields, Status } from '../../types';
+import { AvailableColorSchemas } from '../colorSchemas';
+import { BoardProperty, GroupFields, Status } from '../types';
+import { moveBoardStatusToProgressStatus } from './ColorSchemeSettings/actions/moveBoardStatusToProgressStatus';
 
 function setup({
   columnsOnBoard,
@@ -360,7 +360,7 @@ describe('BoardSettingsTabContent', () => {
       expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
     });
 
-    await moveBoardStatusToProgressStatus('status2', 'inProgress');
+    await moveBoardStatusToProgressStatus(2, 'status2', 'inProgress');
 
     await waitFor(() => {
       // check that board property updated

@@ -1,7 +1,8 @@
 import { globalContainer } from 'dioma';
-import { BoardPropertyServiceToken } from '../../shared/boardPropertyService';
+import { BoardPropertyServiceToken } from '../../../shared/boardPropertyService';
+
+import { BoardProperty } from '../../types';
 import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
-import { BoardProperty } from '../types';
 
 export const loadSubTaskProgressBoardProperty = async () => {
   // dont load if it loaded already
