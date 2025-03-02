@@ -1,7 +1,7 @@
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { AvailableColorSchemas } from '../colorSchemas';
-import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
+import { AvailableColorSchemas } from '../../../colorSchemas';
+import { useSubTaskProgressBoardPropertyStore } from '../../../stores/subTaskProgressBoardProperty';
 
 export const setSelectedColorScheme = (colorScheme: AvailableColorSchemas) => {
   useSubTaskProgressBoardPropertyStore.getState().actions.setSelectedColorScheme(colorScheme);

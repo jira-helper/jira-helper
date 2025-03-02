@@ -1,9 +1,9 @@
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from '../../../stores/subTaskProgressBoardProperty';
 
-export const toggleFlagsAsBlocked = () => {
-  useSubTaskProgressBoardPropertyStore.getState().actions.toggleFlagsAsBlocked();
+export const toggleIgnoreStatus = (statusId: number) => {
+  useSubTaskProgressBoardPropertyStore.getState().actions.toggleIgnoredStatus(statusId);
   globalContainer
     .inject(BoardPropertyServiceToken)
     .updateBoardProperty('sub-task-progress', useSubTaskProgressBoardPropertyStore.getState().data, {});
