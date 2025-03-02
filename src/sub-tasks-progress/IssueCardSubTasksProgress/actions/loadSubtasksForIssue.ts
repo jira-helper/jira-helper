@@ -3,9 +3,9 @@ import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalI
 import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
 import { createAction } from 'src/shared/action';
 import { loggerToken } from 'src/shared/Logger';
+import { loadIssue } from 'src/shared/jira/jiraIssues/actions/loadIssue';
+import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { useJiraSubtasksStore } from '../../../shared/jira/stores/jiraSubtasks';
-import { loadIssue } from '../../actions/loadIssue';
-import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
 
 const innerLoadSubtasksForIssue = createAction({
   name: 'loadSubtasksForIssue',
@@ -39,6 +39,7 @@ const loadExternalIssuesForIssue = createAction({
   name: 'loadExternalIssuesForIssue',
   async handler(issueKey: string, abortSignal: AbortSignal) {
     const logger = this.di.inject(loggerToken);
+    const { actions } = useJiraExternalIssuesStore.getState();
     const log = logger.getPrefixedLog(`loadExternalIssuesForIssue: ${issueKey}`);
 
     const issueExternalIssues = useJiraExternalIssuesStore.getState().data[issueKey];
@@ -47,7 +48,7 @@ const loadExternalIssuesForIssue = createAction({
       return;
     }
 
-    useJiraExternalIssuesStore.getState().actions.startLoadingExternalIssues(issueKey);
+    actions.startLoadingExternalIssues(issueKey);
 
     const jiraService = this.di.inject(JiraServiceToken);
     let issueData = useJiraIssuesStore.getState().issues.find(i => i.data.key === issueKey);
@@ -59,7 +60,7 @@ const loadExternalIssuesForIssue = createAction({
 
     if (!issueData) {
       log('loaded issue but no data after loading finished', 'warn');
-      useJiraExternalIssuesStore.getState().actions.addExternalIssues(issueKey, []);
+      actions.addExternalIssues(issueKey, []);
       return;
     }
 
@@ -67,19 +68,19 @@ const loadExternalIssuesForIssue = createAction({
 
     if (!settings.countEpicExternalLinks && issueData.data.issueType === 'Epic') {
       log('skip epic');
-      useJiraExternalIssuesStore.getState().actions.addExternalIssues(issueKey, []);
+      actions.addExternalIssues(issueKey, []);
       return;
     }
 
     if (!settings.countIssuesExternalLinks && issueData.data.issueType === 'Task') {
       log('skip task');
-      useJiraExternalIssuesStore.getState().actions.addExternalIssues(issueKey, []);
+      actions.addExternalIssues(issueKey, []);
       return;
     }
 
     if (!settings.countSubtasksExternalLinks && issueData.data.issueType === 'Sub-task') {
       log('skip sub-task');
-      useJiraExternalIssuesStore.getState().actions.addExternalIssues(issueKey, []);
+      actions.addExternalIssues(issueKey, []);
       return;
     }
 
@@ -88,11 +89,11 @@ const loadExternalIssuesForIssue = createAction({
 
     if (result.err) {
       log(`failed to load external issues ${result.val.message}`, 'error');
-      useJiraExternalIssuesStore.getState().actions.removeExternalIssues(issueKey);
+      actions.removeExternalIssues(issueKey);
       return;
     }
 
-    useJiraExternalIssuesStore.getState().actions.addExternalIssues(issueKey, result.val);
+    actions.addExternalIssues(issueKey, result.val);
   },
 });
 
