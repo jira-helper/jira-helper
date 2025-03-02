@@ -1,6 +1,25 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import { StoreState } from './types';
+
+export type State = {
+  [key: string]:
+    | {
+        value: any;
+        loading: boolean;
+      }
+    | undefined;
+};
+
+type Actions = {
+  setPropertyValue: (key: string, value: any) => void;
+  startLoading: (key: string) => void;
+  finishLoading: (key: string) => void;
+};
+
+type StoreState = {
+  properties: State;
+  actions: Actions;
+};
 
 export const useJiraBoardPropertiesStore = create<StoreState>(set => ({
   properties: {},

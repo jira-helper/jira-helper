@@ -1,9 +1,9 @@
 import { JiraServiceToken } from 'src/shared/jira/jiraService';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues/jiraExternalIssues';
-import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues';
+import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
+import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
 import { createAction } from 'src/shared/action';
 import { loggerToken } from 'src/shared/Logger';
-import { useJiraSubtasksStore } from '../../../shared/jira/stores/jiraSubtasks/jiraSubtasks';
+import { useJiraSubtasksStore } from '../../../shared/jira/stores/jiraSubtasks';
 import { loadIssue } from '../../actions/loadIssue';
 import { useSubTaskProgressBoardPropertyStore } from '../../stores/subTaskProgressBoardProperty';
 

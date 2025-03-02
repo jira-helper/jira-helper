@@ -1,5 +1,5 @@
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
+import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
 
 export const useGetSubtasksForStatusSettings = () => {
   const { data } = useJiraSubtasksStore(

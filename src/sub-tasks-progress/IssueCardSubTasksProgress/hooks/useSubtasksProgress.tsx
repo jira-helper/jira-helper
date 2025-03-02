@@ -1,8 +1,8 @@
 import { JiraIssueMapped } from 'src/shared/jira/types';
-import { useJiraIssuesStore } from 'src/shared/jira/stores/jiraIssues/jiraIssues';
+import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks/jiraSubtasks';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues/jiraExternalIssues';
+import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
 import { Status, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';

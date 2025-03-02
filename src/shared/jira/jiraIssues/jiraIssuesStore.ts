@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import { JiraIssueMapped } from '../../types';
-import { State } from './types';
+import { JiraIssueMapped } from '../types';
+
+type State = {
+  issues: { data: JiraIssueMapped }[];
+  actions: {
+    addIssue: (issue: JiraIssueMapped) => void;
+    removeIssue: (issueKey: string) => void;
+  };
+};
 
 export const useJiraIssuesStore = create<State>(set => ({
   issues: [],

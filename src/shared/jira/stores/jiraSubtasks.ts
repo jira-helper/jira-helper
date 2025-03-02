@@ -1,8 +1,26 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 
-import { Subtasks } from '../../jiraService';
-import { State } from './types';
+import { Subtasks } from '../jiraService';
+
+import { JiraIssueMapped } from '../types';
+
+type State = {
+  data: {
+    [issueId: string]:
+      | {
+          subtasks: JiraIssueMapped[];
+          externalLinks: JiraIssueMapped[];
+          state: 'loading' | 'loaded' | 'error';
+        }
+      | undefined;
+  };
+  actions: {
+    addSubtasks: (issueId: string, subtasks: Subtasks) => void;
+    removeSubtasks: (issueId: string) => void;
+    startLoadingSubtasks: (issueId: string) => void;
+  };
+};
 
 export const useJiraSubtasksStore = create<State>(set => ({
   data: {},

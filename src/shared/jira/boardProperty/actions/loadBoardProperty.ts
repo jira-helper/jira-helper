@@ -1,6 +1,6 @@
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { useJiraBoardPropertiesStore } from 'src/shared/jira/stores/jiraBoardProperties/jiraBoardProperties';
+import { useJiraBoardPropertiesStore } from 'src/shared/jira/boardProperty/jiraBoardPropertiesStore';
 
 export const loadBoardProperty = async <T>(key: string) => {
   const { value = undefined, loading = false } = useJiraBoardPropertiesStore.getState().properties[key] ?? {};

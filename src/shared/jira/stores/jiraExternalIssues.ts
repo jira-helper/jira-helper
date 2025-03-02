@@ -1,8 +1,23 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 
-import { State } from './types';
-import { ExternalIssueMapped } from '../../types';
+import { ExternalIssueMapped } from '../types';
+
+type State = {
+  data: {
+    [issueKey: string]:
+      | {
+          externalIssues: ExternalIssueMapped[];
+          state: 'loading' | 'loaded' | 'error';
+        }
+      | undefined;
+  };
+  actions: {
+    addExternalIssues: (issueKey: string, externalIssues: ExternalIssueMapped[]) => void;
+    removeExternalIssues: (issueKey: string) => void;
+    startLoadingExternalIssues: (issueKey: string) => void;
+  };
+};
 
 export const useJiraExternalIssuesStore = create<State>(set => ({
   data: {},
