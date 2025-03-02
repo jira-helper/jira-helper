@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import Modal from 'antd/es/modal';
 import { Tabs } from 'antd';
-import { BoardSettingsTabContent } from 'src/sub-tasks-progress/components/BoardSettings/BoardSettingsTabContent';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
-import { DiagnosticSettingsTabContent } from 'src/features/diagnostic/SettingsTab';
 import { Image } from '../shared/components/Image';
 import logoUrl from '../assets/jira_helper_32x32.png';
 import styles from './BoardSettingsComponent.module.css';
+import { useBoardSettingsStore } from './stores/boardSettings/boardSettings';
 
 export const BoardSettingsComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const settings = useBoardSettingsStore(state => state.data.settings);
 
   return (
     <WithDi container={globalContainer}>
@@ -26,19 +27,13 @@ export const BoardSettingsComponent = () => {
         width="auto"
       >
         <Tabs defaultActiveKey="1">
-          <Tabs.TabPane tab="General" key="1">
-            Content of tab 1
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Sub-tasks progress" key="2">
-            <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
-              <BoardSettingsTabContent />
-            </ErrorBoundary>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Diagnostic" key="3">
-            <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
-              <DiagnosticSettingsTabContent />
-            </ErrorBoundary>
-          </Tabs.TabPane>
+          {settings.map(setting => (
+            <Tabs.TabPane tab={setting.title} key={setting.title}>
+              <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
+                <setting.component />
+              </ErrorBoundary>
+            </Tabs.TabPane>
+          ))}
         </Tabs>
       </Modal>
     </WithDi>

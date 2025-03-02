@@ -29,6 +29,7 @@ import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
+import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -65,6 +66,7 @@ async function start() {
       CardColorsBoardPage,
       BoardSettingsBoardPage,
       SubTasksProgressBoardPage,
+      DiagnosticBoardPage,
     ],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,
