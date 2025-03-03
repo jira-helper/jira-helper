@@ -1,5 +1,9 @@
+import { createAction } from 'src/shared/action';
 import { useSubTaskProgressBoardPropertyStore } from '../../../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
-export const toggleFlagsAsBlocked = () => {
-  useSubTaskProgressBoardPropertyStore.getState().actions.toggleFlagsAsBlocked();
-};
+export const toggleFlagsAsBlocked = createAction({
+  name: 'toggleFlagsAsBlocked',
+  handler() {
+    useSubTaskProgressBoardPropertyStore.getState().actions.toggleFlagsAsBlocked();
+  },
+});
