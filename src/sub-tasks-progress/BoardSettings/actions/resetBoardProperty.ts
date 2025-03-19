@@ -4,7 +4,10 @@ import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/Sub
 export const resetBoardProperty = createAction({
   name: 'resetBoardProperty',
   handler() {
-    const initialState = useSubTaskProgressBoardPropertyStore.getInitialState();
-    useSubTaskProgressBoardPropertyStore.setState(initialState);
+    const initialState = useSubTaskProgressBoardPropertyStore.getInitialState().data;
+    useSubTaskProgressBoardPropertyStore.setState(state => ({
+      ...state,
+      data: initialState,
+    }));
   },
 });

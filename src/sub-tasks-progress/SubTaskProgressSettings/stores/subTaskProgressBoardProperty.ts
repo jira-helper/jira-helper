@@ -61,7 +61,9 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
     addIgnoredGroup: (group: string) =>
       set(
         produce((state: State) => {
-          state.data.ignoredGroups.push(group);
+          if (!state.data.ignoredGroups.includes(group)) {
+            state.data.ignoredGroups.push(group);
+          }
         })
       ),
     removeIgnoredGroup: (group: string) =>

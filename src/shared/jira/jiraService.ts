@@ -144,7 +144,7 @@ const getIsBlockedByLinks = (issue: JiraIssue) => {
   });
 };
 
-const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
+export const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
   return {
     ...jiraIssue,
     id: jiraIssue.id,
@@ -216,12 +216,18 @@ class ExternalIssuesService {
   }
 }
 
-export class JiraService {
+export interface IJiraService {
+  fetchJiraIssue: (issueId: string, abortSignal: AbortSignal) => Promise<Result<JiraIssueMapped, Error>>;
+  fetchSubtasks: (issueId: string, abortSignal: AbortSignal) => Promise<Result<Subtasks, Error>>;
+  getExternalIssues: (issueKey: string, signal: AbortSignal) => Promise<Result<ExternalIssueMapped[], Error>>;
+}
+
+export class JiraService implements IJiraService {
   private queue = new TaskQueue();
 
-  public subtasksService = new SubtasksService();
+  private subtasksService = new SubtasksService();
 
-  public jiraIssuesService = new JiraIssuesService();
+  private jiraIssuesService = new JiraIssuesService();
 
   private externalIssuesService = new ExternalIssuesService();
 
@@ -315,7 +321,6 @@ export class JiraService {
   }
 
   async getExternalIssues(issueKey: string, signal: AbortSignal): Promise<Result<ExternalIssueMapped[], Error>> {
-    console.log('start');
     const externalIssues = this.externalIssuesService.getExternalIssue(issueKey);
     if (externalIssues) {
       return Ok(externalIssues);
@@ -326,7 +331,6 @@ export class JiraService {
       cb: () => getExternalIssues(issueKey, { signal }),
       abortSignal: signal,
     });
-    console.log('no issues');
 
     if (externalIssuesResult.err) {
       return Err(externalIssuesResult.val);
@@ -450,7 +454,7 @@ export class JiraService {
   }
 }
 
-export const JiraServiceToken = new Token<JiraService>('JiraService');
+export const JiraServiceToken = new Token<IJiraService>('JiraService');
 export const registerJiraServiceInDI = (container: Container) => {
   container.register({ token: JiraServiceToken, factory: () => JiraService.getInstance() });
 };
