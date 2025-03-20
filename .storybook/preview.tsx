@@ -2,6 +2,7 @@ import React from 'react';
 import type { Preview } from '@storybook/react';
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
+import { registerLogger } from '../src/shared/Logger';
 import { WithDi } from '../src/shared/diContext';
 const preview: Preview = {
   parameters: {
@@ -29,5 +30,6 @@ globalContainer.register({
     deleteBoardProperty: () => {},
   },
 });
+registerLogger(globalContainer)
 
 export default preview;

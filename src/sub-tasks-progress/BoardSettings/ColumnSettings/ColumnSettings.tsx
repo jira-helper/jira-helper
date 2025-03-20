@@ -9,6 +9,43 @@ import { useDi } from 'src/shared/diContext';
 import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { setColumns } from './actions/setColumns';
 
+// New component for the columns list
+const ColumnsList = ({
+  columns,
+  onUpdate,
+}: {
+  columns: { name: string; enabled: boolean }[];
+  onUpdate: (updatedColumns: { name: string; enabled: boolean }[]) => void;
+}) => {
+  if (columns.length === 0) {
+    return <div data-testid="sub-task-progress-no-columns">No columns available</div>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+      {columns.map(column => (
+        <div key={column.name} data-testid="sub-task-progress-column">
+          <Checkbox
+            data-testid="sub-task-progress-column-checkbox"
+            checked={column.enabled}
+            onChange={() => {
+              const updatedColumns = columns.map(c => {
+                if (c.name === column.name) {
+                  return { ...c, enabled: !c.enabled };
+                }
+                return c;
+              });
+              onUpdate(updatedColumns);
+            }}
+          >
+            <span data-testid="sub-task-progress-column-name">{column.name}</span>
+          </Checkbox>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const ColumnsSettingsPure = (props: {
   columns: { name: string; enabled: boolean }[];
   onUpdate: (columns: { name: string; enabled: boolean }[]) => void;
@@ -18,27 +55,7 @@ export const ColumnsSettingsPure = (props: {
     <Card title="Columns Settings" style={{ marginBottom: '16px' }} type="inner">
       <p style={{ marginBottom: '16px' }}>Select columns where sub-tasks progress should be tracked:</p>
       {props.loading && <Spin />}
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-        {props.columns.map(column => (
-          <div key={column.name} data-testid="sub-task-progress-column">
-            <Checkbox
-              data-testid="sub-task-progress-column-checkbox"
-              checked={column.enabled}
-              onChange={() => {
-                const updatedColumns = props.columns.map(c => {
-                  if (c.name === column.name) {
-                    return { ...c, enabled: !c.enabled };
-                  }
-                  return c;
-                });
-                props.onUpdate(updatedColumns);
-              }}
-            >
-              <span data-testid="sub-task-progress-column-name">{column.name}</span>
-            </Checkbox>
-          </div>
-        ))}
-      </div>
+      {props.loading ? null : <ColumnsList columns={props.columns} onUpdate={props.onUpdate} />}
     </Card>
   );
 };
