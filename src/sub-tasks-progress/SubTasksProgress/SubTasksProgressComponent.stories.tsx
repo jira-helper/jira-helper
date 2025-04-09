@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
-import { jiraColorScheme } from '../../colorSchemas';
+
 import { subTasksProgress } from './testData';
+import { jiraColorScheme } from '../colorSchemas';
 
 const meta: Meta<typeof SubTasksProgressComponent> = {
   title: 'Features/Sub-tasks Progress/SubTasksProgressComponent',

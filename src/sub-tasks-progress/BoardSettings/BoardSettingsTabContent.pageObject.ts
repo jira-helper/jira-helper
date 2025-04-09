@@ -37,16 +37,12 @@ export const BoardSettingsTabContentPageObject = {
   },
 
   getStatusMapping: (): Record<string, Status> => {
-    const columns = screen.getAllByTestId('status-mapping-column');
-
+    // screen.debug(screen.getByTestId('subtasks-settings'));
+    const names = screen.getAllByTestId('subtasks-settings-status-name').map(name => name.textContent?.trim());
+    const values = screen.getAllByTestId('subtasks-settings-status-select').map(select => select.textContent?.trim());
     const statusMapping: Record<string, Status> = {};
-    columns.forEach(column => {
-      const columnName = column.querySelector('[data-testid="status-mapping-column-name"]')?.textContent || '';
-      const statuses = column.querySelectorAll('[data-testid="status-mapping-column-status-card"]');
-      statuses.forEach(status => {
-        if (!status.textContent) throw new Error('Status text content is empty');
-        statusMapping[status.textContent] = columnName as Status;
-      });
+    names.forEach((name, index) => {
+      statusMapping[name] = values[index] as Status;
     });
     return statusMapping;
   },

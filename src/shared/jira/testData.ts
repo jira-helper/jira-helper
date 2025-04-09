@@ -90,6 +90,25 @@ export class JiraTestDataBuilder {
     return this;
   }
 
+  status({
+    status,
+    statusId,
+    statusCategory,
+    statusColor,
+  }: {
+    status: string;
+    statusId: number;
+    statusCategory: 'new' | 'indeterminate' | 'done';
+    statusColor: string;
+  }) {
+    this.mock.fields.status = {
+      id: statusId.toString(),
+      name: status,
+      statusCategory: { id: 1, key: statusCategory, colorName: statusColor, name: statusCategory },
+    };
+    return this;
+  }
+
   build(): JiraIssueMapped {
     return mapJiraIssue(this.mock);
   }

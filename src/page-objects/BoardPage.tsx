@@ -27,7 +27,30 @@ class CardPageObject {
   }
 }
 
-export const BoardPagePageObject = {
+export interface IBoardPagePageObject {
+  selectors: {
+    pool: string;
+    issue: string;
+    flagged: string;
+    grabber: string;
+    grabberTransparent: string;
+    sidebar: string;
+    column: string;
+    columnHeader: string;
+    columnTitle: string;
+  };
+
+  classlist: {
+    flagged: string;
+  };
+
+  getColumns(): string[];
+  listenCards(callback: (cards: CardPageObject[]) => void): () => void;
+  getColumnOfIssue(issueId: string): string;
+  getHtml(): string;
+}
+
+export const BoardPagePageObject: IBoardPagePageObject = {
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',
@@ -90,7 +113,7 @@ export const BoardPagePageObject = {
   },
 };
 
-export const boardPagePageObjectToken = new Token<typeof BoardPagePageObject>('boardPagePageObjectToken');
+export const boardPagePageObjectToken = new Token<IBoardPagePageObject>('boardPagePageObjectToken');
 
 export const registerBoardPagePageObjectInDI = (container: Container) => {
   container.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });

@@ -42,6 +42,7 @@ export const Default: StoryType = {
     }),
     withStore(useSubTaskProgressBoardPropertyStore, {
       data: {
+        ...useSubTaskProgressBoardPropertyStore.getInitialState().data,
         columnsToTrack: ['Column 1', 'Column 3', 'Column 4 (only in board property)'],
       },
       state: 'loaded',
@@ -71,6 +72,7 @@ export const aLotOfColumns: StoryType = {
     }),
     withStore(useSubTaskProgressBoardPropertyStore, {
       data: {
+        ...useSubTaskProgressBoardPropertyStore.getInitialState().data,
         columnsToTrack: Array.from({ length: 15 }, (_, i) => `Column ${i + 1}`),
       },
       state: 'loaded',
@@ -91,6 +93,7 @@ export const boardPropertyHasColumnThatIsNotInBoardAndBoardPropertyHasColumnsTha
     }),
     withStore(useSubTaskProgressBoardPropertyStore, {
       data: {
+        ...useSubTaskProgressBoardPropertyStore.getInitialState().data,
         columnsToTrack: ['Column 1', 'Column 3', 'Column 4 (only in board property)'],
       },
       state: 'loaded',

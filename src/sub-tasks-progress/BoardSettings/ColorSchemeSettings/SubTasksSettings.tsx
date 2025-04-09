@@ -20,6 +20,7 @@ export const SubTasksSettings = () => {
 
   return (
     <div
+      data-testid="subtasks-settings"
       style={{
         display: 'grid',
         gridTemplateColumns: 'auto auto auto auto',
@@ -36,7 +37,7 @@ export const SubTasksSettings = () => {
         const projects = status.projects.join(', ');
         return (
           <>
-            <span> {status.name}</span>
+            <span data-testid="subtasks-settings-status-name"> {status.name}</span>
             {projects.length > 0 ? (
               <Tooltip title={`projects: ${projects}`}>
                 <span>
@@ -47,6 +48,7 @@ export const SubTasksSettings = () => {
               <span />
             )}
             <Select
+              data-testid="subtasks-settings-status-select"
               style={{ minWidth: 140 }}
               value={statusMapping[statusIdNumber]?.progressStatus || 'unmapped'}
               onChange={value => {
@@ -55,7 +57,7 @@ export const SubTasksSettings = () => {
             >
               {availableStatuses.map(avStatus => {
                 return (
-                  <Select.Option key={avStatus} value={avStatus}>
+                  <Select.Option key={avStatus} value={avStatus} data-testid="subtasks-settings-status-select-option">
                     <span
                       style={{
                         display: 'flex',
@@ -79,6 +81,7 @@ export const SubTasksSettings = () => {
               })}
             </Select>
             <Checkbox
+              data-testid="subtasks-settings-status-checkbox"
               checked={settings.ignoredStatuses.includes(statusIdNumber)}
               onChange={() => {
                 toggleIgnoreStatus(statusIdNumber);

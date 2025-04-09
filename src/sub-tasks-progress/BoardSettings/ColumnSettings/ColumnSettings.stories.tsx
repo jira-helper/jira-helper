@@ -5,6 +5,7 @@ import { withStore } from 'src/shared/testTools/storyWithStore';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
+import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
 import { ColumnsSettingsContainer } from './ColumnSettings';
 
 const meta: Meta<typeof ColumnsSettingsContainer> = {
@@ -26,6 +27,7 @@ export const Default: StoryType = {
       container.register({
         token: boardPagePageObjectToken,
         value: {
+          ...BoardPagePageObjectMock,
           getColumns: () => ['Column From Board 1', 'Column From Board 2', 'Column From Board 3'],
         },
       });
@@ -48,6 +50,7 @@ export const LotOfColumns: StoryType = {
       container.register({
         token: boardPagePageObjectToken,
         value: {
+          ...BoardPagePageObjectMock,
           getColumns: () => [
             'Column From Board 1',
             'Column From Board 2',
@@ -94,6 +97,7 @@ export const Loading: StoryType = {
       container.register({
         token: boardPagePageObjectToken,
         value: {
+          ...BoardPagePageObjectMock,
           getColumns: () => ['To Do', 'In Progress', 'Done'],
         },
       });

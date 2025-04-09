@@ -6,12 +6,17 @@ import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { registerLogger } from 'src/shared/Logger';
+import { step } from 'src/shared/testTools/step';
+import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { JiraTestDataBuilder } from 'src/shared/jira/testData';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
 import { AvailableColorSchemas } from '../colorSchemas';
 import { BoardProperty, GroupFields, Status } from '../types';
 import { moveBoardStatusToProgressStatus } from './ColorSchemeSettings/actions/moveBoardStatusToProgressStatus';
+import { loadSubTaskProgressBoardProperty } from '../SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
 
 function setup({
   columnsOnBoard,
@@ -19,12 +24,14 @@ function setup({
   colorScheme,
   groupingField,
   statusMapping,
+  useCustomColorScheme,
 }: {
   columnsOnBoard: string[];
   columnsOnBoardProperty: string[];
   colorScheme?: AvailableColorSchemas;
   groupingField?: GroupFields;
-  statusMapping?: Record<string, Status>;
+  statusMapping?: Record<number, { progressStatus: Status; name: string }>;
+  useCustomColorScheme?: boolean;
 }) {
   const container = globalContainer;
   const getColumnsSpy = vi.fn(() => columnsOnBoard);
@@ -42,7 +49,8 @@ function setup({
         columnsToTrack: columnsOnBoardProperty,
         selectedColorScheme: colorScheme,
         groupingField,
-        statusMapping,
+        newStatusMapping: statusMapping,
+        useCustomColorScheme,
       }) as Promise<BoardProperty>
   );
   const updateBoardPropertySpy = vi.fn();
@@ -57,44 +65,19 @@ function setup({
 
   useSubTaskProgressBoardPropertyStore.setState(useSubTaskProgressBoardPropertyStore.getInitialState());
 
+  registerLogger(container);
+
   return { container };
 }
 
 describe('BoardSettingsTabContent', () => {
-  it.skip('should render', () => {
-    const container = globalContainer;
-    container.register({
-      token: boardPagePageObjectToken,
-      value: {
-        ...BoardPagePageObject,
-        getColumns: () => ['Column1', 'Column 2', 'Column 3', 'Column 5 (only in board)'],
-      },
-    });
-    // @ts-expect-error
-    container.register({
-      token: BoardPropertyServiceToken,
-      value: {
-        getBoardProperty: () =>
-          Promise.resolve({
-            statusMapping: {
-              'Column 1': 'status1',
-              'Column 2': 'status2',
-              'Column 3': 'status3',
-            },
-          }),
-      },
-    });
-    render(
-      <WithDi container={container}>
-        <BoardSettingsTabContent />
-      </WithDi>
-    );
-  });
   it('should render columns only presented at board', async () => {
     const { container } = setup({
       columnsOnBoard: ['Column 1', 'Column 2'],
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
     });
+
+    await loadSubTaskProgressBoardProperty();
 
     const { rerender } = render(
       <WithDi container={container}>
@@ -131,6 +114,8 @@ describe('BoardSettingsTabContent', () => {
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
     });
 
+    await loadSubTaskProgressBoardProperty();
+
     const { rerender } = render(
       <WithDi container={container}>
         <BoardSettingsTabContent />
@@ -149,16 +134,6 @@ describe('BoardSettingsTabContent', () => {
       throw new Error('Disabled column not found');
     }
     disabledColumn.click();
-
-    // Then it should update board property with new state of columns
-    const boardPropertyService = container.inject(BoardPropertyServiceToken);
-    expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
-      'sub-task-progress',
-      {
-        columnsToTrack: ['Column 1', 'Column 2'],
-      },
-      {}
-    );
 
     // Then it should update inner state of columns
     expect(useSubTaskProgressBoardPropertyStore.getState().data!.columnsToTrack).toEqual(['Column 1', 'Column 2']);
@@ -185,7 +160,10 @@ describe('BoardSettingsTabContent', () => {
         columnsOnBoard: ['Column 1', 'Column 2'],
         columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
         colorScheme: initialScheme,
+        useCustomColorScheme: true,
       });
+
+      await loadSubTaskProgressBoardProperty();
 
       render(
         <WithDi container={container}>
@@ -206,8 +184,10 @@ describe('BoardSettingsTabContent', () => {
       columnsOnBoard: ['Column 1', 'Column 2'],
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
       colorScheme: 'yellowGreen',
+      useCustomColorScheme: true,
     });
 
+    await loadSubTaskProgressBoardProperty();
     render(
       <WithDi container={container}>
         <BoardSettingsTabContent />
@@ -225,17 +205,6 @@ describe('BoardSettingsTabContent', () => {
       const colorScheme = BoardSettingsTabContentPageObject.getColorScheme();
       expect(colorScheme).toEqual('jira');
     });
-
-    // check that board property updated
-    const boardPropertyService = container.inject(BoardPropertyServiceToken);
-    expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
-      'sub-task-progress',
-      {
-        columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
-        selectedColorScheme: 'jira',
-      },
-      {}
-    );
 
     // check that board property in inner state is updated
     expect(useSubTaskProgressBoardPropertyStore.getState().data!.selectedColorScheme).toEqual('jira');
@@ -257,6 +226,8 @@ describe('BoardSettingsTabContent', () => {
         columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
         groupingField: initialGrouping,
       });
+
+      await loadSubTaskProgressBoardProperty();
 
       render(
         <WithDi container={container}>
@@ -280,6 +251,8 @@ describe('BoardSettingsTabContent', () => {
       groupingField: 'project',
     });
 
+    await loadSubTaskProgressBoardProperty();
+
     render(
       <WithDi container={container}>
         <BoardSettingsTabContent />
@@ -292,22 +265,10 @@ describe('BoardSettingsTabContent', () => {
 
     BoardSettingsTabContentPageObject.setGroupingField('assignee');
 
-    await waitFor(() => {
-      // check that board property updated
-      const boardPropertyService = container.inject(BoardPropertyServiceToken);
-      expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
-        'sub-task-progress',
-        {
-          columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
-          groupingField: 'assignee',
-          selectedColorScheme: undefined,
-        },
-        {}
-      );
-    });
-
     // check that inner state is updated
-    expect(useSubTaskProgressBoardPropertyStore.getState().data!.groupingField).toEqual('assignee');
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().data!.groupingField).toEqual('assignee');
+    });
 
     // check that new grouping field is selected
     const updatedGroupingField = BoardSettingsTabContentPageObject.getGroupingField();
@@ -320,8 +281,40 @@ describe('BoardSettingsTabContent', () => {
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
       colorScheme: 'jira',
       statusMapping: {
-        status1: 'done',
+        1: {
+          name: 'status1',
+          progressStatus: 'done',
+        },
       },
+      useCustomColorScheme: true,
+    });
+
+    await loadSubTaskProgressBoardProperty();
+
+    step('Given: user has issues on board', () => {
+      const subtask1 = new JiraTestDataBuilder()
+        .key('SUBTASK-1')
+        .status({
+          status: 'status1',
+          statusId: 1,
+          statusCategory: 'done',
+          statusColor: 'green',
+        })
+        .build();
+      const subtask2 = new JiraTestDataBuilder()
+        .key('SUBTASK-2')
+        .status({
+          status: 'status2',
+          statusId: 2,
+          statusCategory: 'indeterminate',
+          statusColor: 'blue',
+        })
+        .build();
+
+      useJiraSubtasksStore.getState().actions.addSubtasks('TEST-123', {
+        subtasks: [subtask1, subtask2],
+        externalLinks: [],
+      });
     });
 
     render(
@@ -334,9 +327,12 @@ describe('BoardSettingsTabContent', () => {
       expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
     });
 
-    const statusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
-    expect(statusMapping).toEqual({
-      status1: 'done',
+    await waitFor(() => {
+      const statusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
+      expect(statusMapping).toEqual({
+        status1: 'done',
+        status2: 'unmapped',
+      });
     });
   });
 
@@ -346,8 +342,47 @@ describe('BoardSettingsTabContent', () => {
       columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
       colorScheme: 'jira',
       statusMapping: {
-        status1: 'done',
+        1: {
+          name: 'status1',
+          progressStatus: 'done',
+        },
       },
+      useCustomColorScheme: true,
+    });
+
+    step('Given: user has issues on board', () => {
+      const subtask1 = new JiraTestDataBuilder()
+        .key('SUBTASK-1')
+        .status({
+          status: 'status1',
+          statusId: 1,
+          statusCategory: 'done',
+          statusColor: 'green',
+        })
+        .build();
+      const subtask2 = new JiraTestDataBuilder()
+        .key('SUBTASK-2')
+        .status({
+          status: 'status2',
+          statusId: 2,
+          statusCategory: 'indeterminate',
+          statusColor: 'blue',
+        })
+        .build();
+
+      useJiraSubtasksStore.getState().actions.addSubtasks('TEST-123', {
+        subtasks: [subtask1, subtask2],
+        externalLinks: [],
+      });
+    });
+
+    // Given user has tasks
+    // And board has columns
+    // And setting set to use custom color scheme
+    // When user updates status mapping
+
+    await step('Given settings are loaded', async () => {
+      await loadSubTaskProgressBoardProperty();
     });
 
     render(
@@ -362,28 +397,18 @@ describe('BoardSettingsTabContent', () => {
 
     await moveBoardStatusToProgressStatus(2, 'status2', 'inProgress');
 
-    await waitFor(() => {
-      // check that board property updated
-      const boardPropertyService = container.inject(BoardPropertyServiceToken);
-      expect(boardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
-        'sub-task-progress',
-        {
-          columnsToTrack: ['Column 1', 'Column 3 (only in board)'],
-          groupingField: undefined,
-          selectedColorScheme: 'jira',
-          statusMapping: {
-            status1: 'done',
-            status2: 'inProgress',
-          },
-        },
-        {}
-      );
-    });
-
     // check that inner state is updated
-    expect(useSubTaskProgressBoardPropertyStore.getState().data!.statusMapping).toEqual({
-      status1: 'done',
-      status2: 'inProgress',
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().data!.newStatusMapping).toEqual({
+        1: {
+          name: 'status1',
+          progressStatus: 'done',
+        },
+        2: {
+          name: 'status2',
+          progressStatus: 'inProgress',
+        },
+      });
     });
 
     // check that new grouping field is selected
