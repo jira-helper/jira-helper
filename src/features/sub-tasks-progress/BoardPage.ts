@@ -1,7 +1,7 @@
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 
 import { registerSettings } from 'src/board-settings/actions/registerSettings';
-import { PageModification } from '../shared/PageModification';
+import { PageModification } from '../../shared/PageModification';
 
 import { loadSubTaskProgressBoardProperty } from './SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
 import { BoardSettingsTabContent } from './BoardSettings/BoardSettingsTabContent';

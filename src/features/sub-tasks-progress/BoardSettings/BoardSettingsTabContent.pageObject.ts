@@ -37,12 +37,11 @@ export const BoardSettingsTabContentPageObject = {
   },
 
   getStatusMapping: (): Record<string, Status> => {
-    // screen.debug(screen.getByTestId('subtasks-settings'));
     const names = screen.getAllByTestId('subtasks-settings-status-name').map(name => name.textContent?.trim());
     const values = screen.getAllByTestId('subtasks-settings-status-select').map(select => select.textContent?.trim());
     const statusMapping: Record<string, Status> = {};
     names.forEach((name, index) => {
-      statusMapping[name] = values[index] as Status;
+      statusMapping[name!] = values[index] as Status;
     });
     return statusMapping;
   },

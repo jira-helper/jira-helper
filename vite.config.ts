@@ -2,7 +2,7 @@
 
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
-// import arraybuffer from 'vite-plugin-arraybuffer';
+
 import * as path from 'path';
 import manifest from './manifest.json';
 
