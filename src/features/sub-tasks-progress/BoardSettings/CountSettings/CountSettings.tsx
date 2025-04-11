@@ -16,40 +16,40 @@ const TEXTS = {
     ru: 'Учитывать задачи эпика',
   },
   countEpicLinkedIssues: {
-    en: 'Count linked issues of epic',
-    ru: 'Учитывать связанные задачи эпика',
+    en: 'Count epic linked issues',
+    ru: 'Учитывать связанные с эпиками задачи',
   },
   countEpicExternalLinks: {
-    en: 'Count external links of epic',
-    ru: 'Учитывать внешние ссылки эпика',
+    en: 'Count epic external links',
+    ru: 'Учитывать внешние ссылки эпиков',
   },
   issues: {
     en: 'Issues',
     ru: 'Задачи',
   },
   countIssuesSubtasks: {
-    en: 'Count sub-tasks',
+    en: 'Count issues subtasks',
     ru: 'Учитывать подзадачи',
   },
   countIssuesLinkedIssues: {
-    en: 'Count linked issues',
+    en: 'Count issues linked issues',
     ru: 'Учитывать связанные задачи',
   },
   countIssuesExternalLinks: {
-    en: 'Count external links',
-    ru: 'Учитывать внешние ссылки',
+    en: 'Count issues external links',
+    ru: 'Учитывать внешние ссылки задач',
   },
   subTasks: {
     en: 'SubTasks',
     ru: 'Под-задачи',
   },
   countSubtasksLinkedIssues: {
-    ru: 'Учитывать связанные задачи',
-    en: 'Count linked issues',
+    en: 'Count subtasks linked issues',
+    ru: 'Учитывать связанные с подзадачами задачи',
   },
   countSubtasksExternalLinks: {
-    ru: 'Учитывать внешние ссылки',
-    en: 'Count external links',
+    en: 'Count subtasks external links',
+    ru: 'Учитывать внешние ссылки подзадач',
   },
   countingSettingsTitle: {
     ru: 'Настройки подсчета прогресса',
@@ -85,12 +85,14 @@ export const CountSettings = () => {
       </div>
       style={{ marginBottom: '16px' }}
       type="inner"
+      data-testid="count-settings-card"
     >
       <div style={{ marginBottom: '16px' }}>
         <div>{texts.epic}</div>
         <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
           <Checkbox
             checked={settings.countEpicIssues}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countEpicIssues', !settings.countEpicIssues);
             }}
@@ -99,6 +101,7 @@ export const CountSettings = () => {
           </Checkbox>
           <Checkbox
             checked={settings.countEpicLinkedIssues}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countEpicLinkedIssues', !settings.countEpicLinkedIssues);
             }}
@@ -107,6 +110,7 @@ export const CountSettings = () => {
           </Checkbox>
           <Checkbox
             checked={settings.countEpicExternalLinks}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countEpicExternalLinks', !settings.countEpicExternalLinks);
             }}
@@ -126,6 +130,7 @@ export const CountSettings = () => {
         <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
           <Checkbox
             checked={settings.countIssuesSubtasks}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countIssuesSubtasks', !settings.countIssuesSubtasks);
             }}
@@ -134,6 +139,7 @@ export const CountSettings = () => {
           </Checkbox>
           <Checkbox
             checked={settings.countIssuesLinkedIssues}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countIssuesLinkedIssues', !settings.countIssuesLinkedIssues);
             }}
@@ -142,6 +148,7 @@ export const CountSettings = () => {
           </Checkbox>
           <Checkbox
             checked={settings.countIssuesExternalLinks}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countIssuesExternalLinks', !settings.countIssuesExternalLinks);
             }}
@@ -160,6 +167,7 @@ export const CountSettings = () => {
         <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
           <Checkbox
             checked={settings.countSubtasksLinkedIssues}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countSubtasksLinkedIssues', !settings.countSubtasksLinkedIssues);
             }}
@@ -168,6 +176,7 @@ export const CountSettings = () => {
           </Checkbox>
           <Checkbox
             checked={settings.countSubtasksExternalLinks}
+            disabled={!settings.enabled}
             onChange={() => {
               changeCount('countSubtasksExternalLinks', !settings.countSubtasksExternalLinks);
             }}

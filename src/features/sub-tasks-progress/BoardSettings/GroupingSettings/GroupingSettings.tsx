@@ -39,8 +39,8 @@ const useGetAvailableGroups = (groupingField: GroupFields) => {
 
 const TEXTS = {
   groupingField: {
-    en: 'Grouping field',
-    ru: 'Поле группировки',
+    en: 'Group by',
+    ru: 'Группировать по',
   },
   ignoredGroups: {
     en: 'Ignored groups',
@@ -86,6 +86,7 @@ export const GroupingSettings = () => {
           style={{ minWidth: 140 }}
           value={settings?.groupingField || 'project'}
           onChange={setGroupingField}
+          disabled={!settings.enabled}
           options={groupingFields.map(field => ({
             value: field,
             label: <span data-testid="grouping-field-option">{field}</span>,
@@ -109,6 +110,7 @@ export const GroupingSettings = () => {
             style={{ minWidth: 140 }}
             value="choose group to ignore"
             onChange={addIgnoredGroup}
+            disabled={!settings.enabled}
             options={groupsAvailableToIgnore.map(group => ({
               value: group,
               label: <span data-testid="ignored-group-option">{group}</span>,

@@ -39,6 +39,7 @@ export const ColorSchemeChooser = () => {
       <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'row', gap: 10 }}>
         <Checkbox
           checked={settings.useCustomColorScheme}
+          disabled={!settings.enabled}
           onChange={() => {
             changeUseCustomColorScheme(!settings.useCustomColorScheme);
           }}
@@ -47,6 +48,7 @@ export const ColorSchemeChooser = () => {
         </Checkbox>
         <Checkbox
           checked={settings.flagsAsBlocked}
+          disabled={!settings.enabled}
           onChange={() => {
             toggleFlagsAsBlocked();
           }}
@@ -55,6 +57,7 @@ export const ColorSchemeChooser = () => {
         </Checkbox>
         <Checkbox
           checked={settings.blockedByLinksAsBlocked}
+          disabled={!settings.enabled}
           onChange={() => {
             toggleBlockedByLinksAsBlocked();
           }}
@@ -70,6 +73,7 @@ export const ColorSchemeChooser = () => {
             <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
               <Select
                 data-testid="color-scheme-chooser"
+                disabled={!settings.enabled}
                 value={selectedColorScheme}
                 onChange={setSelectedColorScheme}
                 style={{ minWidth: 140 }} // Set min width to accommodate "yellowGreen"

@@ -4,6 +4,7 @@ import { State } from './subTaskProgressBoardProperty.types';
 import { BoardProperty } from '../../types';
 
 const initialData: Required<BoardProperty> = {
+  enabled: true,
   columnsToTrack: [],
   selectedColorScheme: 'jira',
   statusMapping: {},
@@ -28,6 +29,16 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
   data: initialData,
   state: 'initial',
   actions: {
+    toggleEnabled: value =>
+      set(
+        produce((state: State) => {
+          if (value === undefined) {
+            state.data.enabled = !state.data.enabled;
+          } else {
+            state.data.enabled = value;
+          }
+        })
+      ),
     setData: data => set({ data: { ...initialData, ...data } }),
     setColumns: columns =>
       set(

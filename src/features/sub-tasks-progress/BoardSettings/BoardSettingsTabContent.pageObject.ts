@@ -6,6 +6,18 @@ import { setSelectedColorScheme } from './ColorSchemeSettings/actions/setSelecte
 import { setGroupingField } from './GroupingSettings/actions/setGroupingField';
 
 export const BoardSettingsTabContentPageObject = {
+  toggleEnabled: () => {
+    fireEvent.click(screen.getByTestId('sub-task-progress-board-settings-enabled-checkbox'));
+  },
+
+  getResetButton: () => {
+    return screen.getByTestId('reset-board-property-button');
+  },
+
+  getCountSettingsCheckboxes: () => {
+    return screen.getByTestId('count-settings-card').querySelectorAll('checkbox');
+  },
+
   getColumns: () => {
     const columns = screen.getAllByTestId('sub-task-progress-column');
     return columns.map(column => ({

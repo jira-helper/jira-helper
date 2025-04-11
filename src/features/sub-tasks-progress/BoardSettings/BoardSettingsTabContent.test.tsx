@@ -418,4 +418,48 @@ describe('BoardSettingsTabContent', () => {
       status2: 'inProgress',
     });
   });
+
+  it('enabled and disabled settings', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
+      colorScheme: 'jira',
+      statusMapping: {
+        1: {
+          name: 'status1',
+          progressStatus: 'done',
+        },
+      },
+      useCustomColorScheme: true,
+    });
+
+    step('Given: settings are enabled', async () => {});
+
+    await step('When: user open settings tab', async () => {
+      await loadSubTaskProgressBoardProperty();
+
+      render(
+        <WithDi container={container}>
+          <BoardSettingsTabContent />
+        </WithDi>
+      );
+    });
+
+    step('When: user disables feature', () => {
+      BoardSettingsTabContentPageObject.toggleEnabled();
+    });
+
+    step('Then: settings are disabled', async () => {
+      step('in store data', () => {
+        expect(useSubTaskProgressBoardPropertyStore.getState().data!.enabled).toEqual(false);
+      });
+      step('in UI', () => {
+        expect(BoardSettingsTabContentPageObject.getResetButton()).toBeDisabled();
+        const countSettingsCheckboxes = BoardSettingsTabContentPageObject.getCountSettingsCheckboxes();
+        for (const checkbox of Object.values(countSettingsCheckboxes)) {
+          expect(checkbox).toBeDisabled();
+        }
+      });
+    });
+  });
 });

@@ -57,6 +57,7 @@ export const SubTasksSettings = () => {
             <Select
               data-testid="subtasks-settings-status-select"
               style={{ minWidth: 140 }}
+              disabled={!settings.enabled}
               value={statusMapping[statusIdNumber]?.progressStatus || 'unmapped'}
               onChange={value => {
                 moveBoardStatusToProgressStatus(statusIdNumber, status.name, value);
@@ -89,6 +90,7 @@ export const SubTasksSettings = () => {
             </Select>
             <Checkbox
               data-testid="subtasks-settings-status-checkbox"
+              disabled={!settings.enabled}
               checked={settings.ignoredStatuses.includes(statusIdNumber)}
               onChange={() => {
                 toggleIgnoreStatus(statusIdNumber);

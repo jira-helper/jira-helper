@@ -18,6 +18,7 @@ type StatusId = number;
 
 export type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
 export type BoardProperty = {
+  enabled?: boolean;
   columnsToTrack?: string[];
   groupingField?: GroupFields;
   statusMapping?: Record<string, Status>;

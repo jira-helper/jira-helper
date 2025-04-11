@@ -34,9 +34,11 @@ const TEXTS = {
 const ColumnsList = ({
   columns,
   onUpdate,
+  disabled,
 }: {
   columns: { name: string; enabled: boolean }[];
   onUpdate: (updatedColumns: { name: string; enabled: boolean }[]) => void;
+  disabled?: boolean;
 }) => {
   const texts = useGetTextsByLocale(TEXTS);
   if (columns.length === 0) {
@@ -50,6 +52,7 @@ const ColumnsList = ({
           <Checkbox
             data-testid="sub-task-progress-column-checkbox"
             checked={column.enabled}
+            disabled={disabled}
             onChange={() => {
               const updatedColumns = columns.map(c => {
                 if (c.name === column.name) {
@@ -72,6 +75,7 @@ export const ColumnsSettingsPure = (props: {
   columns: { name: string; enabled: boolean }[];
   onUpdate: (columns: { name: string; enabled: boolean }[]) => void;
   loading?: boolean;
+  disabled?: boolean;
 }) => {
   const texts = useGetTextsByLocale(TEXTS);
   return (
@@ -85,7 +89,9 @@ export const ColumnsSettingsPure = (props: {
         </Tooltip>
       </p>
       {props.loading && <Spin />}
-      {props.loading ? null : <ColumnsList columns={props.columns} onUpdate={props.onUpdate} />}
+      {props.loading ? null : (
+        <ColumnsList columns={props.columns} onUpdate={props.onUpdate} disabled={props.disabled} />
+      )}
     </Card>
   );
 };
@@ -112,6 +118,7 @@ export const ColumnsSettingsContainer = () => {
       columns={columns}
       onUpdate={setColumns}
       loading={propertyState === 'loading' || propertyState === 'initial'}
+      disabled={!propertyData.enabled}
     />
   );
 };

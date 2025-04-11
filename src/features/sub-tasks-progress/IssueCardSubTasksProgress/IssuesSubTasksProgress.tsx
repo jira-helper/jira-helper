@@ -17,7 +17,7 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   const boardPage = container.inject(boardPagePageObjectToken);
   const issueColumn = boardPage.getColumnOfIssue(issueId);
 
-  const shouldTrackIssue = settings?.columnsToTrack?.includes(issueColumn);
+  const shouldTrackIssue = settings?.columnsToTrack?.includes(issueColumn) && settings?.enabled;
 
   useEffect(() => {
     if (!shouldTrackIssue) {
