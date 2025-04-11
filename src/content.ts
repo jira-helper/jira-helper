@@ -1,5 +1,6 @@
 import './firefoxFixes';
 import { globalContainer } from 'dioma';
+import { setAutoFreeze } from 'immer';
 import { Routes } from './routing';
 import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';
@@ -31,6 +32,8 @@ import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+
+setAutoFreeze(false);
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return

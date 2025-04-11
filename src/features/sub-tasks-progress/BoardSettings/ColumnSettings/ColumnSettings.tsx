@@ -1,6 +1,6 @@
 import Checkbox from 'antd/es/checkbox';
 import Spin from 'antd/es/spin';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Card, Tooltip } from 'antd';
 import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
@@ -27,6 +27,10 @@ const TEXTS = {
   columnsSettingsTitle: {
     en: 'Columns Settings',
     ru: 'Настройки колонок',
+  },
+  refreshColumns: {
+    en: 'Refresh columns',
+    ru: 'Обновить колонки',
   },
 } as const;
 
@@ -98,7 +102,7 @@ export const ColumnsSettingsPure = (props: {
 
 export const ColumnsSettingsContainer = () => {
   const boardPagePageObject = useDi().inject(boardPagePageObjectToken) as typeof BoardPagePageObject;
-  const [columnsFromBoard] = useState<string[]>(boardPagePageObject.getColumns());
+  const [columnsFromBoard, setColumnsFromBoard] = useState<string[]>(boardPagePageObject.getColumns());
 
   const propertyData = useSubTaskProgressBoardPropertyStore(useShallow(state => state.data));
 
@@ -111,13 +115,27 @@ export const ColumnsSettingsContainer = () => {
     return columnsToState;
   }, [propertyData, columnsFromBoard]);
 
+  /**
+   * Component can be rendered before board is loaded
+   * In that case we get zero columns from board
+   * If we have zero columns, we try to get columns periodically
+   */
+  useEffect(() => {
+    if (columnsFromBoard.length === 0) {
+      const interval = setInterval(() => {
+        setColumnsFromBoard(boardPagePageObject.getColumns());
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [columnsFromBoard.length]);
+
   const propertyState = useSubTaskProgressBoardPropertyStore(useShallow(state => state.state));
 
   return (
     <ColumnsSettingsPure
       columns={columns}
       onUpdate={setColumns}
-      loading={propertyState === 'loading' || propertyState === 'initial'}
+      loading={propertyState === 'loading' || propertyState === 'initial' || columnsFromBoard.length === 0}
       disabled={!propertyData.enabled}
     />
   );

@@ -62,6 +62,7 @@ export const StatusCategorySettings = () => {
             />
             <Checkbox
               checked={settings.ignoredStatuses.includes(statusIdNumber)}
+              disabled={!settings.enabled}
               onChange={() => {
                 toggleIgnoreStatus(statusIdNumber);
               }}

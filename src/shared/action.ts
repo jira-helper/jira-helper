@@ -35,7 +35,10 @@ class Action<Payload extends any[], Result> {
     logger.log(`Action ${this.name} started`);
 
     const logFinished = () => logger.log(`Action ${this.name} finished`);
-    const logFailed = (e: any) => logger.log(`Action ${this.name} failed with error ${e.toString()}`, 'error');
+    const logFailed = (e: any) => {
+      logger.log(`Action ${this.name} failed with error ${e.toString()}`, 'error');
+      logger.log(e, 'error');
+    };
     try {
       const result = this.handler.apply(
         {
