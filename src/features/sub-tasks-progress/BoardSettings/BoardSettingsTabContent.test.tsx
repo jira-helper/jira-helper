@@ -5,7 +5,7 @@ import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { registerLogger } from 'src/shared/Logger';
 import { step } from 'src/shared/testTools/step';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';

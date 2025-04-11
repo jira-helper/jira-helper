@@ -3,6 +3,7 @@ import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
 import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { Status, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
@@ -85,10 +86,27 @@ const createEmptyGroup = () => ({
  * @returns
  */
 
+const TEXTS = {
+  unmappedIssue: {
+    en: 'Unmapped issue',
+    ru: 'Неизвестный статус',
+  },
+  blockedByLinks: {
+    en: 'Blocked by links',
+    ru: 'Заблокировано ссылкой blocked by',
+  },
+  flaggedIssue: {
+    en: 'Flagged issue',
+    ru: 'Зафлагованая задача',
+  },
+};
+
 const useCalcProgress = (
   subtasks: JiraIssueMapped[]
 ): Record<string, { progress: SubTasksProgress; comments: string[] }> => {
   const { settings } = useGetSettings();
+
+  const texts = useGetTextsByLocale(TEXTS);
   const statusMapping = settings?.newStatusMapping || {};
   const groupingField = settings?.groupingField || 'project';
   const ignoredGroups = settings?.ignoredGroups || [];
@@ -129,16 +147,16 @@ const useCalcProgress = (
     }
     if (issue.isFlagged && settings.flagsAsBlocked) {
       status.progressStatus = 'blocked';
-      progress[group].comments.push(`Flagged issue: ${issue.key}`);
+      progress[group].comments.push(`${texts.flaggedIssue}: ${issue.key}`);
     }
 
     if (issue.isBlockedByLinks && settings.blockedByLinksAsBlocked) {
       status.progressStatus = 'blocked';
-      progress[group].comments.push(`Blocked by links: ${issue.key}`);
+      progress[group].comments.push(`${texts.blockedByLinks}: ${issue.key}`);
     }
 
     if (status.progressStatus === 'unmapped') {
-      progress[group].comments.push(`Unmapped issue: ${issue.key}`);
+      progress[group].comments.push(`${texts.unmappedIssue}: ${issue.key}`);
     }
 
     progress[group].progress[status.progressStatus] += 1;

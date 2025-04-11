@@ -2,12 +2,33 @@ import Checkbox from 'antd/es/checkbox';
 import Spin from 'antd/es/spin';
 import React, { useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Card } from 'antd';
+import { Card, Tooltip } from 'antd';
 import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { useDi } from 'src/shared/diContext';
 
-import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { WarningFilled } from '@ant-design/icons';
 import { setColumns } from './actions/setColumns';
+
+const TEXTS = {
+  selectColumnsWhereSubTasksProgressShouldBeTracked: {
+    en: 'Select columns where sub-tasks progress should be tracked:',
+    ru: 'Выберите колонки, где должен отображаться прогресс под-задач:',
+  },
+  warningTooltip: {
+    ru: 'Включите фичу только для тех колонок, где вам реально важно видеть прогресс под-задач. Включение для всех колонок может привести к значительному увеличению нагрузки на Jira и замедлить скорость работы плагина',
+    en: 'Enable the feature only for those columns where you really need to see the progress of sub-tasks. Enabling for all columns may lead to significant load on Jira and slow down the plugin',
+  },
+  noColumnsAvailable: {
+    en: 'No columns available',
+    ru: 'Нет доступных колонок',
+  },
+  columnsSettingsTitle: {
+    en: 'Columns Settings',
+    ru: 'Настройки колонок',
+  },
+} as const;
 
 // New component for the columns list
 const ColumnsList = ({
@@ -17,8 +38,9 @@ const ColumnsList = ({
   columns: { name: string; enabled: boolean }[];
   onUpdate: (updatedColumns: { name: string; enabled: boolean }[]) => void;
 }) => {
+  const texts = useGetTextsByLocale(TEXTS);
   if (columns.length === 0) {
-    return <div data-testid="sub-task-progress-no-columns">No columns available</div>;
+    return <div data-testid="sub-task-progress-no-columns">{texts.noColumnsAvailable}</div>;
   }
 
   return (
@@ -51,9 +73,17 @@ export const ColumnsSettingsPure = (props: {
   onUpdate: (columns: { name: string; enabled: boolean }[]) => void;
   loading?: boolean;
 }) => {
+  const texts = useGetTextsByLocale(TEXTS);
   return (
-    <Card title="Columns Settings" style={{ marginBottom: '16px' }} type="inner">
-      <p style={{ marginBottom: '16px' }}>Select columns where sub-tasks progress should be tracked:</p>
+    <Card title={texts.columnsSettingsTitle} style={{ marginBottom: '16px' }} type="inner">
+      <p style={{ marginBottom: '16px' }}>
+        {texts.selectColumnsWhereSubTasksProgressShouldBeTracked}{' '}
+        <Tooltip overlayStyle={{ maxWidth: 600 }} title={<p>{texts.warningTooltip}</p>}>
+          <span>
+            <WarningFilled style={{ color: 'orange' }} size={24} />
+          </span>
+        </Tooltip>
+      </p>
       {props.loading && <Spin />}
       {props.loading ? null : <ColumnsList columns={props.columns} onUpdate={props.onUpdate} />}
     </Card>

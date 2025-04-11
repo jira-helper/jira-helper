@@ -1,16 +1,23 @@
 import React from 'react';
 import { Checkbox, Select, Tooltip } from 'antd';
 import { InfoCircleFilled } from '@ant-design/icons';
-import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { availableStatuses, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { useGetSubtasksForStatusSettings } from './hooks/useGetSubtasksForStatusSettings';
 import { moveBoardStatusToProgressStatus } from './actions/moveBoardStatusToProgressStatus';
 import { toggleIgnoreStatus } from './actions/toggleIgnoreStatus';
 
+const TEXTS = {
+  ignoreStatus: {
+    en: 'Ignore status',
+    ru: 'Игнорировать статус',
+  },
+};
 export const SubTasksSettings = () => {
   const { statuses } = useGetSubtasksForStatusSettings();
   const { settings } = useGetSettings();
-
+  const texts = useGetTextsByLocale(TEXTS);
   if (!settings.useCustomColorScheme) {
     return null;
   }
@@ -87,7 +94,7 @@ export const SubTasksSettings = () => {
                 toggleIgnoreStatus(statusIdNumber);
               }}
             >
-              Ignore status
+              {texts.ignoreStatus}
             </Checkbox>
           </>
         );

@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
 export const resetBoardProperty = createAction({
   name: 'resetBoardProperty',

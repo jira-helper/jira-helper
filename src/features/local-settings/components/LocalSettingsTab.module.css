@@ -1,0 +1,15 @@
+.localSettings {
+  padding: 20px;
+}
+
+.settingGroup {
+  margin-bottom: 16px;
+}
+
+.settingLabel {
+  margin-right: 8px;
+}
+
+.settingSelect {
+  min-width: 150px;
+}

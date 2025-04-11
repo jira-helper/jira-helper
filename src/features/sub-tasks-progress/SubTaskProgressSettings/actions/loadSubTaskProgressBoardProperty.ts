@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { BoardPropertyServiceToken } from '../../../shared/boardPropertyService';
+import { BoardPropertyServiceToken } from '../../../../shared/boardPropertyService';
 
 import { BoardProperty } from '../../types';
 import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';

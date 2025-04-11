@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
-import { Card, Select, Tag } from 'antd';
+import { Card, Select, Tag, Tooltip } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
-import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { InfoCircleFilled } from '@ant-design/icons';
 import { GroupFields } from '../../types';
 import { setGroupingField } from './actions/setGroupingField';
 import { removeIgnoredGroup } from './actions/removeIgnoredGroup';
@@ -35,16 +37,51 @@ const useGetAvailableGroups = (groupingField: GroupFields) => {
   return availableGroups;
 };
 
+const TEXTS = {
+  groupingField: {
+    en: 'Grouping field',
+    ru: 'Поле группировки',
+  },
+  ignoredGroups: {
+    en: 'Ignored groups',
+    ru: 'Игнорируемые группы',
+  },
+  selectGroupingField: {
+    en: 'Select grouping field',
+    ru: 'Выберите поле группировки',
+  },
+  addGroupToIgnore: {
+    en: 'Add group to ignore',
+    ru: 'Добавить группу для игнорирования',
+  },
+  selectGroupingFieldTooltip: {
+    ru: 'Выберите поле, по которому будет производиться прогресса под-задач для карточки на доске. Не применяется для внешних ссылок',
+    en: 'Select the field by which the progress of sub-tasks for the card on the board will be calculated. Not applied to external links',
+  },
+  groupingSettingsTitle: {
+    en: 'Grouping Settings',
+    ru: 'Настройки группировки',
+  },
+};
+
 export const GroupingSettings = () => {
+  const texts = useGetTextsByLocale(TEXTS);
   const { settings } = useGetSettings();
   const availableGroups = useGetAvailableGroups(settings.groupingField);
   const ignoredGroups = settings.ignoredGroups || [];
   const groupsAvailableToIgnore = availableGroups.filter(group => !ignoredGroups.includes(group));
 
   return (
-    <Card title="Grouping Settings" style={{ marginBottom: '16px' }} type="inner">
+    <Card title={texts.groupingSettingsTitle} style={{ marginBottom: '16px' }} type="inner">
       <div style={{ marginBottom: '24px' }}>
-        <p style={{ marginBottom: '16px' }}>Select grouping field:</p>
+        <p style={{ marginBottom: '16px' }}>
+          {texts.selectGroupingField}{' '}
+          <Tooltip overlayStyle={{ maxWidth: 600 }} title={<p>{texts.selectGroupingFieldTooltip}</p>}>
+            <span>
+              <InfoCircleFilled style={{ color: '#1677ff' }} />
+            </span>
+          </Tooltip>
+        </p>
         <Select
           style={{ minWidth: 140 }}
           value={settings?.groupingField || 'project'}
@@ -57,7 +94,7 @@ export const GroupingSettings = () => {
       </div>
       {ignoredGroups.length > 0 ? (
         <div style={{ marginBottom: '24px' }}>
-          <p style={{ marginBottom: '16px' }}>ignored groups</p>
+          <p style={{ marginBottom: '16px' }}>{texts.ignoredGroups}</p>
           {ignoredGroups.map(group => (
             <Tag key={group} color="blue" closable closeIcon onClose={() => removeIgnoredGroup(group)}>
               {group}
@@ -67,7 +104,7 @@ export const GroupingSettings = () => {
       ) : null}
       {groupsAvailableToIgnore.length > 0 ? (
         <div style={{ marginBottom: '24px' }}>
-          <p style={{ marginBottom: '16px' }}>Add group to ignore:</p>
+          <p style={{ marginBottom: '16px' }}>{texts.addGroupToIgnore}</p>
           <Select
             style={{ minWidth: 140 }}
             value="choose group to ignore"

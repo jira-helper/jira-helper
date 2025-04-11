@@ -3,7 +3,7 @@ import React from 'react';
 import { withDi } from 'src/shared/testTools/storyWithDi';
 import { withStore } from 'src/shared/testTools/storyWithStore';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { useSubTaskProgressBoardPropertyStore } from 'src/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
 import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
 import { ColumnsSettingsContainer } from './ColumnSettings';

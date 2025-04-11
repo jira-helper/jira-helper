@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { loadSubtasksForIssue } from 'src/sub-tasks-progress/IssueCardSubTasksProgress/actions/loadSubtasksForIssue';
+import { loadSubtasksForIssue } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/actions/loadSubtasksForIssue';
 
-import { useSubtasksProgress } from 'src/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
-import { colorSchemas } from 'src/sub-tasks-progress/colorSchemas';
+import { useSubtasksProgress } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
+import { colorSchemas } from 'src/features/sub-tasks-progress/colorSchemas';
 import { useDi, WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 

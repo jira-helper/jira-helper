@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Checkbox, Select } from 'antd';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { availableColorSchemas, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
 import { SubTasksProgressComponent } from '../../SubTasksProgress/SubTasksProgressComponent';
@@ -11,12 +12,30 @@ import { toggleBlockedByLinksAsBlocked } from './actions/toggleBlockedByLinksAsB
 import { StatusCategorySettings } from './StatusCategorySettings';
 import { SubTasksSettings } from './SubTasksSettings';
 
+const TEXTS = {
+  colorSchemeTitle: {
+    en: 'Color Scheme',
+    ru: 'Цветовая схема',
+  },
+  useCustomColorScheme: {
+    en: 'Use custom color scheme',
+    ru: 'Использовать пользовательскую цветовую схему',
+  },
+  flagsAsBlocked: {
+    en: 'Flags as blocked',
+    ru: 'Считать флаг на задаче как блокировку',
+  },
+  blockedByLinksAsBlocked: {
+    en: 'Blocked by links as blocked',
+    ru: 'Считать связь Blocked By как блокировку',
+  },
+};
 export const ColorSchemeChooser = () => {
   const { settings } = useGetSettings();
   const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
-
+  const texts = useGetTextsByLocale(TEXTS);
   return (
-    <Card title="Color Scheme" style={{ marginBottom: '16px' }} type="inner">
+    <Card title={texts.colorSchemeTitle} style={{ marginBottom: '16px' }} type="inner">
       <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'row', gap: 10 }}>
         <Checkbox
           checked={settings.useCustomColorScheme}
@@ -24,7 +43,7 @@ export const ColorSchemeChooser = () => {
             changeUseCustomColorScheme(!settings.useCustomColorScheme);
           }}
         >
-          Use custom color scheme
+          {texts.useCustomColorScheme}
         </Checkbox>
         <Checkbox
           checked={settings.flagsAsBlocked}
@@ -32,7 +51,7 @@ export const ColorSchemeChooser = () => {
             toggleFlagsAsBlocked();
           }}
         >
-          Flags as blocked
+          {texts.flagsAsBlocked}
         </Checkbox>
         <Checkbox
           checked={settings.blockedByLinksAsBlocked}
@@ -40,7 +59,7 @@ export const ColorSchemeChooser = () => {
             toggleBlockedByLinksAsBlocked();
           }}
         >
-          Blocked by links as blocked
+          {texts.blockedByLinksAsBlocked}
         </Checkbox>
       </div>
       <StatusCategorySettings />

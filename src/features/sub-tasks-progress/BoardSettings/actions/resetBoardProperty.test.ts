@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { registerLogger } from 'src/shared/Logger';
 import { globalContainer } from 'dioma';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { resetBoardProperty } from './resetBoardProperty';
-import { useSubTaskProgressBoardPropertyStore } from '../../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
 describe('resetBoardProperty', () => {
   beforeAll(() => {

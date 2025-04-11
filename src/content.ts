@@ -24,12 +24,13 @@ import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
 import { BoardSettingsBoardPage } from './board-settings/BoardPage';
-import { SubTasksProgressBoardPage } from './sub-tasks-progress/BoardPage';
+import { SubTasksProgressBoardPage } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
+import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -66,6 +67,7 @@ async function start() {
       CardColorsBoardPage,
       BoardSettingsBoardPage,
       SubTasksProgressBoardPage,
+      LocalSettingsBoardPage,
       DiagnosticBoardPage,
     ],
     [Routes.SETTINGS]: [

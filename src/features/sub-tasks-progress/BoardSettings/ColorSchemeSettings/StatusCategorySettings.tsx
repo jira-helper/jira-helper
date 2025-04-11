@@ -1,14 +1,23 @@
 import React from 'react';
 import { Checkbox } from 'antd';
 
-import { useGetSettings } from 'src/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { jiraColorScheme } from '../../colorSchemas';
 import { useGetSubtasksForStatusSettings } from './hooks/useGetSubtasksForStatusSettings';
 import { toggleIgnoreStatus } from './actions/toggleIgnoreStatus';
 
+const TEXTS = {
+  ignoreStatus: {
+    en: 'Ignore status',
+    ru: 'Игнорировать статус',
+  },
+};
+
 export const StatusCategorySettings = () => {
   const { settings } = useGetSettings();
   const { statuses } = useGetSubtasksForStatusSettings();
+  const texts = useGetTextsByLocale(TEXTS);
 
   if (settings.useCustomColorScheme) {
     return null;
@@ -57,7 +66,7 @@ export const StatusCategorySettings = () => {
                 toggleIgnoreStatus(statusIdNumber);
               }}
             >
-              Ignore status
+              {texts.ignoreStatus}
             </Checkbox>
           </>
         );
