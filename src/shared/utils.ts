@@ -8,7 +8,7 @@ export const waitForElement = (
   selector: string,
   container: Document | HTMLElement | Element = document
 ): { promise: Promise<Element>; cancel: () => void } => {
-  let intervalId: number;
+  let intervalId: any;
   const promise = new Promise<Element>(resolve => {
     intervalId = setInterval(() => {
       const element = container.querySelector(selector);

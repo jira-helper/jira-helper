@@ -15,3 +15,4 @@ dist
 coverage
 .history
 *storybook.log
+jira-helper-*.zip

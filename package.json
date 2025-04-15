@@ -1,6 +1,6 @@
 {
   "name": "jira-helper",
-  "version": "2.24.6",
+  "version": "2.25.0",
   "description": "jira-helper: Elements for visualizations, button template, swimlane-viz",
   "repository": "https://github.com/Tinkoff/jira-helper.git",
   "license": "ISC",
@@ -106,11 +106,19 @@
     "@types/react": "^18.3.12",
     "antd": "^5.22.0",
     "core-js": "^3.8.3",
+    "dioma": "^0.4.6",
+    "events": "^3.3.0",
     "gsap": "^3.12.5",
+    "immer": "^10.1.1",
     "react": "^18.3.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "simple-color-picker": "^1.0.4",
-    "svelte": "^5.1.12"
+    "svelte": "^5.1.12",
+    "ts-results": "^3.3.0",
+    "typed-emitter": "^2.1.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",
