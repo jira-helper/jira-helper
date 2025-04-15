@@ -313,7 +313,15 @@ export const getExternalIssues = async (issueKey: string, options: RequestInit =
     return Err(result.val);
   }
 
-  return Ok(await result.val.json());
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  return Ok(jsonDataResult.val);
 };
 
 export const renderRemoteLink = async (
