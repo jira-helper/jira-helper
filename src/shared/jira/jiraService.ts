@@ -161,6 +161,7 @@ export const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
     priority: jiraIssue.fields.priority?.name || 'none',
     creator: jiraIssue.fields.creator?.displayName || 'none',
     issueType: mapJiraIssueType(jiraIssue),
+    issueTypeName: jiraIssue.fields.issuetype.name,
     isFlagged: getIsFlagged(jiraIssue),
     isBlockedByLinks: getIsBlockedByLinks(jiraIssue),
   };

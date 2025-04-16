@@ -118,7 +118,20 @@ const useCalcProgress = (
     return 'done';
   };
   const mapIssue = (issue: JiraIssueMapped) => {
-    const group = issue[groupingField];
+    const groupingFieldsMapping = {
+      project: 'project',
+      assignee: 'assignee',
+      issueType: 'issueTypeName',
+      reporter: 'reporter',
+      creator: 'creator',
+      priority: 'priority',
+      status: 'status',
+      statusCategory: 'statusCategory',
+      created: 'created',
+      updated: 'updated',
+    } as const;
+    const jiraGroupingField = groupingFieldsMapping[groupingField];
+    const group = issue[jiraGroupingField];
     if (ignoredGroups.includes(group)) {
       return;
     }
