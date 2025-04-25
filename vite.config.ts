@@ -8,6 +8,9 @@ import manifest from './manifest.json';
 
 const targetBrowser = process.env.BROWSER === 'FIREFOX' ? 'firefox' : 'chrome';
 
+if (targetBrowser === 'firefox') {
+  manifest.name = 'jira-helper-for-ff';
+}
 export default defineConfig({
   build: {
     outDir: targetBrowser === 'chrome' ? 'dist' : 'dist-firefox',
