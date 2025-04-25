@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "jira-helper",
     "short_name": "jira-helper",
-    "version": "2.24.6",
+    "version": "2.25.0",
     "author": "pavel.power@gmail.com",
     "description": "jira-helper",
     "icons": {
@@ -10,7 +10,9 @@
         "32": "src/assets/jira_helper_32x32.png",
         "48": "src/assets/jira_helper_48x48.png",
         "64": "src/assets/jira_helper_64x64.png",
-        "128": "src/assets/jira_helper_128x128.png"
+        "128": "src/assets/jira_helper_128x128.png",
+        "256": "src/assets/jira_helper_256x256.png",
+        "512": "src/assets/jira_helper_512x512.png"
     },
     "minimum_chrome_version": "88",
     "action": {

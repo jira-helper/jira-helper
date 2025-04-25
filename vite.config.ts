@@ -2,7 +2,7 @@
 
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
-// import arraybuffer from 'vite-plugin-arraybuffer';
+
 import * as path from 'path';
 import manifest from './manifest.json';
 
@@ -25,6 +25,7 @@ export default defineConfig({
     setupFiles: ['./test/setup.ts'],
     coverage: {
       include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: ['src/**/*.stories.tsx'],
       reporter: ['lcov'],
     },
   },

@@ -1,0 +1,13 @@
+.group { 
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	min-width: 50px;
+	
+}
+
+.groupName {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}

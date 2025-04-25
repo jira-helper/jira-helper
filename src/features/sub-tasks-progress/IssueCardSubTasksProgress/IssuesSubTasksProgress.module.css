@@ -1,0 +1,9 @@
+.container {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 4px;
+}
+
+.container.splitLines {
+	grid-template-columns: 1fr;
+}

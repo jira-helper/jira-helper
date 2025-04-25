@@ -1,4 +1,6 @@
 import './firefoxFixes';
+import { globalContainer } from 'dioma';
+import { setAutoFreeze } from 'immer';
 import { Routes } from './routing';
 import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';
@@ -22,6 +24,16 @@ import WiplimitOnCellsSettings from './wiplimit-on-cells/WiplimitOnCellsSettings
 import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
+import { BoardSettingsBoardPage } from './board-settings/BoardPage';
+import { SubTasksProgressBoardPage } from './features/sub-tasks-progress/BoardPage';
+import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
+import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
+import { registerJiraServiceInDI } from './shared/jira/jiraService';
+import { registerLogger } from './shared/Logger';
+import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
+import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+
+setAutoFreeze(false);
 
 const domLoaded = () =>
   // eslint-disable-next-line consistent-return
@@ -30,10 +42,19 @@ const domLoaded = () =>
     window.addEventListener('DOMContentLoaded', resolve);
   });
 
+function initDiContainer() {
+  const container = globalContainer;
+  registerBoardPagePageObjectInDI(container);
+  registerBoardPropertyServiceInDI(container);
+  registerJiraServiceInDI(container);
+  registerLogger(container);
+}
+
 async function start() {
   if (!isJira) return;
 
   await domLoaded();
+  initDiContainer();
 
   setUpBlurSensitiveOnPage();
 
@@ -47,6 +68,10 @@ async function start() {
       FieldLimitsBoardPage,
       WiplimitOnCells,
       CardColorsBoardPage,
+      BoardSettingsBoardPage,
+      SubTasksProgressBoardPage,
+      LocalSettingsBoardPage,
+      DiagnosticBoardPage,
     ],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,

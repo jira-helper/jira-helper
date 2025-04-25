@@ -1,6 +1,6 @@
 export default {
   entry: ['src/content.js', 'src/background/background.ts'],
-  project: ['src/**/*.{js,ts}'],
+  project: ['src/**/*.{jsx?,tsx?}'],
   rules: {
     files: 'error',
     classMembers: 'error',

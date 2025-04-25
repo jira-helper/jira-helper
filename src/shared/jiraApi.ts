@@ -11,8 +11,10 @@ import complement from '@tinkoff/utils/function/complement';
 import isNil from '@tinkoff/utils/is/nil';
 import path from '@tinkoff/utils/object/path';
 import pathOr from '@tinkoff/utils/object/pathOr';
+import { Ok, Err, Result } from 'ts-results';
 import { defaultHeaders } from './defaultHeaders';
 import manifest from '../../manifest.json';
+import { JiraIssue } from './jira/types';
 
 const PACKAGE_VERSION = manifest.version;
 
@@ -43,18 +45,54 @@ const getContextPath = (() => {
   return location.origin;
 })();
 
+const EXTENSION_HEADERS = {
+  'browser-plugin': `jira-helper/${PACKAGE_VERSION}`,
+};
+const BASE_URL = `${getContextPath}/rest/`;
+
 // Configure the Jira request with base plugins
 const requestJira = request([
-  defaultHeaders({
-    'browser-plugin': `jira-helper/${PACKAGE_VERSION}`,
-  }),
+  defaultHeaders(EXTENSION_HEADERS),
   transformUrl({
-    baseUrl: `${getContextPath}/rest/`,
+    baseUrl: BASE_URL,
   }),
   deduplicateCache(),
   memoryCache({ allowStale: true }),
   http(),
 ]);
+
+const requestJiraViaFetch = async (
+  url: string,
+  options: RequestInit = {},
+  retries = 5
+): Promise<Result<Response, Error>> => {
+  const rawResponse = await fetch(`${BASE_URL}${url}`, {
+    headers: {
+      ...EXTENSION_HEADERS,
+      ...options.headers,
+    },
+    ...options,
+  }).then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (rawResponse.err) {
+    return rawResponse;
+  }
+  const response = rawResponse.val;
+
+  if (response.status === 429 && retries > 0) {
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    return requestJiraViaFetch(url, options, retries - 1);
+  }
+
+  if (response.status < 200 || response.status >= 300) {
+    return Err(new Error(`${response.status} ${response.statusText}`));
+  }
+
+  return Ok(response);
+};
 
 // Fetch all properties of a board
 const getBoardProperties = (boardId: string): Promise<any> => {
@@ -134,13 +172,61 @@ export const getBoardEditData = (boardId: string, params: Record<string, any> = 
 };
 
 // Search issues based on JQL query
-const searchIssues = (jql: string, params: Record<string, any> = {}): Promise<any> =>
+const internalSearchIssues = (jql: string, params: Record<string, any> = {}): Promise<any> =>
   requestJira({
     url: `api/2/search?jql=${jql}`,
     type: 'json',
     ...params,
   });
 
+export const searchIssues = async (
+  jql: string,
+  searchOptions: {
+    maxResults: number;
+    expand: 'changelog'[];
+  } = {
+    maxResults: 100,
+    expand: ['changelog'],
+  },
+  requestOptions: RequestInit = {}
+) => {
+  const fetchOptions = {
+    ...requestOptions,
+    headers: {
+      ...requestOptions.headers,
+      'browser-plugin': `jira-extension/${PACKAGE_VERSION}`,
+    },
+  };
+  let counter = 0;
+  const maxRetries = 3;
+  // eslint-disable-next-line no-plusplus
+  while (counter++ < maxRetries) {
+    // eslint-disable-next-line no-await-in-loop
+    const response = await fetch(
+      `${BASE_URL}api/2/search?jql=${jql}&maxResults=${searchOptions.maxResults}&expand=${searchOptions.expand.join(',')}`,
+      {
+        ...fetchOptions,
+      }
+    ).then(
+      r => Ok(r),
+      e => Err(e)
+    );
+
+    if (response.err) {
+      return response;
+    }
+
+    if (response.val.status === 429) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      continue;
+    }
+
+    return response;
+  }
+
+  return Err(new Error('Too many retries'));
+};
 // Load configuration for new issue view
 export const loadNewIssueViewEnabled = (params: Record<string, any> = {}): Promise<boolean> =>
   requestJira({
@@ -171,7 +257,7 @@ const getFlaggedIssues = (flagField: string) =>
 export const loadFlaggedIssues = async (keys: string[]): Promise<any> => {
   const flagField = await getFlaggedField();
 
-  return searchIssues(`key in (${keys.join(',')})&fields=${flagField}`).then(getFlaggedIssues(flagField!));
+  return internalSearchIssues(`key in (${keys.join(',')})&fields=${flagField}`).then(getFlaggedIssues(flagField!));
 };
 
 // Fetch user based on a query
@@ -201,3 +287,51 @@ export const getUser = (query: string): Promise<any> =>
       const substringMatch = users.find(user => user.name?.includes(query) || user.displayName?.includes(query));
       return substringMatch || users[0];
     });
+
+export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> => {
+  const result = await requestJiraViaFetch(`api/2/issue/${issueId}`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  const jsonData = jsonDataResult.val;
+
+  return Ok(jsonData);
+};
+
+export const getExternalIssues = async (issueKey: string, options: RequestInit = {}): Promise<Result<any, Error>> => {
+  const result = await requestJiraViaFetch(`api/2/issue/${issueKey}/remotelink`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  return Ok(jsonDataResult.val);
+};
+
+export const renderRemoteLink = async (
+  remoteLinkId: number,
+  options: RequestInit = {}
+): Promise<Result<string, Error>> => {
+  const result = await requestJiraViaFetch(`viewIssue/1/remoteIssueLink/render/${remoteLinkId}`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  return Ok(await result.val.text());
+};
