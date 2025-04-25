@@ -3,7 +3,6 @@ import { Card, Checkbox, Select } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { availableColorSchemas, jiraColorScheme, yellowGreenColorScheme } from '../../colorSchemas';
-import { SubTasksProgressComponent } from '../../SubTasksProgress/SubTasksProgressComponent';
 import { subTasksProgress } from '../../SubTasksProgress/testData';
 import { setSelectedColorScheme } from './actions/setSelectedColorScheme';
 import { setUseCustomColorScheme } from './actions/setUseCustomColorScheme';
@@ -12,10 +11,13 @@ import { toggleBlockedByLinksAsBlocked } from './actions/toggleBlockedByLinksAsB
 import { StatusCategorySettings } from './StatusCategorySettings';
 import { SubTasksSettings } from './SubTasksSettings';
 
+import { setSubtasksProgressDisplayMode } from './actions/setSubtasksProgressDisplayMode';
+import { IssuesSubTasksProgressPure } from '../../IssueCardSubTasksProgress/IssuesSubTasksProgress';
+
 const TEXTS = {
-  colorSchemeTitle: {
-    en: 'Color Scheme',
-    ru: 'Цветовая схема',
+  displaySettingsTitle: {
+    en: 'Display settings',
+    ru: 'Настройки отображения',
   },
   useCustomColorScheme: {
     en: 'Use custom color scheme',
@@ -29,14 +31,47 @@ const TEXTS = {
     en: 'Blocked by links as blocked',
     ru: 'Считать связь Blocked By как блокировку',
   },
+  splitLines: {
+    en: 'Split group name and progress',
+    ru: 'Разделять имя группы и прогресс',
+  },
+  example: {
+    en: 'Example:',
+    ru: 'Пример:',
+  },
 };
 export const ColorSchemeChooser = () => {
   const { settings } = useGetSettings();
   const selectedColorScheme = settings?.selectedColorScheme ?? availableColorSchemas[0];
   const texts = useGetTextsByLocale(TEXTS);
   return (
-    <Card title={texts.colorSchemeTitle} style={{ marginBottom: '16px' }} type="inner">
+    <Card title={texts.displaySettingsTitle} style={{ marginBottom: '16px' }} type="inner">
+      <div style={{ minWidth: 200, maxWidth: 400, marginBottom: '16px' }}>
+        {texts.example}
+        <IssuesSubTasksProgressPure
+          subtasksProgressByGroup={{
+            'Some Group': {
+              progress: settings.useCustomColorScheme
+                ? subTasksProgress.smallMixed
+                : subTasksProgress.smallMixedJiraTypes,
+              comments: ['example comment 1'],
+            },
+          }}
+          colorScheme={selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme}
+          displayMode={settings.subtasksProgressDisplayMode}
+        />
+      </div>
       <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'row', gap: 10 }}>
+        <Checkbox
+          checked={settings.subtasksProgressDisplayMode === 'splitLines'}
+          disabled={!settings.enabled}
+          onChange={() => {
+            const newValue = settings.subtasksProgressDisplayMode === 'splitLines' ? 'singleLine' : 'splitLines';
+            setSubtasksProgressDisplayMode(newValue);
+          }}
+        >
+          {texts.splitLines}
+        </Checkbox>
         <Checkbox
           checked={settings.useCustomColorScheme}
           disabled={!settings.enabled}
@@ -82,13 +117,6 @@ export const ColorSchemeChooser = () => {
                   label: <span data-testid="color-scheme-chooser-option">{schema}</span>,
                 }))}
               />
-              <span style={{ minWidth: 200 }}>
-                Example:
-                <SubTasksProgressComponent
-                  progress={subTasksProgress.smallMixed}
-                  colorScheme={selectedColorScheme === 'jira' ? jiraColorScheme : yellowGreenColorScheme}
-                />
-              </span>
             </div>
           </div>
 

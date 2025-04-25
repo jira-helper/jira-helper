@@ -2,6 +2,7 @@ import Tooltip from 'antd/es/tooltip';
 import React from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { ActiveStatuses, ColorScheme, SubTasksProgress } from '../types';
+import styles from './SubTasksProgressComponent.module.css';
 
 const TEXTS: Record<keyof SubTasksProgress, { en: string; ru: string }> = {
   todo: {
@@ -64,7 +65,7 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
 
   return (
     <Tooltip title={title}>
-      <div style={{ display: 'flex', gap: '0px', width: `${totalWidth}%` }}>
+      <div className={styles.container} style={{ width: `${totalWidth}%` }}>
         {activeStatuses.map(status => {
           const proportion = progress[status] / totalCount;
 

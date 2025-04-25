@@ -200,7 +200,8 @@ const useExternalIssuesProgress = (issueKey: string) => {
   return progress;
 };
 
-export const useSubtasksProgress = (issueKey: string) => {
+export type SubTasksProgressByGroup = Record<string, { progress: SubTasksProgress; comments: string[] }>;
+export const useSubtasksProgress = (issueKey: string): SubTasksProgressByGroup => {
   const subtasks = useGetSubtasksToCountProgress(issueKey);
   const progress = useCalcProgress(subtasks);
   const externalIssuesProgress = useExternalIssuesProgress(issueKey);

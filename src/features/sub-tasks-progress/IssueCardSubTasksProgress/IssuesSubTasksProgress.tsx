@@ -1,14 +1,48 @@
 import React, { useEffect } from 'react';
 import { loadSubtasksForIssue } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/actions/loadSubtasksForIssue';
-
-import { useSubtasksProgress } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
+import {
+  SubTasksProgressByGroup,
+  useSubtasksProgress,
+} from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
 import { colorSchemas } from 'src/features/sub-tasks-progress/colorSchemas';
 import { useDi, WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 
 import { globalContainer } from 'dioma';
+import cn from 'classnames';
+import styles from './IssuesSubTasksProgress.module.css';
 import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
 import { SubTaskProgressByGroup } from '../SubTasksProgress/SubTaskProgressByGroup';
+import { ColorScheme } from '../types';
+
+export const IssuesSubTasksProgressPure = (props: {
+  subtasksProgressByGroup: SubTasksProgressByGroup;
+  colorScheme: ColorScheme;
+  displayMode: 'splitLines' | 'singleLine';
+}) => {
+  const { subtasksProgressByGroup, colorScheme, displayMode } = props;
+  return (
+    <div className={cn(styles.container, displayMode === 'splitLines' && styles.splitLines)}>
+      {Object.entries(subtasksProgressByGroup).map(([group, progress]) => (
+        <SubTaskProgressByGroup
+          key={group}
+          groupName={group}
+          progress={progress.progress}
+          colorScheme={colorScheme}
+          warning={
+            progress.comments.length > 0 ? (
+              <div>
+                {progress.comments.map(comment => (
+                  <div key={comment}>{comment}</div>
+                ))}
+              </div>
+            ) : undefined
+          }
+        />
+      ))}
+    </div>
+  );
+};
 
 const IssuesSubTasksProgress = (props: { issueId: string }) => {
   const { settings } = useGetSettings();
@@ -41,25 +75,11 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {Object.entries(subtasksProgressByGroup).map(([group, progress]) => (
-        <SubTaskProgressByGroup
-          key={group}
-          groupName={group}
-          progress={progress.progress}
-          warning={
-            progress.comments.length > 0 ? (
-              <div>
-                {progress.comments.map(comment => (
-                  <div key={comment}>{comment}</div>
-                ))}
-              </div>
-            ) : undefined
-          }
-          colorScheme={colorSchemas[settings?.selectedColorScheme || 'jira']}
-        />
-      ))}
-    </div>
+    <IssuesSubTasksProgressPure
+      subtasksProgressByGroup={subtasksProgressByGroup}
+      colorScheme={colorSchemas[settings?.selectedColorScheme || 'jira']}
+      displayMode={settings?.subtasksProgressDisplayMode}
+    />
   );
 };
 

@@ -23,6 +23,7 @@ const initialData: Required<BoardProperty> = {
   ignoredStatuses: [],
   flagsAsBlocked: true,
   blockedByLinksAsBlocked: false,
+  subtasksProgressDisplayMode: 'splitLines',
 };
 
 export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
@@ -122,6 +123,12 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.blockedByLinksAsBlocked = !state.data.blockedByLinksAsBlocked;
+        })
+      ),
+    setSubtasksProgressDisplayMode: (displayMode: 'splitLines' | 'singleLine') =>
+      set(
+        produce((state: State) => {
+          state.data.subtasksProgressDisplayMode = displayMode;
         })
       ),
   },

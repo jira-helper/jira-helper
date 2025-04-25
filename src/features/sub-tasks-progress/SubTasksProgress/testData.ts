@@ -10,6 +10,15 @@ const smallMixedProgress: SubTasksProgress = {
   unmapped: 1,
 };
 
+const smallMixedJiraTypesProgress: SubTasksProgress = {
+  todo: 1,
+  inProgress: 2,
+  almostDone: 0,
+  done: 2,
+  blocked: 1,
+  unmapped: 1,
+};
+
 const largeMixedProgress: SubTasksProgress = {
   todo: 8,
   inProgress: 12,
@@ -54,4 +63,5 @@ export const subTasksProgress = {
   largeSameStatus: largeSameStatusProgress,
   smallSameStatus: smallSameStatusProgress,
   empty: emptyProgress,
+  smallMixedJiraTypes: smallMixedJiraTypesProgress,
 };

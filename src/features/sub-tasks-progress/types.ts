@@ -37,6 +37,7 @@ export type BoardProperty = {
   countIssuesExternalLinks?: boolean;
   countSubtasksExternalLinks?: boolean;
   countEpicExternalLinks?: boolean;
+  subtasksProgressDisplayMode?: 'splitLines' | 'singleLine';
 };
 
 export type CountType =

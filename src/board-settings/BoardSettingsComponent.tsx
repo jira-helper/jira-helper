@@ -5,7 +5,7 @@ import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
 import { Image } from '../shared/components/Image';
-import logoUrl from '../assets/jira_helper_32x32.png';
+import logoUrl from '../assets/jira_helper_512x512.png';
 import styles from './BoardSettingsComponent.module.css';
 import { useBoardSettingsStore } from './stores/boardSettings/boardSettings';
 

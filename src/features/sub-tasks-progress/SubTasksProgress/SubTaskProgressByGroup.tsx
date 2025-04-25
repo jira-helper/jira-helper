@@ -3,7 +3,7 @@ import { WarningFilled } from '@ant-design/icons';
 import Tooltip from 'antd/es/tooltip';
 import { SubTasksProgress, ColorScheme } from '../types';
 import { SubTasksProgressComponent } from './SubTasksProgressComponent';
-
+import styles from './SubTaskProgressByGroup.module.css';
 /**
  * shows group name and progress bar
  */
@@ -16,9 +16,12 @@ export const SubTaskProgressByGroup = (props: {
   const { groupName, progress, colorScheme, warning } = props;
   const count = Object.values(progress).reduce((acc, c) => acc + c, 0);
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        {groupName} ({count})
+    <>
+      <div className={styles.group}>
+        <span className={styles.groupName} title={groupName}>
+          {groupName}
+        </span>{' '}
+        ({count})
         {warning && (
           <Tooltip title={warning}>
             <WarningFilled style={{ color: '#faad14' }} />
@@ -26,6 +29,6 @@ export const SubTaskProgressByGroup = (props: {
         )}
       </div>
       <SubTasksProgressComponent progress={progress} colorScheme={colorScheme} />
-    </div>
+    </>
   );
 };
