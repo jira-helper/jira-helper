@@ -157,7 +157,7 @@ export default class extends PageModification<[EditData?, BoardGroup?, Swimlanes
       }
 
       const leftTailColumnIndex = Math.min(
-        ...groupColumns.map(columnId => columnsInOrder.indexOf(columnId)).filter(index => index != null)
+        ...groupColumns.map(columnId => columnsInOrder.indexOf(columnId)).filter(index => index !== -1)
       );
       const leftTailColumnId = columnsInOrder[leftTailColumnIndex];
 
