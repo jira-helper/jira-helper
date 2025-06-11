@@ -1,0 +1,83 @@
+.container {
+  max-width: 800px;
+  width: fit-content;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.group {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.groupHeader {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.groupHeaderInput {
+  width: 200px;
+}
+
+.groupOptions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.badgeOptions {
+  margin-bottom: 16px;
+}
+
+.badgeOptionsTitle {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.badgeOptionsContent {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.colorPicker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.colorPickerLabel {
+  font-size: 14px;
+}
+
+.examples {
+  margin-top: 24px;
+}
+
+.examplesTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.examplesContent {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  max-width: 800px;
+}
+
+.examplesContent > * {
+  min-width: 0;
+} 

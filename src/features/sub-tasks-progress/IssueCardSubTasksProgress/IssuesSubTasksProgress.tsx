@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { loadSubtasksForIssue } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/actions/loadSubtasksForIssue';
 import {
-  SubTasksProgressByGroup,
   useSubtasksProgress,
+  useSubtasksProgressByCustomGroup,
 } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
-import { colorSchemas } from 'src/features/sub-tasks-progress/colorSchemas';
 import { useDi, WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 
@@ -13,33 +12,64 @@ import cn from 'classnames';
 import styles from './IssuesSubTasksProgress.module.css';
 import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
 import { SubTaskProgressByGroup } from '../SubTasksProgress/SubTaskProgressByGroup';
-import { ColorScheme } from '../types';
+import { SubTasksProgress } from '../types';
+
+import { CounterComponent } from '../SubTasksProgress/CounterComponent';
+
+type SubtasksProgressBar = {
+  groupId: string;
+  groupName: string;
+  progress: SubTasksProgress;
+  comments: string[];
+};
+
+type SubtasksProgressCounter = {
+  groupId: string;
+  groupName: string;
+  progress: SubTasksProgress;
+  comments: string[];
+  pendingColor: string;
+  doneColor: string;
+};
 
 export const IssuesSubTasksProgressPure = (props: {
-  subtasksProgressByGroup: SubTasksProgressByGroup;
-  colorScheme: ColorScheme;
-  displayMode: 'splitLines' | 'singleLine';
+  progressBarsDisplayMode: 'splitLines' | 'singleLine';
+  subtasksProgressBars: SubtasksProgressBar[];
+  subtasksProgressCounters: SubtasksProgressCounter[];
 }) => {
-  const { subtasksProgressByGroup, colorScheme, displayMode } = props;
+  const { progressBarsDisplayMode, subtasksProgressBars, subtasksProgressCounters } = props;
   return (
-    <div className={cn(styles.container, displayMode === 'splitLines' && styles.splitLines)}>
-      {Object.entries(subtasksProgressByGroup).map(([group, progress]) => (
-        <SubTaskProgressByGroup
-          key={group}
-          groupName={group}
-          progress={progress.progress}
-          colorScheme={colorScheme}
-          warning={
-            progress.comments.length > 0 ? (
-              <div>
-                {progress.comments.map(comment => (
-                  <div key={comment}>{comment}</div>
-                ))}
-              </div>
-            ) : undefined
-          }
-        />
-      ))}
+    <div>
+      <div className={cn(styles.container, progressBarsDisplayMode === 'splitLines' && styles.splitLines)}>
+        {subtasksProgressBars.map(({ groupName: group, groupId, progress, comments }) => (
+          <SubTaskProgressByGroup
+            key={groupId}
+            groupName={group}
+            progress={progress}
+            warning={
+              comments.length > 0 ? (
+                <div>
+                  {comments.map(comment => (
+                    <div key={comment}>{comment}</div>
+                  ))}
+                </div>
+              ) : undefined
+            }
+          />
+        ))}
+      </div>
+      <div className={styles.countersContainer}>
+        {subtasksProgressCounters.map(({ groupName: group, groupId, progress, comments, pendingColor, doneColor }) => (
+          <CounterComponent
+            key={groupId}
+            groupName={group}
+            progress={progress}
+            comments={comments}
+            pendingColor={pendingColor}
+            doneColor={doneColor}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -47,6 +77,7 @@ export const IssuesSubTasksProgressPure = (props: {
 const IssuesSubTasksProgress = (props: { issueId: string }) => {
   const { settings } = useGetSettings();
   const { issueId } = props;
+  const { customGroups } = settings;
   const container = useDi();
   const boardPage = container.inject(boardPagePageObjectToken);
   const issueColumn = boardPage.getColumnOfIssue(issueId);
@@ -65,20 +96,80 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   }, [shouldTrackIssue, issueId]);
 
   const subtasksProgressByGroup = useSubtasksProgress(issueId);
+  const customGroupsProgress = useSubtasksProgressByCustomGroup(issueId);
 
-  if (!shouldTrackIssue) {
-    return null;
+  const subtasksProgressBars: SubtasksProgressBar[] = [];
+  const subtasksProgressCounters: SubtasksProgressCounter[] = [];
+
+  for (const groupName in subtasksProgressByGroup) {
+    if (settings.showGroupsByFieldAsCounters) {
+      const total = Object.values(subtasksProgressByGroup[groupName].progress).reduce((acc, curr) => acc + curr, 0);
+      const { done } = subtasksProgressByGroup[groupName].progress;
+      const isComplete = done === total;
+
+      if (settings.groupByFieldHideIfCompleted && isComplete) {
+        continue;
+      }
+
+      subtasksProgressCounters.push({
+        groupName,
+        progress: subtasksProgressByGroup[groupName].progress,
+        comments: subtasksProgressByGroup[groupName].comments,
+        groupId: `auto-group-by-field-${groupName}`,
+        pendingColor: settings.groupByFieldPendingColor,
+        doneColor: settings.groupByFieldDoneColor,
+      });
+    } else {
+      subtasksProgressBars.push({
+        groupName,
+        progress: subtasksProgressByGroup[groupName].progress,
+        comments: subtasksProgressByGroup[groupName].comments,
+        groupId: `auto-group-by-field-${groupName}`,
+      });
+    }
   }
 
-  if (Object.keys(subtasksProgressByGroup).length === 0) {
+  for (const cgid in customGroupsProgress) {
+    const customGroupProgress = customGroupsProgress[cgid];
+    const customGroup = customGroups.find(cg => cg.id === parseInt(cgid, 10));
+
+    if (!customGroup) continue;
+
+    const total = Object.values(customGroupProgress.progress).reduce((acc, curr) => acc + curr, 0);
+    const { done } = customGroupProgress.progress;
+    const isComplete = done === total;
+    if (customGroup.hideCompleted && isComplete) {
+      continue;
+    }
+
+    if (customGroup.showAsCounter) {
+      subtasksProgressCounters.push({
+        groupName: customGroup.name,
+        progress: customGroupProgress.progress,
+        comments: customGroupProgress.comments,
+        groupId: customGroup.id.toString(),
+        pendingColor: customGroup.badgePendingColor,
+        doneColor: customGroup.badgeDoneColor,
+      });
+    } else {
+      subtasksProgressBars.push({
+        groupName: customGroup.name,
+        progress: customGroupProgress.progress,
+        comments: customGroupProgress.comments,
+        groupId: customGroup.id.toString(),
+      });
+    }
+  }
+
+  if (subtasksProgressBars.length === 0 && subtasksProgressCounters.length === 0) {
     return null;
   }
 
   return (
     <IssuesSubTasksProgressPure
-      subtasksProgressByGroup={subtasksProgressByGroup}
-      colorScheme={colorSchemas[settings?.selectedColorScheme || 'jira']}
-      displayMode={settings?.subtasksProgressDisplayMode}
+      subtasksProgressBars={subtasksProgressBars}
+      subtasksProgressCounters={subtasksProgressCounters}
+      progressBarsDisplayMode={settings?.subtasksProgressDisplayMode}
     />
   );
 };

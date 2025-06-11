@@ -1,8 +1,8 @@
+import { CustomGroup } from './BoardSettings/GroupingSettings/CustomGroups/types';
 import { AvailableColorSchemas } from './colorSchemas';
 
-export type IgnoredStatus = 'ignored';
-export type ActiveStatuses = 'todo' | 'inProgress' | 'almostDone' | 'done' | 'blocked' | 'unmapped';
-export type Status = IgnoredStatus | ActiveStatuses;
+export type ActiveStatuses = 'todo' | 'inProgress' | 'done' | 'blocked';
+export type Status = ActiveStatuses;
 export type SubTasksProgress = {
   [key in ActiveStatuses]: number;
 };
@@ -17,6 +17,11 @@ export type ColorScheme = {
 type StatusId = number;
 
 export type GroupFields = 'project' | 'assignee' | 'reporter' | 'priority' | 'creator' | 'issueType';
+export type IssueLinkTypeSelection = {
+  id: string;
+  direction: 'inward' | 'outward';
+};
+
 export type BoardProperty = {
   enabled?: boolean;
   columnsToTrack?: string[];
@@ -38,6 +43,17 @@ export type BoardProperty = {
   countSubtasksExternalLinks?: boolean;
   countEpicExternalLinks?: boolean;
   subtasksProgressDisplayMode?: 'splitLines' | 'singleLine';
+  customGroups?: CustomGroup[];
+  enableGroupByField?: boolean;
+  showGroupsByFieldAsCounters?: boolean;
+  groupByFieldPendingColor?: string;
+  groupByFieldDoneColor?: string;
+  groupByFieldHideIfCompleted?: boolean;
+  /**
+   * If countEpicLinkedIssues or countIssuesLinkedIssues is enabled, this stores which link types/directions to count.
+   * If empty or undefined, all are counted.
+   */
+  issueLinkTypesToCount?: IssueLinkTypeSelection[];
 };
 
 export type CountType =
