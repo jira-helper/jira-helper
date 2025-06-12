@@ -30,6 +30,7 @@ describe('simpleJqlParser', () => {
     expect(parseJql('Field1 not in (a, b, c)')(wrap({ Field1: 'b' }))).toBe(false);
     expect(parseJql('Field1 not in (a, b, c)')(wrap({ Field1: 'd' }))).toBe(true);
     expect(parseJql('FIELD1 in (a, b, c)')(wrap({ field1: 'b' }))).toBe(true);
+    expect(parseJql('FIELD1 in (a, b, c,)')(wrap({ field1: 'c' }))).toBe(true);
   });
 
   it('should match AND and OR', () => {
@@ -93,6 +94,7 @@ describe('simpleJqlParser', () => {
     // in
     expect(parseJql('labels in (bug, urgent)')(wrap({ labels: ['feature', 'bug', 'urgent'] }))).toBe(true);
     expect(parseJql('labels in (foo, bar)')(wrap({ labels: ['feature', 'bug', 'urgent'] }))).toBe(false);
+    expect(parseJql('labels in (foo, bar, bad, got)')(wrap({ labels: ['feature', 'bug', 'urgent'] }))).toBe(false);
     // not in
     expect(parseJql('labels not in (foo, bar)')(wrap({ labels: ['feature', 'bug', 'urgent'] }))).toBe(true);
     expect(parseJql('labels not in (bug, urgent)')(wrap({ labels: ['feature', 'bug', 'urgent'] }))).toBe(false);
@@ -108,5 +110,29 @@ describe('simpleJqlParser', () => {
     expect(
       parseJql('project = "THF" AND  "Issue Size" is not EMPTY')(wrap({ project: 'THF', 'issue size': ['kek'] }))
     ).toBe(true);
+  });
+
+  it('incorrect JQL should throw', () => {
+    expect(() => parseJql('Field1 = value with spaces')(wrap({}))).toThrow(
+      'Expected AND, OR, "," or ) expected, but got "with". Did you forget to quote the value?'
+    );
+    expect(() => parseJql('Field1 with1 spaces = value with spaces')(wrap({}))).toThrow(
+      'Unknown operator: "with1". Did you forget to quote the field name?'
+    );
+    expect(() => parseJql('Field1 not in a')(wrap({}))).toThrow('Expected ( after in');
+  });
+  it('complex cases', () => {
+    expect(
+      parseJql(
+        'project = THF and labels in (without-idea) and Team = Hotels.Core and Team != Hotels.B2C.Orders and component not in (HotelsApi)'
+      )(
+        wrap({
+          project: 'THF',
+          labels: ['without-idea'],
+          team: 'Hotels.Core',
+          component: ['HotelsWeb'],
+        })
+      )
+    ).toEqual(true);
   });
 });

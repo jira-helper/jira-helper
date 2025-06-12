@@ -14,6 +14,9 @@ export type JqlAstResult =
   | { type: 'NOT'; expr: JqlAstResult; matched: boolean }
   | { type: 'condition'; field: string; op: string; value?: string; values?: string[]; matched: boolean };
 
+type LogicalOperator = 'and' | 'or';
+type ExpressionOperator = '=' | '!=' | 'in' | 'not in' | 'is' | 'is not';
+
 // Tokenizer that respects quoted strings and tracks if token was quoted
 function tokenize(jql: string): string[] {
   const tokens: string[] = [];
@@ -81,60 +84,83 @@ function parseTokens(tokens: string[]): any {
       pos++;
       return expr;
     }
-    return parseCondition();
+    const condition = parseCondition();
+    const currentToken = tokens[pos];
+    if (
+      currentToken != undefined &&
+      !isKeyword(currentToken, 'AND') &&
+      !isKeyword(currentToken, 'OR') &&
+      !isKeyword(currentToken, ')')
+    ) {
+      console.log(currentToken);
+      console.log(condition);
+      throw new Error(
+        `Expected AND, OR, "," or ) expected, but got "${currentToken}". Did you forget to quote the value?`
+      );
+    }
+    return condition;
   }
 
   function parseCondition(): any {
     let field = tokens[pos++];
-    // Enforce quoting for field names with spaces
-    if (field.includes(' ') && !isQuoted(field)) {
-      throw new Error(`Field name with spaces must be quoted: ${field}`);
-    }
+
     field = stripQuotes(field).toLowerCase();
     let op = tokens[pos++];
-    // Normalize operator keywords
-    if (isKeyword(op, 'is')) {
-      if (isKeyword(tokens[pos], 'not')) {
-        pos++;
+    console.log(op);
+    switch (true) {
+      case isKeyword(op, 'is'): {
+        if (isKeyword(tokens[pos], 'not')) {
+          pos++;
+          let value = tokens[pos++];
+          if (value.includes(' ') && !isQuoted(value)) {
+            throw new Error(`Value with spaces must be quoted: ${value}`);
+          }
+          value = stripQuotes(value);
+          return { type: 'condition', field, op: 'is not', value };
+        }
         let value = tokens[pos++];
         if (value.includes(' ') && !isQuoted(value)) {
           throw new Error(`Value with spaces must be quoted: ${value}`);
         }
         value = stripQuotes(value);
-        return { type: 'condition', field, op: 'is not', value };
+        return { type: 'condition', field, op: '=', value };
       }
-      let value = tokens[pos++];
-      if (value.includes(' ') && !isQuoted(value)) {
-        throw new Error(`Value with spaces must be quoted: ${value}`);
-      }
-      value = stripQuotes(value);
-      return { type: 'condition', field, op: '=', value };
-    }
-    if (isKeyword(op, 'not')) {
-      op += ` ${tokens[pos++]}`; // 'not in'
-    }
-    if (isKeyword(op, 'in') || op.toLowerCase() === 'not in') {
-      if (tokens[pos++] !== '(') throw new Error('Expected ( after in');
-      const values = [];
-      while (tokens[pos] !== ')') {
-        let val = tokens[pos++];
-        if (val.endsWith(',')) val = val.slice(0, -1);
-        if (val.includes(' ') && !isQuoted(val)) {
-          throw new Error(`Value with spaces must be quoted: ${val}`);
+      case isKeyword(op, 'not'): {
+        const nextToken = tokens[pos];
+        if (nextToken != 'in') {
+          console.log(tokens, nextToken);
+          throw new Error(`Expected in to get "not in", but got "${nextToken}"`);
         }
-        values.push(stripQuotes(val));
-        if (tokens[pos] === ',') pos++;
+        pos++;
+        op = 'not in';
       }
-      pos++; // skip ')'
-      return { type: 'condition', field, op: op.toLowerCase(), values };
+      case isKeyword(op, 'in') || op.toLowerCase() === 'not in': {
+        if (tokens[pos++] !== '(') throw new Error('Expected ( after in');
+        const values = [];
+        while (tokens[pos] !== ')') {
+          let val = tokens[pos++];
+          if (val.endsWith(',')) val = val.slice(0, -1);
+          if (val.includes(' ') && !isQuoted(val)) {
+            throw new Error(`Value with spaces must be quoted: ${val}`);
+          }
+          values.push(stripQuotes(val));
+          if (tokens[pos] === ',') pos++;
+        }
+        pos++; // skip ')'
+        return { type: 'condition', field, op: op.toLowerCase(), values };
+      }
+      case isKeyword(op, '='):
+      case isKeyword(op, '!='): {
+        // Enforce quoting for value with spaces
+        let value = tokens[pos++];
+
+        value = stripQuotes(value);
+        return { type: 'condition', field, op: op.toLowerCase(), value };
+      }
+      default: {
+        throw new Error(`Unknown operator: "${op}". Did you forget to quote the field name?`);
+      }
     }
-    // Enforce quoting for value with spaces
-    let value = tokens[pos++];
-    if (value && value.includes(' ') && !isQuoted(value)) {
-      throw new Error(`Value with spaces must be quoted: ${value}`);
-    }
-    value = stripQuotes(value);
-    return { type: 'condition', field, op: op.toLowerCase(), value };
   }
 
   return parseExpression();
@@ -225,7 +251,9 @@ function compile(node: any): JqlMatchFn {
 
 export function parseJql(jql: string): JqlMatchFn {
   const tokens = tokenize(jql);
+  // console.log(tokens);
   const ast = parseTokens(tokens);
+
   return compile(ast);
 }
 
