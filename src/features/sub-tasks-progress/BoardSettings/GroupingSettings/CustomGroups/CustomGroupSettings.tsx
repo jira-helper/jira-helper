@@ -5,6 +5,7 @@ import type { Color } from 'antd/es/color-picker';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
 import { throttle } from 'src/shared/utils';
+import { JqlParserInfoTooltip } from 'src/shared/jql/JqlParserInfoTooltip';
 import { SubTaskProgressByGroup } from '../../../SubTasksProgress/SubTaskProgressByGroup';
 import { CounterComponent } from '../../../SubTasksProgress/CounterComponent';
 import styles from './CustomGroupSettings.module.css';
@@ -229,6 +230,9 @@ export const CustomGroupSettings: React.FC<CustomGroupSettingsProps> = ({
                 </>
               ) : (
                 <div style={{ display: 'flex', gap: 12, width: '100%', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500, marginBottom: 4 }}>
+                    {texts.jql} <JqlParserInfoTooltip />
+                  </div>
                   <Input
                     placeholder={texts.jql}
                     value={jqlValue}

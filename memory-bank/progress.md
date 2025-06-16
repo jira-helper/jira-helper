@@ -18,7 +18,3 @@
 ## Known issues
 - Edge cases in JQL parsing may arise as new requirements/tests are added.
 - UI may need further refinement for large boards or many custom groups.
-
-## Future Plans
-1. Add demo mode for debugging custom JQL: User enters a task key, debug mode downloads task info and checks JQL against the task, showing which conditions matched and which did not.
-2. Add tooltip around JQL mode with description and limitations of the JQL implementation.
