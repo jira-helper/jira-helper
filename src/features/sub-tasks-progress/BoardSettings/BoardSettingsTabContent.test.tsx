@@ -9,7 +9,7 @@ import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-pro
 import { registerLogger } from 'src/shared/Logger';
 import { step } from 'src/shared/testTools/step';
 import { JiraServiceToken } from 'src/shared/jira/jiraService';
-import { Err, Ok } from 'ts-results';
+import { Err } from 'ts-results';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
@@ -64,6 +64,7 @@ function setup({
 
   container.register({
     token: JiraServiceToken,
+    // @ts-expect-error minimal mock
     value: {
       getProjectFields: vi.fn(() => Promise.resolve(Err(new Error('test')))),
     },
