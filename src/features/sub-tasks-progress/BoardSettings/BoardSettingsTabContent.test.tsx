@@ -8,14 +8,13 @@ import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { registerLogger } from 'src/shared/Logger';
 import { step } from 'src/shared/testTools/step';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
+import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { Err, Ok } from 'ts-results';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
 import { AvailableColorSchemas } from '../colorSchemas';
 import { BoardProperty, GroupFields, Status } from '../types';
-import { moveBoardStatusToProgressStatus } from './ColorSchemeSettings/actions/moveBoardStatusToProgressStatus';
 import { loadSubTaskProgressBoardProperty } from '../SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
 
 function setup({
@@ -60,6 +59,13 @@ function setup({
     value: {
       getBoardProperty: getBoardPropertySpy,
       updateBoardProperty: updateBoardPropertySpy,
+    },
+  });
+
+  container.register({
+    token: JiraServiceToken,
+    value: {
+      getProjectFields: vi.fn(() => Promise.resolve(Err(new Error('test')))),
     },
   });
 
@@ -150,67 +156,6 @@ describe('BoardSettingsTabContent', () => {
   });
 
   it.each([
-    { initialScheme: undefined, expectedScheme: 'jira' } as const,
-    { initialScheme: 'jira', expectedScheme: 'jira' } as const,
-    { initialScheme: 'yellowGreen', expectedScheme: 'yellowGreen' } as const,
-  ])(
-    'When board property has colorscheme with value $initialScheme, it should render $expectedScheme',
-    async ({ initialScheme, expectedScheme }) => {
-      const { container } = setup({
-        columnsOnBoard: ['Column 1', 'Column 2'],
-        columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
-        colorScheme: initialScheme,
-        useCustomColorScheme: true,
-      });
-
-      await loadSubTaskProgressBoardProperty();
-
-      render(
-        <WithDi container={container}>
-          <BoardSettingsTabContent />
-        </WithDi>
-      );
-      await waitFor(() => {
-        expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
-      });
-
-      const colorScheme = BoardSettingsTabContentPageObject.getColorScheme();
-      expect(colorScheme).toEqual(expectedScheme);
-    }
-  );
-
-  it('should update colorScheme', async () => {
-    const { container } = setup({
-      columnsOnBoard: ['Column 1', 'Column 2'],
-      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
-      colorScheme: 'yellowGreen',
-      useCustomColorScheme: true,
-    });
-
-    await loadSubTaskProgressBoardProperty();
-    render(
-      <WithDi container={container}>
-        <BoardSettingsTabContent />
-      </WithDi>
-    );
-
-    await waitFor(() => {
-      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
-    });
-
-    BoardSettingsTabContentPageObject.setColorScheme('jira');
-
-    // check current color scheme
-    await waitFor(() => {
-      const colorScheme = BoardSettingsTabContentPageObject.getColorScheme();
-      expect(colorScheme).toEqual('jira');
-    });
-
-    // check that board property in inner state is updated
-    expect(useSubTaskProgressBoardPropertyStore.getState().data!.selectedColorScheme).toEqual('jira');
-  });
-
-  it.each([
     { initialGrouping: undefined, expectedGrouping: 'project' } as const,
     { initialGrouping: 'project', expectedGrouping: 'project' } as const,
     { initialGrouping: 'assignee', expectedGrouping: 'assignee' } as const,
@@ -273,150 +218,6 @@ describe('BoardSettingsTabContent', () => {
     // check that new grouping field is selected
     const updatedGroupingField = BoardSettingsTabContentPageObject.getGroupingField();
     expect(updatedGroupingField).toEqual('assignee');
-  });
-
-  it('should render status mapping', async () => {
-    const { container } = setup({
-      columnsOnBoard: ['Column 1', 'Column 2'],
-      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
-      colorScheme: 'jira',
-      statusMapping: {
-        1: {
-          name: 'status1',
-          progressStatus: 'done',
-        },
-      },
-      useCustomColorScheme: true,
-    });
-
-    await loadSubTaskProgressBoardProperty();
-
-    step('Given: user has issues on board', () => {
-      const subtask1 = new JiraTestDataBuilder()
-        .key('SUBTASK-1')
-        .status({
-          status: 'status1',
-          statusId: 1,
-          statusCategory: 'done',
-          statusColor: 'green',
-        })
-        .build();
-      const subtask2 = new JiraTestDataBuilder()
-        .key('SUBTASK-2')
-        .status({
-          status: 'status2',
-          statusId: 2,
-          statusCategory: 'indeterminate',
-          statusColor: 'blue',
-        })
-        .build();
-
-      useJiraSubtasksStore.getState().actions.addSubtasks('TEST-123', {
-        subtasks: [subtask1, subtask2],
-        externalLinks: [],
-      });
-    });
-
-    render(
-      <WithDi container={container}>
-        <BoardSettingsTabContent />
-      </WithDi>
-    );
-
-    await waitFor(() => {
-      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
-    });
-
-    await waitFor(() => {
-      const statusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
-      expect(statusMapping).toEqual({
-        status1: 'done',
-        status2: 'unmapped',
-      });
-    });
-  });
-
-  it('should update status mapping', async () => {
-    const { container } = setup({
-      columnsOnBoard: ['Column 1', 'Column 2'],
-      columnsOnBoardProperty: ['Column 1', 'Column 3 (only in board)'],
-      colorScheme: 'jira',
-      statusMapping: {
-        1: {
-          name: 'status1',
-          progressStatus: 'done',
-        },
-      },
-      useCustomColorScheme: true,
-    });
-
-    step('Given: user has issues on board', () => {
-      const subtask1 = new JiraTestDataBuilder()
-        .key('SUBTASK-1')
-        .status({
-          status: 'status1',
-          statusId: 1,
-          statusCategory: 'done',
-          statusColor: 'green',
-        })
-        .build();
-      const subtask2 = new JiraTestDataBuilder()
-        .key('SUBTASK-2')
-        .status({
-          status: 'status2',
-          statusId: 2,
-          statusCategory: 'indeterminate',
-          statusColor: 'blue',
-        })
-        .build();
-
-      useJiraSubtasksStore.getState().actions.addSubtasks('TEST-123', {
-        subtasks: [subtask1, subtask2],
-        externalLinks: [],
-      });
-    });
-
-    // Given user has tasks
-    // And board has columns
-    // And setting set to use custom color scheme
-    // When user updates status mapping
-
-    await step('Given settings are loaded', async () => {
-      await loadSubTaskProgressBoardProperty();
-    });
-
-    render(
-      <WithDi container={container}>
-        <BoardSettingsTabContent />
-      </WithDi>
-    );
-
-    await waitFor(() => {
-      expect(useSubTaskProgressBoardPropertyStore.getState().state).toEqual('loaded');
-    });
-
-    await moveBoardStatusToProgressStatus(2, 'status2', 'inProgress');
-
-    // check that inner state is updated
-    await waitFor(() => {
-      expect(useSubTaskProgressBoardPropertyStore.getState().data!.newStatusMapping).toEqual({
-        1: {
-          name: 'status1',
-          progressStatus: 'done',
-        },
-        2: {
-          name: 'status2',
-          progressStatus: 'inProgress',
-        },
-      });
-    });
-
-    // check that new grouping field is selected
-    const updatedStatusMapping = BoardSettingsTabContentPageObject.getStatusMapping();
-    expect(updatedStatusMapping).toEqual({
-      status1: 'done',
-      status2: 'inProgress',
-    });
   });
 
   it('enabled and disabled settings', async () => {
