@@ -1,3 +1,4 @@
+import React from 'react';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { getUser } from '../../shared/jiraApi';
@@ -5,7 +6,7 @@ import { btnGroupIdForColumnsSettingsPage, BOARD_PROPERTIES } from '../../shared
 import {
   settingsJiraDOM,
   groupSettingsBtnTemplate,
-  formPersonalWipLimit,
+  FormPersonalWipLimit,
   tablePersonalWipLimit,
   addPersonalWipLimit,
 } from './htmlTemplates';
@@ -139,7 +140,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData, any],
 
   openPersonalSettingsPopup = async (): Promise<void> => {
     await this.popup!.render();
-    await this.popup!.appendToContent(formPersonalWipLimit());
+    this.popup!.appendReactComponentToContent(<FormPersonalWipLimit />);
     await this.popup!.appendToContent(tablePersonalWipLimit());
 
     this.DOMselectColumns = document.getElementById(settingsJiraDOM.idColumnSelect) as HTMLSelectElement;
