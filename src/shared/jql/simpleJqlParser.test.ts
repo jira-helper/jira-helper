@@ -135,4 +135,40 @@ describe('simpleJqlParser', () => {
       )
     ).toEqual(true);
   });
+
+  it('should match ~ (contains) and !~ (not contains) for strings, numbers, arrays, null, undefined, boolean', () => {
+    // String
+    expect(parseJql('Field1 ~ val')(wrap({ Field1: 'value' }))).toBe(true);
+    expect(parseJql('Field1 ~ val')(wrap({ Field1: 'other' }))).toBe(false);
+    expect(parseJql('Field1 !~ val')(wrap({ Field1: 'value' }))).toBe(false);
+    expect(parseJql('Field1 !~ val')(wrap({ Field1: 'other' }))).toBe(true);
+    // Quoted string
+    expect(parseJql('Field1 ~ "hello world"')(wrap({ Field1: 'say hello world!' }))).toBe(true);
+    expect(parseJql('Field1 !~ "hello world"')(wrap({ Field1: 'say hello world!' }))).toBe(false);
+    // Number
+    expect(parseJql('Field1 ~ 23')(wrap({ Field1: 12345 }))).toBe(true);
+    expect(parseJql('Field1 !~ 23')(wrap({ Field1: 12345 }))).toBe(false);
+    expect(parseJql('Field1 ~ 99')(wrap({ Field1: 12345 }))).toBe(false);
+    expect(parseJql('Field1 !~ 99')(wrap({ Field1: 12345 }))).toBe(true);
+    // Array of strings
+    expect(parseJql('Field1 ~ foo')(wrap({ Field1: ['bar', 'foo', 'baz'] }))).toBe(true);
+    expect(parseJql('Field1 !~ foo')(wrap({ Field1: ['bar', 'foo', 'baz'] }))).toBe(false);
+    expect(parseJql('Field1 ~ qux')(wrap({ Field1: ['bar', 'foo', 'baz'] }))).toBe(false);
+    expect(parseJql('Field1 !~ qux')(wrap({ Field1: ['bar', 'foo', 'baz'] }))).toBe(true);
+    // Array of numbers
+    expect(parseJql('Field1 ~ 23')(wrap({ Field1: [1, 23, 456] }))).toBe(true);
+    expect(parseJql('Field1 !~ 23')(wrap({ Field1: [1, 23, 456] }))).toBe(false);
+    expect(parseJql('Field1 ~ 99')(wrap({ Field1: [1, 23, 456] }))).toBe(false);
+    expect(parseJql('Field1 !~ 99')(wrap({ Field1: [1, 23, 456] }))).toBe(true);
+    // Null/undefined/boolean
+    expect(parseJql('Field1 ~ foo')(wrap({ Field1: null }))).toBe(false);
+    expect(parseJql('Field1 !~ foo')(wrap({ Field1: null }))).toBe(true);
+    expect(parseJql('Field1 ~ foo')(wrap({ Field1: undefined }))).toBe(false);
+    expect(parseJql('Field1 !~ foo')(wrap({ Field1: undefined }))).toBe(true);
+    expect(parseJql('Field1 ~ foo')(wrap({ Field1: true }))).toBe(false);
+    expect(parseJql('Field1 !~ foo')(wrap({ Field1: false }))).toBe(true);
+    // Case-insensitive field name
+    expect(parseJql('FIELD1 ~ foo')(wrap({ field1: 'foobar' }))).toBe(true);
+    expect(parseJql('field1 !~ foo')(wrap({ FIELD1: 'foobar' }))).toBe(false);
+  });
 });

@@ -13,7 +13,7 @@ How it works:
 
 Supported Syntax:
 -----------------
-- Comparison operators: =, !=, in, not in
+- Comparison operators: =, !=, in, not in, ~ (contains), !~ (not contains)
 - Logical operators: AND, OR, NOT
 - Parentheses for grouping: (...)
 - Quoted field names and values (e.g., "Issue Size" = "Some Value")
@@ -26,7 +26,7 @@ Not Supported:
 - Functions (e.g., currentUser(), startOfDay())
 - ORDER BY, sorting, or subqueries
 - Complex field types (dates, numbers, custom Jira functions)
-- Wildcards, LIKE, ~, or regex matching
+- Wildcards, LIKE, regex matching
 - Nested property access (e.g., parent.field)
 - Comments or multiline queries
 
@@ -43,12 +43,14 @@ Examples of Supported JQL:
 - Field1 is not EMPTY
 - labels = bug
 - project = THF AND "Issue Size" is not EMPTY
+- summary ~ win
+- summary !~ run
+- description ~ "full screen"
 
 Examples of NOT Supported JQL:
 ------------------------------
 - assignee in (currentUser())           // Functions not supported
 - created >= startOfDay(-7d)            // Functions and operators not supported
-- summary ~ "urgent"                   // ~ (contains) operator not supported
 - ORDER BY created DESC                 // Sorting not supported
 - parent.status = Done                  // Nested property access not supported
 - Field1 = value with spaces            // Value with spaces must be quoted
@@ -161,7 +163,6 @@ function parseTokens(tokens: string[]): any {
 
   function parseCondition(): any {
     let field = tokens[pos++];
-
     field = stripQuotes(field).toLowerCase();
     let op = tokens[pos++];
     switch (true) {
@@ -205,11 +206,15 @@ function parseTokens(tokens: string[]): any {
         pos++; // skip ')'
         return { type: 'condition', field, op: op.toLowerCase(), values };
       }
+      case op === '~' || op === '!~': {
+        let value = tokens[pos++];
+        value = stripQuotes(value);
+        return { type: 'condition', field, op, value };
+      }
       case isKeyword(op, '='):
       case isKeyword(op, '!='): {
         // Enforce quoting for value with spaces
         let value = tokens[pos++];
-
         value = stripQuotes(value);
         return { type: 'condition', field, op: op.toLowerCase(), value };
       }
@@ -276,7 +281,6 @@ function compile(node: any): JqlMatchFn {
     return getFieldValue => !expr(getFieldValue);
   }
   if (node.type === 'condition') {
-    // Always use lowercased field names for case-insensitive matching
     const field = node.field.toLowerCase();
     if (node.value === 'EMPTY') {
       if (node.op === '=') {
@@ -300,6 +304,38 @@ function compile(node: any): JqlMatchFn {
     }
     if (node.op === 'not in') {
       return getFieldValue => allMatch(getFieldValue(field), v => !node.values.includes(v));
+    }
+    if (node.op === '~') {
+      return getFieldValue => {
+        const result = anyMatch(getFieldValue(field), v => {
+          if (typeof v === 'string' || typeof v === 'number') {
+            return v.toString().includes(node.value ?? '');
+          }
+          if (Array.isArray(v)) {
+            return v.some(item =>
+              typeof item === 'string' || typeof item === 'number' ? item.toString().includes(node.value ?? '') : false
+            );
+          }
+          return false;
+        });
+        return result === undefined ? false : result;
+      };
+    }
+    if (node.op === '!~') {
+      return getFieldValue => {
+        const result = allMatch(getFieldValue(field), v => {
+          if (typeof v === 'string' || typeof v === 'number') {
+            return !v.toString().includes(node.value ?? '');
+          }
+          if (Array.isArray(v)) {
+            return v.every(item =>
+              typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(node.value ?? '') : true
+            );
+          }
+          return true;
+        });
+        return result === undefined ? true : result;
+      };
     }
   }
   throw new Error(`Unknown node: ${JSON.stringify(node)}`);
@@ -354,6 +390,32 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
       matched = anyMatch(getFieldValue(field), v => ast.values && ast.values.includes(v));
     } else if (ast.op === 'not in') {
       matched = allMatch(getFieldValue(field), v => ast.values && !ast.values.includes(v));
+    } else if (ast.op === '~') {
+      const result = anyMatch(getFieldValue(field), v => {
+        if (typeof v === 'string' || typeof v === 'number') {
+          return v.toString().includes(ast.value ?? '');
+        }
+        if (Array.isArray(v)) {
+          return v.some(item =>
+            typeof item === 'string' || typeof item === 'number' ? item.toString().includes(ast.value ?? '') : false
+          );
+        }
+        return false;
+      });
+      matched = result === undefined ? false : result;
+    } else if (ast.op === '!~') {
+      const result = allMatch(getFieldValue(field), v => {
+        if (typeof v === 'string' || typeof v === 'number') {
+          return !v.toString().includes(ast.value ?? '');
+        }
+        if (Array.isArray(v)) {
+          return v.every(item =>
+            typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(ast.value ?? '') : true
+          );
+        }
+        return true;
+      });
+      matched = result === undefined ? true : result;
     }
     return { ...ast, matched, type: 'condition' };
   }

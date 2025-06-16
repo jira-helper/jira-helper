@@ -20,6 +20,14 @@ const TEXTS = {
     en: '=, !=, in, not in',
     ru: '=, !=, in, not in',
   },
+  containsOps: {
+    en: '~ (contains), !~ (not contains)',
+    ru: '~ (содержит), !~ (не содержит)',
+  },
+  containsDesc: {
+    en: 'The ~ and !~ operators check if a field contains (or does not contain) a substring. Works for strings, numbers, arrays. LIKE/regex are not supported.',
+    ru: 'Операторы ~ и !~ проверяют, содержит ли поле подстроку (или не содержит). Работает для строк, чисел, массивов. LIKE/регулярные выражения не поддерживаются.',
+  },
   emptyIsParens: {
     en: 'EMPTY, is, parentheses',
     ru: 'EMPTY, is, скобки',
@@ -40,9 +48,9 @@ const TEXTS = {
     en: 'ORDER BY, sorting',
     ru: 'ORDER BY, сортировка',
   },
-  contains: {
-    en: '~ (contains), LIKE, regex',
-    ru: '~ (contains), LIKE, regex',
+  likeRegex: {
+    en: 'LIKE, regex',
+    ru: 'LIKE, regex',
   },
   nested: {
     en: 'Nested fields (e.g., parent.status)',
@@ -55,13 +63,15 @@ export const JqlParserInfoTooltip: React.FC = () => {
   return (
     <Tooltip
       title={
-        <div style={{ maxWidth: 320 }}>
+        <div style={{ maxWidth: 340 }}>
           <b>{texts.title}</b>
           <div style={{ marginTop: 4 }}>
             <div>{texts.supports}</div>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
               <li>{texts.andOrNot}</li>
               <li>{texts.eqNeqInNotIn}</li>
+              <li>{texts.containsOps}</li>
+              <li style={{ fontSize: 12, color: '#888' }}>{texts.containsDesc}</li>
               <li>{texts.emptyIsParens}</li>
               <li>{texts.quoted}</li>
             </ul>
@@ -70,7 +80,7 @@ export const JqlParserInfoTooltip: React.FC = () => {
               <ul style={{ margin: 0, paddingLeft: 18 }}>
                 <li>{texts.functions}</li>
                 <li>{texts.orderBy}</li>
-                <li>{texts.contains}</li>
+                <li>{texts.likeRegex}</li>
                 <li>{texts.nested}</li>
               </ul>
             </div>
