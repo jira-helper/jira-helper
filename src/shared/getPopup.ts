@@ -1,3 +1,5 @@
+import { createRoot } from 'react-dom/client';
+
 const noopWithCallback = (cb: () => void): void => cb();
 
 interface PopupProps {
@@ -150,6 +152,12 @@ export class Popup {
   // Appends HTML content to the popup content block
   appendToContent(str = ''): void {
     this.contentBlock?.insertAdjacentHTML('beforeend', str);
+  }
+
+  appendReactComponentToContent(component: React.ReactNode): void {
+    const div = document.createElement('div');
+    createRoot(div).render(component);
+    this.contentBlock?.appendChild(div);
   }
 
   // Clears the content of the popup
