@@ -1,38 +1,14 @@
 import Tooltip from 'antd/es/tooltip';
 import React from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { ActiveStatuses, ColorScheme, SubTasksProgress } from '../types';
+import { ActiveStatuses, SubTasksProgress } from '../types';
 import styles from './SubTasksProgressComponent.module.css';
+import { jiraColorScheme } from '../colorSchemas';
+import { StatusNamesTexts } from '../constants';
 
-const TEXTS: Record<keyof SubTasksProgress, { en: string; ru: string }> = {
-  todo: {
-    en: 'To Do',
-    ru: 'К выполнению',
-  },
-  inProgress: {
-    en: 'In Progress',
-    ru: 'В работе',
-  },
-  almostDone: {
-    en: 'Almost Done',
-    ru: 'Почти выполнено',
-  },
-  done: {
-    en: 'Done',
-    ru: 'Выполнено',
-  },
-  blocked: {
-    en: 'Blocked',
-    ru: 'Заблокировано',
-  },
-  unmapped: {
-    en: 'Unknown',
-    ru: 'Неизвестно',
-  },
-};
-export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; colorScheme: ColorScheme }) => {
-  const texts = useGetTextsByLocale(TEXTS);
-  const { progress, colorScheme } = props;
+export const SubTasksProgressComponent = (props: { progress: SubTasksProgress }) => {
+  const texts = useGetTextsByLocale(StatusNamesTexts);
+  const { progress } = props;
   const totalCount = Object.values(progress).reduce((acc, count) => acc + count, 0);
 
   if (totalCount === 0) {
@@ -78,7 +54,7 @@ export const SubTasksProgressComponent = (props: { progress: SubTasksProgress; c
               style={{
                 ...getProgressBarStyle(isFirst, isLast),
                 width: `${width}%`,
-                backgroundColor: colorScheme[status],
+                backgroundColor: jiraColorScheme[status],
               }}
             />
           );

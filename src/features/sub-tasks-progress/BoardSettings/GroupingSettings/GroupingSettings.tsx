@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Card, Select, Tag, Tooltip } from 'antd';
+import { Card, Checkbox, ColorPicker, Select, Tag, Tooltip } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
@@ -9,6 +9,13 @@ import { GroupFields } from '../../types';
 import { setGroupingField } from './actions/setGroupingField';
 import { removeIgnoredGroup } from './actions/removeIgnoredGroup';
 import { addIgnoredGroup } from './actions/addIgnoredGroup';
+import { CustomGroupSettingsContainer } from './CustomGroups/CustomGroupSettingsContainer';
+import { enableGroupingByField } from './actions/enableGroupingByField';
+import { showGroupsByFieldAsBadges } from './actions/showGroupsByFieldAsBadges';
+import { setGroupByFieldHideIfCompleted } from './actions/setGroupByFieldHideIfCompleted';
+import styles from './GroupingSettings.module.css';
+import { setGroupByFieldPendingColor } from './actions/setGroupByFieldPendingColor';
+import { setGroupByFieldDoneColor } from './actions/setGroupByFieldDoneColor';
 
 const groupingFields: GroupFields[] = ['project', 'assignee', 'reporter', 'priority', 'creator', 'issueType'];
 
@@ -62,9 +69,33 @@ const TEXTS = {
     en: 'Grouping Settings',
     ru: 'Настройки группировки',
   },
+  groupingByFieldTitle: {
+    en: 'Grouping by field',
+    ru: 'Группировка по полю',
+  },
   chooseGroupToIgnore: {
     en: 'Choose group to ignore',
     ru: 'Выберите группу для игнорирования',
+  },
+  enabled: {
+    en: 'Enabled',
+    ru: 'Включено',
+  },
+  showGroupsByFieldAsCounters: {
+    en: 'Show groups by field as counters',
+    ru: 'Показывать группы по полю в виде счетчиков',
+  },
+  groupByFieldHideIfCompleted: {
+    en: 'Hide group if all tasks are completed',
+    ru: 'Скрывать группу если все задачи в ней выполнены',
+  },
+  badgePendingColor: {
+    en: 'Badge pending color',
+    ru: 'Цвет бейджа в процессе',
+  },
+  badgeDoneColor: {
+    en: 'Badge completed color',
+    ru: 'Цвет выполненного бейджа',
   },
 };
 
@@ -78,6 +109,72 @@ export const GroupingSettings = () => {
   return (
     <Card title={texts.groupingSettingsTitle} style={{ marginBottom: '16px' }} type="inner">
       <div style={{ marginBottom: '24px' }}>
+        <h2 className={styles.title}>{texts.groupingByFieldTitle}</h2>
+        <Checkbox
+          checked={settings.enableGroupByField}
+          onChange={() => enableGroupingByField(!settings.enableGroupByField)}
+        >
+          {texts.enabled}
+        </Checkbox>
+        <Checkbox
+          checked={settings.groupByFieldHideIfCompleted}
+          onChange={() => setGroupByFieldHideIfCompleted(!settings.groupByFieldHideIfCompleted)}
+        >
+          {texts.groupByFieldHideIfCompleted}
+        </Checkbox>
+        <Checkbox
+          checked={settings.showGroupsByFieldAsCounters}
+          onChange={() => showGroupsByFieldAsBadges(!settings.showGroupsByFieldAsCounters)}
+        >
+          {texts.showGroupsByFieldAsCounters}
+        </Checkbox>
+
+        {settings.showGroupsByFieldAsCounters ? (
+          <>
+            <div className={styles.colorPicker}>
+              <span className={styles.colorPickerLabel}>{texts.badgePendingColor}</span>
+              <ColorPicker
+                value={settings.groupByFieldPendingColor}
+                onChange={color => setGroupByFieldPendingColor(color.toRgbString())}
+                showText
+                presets={[
+                  {
+                    label: 'Recommended',
+                    colors: [
+                      '#3b82f6', // blue
+                      '#ef4444', // red
+                      '#f59e0b', // amber
+                      '#10b981', // emerald
+                      '#6366f1', // indigo
+                    ],
+                  },
+                ]}
+              />
+            </div>
+
+            <div className={styles.colorPicker}>
+              <span className={styles.colorPickerLabel}>{texts.badgeDoneColor}</span>
+              <ColorPicker
+                value={settings.groupByFieldDoneColor}
+                onChange={color => setGroupByFieldDoneColor(color.toRgbString())}
+                showText
+                presets={[
+                  {
+                    label: 'Recommended',
+                    colors: [
+                      '#22c55e', // green
+                      '#10b981', // emerald
+                      '#059669', // green-600
+                      '#047857', // green-700
+                      '#065f46', // green-800
+                    ],
+                  },
+                ]}
+              />
+            </div>
+          </>
+        ) : null}
+
         <p style={{ marginBottom: '16px' }}>
           {texts.selectGroupingField}{' '}
           <Tooltip overlayStyle={{ maxWidth: 600 }} title={<p>{texts.selectGroupingFieldTooltip}</p>}>
@@ -122,6 +219,7 @@ export const GroupingSettings = () => {
           />
         </div>
       ) : null}
+      <CustomGroupSettingsContainer />
     </Card>
   );
 };

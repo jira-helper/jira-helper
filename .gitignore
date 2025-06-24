@@ -16,3 +16,6 @@ coverage
 .history
 *storybook.log
 jira-helper-*.zip
+
+memory-bank/activeContext.md
+memory-bank/progress.md

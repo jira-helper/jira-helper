@@ -4,6 +4,7 @@ import { useDi } from 'src/shared/diContext';
 import { loggerToken } from 'src/shared/Logger';
 import { Button } from 'antd';
 import { saveDiagnosticData } from './actions/saveDiagnosticData';
+import { JqlDebugDemo } from './JqlDebugDemo';
 
 export const DiagnosticSettingsTabContent = () => {
   const di = useDi();
@@ -49,6 +50,7 @@ export const DiagnosticSettingsTabContent = () => {
           save diagnostic data
         </Button>
       </div>
+      <JqlDebugDemo />
     </div>
   );
 };

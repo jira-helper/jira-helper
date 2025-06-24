@@ -1,0 +1,9 @@
+.counterContainer {
+  display: inline-block;
+} 
+
+.counterContent {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}

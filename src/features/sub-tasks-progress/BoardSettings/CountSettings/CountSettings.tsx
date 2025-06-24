@@ -4,7 +4,9 @@ import { Card, Tooltip } from 'antd';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { InfoCircleFilled } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { changeCount } from './actions/changeCount';
+import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
+import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { changeCount, setIssueLinkTypesToCount, clearIssueLinkTypesToCount } from './actions/changeCount';
 
 const TEXTS = {
   epic: {
@@ -63,10 +65,57 @@ const TEXTS = {
     ru: 'Внешние задачи создают дополнительную нагрузку на инстанс jira, а также данные по ним ограничены и не все фичи будут доступны',
     en: 'External issues create additional load on the Jira instance and the analysis of their progress is very limited',
   },
+  issueLinkTypesToCountTitle: {
+    en: 'Issue link types to count',
+    ru: 'Типы ссылок задач для подсчета',
+  },
+  countAllIssueLinks: {
+    en: 'Count all issue links',
+    ru: 'Учитывать все ссылки задач',
+  },
+  loadingLinkTypes: {
+    en: 'Loading link types...',
+    ru: 'Загрузка типов ссылок...',
+  },
+  failedToLoadLinkTypes: {
+    en: 'Failed to load link types',
+    ru: 'Не удалось загрузить типы ссылок',
+  },
 };
 export const CountSettings = () => {
   const { settings } = useGetSettings();
   const texts = useGetTextsByLocale(TEXTS);
+  const { linkTypes, isLoading: isLoadingLinkTypes, error: linkTypesError } = useGetIssueLinkTypes();
+  const { data } = useSubTaskProgressBoardPropertyStore();
+
+  const showLinkTypeSection = settings.countEpicLinkedIssues || settings.countIssuesLinkedIssues;
+
+  // Local state only for toggling between 'count all' and granular selection UI
+  const [showGranular, setShowGranular] = React.useState(false);
+
+  // Use store state for selected link types
+  const selectedLinkTypes = data.issueLinkTypesToCount || [];
+  const countAllIssueLinks = selectedLinkTypes.length === 0 && !showGranular;
+
+  const handleLinkTypeChange = (id: string, direction: 'inward' | 'outward', checked: boolean) => {
+    let newSelections = [...selectedLinkTypes];
+    if (checked) {
+      newSelections.push({ id, direction });
+    } else {
+      newSelections = newSelections.filter(sel => !(sel.id === id && sel.direction === direction));
+    }
+    setIssueLinkTypesToCount(newSelections);
+  };
+
+  const handleCountAllChange = (checked: boolean) => {
+    if (checked) {
+      setShowGranular(false);
+      clearIssueLinkTypesToCount();
+    } else {
+      setShowGranular(true);
+    }
+  };
+
   return (
     <Card
       title={
@@ -192,6 +241,79 @@ export const CountSettings = () => {
           </Checkbox>
         </div>
       </div>
+      {showLinkTypeSection && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>{texts.issueLinkTypesToCountTitle}</div>
+          <div
+            style={{
+              background: '#fafbfc',
+              border: '1px solid #e4e7ed',
+              borderRadius: 8,
+              padding: 16,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+              marginBottom: 8,
+            }}
+          >
+            <Checkbox
+              checked={countAllIssueLinks}
+              onChange={e => handleCountAllChange(e.target.checked)}
+              style={{ fontWeight: 500, marginBottom: 12 }}
+            >
+              {texts.countAllIssueLinks}
+            </Checkbox>
+            {(selectedLinkTypes.length > 0 || showGranular) && !isLoadingLinkTypes && linkTypes.length > 0 && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                  gap: 16,
+                  marginTop: 8,
+                }}
+              >
+                {linkTypes.map(linkType => (
+                  <div
+                    key={linkType.id}
+                    style={{
+                      border: '1px solid #e4e7ed',
+                      borderRadius: 6,
+                      padding: 12,
+                      background: '#fff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6,
+                      minWidth: 0,
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, marginBottom: 4 }}>{linkType.name}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <Checkbox
+                        checked={selectedLinkTypes.some(sel => sel.id === linkType.id && sel.direction === 'inward')}
+                        onChange={e => handleLinkTypeChange(linkType.id, 'inward', e.target.checked)}
+                        style={{ marginLeft: 2 }}
+                      >
+                        {linkType.inward}
+                      </Checkbox>
+                      <Checkbox
+                        checked={selectedLinkTypes.some(sel => sel.id === linkType.id && sel.direction === 'outward')}
+                        onChange={e => handleLinkTypeChange(linkType.id, 'outward', e.target.checked)}
+                        style={{ marginLeft: 2 }}
+                      >
+                        {linkType.outward}
+                      </Checkbox>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {(selectedLinkTypes.length > 0 || showGranular) && isLoadingLinkTypes && (
+              <div style={{ marginTop: 8 }}>{texts.loadingLinkTypes}</div>
+            )}
+            {(selectedLinkTypes.length > 0 || showGranular) && linkTypesError && (
+              <div style={{ marginTop: 8, color: 'red' }}>{texts.failedToLoadLinkTypes}</div>
+            )}
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
