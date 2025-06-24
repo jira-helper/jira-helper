@@ -21,6 +21,8 @@ export class Popup {
     cancelBtnId: string;
   };
 
+  private reactRoots: Array<import('react-dom/client').Root> = [];
+
   public htmlElement: HTMLElement | null;
 
   public contentBlock: HTMLElement | null;
@@ -141,6 +143,9 @@ export class Popup {
 
   // Unmounts the popup
   unmount = (): void => {
+    this.reactRoots.forEach(root => root.unmount());
+    this.reactRoots = [];
+
     if (this.htmlElement) {
       this.deattachButtonHandlers();
       this.removeDarkBackground();
@@ -156,7 +161,10 @@ export class Popup {
 
   appendReactComponentToContent(component: React.ReactNode): void {
     const div = document.createElement('div');
-    createRoot(div).render(component);
+    const root = createRoot(div);
+    root.render(component);
+    this.reactRoots.push(root);
+
     this.contentBlock?.appendChild(div);
   }
 

@@ -233,19 +233,15 @@ class ExternalIssuesService {
 class LocalStorageCache<T> {
   private readonly ttl: number;
 
-  private readonly prefix: string;
+  private readonly storageKey: string;
 
-  constructor(prefix: string, ttl: number) {
-    this.prefix = prefix;
+  constructor(storageKey: string, ttl: number) {
+    this.storageKey = storageKey;
     this.ttl = ttl;
   }
 
-  private getKey(key: string): string {
-    return `${this.prefix}:${key}`;
-  }
-
   get(): T | null {
-    const item = localStorage.getItem(this.getKey(''));
+    const item = localStorage.getItem(this.storageKey);
     if (!item) {
       return null;
     }
@@ -253,7 +249,7 @@ class LocalStorageCache<T> {
     try {
       const { value, timestamp } = JSON.parse(item);
       if (timestamp + this.ttl < Date.now()) {
-        localStorage.removeItem(this.getKey(''));
+        localStorage.removeItem(this.storageKey);
         return null;
       }
       return value;
@@ -267,7 +263,7 @@ class LocalStorageCache<T> {
       value,
       timestamp: Date.now(),
     });
-    localStorage.setItem(this.getKey(''), item);
+    localStorage.setItem(this.storageKey, item);
   }
 }
 
@@ -554,12 +550,21 @@ export class JiraService implements IJiraService {
       return Ok(cached);
     }
 
-    const result = await getIssueLinkTypes({ signal: abortSignal });
-    if (result.err) {
-      return Err(result.val);
-    }
-    this.issueLinkTypesCache.set(result.val);
-    return Ok(result.val);
+    const issueLinkTypes = await this.queue.register({
+      key: 'getIssueLinkTypes',
+      cb: async () => {
+        const result = await getIssueLinkTypes({ signal: abortSignal });
+        if (result.err) {
+          return Err(result.val);
+        }
+        this.issueLinkTypesCache.set(result.val);
+        return Ok(result.val);
+      },
+      abortSignal,
+      priority: 'high',
+    });
+
+    return issueLinkTypes;
   }
 }
 

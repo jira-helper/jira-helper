@@ -336,11 +336,9 @@ export const useSubtasksProgressByCustomGroup = (issueKey: string): SubTasksCoun
         try {
           matchFn = parseJql(cg.jql);
         } catch {
-          // console.log('invalid JQL', cg.jql);
           continue; // skip invalid JQL
         }
         groupSubtasks = subtasks.filter(subtask => matchFn!(getFieldValueForJqlStandalone(subtask, fields)));
-        // console.log('🚀 ~ useSubtasksProgressByCustomGroup ~ groupSubtasks:', groupSubtasks);
       }
     } else if (cg.mode === 'field') {
       groupSubtasks = subtasks.filter(subtask => matchToCustomGroupByField(subtask, cg, fields));

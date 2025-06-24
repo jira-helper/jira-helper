@@ -10,6 +10,7 @@ export const useGetFields = () => {
   useEffect(() => {
     if (fields.length === 0 && !isLoading && !error) {
       const controller = new AbortController();
+      abortController.current = controller;
 
       loadJiraFields(controller.signal);
     }

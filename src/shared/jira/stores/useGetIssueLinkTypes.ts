@@ -10,6 +10,8 @@ export const useGetIssueLinkTypes = () => {
   useEffect(() => {
     if (linkTypes.length === 0 && !isLoading && !error) {
       const controller = new AbortController();
+      abortController.current = controller;
+
       loadJiraIssueLinkTypes(controller.signal);
     }
   }, [linkTypes.length, isLoading, error]);
