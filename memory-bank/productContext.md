@@ -1,21 +1,28 @@
 # Product Context
 
 ## Why this project exists
-Jira's native grouping and progress tracking are limited, especially for teams with custom workflows. This project provides advanced grouping and visualization features to improve project management.
+Jira is limited in visualization capabilities, flexible grouping, WIP-limit management, and data privacy. This project was created to extend Jira's standard features, providing teams with tools for more effective task management, visual control, and board customization for their processes.
 
 ## Problems it solves
-- Lack of flexible custom groupings (by field or JQL).
-- No visual badge counters for custom groups.
-- Difficulty tracking sub-task progress across custom-defined groups.
-- Inconsistent or case-sensitive field matching in JQL.
+- Insufficient flexibility in task grouping (by fields, JQL).
+- No clear counters, progress bars, or Chart Bar for swimlanes/columns.
+- No convenient task description templates.
+- Limited WIP-limit options (no combined, swimlane, or personal limits).
+- No full card highlighting (Card Colors) for the entire card.
+- No SLA lines, rulers, or advanced analytics on the Control Chart.
+- No simple way to hide/blur private data.
+- No extension request identification for admins.
 
 ## How it should work
-- Users can define custom groups using either field values or JQL.
-- The UI allows configuration of group names, colors, and display modes (counter or bar).
-- Progress and counters update in real time as issues and sub-tasks change.
-- All matching is robust to case and array values.
+- The user can configure groups, colors, limits, templates, and visual elements via the board UI.
+- All visual elements (Chart Bar, Card Colors, SLA, ruler, flags) are available and customizable.
+- Description templates are stored locally and quickly applied.
+- WIP-limits are flexibly configured for columns, swimlanes, and individuals.
+- Private data can be blurred with a single action.
+- All extension requests are easily identified by a special header.
 
 ## User experience goals
-- Simple, intuitive group configuration.
-- Immediate visual feedback on board.
-- Reliable, predictable group matching and progress display.
+- Maximum simplicity and intuitiveness in configuring all features.
+- Instant visual feedback on the board.
+- Transparency and control over processes for teams with any workflow.
+- Security and privacy of user data.
