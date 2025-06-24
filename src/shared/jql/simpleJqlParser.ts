@@ -163,8 +163,11 @@ function parseTokens(tokens: string[]): any {
 
   function parseCondition(): any {
     let field = tokens[pos++];
+    if (!field) throw new Error('Expecting field name, but got END');
+
     field = stripQuotes(field).toLowerCase();
     let op = tokens[pos++];
+    if (!op) throw new Error('Expecting operator, but got END');
     switch (true) {
       case isKeyword(op, 'is'): {
         if (isKeyword(tokens[pos], 'not')) {
@@ -173,6 +176,7 @@ function parseTokens(tokens: string[]): any {
           if (value.includes(' ') && !isQuoted(value)) {
             throw new Error(`Value with spaces must be quoted: ${value}`);
           }
+          if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
           value = stripQuotes(value);
           return { type: 'condition', field, op: 'is not', value };
         }
@@ -180,6 +184,7 @@ function parseTokens(tokens: string[]): any {
         if (value.includes(' ') && !isQuoted(value)) {
           throw new Error(`Value with spaces must be quoted: ${value}`);
         }
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
         value = stripQuotes(value);
         return { type: 'condition', field, op: '=', value };
       }
@@ -208,6 +213,7 @@ function parseTokens(tokens: string[]): any {
       }
       case op === '~' || op === '!~': {
         let value = tokens[pos++];
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
         value = stripQuotes(value);
         return { type: 'condition', field, op, value };
       }
@@ -215,6 +221,7 @@ function parseTokens(tokens: string[]): any {
       case isKeyword(op, '!='): {
         // Enforce quoting for value with spaces
         let value = tokens[pos++];
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
         value = stripQuotes(value);
         return { type: 'condition', field, op: op.toLowerCase(), value };
       }

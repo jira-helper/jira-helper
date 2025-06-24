@@ -171,4 +171,8 @@ describe('simpleJqlParser', () => {
     expect(parseJql('FIELD1 ~ foo')(wrap({ field1: 'foobar' }))).toBe(true);
     expect(parseJql('field1 !~ foo')(wrap({ FIELD1: 'foobar' }))).toBe(false);
   });
+  it('should parse jql (found errors in prod)', () => {
+    expect(() => parseJql('project = THF or Platform')(wrap({}))).toThrow('Expecting operator, but got END');
+    expect(() => parseJql('project = THF or Platform = ')(wrap({}))).toThrow('Expecting value, but got END');
+  });
 });

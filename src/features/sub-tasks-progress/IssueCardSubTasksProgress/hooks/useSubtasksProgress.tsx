@@ -137,6 +137,7 @@ const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraFiel
         case 'component':
         case 'string':
         case 'option':
+          if (!val) return [];
           return val.map((v: { name: string }) => v.name);
         default:
           return [];

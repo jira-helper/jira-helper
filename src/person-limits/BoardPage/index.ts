@@ -280,7 +280,7 @@ export default class extends PageModification<[any, any], Element> {
     }
 
     // TODO: Shouldn't work for any other language except English, so we have to think about it. F.e., in Russian, it is "Дорожка для custom"
-    return someswimlane.getAttribute('aria-label')?.includes('Swimlane for custom') ?? false;
+    return someswimlane.getAttribute('aria-label')?.includes('custom') ?? false;
   }
 
   countAmountPersonalIssuesInColumn(column: Element, stats: PersonLimit[], swimlaneId?: string | null): void {
