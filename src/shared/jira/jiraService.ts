@@ -49,6 +49,7 @@ type NewTask<T> = {
 
 type RegiseteredTask<T> = NewTask<T> & {
   promise: Promise<T>;
+  reject: (reason?: any) => void;
 };
 
 class TaskQueue {
@@ -59,14 +60,9 @@ class TaskQueue {
   private runningTasksCount = 0;
 
   register<T>(task: NewTask<T> & { priority?: 'high' }) {
-    let resolve: (value: T) => void;
-    let reject: (reason?: any) => void;
-    const promise = new Promise<T>((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
+    const { promise, resolve, reject } = Promise.withResolvers<T>();
 
-    const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise };
+    const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise, reject };
 
     if (task.priority === 'high') {
       this.queue.unshift(queueItem);
@@ -75,6 +71,11 @@ class TaskQueue {
     }
 
     task.abortSignal.addEventListener('abort', () => {
+      const foundTask = this.queue.find(t => t.key === task.key);
+      if (foundTask) {
+        foundTask.reject(new Error('Aborted by abort signal'));
+      }
+
       this.queue = this.queue.filter(t => t.key !== task.key);
     });
 
@@ -344,6 +345,10 @@ export class JiraService implements IJiraService {
     const subtasks = this.subtasksService.getSubtasks(issueId);
     if (subtasks) {
       return Ok(subtasks);
+    }
+
+    if (abortSignal.aborted) {
+      return Err(new Error('Abort signal aborted'));
     }
 
     const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;

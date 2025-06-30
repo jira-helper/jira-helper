@@ -10,6 +10,7 @@ export const DiagnosticSettingsTabContent = () => {
   const di = useDi();
   const logger = di.inject(loggerToken);
   const [messages, setMessages] = React.useState(logger.getMessages());
+  const [filterText, setFilterText] = React.useState('');
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -17,6 +18,10 @@ export const DiagnosticSettingsTabContent = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [logger]);
+
+  const messagesFiltered = messages.filter(message => {
+    return message.message.toLowerCase().includes(filterText);
+  });
 
   return (
     <div style={{ padding: '16px' }}>
@@ -26,11 +31,21 @@ export const DiagnosticSettingsTabContent = () => {
         </Button>
         <span>auto-refresh every 5 seconds</span>
       </div>
+      <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="text"
+          placeholder="Filter messages..."
+          style={{ padding: '4px 8px', flex: 1 }}
+          onChange={e => {
+            setFilterText(e.target.value.toLowerCase());
+          }}
+        />
+      </div>
       <div style={{ marginTop: '16px' }}>
         <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          {messages.map(message => (
+          {messagesFiltered.map(message => (
             <div
-              key={message.timestamp + message.level + message.message}
+              key={message.timestamp + Date.now() + Math.random()}
               style={{
                 padding: '8px',
                 borderBottom: '1px solid #ddd',
