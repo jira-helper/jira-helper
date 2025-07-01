@@ -1,6 +1,6 @@
 import { Container, Token } from 'dioma';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 
 class CardPageObject {
   selectors = {
@@ -19,11 +19,27 @@ class CardPageObject {
     if (div) {
       return;
     }
+
     div = document.createElement('div');
     div.setAttribute('data-jh-attached-key', key);
     this.card.querySelector('.ghx-issue-content')?.appendChild(div);
 
-    createRoot(div).render(<ComponentToAttach issueId={this.getIssueId()} />);
+    const root = createRoot(div);
+    root.render(<ComponentToAttach issueId={this.getIssueId()} />);
+
+    this.unmountReactRootWhenCardIsRemoved(root);
+  }
+
+  /**
+   * Jira can remove card from DOM by different ways, so we need to unmount React root when card is removed
+   */
+  private unmountReactRootWhenCardIsRemoved(root: Root) {
+    const interval = setInterval(() => {
+      if (!document.body.contains(this.card)) {
+        root.unmount();
+        clearInterval(interval);
+      }
+    }, 1000);
   }
 }
 

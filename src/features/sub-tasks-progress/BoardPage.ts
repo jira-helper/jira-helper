@@ -26,7 +26,9 @@ export class SubTasksProgressBoardPage extends PageModification<void, Element> {
     this.sideEffects.push(turnOffAutoSync);
 
     const unlisten = BoardPagePageObject.listenCards(cards => {
-      cards.forEach(card => card.attach(IssuesSubTasksProgressContainer, 'sub-tasks-progress'));
+      cards.forEach(card => {
+        card.attach(IssuesSubTasksProgressContainer, 'sub-tasks-progress');
+      });
     });
     this.sideEffects.push(unlisten);
 
