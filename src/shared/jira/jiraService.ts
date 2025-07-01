@@ -50,6 +50,7 @@ type NewTask<T> = {
 type RegiseteredTask<T> = NewTask<T> & {
   promise: Promise<T>;
   reject: (reason?: any) => void;
+  resolve: (value: T) => void;
 };
 
 class TaskQueue {
@@ -62,7 +63,7 @@ class TaskQueue {
   register<T>(task: NewTask<T> & { priority?: 'high' }) {
     const { promise, resolve, reject } = Promise.withResolvers<T>();
 
-    const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise, reject };
+    const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise, reject, resolve };
 
     if (task.priority === 'high') {
       this.queue.unshift(queueItem);
@@ -73,7 +74,7 @@ class TaskQueue {
     task.abortSignal.addEventListener('abort', () => {
       const foundTask = this.queue.find(t => t.key === task.key);
       if (foundTask) {
-        foundTask.reject(new Error('Aborted by abort signal'));
+        foundTask.resolve(Err(new Error('Aborted by abort signal')));
       }
 
       this.queue = this.queue.filter(t => t.key !== task.key);
