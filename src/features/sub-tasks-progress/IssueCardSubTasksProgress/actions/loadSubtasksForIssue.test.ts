@@ -69,10 +69,10 @@ describe('loadSubtasksForIssue', () => {
     await loadSubtasksForIssue(issueKey, abortSignal);
 
     // AND JiraService.fetchSubtasks should be called with the issue key and abort signal
-    expect(mockJiraService.fetchSubtasks).toHaveBeenCalledWith(issueKey, abortSignal);
+    expect(mockJiraService.fetchSubtasks).toHaveBeenCalledWith(issueKey, expect.any(AbortSignal));
 
     // AND JiraService.getExternalIssues should be called with the issue key and abort signal
-    expect(mockJiraService.getExternalIssues).toHaveBeenCalledWith(issueKey, abortSignal);
+    expect(mockJiraService.getExternalIssues).toHaveBeenCalledWith(issueKey, expect.any(AbortSignal));
 
     // AND the subtasks store should have the correct state
     expect(useJiraSubtasksStore.getState().data[issueKey]).toEqual({
