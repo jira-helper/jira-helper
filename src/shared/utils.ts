@@ -65,3 +65,32 @@ export function hslFromRGB(r: number, g: number, b: number) {
 
   return [h, s, l];
 }
+
+/**
+ * Throttle a function so it only runs once per delay period.
+ * @param fn The function to throttle
+ * @param delay The delay in ms
+ * @returns A throttled version of the function
+ */
+export function throttle<T extends (...args: any[]) => any>(fn: T, delay: number): T {
+  let lastCall = 0;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  let lastArgs: any[];
+  return function (this: any, ...args: any[]) {
+    const now = Date.now();
+    lastArgs = args;
+    if (now - lastCall >= delay) {
+      lastCall = now;
+      fn.apply(this, args);
+    } else {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(
+        () => {
+          lastCall = Date.now();
+          fn.apply(this, lastArgs);
+        },
+        delay - (now - lastCall)
+      );
+    }
+  } as T;
+}

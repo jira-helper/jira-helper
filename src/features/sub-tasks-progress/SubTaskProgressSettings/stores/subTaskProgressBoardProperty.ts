@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import { State } from './subTaskProgressBoardProperty.types';
 import { BoardProperty } from '../../types';
+import { CustomGroup } from '../../BoardSettings/GroupingSettings/CustomGroups/types';
 
 const initialData: Required<BoardProperty> = {
   enabled: true,
@@ -24,6 +25,13 @@ const initialData: Required<BoardProperty> = {
   flagsAsBlocked: true,
   blockedByLinksAsBlocked: false,
   subtasksProgressDisplayMode: 'splitLines',
+  customGroups: [],
+  enableGroupByField: true,
+  showGroupsByFieldAsCounters: false,
+  groupByFieldHideIfCompleted: false,
+  groupByFieldPendingColor: '#3b82f6',
+  groupByFieldDoneColor: '#22c55e',
+  issueLinkTypesToCount: [],
 };
 
 export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
@@ -45,21 +53,6 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.columnsToTrack = columns.filter(c => c.enabled).map(c => c.name);
-        })
-      ),
-    setUseCustomColorScheme: (useCustomColorScheme: boolean) =>
-      set(
-        produce((state: State) => {
-          state.data.useCustomColorScheme = useCustomColorScheme;
-          if (!useCustomColorScheme) {
-            state.data.selectedColorScheme = 'jira';
-          }
-        })
-      ),
-    setSelectedColorScheme: colorScheme =>
-      set(
-        produce((state: State) => {
-          state.data.selectedColorScheme = colorScheme;
         })
       ),
     setState: state => set({ state }),
@@ -84,35 +77,13 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
           state.data.ignoredGroups = state.data.ignoredGroups.filter(g => g !== group);
         })
       ),
-    setStatusMapping: (boardStatus, statusName, progressStatus) =>
-      set(
-        produce((state: State) => {
-          if (progressStatus === 'unmapped') {
-            delete state.data.newStatusMapping[boardStatus];
-          } else {
-            state.data.newStatusMapping[boardStatus] = {
-              progressStatus,
-              name: statusName,
-            };
-          }
-        })
-      ),
     changeCount: (countType, value) =>
       set(
         produce((state: State) => {
           state.data[countType] = value;
         })
       ),
-    toggleIgnoredStatus: (statusId: number) =>
-      set(
-        produce((state: State) => {
-          if (state.data.ignoredStatuses.includes(statusId)) {
-            state.data.ignoredStatuses = state.data.ignoredStatuses.filter(id => id !== statusId);
-          } else {
-            state.data.ignoredStatuses.push(statusId);
-          }
-        })
-      ),
+
     toggleFlagsAsBlocked: () =>
       set(
         produce((state: State) => {
@@ -129,6 +100,87 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.subtasksProgressDisplayMode = displayMode;
+        })
+      ),
+    addCustomGroup: () =>
+      set(
+        produce((state: State) => {
+          state.data.customGroups.push({
+            id: Date.now(),
+            name: '',
+            description: '',
+            mode: 'field',
+            fieldId: '',
+            value: '',
+            jql: '',
+            showAsCounter: false,
+            badgeDoneColor: '#22c55e',
+            badgePendingColor: '#3b82f6',
+            hideCompleted: false,
+          });
+        })
+      ),
+    updateCustomGroup: <Key extends keyof CustomGroup>(id: number, key: Key, value: CustomGroup[Key]) =>
+      set(
+        produce((state: State) => {
+          const group = state.data.customGroups.find(g => g.id === id);
+          if (group) {
+            group[key] = value;
+          }
+        })
+      ),
+    removeCustomGroup: (id: number) =>
+      set(
+        produce((state: State) => {
+          state.data.customGroups = state.data.customGroups.filter(g => g.id !== id);
+        })
+      ),
+    setCustomGroups: (groups: typeof initialData.customGroups) =>
+      set(
+        produce((state: State) => {
+          state.data.customGroups = groups;
+        })
+      ),
+    setEnableGroupByField: (enabled: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.enableGroupByField = enabled;
+        })
+      ),
+    setShowGroupsByFieldAsCounters: (showAsCounters: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.showGroupsByFieldAsCounters = showAsCounters;
+        })
+      ),
+    setGroupByFieldPendingColor: (color: string) =>
+      set(
+        produce((state: State) => {
+          state.data.groupByFieldPendingColor = color;
+        })
+      ),
+    setGroupByFieldDoneColor: (color: string) =>
+      set(
+        produce((state: State) => {
+          state.data.groupByFieldDoneColor = color;
+        })
+      ),
+    setGroupByFieldHideIfCompleted: (hideIfCompleted: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.groupByFieldHideIfCompleted = hideIfCompleted;
+        })
+      ),
+    setIssueLinkTypesToCount: selections =>
+      set(
+        produce((state: State) => {
+          state.data.issueLinkTypesToCount = selections;
+        })
+      ),
+    clearIssueLinkTypesToCount: () =>
+      set(
+        produce((state: State) => {
+          state.data.issueLinkTypesToCount = [];
         })
       ),
   },

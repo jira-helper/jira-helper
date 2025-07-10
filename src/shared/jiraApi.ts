@@ -14,7 +14,7 @@ import pathOr from '@tinkoff/utils/object/pathOr';
 import { Ok, Err, Result } from 'ts-results';
 import { defaultHeaders } from './defaultHeaders';
 import manifest from '../../manifest.json';
-import { JiraIssue } from './jira/types';
+import { JiraField, JiraIssue, JiraIssueLinkType } from './jira/types';
 
 const PACKAGE_VERSION = manifest.version;
 
@@ -334,4 +334,38 @@ export const renderRemoteLink = async (
   }
 
   return Ok(await result.val.text());
+};
+
+export const getProjectFields = async (options: RequestInit = {}): Promise<Result<JiraField[], Error>> => {
+  const result = await requestJiraViaFetch('api/2/field', options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  return Ok(jsonDataResult.val);
+};
+
+export const getIssueLinkTypes = async (options: RequestInit = {}): Promise<Result<JiraIssueLinkType[], Error>> => {
+  const result = await requestJiraViaFetch('api/2/issueLinkType', options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  return Ok(jsonDataResult.val.issueLinkTypes);
 };

@@ -1,0 +1,43 @@
+---
+description: Cursor Memory Bank Rules
+globs: 
+alwaysApply: true
+---
+# Memory Bank Instructions
+
+This file provides instructions for using and maintaining the Memory Bank in this project. The Memory Bank is a structured documentation system designed to preserve project context, requirements, and decisions across sessions and contributors. It is inspired by the Cline Memory Bank and extended for use with Model Context Protocol (MCP) tools.
+
+## Core Principles
+- **Single Source of Truth:** All project context, requirements, and decisions are documented in the Memory Bank files.
+- **Hierarchical Structure:** Files are organized in a hierarchy, with `projectbrief.md` as the foundation and other files building upon it.
+- **Continuous Updates:** Update the Memory Bank whenever significant changes are made to the project, especially after major decisions, new patterns, or user requests.
+- **Access Pattern:** Always read files in hierarchical order (foundation → context → status). Update in reverse order (status → context → foundation).
+
+## Core Files
+- `projectbrief.md`: Core requirements and project goals
+- `productContext.md`: Problem context and user experience goals
+- `systemPatterns.md`: Architecture, design patterns, and technical decisions
+- `techContext.md`: Tech stack, setup, and constraints
+- `activeContext.md`: Current focus, recent changes, and next steps
+- `progress.md`: Status, roadmap, and known issues
+
+## Custom Files
+Add custom documentation (e.g., features, API, deployment) as needed. Reference them in `activeContext.md` when added.
+
+## Update Triggers
+- ≥25% code impact changes
+- New pattern discovery
+- User request ("update memory bank")
+- Context ambiguity detected
+
+## Usage
+- Read all Memory Bank files before starting any major task.
+- Update files as the project evolves, following the hierarchical structure.
+- Use \n for newlines in JSON operations, and lowercase booleans (true/false).
+
+## Integration
+- The Memory Bank is designed for use with MCP-compatible tools and AI assistants (e.g., Cursor, Cline, Claude).
+- Ensure the Memory Bank directory is included in your project and kept up to date.
+
+---
+For more information, see the official Memory Bank MCP documentation or contact your project lead. 

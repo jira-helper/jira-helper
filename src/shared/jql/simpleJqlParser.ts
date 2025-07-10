@@ -1,0 +1,430 @@
+/*
+Simple JQL Parser Documentation
+===============================
+
+This file implements a simple parser for a subset of Jira Query Language (JQL).
+
+How it works:
+-------------
+- The parser tokenizes the input string, respecting quoted values and parentheses.
+- It parses the tokens into an Abstract Syntax Tree (AST) supporting logical and comparison operations.
+- The AST is compiled into a matching function that can be used to filter issues by their fields.
+- The parser is case-insensitive for field names and operators.
+
+Supported Syntax:
+-----------------
+- Comparison operators: =, !=, in, not in, ~ (contains), !~ (not contains)
+- Logical operators: AND, OR, NOT
+- Parentheses for grouping: (...)
+- Quoted field names and values (e.g., "Issue Size" = "Some Value")
+- Special keywords: EMPTY, is, is not
+- Array values for fields (e.g., labels in (bug, urgent))
+- Case-insensitive field names and operators
+
+Not Supported:
+--------------
+- Functions (e.g., currentUser(), startOfDay())
+- ORDER BY, sorting, or subqueries
+- Complex field types (dates, numbers, custom Jira functions)
+- Wildcards, LIKE, regex matching
+- Nested property access (e.g., parent.field)
+- Comments or multiline queries
+
+Examples of Supported JQL:
+--------------------------
+- project = THF
+- status != Done
+- labels in (bug, urgent)
+- labels not in (feature, enhancement)
+- "Issue Size" = "Large"
+- Field1 = value AND Field2 != other
+- (Field1 = a OR Field2 = b) AND Field2 != c
+- Field1 is EMPTY
+- Field1 is not EMPTY
+- labels = bug
+- project = THF AND "Issue Size" is not EMPTY
+- summary ~ win
+- summary !~ run
+- description ~ "full screen"
+
+Examples of NOT Supported JQL:
+------------------------------
+- assignee in (currentUser())           // Functions not supported
+- created >= startOfDay(-7d)            // Functions and operators not supported
+- ORDER BY created DESC                 // Sorting not supported
+- parent.status = Done                  // Nested property access not supported
+- Field1 = value with spaces            // Value with spaces must be quoted
+- Field1 not in a                      // Missing parentheses after 'in'
+
+Error Handling:
+---------------
+- The parser throws clear errors for unsupported syntax, missing quotes, or unexpected tokens.
+- Example: Field1 = value with spaces → Error: Did you forget to quote the value?
+- Example: Field1 not in a → Error: Expected ( after in
+
+*/
+// Simple JQL parser for basic expressions
+// Supported: =, !=, in, not in, AND, OR, NOT, EMPTY, is, parentheses
+
+export type JqlMatchFn = (getFieldValue: (fieldName: string) => any) => boolean;
+
+// Exported types for AST and evaluation result
+export type JqlAstNode =
+  | { type: 'AND' | 'OR'; left: JqlAstNode; right: JqlAstNode }
+  | { type: 'NOT'; expr: JqlAstNode }
+  | { type: 'condition'; field: string; op: string; value?: string; values?: string[] };
+
+export type JqlAstResult =
+  | { type: 'AND' | 'OR'; left: JqlAstResult; right: JqlAstResult; matched: boolean }
+  | { type: 'NOT'; expr: JqlAstResult; matched: boolean }
+  | { type: 'condition'; field: string; op: string; value?: string; values?: string[]; matched: boolean };
+
+// Tokenizer that respects quoted strings and tracks if token was quoted
+function tokenize(jql: string): string[] {
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < jql.length) {
+    if (jql[i].match(/\s/)) {
+      i++;
+      continue;
+    }
+    if (jql[i] === '"') {
+      let j = i + 1;
+      while (j < jql.length && jql[j] !== '"') j++;
+      if (j === jql.length) throw new Error('Unclosed quote');
+      tokens.push(jql.slice(i, j + 1));
+      i = j + 1;
+      continue;
+    }
+    if (jql[i] === '(' || jql[i] === ')') {
+      tokens.push(jql[i]);
+      i++;
+      continue;
+    }
+    // word
+    let j = i;
+    while (j < jql.length && !jql[j].match(/[\s()]/)) j++;
+    tokens.push(jql.slice(i, j));
+    i = j;
+  }
+  return tokens;
+}
+
+// Helper to check if a token is a keyword (case-insensitive)
+function isKeyword(token: string, keyword: string) {
+  return token && token.toUpperCase() === keyword.toUpperCase();
+}
+
+// Helper to check if a token is quoted
+function isQuoted(token: string) {
+  return token.length >= 2 && token[0] === '"' && token[token.length - 1] === '"';
+}
+
+// Parser
+function parseTokens(tokens: string[]): any {
+  let pos = 0;
+
+  function parseExpression(): any {
+    let node = parseTerm();
+    while (isKeyword(tokens[pos], 'AND') || isKeyword(tokens[pos], 'OR')) {
+      const op = tokens[pos++].toUpperCase();
+      const right = parseTerm();
+      node = { type: op, left: node, right };
+    }
+    return node;
+  }
+
+  function parseTerm(): any {
+    if (isKeyword(tokens[pos], 'NOT')) {
+      pos++;
+      return { type: 'NOT', expr: parseTerm() };
+    }
+    if (tokens[pos] === '(') {
+      pos++;
+      const expr = parseExpression();
+      if (tokens[pos] !== ')') throw new Error('Expected )');
+      pos++;
+      return expr;
+    }
+    const condition = parseCondition();
+    const currentToken = tokens[pos];
+    if (
+      currentToken != undefined &&
+      !isKeyword(currentToken, 'AND') &&
+      !isKeyword(currentToken, 'OR') &&
+      !isKeyword(currentToken, ')')
+    ) {
+      throw new Error(
+        `Expected AND, OR, "," or ) expected, but got "${currentToken}". Did you forget to quote the value?`
+      );
+    }
+    return condition;
+  }
+
+  function parseCondition(): any {
+    let field = tokens[pos++];
+    if (!field) throw new Error('Expecting field name, but got END');
+
+    field = stripQuotes(field).toLowerCase();
+    let op = tokens[pos++];
+    if (!op) throw new Error('Expecting operator, but got END');
+    switch (true) {
+      case isKeyword(op, 'is'): {
+        if (isKeyword(tokens[pos], 'not')) {
+          pos++;
+          let value = tokens[pos++];
+          if (value.includes(' ') && !isQuoted(value)) {
+            throw new Error(`Value with spaces must be quoted: ${value}`);
+          }
+          if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
+          value = stripQuotes(value);
+          return { type: 'condition', field, op: 'is not', value };
+        }
+        let value = tokens[pos++];
+        if (value.includes(' ') && !isQuoted(value)) {
+          throw new Error(`Value with spaces must be quoted: ${value}`);
+        }
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
+        value = stripQuotes(value);
+        return { type: 'condition', field, op: '=', value };
+      }
+      case isKeyword(op, 'not'): {
+        const nextToken = tokens[pos];
+        if (nextToken != 'in') {
+          throw new Error(`Expected in to get "not in", but got "${nextToken}"`);
+        }
+        pos++;
+        op = 'not in';
+      }
+      case isKeyword(op, 'in') || op.toLowerCase() === 'not in': {
+        if (tokens[pos++] !== '(') throw new Error('Expected ( after in');
+        const values = [];
+        while (tokens[pos] !== ')') {
+          let val = tokens[pos++];
+          if (val.endsWith(',')) val = val.slice(0, -1);
+          if (val.includes(' ') && !isQuoted(val)) {
+            throw new Error(`Value with spaces must be quoted: ${val}`);
+          }
+          values.push(stripQuotes(val));
+          if (tokens[pos] === ',') pos++;
+        }
+        pos++; // skip ')'
+        return { type: 'condition', field, op: op.toLowerCase(), values };
+      }
+      case op === '~' || op === '!~': {
+        let value = tokens[pos++];
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
+        value = stripQuotes(value);
+        return { type: 'condition', field, op, value };
+      }
+      case isKeyword(op, '='):
+      case isKeyword(op, '!='): {
+        // Enforce quoting for value with spaces
+        let value = tokens[pos++];
+        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
+        value = stripQuotes(value);
+        return { type: 'condition', field, op: op.toLowerCase(), value };
+      }
+      default: {
+        throw new Error(`Unknown operator: "${op}". Did you forget to quote the field name?`);
+      }
+    }
+  }
+
+  return parseExpression();
+}
+
+function stripQuotes(val: string) {
+  return val.replace(/^"|"$/g, '');
+}
+
+function isEmpty(val: any): boolean {
+  return (
+    val === undefined ||
+    val === null ||
+    (typeof val === 'string' && val.trim() === '') ||
+    (Array.isArray(val) && val.length === 0)
+  );
+}
+
+// Helper to handle array or single value
+function anyMatch(val: any, predicate: (v: any) => boolean): boolean {
+  if (Array.isArray(val)) {
+    return val.some(predicate);
+  }
+  return predicate(val);
+}
+
+function allMatch(val: any, predicate: (v: any) => boolean): boolean {
+  if (Array.isArray(val)) {
+    return val.every(predicate);
+  }
+  return predicate(val);
+}
+
+function isArrayEmptyOrAll(val: any, predicate: (v: any) => boolean): boolean {
+  if (Array.isArray(val)) {
+    return val.length === 0 || val.every(predicate);
+  }
+  return predicate(val);
+}
+
+// Compiler
+function compile(node: any): JqlMatchFn {
+  if (!node) return () => true;
+
+  if (node.type === 'AND') {
+    const l = compile(node.left);
+    const r = compile(node.right);
+    return getFieldValue => l(getFieldValue) && r(getFieldValue);
+  }
+  if (node.type === 'OR') {
+    const l = compile(node.left);
+    const r = compile(node.right);
+    return getFieldValue => l(getFieldValue) || r(getFieldValue);
+  }
+  if (node.type === 'NOT') {
+    const expr = compile(node.expr);
+    return getFieldValue => !expr(getFieldValue);
+  }
+  if (node.type === 'condition') {
+    const field = node.field.toLowerCase();
+    if (node.value === 'EMPTY') {
+      if (node.op === '=') {
+        return getFieldValue => isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      }
+      if (node.op === '!=') {
+        return getFieldValue => !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      }
+      if (node.op === 'is not') {
+        return getFieldValue => !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      }
+    }
+    if (node.op === '=') {
+      return getFieldValue => anyMatch(getFieldValue(field), v => v == node.value);
+    }
+    if (node.op === '!=') {
+      return getFieldValue => allMatch(getFieldValue(field), v => v != node.value);
+    }
+    if (node.op === 'in') {
+      return getFieldValue => anyMatch(getFieldValue(field), v => node.values.includes(v));
+    }
+    if (node.op === 'not in') {
+      return getFieldValue => allMatch(getFieldValue(field), v => !node.values.includes(v));
+    }
+    if (node.op === '~') {
+      return getFieldValue => {
+        const result = anyMatch(getFieldValue(field), v => {
+          if (typeof v === 'string' || typeof v === 'number') {
+            return v.toString().includes(node.value ?? '');
+          }
+          if (Array.isArray(v)) {
+            return v.some(item =>
+              typeof item === 'string' || typeof item === 'number' ? item.toString().includes(node.value ?? '') : false
+            );
+          }
+          return false;
+        });
+        return result === undefined ? false : result;
+      };
+    }
+    if (node.op === '!~') {
+      return getFieldValue => {
+        const result = allMatch(getFieldValue(field), v => {
+          if (typeof v === 'string' || typeof v === 'number') {
+            return !v.toString().includes(node.value ?? '');
+          }
+          if (Array.isArray(v)) {
+            return v.every(item =>
+              typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(node.value ?? '') : true
+            );
+          }
+          return true;
+        });
+        return result === undefined ? true : result;
+      };
+    }
+  }
+  throw new Error(`Unknown node: ${JSON.stringify(node)}`);
+}
+
+export function parseJql(jql: string): JqlMatchFn {
+  const tokens = tokenize(jql);
+  const ast = parseTokens(tokens);
+
+  return compile(ast);
+}
+
+// Export tokenizer
+export { tokenize };
+
+// Export AST parser
+export function parseJqlAst(jql: string): JqlAstNode {
+  const tokens = tokenize(jql);
+  return parseTokens(tokens);
+}
+
+// Evaluate AST and return result tree
+export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: string) => any): JqlAstResult {
+  if (!ast) return { type: 'condition', field: '', op: '', matched: true };
+  if (ast.type === 'AND' || ast.type === 'OR') {
+    const left = evaluateJqlAst(ast.left, getFieldValue);
+    const right = evaluateJqlAst(ast.right, getFieldValue);
+    const matched = ast.type === 'AND' ? left.matched && right.matched : left.matched || right.matched;
+    return { type: ast.type, left, right, matched };
+  }
+  if (ast.type === 'NOT') {
+    const expr = evaluateJqlAst(ast.expr, getFieldValue);
+    return { type: 'NOT', expr, matched: !expr.matched };
+  }
+  if (ast.type === 'condition') {
+    // Always use lowercased field names for case-insensitive matching
+    const field = ast.field.toLowerCase();
+    let matched = false;
+    if (ast.value === 'EMPTY') {
+      if (ast.op === '=') {
+        matched = isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      } else if (ast.op === '!=') {
+        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      } else if (ast.op === 'is not') {
+        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+      }
+    } else if (ast.op === '=') {
+      matched = anyMatch(getFieldValue(field), v => v == ast.value);
+    } else if (ast.op === '!=') {
+      matched = allMatch(getFieldValue(field), v => v != ast.value);
+    } else if (ast.op === 'in') {
+      matched = anyMatch(getFieldValue(field), v => ast.values && ast.values.includes(v));
+    } else if (ast.op === 'not in') {
+      matched = allMatch(getFieldValue(field), v => ast.values && !ast.values.includes(v));
+    } else if (ast.op === '~') {
+      const result = anyMatch(getFieldValue(field), v => {
+        if (typeof v === 'string' || typeof v === 'number') {
+          return v.toString().includes(ast.value ?? '');
+        }
+        if (Array.isArray(v)) {
+          return v.some(item =>
+            typeof item === 'string' || typeof item === 'number' ? item.toString().includes(ast.value ?? '') : false
+          );
+        }
+        return false;
+      });
+      matched = result === undefined ? false : result;
+    } else if (ast.op === '!~') {
+      const result = allMatch(getFieldValue(field), v => {
+        if (typeof v === 'string' || typeof v === 'number') {
+          return !v.toString().includes(ast.value ?? '');
+        }
+        if (Array.isArray(v)) {
+          return v.every(item =>
+            typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(ast.value ?? '') : true
+          );
+        }
+        return true;
+      });
+      matched = result === undefined ? true : result;
+    }
+    return { ...ast, matched, type: 'condition' };
+  }
+  throw new Error(`Unknown node: ${JSON.stringify(ast)}`);
+}

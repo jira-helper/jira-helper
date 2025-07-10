@@ -232,6 +232,7 @@ export type JiraIssueMapped = JiraIssue & {
   issueTypeName: string;
   isFlagged: boolean;
   isBlockedByLinks: boolean;
+  fields?: any;
 };
 
 export type RemoteLink = {
@@ -274,4 +275,51 @@ export type ExternalIssueMapped = {
     | 'warm-red'
     // Todo\new
     | 'blue-gray';
+};
+
+export type JiraField = {
+  id: string;
+  name: string;
+  custom: boolean;
+  orderable: boolean;
+  navigable: boolean;
+  searchable: boolean;
+  clauseNames: string[];
+  schema?: {
+    type:
+      | 'number'
+      | 'any'
+      | 'string'
+      | 'resolution'
+      | 'user'
+      | 'array'
+      | 'option-with-child'
+      | 'date'
+      | 'datetime'
+      | 'option'
+      | 'votes'
+      | 'timetracking'
+      | 'progress'
+      | 'project'
+      | 'watches'
+      | 'version'
+      | 'issuetype'
+      | 'status'
+      | 'comments-page'
+      | 'priority'
+      | 'securitylevel';
+
+    custom?: string;
+    customId?: number;
+    items?: string;
+    system?: string;
+  };
+};
+
+export type JiraIssueLinkType = {
+  id: string;
+  name: string;
+  inward: string;
+  outward: string;
+  self: string;
 };

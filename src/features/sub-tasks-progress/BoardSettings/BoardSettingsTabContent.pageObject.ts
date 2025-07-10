@@ -1,8 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
-import { AvailableColorSchemas } from '../colorSchemas';
 
 import { GroupFields, Status } from '../types';
-import { setSelectedColorScheme } from './ColorSchemeSettings/actions/setSelectedColorScheme';
+
 import { setGroupingField } from './GroupingSettings/actions/setGroupingField';
 
 export const BoardSettingsTabContentPageObject = {
@@ -31,11 +30,6 @@ export const BoardSettingsTabContentPageObject = {
     const colorScheme = screen.getByTestId('color-scheme-chooser');
     const colorSchemeOption = colorScheme.querySelector('[data-testid="color-scheme-chooser-option"]');
     return colorSchemeOption?.textContent;
-  },
-
-  setColorScheme: async (colorScheme: AvailableColorSchemas) => {
-    // we cant set color scheme directly because antd is not ready to be used via testing-library
-    setSelectedColorScheme(colorScheme);
   },
 
   setGroupingField: (groupingField: GroupFields) => {

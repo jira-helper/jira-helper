@@ -1,7 +1,14 @@
 import { Err, Ok, Result } from 'ts-results';
 import { Container, Token } from 'dioma';
-import { getExternalIssues, getJiraIssue, renderRemoteLink, searchIssues } from '../jiraApi';
-import { ExternalIssueMapped, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
+import {
+  getExternalIssues,
+  getIssueLinkTypes,
+  getJiraIssue,
+  getProjectFields,
+  renderRemoteLink,
+  searchIssues,
+} from '../jiraApi';
+import { ExternalIssueMapped, JiraField, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
 
 class CacheWithTTL<T> {
   private cache: { [key: string]: { value: T; timestamp: number } } = {};
@@ -42,6 +49,8 @@ type NewTask<T> = {
 
 type RegiseteredTask<T> = NewTask<T> & {
   promise: Promise<T>;
+  reject: (reason?: any) => void;
+  resolve: (value: T) => void;
 };
 
 class TaskQueue {
@@ -51,17 +60,23 @@ class TaskQueue {
 
   private runningTasksCount = 0;
 
-  register<T>(task: NewTask<T>) {
-    let resolve: (value: T) => void;
-    let reject: (reason?: any) => void;
-    const promise = new Promise<T>((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
+  register<T>(task: NewTask<T> & { priority?: 'high' }) {
+    const { promise, resolve, reject } = Promise.withResolvers<T>();
 
-    this.queue.push({ ...task, cb: () => task.cb().then(resolve, reject), promise });
+    const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise, reject, resolve };
+
+    if (task.priority === 'high') {
+      this.queue.unshift(queueItem);
+    } else {
+      this.queue.push(queueItem);
+    }
 
     task.abortSignal.addEventListener('abort', () => {
+      const foundTask = this.queue.find(t => t.key === task.key);
+      if (foundTask) {
+        foundTask.resolve(Err(new Error('Aborted by abort signal')));
+      }
+
       this.queue = this.queue.filter(t => t.key !== task.key);
     });
 
@@ -217,10 +232,49 @@ class ExternalIssuesService {
   }
 }
 
+class LocalStorageCache<T> {
+  private readonly ttl: number;
+
+  private readonly storageKey: string;
+
+  constructor(storageKey: string, ttl: number) {
+    this.storageKey = storageKey;
+    this.ttl = ttl;
+  }
+
+  get(): T | null {
+    const item = localStorage.getItem(this.storageKey);
+    if (!item) {
+      return null;
+    }
+
+    try {
+      const { value, timestamp } = JSON.parse(item);
+      if (timestamp + this.ttl < Date.now()) {
+        localStorage.removeItem(this.storageKey);
+        return null;
+      }
+      return value;
+    } catch {
+      return null;
+    }
+  }
+
+  set(value: T): void {
+    const item = JSON.stringify({
+      value,
+      timestamp: Date.now(),
+    });
+    localStorage.setItem(this.storageKey, item);
+  }
+}
+
 export interface IJiraService {
   fetchJiraIssue: (issueId: string, abortSignal: AbortSignal) => Promise<Result<JiraIssueMapped, Error>>;
   fetchSubtasks: (issueId: string, abortSignal: AbortSignal) => Promise<Result<Subtasks, Error>>;
   getExternalIssues: (issueKey: string, signal: AbortSignal) => Promise<Result<ExternalIssueMapped[], Error>>;
+  getProjectFields: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
+  getIssueLinkTypes: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
 }
 
 export class JiraService implements IJiraService {
@@ -231,6 +285,10 @@ export class JiraService implements IJiraService {
   private jiraIssuesService = new JiraIssuesService();
 
   private externalIssuesService = new ExternalIssuesService();
+
+  private projectFieldsCache = new LocalStorageCache<JiraField[]>('jira-helper-fields', 7 * 24 * 60 * 60 * 1000); // 1 week
+
+  private issueLinkTypesCache = new LocalStorageCache<any[]>('jira-helper-issue-link-types', 7 * 24 * 60 * 60 * 1000); // 1 week
 
   static getInstance() {
     if (!JiraService.instance) {
@@ -288,6 +346,10 @@ export class JiraService implements IJiraService {
     const subtasks = this.subtasksService.getSubtasks(issueId);
     if (subtasks) {
       return Ok(subtasks);
+    }
+
+    if (abortSignal.aborted) {
+      return Err(new Error('Abort signal aborted'));
     }
 
     const JQL = `${SUBTASK_JQL} OR ${EPIC_TASKS_JQL} OR ${LINKED_ISSUES_JQL}`;
@@ -452,6 +514,63 @@ export class JiraService implements IJiraService {
 
   isFetchingSubtasks() {
     return !!this.queue.getTasksCount(key => key.startsWith('fetchSubtasks'));
+  }
+
+  async getProjectFields(abortSignal: AbortSignal): Promise<Result<JiraField[], Error>> {
+    const cachedFields = this.projectFieldsCache.get();
+    if (cachedFields) {
+      return Ok(cachedFields);
+    }
+
+    try {
+      const fields = await this.queue.register({
+        key: 'getProjectFields',
+        cb: async () => {
+          const result = await getProjectFields({
+            signal: abortSignal,
+          });
+          if (result.err) {
+            return Err(result.val);
+          }
+          this.projectFieldsCache.set(result.val);
+          return Ok(result.val);
+        },
+        abortSignal,
+        priority: 'high',
+      });
+
+      return fields;
+    } catch (error) {
+      if (error instanceof Error) {
+        const message = `Failed to fetch project fields: ${error.message}`;
+        error.message = message;
+        return Err(error);
+      }
+      return Err(new Error(`Unknown error: ${error}`));
+    }
+  }
+
+  async getIssueLinkTypes(abortSignal: AbortSignal): Promise<Result<any[], Error>> {
+    const cached = this.issueLinkTypesCache.get();
+    if (cached) {
+      return Ok(cached);
+    }
+
+    const issueLinkTypes = await this.queue.register({
+      key: 'getIssueLinkTypes',
+      cb: async () => {
+        const result = await getIssueLinkTypes({ signal: abortSignal });
+        if (result.err) {
+          return Err(result.val);
+        }
+        this.issueLinkTypesCache.set(result.val);
+        return Ok(result.val);
+      },
+      abortSignal,
+      priority: 'high',
+    });
+
+    return issueLinkTypes;
   }
 }
 

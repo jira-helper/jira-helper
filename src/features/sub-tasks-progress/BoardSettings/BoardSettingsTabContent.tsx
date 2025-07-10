@@ -7,7 +7,6 @@ import { resetBoardProperty } from 'src/features/sub-tasks-progress/BoardSetting
 import { ColumnsSettingsContainer } from 'src/features/sub-tasks-progress/BoardSettings/ColumnSettings/ColumnSettings';
 import { CountSettings } from 'src/features/sub-tasks-progress/BoardSettings/CountSettings/CountSettings';
 import { GroupingSettings } from 'src/features/sub-tasks-progress/BoardSettings/GroupingSettings/GroupingSettings';
-import { ColorSchemeChooser } from 'src/features/sub-tasks-progress/BoardSettings/ColorSchemeSettings/ColorSchemeChooser';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
 import { toggleEnabled } from './actions/toggleEnabled';
@@ -58,8 +57,6 @@ export const BoardSettingsTabContent = () => {
       <GroupingSettings />
       <CountSettings />
       <ColumnsSettingsContainer />
-
-      <ColorSchemeChooser />
     </div>
   );
 };

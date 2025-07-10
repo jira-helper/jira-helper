@@ -1,5 +1,6 @@
 import { createAction } from 'src/shared/action';
 import { loggerToken } from 'src/shared/Logger';
+
 import { BoardPropertyServiceToken } from '../../../../shared/boardPropertyService';
 
 import { BoardProperty } from '../../types';
