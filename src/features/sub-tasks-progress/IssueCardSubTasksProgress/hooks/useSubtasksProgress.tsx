@@ -135,10 +135,12 @@ const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraFiel
     case 'array': {
       switch (field.schema.items) {
         case 'component':
+          if (!val) return [];
+          return val.map((v: { name: string }) => v.name);
         case 'string':
         case 'option':
           if (!val) return [];
-          return val.map((v: { name: string }) => v.name);
+          return val.map((v: { value: string }) => v.value);
         default:
           return [];
       }
