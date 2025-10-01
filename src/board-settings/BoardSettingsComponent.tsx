@@ -16,7 +16,7 @@ export const BoardSettingsComponent = () => {
 
   return (
     <WithDi container={globalContainer}>
-      <div className={styles.wrapper} onClick={() => setIsModalOpen(true)}>
+      <div className={styles.wrapper} data-jh-component="boardSettingsComponent" onClick={() => setIsModalOpen(true)}>
         <Image src={logoUrl} width={32} height={32} />
       </div>
       <Modal
