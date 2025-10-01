@@ -86,6 +86,11 @@ class ExtensionApiService {
   }): void {
     this.extensionAPI.contextMenus.create(config);
   }
+
+  async sendMessage(payload: { message: string }): Promise<void> {
+    // @ts-expect-error something wrong with types, but it works
+    await this.extensionAPI.runtime.sendMessage(payload);
+  }
 }
 
 export const extensionApiService = new ExtensionApiService();

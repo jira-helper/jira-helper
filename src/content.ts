@@ -32,6 +32,7 @@ import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+import { extensionApiService } from './shared/ExtensionApiService';
 
 setAutoFreeze(false);
 
@@ -93,6 +94,7 @@ async function start() {
 
 initBlurSensitive();
 start();
+extensionApiService.sendMessage({ message: 'jira-helper-inited' });
 
 // @ts-expect-error
 window.SettingsPage = SettingsPage;
