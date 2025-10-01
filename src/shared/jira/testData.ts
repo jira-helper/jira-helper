@@ -1,4 +1,4 @@
-import { mapJiraIssue } from './jiraService';
+import { JiraService } from './jiraService';
 import { JiraIssue, JiraIssueMapped } from './types';
 
 const baseMock: JiraIssue = {
@@ -108,7 +108,8 @@ export class JiraTestDataBuilder {
   }
 
   build(): JiraIssueMapped {
-    return mapJiraIssue(this.mock);
+    const jiraService = JiraService.getInstance();
+    return jiraService.mapJiraIssue(this.mock);
   }
 }
 
