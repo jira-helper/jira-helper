@@ -12,6 +12,7 @@ interface CounterComponentProps {
   pendingColor: string;
   doneColor: string;
   comments: string[];
+  showOnlyIncomplete: boolean;
 }
 
 export const CounterComponent: React.FC<CounterComponentProps> = ({
@@ -20,13 +21,15 @@ export const CounterComponent: React.FC<CounterComponentProps> = ({
   pendingColor,
   doneColor,
   comments,
+  showOnlyIncomplete,
 }) => {
   const texts = useGetTextsByLocale(StatusNamesTexts);
   const current = progress.done;
   const total = Object.values(progress).reduce((acc, curr) => acc + curr, 0);
   const isComplete = current === total;
   const backgroundColor = isComplete ? doneColor : pendingColor;
-  const counterText = `${groupName} ${current}/${total}`;
+  const incomplete = total - current;
+  const counterText = showOnlyIncomplete ? `${groupName} ${incomplete}` : `${groupName} ${current}/${total}`;
 
   const warningContent =
     comments.length > 0 ? (

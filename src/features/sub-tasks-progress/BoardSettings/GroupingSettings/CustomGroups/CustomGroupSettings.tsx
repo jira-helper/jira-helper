@@ -68,6 +68,10 @@ const TEXTS = {
     en: 'Badge completed color',
     ru: 'Цвет выполненного бейджа',
   },
+  showOnlyIncomplete: {
+    en: 'Show only incomplete tasks',
+    ru: 'Показывать только незавершенные задачи',
+  },
   examples: {
     en: 'Examples',
     ru: 'Примеры',
@@ -263,6 +267,17 @@ const CustomGroupItem: React.FC<CustomGroupItemProps> = ({
       </div>
 
       {group.showAsCounter && (
+        <div className={styles.groupOptions}>
+          <Checkbox
+            checked={group.showOnlyIncomplete}
+            onChange={e => onUpdateGroup(group.id, 'showOnlyIncomplete', e.target.checked)}
+          >
+            {texts.showOnlyIncomplete}
+          </Checkbox>
+        </div>
+      )}
+
+      {group.showAsCounter && (
         <div className={styles.badgeOptions}>
           <div className={styles.badgeOptionsTitle}>{texts.badgeOptions}</div>
           <div className={styles.badgeOptionsContent}>
@@ -322,6 +337,7 @@ const CustomGroupItem: React.FC<CustomGroupItemProps> = ({
                 comments={[]}
                 pendingColor={group.badgePendingColor}
                 doneColor={group.badgeDoneColor}
+                showOnlyIncomplete={group.showOnlyIncomplete}
               />
               <CounterComponent
                 groupName={group.name || 'Group'}
@@ -329,6 +345,7 @@ const CustomGroupItem: React.FC<CustomGroupItemProps> = ({
                 comments={[]}
                 pendingColor={group.badgePendingColor}
                 doneColor={group.badgeDoneColor}
+                showOnlyIncomplete={group.showOnlyIncomplete}
               />
               {!group.hideCompleted ? (
                 <CounterComponent
@@ -337,6 +354,7 @@ const CustomGroupItem: React.FC<CustomGroupItemProps> = ({
                   comments={[]}
                   pendingColor={group.badgePendingColor}
                   doneColor={group.badgeDoneColor}
+                  showOnlyIncomplete={group.showOnlyIncomplete}
                 />
               ) : null}
             </>

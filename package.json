@@ -72,6 +72,7 @@
     "test:ci": "vitest run --coverage",
     "coverage": "vitest --collectCoverage",
     "build": "vite build",
+    "build:dev": "NODE_ENV=development vite build",
     "postbuild": "node tools/fix-manifest.cjs",
     "prod": "npm run build && cd dist && zip -r ../jira-helper.zip . && cd ..",
     "prod:firefox": "BROWSER=FIREFOX npm run build && cd dist-firefox && zip -r ../jira-helper-firefox.zip . && cd ..",
@@ -119,7 +120,7 @@
     "svelte": "^5.1.12",
     "ts-results": "^3.3.0",
     "typed-emitter": "^2.1.0",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@actions/core": "^1.10.0",

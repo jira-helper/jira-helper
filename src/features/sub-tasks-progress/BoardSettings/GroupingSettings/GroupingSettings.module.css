@@ -14,3 +14,24 @@
   font-weight: 600;
   margin-bottom: 16px;
 }
+
+.examples {
+  margin-top: 24px;
+}
+
+.examplesTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.examplesContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 200px;
+}
+
+.examplesContent > * {
+  min-width: 0;
+}

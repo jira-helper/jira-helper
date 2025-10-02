@@ -26,9 +26,11 @@ const initialData: Required<BoardProperty> = {
   blockedByLinksAsBlocked: false,
   subtasksProgressDisplayMode: 'splitLines',
   customGroups: [],
+  enableAllTasksTracking: true,
   enableGroupByField: true,
   showGroupsByFieldAsCounters: false,
   groupByFieldHideIfCompleted: false,
+  groupByFieldShowOnlyIncomplete: false,
   groupByFieldPendingColor: '#3b82f6',
   groupByFieldDoneColor: '#22c55e',
   issueLinkTypesToCount: [],
@@ -48,7 +50,13 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
           }
         })
       ),
-    setData: data => set({ data: { ...initialData, ...data } }),
+    setData: data => {
+      // check new option by data of old options
+      if (data.enableAllTasksTracking === undefined && data.enableGroupByField === true) {
+        data.enableAllTasksTracking = true;
+      }
+      return set({ data: { ...initialData, ...data } });
+    },
     setColumns: columns =>
       set(
         produce((state: State) => {
@@ -117,6 +125,7 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
             badgeDoneColor: '#22c55e',
             badgePendingColor: '#3b82f6',
             hideCompleted: false,
+            showOnlyIncomplete: false,
           });
         })
       ),
@@ -139,6 +148,12 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.customGroups = groups;
+        })
+      ),
+    setEnableAllTasksTracking: (enabled: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.enableAllTasksTracking = enabled;
         })
       ),
     setEnableGroupByField: (enabled: boolean) =>
@@ -169,6 +184,12 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
       set(
         produce((state: State) => {
           state.data.groupByFieldHideIfCompleted = hideIfCompleted;
+        })
+      ),
+    setGroupByFieldShowOnlyIncomplete: (showOnlyIncomplete: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.groupByFieldShowOnlyIncomplete = showOnlyIncomplete;
         })
       ),
     setIssueLinkTypesToCount: selections =>

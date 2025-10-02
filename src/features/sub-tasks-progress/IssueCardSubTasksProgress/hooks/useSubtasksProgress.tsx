@@ -21,6 +21,7 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
   );
 
   const subtasks = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
+
   const issueLinks = (issue?.data.fields.issuelinks as JiraIssueMapped['fields']['issuelinks'][]) || [];
 
   // Filter issue links by selected types/directions
@@ -233,6 +234,7 @@ const useCalcProgress = (
 
   const groupingField = settings?.groupingField || 'project';
   const ignoredGroups = settings?.ignoredGroups || [];
+  const withoutGrouping = !settings?.enableGroupByField;
 
   const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
 
@@ -251,7 +253,11 @@ const useCalcProgress = (
         updated: 'updated',
       } as const;
       const jiraGroupingField = groupingFieldsMapping[groupingField];
-      const group = issue[jiraGroupingField];
+      let group = issue[jiraGroupingField];
+
+      if (withoutGrouping) {
+        group = 'tasks';
+      }
 
       if (ignoredGroups.includes(group)) {
         return acc;
@@ -307,12 +313,13 @@ const useExternalIssuesProgress = (issueKey: string) => {
 export type SubTasksProgressByGroup = Record<string, { progress: SubTasksProgress; comments: string[] }>;
 export const useSubtasksProgress = (issueKey: string): SubTasksProgressByGroup => {
   const { settings } = useGetSettings();
-  if (!settings.enableGroupByField) {
-    return {};
-  }
   const subtasks = useGetSubtasksToCountProgress(issueKey);
+
   const progress = useCalcProgress(subtasks);
   const externalIssuesProgress = useExternalIssuesProgress(issueKey);
+  if (!settings.enableAllTasksTracking) {
+    return {};
+  }
   return { ...progress, ...externalIssuesProgress };
 };
 
