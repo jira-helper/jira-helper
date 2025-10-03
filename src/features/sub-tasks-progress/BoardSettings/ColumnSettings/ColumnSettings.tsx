@@ -11,7 +11,7 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import { WarningFilled } from '@ant-design/icons';
 import { setColumns } from './actions/setColumns';
 
-const TEXTS = {
+export const TEXTS = {
   selectColumnsWhereSubTasksProgressShouldBeTracked: {
     en: 'Select columns where sub-tasks progress should be tracked:',
     ru: 'Выберите колонки, где должен отображаться прогресс под-задач:',
@@ -25,8 +25,8 @@ const TEXTS = {
     ru: 'Нет доступных колонок',
   },
   columnsSettingsTitle: {
-    en: 'Columns Settings',
-    ru: 'Настройки колонок',
+    en: 'Select columns for tracking progress',
+    ru: 'Выбор колонок для отслеживания прогресса',
   },
   refreshColumns: {
     en: 'Refresh columns',

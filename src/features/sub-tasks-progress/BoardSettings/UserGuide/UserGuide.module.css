@@ -1,0 +1,16 @@
+.stepsContainer :global(.ant-steps-item-icon) {
+  color: #d9d9d9 !important; /* Серая по умолчанию */
+  transition: color 0.3s ease;
+}
+
+.stepsContainer :global(.ant-steps-item-icon:hover) {
+  color: #52c41a !important; /* Зеленая при ховере */
+}
+
+.stepsContainer :global(.ant-steps-item-icon.ant-steps-item-icon-active) {
+  color: #52c41a !important; /* Зеленая при клике/активном состоянии */
+}
+
+.stepsContainer :global(.ant-steps-item-icon.ant-steps-item-icon-finish) {
+  color: #52c41a !important; /* Зеленая для завершенных шагов */
+}
