@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Collapse, Steps, Typography, Card } from 'antd';
-import { InfoCircleOutlined, CheckCircleOutlined, RocketOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Collapse, Steps, Typography, Card, Button } from 'antd';
+import { InfoCircleOutlined, CheckCircleOutlined, RocketOutlined, CloseOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import confetti from 'canvas-confetti';
 import styles from './UserGuide.module.css';
@@ -8,6 +8,13 @@ import { TEXTS as ColumnSettingsTEXTS } from '../ColumnSettings/ColumnSettings';
 
 const { Panel } = Collapse;
 const { Title, Paragraph, Text } = Typography;
+
+const STORAGE_KEYS = {
+  GUIDE_VIEWED: 'jira-helper-user-guide-viewed',
+  GUIDE_VIEW_COUNT: 'jira-helper-user-guide-view-count',
+} as const;
+
+const MAX_VIEWS_BEFORE_AUTO_HIDE = 10;
 
 const TEXTS = {
   title: {
@@ -92,7 +99,15 @@ const TEXTS = {
   },
   tipsItems: {
     en: 'Start with basic settings and gradually add complexity\nFor simple cases, it will be enough to configure the progress of all subtasks or grouping by field',
-    ru: 'Начните с базовых настроек и постепенно добавляйте сложность\nДля простых кейсов будет достаточно настроить прогресс всех под-задач или группировку по полю\n',
+    ru: 'Начните с базовых настроек и постепенно добавляйте сложность\nДля простых кейсов будет достаточно настроить прогресс всех под-задач или группировку по полю',
+  },
+  hideGuide: {
+    en: 'Hide guide',
+    ru: 'Скрыть гайд',
+  },
+  showGuide: {
+    en: 'Show guide',
+    ru: 'Показать гайд',
   },
 };
 
@@ -138,6 +153,36 @@ const runConfetti = () => {
 export const UserGuide = () => {
   const texts = useGetTextsByLocale(TEXTS);
   const [activeStep, setActiveStep] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Инициализация видимости гайда
+  useEffect(() => {
+    const isGuideViewed = localStorage.getItem(STORAGE_KEYS.GUIDE_VIEWED) === 'true';
+    const viewCount = parseInt(localStorage.getItem(STORAGE_KEYS.GUIDE_VIEW_COUNT) || '0', 10);
+
+    // Показываем гайд если он не был просмотрен или просмотрен меньше 10 раз
+    if (!isGuideViewed || viewCount < MAX_VIEWS_BEFORE_AUTO_HIDE) {
+      setIsVisible(true);
+
+      // Увеличиваем счетчик просмотров
+      const newViewCount = viewCount + 1;
+      localStorage.setItem(STORAGE_KEYS.GUIDE_VIEW_COUNT, newViewCount.toString());
+
+      // Если достигли лимита просмотров, помечаем как просмотренный
+      if (newViewCount >= MAX_VIEWS_BEFORE_AUTO_HIDE) {
+        localStorage.setItem(STORAGE_KEYS.GUIDE_VIEWED, 'true');
+      }
+    }
+  }, []);
+
+  const handleHideGuide = () => {
+    setIsVisible(false);
+    localStorage.setItem(STORAGE_KEYS.GUIDE_VIEWED, 'true');
+  };
+
+  const handleShowGuide = () => {
+    setIsVisible(true);
+  };
 
   const steps = [
     {
@@ -181,13 +226,66 @@ export const UserGuide = () => {
     runConfetti();
   };
 
+  // Если гайд скрыт, показываем только кнопку для его открытия
+  if (!isVisible) {
+    return (
+      <Card style={{ marginBottom: '24px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+          }}
+          onClick={handleShowGuide}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <InfoCircleOutlined style={{ color: '#1677ff' }} />
+            <span>{texts.title}</span>
+          </div>
+          <Button
+            type="link"
+            icon={<InfoCircleOutlined />}
+            onClick={e => {
+              e.stopPropagation();
+              handleShowGuide();
+            }}
+          >
+            {texts.showGuide}
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card
       style={{ marginBottom: '24px' }}
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <InfoCircleOutlined style={{ color: '#1677ff' }} />
-          <span>{texts.title}</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+          }}
+          onClick={handleHideGuide}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <InfoCircleOutlined style={{ color: '#1677ff' }} />
+            <span>{texts.title}</span>
+          </div>
+          <Button
+            type="text"
+            icon={<CloseOutlined />}
+            onClick={e => {
+              e.stopPropagation();
+              handleHideGuide();
+            }}
+            size="small"
+          >
+            {texts.hideGuide}
+          </Button>
         </div>
       }
     >
