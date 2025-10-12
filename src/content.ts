@@ -54,6 +54,9 @@ function initDiContainer() {
 async function start() {
   if (!isJira) return;
 
+  initBlurSensitive();
+  extensionApiService.sendMessage({ message: 'jira-helper-inited' });
+
   await domLoaded();
   initDiContainer();
 
@@ -92,9 +95,7 @@ async function start() {
   runModifications(modificationsMap);
 }
 
-initBlurSensitive();
 start();
-extensionApiService.sendMessage({ message: 'jira-helper-inited' });
 
 // @ts-expect-error
 window.SettingsPage = SettingsPage;
