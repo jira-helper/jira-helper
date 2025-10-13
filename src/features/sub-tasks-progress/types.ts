@@ -44,11 +44,13 @@ export type BoardProperty = {
   countEpicExternalLinks?: boolean;
   subtasksProgressDisplayMode?: 'splitLines' | 'singleLine';
   customGroups?: CustomGroup[];
+  enableAllTasksTracking?: boolean;
   enableGroupByField?: boolean;
   showGroupsByFieldAsCounters?: boolean;
   groupByFieldPendingColor?: string;
   groupByFieldDoneColor?: string;
   groupByFieldHideIfCompleted?: boolean;
+  groupByFieldShowOnlyIncomplete?: boolean;
   /**
    * If countEpicLinkedIssues or countIssuesLinkedIssues is enabled, this stores which link types/directions to count.
    * If empty or undefined, all are counted.

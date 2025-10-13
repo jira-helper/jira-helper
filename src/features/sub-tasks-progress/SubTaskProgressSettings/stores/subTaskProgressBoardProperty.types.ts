@@ -21,11 +21,13 @@ export type State = {
     updateCustomGroup: <Key extends keyof CustomGroup>(id: number, key: Key, value: CustomGroup[Key]) => void;
     removeCustomGroup: (id: number) => void;
     setCustomGroups: (groups: CustomGroup[]) => void;
+    setEnableAllTasksTracking: (enabled: boolean) => void;
     setEnableGroupByField: (enabled: boolean) => void;
     setShowGroupsByFieldAsCounters: (showAsCounters: boolean) => void;
     setGroupByFieldPendingColor: (color: string) => void;
     setGroupByFieldDoneColor: (color: string) => void;
     setGroupByFieldHideIfCompleted: (hideIfCompleted: boolean) => void;
+    setGroupByFieldShowOnlyIncomplete: (showOnlyIncomplete: boolean) => void;
     setIssueLinkTypesToCount: (selections: IssueLinkTypeSelection[]) => void;
     clearIssueLinkTypesToCount: () => void;
   };

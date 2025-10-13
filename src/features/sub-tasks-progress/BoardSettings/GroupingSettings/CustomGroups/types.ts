@@ -13,4 +13,5 @@ export interface CustomGroup {
   badgeDoneColor: string;
   badgePendingColor: string;
   hideCompleted: boolean;
+  showOnlyIncomplete: boolean;
 }

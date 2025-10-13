@@ -83,8 +83,14 @@ class ExtensionApiService {
     id: string;
     checked: boolean;
     contexts: 'page'[];
+    documentUrlPatterns?: string[];
   }): void {
     this.extensionAPI.contextMenus.create(config);
+  }
+
+  async sendMessage(payload: { message: string }): Promise<void> {
+    // @ts-expect-error something wrong with types, but it works
+    await this.extensionAPI.runtime.sendMessage(payload);
   }
 }
 

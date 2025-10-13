@@ -263,6 +263,7 @@ export type ExternalIssueMapped = {
   project: string;
   issueKey: string;
   summary: string;
+  relationship: string;
   // @see https://developer.atlassian.com/server/jira/platform/jira-issue-statuses-as-lozenges/
   // @see /rest/api/2/statuscategory/
   statusColor: // no category => unmapped

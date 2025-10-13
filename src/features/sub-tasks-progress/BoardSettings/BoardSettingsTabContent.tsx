@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { Button, Checkbox, Divider } from 'antd';
+import { Button, Checkbox } from 'antd';
 
 import { resetBoardProperty } from 'src/features/sub-tasks-progress/BoardSettings/actions/resetBoardProperty';
 
 import { ColumnsSettingsContainer } from 'src/features/sub-tasks-progress/BoardSettings/ColumnSettings/ColumnSettings';
 import { CountSettings } from 'src/features/sub-tasks-progress/BoardSettings/CountSettings/CountSettings';
 import { GroupingSettings } from 'src/features/sub-tasks-progress/BoardSettings/GroupingSettings/GroupingSettings';
+import { UserGuide } from 'src/features/sub-tasks-progress/BoardSettings/UserGuide';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
 import { toggleEnabled } from './actions/toggleEnabled';
@@ -52,11 +53,12 @@ export const BoardSettingsTabContent = () => {
         {texts.resetButton}
       </Button>
 
-      <Divider />
+      <UserGuide />
+
+      <ColumnsSettingsContainer />
+      <CountSettings />
 
       <GroupingSettings />
-      <CountSettings />
-      <ColumnsSettingsContainer />
     </div>
   );
 };

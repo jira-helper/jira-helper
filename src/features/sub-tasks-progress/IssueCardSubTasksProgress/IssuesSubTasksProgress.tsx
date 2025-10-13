@@ -30,6 +30,7 @@ type SubtasksProgressCounter = {
   comments: string[];
   pendingColor: string;
   doneColor: string;
+  showOnlyIncomplete: boolean;
 };
 
 export const IssuesSubTasksProgressPure = (props: {
@@ -59,16 +60,19 @@ export const IssuesSubTasksProgressPure = (props: {
         ))}
       </div>
       <div className={styles.countersContainer}>
-        {subtasksProgressCounters.map(({ groupName: group, groupId, progress, comments, pendingColor, doneColor }) => (
-          <CounterComponent
-            key={groupId}
-            groupName={group}
-            progress={progress}
-            comments={comments}
-            pendingColor={pendingColor}
-            doneColor={doneColor}
-          />
-        ))}
+        {subtasksProgressCounters.map(
+          ({ groupName: group, groupId, progress, comments, pendingColor, doneColor, showOnlyIncomplete }) => (
+            <CounterComponent
+              key={groupId}
+              groupName={group}
+              progress={progress}
+              comments={comments}
+              pendingColor={pendingColor}
+              doneColor={doneColor}
+              showOnlyIncomplete={showOnlyIncomplete}
+            />
+          )
+        )}
       </div>
     </div>
   );
@@ -105,9 +109,14 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
     if (settings.showGroupsByFieldAsCounters) {
       const total = Object.values(subtasksProgressByGroup[groupName].progress).reduce((acc, curr) => acc + curr, 0);
       const { done } = subtasksProgressByGroup[groupName].progress;
+
       const isComplete = done === total;
 
       if (settings.groupByFieldHideIfCompleted && isComplete) {
+        continue;
+      }
+
+      if (settings.groupByFieldShowOnlyIncomplete && isComplete) {
         continue;
       }
 
@@ -118,6 +127,7 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
         groupId: `auto-group-by-field-${groupName}`,
         pendingColor: settings.groupByFieldPendingColor,
         doneColor: settings.groupByFieldDoneColor,
+        showOnlyIncomplete: settings.groupByFieldShowOnlyIncomplete || false,
       });
     } else {
       subtasksProgressBars.push({
@@ -142,6 +152,10 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
       continue;
     }
 
+    if (customGroup.showOnlyIncomplete && isComplete) {
+      continue;
+    }
+
     if (customGroup.showAsCounter) {
       subtasksProgressCounters.push({
         groupName: customGroup.name,
@@ -150,6 +164,7 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
         groupId: customGroup.id.toString(),
         pendingColor: customGroup.badgePendingColor,
         doneColor: customGroup.badgeDoneColor,
+        showOnlyIncomplete: customGroup.showOnlyIncomplete,
       });
     } else {
       subtasksProgressBars.push({

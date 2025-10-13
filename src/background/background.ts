@@ -1,5 +1,5 @@
 import { types } from './actions';
-import { extensionApiService, TabChangeInfo } from '../shared/ExtensionApiService';
+import { extensionApiService } from '../shared/ExtensionApiService';
 
 const regexpBoardUrl = /rapidView=(\d*)/im;
 const regexpBoardSettingsTabUrl = /tab=/im;
@@ -58,6 +58,19 @@ extensionApiService.addContextMenuListener(async (info, tab) => {
   }
 });
 
+class DocumentUrlPatterns {
+  private patterns: string[] = [];
+
+  registerOrigin(origin: string) {
+    this.patterns.push(`${origin}/*`);
+  }
+
+  getPatterns() {
+    return this.patterns;
+  }
+}
+const documentUrlPatterns = new DocumentUrlPatterns();
+
 const createContextMenuItem = (isBlurSensitive: boolean) => {
   extensionApiService.createContextMenu({
     title: 'Blur secret data',
@@ -65,15 +78,12 @@ const createContextMenuItem = (isBlurSensitive: boolean) => {
     id: 'checkbox',
     checked: isBlurSensitive,
     contexts: ['page'],
+    documentUrlPatterns: documentUrlPatterns.getPatterns(),
   });
 };
 
-export const createContextMenu = (tabId: number, changeInfo?: TabChangeInfo) => {
+export const createContextMenu = (tabId: number) => {
   extensionApiService.removeAllContextMenus(async () => {
-    const isScope = await extensionApiService.checkTabURLByPattern(tabId, regexpBoardUrl);
-    if (!isScope || changeInfo == null || changeInfo.status !== 'complete') {
-      return;
-    }
     extensionApiService.sendMessageToTab(tabId, { getBlurSensitive: true }, (response: Response) => {
       if (response && Object.prototype.hasOwnProperty.call(response, 'blurSensitive')) {
         createContextMenuItem(response.blurSensitive!);
@@ -82,10 +92,16 @@ export const createContextMenu = (tabId: number, changeInfo?: TabChangeInfo) => 
   });
 };
 
-extensionApiService.onTabsUpdated((tabId, changeInfo) => {
-  createContextMenu(tabId, changeInfo);
-});
+extensionApiService.onMessage(async (request: any, { origin, tab }: { origin?: string; tab?: { id?: number } }) => {
+  if (!request.message) return;
+  const { message } = request;
+  if (typeof message !== 'string') return;
 
-extensionApiService.onTabsActivated(async (activeInfo: { tabId: number }) => {
-  createContextMenu(activeInfo.tabId);
+  if (message === 'jira-helper-inited') {
+    if (!tab || !tab.id) return;
+    if (origin) {
+      documentUrlPatterns.registerOrigin(origin);
+    }
+    createContextMenu(tab.id);
+  }
 });

@@ -26,6 +26,10 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
       console.error('Sidebar not found');
       return;
     }
+    const boardSettingsComponent = sidebar.parentElement?.querySelector('[data-jh-component="boardSettingsComponent"]');
+    if (boardSettingsComponent) {
+      return;
+    }
 
     sidebar.after(div);
     createRoot(div).render(<BoardSettingsComponent />);

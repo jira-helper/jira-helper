@@ -119,69 +119,6 @@ class TaskQueue {
   }
 }
 
-const mapJiraIssueType = (jiraIssue: JiraIssue): JiraIssueMapped['issueType'] => {
-  if (jiraIssue.fields.issuetype.name === 'Epic') {
-    return 'Epic';
-  }
-  if (jiraIssue.fields.issuetype.subtask) {
-    return 'Sub-task';
-  }
-  return 'Task';
-};
-
-const getIsFlagged = (issue: JiraIssue) => {
-  if (issue.fields.status.statusCategory.key === 'done') {
-    return false;
-  }
-  return Object.values(issue.fields).some((field: unknown) => {
-    if (field == null) {
-      return false;
-    }
-    if (Array.isArray(field)) {
-      return field.some(item => item?.value === 'Impediment');
-    }
-    // @ts-expect-error
-    if (field?.value === 'Impediment') {
-      return true;
-    }
-    return false;
-  });
-};
-
-const getIsBlockedByLinks = (issue: JiraIssue) => {
-  if (issue.fields.status.statusCategory.key === 'done') {
-    return false;
-  }
-  return issue.fields.issuelinks.some(issueLink => {
-    return (
-      issueLink.type.inward === 'is blocked by' && issueLink.inwardIssue?.fields.status.statusCategory.key !== 'done'
-    );
-  });
-};
-
-export const mapJiraIssue = (jiraIssue: JiraIssue): JiraIssueMapped => {
-  return {
-    ...jiraIssue,
-    id: jiraIssue.id,
-    key: jiraIssue.key,
-    project: jiraIssue.fields.project.key,
-    summary: jiraIssue.fields.summary,
-    status: jiraIssue.fields.status.name,
-    statusId: parseInt(jiraIssue.fields.status.id, 10),
-    statusCategory: jiraIssue.fields.status.statusCategory.key,
-    statusColor: jiraIssue.fields.status.statusCategory.colorName,
-    assignee: jiraIssue.fields.assignee?.displayName || 'none',
-    created: jiraIssue.fields.created,
-    reporter: jiraIssue.fields.reporter?.displayName || 'none',
-    priority: jiraIssue.fields.priority?.name || 'none',
-    creator: jiraIssue.fields.creator?.displayName || 'none',
-    issueType: mapJiraIssueType(jiraIssue),
-    issueTypeName: jiraIssue.fields.issuetype.name,
-    isFlagged: getIsFlagged(jiraIssue),
-    isBlockedByLinks: getIsBlockedByLinks(jiraIssue),
-  };
-};
-
 export type Subtasks = {
   subtasks: JiraIssueMapped[];
   externalLinks: JiraIssueMapped[];
@@ -290,6 +227,8 @@ export class JiraService implements IJiraService {
 
   private issueLinkTypesCache = new LocalStorageCache<any[]>('jira-helper-issue-link-types', 7 * 24 * 60 * 60 * 1000); // 1 week
 
+  private epicNameFieldId: string | null = null;
+
   static getInstance() {
     if (!JiraService.instance) {
       JiraService.instance = new JiraService();
@@ -298,6 +237,82 @@ export class JiraService implements IJiraService {
   }
 
   private static instance: JiraService;
+
+  private resolveEpicNameFieldId(fields: JiraField[]): void {
+    // this fiels is reserved by Jira for Epics
+    const epicNameField = fields.find(field => field.name === 'Epic Name');
+    this.epicNameFieldId = epicNameField?.id || null;
+  }
+
+  private mapJiraIssueType(jiraIssue: JiraIssue): JiraIssueMapped['issueType'] {
+    // Checking for the presence of the Epic Name field
+    if (this.epicNameFieldId && (jiraIssue.fields as any)[this.epicNameFieldId] != null) {
+      return 'Epic';
+    }
+
+    // Fallback to the old logic for compatibility
+    if (jiraIssue.fields.issuetype.name === 'Epic') {
+      return 'Epic';
+    }
+
+    if (jiraIssue.fields.issuetype.subtask) {
+      return 'Sub-task';
+    }
+    return 'Task';
+  }
+
+  mapJiraIssue(jiraIssue: JiraIssue): JiraIssueMapped {
+    return {
+      ...jiraIssue,
+      id: jiraIssue.id,
+      key: jiraIssue.key,
+      project: jiraIssue.fields.project.key,
+      summary: jiraIssue.fields.summary,
+      status: jiraIssue.fields.status.name,
+      statusId: parseInt(jiraIssue.fields.status.id, 10),
+      statusCategory: jiraIssue.fields.status.statusCategory.key,
+      statusColor: jiraIssue.fields.status.statusCategory.colorName,
+      assignee: jiraIssue.fields.assignee?.displayName || 'none',
+      created: jiraIssue.fields.created,
+      reporter: jiraIssue.fields.reporter?.displayName || 'none',
+      priority: jiraIssue.fields.priority?.name || 'none',
+      creator: jiraIssue.fields.creator?.displayName || 'none',
+      issueType: this.mapJiraIssueType(jiraIssue),
+      issueTypeName: jiraIssue.fields.issuetype.name,
+      isFlagged: this.getIsFlagged(jiraIssue),
+      isBlockedByLinks: this.getIsBlockedByLinks(jiraIssue),
+    };
+  }
+
+  private getIsFlagged(issue: JiraIssue): boolean {
+    if (issue.fields.status.statusCategory.key === 'done') {
+      return false;
+    }
+    return Object.values(issue.fields).some((field: unknown) => {
+      if (field == null) {
+        return false;
+      }
+      if (Array.isArray(field)) {
+        return field.some(item => item?.value === 'Impediment');
+      }
+      // @ts-expect-error
+      if (field?.value === 'Impediment') {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  private getIsBlockedByLinks(issue: JiraIssue): boolean {
+    if (issue.fields.status.statusCategory.key === 'done') {
+      return false;
+    }
+    return issue.fields.issuelinks.some(issueLink => {
+      return (
+        issueLink.type.inward === 'is blocked by' && issueLink.inwardIssue?.fields.status.statusCategory.key !== 'done'
+      );
+    });
+  }
 
   async fetchJiraIssue(issueId: string, abortSignal: AbortSignal): Promise<Result<JiraIssueMapped, Error>> {
     const issue = this.jiraIssuesService.getJiraIssue(issueId);
@@ -320,7 +335,7 @@ export class JiraService implements IJiraService {
           if (apiJiraIssue.err) {
             return Err(apiJiraIssue.val);
           }
-          const mappedIssue = mapJiraIssue(apiJiraIssue.val);
+          const mappedIssue = this.mapJiraIssue(apiJiraIssue.val);
           this.jiraIssuesService.updateJiraIssue(issueId, mappedIssue);
           return Ok(mappedIssue);
         },
@@ -375,7 +390,7 @@ export class JiraService implements IJiraService {
     }
 
     const allSubtasksData = await allSubtasksResponse.val.json();
-    const allSubtasks = allSubtasksData.issues.map(mapJiraIssue);
+    const allSubtasks = allSubtasksData.issues.map((issue: JiraIssue) => this.mapJiraIssue(issue));
     this.subtasksService.updateSubtasks(issueId, {
       subtasks: allSubtasks,
       externalLinks: [],
@@ -413,9 +428,6 @@ export class JiraService implements IJiraService {
     if (!issues.length) {
       return Ok([]);
     }
-
-    const project = issues[0].object.title.split('-')[0];
-    const externalIssueKey = issues[0].object.title;
 
     const result: ExternalIssueMapped[] = [];
     for (const issue of issues) {
@@ -498,12 +510,16 @@ export class JiraService implements IJiraService {
           ?.replace('jira-issue-status-lozenge-', '');
       }
 
+      const project = issue.object.title.split('-')[0];
+      const externalIssueKey = issue.object.title;
+
       result.push({
         status,
         project,
         issueKey: externalIssueKey,
         summary,
         statusColor: statusColor as 'medium-gray' | 'green' | 'yellow' | 'brown' | 'warm-red' | 'blue-gray',
+        relationship: issue.relationship,
       });
     }
 
@@ -519,6 +535,7 @@ export class JiraService implements IJiraService {
   async getProjectFields(abortSignal: AbortSignal): Promise<Result<JiraField[], Error>> {
     const cachedFields = this.projectFieldsCache.get();
     if (cachedFields) {
+      this.resolveEpicNameFieldId(cachedFields);
       return Ok(cachedFields);
     }
 
@@ -533,6 +550,7 @@ export class JiraService implements IJiraService {
             return Err(result.val);
           }
           this.projectFieldsCache.set(result.val);
+          this.resolveEpicNameFieldId(result.val);
           return Ok(result.val);
         },
         abortSignal,

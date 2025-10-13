@@ -32,6 +32,7 @@ import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+import { extensionApiService } from './shared/ExtensionApiService';
 
 setAutoFreeze(false);
 
@@ -52,6 +53,9 @@ function initDiContainer() {
 
 async function start() {
   if (!isJira) return;
+
+  initBlurSensitive();
+  extensionApiService.sendMessage({ message: 'jira-helper-inited' });
 
   await domLoaded();
   initDiContainer();
@@ -91,7 +95,6 @@ async function start() {
   runModifications(modificationsMap);
 }
 
-initBlurSensitive();
 start();
 
 // @ts-expect-error

@@ -7,6 +7,7 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetFields } from 'src/shared/jira/fields/useGetFields';
 
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
+import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
 import { ActiveStatuses, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
@@ -21,6 +22,7 @@ export const useGetSubtasksToCountProgress = (issueId: string) => {
   );
 
   const subtasks = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
+
   const issueLinks = (issue?.data.fields.issuelinks as JiraIssueMapped['fields']['issuelinks'][]) || [];
 
   // Filter issue links by selected types/directions
@@ -233,6 +235,7 @@ const useCalcProgress = (
 
   const groupingField = settings?.groupingField || 'project';
   const ignoredGroups = settings?.ignoredGroups || [];
+  const withoutGrouping = !settings?.enableGroupByField;
 
   const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
 
@@ -251,7 +254,11 @@ const useCalcProgress = (
         updated: 'updated',
       } as const;
       const jiraGroupingField = groupingFieldsMapping[groupingField];
-      const group = issue[jiraGroupingField];
+      let group = issue[jiraGroupingField];
+
+      if (withoutGrouping) {
+        group = 'tasks';
+      }
 
       if (ignoredGroups.includes(group)) {
         return acc;
@@ -276,6 +283,8 @@ const useCalcProgress = (
 const useExternalIssuesProgress = (issueKey: string) => {
   const { settings } = useGetSettings();
 
+  const { linkTypes } = useGetIssueLinkTypes();
+  const selectedLinkTypes = settings.issueLinkTypesToCount;
   const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
   const externalIssues = useJiraExternalIssuesStore(useShallow(state => state.data[issueKey]?.externalIssues));
 
@@ -288,7 +297,23 @@ const useExternalIssuesProgress = (issueKey: string) => {
     return progress;
   }
 
-  for (const externalIssue of externalIssues) {
+  let externalIssuesToProcess = externalIssues;
+  if (selectedLinkTypes && selectedLinkTypes.length > 0) {
+    const linkTypesToSelect = linkTypes.filter(linkType =>
+      selectedLinkTypes.some(selectedLinkType => selectedLinkType.id === linkType.id)
+    );
+    externalIssuesToProcess = externalIssues.filter(issue => {
+      return linkTypesToSelect.some(
+        linkType => linkType.inward === issue.relationship || linkType.outward === issue.relationship
+      );
+    });
+  }
+
+  if (!externalIssuesToProcess) {
+    return progress;
+  }
+
+  for (const externalIssue of externalIssuesToProcess) {
     const group = `ext: ${externalIssue.project}`;
     if (!progress[group]) {
       progress[group] = createEmptyGroup();
@@ -307,12 +332,13 @@ const useExternalIssuesProgress = (issueKey: string) => {
 export type SubTasksProgressByGroup = Record<string, { progress: SubTasksProgress; comments: string[] }>;
 export const useSubtasksProgress = (issueKey: string): SubTasksProgressByGroup => {
   const { settings } = useGetSettings();
-  if (!settings.enableGroupByField) {
-    return {};
-  }
   const subtasks = useGetSubtasksToCountProgress(issueKey);
+
   const progress = useCalcProgress(subtasks);
   const externalIssuesProgress = useExternalIssuesProgress(issueKey);
+  if (!settings.enableAllTasksTracking) {
+    return {};
+  }
   return { ...progress, ...externalIssuesProgress };
 };
 

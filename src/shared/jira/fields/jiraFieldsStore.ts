@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
+import { produce } from 'immer';
 import { JiraField } from '../types';
 
 interface JiraFieldsState {
@@ -11,22 +11,26 @@ interface JiraFieldsState {
   setError: (error: Error | null) => void;
 }
 
-export const useJiraFieldsStore = create<JiraFieldsState>()(
-  immer(set => ({
-    fields: [],
-    isLoading: false,
-    error: null,
-    setFields: fields =>
-      set(state => {
+export const useJiraFieldsStore = create<JiraFieldsState>(set => ({
+  fields: [],
+  isLoading: false,
+  error: null,
+  setFields: fields =>
+    set(
+      produce(state => {
         state.fields = fields;
-      }),
-    setLoading: isLoading =>
-      set(state => {
+      })
+    ),
+  setLoading: isLoading =>
+    set(
+      produce(state => {
         state.isLoading = isLoading;
-      }),
-    setError: error =>
-      set(state => {
+      })
+    ),
+  setError: error =>
+    set(
+      produce(state => {
         state.error = error;
-      }),
-  }))
-);
+      })
+    ),
+}));
