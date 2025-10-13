@@ -83,6 +83,7 @@ class ExtensionApiService {
     id: string;
     checked: boolean;
     contexts: 'page'[];
+    documentUrlPatterns?: string[];
   }): void {
     this.extensionAPI.contextMenus.create(config);
   }

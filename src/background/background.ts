@@ -58,6 +58,19 @@ extensionApiService.addContextMenuListener(async (info, tab) => {
   }
 });
 
+class DocumentUrlPatterns {
+  private patterns: string[] = [];
+
+  registerOrigin(origin: string) {
+    this.patterns.push(`${origin}/*`);
+  }
+
+  getPatterns() {
+    return this.patterns;
+  }
+}
+const documentUrlPatterns = new DocumentUrlPatterns();
+
 const createContextMenuItem = (isBlurSensitive: boolean) => {
   extensionApiService.createContextMenu({
     title: 'Blur secret data',
@@ -65,6 +78,7 @@ const createContextMenuItem = (isBlurSensitive: boolean) => {
     id: 'checkbox',
     checked: isBlurSensitive,
     contexts: ['page'],
+    documentUrlPatterns: documentUrlPatterns.getPatterns(),
   });
 };
 
@@ -78,13 +92,16 @@ export const createContextMenu = (tabId: number) => {
   });
 };
 
-extensionApiService.onMessage(async (request: any, { tab }: { tab?: { id?: number } }) => {
+extensionApiService.onMessage(async (request: any, { origin, tab }: { origin?: string; tab?: { id?: number } }) => {
   if (!request.message) return;
   const { message } = request;
   if (typeof message !== 'string') return;
 
   if (message === 'jira-helper-inited') {
     if (!tab || !tab.id) return;
+    if (origin) {
+      documentUrlPatterns.registerOrigin(origin);
+    }
     createContextMenu(tab.id);
   }
 });
