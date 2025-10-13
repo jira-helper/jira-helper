@@ -429,9 +429,6 @@ export class JiraService implements IJiraService {
       return Ok([]);
     }
 
-    const project = issues[0].object.title.split('-')[0];
-    const externalIssueKey = issues[0].object.title;
-
     const result: ExternalIssueMapped[] = [];
     for (const issue of issues) {
       // eslint-disable-next-line no-await-in-loop
@@ -513,12 +510,16 @@ export class JiraService implements IJiraService {
           ?.replace('jira-issue-status-lozenge-', '');
       }
 
+      const project = issue.object.title.split('-')[0];
+      const externalIssueKey = issue.object.title;
+
       result.push({
         status,
         project,
         issueKey: externalIssueKey,
         summary,
         statusColor: statusColor as 'medium-gray' | 'green' | 'yellow' | 'brown' | 'warm-red' | 'blue-gray',
+        relationship: issue.relationship,
       });
     }
 

@@ -7,6 +7,7 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetFields } from 'src/shared/jira/fields/useGetFields';
 
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
+import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
 import { ActiveStatuses, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
@@ -282,6 +283,8 @@ const useCalcProgress = (
 const useExternalIssuesProgress = (issueKey: string) => {
   const { settings } = useGetSettings();
 
+  const { linkTypes } = useGetIssueLinkTypes();
+  const selectedLinkTypes = settings.issueLinkTypesToCount;
   const progress: Record<string, { progress: SubTasksProgress; comments: string[] }> = {};
   const externalIssues = useJiraExternalIssuesStore(useShallow(state => state.data[issueKey]?.externalIssues));
 
@@ -294,7 +297,23 @@ const useExternalIssuesProgress = (issueKey: string) => {
     return progress;
   }
 
-  for (const externalIssue of externalIssues) {
+  let externalIssuesToProcess = externalIssues;
+  if (selectedLinkTypes && selectedLinkTypes.length > 0) {
+    const linkTypesToSelect = linkTypes.filter(linkType =>
+      selectedLinkTypes.some(selectedLinkType => selectedLinkType.id === linkType.id)
+    );
+    externalIssuesToProcess = externalIssues.filter(issue => {
+      return linkTypesToSelect.some(
+        linkType => linkType.inward === issue.relationship || linkType.outward === issue.relationship
+      );
+    });
+  }
+
+  if (!externalIssuesToProcess) {
+    return progress;
+  }
+
+  for (const externalIssue of externalIssuesToProcess) {
     const group = `ext: ${externalIssue.project}`;
     if (!progress[group]) {
       progress[group] = createEmptyGroup();
