@@ -1,72 +1,72 @@
 /******** JIRA 7  ************/
-html.blur a.issue-link, /**TOP Menu **/
-html.blur .project-title a, /* title in right panel */
-html.blur .subnav-page-header /* title in backlog */
-html.blur .scope-filter .aui-scope-filter-spectrum span,
-html.blur .ghx-summary:not(span), /* backlog summory issue */
-html.blur .ghx-summary span,
-html.blur .js-epic-name span, /* backlog right panel for epic and version */
-html.blur .js-version-name span,
-html.blur .ghx-extra-field-content, /* epic label in baclog issue */
-html.blur .ghx-extra-field-content h1,
-html.blur .ghx-extra-field-content h2,
-html.blur .ghx-extra-field-content h3,
-html.blur .ghx-extra-field-content h4,
-html.blur .project-shortcut span,
-html.blur .ghx-jql-preview span.field-value, /*** Settings Board ***/
-html.blur #ghx-show-projects-in-board > li > strong,
-html.blur .ghx-project
+html.jh-blur a.issue-link, /**TOP Menu **/
+html.jh-blur .project-title a, /* title in right panel */
+html.jh-blur .subnav-page-header /* title in backlog */
+html.jh-blur .scope-filter .aui-scope-filter-spectrum span,
+html.jh-blur .ghx-summary:not(span), /* backlog summory issue */
+html.jh-blur .ghx-summary span,
+html.jh-blur .js-epic-name span, /* backlog right panel for epic and version */
+html.jh-blur .js-version-name span,
+html.jh-blur .ghx-extra-field-content, /* epic label in baclog issue */
+html.jh-blur .ghx-extra-field-content h1,
+html.jh-blur .ghx-extra-field-content h2,
+html.jh-blur .ghx-extra-field-content h3,
+html.jh-blur .ghx-extra-field-content h4,
+html.jh-blur .project-shortcut span,
+html.jh-blur .ghx-jql-preview span.field-value, /*** Settings Board ***/
+html.jh-blur #ghx-show-projects-in-board > li > strong,
+html.jh-blur .ghx-project
 {
   color: transparent !important;
   text-shadow: #172b4d -1px 1px 10px !important;
 }
 
 
-html.blur .user-hover, /*** Settings Board ***/
-html.blur .item .value a,
-html.blur a.link-title,
-html.blur .user-content-block a,
-html.blur #commentmodule .action-body a,
-html.blur #project-name-val, /*** View Issue ***/
-html.blur .activity-new-val a,
-html.blur .activity-old-val a,
-html.blur .activity-comment a,
-html.blur .activity-item-summary a,
-html.blur .activity-item-description a,
-html.blur .user-content a,
-html.blur div.aui-inline-dialog-contents.contents a, /**Control chart**/
-html.blur .issuerow td a /****SEarch *****/
+html.jh-blur .user-hover, /*** Settings Board ***/
+html.jh-blur .item .value a,
+html.jh-blur a.link-title,
+html.jh-blur .user-content-block a,
+html.jh-blur #commentmodule .action-body a,
+html.jh-blur #project-name-val, /*** View Issue ***/
+html.jh-blur .activity-new-val a,
+html.jh-blur .activity-old-val a,
+html.jh-blur .activity-comment a,
+html.jh-blur .activity-item-summary a,
+html.jh-blur .activity-item-description a,
+html.jh-blur .user-content a,
+html.jh-blur div.aui-inline-dialog-contents.contents a, /**Control chart**/
+html.jh-blur .issuerow td a /****SEarch *****/
 {
   color: transparent !important;
   text-shadow: #172b4d -1px 1px 8px !important;
 }
 
-html.blur .item .value,
-html.blur #summary-val,
-html.blur .link-summary,
-html.blur .user-content-block,
-html.blur #descriptionmodule h1,
-html.blur #descriptionmodule h2,
-html.blur #descriptionmodule h3,
-html.blur #descriptionmodule h4,
-html.blur #descriptionmodule h5,
-html.blur #descriptionmodule h6,
-html.blur #commentmodule .action-body,
-html.blur .activity-new-val,
-html.blur .activity-old-val,
-html.blur .activity-comment,
-html.blur .activity-item-summary,
-html.blur .activity-item-description,
-html.blur .activity-item-description .user-content,
-html.blur .user-content,
-html.blur .user-content h1,
-html.blur .user-content h2,
-html.blur .user-content h3,
-html.blur .user-content h4,
-html.blur .user-content h5,
-html.blur .user-content h6,
-html.blur div.aui-inline-dialog-contents.contents span,
-html.blur .issuerow td /* search */
+html.jh-blur .item .value,
+html.jh-blur #summary-val,
+html.jh-blur .link-summary,
+html.jh-blur .user-content-block,
+html.jh-blur #descriptionmodule h1,
+html.jh-blur #descriptionmodule h2,
+html.jh-blur #descriptionmodule h3,
+html.jh-blur #descriptionmodule h4,
+html.jh-blur #descriptionmodule h5,
+html.jh-blur #descriptionmodule h6,
+html.jh-blur #commentmodule .action-body,
+html.jh-blur .activity-new-val,
+html.jh-blur .activity-old-val,
+html.jh-blur .activity-comment,
+html.jh-blur .activity-item-summary,
+html.jh-blur .activity-item-description,
+html.jh-blur .activity-item-description .user-content,
+html.jh-blur .user-content,
+html.jh-blur .user-content h1,
+html.jh-blur .user-content h2,
+html.jh-blur .user-content h3,
+html.jh-blur .user-content h4,
+html.jh-blur .user-content h5,
+html.jh-blur .user-content h6,
+html.jh-blur div.aui-inline-dialog-contents.contents span,
+html.jh-blur .issuerow td /* search */
 {
   color: transparent !important;
   text-shadow: #172b4d -1px 1px 6px !important;
@@ -74,91 +74,91 @@ html.blur .issuerow td /* search */
 
 /** Backlog **/
 
-html.blur .js-key-link, /* link for issue key */
-html.blur a.external-link,
-html.blur .js-epic-key-link,
-html.blur .avatar-with-name a, /*** release issues **/
-html.blur a.issue-summary,
-html.blur a.issue-key,
-html.blur #issuekey-val > a, /*** Issu info panel ***/
-html.blur .type-gh-epic-link a
+html.jh-blur .js-key-link, /* link for issue key */
+html.jh-blur a.external-link,
+html.jh-blur .js-epic-key-link,
+html.jh-blur .avatar-with-name a, /*** release issues **/
+html.jh-blur a.issue-summary,
+html.jh-blur a.issue-key,
+html.jh-blur #issuekey-val > a, /*** Issu info panel ***/
+html.jh-blur .type-gh-epic-link a
 {
   color: transparent !important;
   text-shadow: #0052cc -1px 1px 10px !important;
 }
 
-html.blur .ghx-row-version-epic-subtasks span, /* epic label in baclog issue */
-html.blur span[data-epickey] /*** Board ***/
+html.jh-blur .ghx-row-version-epic-subtasks span, /* epic label in baclog issue */
+html.jh-blur span[data-epickey] /*** Board ***/
 {
   color: transparent !important;
   text-shadow: #fff -1px 1px 10px !important;
 }
 
-html.blur #descriptionmodule img {
+html.jh-blur #descriptionmodule img {
   filter: blur(5px) !important;
 }
 
 /*** JIRA 8 ***/
-html.blur .code-quote,
-html.blur .code-quote .code-keyword,
-html.blur .code-quote .code-object {
+html.jh-blur .code-quote,
+html.jh-blur .code-quote .code-keyword,
+html.jh-blur .code-quote .code-object {
   color: transparent !important;
   text-shadow: #009100 -1px 1px 6px !important;
 }
 
-html.blur section.ghx-summary,
-html.blur div.ghx-parent-stub span.ghx-summary,
-html.blur div.ghx-parent-stub span.ghx-key {
+html.jh-blur section.ghx-summary,
+html.jh-blur div.ghx-parent-stub span.ghx-summary,
+html.jh-blur div.ghx-parent-stub span.ghx-key {
  color: transparent !important;
  text-shadow: #172B4D -1px 1px 6px !important;
 }
 
-html.blur #breadcrumbs-container span,
-html.blur [data-test-id="issue.views.issue-base.foundation.breadcrumbs.breadcrumb-current-issue-container"]
-html.blur [data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.summary"] div div
+html.jh-blur #breadcrumbs-container span,
+html.jh-blur [data-test-id="issue.views.issue-base.foundation.breadcrumbs.breadcrumb-current-issue-container"]
+html.jh-blur [data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.summary"] div div
 span.css-eaycls {
  color: transparent !important;
  text-shadow: #000000 -1px 1px 6px !important;
 }
 
-html.blur [data-test-id="issue.views.issue-base.foundation.summary.heading"],
-html.blur [data-test-id="issue.views.field.user.assignee"] > div,
-html.blur [data-test-id="profilecard-next.ui.profilecard.profilecard-trigger"] > div,
-html.blur span.css-eaycls,
-html.blur [class^="SingleLineTextInput"],
-html.blur .ak-renderer-document > *,
-html.blur [class^="ItemParts__"],
-html.blur [class^="ItemParts__"] span span,
-html.blur [data-test-id="navigation-apps.scope-switcher-v2"] div div button div div {
+html.jh-blur [data-test-id="issue.views.issue-base.foundation.summary.heading"],
+html.jh-blur [data-test-id="issue.views.field.user.assignee"] > div,
+html.jh-blur [data-test-id="profilecard-next.ui.profilecard.profilecard-trigger"] > div,
+html.jh-blur span.css-eaycls,
+html.jh-blur [class^="SingleLineTextInput"],
+html.jh-blur .ak-renderer-document > *,
+html.jh-blur [class^="ItemParts__"],
+html.jh-blur [class^="ItemParts__"] span span,
+html.jh-blur [data-test-id="navigation-apps.scope-switcher-v2"] div div button div div {
   color: transparent !important;
   text-shadow: #000000 -1px 1px 10px !important;
 }
 
-html.blur [data-test-id="issue.views.issue-base.context.context-items.primary-items"] a[color="blueLight"]{
+html.jh-blur [data-test-id="issue.views.issue-base.context.context-items.primary-items"] a[color="blueLight"]{
   color: transparent !important;
   text-shadow: #0052CC -1px 1px 10px !important;
 }
 
-html.blur a[data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.key"] {
+html.jh-blur a[data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.key"] {
   color: transparent !important;
   text-shadow: rgb(137, 147, 164) -1px 1px 10px !important;
 }
 
-html.blur span[class^="FieldStyles"],
-html.blur div[data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.summary"] div div,
-html.blur #ghx-field-viewname,
-html.blur .jira-system-avatar ~ span,
-html.blur #ghx-create-permissioninfo li span{
+html.jh-blur span[class^="FieldStyles"],
+html.jh-blur div[data-test-id="issue.issue-view.views.common.issue-line-card.issue-line-card-view.summary"] div div,
+html.jh-blur #ghx-field-viewname,
+html.jh-blur .jira-system-avatar ~ span,
+html.jh-blur #ghx-create-permissioninfo li span{
   color: transparent !important;
   text-shadow: #172b4d -1px 1px 10px !important;
 }
 
-html.blur div[data-test-id="navigation-apps.project-switcher-v2"] div div div button div[class^="css-"] {
+html.jh-blur div[data-test-id="navigation-apps.project-switcher-v2"] div div div button div[class^="css-"] {
   color: transparent !important;
   text-shadow: rgb(66, 82, 110) -1px 1px 10px !important;
 }
 
-html.blur div[class^="BreadcrumbsItem__"] a span span {
+html.jh-blur div[class^="BreadcrumbsItem__"] a span span {
   color: transparent !important;
   text-shadow: #6B778C -1px 1px 10px !important;
 }

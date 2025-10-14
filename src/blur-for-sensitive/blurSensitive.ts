@@ -8,9 +8,9 @@ type MessageResponse = { blurSensitive: boolean };
 const setBlurSensitive = (isBlur: boolean): void => {
   const html = document.getElementsByTagName('html')[0];
   if (isBlur) {
-    html.classList.add('blur');
+    html.classList.add('jh-blur');
   } else {
-    html.classList.remove('blur');
+    html.classList.remove('jh-blur');
   }
 };
 
