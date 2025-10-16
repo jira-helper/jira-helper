@@ -1,6 +1,6 @@
 {
   "name": "jira-helper",
-  "version": "2.27.2",
+  "version": "2.28.0",
   "description": "jira-helper: Elements for visualizations, button template, swimlane-viz",
   "repository": "https://github.com/Tinkoff/jira-helper.git",
   "license": "ISC",
@@ -68,7 +68,7 @@
   ],
   "scripts": {
     "bootstrap": "npm i --no-save",
-    "test": "vitest",
+    "test": "vitest run",
     "test:ci": "vitest run --coverage",
     "coverage": "vitest --collectCoverage",
     "build": "vite build",
