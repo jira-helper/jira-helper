@@ -3,9 +3,9 @@ import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additiona
 
 export const useGetSettings = () => {
   const { data, state } = useAdditionalCardElementsBoardPropertyStore(
-    useShallow(state => ({
-      data: state.data,
-      state: state.state,
+    useShallow(innerState => ({
+      data: innerState.data,
+      state: innerState.state,
     }))
   );
 

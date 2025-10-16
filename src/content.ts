@@ -32,7 +32,6 @@ import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
-import { init as initAdditionalCardElements } from './features/additional-card-elements';
 import { extensionApiService } from './shared/ExtensionApiService';
 
 setAutoFreeze(false);
@@ -62,7 +61,6 @@ async function start() {
   initDiContainer();
 
   setUpBlurSensitiveOnPage();
-  initAdditionalCardElements();
 
   const modificationsMap = {
     [Routes.BOARD]: [
