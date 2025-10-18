@@ -162,8 +162,9 @@ export default class FieldLimitsSettingsPage extends PageModification<[BoardData
       fieldNode => {
         const limitKey = fieldNode.getAttribute('data-field-limit-key');
         if (!limitKey) return;
-        const { fieldValue, fieldId } = limitsKey.decode(limitKey);
+
         const stat = limitsStats[limitKey];
+        const { fieldId, fieldValue } = stat;
         const currentIssueNode = fieldNode.querySelector(`.${FieldLimitsSettingsPage.classes.issuesCount}`);
 
         if (!fieldId || !fieldValue || !currentIssueNode) return;

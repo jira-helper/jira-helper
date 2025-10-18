@@ -3,7 +3,7 @@ import { getSettingsTab } from '../../routing';
 import { settingsEditBtnTemplate, fieldLimitsTableTemplate, fieldRowTemplate } from './htmlTemplates';
 import { Popup } from '../../shared/getPopup';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { limitsKey, normalize, NormalizeOutput } from '../shared';
+import { createLimitKey, normalize, NormalizeOutput } from '../shared';
 import { ColorPickerTooltip } from '../../shared/colorPickerTooltip';
 
 type MappedColumn = {
@@ -28,6 +28,16 @@ type BoardData = {
 type CardLayoutField = {
   fieldId: string;
   name: string;
+};
+
+type LimitSettings = {
+  fieldValue: string;
+  fieldId: string;
+  limit: number;
+  columns: string[];
+  swimlanes: string[];
+  bkgColor?: string;
+  visualValue: string;
 };
 
 export default class FieldLimitsSettingsPage extends PageModification<[any, any], Element> {
@@ -81,15 +91,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
 
   private settings: {
     limits: {
-      [key: string]: {
-        fieldValue: string;
-        fieldId: string;
-        limit: number;
-        columns: string[];
-        swimlanes: string[];
-        bkgColor?: string;
-        visualValue: string;
-      };
+      [key: string]: LimitSettings;
     };
   } | null = null;
 
@@ -225,49 +227,53 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
     );
 
     this.renderRows();
+    this.handleButtonsFieldLimitRowClick();
     this.renderColorPicker();
   };
-
-  handleAppliesLimitsToRows(): void {
-    const mergeSelectedRows = (mergedRowObj: any) => {
-      const rows = document.querySelectorAll(`#${FieldLimitsSettingsPage.ids.popupTableBody} > tr`);
-
-      rows.forEach(row => {
-        const isSelected = row.querySelector('input[type="checkbox"]:checked');
-        if (!isSelected) return;
-
-        const limitKey = row.getAttribute('data-field-project-row') || '';
-
-        this.settings!.limits[limitKey] = {
-          ...this.settings!.limits[limitKey],
-          ...mergedRowObj,
-        };
-      });
-
-      this.renderRows();
-    };
-
-    this.addEventListener(document.getElementById(FieldLimitsSettingsPage.ids.applyColumns)!, 'click', () => {
-      const { columns } = this.getSelectedSwimlanesAndColumnsOptions();
-      mergeSelectedRows({ columns });
-    });
-    this.addEventListener(document.getElementById(FieldLimitsSettingsPage.ids.applySwimlanes)!, 'click', () => {
-      const { swimlanes } = this.getSelectedSwimlanesAndColumnsOptions();
-      mergeSelectedRows({ swimlanes });
-    });
-  }
 
   handleButtonsFieldLimitRowClick(): void {
     const btnAdd = document.getElementById(FieldLimitsSettingsPage.ids.popupTableAddLimitRow)!;
     const btnEdit = document.getElementById(FieldLimitsSettingsPage.ids.popupTableEditLimitRow)!;
 
+    const checkIfLimitWithThisSettingsAlreadyExists = ({
+      fieldId,
+      fieldValue,
+      swimlanes,
+      columns,
+    }: {
+      fieldId: string;
+      fieldValue: string;
+      swimlanes: string[];
+      columns: string[];
+    }): undefined | string => {
+      return Object.entries(this.settings!.limits).find(
+        ([, limit]) =>
+          limit.fieldId === fieldId &&
+          limit.fieldValue === fieldValue &&
+          limit.swimlanes.every(swimlane => swimlanes.includes(swimlane)) &&
+          limit.columns.every(column => columns.includes(column))
+      )?.[0];
+    };
+
     const setValuesToTable = (limitKey: string | null) => {
       const { fieldId, fieldValue, visualValue, limit } = this.getInputValues();
       const { columns, swimlanes } = this.getSelectedSwimlanesAndColumnsOptions();
+
+      const limitWithSameSettings = checkIfLimitWithThisSettingsAlreadyExists({
+        fieldId,
+        fieldValue,
+        swimlanes,
+        columns,
+      });
+
+      if (limitWithSameSettings) {
+        limitKey = limitWithSameSettings;
+      }
+
       const isEdit = limitKey != null;
 
       if (!isEdit) {
-        limitKey = limitsKey.encode(fieldValue, fieldId);
+        limitKey = createLimitKey({ fieldValue, fieldId });
       }
 
       if (!this.settings!.limits[limitKey!] || isEdit) {
@@ -299,6 +305,35 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
         return;
       }
       setValuesToTable(this.limitKeyOfEditable);
+    });
+  }
+
+  handleAppliesLimitsToRows(): void {
+    const mergeSelectedRows = (mergedRowObj: any) => {
+      const rows = document.querySelectorAll(`#${FieldLimitsSettingsPage.ids.popupTableBody} > tr`);
+
+      rows.forEach(row => {
+        const isSelected = row.querySelector('input[type="checkbox"]:checked');
+        if (!isSelected) return;
+
+        const limitKey = row.getAttribute('data-field-project-row') || '';
+
+        this.settings!.limits[limitKey] = {
+          ...this.settings!.limits[limitKey],
+          ...mergedRowObj,
+        };
+      });
+
+      this.renderRows();
+    };
+
+    this.addEventListener(document.getElementById(FieldLimitsSettingsPage.ids.applyColumns)!, 'click', () => {
+      const { columns } = this.getSelectedSwimlanesAndColumnsOptions();
+      mergeSelectedRows({ columns });
+    });
+    this.addEventListener(document.getElementById(FieldLimitsSettingsPage.ids.applySwimlanes)!, 'click', () => {
+      const { swimlanes } = this.getSelectedSwimlanesAndColumnsOptions();
+      mergeSelectedRows({ swimlanes });
     });
   }
 
@@ -336,7 +371,6 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
       });
     });
 
-    this.handleButtonsFieldLimitRowClick();
     this.handleAppliesLimitsToRows();
   }
 

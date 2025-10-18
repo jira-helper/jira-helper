@@ -14,6 +14,7 @@
     font-size: 0.8rem;
     line-height: 25px;
     margin-left: 4px;
+    min-width: 20px;
     text-align: center;
     border-radius: 5px;
     color: white;

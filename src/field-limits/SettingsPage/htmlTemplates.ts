@@ -80,14 +80,14 @@ export const fieldLimitsTableTemplate = ({
                 <select id="${columnsSelectId}" class="select2" multiple style="margin: 0 12px; width: 195px;" size="4">
                   ${columnOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`).join('')}
                 </select>
-                <button type="button" id="${applyColumnsId}" class="aui-button aui-button-link">Apply columns<br/>for selected users</button>
+                <button type="button" id="${applyColumnsId}" class="aui-button aui-button-link">Apply columns<br/>for selected limits</button>
               </div>
               <div class="field-group" style="display: flex">
                 <label>Swimlanes</label>
                 <select id="${swimlanesSelectId}" class="select2" multiple style="margin: 0 12px; width: 195px;" size="5">
                   ${swimlaneOptions.map(option => `<option selected value="${option.value}">${option.text}</option>`).join('')}
                 </select>
-                <button type="button" id="${applySwimlanesId}" class="aui-button aui-button-link">Apply swimlanes<br/>for selected users</button>
+                <button type="button" id="${applySwimlanesId}" class="aui-button aui-button-link">Apply swimlanes<br/>for selected limits</button>
               </div>
             </td>
           </tr>
