@@ -145,6 +145,8 @@ export const updateBoardProperty = (
     type: 'json',
     payload: value,
     ...params,
+  }).catch(() => {
+    // ignore error because PUT method does not return JSON
   });
 };
 
