@@ -1,3 +1,2 @@
-export * from './setColumns';
-export * from './setIssueLinks';
-export * from './clearIssueLinks';
+export { autosyncStoreWithBoardProperty } from './autosyncStoreWithBoardProperty';
+export { loadAdditionalCardElementsBoardProperty } from './loadAdditionalCardElementsBoardProperty';

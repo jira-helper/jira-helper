@@ -1,5 +1,14 @@
 # Additional Card Elements - Board Settings
 
+## Автосинхронизация с Board Property
+
+**Поведение**: При изменении настроек в сторе автоматически сохраняются в Board Property с throttling (5 секунд). При загрузке страницы настройки автоматически загружаются из Board Property.
+
+**Реализация**:
+- `loadAdditionalCardElementsBoardProperty` - загружает настройки при инициализации
+- `autosyncStoreWithBoardProperty` - автоматически сохраняет изменения в Board Property
+- Используется throttling для предотвращения частых запросов к API
+
 ## Общие блоки
 
 ### Включение показа доп элементов

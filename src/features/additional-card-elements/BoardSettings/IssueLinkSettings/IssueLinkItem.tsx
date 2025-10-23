@@ -3,6 +3,7 @@ import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Row, Col, Che
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { IssueSelectorByAttributes } from 'src/shared/components/IssueSelectorByAttributes';
+import { useGetFields } from 'src/shared/jira/fields/useGetFields';
 import { IssueLink } from '../../types';
 
 export const TEXTS = {
@@ -110,6 +111,8 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
       });
     }
   };
+
+  const { fields } = useGetFields();
 
   return (
     <Card
@@ -221,7 +224,7 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
             <IssueSelectorByAttributes
               value={link.issueSelector || { mode: 'jql', jql: '' }}
               onChange={handleIssueSelectorChange}
-              fields={[]} // TODO: Get fields from props or context
+              fields={fields || []}
               testIdPrefix={`issue-link-${index}-selector`}
             />
           </div>

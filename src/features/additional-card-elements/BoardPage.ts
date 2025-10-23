@@ -3,6 +3,8 @@ import { PageModification } from 'src/shared/PageModification';
 
 import { registerSettings } from 'src/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
+import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions/loadAdditionalCardElementsBoardProperty';
+import { autosyncStoreWithBoardProperty } from './BoardSettings/actions/autosyncStoreWithBoardProperty';
 
 export class AdditionalCardElementsBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -14,11 +16,21 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
   }
 
   loadData() {
-    return Promise.resolve(undefined);
+    return loadAdditionalCardElementsBoardProperty();
   }
 
   async apply(): Promise<void> {
-    // TODO: Implement card elements display
+    const turnOffAutoSync = await autosyncStoreWithBoardProperty();
+    this.sideEffects.push(turnOffAutoSync);
+
+    // TODO: Implement card elements display on cards
+    // const unlisten = BoardPagePageObject.listenCards(cards => {
+    //   cards.forEach(card => {
+    //     card.attach(AdditionalCardElementsContainer, 'additional-card-elements');
+    //   });
+    // });
+    // this.sideEffects.push(unlisten);
+
     registerSettings({
       title: 'Additional Card Elements',
       component: AdditionalCardElementsSettings,
