@@ -9,5 +9,5 @@ export type BoardSettingsState = {
 
 export type BoardSetting = {
   title: string;
-  component: () => React.ReactNode;
+  component: React.ComponentType<any>;
 };

@@ -4,6 +4,7 @@ import { State } from './additionalCardElementsBoardProperty.types';
 import { AdditionalCardElementsBoardProperty, IssueLink } from '../types';
 
 const initialData: Required<AdditionalCardElementsBoardProperty> = {
+  enabled: false,
   columnsToTrack: [],
   issueLinks: [],
 };
@@ -18,6 +19,13 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
 
     setState: state => set({ state }),
 
+    setEnabled: enabled =>
+      set(
+        produce((state: State) => {
+          state.data.enabled = enabled;
+        })
+      ),
+
     setColumns: columns =>
       set(
         produce((state: State) => {
@@ -29,6 +37,31 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
       set(
         produce((state: State) => {
           state.data.issueLinks = issueLinks;
+        })
+      ),
+
+    addIssueLink: (issueLink: IssueLink) =>
+      set(
+        produce((state: State) => {
+          state.data.issueLinks.push(issueLink);
+        })
+      ),
+
+    updateIssueLink: (index: number, issueLink: IssueLink) =>
+      set(
+        produce((state: State) => {
+          if (index >= 0 && index < state.data.issueLinks.length) {
+            state.data.issueLinks[index] = issueLink;
+          }
+        })
+      ),
+
+    removeIssueLink: (index: number) =>
+      set(
+        produce((state: State) => {
+          if (index >= 0 && index < state.data.issueLinks.length) {
+            state.data.issueLinks.splice(index, 1);
+          }
         })
       ),
 
@@ -52,6 +85,13 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
     setState: (state: any) => {
       useAdditionalCardElementsBoardPropertyStore.setState({ state });
     },
+    setEnabled: (enabled: boolean) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.enabled = enabled;
+        })
+      );
+    },
     setColumns: (columns: { name: string; enabled: boolean }[]) => {
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
@@ -63,6 +103,31 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
           state.data.issueLinks = issueLinks;
+        })
+      );
+    },
+    addIssueLink: (issueLink: IssueLink) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.issueLinks.push(issueLink);
+        })
+      );
+    },
+    updateIssueLink: (index: number, issueLink: IssueLink) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          if (index >= 0 && index < state.data.issueLinks.length) {
+            state.data.issueLinks[index] = issueLink;
+          }
+        })
+      );
+    },
+    removeIssueLink: (index: number) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          if (index >= 0 && index < state.data.issueLinks.length) {
+            state.data.issueLinks.splice(index, 1);
+          }
         })
       );
     },

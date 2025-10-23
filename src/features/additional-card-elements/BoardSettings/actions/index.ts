@@ -1,3 +1,3 @@
-export { setColumns } from './setColumns';
-export { setIssueLinks } from './setIssueLinks';
-export { clearIssueLinks } from './clearIssueLinks';
+export * from './setColumns';
+export * from './setIssueLinks';
+export * from './clearIssueLinks';

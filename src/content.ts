@@ -33,6 +33,7 @@ import { registerLogger } from './shared/Logger';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
 import { extensionApiService } from './shared/ExtensionApiService';
+import { AdditionalCardElementsBoardPage } from './features/additional-card-elements/BoardPage';
 
 setAutoFreeze(false);
 
@@ -76,6 +77,7 @@ async function start() {
       SubTasksProgressBoardPage,
       LocalSettingsBoardPage,
       DiagnosticBoardPage,
+      AdditionalCardElementsBoardPage,
     ],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,

@@ -1,6 +1,9 @@
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { PageModification } from 'src/shared/PageModification';
 
+import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
+
 export class AdditionalCardElementsBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
     return `additional-card-elements-board-${this.getBoardId()}`;
@@ -16,6 +19,9 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
 
   async apply(): Promise<void> {
     // TODO: Implement card elements display
-    console.log('Additional Card Elements BoardPage applied');
+    registerSettings({
+      title: 'Additional Card Elements',
+      component: AdditionalCardElementsSettings,
+    });
   }
 }

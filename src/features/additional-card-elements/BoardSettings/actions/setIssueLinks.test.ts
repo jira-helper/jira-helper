@@ -23,8 +23,8 @@ describe('setIssueLinks', () => {
   it('should update issueLinks with provided array', () => {
     // ARRANGE
     const issueLinks: IssueLink[] = [
-      { linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' },
-      { linkType: { id: '2', direction: 'outward' }, jql: 'priority = "High"' },
+      { name: 'Parent Tasks', linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' },
+      { name: 'Child Tasks', linkType: { id: '2', direction: 'outward' }, jql: 'priority = "High"' },
     ];
 
     // ACT
@@ -53,13 +53,13 @@ describe('setIssueLinks', () => {
       ...state,
       data: {
         ...state.data,
-        issueLinks: [{ linkType: { id: 'old', direction: 'inward' }, jql: 'old' }],
+        issueLinks: [{ name: 'Old Link', linkType: { id: 'old', direction: 'inward' }, jql: 'old' }],
       },
     }));
 
     const newIssueLinks: IssueLink[] = [
-      { linkType: { id: 'new1', direction: 'outward' }, jql: 'new1' },
-      { linkType: { id: 'new2', direction: 'inward' }, jql: 'new2' },
+      { name: 'New Link 1', linkType: { id: 'new1', direction: 'outward' }, jql: 'new1' },
+      { name: 'New Link 2', linkType: { id: 'new2', direction: 'inward' }, jql: 'new2' },
     ];
 
     // ACT

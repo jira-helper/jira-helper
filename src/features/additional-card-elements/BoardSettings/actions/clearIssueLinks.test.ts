@@ -26,8 +26,8 @@ describe('clearIssueLinks', () => {
       data: {
         ...state.data,
         issueLinks: [
-          { linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' },
-          { linkType: { id: '2', direction: 'outward' }, jql: 'priority = "High"' },
+          { name: 'Link 1', linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' },
+          { name: 'Link 2', linkType: { id: '2', direction: 'outward' }, jql: 'priority = "High"' },
         ],
       },
     }));
@@ -64,7 +64,7 @@ describe('clearIssueLinks', () => {
       ...state,
       data: {
         ...state.data,
-        issueLinks: [{ linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' }],
+        issueLinks: [{ name: 'Test Link', linkType: { id: '1', direction: 'inward' }, jql: 'status = "Open"' }],
       },
     }));
 

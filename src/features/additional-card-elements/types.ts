@@ -4,12 +4,19 @@ export type IssueLinkTypeSelection = {
 };
 
 export type IssueLink = {
+  name: string; // Human-readable name
   linkType: IssueLinkTypeSelection;
-  jql: string;
+  issueSelector?: {
+    mode: 'field' | 'jql';
+    fieldId?: string;
+    value?: string;
+    jql?: string;
+  };
   color?: string;
 };
 
 export type AdditionalCardElementsBoardProperty = {
+  enabled?: boolean;
   columnsToTrack?: string[];
   issueLinks?: IssueLink[];
 };
