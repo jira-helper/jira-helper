@@ -13,6 +13,7 @@ export type IssueLink = {
     jql?: string;
   };
   color?: string;
+  multilineSummary?: boolean;
 };
 
 export type AdditionalCardElementsBoardProperty = {

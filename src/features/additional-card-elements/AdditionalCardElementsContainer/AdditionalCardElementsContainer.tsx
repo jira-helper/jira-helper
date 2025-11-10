@@ -24,7 +24,9 @@ const AdditionalCardElements = (props: { issueId: string }) => {
     const abortController = new AbortController();
     loadSubtasksForIssue(issueId, abortController.signal);
 
-    return () => abortController.abort();
+    return () => {
+      abortController.abort();
+    };
   }, [shouldDisplay, issueId]);
 
   if (!shouldDisplay) {

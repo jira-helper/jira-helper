@@ -19,6 +19,7 @@ interface LinkDisplay {
   color: string;
   link: string;
   summary: string;
+  multilineSummary: boolean;
 }
 
 export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) => {
@@ -155,6 +156,7 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) =>
           color,
           link: linkedIssue.key,
           summary,
+          multilineSummary: configLink.multilineSummary || false,
         });
       }
     }
@@ -179,7 +181,13 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) =>
       data-testid={`issue-link-badges-${issueKey}`}
     >
       {linksToDisplay.map(link => (
-        <IssueLinkBadge key={link.link} color={link.color} link={link.link} summary={link.summary} />
+        <IssueLinkBadge
+          key={link.link}
+          color={link.color}
+          link={link.link}
+          summary={link.summary}
+          multilineSummary={link.multilineSummary}
+        />
       ))}
     </span>
   );

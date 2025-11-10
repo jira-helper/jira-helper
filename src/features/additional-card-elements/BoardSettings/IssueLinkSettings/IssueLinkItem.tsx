@@ -23,6 +23,14 @@ export const TEXTS = {
     en: 'Custom Color',
     ru: 'Кастомный цвет',
   },
+  multilineSummary: {
+    en: 'Multiline Summary',
+    ru: 'Многострочное описание',
+  },
+  multilineSummaryTooltip: {
+    en: 'If enabled, long summaries will wrap to multiple lines. Otherwise, they will be truncated with ellipsis.',
+    ru: 'Если включено, длинные описания будут переноситься на несколько строк. Иначе они будут обрезаны троеточием.',
+  },
   removeLink: {
     en: 'Remove',
     ru: 'Удалить',
@@ -112,6 +120,13 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
     }
   };
 
+  const handleMultilineSummaryToggle = (checked: boolean) => {
+    onUpdate(index, {
+      ...link,
+      multilineSummary: checked,
+    });
+  };
+
   const { fields } = useGetFields();
 
   return (
@@ -178,7 +193,7 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
         </Col>
 
         {/* Custom Color */}
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={6}>
           <div>
             <label
               htmlFor={`issue-link-${index}-custom-color-checkbox`}
@@ -204,6 +219,27 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
                 />
               )}
             </Space>
+          </div>
+        </Col>
+
+        {/* Multiline Summary */}
+        <Col xs={24} sm={12} md={6}>
+          <div>
+            <label
+              htmlFor={`issue-link-${index}-multiline-summary-checkbox`}
+              style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}
+            >
+              {texts.multilineSummary}
+              <Tooltip title={texts.multilineSummaryTooltip}>
+                <InfoCircleOutlined style={{ marginLeft: '4px' }} />
+              </Tooltip>
+            </label>
+            <Checkbox
+              id={`issue-link-${index}-multiline-summary-checkbox`}
+              checked={link.multilineSummary || false}
+              onChange={e => handleMultilineSummaryToggle(e.target.checked)}
+              data-testid={`issue-link-${index}-multiline-summary-checkbox`}
+            />
           </div>
         </Col>
       </Row>

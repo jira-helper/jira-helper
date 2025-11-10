@@ -47,13 +47,16 @@
       - Название IssueLinks. 
         - **Компонент**: Input. Расположен в заголовке карточки
         - **Поведение**: Берется из `boardProperty.issueLinks[i].name`. Ограничено 20 символами.
-      - **Строка 1**: Выбор типа связи и цвета
+      - **Строка 1**: Выбор типа связи и отображения
         - Выбор типа связи
           - **Компонент**: Dropdown. Расположен в карточке
           - **Поведение**: берутся все доступные связи из `useGetIssueLinkTypes` и формируется список значений для дропдауна из name.  Т.к. name - не уникальны, как ключ объекта следует использовать id линка + direction линка. Выбранное значение сохраняется в `boardProperty.issueLinks[i].linkType` - сохраняется id и direction.
         - Выбор цвета:
           - **Компонент**: Checkbox + ColorPicker
           - **Поведение**: значение связано с `boardProperty.issueLinks[i].color`. Если чекбокс выключен - colorPicker не показывается, значение поля в boardProperty прописывается как undefined. Если чекбокс включен - показан ColorPicker, его значение записывается в boardProperty.
+        - Многострочность:
+         - **Компонент**: Checkbox
+         - **Поведение**: Значение связано с `boardProperty.issueLinks[i].multilineSummary`
       - **Строка 2**: Выбор сущностей, связи которых следует учитывать
         - **Компонент**: `shared/components/issueSelectorByAttributes`. Расположен в карточке на отдельной строке.
         - **Поведение**: значение связано с `boardProperty.issueLinks[i].issueSelector`, сохраняется as is. По умолчанию - пустое значение.
@@ -120,7 +123,7 @@ function getAutoColor(issueKey: string, issueSummary: string): string {
 - Отображает `IssueLinkBadge` для каждой связи
 - **onMount** если фича включена, то получает issue links из `issue.data.fields.issuelinks` (данные уже загружены через `fetchJiraIssue`)
 - Получает список отслеживаемых связей из `useGetSettings().settings.issueLinks` (настройки из `useAdditionalCardElementsBoardPropertyStore`)
-- Для каждой связанной задачи проверяет, подходит ли она под условия отслеживания через `issueSelector` (JQL парсер или фильтр по полю). Для тех, что подходят высчитывает цвет через `getLinkColor()` из `colorUtils.ts`, если он не определен в настройках. Формирует массив links: `{color: string, link: string, summary: string}[]`. Массив рендерится как `IssueLinkBadge`
+- Для каждой связанной задачи проверяет, подходит ли она под условия отслеживания через `issueSelector` (JQL парсер или фильтр по полю). Для тех, что подходят высчитывает цвет через `getLinkColor()` из `colorUtils.ts`, если он не определен в настройках. Формирует массив links: `{color: string, link: string, summary: string, multilineSummary: boolean}[]`. Массив рендерится как `IssueLinkBadge`
 - Пока идет загрузка данных - ничего не отображается. Отображение есть только если есть настройки отслеживаемых связей и подходящие под эти связи задачи
 
 #### IssueLinkBadge
@@ -128,7 +131,8 @@ function getAutoColor(issueKey: string, issueSummary: string): string {
 **Props**:
 - `color`: Цвет для отображения
 - `link`: Ссылка на задачу
-- `summary`: Название задачи. Должно скрываться за троеточием, если элемент не влезает в родительский контейнер. При наведении мышки можно полное название
+- `summary`: Название задачи
+- `multilineSummary`: если true, то в случае если summary не влазиет в 1 строку, слова переносятся на следующую. Иначе часть summary, которая не помещается, должна скрываться за троеточием, а при наведении мышки можно увидеть полное название в тултипе 
 
 **Поведение**:
 - При клике открывает связанную задачу в новой вкладке
