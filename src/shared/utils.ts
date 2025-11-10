@@ -94,3 +94,19 @@ export function throttle<T extends (...args: any[]) => any>(fn: T, delay: number
     }
   } as T;
 }
+
+/**
+ * Debounce a function so it only runs after the delay period has passed without new calls.
+ * @param fn The function to debounce
+ * @param delay The delay in ms
+ * @returns A debounced version of the function
+ */
+export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number): T {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return function (this: any, ...args: any[]) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  } as T;
+}

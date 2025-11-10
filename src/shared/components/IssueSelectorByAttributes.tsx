@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Select, Input, Alert, Tooltip, Row, Col } from 'antd';
 import { InfoCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
-import { throttle } from 'src/shared/utils';
+import { debounce } from 'src/shared/utils';
 import { JqlParserInfoTooltip } from 'src/shared/jql/JqlParserInfoTooltip';
 import { IssueSelectorByAttributesProps, IssueSelector } from './IssueSelectorByAttributes.types';
 
@@ -72,31 +72,52 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
   const [fieldValue, setFieldValue] = useState(value.value || '');
   const [jqlValue, setJqlValue] = useState(value.jql || '');
 
-  // Sync local state when value prop changes
-  useEffect(() => {
-    setFieldValue(value.value || '');
-  }, [value.value]);
+  // Track last edit time to prevent external updates while user is typing
+  const lastEditTimeFieldValue = useRef<number>(0);
+  const lastEditTimeJql = useRef<number>(0);
+  const DEBOUNCE_DELAY = 600; // ms
 
-  useEffect(() => {
-    setJqlValue(value.jql || '');
-  }, [value.jql]);
+  // Store latest value and onChange in refs to avoid recreating debounced functions
+  const valueRef = useRef(value);
+  const onChangeRef = useRef(onChange);
 
-  // Throttled handlers
-  const throttledUpdateFieldValue = React.useMemo(
+  // Update refs when props change
+  useEffect(() => {
+    valueRef.current = value;
+    onChangeRef.current = onChange;
+  }, [value, onChange]);
+
+  // Create debounced functions once and keep them stable using useMemo
+  const debouncedUpdateFieldValue = React.useMemo(
     () =>
-      throttle((val: string) => {
-        onChange({ ...value, value: val });
-      }, 600),
-    [value, onChange]
+      debounce((val: string) => {
+        onChangeRef.current({ ...valueRef.current, value: val });
+      }, DEBOUNCE_DELAY),
+    [] // Empty deps - function is stable, uses refs for current values
   );
 
-  const throttledUpdateJql = React.useMemo(
+  const debouncedUpdateJql = React.useMemo(
     () =>
-      throttle((val: string) => {
-        onChange({ ...value, jql: val });
-      }, 600),
-    [value, onChange]
+      debounce((val: string) => {
+        onChangeRef.current({ ...valueRef.current, jql: val });
+      }, DEBOUNCE_DELAY),
+    [] // Empty deps - function is stable, uses refs for current values
   );
+
+  // Sync local state when value prop changes, but only if user hasn't edited recently
+  useEffect(() => {
+    const timeSinceLastEdit = Date.now() - lastEditTimeFieldValue.current;
+    if (timeSinceLastEdit >= DEBOUNCE_DELAY && (value.value || '') !== fieldValue) {
+      setFieldValue(value.value || '');
+    }
+  }, [value.value, fieldValue]);
+
+  useEffect(() => {
+    const timeSinceLastEdit = Date.now() - lastEditTimeJql.current;
+    if (timeSinceLastEdit >= DEBOUNCE_DELAY && (value.jql || '') !== jqlValue) {
+      setJqlValue(value.jql || '');
+    }
+  }, [value.jql, jqlValue]);
 
   // JQL validation
   let jqlError = '';
@@ -123,13 +144,15 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
   };
 
   const handleFieldValueChange = (val: string) => {
+    lastEditTimeFieldValue.current = Date.now();
     setFieldValue(val);
-    throttledUpdateFieldValue(val);
+    debouncedUpdateFieldValue(val);
   };
 
   const handleJqlChange = (val: string) => {
+    lastEditTimeJql.current = Date.now();
     setJqlValue(val);
-    throttledUpdateJql(val);
+    debouncedUpdateJql(val);
   };
 
   const currentMode = mode || value.mode;
@@ -226,7 +249,9 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
               <Input
                 id={`${testIdPrefix}-jql-input`}
                 value={jqlValue}
-                onChange={e => handleJqlChange(e.target.value)}
+                onChange={e => {
+                  handleJqlChange(e.target.value);
+                }}
                 placeholder={texts.jqlPlaceholder}
                 disabled={disabled}
                 style={{

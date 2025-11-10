@@ -19,9 +19,10 @@ vi.mock('src/shared/jql/JqlParserInfoTooltip', () => ({
   JqlParserInfoTooltip: () => <div data-testid="jql-tooltip">JQL Info</div>,
 }));
 
-// Mock the throttle utility
+// Mock the throttle and debounce utilities
 vi.mock('src/shared/utils', () => ({
   throttle: (fn: any) => fn,
+  debounce: (fn: any) => fn,
 }));
 
 // Mock the texts hook
