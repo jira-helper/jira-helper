@@ -24,11 +24,11 @@ export const IssueLinkBadge: React.FC<IssueLinkBadgeProps> = ({ color, link, sum
       style={{
         color: textColor,
         cursor: 'pointer',
-        maxWidth: '200px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         marginBottom: '4px',
+        maxWidth: '100%',
       }}
       title={`${link}: ${summary}`}
       onClick={handleClick}

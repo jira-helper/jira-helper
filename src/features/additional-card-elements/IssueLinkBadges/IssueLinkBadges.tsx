@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Space } from 'antd';
+
 import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
 import { JiraIssueMapped } from 'src/shared/jira/types';
@@ -168,10 +168,19 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) =>
   }
 
   return (
-    <Space size={[4, 4]} wrap style={{ marginTop: '8px' }} data-testid={`issue-link-badges-${issueKey}`}>
+    <span
+      style={{
+        marginTop: '8px',
+        maxWidth: '100%',
+        display: 'flex',
+        gap: '4px',
+        flexDirection: 'column',
+      }}
+      data-testid={`issue-link-badges-${issueKey}`}
+    >
       {linksToDisplay.map(link => (
         <IssueLinkBadge key={link.link} color={link.color} link={link.link} summary={link.summary} />
       ))}
-    </Space>
+    </span>
   );
 };
