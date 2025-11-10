@@ -34,7 +34,7 @@ export const IssueLinkBadge: React.FC<IssueLinkBadgeProps> = ({ color, link, sum
       onClick={handleClick}
       data-testid={`issue-link-badge-${link}`}
     >
-      {link}: {summary}
+      {summary}
     </Tag>
   );
 };
