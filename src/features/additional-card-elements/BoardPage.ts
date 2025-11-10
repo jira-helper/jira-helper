@@ -23,13 +23,15 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
     const turnOffAutoSync = await autosyncStoreWithBoardProperty();
     this.sideEffects.push(turnOffAutoSync);
 
-    // TODO: Implement card elements display on cards
-    // const unlisten = BoardPagePageObject.listenCards(cards => {
-    //   cards.forEach(card => {
-    //     card.attach(AdditionalCardElementsContainer, 'additional-card-elements');
-    //   });
-    // });
-    // this.sideEffects.push(unlisten);
+    const { AdditionalCardElementsContainer } = await import(
+      './AdditionalCardElementsContainer/AdditionalCardElementsContainer'
+    );
+    const unlisten = BoardPagePageObject.listenCards(cards => {
+      cards.forEach(card => {
+        card.attach(AdditionalCardElementsContainer, 'additional-card-elements');
+      });
+    });
+    this.sideEffects.push(unlisten);
 
     registerSettings({
       title: 'Additional Card Elements',

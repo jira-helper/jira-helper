@@ -40,15 +40,17 @@ vi.mock('src/shared/texts', () => ({
 }));
 
 // Mock the useGetIssueLinkTypes hook
+const mockUseGetIssueLinkTypes = vi.fn(() => ({
+  linkTypes: [
+    { id: 'relates', outward: 'relates to', inward: 'is related to' },
+    { id: 'blocks', outward: 'blocks', inward: 'is blocked by' },
+  ],
+  isLoading: false,
+  error: null,
+}));
+
 vi.mock('src/shared/jira/stores/useGetIssueLinkTypes', () => ({
-  useGetIssueLinkTypes: () => ({
-    linkTypes: [
-      { id: 'relates', outward: 'relates to', inward: 'is related to' },
-      { id: 'blocks', outward: 'blocks', inward: 'is blocked by' },
-    ],
-    isLoading: false,
-    error: null,
-  }),
+  useGetIssueLinkTypes: () => mockUseGetIssueLinkTypes(),
 }));
 
 // Mock the IssueLinkItem component
@@ -65,6 +67,15 @@ vi.mock('./IssueLinkItem', () => ({
 describe('IssueLinkSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock to default state
+    mockUseGetIssueLinkTypes.mockReturnValue({
+      linkTypes: [
+        { id: 'relates', outward: 'relates to', inward: 'is related to' },
+        { id: 'blocks', outward: 'blocks', inward: 'is blocked by' },
+      ],
+      isLoading: false,
+      error: null,
+    });
   });
 
   describe('Rendering', () => {
@@ -172,28 +183,26 @@ describe('IssueLinkSettings', () => {
   describe('Loading States', () => {
     it('shows loading state when link types are loading', () => {
       // Mock the hook to return loading state
-      vi.doMock('src/shared/jira/stores/useGetIssueLinkTypes', () => ({
-        useGetIssueLinkTypes: () => ({
-          linkTypes: [],
-          isLoading: true,
-          error: null,
-        }),
-      }));
+      mockUseGetIssueLinkTypes.mockReturnValueOnce({
+        linkTypes: [],
+        isLoading: true,
+        error: null,
+      });
 
-      render(<IssueLinkSettings />);
+      const { container } = render(<IssueLinkSettings />);
 
-      expect(screen.getByText('Loading available link types...')).toBeInTheDocument();
+      // Check that Spin component is rendered (it has ant-spin class)
+      const spinElement = container.querySelector('.ant-spin');
+      expect(spinElement).toBeInTheDocument();
     });
 
     it('shows error state when link types fail to load', () => {
       // Mock the hook to return error state
-      vi.doMock('src/shared/jira/stores/useGetIssueLinkTypes', () => ({
-        useGetIssueLinkTypes: () => ({
-          linkTypes: [],
-          isLoading: false,
-          error: new Error('Failed to load'),
-        }),
-      }));
+      mockUseGetIssueLinkTypes.mockReturnValueOnce({
+        linkTypes: [],
+        isLoading: false,
+        error: new Error('Failed to load'),
+      });
 
       render(<IssueLinkSettings />);
 
