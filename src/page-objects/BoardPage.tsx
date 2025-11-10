@@ -13,7 +13,11 @@ class CardPageObject {
     return this.card.querySelector(this.selectors.issueKey)?.textContent?.trim() as string;
   }
 
-  attach(ComponentToAttach: React.ComponentType<{ issueId: string }>, key: string) {
+  attach(
+    ComponentToAttach: React.ComponentType<{ issueId: string }>,
+    key: string,
+    options?: { position: 'aftersummary' }
+  ) {
     let div = this.card.querySelector(`[data-jh-attached-key="${key}"]`);
 
     if (div) {
@@ -22,7 +26,12 @@ class CardPageObject {
 
     div = document.createElement('div');
     div.setAttribute('data-jh-attached-key', key);
-    this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+    if (options?.position === 'aftersummary') {
+      // ghx-summary is inside ghx-issue-fields and ghx-issue-fields width is not 100%
+      this.card.querySelector('.ghx-issue-fields')?.after(div);
+    } else {
+      this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+    }
 
     const root = createRoot(div);
     root.render(<ComponentToAttach issueId={this.getIssueId()} />);

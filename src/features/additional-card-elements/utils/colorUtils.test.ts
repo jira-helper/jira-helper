@@ -3,8 +3,8 @@ import { PASTEL_COLORS, getAutoColor, getLinkColor, isLightColor, getContrastTex
 
 describe('colorUtils', () => {
   describe('PASTEL_COLORS', () => {
-    it('should contain 50 colors', () => {
-      expect(PASTEL_COLORS).toHaveLength(50);
+    it('should contain 20 colors', () => {
+      expect(PASTEL_COLORS).toHaveLength(20);
     });
 
     it('should contain valid hex colors', () => {
@@ -15,7 +15,7 @@ describe('colorUtils', () => {
 
     it('should contain unique colors', () => {
       const uniqueColors = new Set(PASTEL_COLORS);
-      expect(uniqueColors.size).toBe(50);
+      expect(uniqueColors.size).toBe(20);
     });
   });
 
@@ -129,5 +129,3 @@ describe('colorUtils', () => {
     });
   });
 });
-
-

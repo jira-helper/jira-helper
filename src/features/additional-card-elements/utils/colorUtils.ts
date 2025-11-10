@@ -1,57 +1,28 @@
 /**
- * Массив из 50 пастельных цветов для автоматического выбора цвета связей
+ * Массив из 20 легко различимых цветов для автоматического выбора цвета связей
+ * Включает пастельные и более насыщенные оттенки для лучшей визуальной различимости
  */
 export const PASTEL_COLORS = [
-  '#FFB3BA', // Pastel Red
-  '#FFDFBA', // Pastel Orange
-  '#FFFFBA', // Pastel Yellow
-  '#BAFFC9', // Pastel Green
-  '#BAE1FF', // Pastel Blue
-  '#E1BAFF', // Pastel Purple
-  '#FFB3E6', // Pastel Pink
-  '#B3FFE6', // Pastel Mint
-  '#FFE6B3', // Pastel Peach
-  '#E6FFB3', // Pastel Lime
-  '#B3E6FF', // Pastel Sky
-  '#E6B3FF', // Pastel Lavender
-  '#FFB3D9', // Pastel Rose
-  '#B3FFD9', // Pastel Aqua
-  '#FFD9B3', // Pastel Apricot
-  '#D9FFB3', // Pastel Chartreuse
-  '#B3D9FF', // Pastel Cornflower
-  '#D9B3FF', // Pastel Orchid
-  '#FFB3C7', // Pastel Coral
-  '#B3FFC7', // Pastel Emerald
-  '#FFC7B3', // Pastel Salmon
-  '#C7FFB3', // Pastel Spring
-  '#B3C7FF', // Pastel Periwinkle
-  '#C7B3FF', // Pastel Violet
-  '#FFB3B3', // Pastel Light Red
-  '#B3FFB3', // Pastel Light Green
-  '#B3B3FF', // Pastel Light Blue
-  '#FFB3FF', // Pastel Light Magenta
-  '#B3FFFF', // Pastel Light Cyan
-  '#FFFFB3', // Pastel Light Yellow
-  '#FFCCCC', // Pastel Pink Red
-  '#CCFFCC', // Pastel Mint Green
-  '#CCCCFF', // Pastel Lavender Blue
-  '#FFCCFF', // Pastel Lavender Pink
-  '#CCFFFF', // Pastel Light Blue
-  '#FFFFCC', // Pastel Light Yellow
-  '#FFE6CC', // Pastel Peach
-  '#E6FFCC', // Pastel Light Green
-  '#CCE6FF', // Pastel Light Blue
-  '#E6CCFF', // Pastel Light Purple
-  '#FFCCE6', // Pastel Light Pink
-  '#CCFFE6', // Pastel Light Mint
-  '#E6FFE6', // Pastel Light Green
-  '#E6E6FF', // Pastel Light Blue
-  '#FFE6E6', // Pastel Light Pink
-  '#F0E6FF', // Pastel Light Purple
-  '#E6F0FF', // Pastel Light Blue
-  '#FFE6F0', // Pastel Light Pink
-  '#E6FFFF', // Pastel Light Cyan
-  '#FFFFE6', // Pastel Light Yellow
+  '#FF6B6B', // Coral Red - яркий, хорошо различимый
+  '#4ECDC4', // Turquoise - насыщенный бирюзовый
+  '#45B7D1', // Sky Blue - яркий голубой
+  '#FFA07A', // Light Salmon - мягкий оранжево-розовый
+  '#98D8C8', // Mint Green - пастельный мятный
+  '#F7DC6F', // Soft Yellow - мягкий желтый
+  '#BB8FCE', // Lavender - пастельный фиолетовый
+  '#85C1E2', // Light Blue - светлый голубой
+  '#F8B739', // Golden Yellow - золотисто-желтый
+  '#52BE80', // Emerald Green - изумрудный зеленый
+  '#EC7063', // Soft Red - мягкий красный
+  '#5DADE2', // Bright Blue - яркий синий
+  '#F1948A', // Pink Coral - розово-коралловый
+  '#7FB3D3', // Powder Blue - пудрово-голубой
+  '#F4D03F', // Bright Yellow - яркий желтый
+  '#82E0AA', // Light Green - светлый зеленый
+  '#D7BDE2', // Light Purple - светлый фиолетовый
+  '#F5B7B1', // Peach Pink - персиково-розовый
+  '#AED6F1', // Baby Blue - детский голубой
+  '#A9DFBF', // Light Mint - светлый мятный
 ];
 
 /**

@@ -28,7 +28,9 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
     );
     const unlisten = BoardPagePageObject.listenCards(cards => {
       cards.forEach(card => {
-        card.attach(AdditionalCardElementsContainer, 'additional-card-elements');
+        card.attach(AdditionalCardElementsContainer, 'additional-card-elements', {
+          position: 'aftersummary',
+        });
       });
     });
     this.sideEffects.push(unlisten);
