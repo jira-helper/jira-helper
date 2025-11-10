@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Row, Col, Checkbox } from 'antd';
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
@@ -19,9 +19,9 @@ export const TEXTS = {
     en: 'Issue Selector',
     ru: 'Селектор задач',
   },
-  customColor: {
-    en: 'Fixed Color',
-    ru: 'Фиксированный цвет',
+  uniqueColors: {
+    en: 'Unique colors for tasks',
+    ru: 'Уникальные цвета для задач',
   },
   multilineSummary: {
     en: 'Multiline Summary',
@@ -51,9 +51,9 @@ export const TEXTS = {
     en: 'Configure which issues to show for this link',
     ru: 'Настройте, какие задачи показывать для этой связи',
   },
-  colorTooltip: {
-    en: 'Fixed color for the link badge. If not selected, color will be generated automatically for each linked issue',
-    ru: 'Фиксированный цвет для плашки связи. Если не выбран, цвет будет сгенерирован автоматически для каждой связанной задачи',
+  uniqueColorsTooltip: {
+    en: 'If enabled, each linked issue will have a unique color generated automatically. If disabled, you can set a fixed color for all linked issues.',
+    ru: 'Если включено, каждая связанная задача будет иметь уникальный цвет, сгенерированный автоматически. Если выключено, можно установить фиксированный цвет для всех связанных задач.',
   },
 } as const;
 
@@ -73,7 +73,9 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
   availableLinkTypes,
 }) => {
   const texts = useGetTextsByLocale(TEXTS);
-  const [useCustomColor, setUseCustomColor] = useState(!!link.color);
+  // If color is undefined, use unique colors (checkbox checked)
+  // If color is set, use fixed color (checkbox unchecked, show ColorPicker)
+  const useUniqueColors = link.color === undefined;
 
   const handleNameChange = (name: string) => {
     onUpdate(index, {
@@ -110,12 +112,18 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
     });
   };
 
-  const handleCustomColorToggle = (checked: boolean) => {
-    setUseCustomColor(checked);
-    if (!checked) {
+  const handleUniqueColorsToggle = (checked: boolean) => {
+    if (checked) {
+      // Enable unique colors - remove fixed color
       onUpdate(index, {
         ...link,
         color: undefined,
+      });
+    } else if (!link.color) {
+      // Disable unique colors - set a default color if none exists
+      onUpdate(index, {
+        ...link,
+        color: '#1677ff', // Default blue color
       });
     }
   };
@@ -162,9 +170,9 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
       }
     >
       {/* Row 1: Link Type and Color */}
-      <Row gutter={[16, 16]} align="middle" style={{ marginBottom: '16px' }}>
+      <div style={{ display: 'flex', gap: '16px', flexDirection: 'row', marginBottom: '16px' }}>
         {/* Link Type Selection */}
-        <Col xs={24} sm={12} md={8}>
+        <span>
           <div>
             <label
               htmlFor={`issue-link-${index}-type`}
@@ -190,28 +198,30 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
               ))}
             </Select>
           </div>
-        </Col>
+        </span>
 
-        {/* Custom Color */}
-        <Col xs={24} sm={12} md={6}>
+        {/* Unique Colors / Fixed Color */}
+        <span>
           <div>
             <label
-              htmlFor={`issue-link-${index}-custom-color-checkbox`}
+              htmlFor={`issue-link-${index}-unique-colors-checkbox`}
               style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}
             >
-              {texts.customColor}
-              <Tooltip title={texts.colorTooltip}>
+              {texts.uniqueColors}
+              <Tooltip title={texts.uniqueColorsTooltip}>
                 <InfoCircleOutlined style={{ marginLeft: '4px' }} />
               </Tooltip>
             </label>
             <Space>
               <Checkbox
-                id={`issue-link-${index}-custom-color-checkbox`}
-                checked={useCustomColor}
-                onChange={e => handleCustomColorToggle(e.target.checked)}
-                data-testid={`issue-link-${index}-custom-color-checkbox`}
-              />
-              {useCustomColor && (
+                id={`issue-link-${index}-unique-colors-checkbox`}
+                checked={useUniqueColors}
+                onChange={e => handleUniqueColorsToggle(e.target.checked)}
+                data-testid={`issue-link-${index}-unique-colors-checkbox`}
+              >
+                {texts.uniqueColors}
+              </Checkbox>
+              {!useUniqueColors && (
                 <ColorPicker
                   value={link.color}
                   onChange={color => handleColorChange(color.toHexString())}
@@ -220,10 +230,10 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
               )}
             </Space>
           </div>
-        </Col>
+        </span>
 
         {/* Multiline Summary */}
-        <Col xs={24} sm={12} md={6}>
+        <span>
           <div>
             <label
               htmlFor={`issue-link-${index}-multiline-summary-checkbox`}
@@ -241,8 +251,8 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
               data-testid={`issue-link-${index}-multiline-summary-checkbox`}
             />
           </div>
-        </Col>
-      </Row>
+        </span>
+      </div>
 
       {/* Row 2: Issue Selector */}
       <Row gutter={[16, 16]} align="middle">

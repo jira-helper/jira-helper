@@ -10,13 +10,17 @@ vi.mock('src/shared/texts', () => ({
     linkName: 'Link Name',
     linkType: 'Link Type',
     issueSelector: 'Issue Selector',
-    customColor: 'Custom Color',
+    uniqueColors: 'Unique colors for tasks',
+    fixedColor: 'Fixed Color',
+    multilineSummary: 'Multiline Summary',
+    multilineSummaryTooltip: 'If enabled, long summaries will wrap',
     removeLink: 'Remove',
     linkNamePlaceholder: 'Enter link name',
     linkNameTooltip: 'Human-readable name',
     linkTypeTooltip: 'Select the type of link',
     issueSelectorTooltip: 'Configure which issues to show',
-    colorTooltip: 'Custom color for the link badge',
+    uniqueColorsTooltip: 'If enabled, each linked issue will have a unique color',
+    fixedColorTooltip: 'Fixed color for the link badge',
   }),
 }));
 
@@ -70,7 +74,7 @@ describe('IssueLinkItem', () => {
 
       expect(screen.getByDisplayValue('Test Link')).toBeInTheDocument();
       expect(screen.getByText('Link Type')).toBeInTheDocument();
-      expect(screen.getByText('Custom Color')).toBeInTheDocument();
+      expect(screen.getByText('Fixed Color')).toBeInTheDocument();
       expect(screen.getByText('Issue Selector')).toBeInTheDocument();
       expect(screen.getByText('Remove')).toBeInTheDocument();
     });
@@ -92,22 +96,22 @@ describe('IssueLinkItem', () => {
       expect(jqlInput).toHaveValue('status = "Open"');
     });
 
-    it('renders color picker when custom color is enabled', () => {
+    it('renders color picker when fixed color is set (unique colors disabled)', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
-      const colorCheckbox = screen.getByTestId('issue-link-0-custom-color-checkbox');
-      expect(colorCheckbox).toBeChecked();
+      const colorCheckbox = screen.getByTestId('issue-link-0-unique-colors-checkbox');
+      expect(colorCheckbox).not.toBeChecked(); // Fixed color is set, so unique colors are disabled
 
       const colorPicker = screen.getByTestId('issue-link-0-color-picker');
       expect(colorPicker).toBeInTheDocument();
     });
 
-    it('does not render color picker when custom color is disabled', () => {
+    it('does not render color picker when unique colors are enabled', () => {
       const linkWithoutColor = { ...mockIssueLink, color: undefined };
       render(<IssueLinkItem {...defaultProps} link={linkWithoutColor} />);
 
-      const colorCheckbox = screen.getByTestId('issue-link-0-custom-color-checkbox');
-      expect(colorCheckbox).not.toBeChecked();
+      const colorCheckbox = screen.getByTestId('issue-link-0-unique-colors-checkbox');
+      expect(colorCheckbox).toBeChecked(); // No color set, so unique colors are enabled
 
       expect(screen.queryByTestId('issue-link-0-color-picker')).not.toBeInTheDocument();
     });
@@ -157,15 +161,28 @@ describe('IssueLinkItem', () => {
       expect(colorPicker).toBeInTheDocument();
     });
 
-    it('calls onUpdate when custom color is toggled off', () => {
+    it('calls onUpdate when unique colors is toggled on (removes fixed color)', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
-      const colorCheckbox = screen.getByTestId('issue-link-0-custom-color-checkbox');
+      const colorCheckbox = screen.getByTestId('issue-link-0-unique-colors-checkbox');
       fireEvent.click(colorCheckbox);
 
       expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
         ...mockIssueLink,
         color: undefined,
+      });
+    });
+
+    it('calls onUpdate with default color when unique colors is toggled off and no color is set', () => {
+      const linkWithoutColor = { ...mockIssueLink, color: undefined };
+      render(<IssueLinkItem {...defaultProps} link={linkWithoutColor} />);
+
+      const colorCheckbox = screen.getByTestId('issue-link-0-unique-colors-checkbox');
+      fireEvent.click(colorCheckbox);
+
+      expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
+        ...linkWithoutColor,
+        color: '#1677ff', // Default color
       });
     });
 
@@ -188,12 +205,12 @@ describe('IssueLinkItem', () => {
       expect(issueSelector).toBeInTheDocument();
     });
 
-    it('handles link without color', () => {
+    it('handles link without color (unique colors enabled)', () => {
       const linkWithoutColor = { ...mockIssueLink, color: undefined };
       render(<IssueLinkItem {...defaultProps} link={linkWithoutColor} />);
 
-      const colorCheckbox = screen.getByTestId('issue-link-0-custom-color-checkbox');
-      expect(colorCheckbox).not.toBeChecked();
+      const colorCheckbox = screen.getByTestId('issue-link-0-unique-colors-checkbox');
+      expect(colorCheckbox).toBeChecked(); // Unique colors enabled when no color is set
     });
 
     it('handles empty available link types', () => {

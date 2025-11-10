@@ -27,8 +27,8 @@ const TEXTS = {
     ru: 'Выберите колонки, где должны отображаться дополнительные элементы карточек',
   },
   issueLinksTitle: {
-    en: 'Issue Link Settings',
-    ru: 'Настройки связей задач',
+    en: 'Display issue links on cards',
+    ru: 'Отображение связей задач на карточках',
   },
 } as const;
 
