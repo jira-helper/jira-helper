@@ -20,16 +20,16 @@ export const TEXTS = {
     ru: 'Селектор задач',
   },
   customColor: {
-    en: 'Custom Color',
-    ru: 'Кастомный цвет',
+    en: 'Fixed Color',
+    ru: 'Фиксированный цвет',
   },
   multilineSummary: {
     en: 'Multiline Summary',
-    ru: 'Многострочное описание',
+    ru: 'Многострочное название',
   },
   multilineSummaryTooltip: {
     en: 'If enabled, long summaries will wrap to multiple lines. Otherwise, they will be truncated with ellipsis.',
-    ru: 'Если включено, длинные описания будут переноситься на несколько строк. Иначе они будут обрезаны троеточием.',
+    ru: 'Если включено, длинные названия будут переноситься на несколько строк. Иначе они будут обрезаны троеточием.',
   },
   removeLink: {
     en: 'Remove',
@@ -52,8 +52,8 @@ export const TEXTS = {
     ru: 'Настройте, какие задачи показывать для этой связи',
   },
   colorTooltip: {
-    en: 'Custom color for the link badge',
-    ru: 'Кастомный цвет для плашки связи',
+    en: 'Fixed color for the link badge. If not selected, color will be generated automatically for each linked issue',
+    ru: 'Фиксированный цвет для плашки связи. Если не выбран, цвет будет сгенерирован автоматически для каждой связанной задачи',
   },
 } as const;
 

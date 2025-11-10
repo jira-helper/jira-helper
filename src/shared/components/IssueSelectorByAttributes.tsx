@@ -21,8 +21,8 @@ const TEXTS = {
     ru: 'JQL',
   },
   mode: {
-    en: 'Group by',
-    ru: 'Группировать по',
+    en: 'Match by',
+    ru: 'Сопоставить по',
   },
   modeField: {
     en: 'Field value',
@@ -45,16 +45,16 @@ const TEXTS = {
     ru: 'Введите JQL запрос (например, status = "Open")',
   },
   fieldTooltip: {
-    en: 'Select a field to filter by',
-    ru: 'Выберите поле для фильтрации',
+    en: 'Select a field to match by',
+    ru: 'Выберите поле для сопоставления',
   },
   valueTooltip: {
     en: 'Enter the value to match',
     ru: 'Введите значение для сопоставления',
   },
   jqlTooltip: {
-    en: 'Enter JQL query to filter issues',
-    ru: 'Введите JQL запрос для фильтрации задач',
+    en: 'Enter JQL query to match issues',
+    ru: 'Введите JQL запрос для сопоставления задач',
   },
 } as const;
 
