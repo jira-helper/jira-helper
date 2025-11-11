@@ -74,7 +74,7 @@ describe('IssueLinkItem', () => {
 
       expect(screen.getByDisplayValue('Test Link')).toBeInTheDocument();
       expect(screen.getByText('Link Type')).toBeInTheDocument();
-      expect(screen.getByText('Fixed Color')).toBeInTheDocument();
+      expect(screen.getAllByText('Unique colors for tasks').length).toBeGreaterThan(0);
       expect(screen.getByText('Issue Selector')).toBeInTheDocument();
       expect(screen.getByText('Remove')).toBeInTheDocument();
     });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Row, Col, Checkbox } from 'antd';
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
@@ -137,6 +137,35 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
 
   const { fields } = useGetFields();
 
+  // Calculate the width of the Select based on the longest option text
+  const selectWidth = useMemo(() => {
+    if (availableLinkTypes.length === 0) {
+      return 200; // Default width
+    }
+
+    // Create a temporary canvas element to measure text width
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return 200;
+    }
+
+    // Use a similar font to Ant Design Select
+    context.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
+    // Find the maximum width among all option texts
+    let maxWidth = 0;
+    availableLinkTypes.forEach(linkType => {
+      const textWidth = context.measureText(linkType.name).width;
+      if (textWidth > maxWidth) {
+        maxWidth = textWidth;
+      }
+    });
+
+    // Add padding for dropdown arrow and some extra space (approximately 40px)
+    return Math.max(maxWidth + 40, 200);
+  }, [availableLinkTypes]);
+
   return (
     <Card
       size="small"
@@ -185,7 +214,7 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
             </label>
             <Select
               id={`issue-link-${index}-type`}
-              style={{ width: '100%' }}
+              style={{ width: `${selectWidth}px` }}
               value={`${link.linkType.id}|${link.linkType.direction}`}
               onChange={handleLinkTypeChange}
               placeholder="Select link type"
