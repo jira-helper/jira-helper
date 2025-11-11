@@ -56,10 +56,8 @@ export const IssueLinkSettings: React.FC = () => {
     const newLink: IssueLink = {
       name: `Link ${linkNumber}`,
       linkType: { id: availableLinkTypes[0]?.id || '', direction: availableLinkTypes[0]?.direction || 'inward' },
-      issueSelector: {
-        mode: 'jql',
-        jql: '',
-      },
+      trackAllTasks: true, // Default: analyze links for all tasks
+      trackAllLinkedTasks: true, // Default: show all linked tasks
     };
     actions.addIssueLink(newLink);
   };

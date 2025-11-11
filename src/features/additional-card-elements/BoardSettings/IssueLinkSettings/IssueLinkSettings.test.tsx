@@ -120,7 +120,8 @@ describe('IssueLinkSettings', () => {
       expect(mockStore.actions.addIssueLink).toHaveBeenCalledWith({
         name: 'Link 1',
         linkType: { id: 'relates', direction: 'outward' },
-        issueSelector: { mode: 'jql', jql: '' },
+        trackAllTasks: true,
+        trackAllLinkedTasks: true,
       });
     });
 

@@ -3,15 +3,20 @@ export type IssueLinkTypeSelection = {
   direction: 'inward' | 'outward';
 };
 
+export type IssueSelector = {
+  mode: 'field' | 'jql';
+  fieldId?: string;
+  value?: string;
+  jql?: string;
+};
+
 export type IssueLink = {
   name: string; // Human-readable name
   linkType: IssueLinkTypeSelection;
-  issueSelector?: {
-    mode: 'field' | 'jql';
-    fieldId?: string;
-    value?: string;
-    jql?: string;
-  };
+  trackAllTasks?: boolean; // If true, analyze links for all tasks, otherwise use issueSelector
+  issueSelector?: IssueSelector; // Filter for tasks to analyze links for
+  trackAllLinkedTasks?: boolean; // If true, show all linked tasks, otherwise use linkedIssueSelector
+  linkedIssueSelector?: IssueSelector; // Filter for linked tasks to display
   color?: string;
   multilineSummary?: boolean;
 };

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Row, Col, Checkbox } from 'antd';
+import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Checkbox } from 'antd';
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { IssueSelectorByAttributes } from 'src/shared/components/IssueSelectorByAttributes';
@@ -15,9 +15,29 @@ export const TEXTS = {
     en: 'Link Type',
     ru: 'Тип связи',
   },
-  issueSelector: {
-    en: 'Issue Selector',
-    ru: 'Селектор задач',
+  trackAllTasks: {
+    en: 'Track all tasks',
+    ru: 'Учитывать все задачи',
+  },
+  trackAllTasksTooltip: {
+    en: 'If enabled, links will be analyzed for all tasks. If disabled, you can configure which tasks to analyze links for.',
+    ru: 'Если включено, связи будут анализироваться для всех задач. Если выключено, можно настроить, для каких задач анализировать связи.',
+  },
+  tasksToAnalyze: {
+    en: 'Tasks to analyze links for',
+    ru: 'Задачи, для которых анализируем связи',
+  },
+  trackAllLinkedTasks: {
+    en: 'Track all linked tasks',
+    ru: 'Учитывать все связанные задачи',
+  },
+  trackAllLinkedTasksTooltip: {
+    en: 'If enabled, all linked tasks will be displayed. If disabled, you can configure which linked tasks to display.',
+    ru: 'Если включено, все связанные задачи будут отображаться. Если выключено, можно настроить, какие связанные задачи отображать.',
+  },
+  linkedTasksToDisplay: {
+    en: 'Linked tasks to display',
+    ru: 'Связанные задачи для отображения',
   },
   uniqueColors: {
     en: 'Unique colors for tasks',
@@ -98,10 +118,39 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
     }
   };
 
+  const handleTrackAllTasksToggle = (checked: boolean) => {
+    onUpdate(index, {
+      ...link,
+      trackAllTasks: checked,
+      // Clear issueSelector if trackAllTasks is enabled
+      issueSelector: checked ? undefined : link.issueSelector,
+    });
+  };
+
   const handleIssueSelectorChange = (issueSelector: any) => {
     onUpdate(index, {
       ...link,
       issueSelector,
+      // Ensure trackAllTasks is false when selector is configured
+      trackAllTasks: false,
+    });
+  };
+
+  const handleTrackAllLinkedTasksToggle = (checked: boolean) => {
+    onUpdate(index, {
+      ...link,
+      trackAllLinkedTasks: checked,
+      // Clear linkedIssueSelector if trackAllLinkedTasks is enabled
+      linkedIssueSelector: checked ? undefined : link.linkedIssueSelector,
+    });
+  };
+
+  const handleLinkedIssueSelectorChange = (linkedIssueSelector: any) => {
+    onUpdate(index, {
+      ...link,
+      linkedIssueSelector,
+      // Ensure trackAllLinkedTasks is false when selector is configured
+      trackAllLinkedTasks: false,
     });
   };
 
@@ -283,28 +332,79 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
         </span>
       </div>
 
-      {/* Row 2: Issue Selector */}
-      <Row gutter={[16, 16]} align="middle">
-        <Col xs={24}>
-          <div>
-            <label
-              htmlFor={`issue-link-${index}-selector`}
-              style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}
+      {/* Row 2: Tasks to analyze links for */}
+      <div
+        style={{ display: 'flex', gap: '16px', flexDirection: 'row', marginBottom: '16px', alignItems: 'flex-start' }}
+      >
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <Checkbox
+              id={`issue-link-${index}-track-all-tasks`}
+              checked={link.trackAllTasks !== false}
+              onChange={e => handleTrackAllTasksToggle(e.target.checked)}
+              data-testid={`issue-link-${index}-track-all-tasks`}
             >
-              {texts.issueSelector}
-              <Tooltip title={texts.issueSelectorTooltip}>
-                <InfoCircleOutlined style={{ marginLeft: '4px' }} />
-              </Tooltip>
-            </label>
-            <IssueSelectorByAttributes
-              value={link.issueSelector || { mode: 'jql', jql: '' }}
-              onChange={handleIssueSelectorChange}
-              fields={fields || []}
-              testIdPrefix={`issue-link-${index}-selector`}
-            />
+              {texts.trackAllTasks}
+            </Checkbox>
+            <Tooltip title={texts.trackAllTasksTooltip}>
+              <InfoCircleOutlined style={{ color: '#1677ff' }} />
+            </Tooltip>
           </div>
-        </Col>
-      </Row>
+          {link.trackAllTasks === false && (
+            <div>
+              <label
+                htmlFor={`issue-link-${index}-issue-selector`}
+                style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}
+              >
+                {texts.tasksToAnalyze}
+              </label>
+              <IssueSelectorByAttributes
+                value={link.issueSelector || { mode: 'jql', jql: '' }}
+                onChange={handleIssueSelectorChange}
+                fields={fields || []}
+                testIdPrefix={`issue-link-${index}-issue-selector`}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Row 3: Linked tasks to display */}
+      <div
+        style={{ display: 'flex', gap: '16px', flexDirection: 'row', marginBottom: '16px', alignItems: 'flex-start' }}
+      >
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <Checkbox
+              id={`issue-link-${index}-track-all-linked-tasks`}
+              checked={link.trackAllLinkedTasks !== false}
+              onChange={e => handleTrackAllLinkedTasksToggle(e.target.checked)}
+              data-testid={`issue-link-${index}-track-all-linked-tasks`}
+            >
+              {texts.trackAllLinkedTasks}
+            </Checkbox>
+            <Tooltip title={texts.trackAllLinkedTasksTooltip}>
+              <InfoCircleOutlined style={{ color: '#1677ff' }} />
+            </Tooltip>
+          </div>
+          {link.trackAllLinkedTasks === false && (
+            <div>
+              <label
+                htmlFor={`issue-link-${index}-linked-issue-selector`}
+                style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}
+              >
+                {texts.linkedTasksToDisplay}
+              </label>
+              <IssueSelectorByAttributes
+                value={link.linkedIssueSelector || { mode: 'jql', jql: '' }}
+                onChange={handleLinkedIssueSelectorChange}
+                fields={fields || []}
+                testIdPrefix={`issue-link-${index}-linked-issue-selector`}
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 };

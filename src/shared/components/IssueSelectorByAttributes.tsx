@@ -3,7 +3,6 @@ import { Select, Input, Alert, Tooltip, Row, Col } from 'antd';
 import { InfoCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
-import { debounce } from 'src/shared/utils';
 import { JqlParserInfoTooltip } from 'src/shared/jql/JqlParserInfoTooltip';
 import { IssueSelectorByAttributesProps, IssueSelector } from './IssueSelectorByAttributes.types';
 
@@ -68,56 +67,59 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
 }) => {
   const texts = useGetTextsByLocale(TEXTS);
 
-  // Local state for inputs to avoid excessive re-renders
+  // Local state for inputs - updates immediately on user input
   const [fieldValue, setFieldValue] = useState(value.value || '');
   const [jqlValue, setJqlValue] = useState(value.jql || '');
 
-  // Track last edit time to prevent external updates while user is typing
-  const lastEditTimeFieldValue = useRef<number>(0);
-  const lastEditTimeJql = useRef<number>(0);
-  const DEBOUNCE_DELAY = 600; // ms
+  // Track if fields are focused to prevent external updates while user is editing
+  const isFieldValueFocused = useRef(false);
+  const isJqlFocused = useRef(false);
 
-  // Store latest value and onChange in refs to avoid recreating debounced functions
+  // Store latest values and onChange in refs for cleanup on unmount
+  const fieldValueRef = useRef(fieldValue);
+  const jqlValueRef = useRef(jqlValue);
   const valueRef = useRef(value);
   const onChangeRef = useRef(onChange);
 
-  // Update refs when props change
+  // Update refs when values change
+  useEffect(() => {
+    fieldValueRef.current = fieldValue;
+  }, [fieldValue]);
+
+  useEffect(() => {
+    jqlValueRef.current = jqlValue;
+  }, [jqlValue]);
+
   useEffect(() => {
     valueRef.current = value;
     onChangeRef.current = onChange;
   }, [value, onChange]);
 
-  // Create debounced functions once and keep them stable using useMemo
-  const debouncedUpdateFieldValue = React.useMemo(
-    () =>
-      debounce((val: string) => {
-        onChangeRef.current({ ...valueRef.current, value: val });
-      }, DEBOUNCE_DELAY),
-    [] // Empty deps - function is stable, uses refs for current values
-  );
-
-  const debouncedUpdateJql = React.useMemo(
-    () =>
-      debounce((val: string) => {
-        onChangeRef.current({ ...valueRef.current, jql: val });
-      }, DEBOUNCE_DELAY),
-    [] // Empty deps - function is stable, uses refs for current values
-  );
-
-  // Sync local state when value prop changes, but only if user hasn't edited recently
+  // Sync local state when value prop changes, but only if field is not focused
   useEffect(() => {
-    const timeSinceLastEdit = Date.now() - lastEditTimeFieldValue.current;
-    if (timeSinceLastEdit >= DEBOUNCE_DELAY && (value.value || '') !== fieldValue) {
+    if (!isFieldValueFocused.current && (value.value || '') !== fieldValue) {
       setFieldValue(value.value || '');
     }
   }, [value.value, fieldValue]);
 
   useEffect(() => {
-    const timeSinceLastEdit = Date.now() - lastEditTimeJql.current;
-    if (timeSinceLastEdit >= DEBOUNCE_DELAY && (value.jql || '') !== jqlValue) {
+    if (!isJqlFocused.current && (value.jql || '') !== jqlValue) {
       setJqlValue(value.jql || '');
     }
   }, [value.jql, jqlValue]);
+
+  // Save changes on unmount
+  useEffect(() => {
+    return () => {
+      // On unmount, save current local state if it differs from prop
+      if (fieldValueRef.current !== (valueRef.current.value || '')) {
+        onChangeRef.current({ ...valueRef.current, value: fieldValueRef.current });
+      }
+      if (jqlValueRef.current !== (valueRef.current.jql || '')) {
+        onChangeRef.current({ ...valueRef.current, jql: jqlValueRef.current });
+      }
+    };
+  }, []);
 
   // JQL validation
   let jqlError = '';
@@ -144,15 +146,37 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
   };
 
   const handleFieldValueChange = (val: string) => {
-    lastEditTimeFieldValue.current = Date.now();
+    // Update local state immediately
     setFieldValue(val);
-    debouncedUpdateFieldValue(val);
+  };
+
+  const handleFieldValueBlur = () => {
+    isFieldValueFocused.current = false;
+    // Update external state only if local value differs from prop
+    if (fieldValue !== (value.value || '')) {
+      onChange({ ...value, value: fieldValue });
+    }
+  };
+
+  const handleFieldValueFocus = () => {
+    isFieldValueFocused.current = true;
   };
 
   const handleJqlChange = (val: string) => {
-    lastEditTimeJql.current = Date.now();
+    // Update local state immediately
     setJqlValue(val);
-    debouncedUpdateJql(val);
+  };
+
+  const handleJqlBlur = () => {
+    isJqlFocused.current = false;
+    // Update external state only if local value differs from prop
+    if (jqlValue !== (value.jql || '')) {
+      onChange({ ...value, jql: jqlValue });
+    }
+  };
+
+  const handleJqlFocus = () => {
+    isJqlFocused.current = true;
   };
 
   const currentMode = mode || value.mode;
@@ -229,6 +253,8 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
                   id={`${testIdPrefix}-field-value`}
                   value={fieldValue}
                   onChange={e => handleFieldValueChange(e.target.value)}
+                  onFocus={handleFieldValueFocus}
+                  onBlur={handleFieldValueBlur}
                   placeholder={texts.fieldValuePlaceholder}
                   disabled={disabled}
                   data-testid={`${testIdPrefix}-field-value`}
@@ -252,6 +278,8 @@ export const IssueSelectorByAttributes: React.FC<IssueSelectorByAttributesProps>
                 onChange={e => {
                   handleJqlChange(e.target.value);
                 }}
+                onFocus={handleJqlFocus}
+                onBlur={handleJqlBlur}
                 placeholder={texts.jqlPlaceholder}
                 disabled={disabled}
                 style={{

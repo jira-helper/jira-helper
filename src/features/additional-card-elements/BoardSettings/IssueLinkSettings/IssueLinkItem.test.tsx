@@ -9,18 +9,20 @@ vi.mock('src/shared/texts', () => ({
   useGetTextsByLocale: () => ({
     linkName: 'Link Name',
     linkType: 'Link Type',
-    issueSelector: 'Issue Selector',
+    trackAllTasks: 'Track all tasks',
+    trackAllTasksTooltip: 'If enabled, links will be analyzed for all tasks',
+    tasksToAnalyze: 'Tasks to analyze links for',
+    trackAllLinkedTasks: 'Track all linked tasks',
+    trackAllLinkedTasksTooltip: 'If enabled, all linked tasks will be displayed',
+    linkedTasksToDisplay: 'Linked tasks to display',
     uniqueColors: 'Unique colors for tasks',
-    fixedColor: 'Fixed Color',
     multilineSummary: 'Multiline Summary',
     multilineSummaryTooltip: 'If enabled, long summaries will wrap',
     removeLink: 'Remove',
     linkNamePlaceholder: 'Enter link name',
     linkNameTooltip: 'Human-readable name',
     linkTypeTooltip: 'Select the type of link',
-    issueSelectorTooltip: 'Configure which issues to show',
     uniqueColorsTooltip: 'If enabled, each linked issue will have a unique color',
-    fixedColorTooltip: 'Fixed color for the link badge',
   }),
 }));
 
@@ -41,9 +43,15 @@ vi.mock('src/shared/components/IssueSelectorByAttributes', () => ({
 const mockIssueLink: IssueLink = {
   name: 'Test Link',
   linkType: { id: 'relates', direction: 'inward' },
+  trackAllTasks: false, // Set to false so issueSelector is visible
   issueSelector: {
     mode: 'jql',
     jql: 'status = "Open"',
+  },
+  trackAllLinkedTasks: false, // Set to false so linkedIssueSelector is visible
+  linkedIssueSelector: {
+    mode: 'jql',
+    jql: '',
   },
   color: '#ff0000',
 };
@@ -69,13 +77,14 @@ describe('IssueLinkItem', () => {
   });
 
   describe('Rendering', () => {
-    it('renders with all fields in two rows', () => {
+    it('renders with all fields', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
       expect(screen.getByDisplayValue('Test Link')).toBeInTheDocument();
       expect(screen.getByText('Link Type')).toBeInTheDocument();
       expect(screen.getAllByText('Unique colors for tasks').length).toBeGreaterThan(0);
-      expect(screen.getByText('Issue Selector')).toBeInTheDocument();
+      expect(screen.getByText('Track all tasks')).toBeInTheDocument();
+      expect(screen.getByText('Track all linked tasks')).toBeInTheDocument();
       expect(screen.getByText('Remove')).toBeInTheDocument();
     });
 
@@ -86,14 +95,21 @@ describe('IssueLinkItem', () => {
       expect(linkTypeSelect).toBeInTheDocument();
     });
 
-    it('renders issue selector with correct value', () => {
+    it('renders issue selector with correct value when trackAllTasks is false', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
-      const issueSelector = screen.getByTestId('issue-link-0-selector');
+      const issueSelector = screen.getByTestId('issue-link-0-issue-selector');
       expect(issueSelector).toBeInTheDocument();
 
-      const jqlInput = screen.getByTestId('issue-link-0-selector-input');
+      const jqlInput = screen.getByTestId('issue-link-0-issue-selector-input');
       expect(jqlInput).toHaveValue('status = "Open"');
+    });
+
+    it('does not render issue selector when trackAllTasks is true', () => {
+      const linkWithTrackAll = { ...mockIssueLink, trackAllTasks: true };
+      render(<IssueLinkItem {...defaultProps} link={linkWithTrackAll} />);
+
+      expect(screen.queryByTestId('issue-link-0-issue-selector')).not.toBeInTheDocument();
     });
 
     it('renders color picker when fixed color is set (unique colors disabled)', () => {
@@ -141,7 +157,7 @@ describe('IssueLinkItem', () => {
     it('calls onUpdate when issue selector changes', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
-      const jqlInput = screen.getByTestId('issue-link-0-selector-input');
+      const jqlInput = screen.getByTestId('issue-link-0-issue-selector-input');
       fireEvent.change(jqlInput, { target: { value: 'status = "Done"' } });
 
       expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
@@ -150,6 +166,33 @@ describe('IssueLinkItem', () => {
           mode: 'jql',
           jql: 'status = "Done"',
         },
+        trackAllTasks: false, // Should be set to false when selector changes
+      });
+    });
+
+    it('calls onUpdate when trackAllTasks is toggled', () => {
+      render(<IssueLinkItem {...defaultProps} />);
+
+      const trackAllCheckbox = screen.getByTestId('issue-link-0-track-all-tasks');
+      fireEvent.click(trackAllCheckbox);
+
+      expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
+        ...mockIssueLink,
+        trackAllTasks: true,
+        issueSelector: undefined, // Should be cleared when trackAllTasks is enabled
+      });
+    });
+
+    it('calls onUpdate when trackAllLinkedTasks is toggled', () => {
+      render(<IssueLinkItem {...defaultProps} />);
+
+      const trackAllLinkedCheckbox = screen.getByTestId('issue-link-0-track-all-linked-tasks');
+      fireEvent.click(trackAllLinkedCheckbox);
+
+      expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
+        ...mockIssueLink,
+        trackAllLinkedTasks: true,
+        linkedIssueSelector: undefined, // Should be cleared when trackAllLinkedTasks is enabled
       });
     });
 
@@ -197,11 +240,11 @@ describe('IssueLinkItem', () => {
   });
 
   describe('Edge Cases', () => {
-    it('handles link without issue selector', () => {
-      const linkWithoutSelector = { ...mockIssueLink, issueSelector: undefined };
+    it('handles link without issue selector when trackAllTasks is false', () => {
+      const linkWithoutSelector = { ...mockIssueLink, issueSelector: undefined, trackAllTasks: false };
       render(<IssueLinkItem {...defaultProps} link={linkWithoutSelector} />);
 
-      const issueSelector = screen.getByTestId('issue-link-0-selector');
+      const issueSelector = screen.getByTestId('issue-link-0-issue-selector');
       expect(issueSelector).toBeInTheDocument();
     });
 
