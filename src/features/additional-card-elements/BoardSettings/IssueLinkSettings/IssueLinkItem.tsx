@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Checkbox } from 'antd';
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
@@ -97,11 +97,67 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
   // If color is set, use fixed color (checkbox unchecked, show ColorPicker)
   const useUniqueColors = link.color === undefined;
 
+  // Local state for link name - updates immediately on user input
+  const [linkName, setLinkName] = useState(link.name || '');
+
+  // Track if name field is focused to prevent external updates while user is editing
+  const isNameFocused = useRef(false);
+
+  // Store latest values in refs for cleanup on unmount
+  const linkNameRef = useRef(linkName);
+  const linkRef = useRef(link);
+  const onUpdateRef = useRef(onUpdate);
+
+  // Update refs when values change
+  useEffect(() => {
+    linkRef.current = link;
+    onUpdateRef.current = onUpdate;
+  }, [link, onUpdate]);
+
+  // Sync local state when link.name prop changes, but only if field is not focused
+  useEffect(() => {
+    if (!isNameFocused.current && (link.name || '') !== linkName) {
+      setLinkName(link.name || '');
+      linkNameRef.current = link.name || '';
+    }
+  }, [link.name, linkName]);
+
+  // Save changes on unmount
+  useEffect(() => {
+    return () => {
+      // On unmount, save current local state if it differs from prop
+      if (linkNameRef.current !== (linkRef.current.name || '')) {
+        onUpdateRef.current(index, {
+          ...linkRef.current,
+          name: linkNameRef.current,
+        });
+      }
+    };
+  }, [index]);
+
   const handleNameChange = (name: string) => {
-    onUpdate(index, {
-      ...link,
-      name,
-    });
+    // Update local state immediately
+    setLinkName(name);
+    // Update ref synchronously
+    linkNameRef.current = name;
+  };
+
+  const handleNameBlur = () => {
+    isNameFocused.current = false;
+    // Update external state only if local value differs from prop
+    // Use ref to get the latest value (setState is async)
+    const currentName = linkNameRef.current;
+    // Use link prop directly (it doesn't change during name editing)
+    if (currentName !== (link.name || '')) {
+      onUpdate(index, {
+        ...link,
+        name: currentName,
+      });
+    }
+  };
+
+  const handleNameFocus = () => {
+    isNameFocused.current = true;
   };
 
   const handleLinkTypeChange = (linkTypeKey: string) => {
@@ -222,8 +278,10 @@ export const IssueLinkItem: React.FC<IssueLinkItemProps> = ({
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Input
-            value={link.name}
+            value={linkName}
             onChange={e => handleNameChange(e.target.value)}
+            onFocus={handleNameFocus}
+            onBlur={handleNameBlur}
             placeholder={texts.linkNamePlaceholder}
             data-testid={`issue-link-${index}-name`}
             style={{ width: '120px' }}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { IssueLinkItem } from './IssueLinkItem';
 import { IssueLink } from '../../types';
@@ -134,11 +134,22 @@ describe('IssueLinkItem', () => {
   });
 
   describe('Interactions', () => {
-    it('calls onUpdate when link name changes', () => {
+    it('calls onUpdate when link name changes and loses focus', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
       const nameInput = screen.getByTestId('issue-link-0-name');
-      fireEvent.change(nameInput, { target: { value: 'Updated Link' } });
+
+      act(() => {
+        fireEvent.change(nameInput, { target: { value: 'Updated Link' } });
+      });
+
+      // onChange should not be called yet
+      expect(defaultProps.onUpdate).not.toHaveBeenCalled();
+
+      // onBlur should trigger onChange
+      act(() => {
+        fireEvent.blur(nameInput);
+      });
 
       expect(defaultProps.onUpdate).toHaveBeenCalledWith(0, {
         ...mockIssueLink,
