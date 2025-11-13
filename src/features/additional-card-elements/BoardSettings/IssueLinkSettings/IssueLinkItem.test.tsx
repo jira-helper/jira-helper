@@ -1,6 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
+import { globalContainer } from 'dioma';
+import { Ok } from 'ts-results';
+import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { registerLogger } from 'src/shared/Logger';
+import { useJiraFieldsStore } from 'src/shared/jira/fields/jiraFieldsStore';
 import { IssueLinkItem } from './IssueLinkItem';
 import { IssueLink } from '../../types';
 
@@ -72,8 +77,37 @@ const defaultProps = {
 };
 
 describe('IssueLinkItem', () => {
+  beforeAll(() => {
+    globalContainer.reset();
+    registerLogger(globalContainer);
+    // Mock JiraService to prevent DI errors
+    globalContainer.register({
+      token: JiraServiceToken,
+      // @ts-expect-error minimal mock
+      value: {
+        getProjectFields: vi.fn(() => Promise.resolve(Ok([]))),
+      },
+    });
+    // Initialize store with empty fields to prevent loading
+    useJiraFieldsStore.setState({
+      fields: [],
+      isLoading: false,
+      error: null,
+    });
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset store state before each test
+    useJiraFieldsStore.setState({
+      fields: [],
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  afterAll(() => {
+    globalContainer.reset();
   });
 
   describe('Rendering', () => {
@@ -137,8 +171,14 @@ describe('IssueLinkItem', () => {
     it('calls onUpdate when link name changes and loses focus', () => {
       render(<IssueLinkItem {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('issue-link-0-name');
+      const nameInput = screen.getByTestId('issue-link-0-name') as HTMLInputElement;
 
+      // Focus the input first
+      act(() => {
+        fireEvent.focus(nameInput);
+      });
+
+      // Change the input value
       act(() => {
         fireEvent.change(nameInput, { target: { value: 'Updated Link' } });
       });
@@ -146,7 +186,7 @@ describe('IssueLinkItem', () => {
       // onChange should not be called yet
       expect(defaultProps.onUpdate).not.toHaveBeenCalled();
 
-      // onBlur should trigger onChange
+      // onBlur should trigger onUpdate
       act(() => {
         fireEvent.blur(nameInput);
       });
