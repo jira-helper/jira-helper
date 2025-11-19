@@ -156,15 +156,19 @@ const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraFiel
 export function getFieldValueForJqlStandalone(issue: JiraIssueMapped, fields: JiraField[]) {
   return (fieldName: string) => {
     const lowerFieldName = fieldName.toLowerCase();
-    const field = fields.find(
+
+    // jira may have multiple fields with the same name, so we need to filter them
+    // for example: system field Project (type project) and custom field Project (type option)
+    const filteredFields = fields.filter(
       f =>
         f.id.toLowerCase() === lowerFieldName ||
         f.name.toLowerCase() === lowerFieldName ||
         (f.clauseNames && f.clauseNames.some(cn => cn.toLowerCase() === lowerFieldName))
     );
-    if (!field) return [];
-    // Use getFieldValue to get all possible values, but JQL expects a single value, so return the array
-    return getFieldValue(issue, { fieldId: field.id } as any, fields);
+
+    if (!filteredFields.length) return [];
+
+    return filteredFields.flatMap(f => getFieldValue(issue, { fieldId: f.id } as any, fields));
   };
 }
 

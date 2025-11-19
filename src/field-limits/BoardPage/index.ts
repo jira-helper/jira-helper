@@ -289,7 +289,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[BoardData
         const fieldValue = stat.fieldValue.replace(/^∑/, '');
 
         let typeCalc: number = TYPE_CALC.BY_CARD;
-        window.console.info('countAmountPersonalIssuesInColumn:', stat.fieldValue);
+
         if (stat.fieldValue[0] === '∑') {
           typeCalc = TYPE_CALC.BY_SUM_VALUE;
         }
