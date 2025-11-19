@@ -4,7 +4,6 @@ import { PageModification } from 'src/shared/PageModification';
 import { registerSettings } from 'src/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
 import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions/loadAdditionalCardElementsBoardProperty';
-import { autosyncStoreWithBoardProperty } from './BoardSettings/actions/autosyncStoreWithBoardProperty';
 
 export class AdditionalCardElementsBoardBacklogPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -20,15 +19,12 @@ export class AdditionalCardElementsBoardBacklogPage extends PageModification<voi
   }
 
   async apply(): Promise<void> {
-    const turnOffAutoSync = await autosyncStoreWithBoardProperty();
-    this.sideEffects.push(turnOffAutoSync);
-
-    const { AdditionalCardElementsContainer } = await import(
-      './AdditionalCardElementsContainer/AdditionalCardElementsContainer'
+    const { AdditionalCardElementsBacklogContainer } = await import(
+      './AdditionalCardElementsBacklogContainer/AdditionalCardElementsBacklogContainer'
     );
     const unlisten = BoardBacklogPagePageObject.listenCards(cards => {
       cards.forEach(card => {
-        card.attach(AdditionalCardElementsContainer, 'additional-card-elements');
+        card.attach(AdditionalCardElementsBacklogContainer, 'additional-card-elements-backlog');
       });
     });
     this.sideEffects.push(unlisten);

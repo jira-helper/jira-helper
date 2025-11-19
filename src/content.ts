@@ -34,6 +34,7 @@ import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
 import { extensionApiService } from './shared/ExtensionApiService';
 import { AdditionalCardElementsBoardPage } from './features/additional-card-elements/BoardPage';
+import { AdditionalCardElementsBoardBacklogPage } from './features/additional-card-elements/BoardBacklogPage';
 
 setAutoFreeze(false);
 
@@ -79,7 +80,7 @@ async function start() {
       DiagnosticBoardPage,
       AdditionalCardElementsBoardPage,
     ],
-    [Routes.BOARD_BACKLOG]: [],
+    [Routes.BOARD_BACKLOG]: [AdditionalCardElementsBoardBacklogPage],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,
       WIPLimitsSettingsPage,
