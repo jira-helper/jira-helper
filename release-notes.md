@@ -1,4 +1,6 @@
-# Release Notes - Version 2.28.0
+# Release Notes
+
+## Version 2.28.0
 
 ## 🇷🇺 RU
 
@@ -60,3 +62,65 @@ New feature that allows you to visualize relationships between issues directly o
 - Show only "Project" type issues linked to the current issue
 - Status filtering: show only incomplete linked issues
 - Combined filters: e.g., "Project" type issues in incomplete statuses or "Objective" type issues with specific labels
+
+---
+
+## Version 2.28.1
+
+## 🇷🇺 RU
+
+### ✨ Новый функционал: Отображение связей в беклоге
+
+#### Что нового:
+
+- ✨ **Отображение связей в беклоге**: Добавлена возможность показывать связи между задачами не только на доске, но и в беклоге
+- 🎨 **Горизонтальное отображение**: В беклоге связи отображаются горизонтально (в ряд) для экономии места
+- ⚙️ **Отдельная настройка**: Новый чекбокс "Показывать связи в беклоге" в настройках колонок позволяет независимо управлять отображением в беклоге
+- 📱 **Улучшенный UX**: Связи в беклоге не зависят от настроек колонок - они показываются для всех задач, если функция включена
+
+#### Как использовать:
+
+1. Откройте настройки доски (Board Settings)
+2. Найдите раздел "Additional Card Elements"
+3. Убедитесь, что функция отображения связей включена
+4. В разделе "Настройки колонок" включите чекбокс "Показывать связи в беклоге"
+5. Связи будут отображаться на карточках в беклоге горизонтально
+
+#### Примеры использования:
+
+- Отображение связей в беклоге для быстрого просмотра зависимостей без перехода на доску
+
+### 🐛 Исправления
+
+- Исправлена работа виджета отображения связей при различных настройках фильтров
+- Исправлена проверка соответствия задачи JQL-запросу, когда есть несколько полей с одинаковыми названиями
+
+---
+
+## 🇬🇧 English
+
+### ✨ New Feature: Backlog Link Display
+
+#### What's New:
+
+- ✨ **Backlog Link Display**: Added ability to show issue links not only on the board but also in the backlog
+- 🎨 **Horizontal Layout**: Links in the backlog are displayed horizontally (in a row) to save space
+- ⚙️ **Separate Setting**: New "Show links in backlog" checkbox in column settings allows independent control of backlog display
+- 📱 **Improved UX**: Links in the backlog are not affected by column settings - they are shown for all issues if the feature is enabled
+
+#### How to Use:
+
+1. Open Board Settings
+2. Find the "Additional Card Elements" section
+3. Make sure the link display feature is enabled
+4. In the "Column Settings" section, enable the "Show links in backlog" checkbox
+5. Links will be displayed on cards in the backlog horizontally
+
+#### Use Cases:
+
+- Display links in the backlog for quick dependency review without switching to the board
+
+### 🐛 Bug Fixes
+
+- Fixed issue link widget behavior with various filter settings
+- Fixed JQL task matching/checking when multiple fields have the same name
