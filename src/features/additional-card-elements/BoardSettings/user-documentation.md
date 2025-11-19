@@ -19,7 +19,14 @@
 
 1. В разделе **"Выбор колонок"** выберите колонки доски, в которых нужно показывать связи
 2. Связи будут отображаться только в выбранных колонках
-3. Если колонки не выбраны, связи не будут показываться
+3. Если колонки не выбраны, связи не будут показываться на доске
+
+#### Шаг 2.1: Показ в беклоге
+
+1. В разделе **"Настройки колонок"** найдите чекбокс **"Показывать связи в беклоге"**
+2. Установите чекбокс, если хотите видеть связи на карточках в беклоге
+3. Связи в беклоге отображаются горизонтально (в ряд)
+4. В беклоге не учитываются настройки колонок - связи показываются для всех задач, если функция включена
 
 #### Шаг 3: Настройка конфигураций связей (Issue Links)
 
@@ -82,10 +89,19 @@
 
 #### Где отображаются связи
 
+**На доске**:
 - Связи отображаются под заголовком карточки
 - Отображаются только в выбранных колонках
 - Отображаются только если функция включена
 - Отображаются только если задача подходит под условия из конфигурации
+- Бейджи располагаются вертикально (друг под другом)
+
+**В беклоге**:
+- Связи отображаются в конце карточки
+- Отображаются для всех задач (настройки колонок не учитываются)
+- Отображаются только если функция включена и включен чекбокс "Показывать связи в беклоге"
+- Отображаются только если задача подходит под условия из конфигурации
+- Бейджи располагаются горизонтально (в ряд, с переносом при необходимости)
 
 #### Как выглядят связи
 
@@ -172,8 +188,15 @@ The "Display Issue Links" feature allows you to visualize relationships between 
 #### Step 2: Selecting Columns
 
 1. In the **"Column Selection"** section, select the board columns where links should be displayed
-2. Links will only be displayed in selected columns
-3. If no columns are selected, links will not be shown
+2. Links will only be displayed in selected columns on the board
+3. If no columns are selected, links will not be shown on the board
+
+#### Step 2.1: Show in Backlog
+
+1. In the **"Column Settings"** section, find the **"Show links in backlog"** checkbox
+2. Check the box if you want to see links on cards in the backlog
+3. Links in the backlog are displayed horizontally (in a row)
+4. Column settings are not applied in the backlog - links are shown for all issues if the feature is enabled
 
 #### Step 3: Configuring Issue Link Configurations
 
@@ -236,10 +259,19 @@ The "Display Issue Links" feature allows you to visualize relationships between 
 
 #### Where Links Are Displayed
 
+**On the Board**:
 - Links are displayed under the card title
 - Only shown in selected columns
 - Only shown if the feature is enabled
 - Only shown if the issue matches the configuration conditions
+- Badges are arranged vertically (one below another)
+
+**In the Backlog**:
+- Links are displayed at the end of the card
+- Shown for all issues (column settings are not applied)
+- Only shown if the feature is enabled and "Show links in backlog" checkbox is checked
+- Only shown if the issue matches the configuration conditions
+- Badges are arranged horizontally (in a row, wrapping when needed)
 
 #### How Links Look
 
