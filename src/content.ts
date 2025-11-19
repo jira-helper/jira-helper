@@ -79,6 +79,7 @@ async function start() {
       DiagnosticBoardPage,
       AdditionalCardElementsBoardPage,
     ],
+    [Routes.BOARD_BACKLOG]: [],
     [Routes.SETTINGS]: [
       SwimlaneSettingsPopup,
       WIPLimitsSettingsPage,

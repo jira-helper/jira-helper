@@ -4,6 +4,7 @@ import { extensionApiService } from './shared/ExtensionApiService';
 
 export const Routes = {
   BOARD: 'BOARD',
+  BOARD_BACKLOG: 'BOARD_BACKLOG',
   SETTINGS: 'SETTINGS',
   SEARCH: 'SEARCH',
   REPORTS: 'REPORTS',
@@ -60,6 +61,7 @@ export const getCurrentRoute = (): Route | null => {
   if (pathname.includes('RapidBoard.jspa')) {
     if (params.get('config')) return Routes.SETTINGS;
     if (params.get('view') === 'reporting') return Routes.REPORTS;
+    if (params.get('view') === 'planning.nodetail') return Routes.BOARD_BACKLOG;
 
     return Routes.BOARD;
   }

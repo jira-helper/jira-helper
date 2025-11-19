@@ -2,7 +2,7 @@ import mapObj from '@tinkoff/utils/object/map';
 import isEmpty from '@tinkoff/utils/is/empty';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES, COLORS } from '../../shared/constants';
-import { limitsKey, normalize } from '../shared';
+import { normalize } from '../shared';
 import { fieldLimitBlockTemplate, fieldLimitsTemplate, fieldLimitTitleTemplate } from './htmlTemplates';
 import { settingsJiraDOM as DOM } from '../../swimlane/constants';
 
