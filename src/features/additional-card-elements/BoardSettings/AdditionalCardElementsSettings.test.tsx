@@ -8,12 +8,14 @@ const mockStore = {
   data: {
     enabled: false,
     columnsToTrack: [],
+    showInBacklog: false,
     issueLinks: [],
   },
   actions: {
     setEnabled: vi.fn(),
     setData: vi.fn(),
     setColumns: vi.fn(),
+    setShowInBacklog: vi.fn(),
     setIssueLinks: vi.fn(),
     addIssueLink: vi.fn(),
     updateIssueLink: vi.fn(),
@@ -35,15 +37,18 @@ vi.mock('src/shared/texts', () => ({
     columnsTitle: 'Column Settings',
     columnsDescription: 'Select columns where additional card elements should be displayed',
     issueLinksTitle: 'Issue Link Settings',
+    showInBacklog: 'Show links in backlog',
+    showInBacklogTooltip: 'If enabled, issue links will be displayed on cards in the backlog view',
   }),
 }));
 
 // Mock the ColumnSelectorContainer
 vi.mock('src/shared/components', () => ({
-  ColumnSelectorContainer: ({ title, description, testIdPrefix }: any) => (
+  ColumnSelectorContainer: ({ title, description, testIdPrefix, extraContent }: any) => (
     <div data-testid={`${testIdPrefix}-column-selector`}>
       <h3>{title}</h3>
       <p>{description}</p>
+      {extraContent && <div>{extraContent}</div>}
     </div>
   ),
 }));
@@ -107,6 +112,7 @@ describe('AdditionalCardElementsSettings', () => {
       expect(mockStore.actions.setData).toHaveBeenCalledWith({
         enabled: false,
         columnsToTrack: [],
+        showInBacklog: false,
         issueLinks: [],
       });
     });
@@ -126,7 +132,51 @@ describe('AdditionalCardElementsSettings', () => {
       render(<AdditionalCardElementsSettings />);
 
       expect(screen.getByTestId('additional-card-elements-column-selector')).toBeInTheDocument();
+      expect(screen.getByTestId('show-in-backlog-checkbox')).toBeInTheDocument();
       expect(screen.getByTestId('issue-link-settings')).toBeInTheDocument();
+    });
+  });
+
+  describe('Show in Backlog', () => {
+    it('renders show in backlog checkbox when enabled', () => {
+      mockStore.data.enabled = true;
+      mockStore.data.showInBacklog = false;
+
+      render(<AdditionalCardElementsSettings />);
+
+      const checkbox = screen.getByTestId('show-in-backlog-checkbox');
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it('toggles showInBacklog when checkbox is clicked', () => {
+      mockStore.data.enabled = true;
+      mockStore.data.showInBacklog = false;
+
+      render(<AdditionalCardElementsSettings />);
+
+      const checkbox = screen.getByTestId('show-in-backlog-checkbox');
+      fireEvent.click(checkbox);
+
+      expect(mockStore.actions.setShowInBacklog).toHaveBeenCalledWith(true);
+    });
+
+    it('shows checked state when showInBacklog is true', () => {
+      mockStore.data.enabled = true;
+      mockStore.data.showInBacklog = true;
+
+      render(<AdditionalCardElementsSettings />);
+
+      const checkbox = screen.getByTestId('show-in-backlog-checkbox');
+      expect(checkbox).toBeChecked();
+    });
+
+    it('does not show show in backlog checkbox when feature is disabled', () => {
+      mockStore.data.enabled = false;
+
+      render(<AdditionalCardElementsSettings />);
+
+      expect(screen.queryByTestId('show-in-backlog-checkbox')).not.toBeInTheDocument();
     });
   });
 

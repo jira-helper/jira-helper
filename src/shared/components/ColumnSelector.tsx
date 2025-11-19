@@ -87,6 +87,8 @@ export interface ColumnSelectorProps {
   testIdPrefix?: string;
   /** Whether to show warning tooltip */
   showWarning?: boolean;
+  /** Additional content to render inside the card after columns list */
+  extraContent?: React.ReactNode;
 }
 
 export const ColumnSelectorPure = ({
@@ -97,6 +99,7 @@ export const ColumnSelectorPure = ({
   description,
   testIdPrefix = 'column-selector',
   showWarning = true,
+  extraContent,
 }: ColumnSelectorProps) => {
   const texts = useGetTextsByLocale(TEXTS);
 
@@ -113,6 +116,7 @@ export const ColumnSelectorPure = ({
         )}
       </p>
       <ColumnsList columns={columns} onUpdate={onUpdate} disabled={disabled} testIdPrefix={testIdPrefix} />
+      {extraContent && <div style={{ marginTop: '16px' }}>{extraContent}</div>}
     </Card>
   );
 };
@@ -132,6 +136,8 @@ export interface ColumnSelectorContainerProps {
   testIdPrefix?: string;
   /** Whether to show warning tooltip */
   showWarning?: boolean;
+  /** Additional content to render inside the card after columns list */
+  extraContent?: React.ReactNode;
 }
 
 export const ColumnSelectorContainer = ({
@@ -142,6 +148,7 @@ export const ColumnSelectorContainer = ({
   description,
   testIdPrefix = 'column-selector',
   showWarning = true,
+  extraContent,
 }: ColumnSelectorContainerProps) => {
   const boardPagePageObject = useDi().inject(boardPagePageObjectToken) as typeof BoardPagePageObject;
   const [columnsFromBoard, setColumnsFromBoard] = useState<string[]>(boardPagePageObject.getColumns());
@@ -166,6 +173,7 @@ export const ColumnSelectorContainer = ({
       }, 1000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [columnsFromBoard.length, boardPagePageObject]);
 
   const isLoading = loading || columnsFromBoard.length === 0;
@@ -179,6 +187,7 @@ export const ColumnSelectorContainer = ({
       description={description}
       testIdPrefix={testIdPrefix}
       showWarning={showWarning}
+      extraContent={extraContent}
     />
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Checkbox, Divider } from 'antd';
+import { Button, Checkbox, Divider, Tooltip } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { ColumnSelectorContainer } from 'src/shared/components';
 import { IssueLinkSettings } from './IssueLinkSettings';
@@ -30,6 +31,14 @@ const TEXTS = {
     en: 'Display issue links on cards',
     ru: 'Отображение связей задач на карточках',
   },
+  showInBacklog: {
+    en: 'Show links in backlog',
+    ru: 'Показывать связи в беклоге',
+  },
+  showInBacklogTooltip: {
+    en: 'If enabled, issue links will be displayed on cards in the backlog view',
+    ru: 'Если включено, связи задач будут отображаться на карточках в беклоге',
+  },
 } as const;
 
 export const AdditionalCardElementsSettings: React.FC = () => {
@@ -44,6 +53,7 @@ export const AdditionalCardElementsSettings: React.FC = () => {
     actions.setData({
       enabled: false,
       columnsToTrack: [],
+      showInBacklog: false,
       issueLinks: [],
     });
   };
@@ -85,6 +95,18 @@ export const AdditionalCardElementsSettings: React.FC = () => {
               description={texts.columnsDescription}
               testIdPrefix="additional-card-elements"
               showWarning
+              extraContent={
+                <Checkbox
+                  checked={data.showInBacklog}
+                  onChange={() => actions.setShowInBacklog(!data.showInBacklog)}
+                  data-testid="show-in-backlog-checkbox"
+                >
+                  {texts.showInBacklog}
+                  <Tooltip title={texts.showInBacklogTooltip}>
+                    <InfoCircleOutlined style={{ marginLeft: '4px', color: '#1677ff' }} />
+                  </Tooltip>
+                </Checkbox>
+              }
             />
           </div>
 
