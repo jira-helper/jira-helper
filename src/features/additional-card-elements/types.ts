@@ -24,5 +24,6 @@ export type IssueLink = {
 export type AdditionalCardElementsBoardProperty = {
   enabled?: boolean;
   columnsToTrack?: string[];
+  showInBacklog?: boolean;
   issueLinks?: IssueLink[];
 };

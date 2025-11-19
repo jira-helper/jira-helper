@@ -6,6 +6,7 @@ import { AdditionalCardElementsBoardProperty, IssueLink } from '../types';
 const initialData: Required<AdditionalCardElementsBoardProperty> = {
   enabled: false,
   columnsToTrack: [],
+  showInBacklog: false,
   issueLinks: [],
 };
 
@@ -30,6 +31,13 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
       set(
         produce((state: State) => {
           state.data.columnsToTrack = columns.filter(c => c.enabled).map(c => c.name);
+        })
+      ),
+
+    setShowInBacklog: (showInBacklog: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.showInBacklog = showInBacklog;
         })
       ),
 
@@ -96,6 +104,13 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
           state.data.columnsToTrack = columns.filter(c => c.enabled).map(c => c.name);
+        })
+      );
+    },
+    setShowInBacklog: (showInBacklog: boolean) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.showInBacklog = showInBacklog;
         })
       );
     },

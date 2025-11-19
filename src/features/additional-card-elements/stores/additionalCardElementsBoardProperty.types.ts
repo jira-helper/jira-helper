@@ -8,6 +8,7 @@ export type State = {
     setState: (state: 'initial' | 'loading' | 'loaded') => void;
     setEnabled: (enabled: boolean) => void;
     setColumns: (columns: { name: string; enabled: boolean }[]) => void;
+    setShowInBacklog: (showInBacklog: boolean) => void;
     setIssueLinks: (issueLinks: IssueLink[]) => void;
     addIssueLink: (issueLink: IssueLink) => void;
     updateIssueLink: (index: number, issueLink: IssueLink) => void;
