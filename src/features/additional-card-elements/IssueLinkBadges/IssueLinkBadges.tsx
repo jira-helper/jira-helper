@@ -14,6 +14,7 @@ import { IssueSelector } from '../types';
 
 export interface IssueLinkBadgesProps {
   issueKey: string;
+  horizontal?: boolean;
 }
 
 interface LinkDisplay {
@@ -104,7 +105,7 @@ function matchesSelector(
   return true; // If selector is not properly configured, consider it a match
 }
 
-export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) => {
+export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey, horizontal = false }) => {
   const { settings } = useGetSettings();
   const { fields } = useGetFields();
   const issue = useJiraIssuesStore(
@@ -232,7 +233,8 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey }) =>
         maxWidth: '100%',
         display: 'flex',
         gap: '4px',
-        flexDirection: 'column',
+        flexDirection: horizontal ? 'row' : 'column',
+        flexWrap: horizontal ? 'wrap' : 'nowrap',
       }}
       data-testid={`issue-link-badges-${issueKey}`}
     >
