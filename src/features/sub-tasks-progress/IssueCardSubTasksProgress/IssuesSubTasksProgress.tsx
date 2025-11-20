@@ -82,22 +82,6 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   const { settings } = useGetSettings();
   const { issueId } = props;
   const { customGroups } = settings;
-  const container = useDi();
-  const boardPage = container.inject(boardPagePageObjectToken);
-  const issueColumn = boardPage.getColumnOfIssue(issueId);
-
-  const shouldTrackIssue = settings?.columnsToTrack?.includes(issueColumn) && settings?.enabled;
-
-  useEffect(() => {
-    if (!shouldTrackIssue) {
-      return;
-    }
-
-    const abortController = new AbortController();
-    loadSubtasksForIssue(issueId, abortController.signal);
-
-    return () => abortController.abort();
-  }, [shouldTrackIssue, issueId]);
 
   const subtasksProgressByGroup = useSubtasksProgress(issueId);
   const customGroupsProgress = useSubtasksProgressByCustomGroup(issueId);
@@ -189,11 +173,38 @@ const IssuesSubTasksProgress = (props: { issueId: string }) => {
   );
 };
 
+const IssueSubTasksProgressWrapper = (props: { issueId: string }) => {
+  const { settings } = useGetSettings();
+  const { issueId } = props;
+  const container = useDi();
+  const boardPage = container.inject(boardPagePageObjectToken);
+  const issueColumn = boardPage.getColumnOfIssue(issueId);
+
+  const shouldTrackIssue = settings?.columnsToTrack?.includes(issueColumn) && settings?.enabled;
+
+  useEffect(() => {
+    if (!shouldTrackIssue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+    loadSubtasksForIssue(issueId, abortController.signal);
+
+    return () => abortController.abort();
+  }, [shouldTrackIssue, issueId]);
+
+  if (!shouldTrackIssue) {
+    return null;
+  }
+
+  return <IssuesSubTasksProgress {...props} />;
+};
+
 export const IssuesSubTasksProgressContainer = (props: { issueId: string }) => {
   const container = globalContainer;
   return (
     <WithDi container={container}>
-      <IssuesSubTasksProgress {...props} />
+      <IssueSubTasksProgressWrapper {...props} />
     </WithDi>
   );
 };
