@@ -124,3 +124,23 @@ New feature that allows you to visualize relationships between issues directly o
 
 - Fixed issue link widget behavior with various filter settings
 - Fixed JQL task matching/checking when multiple fields have the same name
+
+---
+
+## Version 2.28.2
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+- Исправлено отображение ссылок на задачи в беклоге при открытом сайдбаре с информацией о задаче из беклога
+- Исправлен кейс, когда прогресс сабтасок добавлялся на лишние колонки
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+- Fixed issue link display in backlog when sidebar with issue details is open on backlog screen
+- Fixed case where subtask progress was added to extra columns
