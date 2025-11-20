@@ -61,7 +61,7 @@ export const getCurrentRoute = (): Route | null => {
   if (pathname.includes('RapidBoard.jspa')) {
     if (params.get('config')) return Routes.SETTINGS;
     if (params.get('view') === 'reporting') return Routes.REPORTS;
-    if (params.get('view') === 'planning.nodetail') return Routes.BOARD_BACKLOG;
+    if (params.get('view') === 'planning.nodetail' || params.get('view') === 'planning') return Routes.BOARD_BACKLOG;
 
     return Routes.BOARD;
   }
