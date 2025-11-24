@@ -41,4 +41,3 @@ export const AdditionalCardElementsBacklogContainer = (props: { issueId: string 
     </WithDi>
   );
 };
-

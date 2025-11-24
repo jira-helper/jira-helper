@@ -123,7 +123,7 @@ export const WithCustomPlaceholder: Story = {
   render: IssueSelectorWrapper,
   args: {
     fields: mockFields,
-    placeholder: 'Custom placeholder text',
+
     testIdPrefix: 'story-issue-selector',
   },
 };
@@ -213,7 +213,7 @@ export const InteractiveDemo: Story = {
               <div style={{ maxHeight: 200, overflow: 'auto' }}>
                 {history.map((item, index) => (
                   <div
-                    key={index}
+                    key={item.mode + item.fieldId + item.value + item.jql}
                     style={{
                       marginBottom: 8,
                       padding: 8,

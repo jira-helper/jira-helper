@@ -29,7 +29,7 @@ describe('resetBoardProperty', () => {
         useCustomColorScheme: true,
         flagsAsBlocked: true,
         blockedByLinksAsBlocked: true,
-        selectedColorScheme: 'yellowGreen',
+        selectedColorScheme: 'jira',
         ignoredStatuses: [123, 456],
         newStatusMapping: {
           789: { name: 'In Progress', progressStatus: 'inProgress' },

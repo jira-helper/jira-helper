@@ -1,6 +1,7 @@
 import { globalContainer } from 'dioma';
 import { JiraServiceToken } from '../jiraService';
 import { useJiraFieldsStore } from './jiraFieldsStore';
+import { JiraField } from '../types';
 
 export const loadJiraFields = async (abortSignal: AbortSignal) => {
   const jiraService = globalContainer.inject(JiraServiceToken);
@@ -25,4 +26,8 @@ export const loadJiraFields = async (abortSignal: AbortSignal) => {
   } finally {
     store.setLoading(false);
   }
+};
+
+export const getEpicLinkFieldId = (fields: JiraField[]) => {
+  return fields.find(field => field.name === 'Epic Link')?.id;
 };

@@ -7,7 +7,7 @@ import { AdditionalCardElementsSettings } from './AdditionalCardElementsSettings
 const mockStore = {
   data: {
     enabled: false,
-    columnsToTrack: [],
+    columnsToTrack: [] as string[],
     showInBacklog: false,
     issueLinks: [],
   },

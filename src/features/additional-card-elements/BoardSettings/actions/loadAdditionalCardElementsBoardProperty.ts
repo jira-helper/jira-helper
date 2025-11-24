@@ -1,7 +1,7 @@
 import { createAction } from 'src/shared/action';
 import { loggerToken } from 'src/shared/Logger';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { AdditionalCardElementsBoardProperty } from '../types';
+import { AdditionalCardElementsBoardProperty } from '../../types';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
 
 export const loadAdditionalCardElementsBoardProperty = createAction({

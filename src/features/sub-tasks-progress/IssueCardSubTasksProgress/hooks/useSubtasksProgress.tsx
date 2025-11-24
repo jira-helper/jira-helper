@@ -8,80 +8,102 @@ import { useGetFields } from 'src/shared/jira/fields/useGetFields';
 
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
 import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
-import { ActiveStatuses, SubTasksProgress } from '../../types';
+import { getEpicLinkFieldId } from 'src/shared/jira/fields/loadJiraFields';
+import { ActiveStatuses, IssueLinkTypeSelection, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
 import { CustomGroup } from '../../BoardSettings/GroupingSettings/CustomGroups/types';
 
-export const useGetSubtasksToCountProgress = (issueId: string) => {
+const getLinkedIssues = (issue: JiraIssueMapped, subtasks: JiraIssueMapped[]) => {
+  const issueLinks = issue?.fields.issuelinks || [];
+  return subtasks.filter(subtask =>
+    issueLinks.some(link => link.outwardIssue?.key === subtask.key || link.inwardIssue?.key === subtask.key)
+  );
+};
+
+const getSubtasks = (issue: JiraIssueMapped, subtasks: JiraIssueMapped[]) => {
+  const issueSubtasks = issue?.fields.subtasks || [];
+  return subtasks.filter(subtask => issueSubtasks.some(s => s.key === subtask.key));
+};
+
+const getEpicTasks = (issue: JiraIssueMapped, subtasks: JiraIssueMapped[], epicLinkFieldId: string) => {
+  return subtasks.filter(subtask => subtask.fields[epicLinkFieldId] === issue.key);
+};
+
+const getLinkedIssuesKeysWithChosenLinks = (
+  issuelinks: JiraIssueMapped['fields']['issuelinks'],
+  issueLinkTypesToCount: IssueLinkTypeSelection[]
+): string[] => {
+  if (issueLinkTypesToCount.length === 0) {
+    return (
+      issuelinks.map(link => link.outwardIssue?.key || link.inwardIssue?.key).filter(key => key !== undefined) || []
+    );
+  }
+
+  return (
+    issuelinks
+      .filter(link => {
+        return issueLinkTypesToCount.some(sel => {
+          if (sel.direction === 'inward' && link.inwardIssue && link.type.id === sel.id) return true;
+          if (sel.direction === 'outward' && link.outwardIssue && link.type.id === sel.id) return true;
+          return false;
+        });
+      })
+      .map(link => link.outwardIssue?.key || link.inwardIssue?.key)
+      .filter(key => key !== undefined) || []
+  );
+};
+
+const getLinkedIssuesToCount = (linkedIssues: JiraIssueMapped[], linkedIssueKeysWithChosenLinks: string[]) => {
+  return linkedIssues.filter(issue => linkedIssueKeysWithChosenLinks.includes(issue.key));
+};
+
+export const useGetSubtasksToCountProgress = (issueId: string): JiraIssueMapped[] => {
   const { settings } = useGetSettings();
   const issue = useJiraIssuesStore(
     useShallow(state => {
       return state.issues.find(i => i.data.key === issueId);
     })
   );
+  const fieldsStore = useGetFields();
+  const epicLinkFieldId = getEpicLinkFieldId(fieldsStore.fields);
 
   const subtasks = useJiraSubtasksStore(useShallow(state => state.data[issueId]));
 
-  const issueLinks = (issue?.data.fields.issuelinks as JiraIssueMapped['fields']['issuelinks'][]) || [];
-
-  // Filter issue links by selected types/directions
-  let filteredIssueLinks = issueLinks;
-  const selectedLinkTypes = settings.issueLinkTypesToCount;
-  if (selectedLinkTypes && selectedLinkTypes.length > 0) {
-    filteredIssueLinks = issueLinks.filter(link => {
-      return selectedLinkTypes.some(sel => {
-        if (sel.direction === 'inward' && link.inwardIssue && link.type.id === sel.id) return true;
-        if (sel.direction === 'outward' && link.outwardIssue && link.type.id === sel.id) return true;
-        return false;
-      });
-    });
+  if (!issue?.data) {
+    return [];
   }
-
-  const linkedIssuesKeys =
-    filteredIssueLinks
-      .map(link => {
-        const linkedIssue = link.outwardIssue || link.inwardIssue;
-        if (!linkedIssue) {
-          return;
-        }
-        return linkedIssue.key;
-      })
-      .filter(v => v !== undefined) || [];
-
-  const issueSubtasksData = (issue?.data.fields.subtasks as JiraIssueMapped['fields']['subtasks'][]) || [];
-  const subtasksKeys = issueSubtasksData.map(s => s.key).filter(v => v !== undefined) || [];
-
   if (!subtasks) {
     return [];
   }
+
+  const linkedIssues = getLinkedIssues(issue.data, subtasks.subtasks);
+  const subtasksOfIssue = getSubtasks(issue.data, subtasks.subtasks);
+  const epicTasks = epicLinkFieldId ? getEpicTasks(issue.data, subtasks.subtasks, epicLinkFieldId) : [];
+  const linkedIssueKeysWithChosenLinks = getLinkedIssuesKeysWithChosenLinks(
+    issue.data.fields.issuelinks,
+    settings.issueLinkTypesToCount
+  );
+  const linkedIssuesToCount = getLinkedIssuesToCount(linkedIssues, linkedIssueKeysWithChosenLinks);
+
   const issueType = issue?.data.issueType;
 
   switch (issueType) {
     case 'Epic': {
-      const linkedIssues = settings.countEpicLinkedIssues
-        ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
-        : [];
-      const epicIssues = settings.countEpicIssues
-        ? subtasks.subtasks.filter(subtask => !linkedIssuesKeys.includes(subtask.key))
-        : [];
+      const linkedIssuesData = settings.countEpicLinkedIssues ? linkedIssuesToCount : [];
 
-      return [...linkedIssues, ...epicIssues];
+      const epicIssues = settings.countEpicIssues ? epicTasks : [];
+
+      return [...linkedIssuesData, ...epicIssues];
     }
     case 'Task': {
-      const linkedIssues = settings.countIssuesLinkedIssues
-        ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
-        : [];
-      const issueSubtasks = settings.countIssuesSubtasks
-        ? subtasks.subtasks.filter(subtask => subtasksKeys.includes(subtask.key))
-        : [];
+      const linkedIssuesData = settings.countIssuesLinkedIssues ? linkedIssuesToCount : [];
+      const issueSubtasks = settings.countIssuesSubtasks ? subtasksOfIssue : [];
 
-      return [...linkedIssues, ...issueSubtasks];
+      return [...linkedIssuesData, ...issueSubtasks];
     }
     case 'Sub-task': {
-      return settings.countSubtasksLinkedIssues
-        ? subtasks.subtasks.filter(subtask => linkedIssuesKeys.includes(subtask.key))
-        : [];
+      return settings.countSubtasksLinkedIssues ? linkedIssuesToCount : [];
     }
     default:
       // logger.wwarn;

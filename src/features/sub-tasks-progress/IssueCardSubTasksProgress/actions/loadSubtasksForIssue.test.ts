@@ -21,7 +21,7 @@ describe('loadSubtasksForIssue', () => {
   beforeAll(() => {
     globalContainer.reset();
     registerLogger(globalContainer);
-    globalContainer.register({ token: JiraServiceToken, value: mockJiraService });
+    globalContainer.register({ token: JiraServiceToken, value: mockJiraService as any });
   });
 
   beforeEach(() => {

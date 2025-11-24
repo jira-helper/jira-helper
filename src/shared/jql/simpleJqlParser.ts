@@ -394,9 +394,9 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
     } else if (ast.op === '!=') {
       matched = allMatch(getFieldValue(field), v => v != ast.value);
     } else if (ast.op === 'in') {
-      matched = anyMatch(getFieldValue(field), v => ast.values && ast.values.includes(v));
+      matched = anyMatch(getFieldValue(field), v => (ast.values ? ast.values.includes(v) : false));
     } else if (ast.op === 'not in') {
-      matched = allMatch(getFieldValue(field), v => ast.values && !ast.values.includes(v));
+      matched = allMatch(getFieldValue(field), v => (ast.values ? !ast.values.includes(v) : false));
     } else if (ast.op === '~') {
       const result = anyMatch(getFieldValue(field), v => {
         if (typeof v === 'string' || typeof v === 'number') {

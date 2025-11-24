@@ -132,7 +132,7 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey, hori
       return [];
     }
 
-    const issueLinks = (issue.data.fields.issuelinks as JiraIssueMapped['fields']['issuelinks'][]) || [];
+    const issueLinks = issue.data.fields.issuelinks || [];
     const result: LinkDisplay[] = [];
 
     // Process each configured issue link

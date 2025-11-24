@@ -1,3 +1,4 @@
+/* eslint-disable react/button-has-type */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -7,8 +8,8 @@ import { IssueLinkSettings } from './IssueLinkSettings';
 const mockStore = {
   data: {
     enabled: true,
-    columnsToTrack: [],
-    issueLinks: [],
+    columnsToTrack: [] as string[],
+    issueLinks: [] as any[],
   },
   actions: {
     setEnabled: vi.fn(),
@@ -202,7 +203,7 @@ describe('IssueLinkSettings', () => {
       mockUseGetIssueLinkTypes.mockReturnValueOnce({
         linkTypes: [],
         isLoading: false,
-        error: new Error('Failed to load'),
+        error: new Error('Failed to load') as any,
       });
 
       render(<IssueLinkSettings />);

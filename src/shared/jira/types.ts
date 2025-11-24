@@ -177,7 +177,7 @@ export type JiraIssue = {
       self: string;
     };
     created: string;
-  };
+  } & Record<string, any>;
   id: string;
   key: string;
   changelog?: {
@@ -232,7 +232,6 @@ export type JiraIssueMapped = JiraIssue & {
   issueTypeName: string;
   isFlagged: boolean;
   isBlockedByLinks: boolean;
-  fields?: any;
 };
 
 export type RemoteLink = {
