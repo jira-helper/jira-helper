@@ -144,3 +144,19 @@ New feature that allows you to visualize relationships between issues directly o
 
 - Fixed issue link display in backlog when sidebar with issue details is open on backlog screen
 - Fixed case where subtask progress was added to extra columns
+
+## Version 2.28.3
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+- Подсчет прогресса под-задач теперь корректно определяет слинкованные задачи и задачи эпика
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+- Subtask progress calculation now correctly identifies linked issues and epic issues 
