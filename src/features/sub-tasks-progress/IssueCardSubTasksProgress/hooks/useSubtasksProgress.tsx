@@ -58,6 +58,17 @@ const getLinkedIssuesToCount = (linkedIssues: JiraIssueMapped[], linkedIssueKeys
   return linkedIssues.filter(issue => linkedIssueKeysWithChosenLinks.includes(issue.key));
 };
 
+const deduplicateIssues = (issues: JiraIssueMapped[]): JiraIssueMapped[] => {
+  const uniqueIssues = new Set<string>();
+  return issues.filter(issue => {
+    if (uniqueIssues.has(issue.key)) {
+      return false;
+    }
+    uniqueIssues.add(issue.key);
+    return true;
+  });
+};
+
 export const useGetSubtasksToCountProgress = (issueId: string): JiraIssueMapped[] => {
   const { settings } = useGetSettings();
   const issue = useJiraIssuesStore(
@@ -94,13 +105,13 @@ export const useGetSubtasksToCountProgress = (issueId: string): JiraIssueMapped[
 
       const epicIssues = settings.countEpicIssues ? epicTasks : [];
 
-      return [...linkedIssuesData, ...epicIssues];
+      return deduplicateIssues([...linkedIssuesData, ...epicIssues]);
     }
     case 'Task': {
       const linkedIssuesData = settings.countIssuesLinkedIssues ? linkedIssuesToCount : [];
       const issueSubtasks = settings.countIssuesSubtasks ? subtasksOfIssue : [];
 
-      return [...linkedIssuesData, ...issueSubtasks];
+      return deduplicateIssues([...linkedIssuesData, ...issueSubtasks]);
     }
     case 'Sub-task': {
       return settings.countSubtasksLinkedIssues ? linkedIssuesToCount : [];

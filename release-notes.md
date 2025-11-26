@@ -159,4 +159,22 @@ New feature that allows you to visualize relationships between issues directly o
 
 ### 🐛 Bug Fixes
 
-- Subtask progress calculation now correctly identifies linked issues and epic issues 
+- Subtask progress calculation now correctly identifies linked issues and epic issues
+
+---
+
+## Version 2.28.4
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+- Исправлена проблема с двойным учетом задач в счетчиках прогресса. Задача могла учитываться дважды, если была и сабтаской и слинкованной задачей при одновременном учете и сабтасок и слинкованных задач
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+- Fixed issue with double counting of tasks in progress counters. A task could be counted twice if it was both a subtask and a linked task when both subtasks and linked tasks were being counted simultaneously 
