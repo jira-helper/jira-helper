@@ -178,3 +178,25 @@ New feature that allows you to visualize relationships between issues directly o
 ### 🐛 Bug Fixes
 
 - Fixed issue with double counting of tasks in progress counters. A task could be counted twice if it was both a subtask and a linked task when both subtasks and linked tasks were being counted simultaneously 
+
+---
+
+## Version 2.28.5
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+**Поправлен функционал отображения прогресса связанных задач через экстернал линки**
+- Исправлена ситуация, когда не трекались задачи, если в экстернал линках были "непонятные" расширению ссылки
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+**Fixed related tasks progress display functionality through external links**
+- Fixed issue where tasks were not tracked if external links contained links "unknown" to the extension
+
+---

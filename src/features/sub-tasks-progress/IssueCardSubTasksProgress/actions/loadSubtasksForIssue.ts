@@ -65,6 +65,7 @@ const loadExternalIssuesForIssue = createAction({
       return;
     }
 
+    log('finished loading external issues');
     actions.addExternalIssues(issueKey, result.val);
   },
 });

@@ -419,7 +419,7 @@ export class JiraService implements IJiraService {
       if (!Array.isArray(response)) {
         return false;
       }
-      return response.every(o => typeof o?.application?.type === 'string');
+      return response.every(o => typeof o?.application === 'object');
     };
     if (!isRemoteLinksResponse(externalIssuesResponse)) {
       return Err(new Error('Invalid response, expected remoteLinks'));

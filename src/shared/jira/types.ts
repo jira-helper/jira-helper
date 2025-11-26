@@ -241,9 +241,9 @@ export type RemoteLink = {
   globalId: string;
   application: {
     // "com.atlassian.jira",
-    type: string;
+    type?: string;
     // "JIRA | TCS Bank"
-    name: string;
+    name?: string;
   };
   relationship: string;
   object: {
