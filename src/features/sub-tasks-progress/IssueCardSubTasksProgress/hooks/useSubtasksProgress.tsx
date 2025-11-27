@@ -329,7 +329,7 @@ const useExternalIssuesProgress = (issueKey: string) => {
     return progress;
   }
   const isEnabled =
-    settings?.countIssuesExternalLinks || settings.countIssuesExternalLinks || settings.countSubtasksExternalLinks;
+    settings?.countIssuesExternalLinks || settings.countEpicExternalLinks || settings.countSubtasksExternalLinks;
   if (!isEnabled) {
     return progress;
   }

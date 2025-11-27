@@ -199,4 +199,21 @@ New feature that allows you to visualize relationships between issues directly o
 **Fixed related tasks progress display functionality through external links**
 - Fixed issue where tasks were not tracked if external links contained links "unknown" to the extension
 
+
+## Version 2.28.6
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+- Исправлена ситуация, когда не отображался прогресс внешних задач на эпиках
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+- Fixed issue when external task progress was not displayed on epics
+
 ---
