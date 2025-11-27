@@ -217,3 +217,22 @@ New feature that allows you to visualize relationships between issues directly o
 - Fixed issue when external task progress was not displayed on epics
 
 ---
+
+
+## Version 2.28.7
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+- Исправлены дублирующие запросы к jira api
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+- Fixed dupplicated requests to jira api
+
+---

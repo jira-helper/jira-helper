@@ -61,6 +61,11 @@ class TaskQueue {
   private runningTasksCount = 0;
 
   register<T>(task: NewTask<T> & { priority?: 'high' }) {
+    const alreadyRegisteredTask = this.queue.find(t => t.key === task.key);
+    if (alreadyRegisteredTask) {
+      return alreadyRegisteredTask.promise;
+    }
+
     const { promise, resolve, reject } = Promise.withResolvers<T>();
 
     const queueItem = { ...task, cb: () => task.cb().then(resolve, reject), promise, reject, resolve };
