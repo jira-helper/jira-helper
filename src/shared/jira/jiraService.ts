@@ -56,14 +56,22 @@ type RegiseteredTask<T> = NewTask<T> & {
 class TaskQueue {
   private queue: RegiseteredTask<any>[] = [];
 
+  private runningTasks: Map<string, RegiseteredTask<any>> = new Map();
+
   private concurrentTasks = 3;
 
   private runningTasksCount = 0;
 
   register<T>(task: NewTask<T> & { priority?: 'high' }) {
     const alreadyRegisteredTask = this.queue.find(t => t.key === task.key);
+
     if (alreadyRegisteredTask) {
       return alreadyRegisteredTask.promise;
+    }
+
+    const runningTask = this.runningTasks.get(task.key);
+    if (runningTask) {
+      return runningTask.promise;
     }
 
     const { promise, resolve, reject } = Promise.withResolvers<T>();
@@ -97,6 +105,7 @@ class TaskQueue {
     if (!task) {
       return;
     }
+    this.runningTasks.set(task.key, task);
     this.runningTasksCount += 1;
     try {
       const result = await task.cb();
@@ -104,7 +113,7 @@ class TaskQueue {
       return result;
     } finally {
       this.runningTasksCount -= 1;
-
+      this.runningTasks.delete(task.key);
       setTimeout(() => {
         this.run();
       }, this.getDelay());
