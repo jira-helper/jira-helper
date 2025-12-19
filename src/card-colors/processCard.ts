@@ -32,11 +32,20 @@ function paintCard(card: HTMLElement, grabber: HTMLElement): void {
   const [h, s, l] = hslFromRGB(r, g, b);
 
   const newL = l + 0.3 > 1 ? 1 : l + 0.3;
-  const lighterColor = `hsl(${h}, ${s * 100}%, ${newL * 100}%)`;
+
+  // If the lighter color would be white or too close to white, use midpoint between current L and 0.95
+  let finalL: number;
+  if (newL >= 0.95) {
+    finalL = (l + 0.95) / 2;
+  } else {
+    finalL = newL;
+  }
+
+  const finalColor = `hsl(${h}, ${s * 100}%, ${finalL * 100}%)`;
 
   const currentColor = card.style.backgroundColor;
   card.setAttribute('current-color', currentColor);
-  card.style.backgroundColor = lighterColor;
+  card.style.backgroundColor = finalColor;
 }
 
 function markCardAsProcessed(card: Element, processedAttribute: string): void {
@@ -44,21 +53,35 @@ function markCardAsProcessed(card: Element, processedAttribute: string): void {
 }
 
 export function processCard({ card, processedAttribute }: ProcessCardOptions): void {
+  const cardKey = card.getAttribute('data-issue-key') || 'unknown';
+  console.log(`[CardColors] Processing card: ${cardKey}`);
+
   const grabber = card.querySelector(BoardPagePageObject.selectors.grabber) as HTMLElement;
   if (!grabber) {
+    console.log(`[CardColors] ❌ No grabber found for card: ${cardKey}`);
     return;
   }
 
   const color = grabber.style.backgroundColor;
+  console.log(`[CardColors] Grabber color for ${cardKey}: "${color}"`);
+
   if (color === 'transparent' || color === 'rgba(0, 0, 0, 0)' || color === '') {
+    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - transparent/empty color`);
     return;
   }
 
   markCardAsProcessed(card, processedAttribute);
 
-  if (isFlagged(card) || isAlreadyColoredByOtherTools(card)) {
+  if (isFlagged(card)) {
+    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - card is flagged`);
     return;
   }
 
+  if (isAlreadyColoredByOtherTools(card)) {
+    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - already colored by other tools (WIP limit)`);
+    return;
+  }
+
+  console.log(`[CardColors] ✅ Painting card: ${cardKey}`);
   paintCard(card, grabber);
 }

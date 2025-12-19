@@ -255,3 +255,23 @@ New feature that allows you to visualize relationships between issues directly o
 - Fixed dupplicated requests to jira api
 
 ---
+
+## Version 2.28.9
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+**Исправлена функция заливки карточек цветом grabber'а**
+- Исправлена проблема, когда карточки с яркими цветами grabber'ов становились полностью белыми и неразличимыми
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+**Fixed card fill feature with grabber color**
+- Fixed issue where cards with bright grabber colors would become completely white and indistinguishable
+
+---

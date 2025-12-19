@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "jira-helper",
     "short_name": "jira-helper",
-    "version": "2.28.8",
+    "version": "2.28.9",
     "author": "pavel.power@gmail.com",
     "description": "jira-helper",
     "icons": {
