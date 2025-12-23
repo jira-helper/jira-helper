@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { getFieldValueForJqlStandalone } from './useSubtasksProgress';
 import { JiraIssueMapped, JiraField } from 'src/shared/jira/types';
 import { JiraTestDataBuilder } from 'src/shared/jira/testData';
+import { getFieldValueForJqlStandalone } from './useSubtasksProgress';
 
 describe('getFieldValueForJqlStandalone', () => {
   const createMockIssue = (fields?: Record<string, any>): JiraIssueMapped => {
@@ -300,10 +300,7 @@ describe('getFieldValueForJqlStandalone', () => {
 
     it('should extract values for array type field with component items', () => {
       const issue = createMockIssue({
-        components: [
-          { name: 'Component 1' },
-          { name: 'Component 2' },
-        ],
+        components: [{ name: 'Component 1' }, { name: 'Component 2' }],
       });
 
       const fields: JiraField[] = [
@@ -325,10 +322,7 @@ describe('getFieldValueForJqlStandalone', () => {
 
     it('should extract values for array type field with string items', () => {
       const issue = createMockIssue({
-        customfield_10001: [
-          { value: 'Value 1' },
-          { value: 'Value 2' },
-        ],
+        customfield_10001: [{ value: 'Value 1' }, { value: 'Value 2' }],
       });
 
       const fields: JiraField[] = [
@@ -350,10 +344,7 @@ describe('getFieldValueForJqlStandalone', () => {
 
     it('should extract values for array type field with option items', () => {
       const issue = createMockIssue({
-        customfield_10001: [
-          { value: 'Option 1' },
-          { value: 'Option 2' },
-        ],
+        customfield_10001: [{ value: 'Option 1' }, { value: 'Option 2' }],
       });
 
       const fields: JiraField[] = [
@@ -599,4 +590,3 @@ describe('getFieldValueForJqlStandalone', () => {
     });
   });
 });
-

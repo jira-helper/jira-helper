@@ -1,276 +1,298 @@
-# Additional Card Elements - Board Settings
+# Additional Card Elements
 
-## Автосинхронизация с Board Property
-
-**Поведение**: При изменении настроек в сторе автоматически сохраняются в Board Property с throttling (5 секунд). При загрузке страницы настройки автоматически загружаются из Board Property.
-
-**Реализация**:
-- `loadAdditionalCardElementsBoardProperty` - загружает настройки при инициализации
-- `autosyncStoreWithBoardProperty` - автоматически сохраняет изменения в Board Property
-- Используется throttling для предотвращения частых запросов к API
-
-## Общие блоки
-
-### Включение показа доп элементов
-
-**Компонент**: Checkbox
-**Поведение** Состояние чекбокса (включен выключен) связано с `boardProperty.enabled`. Если чекбокс выключен - другие элементы не отображаются
-
-
-### Сброс настроек
-
-**Компонент**: Кнопка
-**Поведение**: При нажатии состояние `boardProperty` сбрасывается на изначальное
-
-### Выбор колонок
-
-**Компонент**: Shared/ColumnsSelector
-**Поведение** Включенные колонки хранятся в `boardProperty.columnsToTrack`
-
-
-### Показывать ли в беклоге
-
-**Компонент**: Checkbox
-**Поведение**: связан с `boardProperty.showInBacklog`. Отображается рядом с колонками
-
-### Показ IssueLinks
-
-**User Story**:
-- Я хочу видеть на доске, с какой задачей связана каждая карточка. Как правило, это связь с задачей, которая представляет собой "Проект" в jira, которая заведен отдельной задачей и привязан через какой-то линк
-
-Кейсы:
-- Я хочу видеть все задачи, которые привязаны к текущей задаче по связи `is Parent of`
-- Я хочу видеть все задачи с типом Project, которые привязаны к текущей задаче по связи `is Parent of`
-- Я хочу видеть все задачи с типом Project в незавершенных статусах, которые привязаны к текущей задаче по связи `is Parent of`
-- Я хочу видеть все незавершенные задачи с типом Project и все задачи с типом Objective и лейблом "Бизнес", которые привязаны к текущей задаче по связи `is Parent of`
-- Я хочу видеть связанные задач не только на доске с задачами, но и в беклоге
-
-**Компонент**: Кастомный
-**Поведение**: При маунте инициализируется загрузка доступных связей проекта через хук `useGetIssueLinkTypes`. Пока грузится - показываем скелетон. Если связи загрузились и они не пустые - показываем компонент. Если пустые - показываем что не удалось загрузить связи проекта или их нет, поэтому невозможно настроить показ связей.
-**Структура**:
-- Список настроек показываемых IssueLinks. Данные связаны с `boardProperty.issueLinks`
-  - Один IssueLink
-    - **Компонент**: карточка
-      - Название IssueLinks. 
-        - **Компонент**: Input. Расположен в заголовке карточки
-        - **Поведение**: Берется из `boardProperty.issueLinks[i].name`. Ограничено 20 символами.
-      - **Строка 1**: Выбор типа связи и отображения
-        - Выбор типа связи
-          - **Компонент**: Dropdown. Расположен в карточке. Ширина дропдауна равна ширине самого длинного элемента.
-          - **Поведение**: берутся все доступные связи из `useGetIssueLinkTypes` и формируется список значений для дропдауна из name.  Т.к. name - не уникальны, как ключ объекта следует использовать id линка + direction линка. Выбранное значение сохраняется в `boardProperty.issueLinks[i].linkType` - сохраняется id и direction.
-        - Использование уникальных цветов для каждой задачи:
-          - **Компонент**: Checkbox + ColorPicker
-          - **Поведение**: значение связано с `boardProperty.issueLinks[i].color`. Если `boardProperty.issueLinks[i].color` не undefined - чекбокс включен, название чекбокса "Уникальные цвета для задач", colorPicker не показывается. Если значение поля установлено, то чекбокс выключен, показывается ColorPicker, его значение записывается в boardProperty.
-        - Многострочность:
-         - **Компонент**: Checkbox
-         - **Поведение**: Значение связано с `boardProperty.issueLinks[i].multilineSummary`
-      - **Строка 2**: Выбор задач, для которых анализируем связи
-        - **Компонент**: div + display: flex-row
-        - Выбор опции "Учитывать все задачи"
-          - **Компонент**: Checkbox + tooltip
-          - **Поведение**: Checkbox связан с `boardProperty.issueLinks[i].trackAllTasks`. В tooltip описано, что можно либо учитывать связи всех задач, либо настроить более гранулярно.
-        - Указание задач, для которых анализируем связи
-          - **Компонент**: `shared/components/issueSelectorByAttributes`.
-          - **Поведение**:
-            - Не отображается если `boardProperty.issueLinks[i].trackAllTasks` === true
-            - Значение связано с `boardProperty.issueLinks[i].issueSelector`, сохраняется as is. По умолчанию - пустое значение
-      - **Строка 3**: Выбор задач, связи с которыми анализируем
-        - **Компонент**: div + display: flex-row
-        - Выбор опции "Учитывать все задачи"
-          - **Компонент**: Checkbox + tooltip
-          - **Поведение**: Checkbox связан с `boardProperty.issueLinks[i].trackAllLinkedTasks`. В tooltip описано, что можно либо связи с любыми задачами, либо настроить более гранулярно и учитывать связи с определенными задачами.
-        - **Компонент**: `shared/components/issueSelectorByAttributes`
-        - **Поведение**: значение связано с `boardProperty.issueLinks[i].linkedIssueSelector`, сохраняется as is. По умолчанию - пустое значение.
-- Кнопка добавления нового IssueLink
-  - **Компонент**: Кнопка с иконкой
-  - **Поведение**: При клике добавляется новый IssueLink с базовыми параметрами: название Link + порядковый номер связи, тип связи = первый id, inward
-
-# Виджет отображения связей (IssueLinkBadges)
-
-## Общие принципы
-
-**Компонент**: `IssueLinkBadges`
-**Назначение**: Универсальный виджет для отображения связей между задачами. Используется как на доске, так и в беклоге.
-
-**Props**:
-- `issueKey: string` - ключ задачи, для которой отображаются связи
-- `horizontal?: boolean` - режим отображения (горизонтальный или вертикальный), по умолчанию `false` (вертикальный)
-
-## Логика получения связей
-
-**Для каждой карточки задачи и каждого настроенного IssueLink**:
-
-1. **Проверка, нужно ли анализировать связи для текущей задачи**:
-   - Если `trackAllTasks === true` - анализируем связи для всех задач
-   - Если `trackAllTasks === false` - проверяем, подходит ли текущая задача под условия `issueSelector`:
-     - Если `issueSelector.mode = 'jql'` - применяется JQL фильтр к данным текущей задачи
-     - Если `issueSelector.mode = 'field'` - фильтр по полю и значению текущей задачи
-   - Если текущая задача не подходит под условия - пропускаем этот IssueLink для данной карточки
-
-2. **Получение связанных задач**: Используется Jira API для получения задач по связи
-   - Тип связи: `linkType.id` + `linkType.direction`
-   - Получаются все связанные задачи для текущей карточки
-   - Данные берутся из `issue.data.fields.issuelinks` (уже загружены через `fetchJiraIssue`)
-   
-3. **Фильтрация связанных задач**: Применяется фильтр для отбора нужных связанных задач
-   - Если `trackAllLinkedTasks === true` - учитываются все связанные задачи
-   - Если `trackAllLinkedTasks === false` - применяется `linkedIssueSelector`:
-     - Если `linkedIssueSelector.mode = 'jql'` - применяется JQL фильтр к данным связанной задачи
-     - Если `linkedIssueSelector.mode = 'field'` - фильтр по полю и значению связанной задачи
-   - Если связанная задача не подходит под условия - она не отображается
-
-4. **Группировка и отображение**: Отфильтрованные связанные задачи группируются по типу связи и отображаются как бейджи
-
-## Режимы отображения
-
-### Вертикальный режим (по умолчанию)
-- Используется на доске
-- `flexDirection: 'column'`
-- `flexWrap: 'nowrap'`
-- Бейджи располагаются друг под другом
-
-### Горизонтальный режим
-- Используется в беклоге
-- `flexDirection: 'row'`
-- `flexWrap: 'wrap'`
-- Бейджи располагаются в ряд, с переносом на новую строку при необходимости
-
-### Цветовая схема
-
-**Приоритет цветов**:
-1. **Кастомный цвет**: Если в настройках IssueLink указан `color` - используется он
-2. **Автоматический цвет**: Если цвет не указан, вычисляется на основе хеш-функции
-
-**Алгоритм автоматического цвета**:
-```typescript
-function getAutoColor(issueKey: string, issueSummary: string): string {
-  const hashInput = issueKey + issueSummary;
-  const hash = simpleHash(hashInput);
-  const colorIndex = hash % PASTEL_COLORS.length;
-  return PASTEL_COLORS[colorIndex];
-}
-```
-
-**Массив пастельных цветов**: 20 предопределенных легко различимых цветов (пастельных и более насыщенных) для консистентного отображения
-
-### Компоненты виджета
-
-#### IssueLinkBadge
-**Назначение**: Отображение одной связи
-**Props**:
-- `color`: Цвет для отображения
-- `link`: Ссылка на задачу
-- `summary`: Название задачи
-- `multilineSummary`: если true, то в случае если summary не влазиет в 1 строку, слова переносятся на следующую. Иначе часть summary, которая не помещается, должна скрываться за троеточием, а при наведении мышки можно увидеть полное название в тултипе 
-
-**Поведение**:
-- При клике открывает связанную задачу в новой вкладке
-- Текст бейджа содержит только summary
+Модуль для отображения дополнительных элементов на карточках задач в Jira.
 
 ---
 
-# Интеграция на доску (Board Page)
+# Общая архитектура
 
-## Общие принципы
+## Board Property
 
-**Поведение**: На каждой карточке задачи отображаются связи согласно настроенным IssueLinks. Связи показываются только в колонках, указанных в `boardProperty.columnsToTrack`.
+**Автосинхронизация**: При изменении настроек в сторе автоматически сохраняются в Board Property с throttling (5 секунд). При загрузке страницы настройки загружаются из Board Property.
 
-**Условия отображения**:
-- Функция должна быть включена (`boardProperty.enabled = true`)
-- Карточка должна находиться в отслеживаемой колонке (`boardProperty.columnsToTrack` содержит колонку карточки)
-- Должны быть настроены IssueLinks
+**Реализация**:
+- `loadAdditionalCardElementsBoardProperty` - загружает настройки при инициализации
+- `autosyncStoreWithBoardProperty` - автоматически сохраняет изменения
 
-## Структура отображения
+```typescript
+interface AdditionalCardElementsBoardProperty {
+  enabled: boolean;
+  columnsToTrack: string[];
+  showInBacklog: boolean;
+  
+  issueLinks: IssueLinkConfig[];
+  daysInColumn: DaysInColumnSettings;
+  daysToDeadline: DaysToDeadlineSettings;
+}
+```
 
-**Компонент**: `AdditionalCardElementsContainer`
-**Расположение**: На карточке под заголовком (position: 'aftersummary')
-**Стиль**: Вертикальный список бейджей с цветовой индикацией
+## Общие настройки (Settings UI)
 
-### Логика работы контейнера
+- **Включение модуля**: Checkbox, связан с `enabled`. Если выключен - все элементы скрыты
+- **Выбор колонок**: `Shared/ColumnsSelector`, связан с `columnsToTrack`
+- **Показывать в беклоге**: Checkbox, связан с `showInBacklog`
+- **Сброс настроек**: Button, сбрасывает на значения по умолчанию
 
-1. **Проверка условий отображения**:
-   - Проверяет `settings.enabled`
-   - Получает колонку карточки через `boardPage.getColumnOfIssue(issueId)`
-   - Проверяет, что колонка входит в `settings.columnsToTrack`
+## Общий компонент Badge
 
-2. **Загрузка данных**:
-   - При монтировании, если условия выполнены, загружает подзадачи через `loadSubtasksForIssue(issueId)`
-   - Используется `AbortController` для отмены загрузки при размонтировании
+Универсальный бейдж для отображения информации на карточке.
 
-3. **Рендеринг виджета**:
-   - Если условия выполнены, рендерит `IssueLinkBadges` с `issueKey={issueId}` (без пропа `horizontal`, используется вертикальный режим по умолчанию)
-   - Если условия не выполнены, возвращает `null`
+**Props**: `text`, `color` (`blue` | `yellow` | `red`), `tooltip?`
 
-### Интеграция в страницу
+---
 
-**Класс**: `AdditionalCardElementsBoardPage`
-**Метод**: `apply()`
+# Фича: Issue Links
 
-1. Загружает настройки через `loadAdditionalCardElementsBoardProperty()`
-2. Настраивает автосинхронизацию через `autosyncStoreWithBoardProperty()`
-3. Подписывается на события карточек через `BoardPagePageObject.listenCards()`
-4. Для каждой карточки прикрепляет `AdditionalCardElementsContainer` с позицией `'aftersummary'`
+## User Story
 
-### Тестирование
+Я хочу видеть на доске, с какой задачей связана каждая карточка. Как правило, это связь с задачей-проектом, привязанной через определенный тип связи.
 
-**Unit тесты**:
-- Логика вычисления цветов
-- Фильтрация связанных задач
-- Формирование ссылок
-- Пустое отображение если нет задач, нет конфига или нет задач под конфиг
+**Кейсы**:
+- Видеть все задачи, привязанные по связи `is Parent of`
+- Видеть только задачи с типом Project по связи `is Parent of`
+- Видеть задачи с типом Project в незавершенных статусах
+- Видеть связи как на доске, так и в беклоге
 
-**Storybook**:
-- Отображение нескольких бейджей. Комбинируем проверки
-  - Цвет из конфига
-  - Высчитанный цвет
-  - Короткий Summary
-  - Длинный Summary
+## Типы данных
 
+```typescript
+interface IssueLinkConfig {
+  name: string;
+  linkType: { id: string; direction: 'inward' | 'outward' };
+  color?: string;
+  multilineSummary: boolean;
+  trackAllTasks: boolean;
+  issueSelector?: IssueSelector;
+  trackAllLinkedTasks: boolean;
+  linkedIssueSelector?: IssueSelector;
+}
+```
 
-# Интеграция в беклог (Backlog Page)
+## Настройки (Settings UI)
 
-## Общие принципы
+При маунте загружаются типы связей через `useGetIssueLinkTypes`. Пока грузится - скелетон. Если пусто - сообщение об ошибке.
 
-**Поведение**: На каждой карточке задачи в беклоге отображаются связи согласно настроенным IssueLinks.
+**Карточка одного IssueLink**:
+- **Название**: Input в заголовке, связан с `name`, макс. 20 символов
+- **Тип связи**: Dropdown, связан с `linkType` (id + direction)
+- **Уникальные цвета**: Checkbox + ColorPicker, связан с `color`. Если `undefined` - уникальные цвета
+- **Многострочность**: Checkbox, связан с `multilineSummary`
+- **Для каких задач**: Checkbox "Все задачи" + `issueSelectorByAttributes`, связан с `trackAllTasks` и `issueSelector`
+- **С какими задачами**: Checkbox "Все задачи" + `issueSelectorByAttributes`, связан с `trackAllLinkedTasks` и `linkedIssueSelector`
 
-**Условия отображения**:
-- Функция должна быть включена (`boardProperty.enabled = true`)
-- Отображение в беклоге должно быть включено (`boardProperty.showInBacklog = true`)
-- Должны быть настроены IssueLinks
-- **Важно**: В беклоге не проверяются колонки (в беклоге нет колонок)
+**Кнопка добавления**: Добавляет новый IssueLink с дефолтными параметрами
 
-## Структура отображения
+## Архитектура компонента
 
-**Компонент**: `AdditionalCardElementsBacklogContainer`
-**Расположение**: В конце карточки (`.ghx-end`)
-**Стиль**: Горизонтальный список бейджей с цветовой индикацией
+```
+IssueLinkBadgesContainer(issueKey) → IssueLinkBadges(issueKey) → useGetIssueLinkBadgesData(issueKey) → IssueLinkBadge[]
+```
 
-### Логика работы контейнера
+- **Контейнер** (`IssueLinkBadgesContainer`): проверяет `enabled` и наличие `issueLinks`, передаёт `issueKey`
+- **Компонент** (`IssueLinkBadges`): вызывает хук, рендерит список бейджей
+- **Хук** (`useGetIssueLinkBadgesData`): получает данные issue, фильтрует связи по настройкам, вычисляет цвета
+- **Бейдж** (`IssueLinkBadge`): отображает одну связь, клик открывает задачу
 
-1. **Проверка условий отображения**:
-   - Проверяет `settings.enabled`
-   - Проверяет `settings.showInBacklog`
-   - **Не проверяет колонки** (в беклоге нет колонок)
+**Логика получения связей**:
+1. Проверка задачи через `issueSelector` (если `trackAllTasks === false`)
+2. Получение связей из `issue.fields.issuelinks` по `linkType.id` + `direction`
+3. Фильтрация через `linkedIssueSelector` (если `trackAllLinkedTasks === false`)
+4. Вычисление цвета: кастомный или автоматический по хешу
 
-2. **Загрузка данных**:
-   - При монтировании, если условия выполнены, загружает подзадачи через `loadSubtasksForIssue(issueId)`
-   - Используется `AbortController` для отмены загрузки при размонтировании
+## Интеграция
 
-3. **Рендеринг виджета**:
-   - Если условия выполнены, рендерит `IssueLinkBadges` с `issueKey={issueId}` и `horizontal={true}` (горизонтальный режим)
-   - Если условия не выполнены, возвращает `null`
+### На доске
+- **Контейнер**: `IssueLinkBadgesContainer` (position: `aftersummary`)
+- **Условия**: `enabled=true`, колонка в `columnsToTrack`, есть настроенные `issueLinks`
+- **Режим**: Вертикальный
 
-### Интеграция в страницу
+### В беклоге
+- **Контейнер**: `IssueLinkBadgesBacklogContainer` (в `.ghx-end`)
+- **Условия**: `enabled=true`, `showInBacklog=true`, есть настроенные `issueLinks`
+- **Режим**: Горизонтальный
 
-**Класс**: `AdditionalCardElementsBoardBacklogPage`
-**Метод**: `apply()`
+## Тестирование
 
-1. Загружает настройки через `loadAdditionalCardElementsBoardProperty()`
-2. Подписывается на события карточек через `BoardBacklogPagePageObject.listenCards()`
-3. Для каждой карточки прикрепляет `AdditionalCardElementsBacklogContainer` в конец карточки (`.ghx-end`)
+**Unit тесты**: Логика цветов, фильтрация связей, формирование ссылок
+**Storybook**: Цвет из конфига / вычисленный, короткий / длинный Summary
 
-### Отличия от доски
+---
 
-- **Не проверяются колонки**: В беклоге нет колонок, поэтому проверка `columnsToTrack` не выполняется
-- **Горизонтальное отображение**: Бейджи располагаются в ряд, а не друг под другом
-- **Отдельная настройка**: Включение отображения в беклоге контролируется отдельной настройкой `showInBacklog`
+# Фича: Days in Column
+
+## User Story
+
+Я хочу видеть, сколько дней задача находится в текущей колонке, чтобы быстро определять "застрявшие" задачи и настроить цветовые пороги для выделения проблемных задач.
+
+## Типы данных
+
+```typescript
+interface DaysInColumnSettings {
+  enabled: boolean;
+  warningThreshold?: number; // undefined = не подсвечивать желтым
+  dangerThreshold?: number;  // undefined = не подсвечивать красным
+}
+```
+
+## Настройки (Settings UI)
+
+- **Включение**: Checkbox, связан с `daysInColumn.enabled`
+- **Порог желтого**: InputNumber (placeholder: "Не задано", min: 1), связан с `warningThreshold`
+- **Порог красного**: InputNumber (placeholder: "Не задано", min: 1), связан с `dangerThreshold`
+- **Валидация**: Alert если `dangerThreshold <= warningThreshold`. Сохранение НЕ блокируется
+
+## Архитектура компонента
+
+```
+CardStatusBadgesContainer(issueKey) → DaysInColumnBadge(issueKey) → useGetDaysInColumnData(issueKey) → Badge
+```
+
+- **Контейнер** (`CardStatusBadgesContainer`): проверяет `enabled` и `daysInColumn.enabled`, передаёт `issueKey`
+- **Компонент** (`DaysInColumnBadge`): вызывает хук, рендерит Badge или null
+- **Хук** (`useGetDaysInColumnData`): парсит дни из DOM (`.ghx-days`), получает настройки из store, вызывает pure-функции для цвета и текста
+- **Pure-функции**: `getDaysInColumnColor(days, settings)`, `formatDaysInColumn(days)`
+
+**Получение данных**: Парсинг элемента `.ghx-days` на карточке, извлечение числа из `data-tooltip`
+
+**Цветовая схема**:
+- Синий: пороги не заданы или `days < warningThreshold`
+- Желтый: `warningThreshold` задан и `days >= warningThreshold`
+- Красный: `dangerThreshold` задан и `days >= dangerThreshold`
+
+**Формат текста**:
+- `days === 0`: "<1 дн. в колонке" / "<1 day in column"
+- `days >= 1`: "X дн. в колонке" / "X day(s) in column"
+
+**Скрытие стандартных точек**: При включении фичи вызывается `BoardPagePageObject.hideDaysInColumn()`, который добавляет CSS правило для скрытия `.ghx-days` элементов
+
+## Интеграция
+
+### На доске
+- **Контейнер**: `CardStatusBadgesContainer` (position: `beforeend`)
+- **Условия**: `enabled=true`, `daysInColumn.enabled=true`, колонка в `columnsToTrack`
+- **Порядок**: Первый бейдж в контейнере
+
+### В беклоге
+- **НЕ отображается** (в беклоге нет колонок)
+
+## Тестирование
+
+**Unit тесты**: Всегда синий без порогов, цвета с порогами, работа при `danger < warning`, парсинг из DOM
+**Storybook**: Различные комбинации дней и порогов
+
+---
+
+# Фича: Days to Deadline
+
+## User Story
+
+Я хочу видеть, сколько дней осталось до дедлайна задачи, чтобы быстро определять задачи с приближающимся или пропущенным дедлайном. Хочу выбрать поле с датой дедлайна.
+
+## Типы данных
+
+```typescript
+type DaysToDeadlineDisplayMode = 'always' | 'lessThanOrOverdue' | 'overdueOnly';
+
+interface DaysToDeadlineSettings {
+  enabled: boolean;
+  fieldId?: string;                    // undefined = поле не выбрано
+  displayMode?: DaysToDeadlineDisplayMode; // По умолчанию 'always'
+  displayThreshold?: number;           // Для режима 'lessThanOrOverdue'
+  warningThreshold?: number;           // undefined = только красный при просрочке
+}
+```
+
+## Настройки (Settings UI)
+
+- **Включение**: Checkbox, связан с `daysToDeadline.enabled`
+- **Выбор поля**: Dropdown, загружает поля через `useGetFields`, фильтрует типы `date`, `datetime`, `string`. Связан с `fieldId`. Placeholder: "Выберите поле". Бейдж не отображается, пока поле не выбрано
+- **Режим отображения**: Radio.Group с опциями:
+  - `always` - "Всегда" (по умолчанию)
+  - `lessThanOrOverdue` - "Менее Х дней или просрочено"
+  - `overdueOnly` - "Только просрочено"
+- **Порог отображения**: InputNumber (появляется только при режиме `lessThanOrOverdue`), связан с `displayThreshold`. Если не задан - показывается только просроченное
+- **Порог желтого**: InputNumber (placeholder: "Не задано", min: 0), связан с `warningThreshold`
+
+## Архитектура компонента
+
+```
+CardStatusBadgesContainer(issueKey) → DaysToDeadlineBadge(issueKey) → useGetDaysToDeadlineData(issueKey) → Badge
+```
+
+- **Контейнер** (`CardStatusBadgesContainer`): проверяет `enabled` и `daysToDeadline.enabled`, передаёт `issueKey`
+- **Компонент** (`DaysToDeadlineBadge`): вызывает хук, рендерит Badge или null
+- **Хук** (`useGetDaysToDeadlineData`): загружает данные issue через `fetchJiraIssue`, извлекает значение поля `fieldId`, вычисляет дни, проверяет режим отображения, вычисляет цвет
+- **Pure-функции**: `calculateDaysRemaining(date)`, `getDaysToDeadlineColor(days, settings)`, `formatDaysToDeadline(days)`
+
+**Логика отображения по режимам**:
+- `always`: бейдж отображается всегда (если есть дедлайн)
+- `overdueOnly`: бейдж отображается только если `days < 0` (просрочено)
+- `lessThanOrOverdue`: бейдж отображается если `days < 0` (просрочено) ИЛИ `days <= displayThreshold`. Если `displayThreshold` не задан - показывается только просроченное
+
+**Цветовая схема**:
+- Красный: `days < 0` (просрочено) — всегда, независимо от настроек
+- Желтый: `days === 0` (сегодня) или `days === 1` (завтра) — всегда, независимо от настроек
+- Желтый: `warningThreshold` задан и `days <= warningThreshold`
+- Синий: остальные случаи
+
+**Формат текста** (с эмодзи ⏰ для визуального отличия от Days in Column):
+- `days < 0`: "⏰ Просрочено на X дн." / "⏰ X days overdue"
+- `days === 0`: "⏰ Сегодня!" / "⏰ Due today!"
+- `days === 1`: "⏰ Завтра" / "⏰ Due tomorrow"
+- `days > 1`: "⏰ X дн." / "⏰ X days left"
+
+**Условия НЕ отображения**: 
+- Поле не выбрано
+- Значение пустое или не удалось распарсить дату
+- Режим `overdueOnly` и задача не просрочена
+- Режим `lessThanOrOverdue` и дней осталось больше порога (и не просрочено)
+
+## Интеграция
+
+### На доске
+- **Контейнер**: `CardStatusBadgesContainer` (position: `beforeend`)
+- **Условия**: `enabled=true`, `daysToDeadline.enabled=true`, `fieldId` задан, колонка в `columnsToTrack`
+- **Порядок**: Второй бейдж в контейнере (после DaysInColumn)
+
+### В беклоге
+- **НЕ отображается** (в беклоге показываются только Issue Links)
+
+## Тестирование
+
+**Unit тесты**: Красный при просрочке, синий/желтый по порогам, расчёт дней, парсинг дат
+**Storybook**: Различные комбинации дней до дедлайна и порогов, просрочка, без дедлайна
+
+---
+
+# Контейнеры интеграции
+
+## IssueLinkBadgesContainer (Board Page)
+
+- **Расположение**: position: `aftersummary`
+- **Содержимое**: Только Issue Links
+- **Условия**: `enabled=true`, колонка в `columnsToTrack`, есть `issueLinks`
+
+## CardStatusBadgesContainer (Board Page)
+
+- **Расположение**: position: `beforeend`
+- **Содержимое**: DaysInColumnBadge + DaysToDeadlineBadge
+- **Условия**: `enabled=true`, колонка в `columnsToTrack`, хотя бы одна фича включена
+
+## IssueLinkBadgesBacklogContainer (Backlog Page)
+
+- **Расположение**: в `.ghx-end`
+- **Содержимое**: Только Issue Links (горизонтальный режим)
+- **Условия**: `enabled=true`, `showInBacklog=true`, есть `issueLinks`
+- **Важно**: В беклоге отображаются **только Issue Links**
+
+## Интеграция в страницы
+
+**Board Page** (`AdditionalCardElementsBoardPage`):
+1. Загружает настройки и настраивает автосинхронизацию
+2. Подписывается на карточки через `BoardPagePageObject.listenCards`
+3. Для каждой карточки прикрепляет `IssueLinkBadgesContainer` (aftersummary) и `CardStatusBadgesContainer` (beforeend)
+
+**Backlog Page** (`AdditionalCardElementsBoardBacklogPage`):
+1. Загружает настройки
+2. Подписывается на карточки через `BoardBacklogPagePageObject.listenCards`
+3. Для каждой карточки прикрепляет только `IssueLinkBadgesBacklogContainer` (в `.ghx-end`)

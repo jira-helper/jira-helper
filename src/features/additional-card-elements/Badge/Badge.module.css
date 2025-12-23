@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.badge[role='button'] {
+  cursor: pointer;
+}
+
+.badge-blue {
+  background: rgba(0, 82, 204, 0.15);
+  color: #0052cc;
+}
+
+.badge-yellow {
+  background: rgba(255, 171, 0, 0.15);
+  color: #8b0000; /* Dark red text on yellow background */
+}
+
+.badge-red {
+  background: rgba(222, 53, 11, 0.15);
+  color: #de350b;
+}
+

@@ -53,35 +53,26 @@ function markCardAsProcessed(card: Element, processedAttribute: string): void {
 }
 
 export function processCard({ card, processedAttribute }: ProcessCardOptions): void {
-  const cardKey = card.getAttribute('data-issue-key') || 'unknown';
-  console.log(`[CardColors] Processing card: ${cardKey}`);
-
   const grabber = card.querySelector(BoardPagePageObject.selectors.grabber) as HTMLElement;
   if (!grabber) {
-    console.log(`[CardColors] ❌ No grabber found for card: ${cardKey}`);
     return;
   }
 
   const color = grabber.style.backgroundColor;
-  console.log(`[CardColors] Grabber color for ${cardKey}: "${color}"`);
 
   if (color === 'transparent' || color === 'rgba(0, 0, 0, 0)' || color === '') {
-    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - transparent/empty color`);
     return;
   }
 
   markCardAsProcessed(card, processedAttribute);
 
   if (isFlagged(card)) {
-    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - card is flagged`);
     return;
   }
 
   if (isAlreadyColoredByOtherTools(card)) {
-    console.log(`[CardColors] ⏭️ Skipping ${cardKey} - already colored by other tools (WIP limit)`);
     return;
   }
 
-  console.log(`[CardColors] ✅ Painting card: ${cardKey}`);
   paintCard(card, grabber);
 }

@@ -11,6 +11,7 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
     column: '.ghx-column',
     columnHeader: '.ghx-column-header',
     columnTitle: '.ghx-column-title',
+    daysInColumn: '.ghx-days',
   },
   classlist: {
     flagged: 'ghx-flagged',
@@ -18,5 +19,7 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   getColumns: () => ['To Do', 'In Progress', 'Done'],
   listenCards: () => () => {},
   getColumnOfIssue: () => '',
+  getDaysInColumn: () => null,
+  hideDaysInColumn: () => {},
   getHtml: () => '',
 };

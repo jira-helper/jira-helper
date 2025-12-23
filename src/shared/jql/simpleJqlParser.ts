@@ -1,3 +1,6 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-plusplus */
 /*
 Simple JQL Parser Documentation
 ===============================
@@ -149,7 +152,7 @@ function parseTokens(tokens: string[]): any {
     const condition = parseCondition();
     const currentToken = tokens[pos];
     if (
-      currentToken != undefined &&
+      currentToken !== undefined &&
       !isKeyword(currentToken, 'AND') &&
       !isKeyword(currentToken, 'OR') &&
       !isKeyword(currentToken, ')')
@@ -196,6 +199,7 @@ function parseTokens(tokens: string[]): any {
         pos++;
         op = 'not in';
       }
+      // eslint-disable-next-line no-fallthrough
       case isKeyword(op, 'in') || op.toLowerCase() === 'not in': {
         if (tokens[pos++] !== '(') throw new Error('Expected ( after in');
         const values = [];

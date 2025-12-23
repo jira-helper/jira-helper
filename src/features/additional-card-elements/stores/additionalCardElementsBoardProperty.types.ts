@@ -1,7 +1,16 @@
-import { IssueLink, AdditionalCardElementsBoardProperty } from '../types';
+import { IssueLink, AdditionalCardElementsBoardProperty, DaysInColumnSettings, DaysToDeadlineSettings } from '../types';
+
+export type RequiredBoardProperty = {
+  enabled: boolean;
+  columnsToTrack: string[];
+  showInBacklog: boolean;
+  issueLinks: IssueLink[];
+  daysInColumn: DaysInColumnSettings;
+  daysToDeadline: DaysToDeadlineSettings;
+};
 
 export type State = {
-  data: Required<AdditionalCardElementsBoardProperty>;
+  data: RequiredBoardProperty;
   state: 'initial' | 'loading' | 'loaded';
   actions: {
     setData: (data: AdditionalCardElementsBoardProperty) => void;
@@ -14,5 +23,7 @@ export type State = {
     updateIssueLink: (index: number, issueLink: IssueLink) => void;
     removeIssueLink: (index: number) => void;
     clearIssueLinks: () => void;
+    setDaysInColumn: (settings: Partial<DaysInColumnSettings>) => void;
+    setDaysToDeadline: (settings: Partial<DaysToDeadlineSettings>) => void;
   };
 };

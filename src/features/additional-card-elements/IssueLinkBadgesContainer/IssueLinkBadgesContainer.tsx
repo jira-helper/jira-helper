@@ -6,7 +6,7 @@ import { loadSubtasksForIssue } from 'src/shared/jira/stores/jiraSubtasks.action
 import { useGetSettings } from '../hooks/useGetSettings';
 import { IssueLinkBadges } from '../IssueLinkBadges/IssueLinkBadges';
 
-const AdditionalCardElements = (props: { issueId: string }) => {
+const IssueLinkBadgesContainerInner = (props: { issueId: string }) => {
   const { settings } = useGetSettings();
   const { issueId } = props;
   const container = useDi();
@@ -36,11 +36,11 @@ const AdditionalCardElements = (props: { issueId: string }) => {
   return <IssueLinkBadges issueKey={issueId} />;
 };
 
-export const AdditionalCardElementsContainer = (props: { issueId: string }) => {
+export const IssueLinkBadgesContainer = (props: { issueId: string }) => {
   const container = globalContainer;
   return (
     <WithDi container={container}>
-      <AdditionalCardElements {...props} />
+      <IssueLinkBadgesContainerInner {...props} />
     </WithDi>
   );
 };

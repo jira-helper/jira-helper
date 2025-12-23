@@ -10,6 +10,16 @@ const mockStore = {
     columnsToTrack: [] as string[],
     showInBacklog: false,
     issueLinks: [],
+    daysInColumn: {
+      enabled: false,
+      warningThreshold: undefined,
+      dangerThreshold: undefined,
+    },
+    daysToDeadline: {
+      enabled: false,
+      fieldId: undefined,
+      warningThreshold: undefined,
+    },
   },
   actions: {
     setEnabled: vi.fn(),
@@ -21,6 +31,8 @@ const mockStore = {
     updateIssueLink: vi.fn(),
     removeIssueLink: vi.fn(),
     clearIssueLinks: vi.fn(),
+    setDaysInColumn: vi.fn(),
+    setDaysToDeadline: vi.fn(),
   },
 };
 
@@ -56,6 +68,16 @@ vi.mock('src/shared/components', () => ({
 // Mock the IssueLinkSettings
 vi.mock('./IssueLinkSettings', () => ({
   IssueLinkSettings: () => <div data-testid="issue-link-settings">Issue Link Settings</div>,
+}));
+
+// Mock the DaysInColumnSettings
+vi.mock('./DaysInColumnSettings', () => ({
+  DaysInColumnSettings: () => <div data-testid="days-in-column-settings">Days In Column Settings</div>,
+}));
+
+// Mock the DaysToDeadlineSettings
+vi.mock('./DaysToDeadlineSettings', () => ({
+  DaysToDeadlineSettings: () => <div data-testid="days-to-deadline-settings">Days To Deadline Settings</div>,
 }));
 
 describe('AdditionalCardElementsSettings', () => {

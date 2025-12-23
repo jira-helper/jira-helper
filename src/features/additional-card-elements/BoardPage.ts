@@ -5,6 +5,8 @@ import { registerSettings } from 'src/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
 import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions/loadAdditionalCardElementsBoardProperty';
 import { autosyncStoreWithBoardProperty } from './BoardSettings/actions/autosyncStoreWithBoardProperty';
+import { IssueLinkBadgesContainer } from './IssueLinkBadgesContainer/IssueLinkBadgesContainer';
+import { CardStatusBadgesContainer } from './CardStatusBadgesContainer/CardStatusBadgesContainer';
 
 export class AdditionalCardElementsBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -23,13 +25,24 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
     const turnOffAutoSync = await autosyncStoreWithBoardProperty();
     this.sideEffects.push(turnOffAutoSync);
 
-    const { AdditionalCardElementsContainer } = await import(
-      './AdditionalCardElementsContainer/AdditionalCardElementsContainer'
+    // Check if Days in Column feature is enabled and hide default Jira counter
+    const { useAdditionalCardElementsBoardPropertyStore } = await import(
+      './stores/additionalCardElementsBoardProperty'
     );
+    const store = useAdditionalCardElementsBoardPropertyStore.getState();
+    if (store.data.enabled && store.data.daysInColumn?.enabled) {
+      BoardPagePageObject.hideDaysInColumn();
+    }
+
     const unlisten = BoardPagePageObject.listenCards(cards => {
       cards.forEach(card => {
-        card.attach(AdditionalCardElementsContainer, 'additional-card-elements', {
+        // Issue link badges - after summary
+        card.attach(IssueLinkBadgesContainer, 'issue-link-badges', {
           position: 'aftersummary',
+        });
+        // Days in column & deadline badges - at the end of card
+        card.attach(CardStatusBadgesContainer, 'card-status-badges', {
+          position: 'beforeend',
         });
       });
     });

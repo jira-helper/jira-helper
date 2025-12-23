@@ -12,9 +12,7 @@ describe('Additional Card Elements Store', () => {
 
   beforeEach(() => {
     // Reset to initial state before each test
-    useAdditionalCardElementsBoardPropertyStore.setState(
-      useAdditionalCardElementsBoardPropertyStore.getInitialState()
-    );
+    useAdditionalCardElementsBoardPropertyStore.setState(useAdditionalCardElementsBoardPropertyStore.getInitialState());
   });
 
   afterAll(() => {
@@ -107,7 +105,7 @@ describe('Additional Card Elements Store', () => {
       // ARRANGE
       const store = useAdditionalCardElementsBoardPropertyStore.getState();
       store.actions.setShowInBacklog(true);
-      
+
       // Verify it was set to true
       const stateAfterTrue = useAdditionalCardElementsBoardPropertyStore.getState();
       expect(stateAfterTrue.data.showInBacklog).toBe(true);

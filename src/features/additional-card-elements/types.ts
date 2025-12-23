@@ -21,9 +21,27 @@ export type IssueLink = {
   multilineSummary?: boolean;
 };
 
+export type DaysInColumnSettings = {
+  enabled: boolean;
+  warningThreshold?: number;
+  dangerThreshold?: number;
+};
+
+export type DaysToDeadlineDisplayMode = 'always' | 'lessThanOrOverdue' | 'overdueOnly';
+
+export type DaysToDeadlineSettings = {
+  enabled: boolean;
+  fieldId?: string;
+  displayMode?: DaysToDeadlineDisplayMode; // По умолчанию 'always'
+  displayThreshold?: number; // Для режима 'lessThanOrOverdue'
+  warningThreshold?: number;
+};
+
 export type AdditionalCardElementsBoardProperty = {
   enabled?: boolean;
   columnsToTrack?: string[];
   showInBacklog?: boolean;
   issueLinks?: IssueLink[];
+  daysInColumn?: DaysInColumnSettings;
+  daysToDeadline?: DaysToDeadlineSettings;
 };

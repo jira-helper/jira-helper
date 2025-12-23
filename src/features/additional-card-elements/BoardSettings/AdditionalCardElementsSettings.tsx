@@ -4,6 +4,8 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { ColumnSelectorContainer } from 'src/shared/components';
 import { IssueLinkSettings } from './IssueLinkSettings';
+import { DaysInColumnSettings } from './DaysInColumnSettings';
+import { DaysToDeadlineSettings } from './DaysToDeadlineSettings';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 
 const TEXTS = {
@@ -115,6 +117,20 @@ export const AdditionalCardElementsSettings: React.FC = () => {
           {/* Issue Link Settings */}
           <div>
             <IssueLinkSettings />
+          </div>
+
+          <Divider />
+
+          {/* Days in Column Settings */}
+          <div>
+            <DaysInColumnSettings />
+          </div>
+
+          <Divider />
+
+          {/* Days to Deadline Settings */}
+          <div>
+            <DaysToDeadlineSettings />
           </div>
         </>
       )}

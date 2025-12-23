@@ -1,13 +1,29 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import { State } from './additionalCardElementsBoardProperty.types';
-import { AdditionalCardElementsBoardProperty, IssueLink } from '../types';
+import { RequiredBoardProperty, State } from './additionalCardElementsBoardProperty.types';
+import { DaysInColumnSettings, DaysToDeadlineSettings, IssueLink } from '../types';
 
-const initialData: Required<AdditionalCardElementsBoardProperty> = {
+const DEFAULT_DAYS_IN_COLUMN: DaysInColumnSettings = {
+  enabled: false,
+  warningThreshold: undefined,
+  dangerThreshold: undefined,
+};
+
+const DEFAULT_DAYS_TO_DEADLINE: DaysToDeadlineSettings = {
+  enabled: false,
+  fieldId: undefined,
+  displayMode: 'always',
+  displayThreshold: undefined,
+  warningThreshold: undefined,
+};
+
+const initialData: RequiredBoardProperty = {
   enabled: false,
   columnsToTrack: [],
   showInBacklog: false,
   issueLinks: [],
+  daysInColumn: DEFAULT_DAYS_IN_COLUMN,
+  daysToDeadline: DEFAULT_DAYS_TO_DEADLINE,
 };
 
 export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set => ({
@@ -77,6 +93,20 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
       set(
         produce((state: State) => {
           state.data.issueLinks = [];
+        })
+      ),
+
+    setDaysInColumn: (settings: Partial<DaysInColumnSettings>) =>
+      set(
+        produce((state: State) => {
+          state.data.daysInColumn = { ...state.data.daysInColumn, ...settings };
+        })
+      ),
+
+    setDaysToDeadline: (settings: Partial<DaysToDeadlineSettings>) =>
+      set(
+        produce((state: State) => {
+          state.data.daysToDeadline = { ...state.data.daysToDeadline, ...settings };
         })
       ),
   },
@@ -150,6 +180,20 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
           state.data.issueLinks = [];
+        })
+      );
+    },
+    setDaysInColumn: (settings: Partial<DaysInColumnSettings>) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.daysInColumn = { ...state.data.daysInColumn, ...settings };
+        })
+      );
+    },
+    setDaysToDeadline: (settings: Partial<DaysToDeadlineSettings>) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.daysToDeadline = { ...state.data.daysToDeadline, ...settings };
         })
       );
     },

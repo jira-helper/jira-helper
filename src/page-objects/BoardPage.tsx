@@ -16,7 +16,7 @@ class CardPageObject {
   attach(
     ComponentToAttach: React.ComponentType<{ issueId: string }>,
     key: string,
-    options?: { position: 'aftersummary' }
+    options?: { position: 'aftersummary' | 'beforeend' }
   ) {
     let div = this.card.querySelector(`[data-jh-attached-key="${key}"]`);
 
@@ -29,6 +29,9 @@ class CardPageObject {
     if (options?.position === 'aftersummary') {
       // ghx-summary is inside ghx-issue-fields and ghx-issue-fields width is not 100%
       this.card.querySelector('.ghx-issue-fields')?.after(div);
+    } else if (options?.position === 'beforeend') {
+      // Insert at the very end of card content
+      this.card.querySelector('.ghx-issue-content')?.appendChild(div);
     } else {
       this.card.querySelector('.ghx-issue-content')?.appendChild(div);
     }
@@ -63,6 +66,7 @@ export interface IBoardPagePageObject {
     column: string;
     columnHeader: string;
     columnTitle: string;
+    daysInColumn: string;
   };
 
   classlist: {
@@ -72,6 +76,8 @@ export interface IBoardPagePageObject {
   getColumns(): string[];
   listenCards(callback: (cards: CardPageObject[]) => void): () => void;
   getColumnOfIssue(issueId: string): string;
+  getDaysInColumn(issueId: string): number | null;
+  hideDaysInColumn(): void;
   getHtml(): string;
 }
 
@@ -86,6 +92,7 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     column: '.ghx-column',
     columnHeader: '#ghx-column-headers',
     columnTitle: '.ghx-column-title',
+    daysInColumn: '.ghx-days',
   },
 
   classlist: {
@@ -131,6 +138,54 @@ export const BoardPagePageObject: IBoardPagePageObject = {
 
     const column = document.querySelector(this.selectors.columnHeader)?.querySelector(`[data-id="${columnId}"]`);
     return column?.querySelector(this.selectors.columnTitle)?.textContent?.trim() || '';
+  },
+
+  getDaysInColumn(issueId: string): number | null {
+    const issue = document.querySelector(`[data-issue-key="${issueId}"]`);
+    if (!issue) return null;
+
+    const daysElement = issue.querySelector(this.selectors.daysInColumn);
+    if (!daysElement) return null;
+
+    // Try to get from data-tooltip attribute first
+    const tooltip = daysElement.getAttribute('data-tooltip') || daysElement.getAttribute('title') || '';
+    // Format: "X day(s) in this column"
+    const match = tooltip.match(/(\d+)\s*day/i);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+
+    // Fallback: count the number of dot elements (each dot = 1 day)
+    const dots = daysElement.querySelectorAll('.ghx-days-icon');
+    if (dots.length > 0) {
+      return dots.length;
+    }
+
+    // Last resort: try to parse text content
+    const text = daysElement.textContent?.trim() || '';
+    const textMatch = text.match(/(\d+)/);
+    if (textMatch) {
+      return parseInt(textMatch[1], 10);
+    }
+
+    return null;
+  },
+
+  hideDaysInColumn(): void {
+    // Add CSS rule to hide default Jira days counter
+    const styleId = 'jira-helper-hide-days-in-column';
+    if (document.getElementById(styleId)) {
+      return; // Already added
+    }
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .ghx-issue .ghx-days {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
   },
 
   getHtml(): string {

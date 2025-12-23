@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDi, WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { loadSubtasksForIssue } from 'src/shared/jira/stores/jiraSubtasks.actions';
 import { useGetSettings } from '../hooks/useGetSettings';
