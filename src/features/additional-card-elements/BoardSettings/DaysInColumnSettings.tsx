@@ -54,6 +54,10 @@ const TEXTS = {
     en: 'Danger',
     ru: 'Опасность',
   },
+  jiraSettingsRequired: {
+    en: 'Important: This feature works ONLY if "Show days in column" is enabled in your board settings. Please check your board configuration → Card layout → Show days in column.',
+    ru: 'Важно: Эта функция работает ТОЛЬКО если в настройках доски включено "Показывать дни в колонке". Проверьте настройки доски → Макет карточки → Показывать дни в колонке.',
+  },
 } as const;
 
 interface ColumnThresholdRowProps {
@@ -63,7 +67,7 @@ interface ColumnThresholdRowProps {
   onWarningChange: (value: number | null) => void;
   onDangerChange: (value: number | null) => void;
   onRemove: () => void;
-  texts: ReturnType<typeof useGetTextsByLocale<typeof TEXTS>>;
+  texts: ReturnType<typeof useGetTextsByLocale<keyof typeof TEXTS>>;
 }
 
 const ColumnThresholdRow: React.FC<ColumnThresholdRowProps> = ({
@@ -277,6 +281,13 @@ export const DaysInColumnSettings: React.FC = () => {
       {daysInColumn.enabled && (
         <div style={{ marginLeft: '24px' }}>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Alert
+              type="info"
+              message={texts.jiraSettingsRequired}
+              showIcon
+              data-testid="days-in-column-jira-settings-required"
+              style={{ marginBottom: '8px' }}
+            />
             {!daysInColumn.usePerColumnThresholds ? (
               // Global thresholds
               <>
