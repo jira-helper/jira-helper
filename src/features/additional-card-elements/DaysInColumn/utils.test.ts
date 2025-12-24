@@ -1,6 +1,107 @@
 import { describe, it, expect } from 'vitest';
-import { getDaysInColumnColor, formatDaysInColumn } from './utils';
+import {
+  getDaysInColumnColor,
+  getDaysInColumnColorFromThresholds,
+  getEffectiveThresholds,
+  formatDaysInColumn,
+} from './utils';
 import { DaysInColumnSettings } from '../types';
+
+describe('getEffectiveThresholds', () => {
+  it('should return global thresholds when usePerColumnThresholds is false', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: false,
+    };
+
+    const result = getEffectiveThresholds(settings, 'In Progress');
+
+    expect(result).toEqual({
+      warningThreshold: 3,
+      dangerThreshold: 7,
+    });
+  });
+
+  it('should return global thresholds when columnName is not provided', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: true,
+      perColumnThresholds: {
+        'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
+      },
+    };
+
+    const result = getEffectiveThresholds(settings);
+
+    expect(result).toEqual({
+      warningThreshold: 3,
+      dangerThreshold: 7,
+    });
+  });
+
+  it('should return per-column thresholds when usePerColumnThresholds is true', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: true,
+      perColumnThresholds: {
+        'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
+        Testing: { warningThreshold: 2, dangerThreshold: 4 },
+      },
+    };
+
+    expect(getEffectiveThresholds(settings, 'In Progress')).toEqual({
+      warningThreshold: 5,
+      dangerThreshold: 10,
+    });
+
+    expect(getEffectiveThresholds(settings, 'Testing')).toEqual({
+      warningThreshold: 2,
+      dangerThreshold: 4,
+    });
+  });
+
+  it('should return empty thresholds for column without specific settings', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: true,
+      perColumnThresholds: {
+        'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
+      },
+    };
+
+    const result = getEffectiveThresholds(settings, 'Unknown Column');
+
+    expect(result).toEqual({});
+  });
+});
+
+describe('getDaysInColumnColorFromThresholds', () => {
+  it('should return blue when no thresholds are set', () => {
+    expect(getDaysInColumnColorFromThresholds(1, {})).toBe('blue');
+    expect(getDaysInColumnColorFromThresholds(5, {})).toBe('blue');
+    expect(getDaysInColumnColorFromThresholds(100, {})).toBe('blue');
+  });
+
+  it('should return yellow when warning threshold is reached', () => {
+    const thresholds = { warningThreshold: 3, dangerThreshold: 7 };
+    expect(getDaysInColumnColorFromThresholds(3, thresholds)).toBe('yellow');
+    expect(getDaysInColumnColorFromThresholds(5, thresholds)).toBe('yellow');
+  });
+
+  it('should return red when danger threshold is reached', () => {
+    const thresholds = { warningThreshold: 3, dangerThreshold: 7 };
+    expect(getDaysInColumnColorFromThresholds(7, thresholds)).toBe('red');
+    expect(getDaysInColumnColorFromThresholds(10, thresholds)).toBe('red');
+  });
+});
 
 describe('getDaysInColumnColor', () => {
   it('should return blue when no thresholds are set', () => {
@@ -72,6 +173,46 @@ describe('getDaysInColumnColor', () => {
     expect(getDaysInColumnColor(2, settings)).toBe('blue');
     expect(getDaysInColumnColor(3, settings)).toBe('red');
     expect(getDaysInColumnColor(5, settings)).toBe('red');
+  });
+
+  it('should use per-column thresholds when enabled', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: true,
+      perColumnThresholds: {
+        'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
+        Testing: { warningThreshold: 2, dangerThreshold: 4 },
+      },
+    };
+
+    // In Progress column: warning at 5, danger at 10
+    expect(getDaysInColumnColor(4, settings, 'In Progress')).toBe('blue');
+    expect(getDaysInColumnColor(5, settings, 'In Progress')).toBe('yellow');
+    expect(getDaysInColumnColor(10, settings, 'In Progress')).toBe('red');
+
+    // Testing column: warning at 2, danger at 4
+    expect(getDaysInColumnColor(1, settings, 'Testing')).toBe('blue');
+    expect(getDaysInColumnColor(2, settings, 'Testing')).toBe('yellow');
+    expect(getDaysInColumnColor(4, settings, 'Testing')).toBe('red');
+  });
+
+  it('should return blue for columns without specific thresholds when per-column is enabled', () => {
+    const settings: DaysInColumnSettings = {
+      enabled: true,
+      warningThreshold: 3,
+      dangerThreshold: 7,
+      usePerColumnThresholds: true,
+      perColumnThresholds: {
+        'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
+      },
+    };
+
+    // Unknown column has no thresholds defined
+    expect(getDaysInColumnColor(1, settings, 'Unknown Column')).toBe('blue');
+    expect(getDaysInColumnColor(10, settings, 'Unknown Column')).toBe('blue');
+    expect(getDaysInColumnColor(100, settings, 'Unknown Column')).toBe('blue');
   });
 });
 

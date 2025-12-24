@@ -1,11 +1,27 @@
 import { BadgeColor } from '../Badge';
-import { DaysInColumnSettings } from '../types';
+import { ColumnThresholds, DaysInColumnSettings } from '../types';
 
 /**
- * Determines the badge color based on days in column and settings
+ * Gets effective thresholds for a column.
+ * If usePerColumnThresholds is enabled, returns per-column thresholds.
+ * Otherwise, returns global thresholds.
  */
-export function getDaysInColumnColor(days: number, settings: DaysInColumnSettings): BadgeColor {
-  const { warningThreshold, dangerThreshold } = settings;
+export function getEffectiveThresholds(settings: DaysInColumnSettings, columnName?: string): ColumnThresholds {
+  if (settings.usePerColumnThresholds && columnName) {
+    return settings.perColumnThresholds?.[columnName] || {};
+  }
+
+  return {
+    warningThreshold: settings.warningThreshold,
+    dangerThreshold: settings.dangerThreshold,
+  };
+}
+
+/**
+ * Determines the badge color based on days in column and thresholds
+ */
+export function getDaysInColumnColorFromThresholds(days: number, thresholds: ColumnThresholds): BadgeColor {
+  const { warningThreshold, dangerThreshold } = thresholds;
 
   // If danger is set and reached - red
   if (dangerThreshold !== undefined && days >= dangerThreshold) {
@@ -19,6 +35,15 @@ export function getDaysInColumnColor(days: number, settings: DaysInColumnSetting
 
   // Default - blue
   return 'blue';
+}
+
+/**
+ * Determines the badge color based on days in column and settings.
+ * Supports both global and per-column thresholds.
+ */
+export function getDaysInColumnColor(days: number, settings: DaysInColumnSettings, columnName?: string): BadgeColor {
+  const thresholds = getEffectiveThresholds(settings, columnName);
+  return getDaysInColumnColorFromThresholds(days, thresholds);
 }
 
 /**

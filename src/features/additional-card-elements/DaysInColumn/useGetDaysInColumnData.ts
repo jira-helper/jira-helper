@@ -23,7 +23,9 @@ export function useGetDaysInColumnData(issueKey: string): DaysInColumnData | nul
       return null;
     }
 
-    const color = getDaysInColumnColor(days, settings);
+    // Get column name for per-column thresholds
+    const columnName = BoardPagePageObject.getColumnOfIssue(issueKey);
+    const color = getDaysInColumnColor(days, settings, columnName);
     const text = formatDaysInColumn(days);
 
     return { text, color, days };

@@ -124,22 +124,49 @@ IssueLinkBadgesContainer(issueKey) → IssueLinkBadges(issueKey) → useGetIssue
 
 Я хочу видеть, сколько дней задача находится в текущей колонке, чтобы быстро определять "застрявшие" задачи и настроить цветовые пороги для выделения проблемных задач.
 
+Также хочу возможность задать разные пороги для разных колонок, потому что время, приемлемое для разных этапов работы, может различаться (например, тестирование должно занимать не более 3 дней, а разработка — до 10 дней).
+
 ## Типы данных
 
 ```typescript
+type ColumnThresholds = {
+  warningThreshold?: number;
+  dangerThreshold?: number;
+};
+
+type PerColumnThresholds = Record<string, ColumnThresholds>;
+
 interface DaysInColumnSettings {
   enabled: boolean;
-  warningThreshold?: number; // undefined = не подсвечивать желтым
-  dangerThreshold?: number;  // undefined = не подсвечивать красным
+  warningThreshold?: number;           // undefined = не подсвечивать желтым
+  dangerThreshold?: number;            // undefined = не подсвечивать красным
+  usePerColumnThresholds?: boolean;    // Использовать отдельные пороги для каждой колонки
+  perColumnThresholds?: PerColumnThresholds; // Пороги для каждой колонки
 }
 ```
 
 ## Настройки (Settings UI)
 
 - **Включение**: Checkbox, связан с `daysInColumn.enabled`
+- **Отдельные правила для колонок**: Checkbox, связан с `usePerColumnThresholds`. Если включено — глобальные пороги скрываются, появляются строки для каждой колонки
+
+### Глобальные пороги (если `usePerColumnThresholds = false`)
 - **Порог желтого**: InputNumber (placeholder: "Не задано", min: 1), связан с `warningThreshold`
 - **Порог красного**: InputNumber (placeholder: "Не задано", min: 1), связан с `dangerThreshold`
 - **Валидация**: Alert если `dangerThreshold <= warningThreshold`. Сохранение НЕ блокируется
+
+### Пороги по колонкам (если `usePerColumnThresholds = true`)
+Для каждой колонки из `columnsToTrack` отображается строка с:
+- **Название колонки**: текст
+- **Порог желтого**: InputNumber (min: 1), связан с `perColumnThresholds[columnName].warningThreshold`
+- **Порог красного**: InputNumber (min: 1), связан с `perColumnThresholds[columnName].dangerThreshold`
+- **Иконка предупреждения**: если `dangerThreshold <= warningThreshold`
+
+### Обработка устаревших колонок
+Если в `perColumnThresholds` есть колонки, которых больше нет на доске:
+- Отображается строка с предупреждением "Эта колонка больше не существует на доске"
+- Кнопка "Удалить" для очистки настроек этой колонки
+- Фон строки — оранжевый
 
 ## Архитектура компонента
 
@@ -149,15 +176,20 @@ CardStatusBadgesContainer(issueKey) → DaysInColumnBadge(issueKey) → useGetDa
 
 - **Контейнер** (`CardStatusBadgesContainer`): проверяет `enabled` и `daysInColumn.enabled`, передаёт `issueKey`
 - **Компонент** (`DaysInColumnBadge`): вызывает хук, рендерит Badge или null
-- **Хук** (`useGetDaysInColumnData`): парсит дни из DOM (`.ghx-days`), получает настройки из store, вызывает pure-функции для цвета и текста
-- **Pure-функции**: `getDaysInColumnColor(days, settings)`, `formatDaysInColumn(days)`
+- **Хук** (`useGetDaysInColumnData`): парсит дни из DOM (`.ghx-days`), получает название колонки через `getColumnOfIssue`, получает настройки из store, вызывает pure-функции для цвета и текста
+- **Pure-функции**: 
+  - `getEffectiveThresholds(settings, columnName)` — возвращает актуальные пороги (глобальные или для колонки)
+  - `getDaysInColumnColor(days, settings, columnName?)` — определяет цвет бейджа
+  - `formatDaysInColumn(days)` — форматирует текст
 
 **Получение данных**: Парсинг элемента `.ghx-days` на карточке, извлечение числа из `data-tooltip`
 
 **Цветовая схема**:
+При `usePerColumnThresholds = true` используются пороги для конкретной колонки, иначе — глобальные.
 - Синий: пороги не заданы или `days < warningThreshold`
 - Желтый: `warningThreshold` задан и `days >= warningThreshold`
 - Красный: `dangerThreshold` задан и `days >= dangerThreshold`
+- Если для колонки не заданы пороги (при `usePerColumnThresholds = true`) — бейдж синий
 
 **Формат текста**:
 - `days === 0`: "<1 дн. в колонке" / "<1 day in column"
@@ -177,8 +209,20 @@ CardStatusBadgesContainer(issueKey) → DaysInColumnBadge(issueKey) → useGetDa
 
 ## Тестирование
 
-**Unit тесты**: Всегда синий без порогов, цвета с порогами, работа при `danger < warning`, парсинг из DOM
-**Storybook**: Различные комбинации дней и порогов
+**Unit тесты**: 
+- Всегда синий без порогов
+- Цвета с глобальными порогами
+- Цвета с порогами по колонкам
+- Работа при `danger < warning`
+- Парсинг из DOM
+- `getEffectiveThresholds` — возврат глобальных/по-колоночных порогов
+
+**Storybook**: 
+- Глобальные пороги
+- Невалидные глобальные пороги (danger < warning)
+- Пороги по колонкам
+- Несуществующая колонка в настройках
+- Частично заданные пороги по колонкам
 
 ---
 

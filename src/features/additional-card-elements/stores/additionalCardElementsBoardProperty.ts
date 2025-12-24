@@ -7,6 +7,8 @@ const DEFAULT_DAYS_IN_COLUMN: DaysInColumnSettings = {
   enabled: false,
   warningThreshold: undefined,
   dangerThreshold: undefined,
+  usePerColumnThresholds: false,
+  perColumnThresholds: {},
 };
 
 const DEFAULT_DAYS_TO_DEADLINE: DaysToDeadlineSettings = {

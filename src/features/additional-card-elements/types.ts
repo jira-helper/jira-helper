@@ -21,10 +21,19 @@ export type IssueLink = {
   multilineSummary?: boolean;
 };
 
+export type ColumnThresholds = {
+  warningThreshold?: number;
+  dangerThreshold?: number;
+};
+
+export type PerColumnThresholds = Record<string, ColumnThresholds>;
+
 export type DaysInColumnSettings = {
   enabled: boolean;
   warningThreshold?: number;
   dangerThreshold?: number;
+  usePerColumnThresholds?: boolean;
+  perColumnThresholds?: PerColumnThresholds;
 };
 
 export type DaysToDeadlineDisplayMode = 'always' | 'lessThanOrOverdue' | 'overdueOnly';
