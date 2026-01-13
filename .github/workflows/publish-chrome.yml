@@ -51,7 +51,7 @@ jobs:
           EXTENSION_ZIP_PATH: ./jira-helper.zip
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: chrome-extension-${{ github.event.release.tag_name }}
