@@ -111,8 +111,41 @@ Please use `english` language only to name branches and commits.
 
 The official version of the extension is published in ["Chrome WebStore"](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
 
-The extension is published after the release [is assembled at github](https://github.com/jira-helper/jira-helper/releases)
-
-Release version is the same as the application version in package.json  [package.json](./package.json) and the version published in ["Chrome WebStore"](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
+Release version is the same as the application version in [package.json](./package.json) and the version published in ["Chrome WebStore"](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
 
 _Minimum required Chrome [version is >= 88](./src/manifest.json)_
+
+### Publishing a new version
+
+The extension can be published automatically via GitHub Actions or manually using a script.
+
+#### Automatic publishing (recommended)
+
+1. Update the version in `package.json`
+2. Commit and push the changes
+3. Create a new [GitHub Release](https://github.com/jira-helper/jira-helper/releases/new) with the tag matching the version (e.g., `v2.29.0`)
+4. The GitHub Actions workflow will automatically:
+   - Build the extension
+   - Upload it to Chrome Web Store
+   - Publish it
+
+**Setup required (one-time):**
+- Configure GitHub Secrets with Chrome Web Store credentials (see [detailed setup guide](./docs/CHROME_WEBSTORE_PUBLISH.md))
+
+#### Manual publishing
+
+1. Update the version in `package.json`
+2. Build the extension:
+   ```bash
+   npm run prod
+   ```
+3. Publish to Chrome Web Store:
+   ```bash
+   CHROME_WEBSTORE_CREDENTIALS_FILE=./path/to/credentials.json node tools/publish-chrome-webstore.js
+   ```
+   Or using credentials from environment variable:
+   ```bash
+   CHROME_WEBSTORE_CREDENTIALS='{"type":"service_account",...}' node tools/publish-chrome-webstore.js
+   ```
+
+For detailed setup instructions, see the [Chrome Web Store Publishing Guide](./docs/CHROME_WEBSTORE_PUBLISH.md).

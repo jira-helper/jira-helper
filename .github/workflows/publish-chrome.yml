@@ -1,0 +1,59 @@
+name: Publish to Chrome Web Store
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and test
+        run: |
+          npm run lint
+          npm test
+        env:
+          CI: true
+
+      - name: Build extension
+        run: npm run prod
+        env:
+          CI: true
+
+      - name: Verify zip file exists
+        run: |
+          if [ ! -f jira-helper.zip ]; then
+            echo "❌ jira-helper.zip not found!"
+            exit 1
+          fi
+          echo "✅ jira-helper.zip found ($(du -h jira-helper.zip | cut -f1))"
+
+      - name: Publish to Chrome Web Store
+        run: node tools/publish-chrome-webstore.js
+        env:
+          CHROME_WEBSTORE_CREDENTIALS: ${{ secrets.CHROME_WEBSTORE_CREDENTIALS }}
+          EXTENSION_ZIP_PATH: ./jira-helper.zip
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: chrome-extension-${{ github.event.release.tag_name }}
+          path: jira-helper.zip
+          retention-days: 30
