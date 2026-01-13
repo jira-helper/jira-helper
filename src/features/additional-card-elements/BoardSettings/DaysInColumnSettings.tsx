@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Checkbox, InputNumber, Alert, Space, Typography, Button } from 'antd';
 import { DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useDi } from 'src/shared/diContext';
-import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { ColumnThresholds } from '../types';
+import { useDaysInColumnSettings } from './hooks/useDaysInColumnSettings';
 
 const { Text } = Typography;
 
@@ -159,100 +157,19 @@ const ColumnThresholdRow: React.FC<ColumnThresholdRowProps> = ({
 
 export const DaysInColumnSettings: React.FC = () => {
   const texts = useGetTextsByLocale(TEXTS);
-  const boardPagePageObject = useDi().inject(boardPagePageObjectToken) as typeof BoardPagePageObject;
-  const { data, actions } = useAdditionalCardElementsBoardPropertyStore();
-  const { daysInColumn, columnsToTrack } = data;
-
-  const [boardColumns, setBoardColumns] = useState<string[]>([]);
-
-  // Get columns from board (with retry for late loading)
-  useEffect(() => {
-    const getColumns = () => {
-      const columns = boardPagePageObject.getColumns();
-      if (columns.length > 0) {
-        setBoardColumns(columns);
-      }
-    };
-
-    getColumns();
-
-    // Retry periodically if no columns found
-    if (boardColumns.length === 0) {
-      const interval = setInterval(getColumns, 1000);
-      return () => clearInterval(interval);
-    }
-
-    return undefined;
-  }, [boardPagePageObject, boardColumns.length]);
-
-  const handleEnabledChange = (checked: boolean) => {
-    actions.setDaysInColumn({ enabled: checked });
-  };
-
-  const handleWarningThresholdChange = (value: number | null) => {
-    actions.setDaysInColumn({ warningThreshold: value ?? undefined });
-  };
-
-  const handleDangerThresholdChange = (value: number | null) => {
-    actions.setDaysInColumn({ dangerThreshold: value ?? undefined });
-  };
-
-  const handleUsePerColumnThresholdsChange = (checked: boolean) => {
-    actions.setDaysInColumn({ usePerColumnThresholds: checked });
-  };
-
-  const handleColumnWarningChange = (columnName: string, value: number | null) => {
-    const perColumnThresholds = { ...(daysInColumn.perColumnThresholds || {}) };
-    perColumnThresholds[columnName] = {
-      ...perColumnThresholds[columnName],
-      warningThreshold: value ?? undefined,
-    };
-    actions.setDaysInColumn({ perColumnThresholds });
-  };
-
-  const handleColumnDangerChange = (columnName: string, value: number | null) => {
-    const perColumnThresholds = { ...(daysInColumn.perColumnThresholds || {}) };
-    perColumnThresholds[columnName] = {
-      ...perColumnThresholds[columnName],
-      dangerThreshold: value ?? undefined,
-    };
-    actions.setDaysInColumn({ perColumnThresholds });
-  };
-
-  const handleRemoveColumn = (columnName: string) => {
-    const perColumnThresholds = { ...(daysInColumn.perColumnThresholds || {}) };
-    delete perColumnThresholds[columnName];
-    actions.setDaysInColumn({ perColumnThresholds });
-  };
-
-  const hasInvalidGlobalThresholds =
-    daysInColumn.warningThreshold !== undefined &&
-    daysInColumn.dangerThreshold !== undefined &&
-    daysInColumn.dangerThreshold <= daysInColumn.warningThreshold;
-
-  // Get columns that should show thresholds:
-  // 1. Columns from columnsToTrack that exist on board
-  // 2. Columns from perColumnThresholds that don't exist on board (for warning/removal)
-  const columnsForThresholds = React.useMemo(() => {
-    const perColumnThresholds = daysInColumn.perColumnThresholds || {};
-    const result: { name: string; existsOnBoard: boolean }[] = [];
-
-    // Add tracked columns that exist on board
-    columnsToTrack.forEach(col => {
-      if (boardColumns.includes(col)) {
-        result.push({ name: col, existsOnBoard: true });
-      }
-    });
-
-    // Add columns from perColumnThresholds that don't exist on board
-    Object.keys(perColumnThresholds).forEach(col => {
-      if (!boardColumns.includes(col) && !result.some(r => r.name === col)) {
-        result.push({ name: col, existsOnBoard: false });
-      }
-    });
-
-    return result;
-  }, [columnsToTrack, boardColumns, daysInColumn.perColumnThresholds]);
+  const {
+    daysInColumn,
+    boardColumns,
+    columnsForThresholds,
+    hasInvalidGlobalThresholds,
+    handleEnabledChange,
+    handleWarningThresholdChange,
+    handleDangerThresholdChange,
+    handleUsePerColumnThresholdsChange,
+    handleColumnWarningChange,
+    handleColumnDangerChange,
+    handleRemoveColumn,
+  } = useDaysInColumnSettings();
 
   return (
     <div style={{ marginBottom: '24px' }}>
