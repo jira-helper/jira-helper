@@ -7,6 +7,7 @@ import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions
 import { autosyncStoreWithBoardProperty } from './BoardSettings/actions/autosyncStoreWithBoardProperty';
 import { IssueLinkBadgesContainer } from './IssueLinkBadgesContainer/IssueLinkBadgesContainer';
 import { CardStatusBadgesContainer } from './CardStatusBadgesContainer/CardStatusBadgesContainer';
+import { IssueConditionCheckContainer } from './IssueConditionCheck/IssueConditionCheckContainer';
 
 export class AdditionalCardElementsBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -43,6 +44,10 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
         // Days in column & deadline badges - at the end of card
         card.attach(CardStatusBadgesContainer, 'card-status-badges', {
           position: 'beforeend',
+        });
+        // Condition check badges - in footer before days counter
+        card.attach(IssueConditionCheckContainer, 'condition-check-badges', {
+          position: 'inFooterBeforeDays',
         });
       });
     });

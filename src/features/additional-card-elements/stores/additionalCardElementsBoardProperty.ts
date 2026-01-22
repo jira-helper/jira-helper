@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { RequiredBoardProperty, State } from './additionalCardElementsBoardProperty.types';
-import { DaysInColumnSettings, DaysToDeadlineSettings, IssueLink } from '../types';
+import { DaysInColumnSettings, DaysToDeadlineSettings, IssueConditionCheck, IssueLink } from '../types';
 
 const DEFAULT_DAYS_IN_COLUMN: DaysInColumnSettings = {
   enabled: false,
@@ -26,6 +26,7 @@ const initialData: RequiredBoardProperty = {
   issueLinks: [],
   daysInColumn: DEFAULT_DAYS_IN_COLUMN,
   daysToDeadline: DEFAULT_DAYS_TO_DEADLINE,
+  issueConditionChecks: [],
 };
 
 export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set => ({
@@ -109,6 +110,38 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
       set(
         produce((state: State) => {
           state.data.daysToDeadline = { ...state.data.daysToDeadline, ...settings };
+        })
+      ),
+
+    // Issue Condition Checks
+    setIssueConditionChecks: (checks: IssueConditionCheck[]) =>
+      set(
+        produce((state: State) => {
+          state.data.issueConditionChecks = checks;
+        })
+      ),
+
+    addIssueConditionCheck: (check: IssueConditionCheck) =>
+      set(
+        produce((state: State) => {
+          state.data.issueConditionChecks.push(check);
+        })
+      ),
+
+    updateIssueConditionCheck: (id: string, check: Partial<IssueConditionCheck>) =>
+      set(
+        produce((state: State) => {
+          const index = state.data.issueConditionChecks.findIndex(c => c.id === id);
+          if (index >= 0) {
+            state.data.issueConditionChecks[index] = { ...state.data.issueConditionChecks[index], ...check };
+          }
+        })
+      ),
+
+    removeIssueConditionCheck: (id: string) =>
+      set(
+        produce((state: State) => {
+          state.data.issueConditionChecks = state.data.issueConditionChecks.filter(c => c.id !== id);
         })
       ),
   },
@@ -196,6 +229,37 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
           state.data.daysToDeadline = { ...state.data.daysToDeadline, ...settings };
+        })
+      );
+    },
+    setIssueConditionChecks: (checks: IssueConditionCheck[]) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.issueConditionChecks = checks;
+        })
+      );
+    },
+    addIssueConditionCheck: (check: IssueConditionCheck) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.issueConditionChecks.push(check);
+        })
+      );
+    },
+    updateIssueConditionCheck: (id: string, check: Partial<IssueConditionCheck>) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          const index = state.data.issueConditionChecks.findIndex(c => c.id === id);
+          if (index >= 0) {
+            state.data.issueConditionChecks[index] = { ...state.data.issueConditionChecks[index], ...check };
+          }
+        })
+      );
+    },
+    removeIssueConditionCheck: (id: string) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.issueConditionChecks = state.data.issueConditionChecks.filter(c => c.id !== id);
         })
       );
     },

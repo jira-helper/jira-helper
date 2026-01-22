@@ -20,7 +20,7 @@ class CardPageObject {
   attach(
     ComponentToAttach: React.ComponentType<{ issueId: string }>,
     key: string,
-    options?: { position: 'aftersummary' | 'beforeend' }
+    options?: { position: 'aftersummary' | 'beforeend' | 'inFooterBeforeDays' }
   ) {
     let div = this.card.querySelector(`[data-jh-attached-key="${key}"]`);
 
@@ -28,11 +28,23 @@ class CardPageObject {
       return;
     }
 
-    div = document.createElement('div');
+    div = document.createElement('span');
     div.setAttribute('data-jh-attached-key', key);
     if (options?.position === 'aftersummary') {
       // ghx-summary is inside ghx-issue-fields and ghx-issue-fields width is not 100%
       this.card.querySelector('.ghx-issue-fields')?.after(div);
+    } else if (options?.position === 'inFooterBeforeDays') {
+      // Insert in .ghx-card-footer before .ghx-days if exists
+      const footer = this.card.querySelector('.ghx-card-footer');
+      const daysElement = footer?.querySelector('.ghx-days');
+      if (footer && daysElement) {
+        daysElement.before(div);
+      } else if (footer) {
+        footer.appendChild(div);
+      } else {
+        // Fallback: insert at the end of card content
+        this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+      }
     } else if (options?.position === 'beforeend') {
       // Insert at the very end of card content
       this.card.querySelector('.ghx-issue-content')?.appendChild(div);

@@ -6,6 +6,7 @@ import { ColumnSelectorContainer } from 'src/shared/components';
 import { IssueLinkSettings } from './IssueLinkSettings';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
 import { DaysToDeadlineSettings } from './DaysToDeadlineSettings';
+import { IssueConditionCheckSettings } from './IssueConditionCheckSettings';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 
 const TEXTS = {
@@ -131,6 +132,13 @@ export const AdditionalCardElementsSettings: React.FC = () => {
           {/* Days to Deadline Settings */}
           <div>
             <DaysToDeadlineSettings />
+          </div>
+
+          <Divider />
+
+          {/* Issue Condition Check Settings */}
+          <div>
+            <IssueConditionCheckSettings />
           </div>
         </>
       )}

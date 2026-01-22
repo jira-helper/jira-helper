@@ -2,16 +2,37 @@
 
 ## “jira-helper” features
 
-_version 2.20.0_
+_version 2.30.0_
 
-- [Chart Bar - showed count issues in columns for every swimlane on a board](./docs/index.md#swimlane-chart-bar)
-- [showed a red-flag on the issue panel](./docs/index.md#flag-on-issue-panel)
-- [WIP-limit for several columns](./docs/index.md#wip-limits-for-several-columns)
-- [WIP-limit for Swimlane](./docs/index.md#wip-limits-for-swimlanes)
-- [Personal WIP-limit](./docs/index.md#wip-limit-for-person)
+A browser extension that enhances Jira with advanced visualization, WIP-limits, and workflow management tools.
+
+[Full features documentation](./docs/features-summary.md) | [Detailed documentation](./docs/index.md)
+
+### WIP-Limits and Flow Management
+- [WIP-limit for several columns (CONWIP)](./docs/index.md#wip-limits-for-several-columns-conwip)
+- [WIP-limit for Swimlanes](./docs/index.md#wip-limits-for-swimlanes)
+- [Personal WIP-limit](./docs/index.md#wip-limits-for-individual-team-members)
+- [WIP-limit by Field Value](./docs/index.ru.md#wip-limit-for-field-value)
+- [WIP-limit on Cells](./docs/index.ru.md#wip-limit-on-cell)
+
+### Board Visualization
+- [Card Colors - full card highlighting](./docs/index.md#card-colors)
+- [Swimlane Chart Bar - issue count visualization](./docs/index.md#swimlane-chart-bar)
+- [Flag on Issue panel](./docs/index.md#flag-on-issue-panel)
+- [Secret data blurring](./docs/index.md#secret-data-blurring)
+
+### Task Progress and Relationships
+- [Sub-tasks Progress - progress bar on cards](./docs/index.md#sub-tasks-progress)
+- [Issue Links Display - show related issues on cards](./docs/index.md#issue-links-display)
+- [Days in Column - track time in column](./docs/index.md#days-in-column)
+- [Days to Deadline - deadline tracking](./docs/index.md#days-to-deadline)
+
+### Analytics
 - [SLA-line for Control Chart with percentile](./docs/index.md#sla-line-for-control-chart)
-- [Overlay Measurement Ruler on the Control Chart](./docs/index.md#control-chart-ruler)
-- [Secret data blurring](./docs/index.md#the-blurring-of-secret-data)
+- [Measurement Ruler on Control Chart](./docs/index.md#control-chart-scale)
+
+### Templates
+- [Task Description Template](./docs/index.md#task-description-template)
 
 ## Issuing project tasks
 

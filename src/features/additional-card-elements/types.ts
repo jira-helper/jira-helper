@@ -53,4 +53,90 @@ export type AdditionalCardElementsBoardProperty = {
   issueLinks?: IssueLink[];
   daysInColumn?: DaysInColumnSettings;
   daysToDeadline?: DaysToDeadlineSettings;
+  issueConditionChecks?: IssueConditionCheck[];
 };
+
+/**
+ * Issue Condition Check - проверка задач на соответствие условиям
+ *
+ * Режим 1 (simple): Если задача попадает под JQL - показываем иконку с тултипом
+ * Режим 2 (withSubtasks): Если задача попадает под issueJql И имеет подзадачи под subtaskJql - показываем иконку
+ */
+export type IssueConditionCheckMode = 'simple' | 'withSubtasks';
+
+/**
+ * Режим проверки подзадач:
+ * - 'any': условие соблюдено если ХОТЯ БЫ ОДНА подзадача подходит (по умолчанию)
+ * - 'all': условие соблюдено только если ВСЕ подзадачи подходят
+ */
+export type IssueConditionCheckSubtaskMatchMode = 'any' | 'all';
+
+/**
+ * Источники подзадач для проверки:
+ * - includeDirectSubtasks: прямые подзадачи (issuetype.subtask = true)
+ * - includeEpicChildren: задачи эпика (не subtask, связаны через Epic Link)
+ * - includeLinkedIssues: связанные задачи через issue links (Jira links, не external)
+ */
+export type IssueConditionCheckSubtaskSources = {
+  includeDirectSubtasks?: boolean; // По умолчанию true
+  includeEpicChildren?: boolean; // По умолчанию true
+  includeLinkedIssues?: boolean; // По умолчанию false
+};
+
+export type IssueConditionCheck = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  mode: IssueConditionCheckMode;
+  icon: IssueConditionCheckIcon;
+  color?: string; // Background color in hex format (e.g., '#ff0000'), undefined = no background
+  tooltipText: string;
+  animation?: IssueConditionCheckAnimation; // Анимация для привлечения внимания (по умолчанию 'none')
+
+  // Режим simple: JQL для проверки задачи
+  jql?: string;
+
+  // Режим withSubtasks: JQL для задачи и подзадач
+  issueJql?: string;
+  subtaskJql?: string;
+  subtaskMatchMode?: IssueConditionCheckSubtaskMatchMode; // По умолчанию 'any'
+  subtaskSources?: IssueConditionCheckSubtaskSources; // По умолчанию { includeDirectSubtasks: true, includeEpicChildren: true }
+};
+
+export type IssueConditionCheckIcon =
+  | 'warning'
+  | 'info'
+  | 'check'
+  | 'close'
+  | 'question'
+  | 'exclamation'
+  | 'flag'
+  | 'star'
+  | 'bug'
+  | 'clock'
+  // Priority & Status
+  | 'fire'
+  | 'rocket'
+  | 'lock'
+  | 'eye'
+  | 'bell'
+  | 'lightning'
+  | 'stop'
+  | 'link'
+  | 'pin'
+  | 'heart'
+  | 'thumbsUp'
+  | 'thumbsDown'
+  // Roles
+  | 'police'
+  | 'scientist'
+  | 'doctor'
+  // Vehicles
+  | 'car'
+  | 'policeCar'
+  | 'fireTruck'
+  | 'ambulance'
+  | 'racingCar'
+  | 'bus';
+
+export type IssueConditionCheckAnimation = 'none' | 'pulse' | 'breathe' | 'blink' | 'blinkFast' | 'shake';

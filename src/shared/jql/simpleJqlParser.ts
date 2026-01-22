@@ -80,7 +80,15 @@ export type JqlAstNode =
 export type JqlAstResult =
   | { type: 'AND' | 'OR'; left: JqlAstResult; right: JqlAstResult; matched: boolean }
   | { type: 'NOT'; expr: JqlAstResult; matched: boolean }
-  | { type: 'condition'; field: string; op: string; value?: string; values?: string[]; matched: boolean };
+  | {
+      type: 'condition';
+      field: string;
+      op: string;
+      value?: string;
+      values?: string[];
+      matched: boolean;
+      actualValue?: unknown; // Actual field value from the issue for debugging
+    };
 
 // Tokenizer that respects quoted strings and tracks if token was quoted
 function tokenize(jql: string): string[] {
@@ -384,25 +392,26 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
   if (ast.type === 'condition') {
     // Always use lowercased field names for case-insensitive matching
     const field = ast.field.toLowerCase();
+    const actualValue = getFieldValue(field);
     let matched = false;
     if (ast.value === 'EMPTY') {
       if (ast.op === '=') {
-        matched = isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = isArrayEmptyOrAll(actualValue, isEmpty);
       } else if (ast.op === '!=') {
-        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
       } else if (ast.op === 'is not') {
-        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
       }
     } else if (ast.op === '=') {
-      matched = anyMatch(getFieldValue(field), v => v == ast.value);
+      matched = anyMatch(actualValue, v => v == ast.value);
     } else if (ast.op === '!=') {
-      matched = allMatch(getFieldValue(field), v => v != ast.value);
+      matched = allMatch(actualValue, v => v != ast.value);
     } else if (ast.op === 'in') {
-      matched = anyMatch(getFieldValue(field), v => (ast.values ? ast.values.includes(v) : false));
+      matched = anyMatch(actualValue, v => (ast.values ? ast.values.includes(v) : false));
     } else if (ast.op === 'not in') {
-      matched = allMatch(getFieldValue(field), v => (ast.values ? !ast.values.includes(v) : false));
+      matched = allMatch(actualValue, v => (ast.values ? !ast.values.includes(v) : false));
     } else if (ast.op === '~') {
-      const result = anyMatch(getFieldValue(field), v => {
+      const result = anyMatch(actualValue, v => {
         if (typeof v === 'string' || typeof v === 'number') {
           return v.toString().includes(ast.value ?? '');
         }
@@ -415,7 +424,7 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
       });
       matched = result === undefined ? false : result;
     } else if (ast.op === '!~') {
-      const result = allMatch(getFieldValue(field), v => {
+      const result = allMatch(actualValue, v => {
         if (typeof v === 'string' || typeof v === 'number') {
           return !v.toString().includes(ast.value ?? '');
         }
@@ -428,7 +437,7 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
       });
       matched = result === undefined ? true : result;
     }
-    return { ...ast, matched, type: 'condition' };
+    return { ...ast, matched, actualValue, type: 'condition' };
   }
   throw new Error(`Unknown node: ${JSON.stringify(ast)}`);
 }

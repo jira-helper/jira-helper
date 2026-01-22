@@ -14,6 +14,9 @@
 - Container/pure component separation for testability and DI.
 - Hooks for state and effect management.
 - Utility functions for field value extraction and matching.
+- DOM-first anchor insertion for Jira cards:
+  - Prefer inserting UI into stable Jira anchors (e.g. `.ghx-card-footer`) to blend with native layout
+  - When possible, insert relative to existing elements (e.g. before `.ghx-days`) with safe fallbacks
 
 ## Component relationships
 - Board UI integrates group settings and progress/counter displays.
@@ -66,3 +69,26 @@
 5. **Default values: explicitly state "not set"**
    - ❌ Bad: `warningThreshold: 3` (unclear if mandatory)
    - ✅ Good: `warningThreshold?: number` + "default is empty, user must explicitly set"
+
+## Issue Condition Checks Patterns
+
+### Tooltip with Clickable Links
+- Для отображения ссылок в тултипе Ant Design Tooltip принимает ReactNode
+- Ссылки на подзадачи формируются через `window.location.origin + '/browse/' + key`
+- `onClick={e => e.stopPropagation()}` предотвращает клик по карточке при клике на ссылку
+
+### Subtask Match Modes
+- `any` — условие выполнено при наличии хотя бы одной подходящей подзадачи
+- `all` — условие выполнено только если ВСЕ подзадачи подходят (и есть хотя бы одна)
+- Режим `all` с пустым списком подзадач = false (требуется минимум одна подзадача)
+
+### CSS Animations
+- Анимации определены через `@keyframes` в CSS Module
+- Классы анимаций применяются динамически через `getAnimationClass()`
+- `blink` — медленный (2.5s), `blinkFast` — быстрый (1.5s)
+
+### ColorPicker Integration
+- Ant Design ColorPicker с `allowClear` для опционального цвета
+- `presets` для быстрого выбора рекомендованных цветов
+- `color?: string` (hex) или `undefined` (без фона)
+- Inline styles для применения цвета: `style={{ backgroundColor: color }}`

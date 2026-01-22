@@ -1,4 +1,10 @@
-import { IssueLink, AdditionalCardElementsBoardProperty, DaysInColumnSettings, DaysToDeadlineSettings } from '../types';
+import {
+  IssueLink,
+  AdditionalCardElementsBoardProperty,
+  DaysInColumnSettings,
+  DaysToDeadlineSettings,
+  IssueConditionCheck,
+} from '../types';
 
 export type RequiredBoardProperty = {
   enabled: boolean;
@@ -7,6 +13,7 @@ export type RequiredBoardProperty = {
   issueLinks: IssueLink[];
   daysInColumn: DaysInColumnSettings;
   daysToDeadline: DaysToDeadlineSettings;
+  issueConditionChecks: IssueConditionCheck[];
 };
 
 export type State = {
@@ -25,5 +32,10 @@ export type State = {
     clearIssueLinks: () => void;
     setDaysInColumn: (settings: Partial<DaysInColumnSettings>) => void;
     setDaysToDeadline: (settings: Partial<DaysToDeadlineSettings>) => void;
+    // Issue Condition Checks
+    setIssueConditionChecks: (checks: IssueConditionCheck[]) => void;
+    addIssueConditionCheck: (check: IssueConditionCheck) => void;
+    updateIssueConditionCheck: (id: string, check: Partial<IssueConditionCheck>) => void;
+    removeIssueConditionCheck: (id: string) => void;
   };
 };

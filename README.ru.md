@@ -4,16 +4,37 @@
 
 ## Функционал расширения "jira-helper"
 
-_version 2.20.0_
+_version 2.30.0_
 
-- [Chart Bar - показывает количество задач в колоноках для кадой swimlane на доске](./docs/index.ru.md#swimlane-chart-bar)
-- [Показывает красный флажок на панели задач](./docs/index.ru.md#flag-on-issue-panel)
-- [WIP-limit для нескольких колонок](./docs/index.ru.md#wip-limits-for-several-columns)
+Браузерное расширение, которое расширяет возможности Jira: продвинутая визуализация, WIP-лимиты и инструменты управления потоком работ.
+
+[Краткое описание всех функций](./docs/features-summary.ru.md) | [Подробная документация](./docs/index.ru.md)
+
+### WIP-лимиты и управление потоком
+- [WIP-limit для нескольких колонок (CONWIP)](./docs/index.ru.md#wip-limits-for-several-columns-conwip)
 - [WIP-limit для Swimlane](./docs/index.ru.md#wip-limits-for-swimlanes)
-- [Personal WIP-limit](./docs/index.ru.md#wip-limit-for-person)
-- [SLA-линия для Control Chart с процентилем](./docs/index.ru.md#sla-line-for-control-chart)
-- [Наложение линейки измерений на Control Chart](./docs/index.ru.md#ruler-of-measuring-for-control-chart)
+- [Персональный WIP-limit](./docs/index.ru.md#wip-limit-for-person)
+- [WIP-limit по значению поля](./docs/index.ru.md#wip-limit-for-field-value)
+- [WIP-limit на ячейки](./docs/index.ru.md#wip-limit-on-cell)
+
+### Визуализация доски
+- [Card Colors - полная подсветка карточек](./docs/index.ru.md#card-colors-цвета-карточек)
+- [Swimlane Chart Bar - визуализация количества задач](./docs/index.ru.md#swimlane-chart-bar)
+- [Флажок на панели задачи](./docs/index.ru.md#flag-on-issue-panel)
 - [Размытие секретных данных](./docs/index.ru.md#blurring-of-secret-data)
+
+### Прогресс задач и связи
+- [Sub-tasks Progress - прогресс-бар на карточках](./docs/index.ru.md#sub-tasks-progress-прогресс-подзадач)
+- [Issue Links Display - отображение связей на карточках](./docs/index.ru.md#issue-links-display-отображение-связей)
+- [Days in Column - отслеживание времени в колонке](./docs/index.ru.md#days-in-column-дни-в-колонке)
+- [Days to Deadline - отслеживание дедлайнов](./docs/index.ru.md#days-to-deadline-дни-до-дедлайна)
+
+### Аналитика
+- [SLA-линия для Control Chart с процентилем](./docs/index.ru.md#sla-line-for-control-chart)
+- [Линейка измерений на Control Chart](./docs/index.ru.md#ruler-of-measuring-for-control-chart)
+
+### Шаблоны
+- [Шаблон описания задачи](./docs/index.ru.md#template-for-description)
 
 ## Ведение задач проекта
 
