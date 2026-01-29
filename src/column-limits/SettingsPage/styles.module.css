@@ -40,13 +40,40 @@
 
 .columnGroupJH {
   margin-bottom: 10px;
-  background-color: lightgray;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .columnGroupLimitsJH {
   display: block;
   background: white;
   padding: 5px 10px;
+}
+
+.columnGroupLimitsJH > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.columnGroupLimitsJH > div > span {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.columnGroupLimitsJH > div > input {
+  flex: 0 0 auto;
+  min-width: 60px;
+  max-width: 100px;
+}
+
+.columnGroupLimitsJH > div > button {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .addGroupDropzoneJH {

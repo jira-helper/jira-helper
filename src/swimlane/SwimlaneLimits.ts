@@ -9,6 +9,7 @@ import { mergeSwimlaneSettings } from './utils';
 interface SwimlaneSettings {
   [key: string]: {
     limit?: number;
+    includedIssueTypes?: string[];
   };
 }
 
@@ -61,13 +62,18 @@ export default class extends PageModification<any, Element> {
       const swimlaneHeader = swimlane.querySelector(DOM.swimlaneHeader);
       const swimlaneColumns = Array.from(swimlane.getElementsByClassName('ghx-columns')[0].childNodes || []);
 
+      const { includedIssueTypes } = settings[swimlaneId!];
       const numberIssues = swimlaneColumns.reduce(
-        (acc, column) =>
-          acc +
-          filter(
+        (acc, column) => {
+          const issues = filter(
             issue => !issue.classList.contains('ghx-done') && !issue.classList.contains('ghx-issue-subtask'),
             (column as HTMLElement).querySelectorAll('.ghx-issue')
-          ).length,
+          );
+          const filteredIssues = includedIssueTypes && includedIssueTypes.length > 0
+            ? filter(issue => this.shouldCountIssue(issue, includedIssueTypes), issues)
+            : issues;
+          return acc + filteredIssues.length;
+        },
         0
       );
 

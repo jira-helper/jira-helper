@@ -22,6 +22,7 @@ interface BoardGroup {
     customHexColor?: string;
     name: string;
     value: string;
+    includedIssueTypes?: string[];
   };
 }
 
@@ -119,12 +120,18 @@ export default class extends PageModification<[EditData?, BoardGroup?, Swimlanes
     });
   }
 
-  getIssuesInColumn(columnId: string, ignoredSwimlanes: string[]): number {
+  getIssuesInColumn(columnId: string, ignoredSwimlanes: string[], includedIssueTypes?: string[]): number {
     const swimlanesFilter = ignoredSwimlanes.map(swimlaneId => `:not([swimlane-id="${swimlaneId}"])`).join('');
 
-    return document.querySelectorAll(
+    const issues = document.querySelectorAll(
       `.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"] .ghx-issue:not(.ghx-done)${this.cssNotIssueSubTask}`
-    ).length;
+    );
+
+    if (!includedIssueTypes || includedIssueTypes.length === 0) {
+      return issues.length;
+    }
+
+    return Array.from(issues).filter(issue => this.shouldCountIssue(issue, includedIssueTypes)).length;
   }
 
   styleColumnsWithLimitations(): void {
@@ -138,11 +145,11 @@ export default class extends PageModification<[EditData?, BoardGroup?, Swimlanes
     const swimlanesFilter = ignoredSwimlanes.map(swimlaneId => `:not([swimlane-id="${swimlaneId}"])`).join('');
 
     Object.values(this.boardGroups).forEach(group => {
-      const { columns: groupColumns, max: groupLimit } = group;
+      const { columns: groupColumns, max: groupLimit, includedIssueTypes } = group;
       if (!groupColumns || !groupLimit) return;
 
       const amountOfGroupTasks = groupColumns.reduce(
-        (acc, columnId) => acc + this.getIssuesInColumn(columnId, ignoredSwimlanes),
+        (acc, columnId) => acc + this.getIssuesInColumn(columnId, ignoredSwimlanes, includedIssueTypes),
         0
       );
 

@@ -12,6 +12,7 @@ interface PersonLimit {
   swimlanes: Array<{ id: string }>;
   limit: number;
   issues: HTMLElement[];
+  includedIssueTypes?: string[];
 }
 
 const isPersonLimitAppliedToIssue = (
@@ -292,7 +293,10 @@ export default class extends PageModification<[any, any], Element> {
 
       if (assignee) {
         stats.forEach(personLimit => {
-          if (isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId)) {
+          if (
+            isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId) &&
+            this.shouldCountIssue(issue, personLimit.includedIssueTypes)
+          ) {
             personLimit.issues.push(issue as HTMLElement);
           }
         });

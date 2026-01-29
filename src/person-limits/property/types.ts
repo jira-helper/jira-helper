@@ -1,0 +1,28 @@
+/**
+ * PersonLimit - один лимит для конкретного человека.
+ * Хранится в Jira Board Property.
+ *
+ * Special convention for "all" columns/swimlanes:
+ * - columns: empty array [] means "all columns"
+ * - swimlanes: empty array [] means "all swimlanes"
+ */
+export type PersonLimit = {
+  id: number;
+  person: {
+    name: string;
+    displayName: string;
+    self: string;
+    avatar: string;
+  };
+  limit: number;
+  columns: Array<{ id: string; name: string }>;
+  swimlanes: Array<{ id: string; name: string }>;
+  includedIssueTypes?: string[];
+};
+
+/**
+ * Структура, хранимая в Jira Board Property
+ */
+export type PersonWipLimitsProperty = {
+  limits: PersonLimit[];
+};

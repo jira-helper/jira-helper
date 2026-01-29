@@ -17,6 +17,7 @@ interface Range {
   wipLimit: number;
   disable: boolean;
   matrixRange?: any[];
+  includedIssueTypes?: string[];
 }
 
 export default class extends PageModification<any, Element> {
@@ -66,8 +67,11 @@ export default class extends PageModification<any, Element> {
         const selector = `[swimlane-id='${cell.swimlane}'] [data-column-id='${cell.column}']`;
         const cellsDOM = document.querySelector(selector);
         if (cellsDOM) {
-          const { length } = cellsDOM.querySelectorAll(this.counterCssSelector);
-          countIssues += length;
+          const issues = cellsDOM.querySelectorAll(this.counterCssSelector);
+          const filteredIssues = range.includedIssueTypes && range.includedIssueTypes.length > 0
+            ? Array.from(issues).filter(issue => this.shouldCountIssue(issue, range.includedIssueTypes))
+            : issues;
+          countIssues += filteredIssues.length;
           cell.DOM = cellsDOM;
           const XY = this.excludeCells(ArrayOfCells, matrixRange, cellsDOM);
           cell.x = XY.s;

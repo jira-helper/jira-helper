@@ -9,6 +9,7 @@ interface SwimlaneSettings {
   [key: string]: {
     limit?: number;
     ignoreWipInColumns?: boolean;
+    includedIssueTypes?: string[];
   };
 }
 

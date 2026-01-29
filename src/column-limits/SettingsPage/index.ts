@@ -1,5 +1,7 @@
 import isEmpty from '@tinkoff/utils/is/empty';
 import keys from '@tinkoff/utils/object/keys';
+import React from 'react';
+import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES, btnGroupIdForColumnsSettingsPage } from '../../shared/constants';
@@ -16,6 +18,8 @@ import {
 import styles from './styles.module.css';
 import { getRandomString } from '../../shared/utils';
 import { ColorPickerTooltip } from '../../shared/colorPickerTooltip';
+import { IssueTypeSelector } from '../../shared/components/IssueTypeSelector';
+import { ColumnLimitsForm } from './ColumnLimitsForm';
 
 const WITHOUT_GROUP_ID = 'Without Group';
 
@@ -40,6 +44,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     allColumnsJira7: '.ghx-mapped.ui-droppable[data-column-id]',
     columnsConfigLastChild: '#ghx-config-columns > *:last-child',
     columnHeaderName: '.ghx-header-name',
+    columnsConfigTab: '#ghx-config-columns', // Use more specific selector instead of #columns
   };
 
   wipLimits: Record<string, any> = {};
@@ -52,6 +57,20 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
 
   private mappedColumnsToGroups: GroupMap | null = null;
 
+  private issueTypeSelectorStates: Map<
+    string,
+    {
+      countAllTypes: boolean;
+      projectKey: string;
+      selectedTypes: string[];
+      issueTypes: Array<{ id: string; name: string; subtask: boolean }>;
+    }
+  > = new Map();
+
+  private issueTypeSelectorRoots: Map<string, Root> = new Map();
+
+  private columnLimitsFormRoot: Root | null = null;
+
   async shouldApply(): Promise<boolean> {
     return (await getSettingsTab()) === 'columns';
   }
@@ -61,7 +80,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement('#columns');
+    // Use more specific selector to avoid conflicts with Jira's #columns styles
+    return this.waitForElement('#ghx-config-columns');
   }
 
   loadData(): Promise<[any, any]> {
@@ -174,7 +194,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     this.addEventListener(openModalBtn, 'click', this.openGroupSettingsPopup);
   }
 
-  openGroupSettingsPopup = (): void => {
+  openGroupSettingsPopup = async (): Promise<void> => {
     this.popup = new Popup({
       title: 'Limits for groups',
       okButtonText: 'Save',
@@ -189,11 +209,26 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       withoutGroupId: WITHOUT_GROUP_ID,
     });
 
+    // Initialize states for existing groups
+    this.mappedColumnsToGroups.allGroupIds.forEach(groupId => {
+      if (groupId !== WITHOUT_GROUP_ID) {
+        const group = this.wipLimits[groupId];
+        if (group && !this.issueTypeSelectorStates.has(groupId)) {
+          this.issueTypeSelectorStates.set(groupId, {
+            countAllTypes: !group.includedIssueTypes || group.includedIssueTypes.length === 0,
+            projectKey: '',
+            selectedTypes: group.includedIssueTypes || [],
+            issueTypes: [],
+          });
+        }
+      }
+    });
+
     this.renderGroupsEditor();
   };
 
   groupHtml(groupId: string): string {
-    const { max, customHexColor } = this.wipLimits[groupId] || {};
+    const { max, customHexColor, includedIssueTypes } = this.wipLimits[groupId] || {};
     const columns = this.mappedColumnsToGroups!.byGroupId[groupId];
 
     return groupTemplate({
@@ -211,6 +246,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
             })
             .join('')
         : '',
+      issueTypesHtml: `<div data-issue-type-selector-container="${groupId}"></div>`,
     });
   }
 
@@ -225,27 +261,141 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     });
   }
 
-  renderGroupsEditor(): void {
-    this.popup.appendToContent(
-      formTemplate({
-        id: SettingsWIPLimits.ids.formId,
-        leftBlock: this.groupHtml(WITHOUT_GROUP_ID),
-        rightBlock: `
-          ${groupsTemplate({
-            id: SettingsWIPLimits.ids.allGroups,
-            children: this.mappedColumnsToGroups!.allGroupIds.map(groupId =>
-              groupId !== WITHOUT_GROUP_ID ? this.groupHtml(groupId) : ''
-            ).join(''),
-          })}
-          ${dragOverHereTemplate({
-            dropzoneId: SettingsWIPLimits.ids.createGroupDropzone,
-            dropzoneClass: SettingsWIPLimits.classes.dropzone,
-          })}
-        `,
+  private getFormProps() {
+    const withoutGroupColumns =
+      this.mappedColumnsToGroups!.byGroupId[WITHOUT_GROUP_ID]?.allColumnIds.map((colId: string) => {
+        const col = this.mappedColumnsToGroups!.byGroupId[WITHOUT_GROUP_ID].byColumnId[colId];
+        return {
+          id: col.id,
+          name: col.column.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName)?.getAttribute('title') || '',
+        };
+      }) || [];
+
+    const groups = this.mappedColumnsToGroups!.allGroupIds.filter(groupId => groupId !== WITHOUT_GROUP_ID).map(
+      groupId => {
+        const groupData = this.mappedColumnsToGroups!.byGroupId[groupId];
+        const wipLimit = this.wipLimits[groupId] || {};
+        return {
+          id: groupId,
+          columns: groupData.allColumnIds.map((colId: string) => {
+            const col = groupData.byColumnId[colId];
+            return {
+              id: col.id,
+              name:
+                col.column.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName)?.getAttribute('title') || '',
+            };
+          }),
+          max: wipLimit.max,
+          customHexColor: wipLimit.customHexColor,
+          includedIssueTypes: wipLimit.includedIssueTypes,
+        };
+      }
+    );
+
+    return {
+      withoutGroupColumns,
+      groups,
+    };
+  }
+
+  private updateColumnLimitsForm(): void {
+    if (!this.columnLimitsFormRoot) return;
+
+    const { withoutGroupColumns, groups } = this.getFormProps();
+
+    this.columnLimitsFormRoot.render(
+      React.createElement(ColumnLimitsForm, {
+        ...this.getFormProps(),
+        onLimitChange: (groupId: string, limit: number) => {
+          if (!this.wipLimits[groupId]) {
+            this.wipLimits[groupId] = { columns: [] };
+          }
+          this.wipLimits[groupId].max = limit;
+          // Don't re-render here - let React component handle it with local state
+          // Only update the data, component will sync on blur
+        },
+        onColorChange: (groupId: string) => {
+          const button = document.querySelector(`[data-group-id="${groupId}"][data-color-picker-btn]`) as HTMLElement;
+          if (button) {
+            this.colorPickerTooltip.showTooltip({ target: button });
+          }
+        },
+        onIssueTypesChange: (groupId: string, selectedTypes: string[], countAllTypes: boolean) => {
+          const currentState = this.issueTypeSelectorStates.get(groupId) || {
+            countAllTypes: true,
+            projectKey: '',
+            selectedTypes: [],
+            issueTypes: [],
+          };
+          this.issueTypeSelectorStates.set(groupId, {
+            ...currentState,
+            countAllTypes,
+            selectedTypes,
+          });
+        },
+        onColumnDragStart: (e: React.DragEvent, columnId: string, groupId: string) => {
+          const element = e.currentTarget as HTMLElement;
+          this.draggingElement = element;
+          e.dataTransfer.effectAllowed = 'move';
+        },
+        onColumnDragEnd: (e: React.DragEvent) => {
+          this.draggingElement = null;
+        },
+        onDrop: (e: React.DragEvent, targetGroupId: string) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = e.currentTarget as HTMLElement;
+          target.classList.remove(styles.addGroupDropzoneActiveJH);
+
+          if (!this.draggingElement) return;
+
+          const columnId = this.draggingElement.getAttribute('data-column-id');
+          const fromGroup = this.draggingElement.getAttribute('data-group-id');
+
+          if (!columnId || !fromGroup) return;
+
+          const column = this.mappedColumnsToGroups!.byGroupId[fromGroup].byColumnId[columnId];
+          this.moveColumn(column, fromGroup, targetGroupId);
+          this.draggingElement.remove();
+          this.draggingElement = null;
+
+          // Re-render component
+          this.popup.clearContent();
+          this.renderGroupsEditor();
+        },
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = e.currentTarget as HTMLElement;
+          if (target.classList.contains(SettingsWIPLimits.classes.dropzone)) {
+            target.classList.add(styles.addGroupDropzoneActiveJH);
+          }
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          const target = e.currentTarget as HTMLElement;
+          if (target.classList.contains(SettingsWIPLimits.classes.dropzone)) {
+            target.classList.remove(styles.addGroupDropzoneActiveJH);
+          }
+        },
+        issueTypeSelectorStates: this.issueTypeSelectorStates,
+        formId: SettingsWIPLimits.ids.formId,
+        allGroupsId: SettingsWIPLimits.ids.allGroups,
+        createGroupDropzoneId: SettingsWIPLimits.ids.createGroupDropzone,
       })
     );
-    this.showColorPicker();
-    this.initEditorListeners();
+  }
+
+  renderGroupsEditor(): void {
+    // Create container for React component
+    const container = document.createElement('div');
+    this.popup.appendToContent(container.outerHTML);
+    const actualContainer = this.popup.contentBlock!.querySelector('div:last-child');
+
+    if (actualContainer) {
+      this.columnLimitsFormRoot = createRoot(actualContainer);
+      this.updateColumnLimitsForm();
+      this.showColorPicker();
+    }
   }
 
   initEditorListeners(): void {
@@ -256,6 +406,44 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
         this.addEventListener(form, listenerKey, this.editorFormListeners[listenerKey]);
       }
     });
+
+    // Initialize React components for issue type selectors
+    if (form) {
+      this.mappedColumnsToGroups!.allGroupIds.forEach(groupId => {
+        if (groupId !== WITHOUT_GROUP_ID) {
+          const container = form.querySelector(`[data-issue-type-selector-container="${groupId}"]`);
+          if (container) {
+            const group = this.wipLimits[groupId];
+            const includedIssueTypes = group?.includedIssueTypes || [];
+            const countAllTypes = !includedIssueTypes || includedIssueTypes.length === 0;
+
+            const root = createRoot(container);
+            root.render(
+              React.createElement(IssueTypeSelector, {
+                groupId,
+                selectedTypes: includedIssueTypes,
+                initialCountAllTypes: countAllTypes,
+                initialProjectKey: this.issueTypeSelectorStates.get(groupId)?.projectKey || '',
+                onSelectionChange: (selectedTypes: string[], countAllTypesValue: boolean) => {
+                  // Update state
+                  const currentState = this.issueTypeSelectorStates.get(groupId) || {
+                    countAllTypes: true,
+                    projectKey: '',
+                    selectedTypes: [],
+                    issueTypes: [],
+                  };
+                  this.issueTypeSelectorStates.set(groupId, {
+                    ...currentState,
+                    countAllTypes: countAllTypesValue,
+                    selectedTypes,
+                  });
+                },
+              })
+            );
+          }
+        }
+      });
+    }
   }
 
   moveColumn(column: any, fromGroup: string, toGroup: string): void {
@@ -274,6 +462,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
         this.wipLimits[toGroup] = {
           columns: [...this.wipLimits[toGroup].columns, column.id],
           max: this.wipLimits[toGroup].max,
+          customHexColor: this.wipLimits[toGroup].customHexColor,
+          includedIssueTypes: this.wipLimits[toGroup].includedIssueTypes,
         };
         break;
       case isNewGroup:
@@ -293,25 +483,35 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       withoutGroupId: WITHOUT_GROUP_ID,
     });
 
+    // Re-render React component
     this.popup.clearContent();
     this.renderGroupsEditor();
   }
 
   showColorPicker = (): void => {
-    const allGroups = document.getElementById(SettingsWIPLimits.ids.allGroups);
-    this.colorPickerTooltip.init(this.popup.contentBlock!, 'data-group-id');
+    // Wait for React component to render
+    setTimeout(() => {
+      const form = document.getElementById(SettingsWIPLimits.ids.formId);
+      this.colorPickerTooltip.init(this.popup.contentBlock!, 'data-group-id');
 
-    if (allGroups) {
-      this.addEventListener(allGroups, 'click', event => {
-        // @ts-expect-error
-        this.colorPickerTooltip.showTooltip(event);
-      });
-    }
+      if (form) {
+        // Listen for clicks on "Change color" buttons
+        this.addEventListener(form, 'click', event => {
+          const target = event.target as HTMLElement;
+          if (target.hasAttribute('data-color-picker-btn')) {
+            event.stopPropagation();
+            // @ts-expect-error
+            this.colorPickerTooltip.showTooltip(event);
+          }
+        });
+      }
+    }, 100);
   };
 
   getWipLimitsForOnlyExistsColumns(): Record<string, any> {
     const columns = Array.from(this.getColumns()).map(el => el.getAttribute('data-column-id'));
     const wipLimits: Record<string, any> = {};
+    const form = document.getElementById(SettingsWIPLimits.ids.formId);
 
     Object.keys(this.wipLimits).forEach(key => {
       const group = this.wipLimits[key];
@@ -325,6 +525,23 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       }
 
       if (group.columns.length > 0) {
+        // Get issue type filter settings from state
+        const state = this.issueTypeSelectorStates.get(key);
+        if (state) {
+          if (!state.countAllTypes) {
+            // Only include selected types if "count all types" is unchecked
+            if (state.selectedTypes.length > 0) {
+              group.includedIssueTypes = state.selectedTypes;
+            } else {
+              // If no types selected but countAllTypes is false, still set empty array
+              // to indicate filtering is enabled
+              group.includedIssueTypes = [];
+            }
+          } else {
+            // If "count all types" is checked, remove the filter
+            delete group.includedIssueTypes;
+          }
+        }
         wipLimits[key] = group;
       }
     });
@@ -334,6 +551,13 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
 
   handleSubmit = async (unmountPopup: () => void): Promise<void> => {
     await this.updateBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_SETTINGS, this.getWipLimitsForOnlyExistsColumns());
+    // Clean up React roots
+    this.issueTypeSelectorRoots.forEach(root => root.unmount());
+    this.issueTypeSelectorRoots.clear();
+    if (this.columnLimitsFormRoot) {
+      this.columnLimitsFormRoot.unmount();
+      this.columnLimitsFormRoot = null;
+    }
     unmountPopup();
   };
 }

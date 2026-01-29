@@ -371,3 +371,36 @@ export const getIssueLinkTypes = async (options: RequestInit = {}): Promise<Resu
   }
   return Ok(jsonDataResult.val.issueLinkTypes);
 };
+
+export interface ProjectIssueType {
+  id: string;
+  name: string;
+  subtask: boolean;
+}
+
+export const getProjectIssueTypes = async (
+  projectKey: string,
+  options: RequestInit = {}
+): Promise<Result<ProjectIssueType[], Error>> => {
+  const result = await requestJiraViaFetch(`api/2/project/${projectKey}`, options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+
+  const project = jsonDataResult.val;
+  const issueTypes = project.issueTypes || [];
+  return Ok(issueTypes.map((type: any) => ({
+    id: type.id,
+    name: type.name,
+    subtask: type.subtask || false,
+  })));
+};

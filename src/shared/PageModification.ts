@@ -148,6 +148,28 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return `.ghx-issue${cssNotIssueSubTask}`;
   }
 
+  protected getIssueTypeFromCard(card: Element): string | null {
+    const typeElement = card.querySelector('.ghx-type');
+    if (!typeElement) return null;
+
+    const title = typeElement.getAttribute('title');
+    if (!title) return null;
+
+    // Extract type name from title attribute
+    // Title format can be: "Idea", "Тип запроса: Idea", etc.
+    const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
+    return typeName || null;
+  }
+
+  protected shouldCountIssue(card: Element, includedIssueTypes?: string[]): boolean {
+    if (!includedIssueTypes || includedIssueTypes.length === 0) {
+      return true; // Если фильтр не настроен, считать все задачи
+    }
+
+    const issueType = this.getIssueTypeFromCard(card);
+    return issueType ? includedIssueTypes.includes(issueType) : false;
+  }
+
   protected getSearchParam(param: string): string | null {
     return getSearchParam(param);
   }

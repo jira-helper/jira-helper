@@ -19,6 +19,7 @@ interface WipLimitSettings {
   cells: Array<{ column: string; showBadge: boolean; swimlane: string }>;
   name: string;
   wipLimit: number;
+  includedIssueTypes?: string[];
 }
 
 export default class WipLimitOnCells extends PageModification<[BoardData, WipLimitSettings[][]], Element> {
@@ -101,7 +102,8 @@ export default class WipLimitOnCells extends PageModification<[BoardData, WipLim
     this.table = new TableRangeWipLimit({ data: this.data, handleGetNameLabel });
 
     this.renderEditButton();
-    this.onDOMChange('#columns', () => {
+    // Use more specific selector to avoid conflicts with Jira's #columns styles
+    this.onDOMChange('#ghx-config-columns', () => {
       this.renderEditButton();
     });
   }

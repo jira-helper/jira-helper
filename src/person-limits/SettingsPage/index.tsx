@@ -2,15 +2,15 @@ import React from 'react';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { getUser } from '../../shared/jiraApi';
-import { btnGroupIdForColumnsSettingsPage, BOARD_PROPERTIES } from '../../shared/constants';
-import {
-  settingsJiraDOM,
-  groupSettingsBtnTemplate,
-  FormPersonalWipLimit,
-  tablePersonalWipLimit,
-  addPersonalWipLimit,
-} from './htmlTemplates';
+import { btnGroupIdForColumnsSettingsPage } from '../../shared/constants';
+import { groupSettingsBtnTemplate } from './htmlTemplates';
 import { Popup } from '../../shared/getPopup';
+import { PersonalWipLimitContainer } from './components/PersonalWipLimitContainer';
+import { createPersonLimit, updatePersonLimit, initFromProperty, saveToProperty } from './actions';
+import { loadPersonWipLimitsProperty } from '../property';
+import { usePersonWipLimitsPropertyStore } from '../property/store';
+import { useSettingsUIStore } from './stores/settingsUIStore';
+import type { PersonLimit, FormData, Swimlane } from './state/types';
 
 type MappedColumn = {
   id: string;
@@ -18,7 +18,7 @@ type MappedColumn = {
   max?: number;
   name: string;
 };
-type Swimlane = {
+type BoardSwimlane = {
   name: string;
 };
 type BoardData = {
@@ -26,28 +26,15 @@ type BoardData = {
     mappedColumns: MappedColumn[];
   };
   swimlanesConfig: {
-    swimlanes: Swimlane[];
+    swimlanes: BoardSwimlane[];
   };
   canEdit: boolean;
-};
-
-type PersonLimit = {
-  id: number;
-  person: {
-    name: string;
-    displayName: string;
-    self: string;
-    avatar: string;
-  };
-  limit: number;
-  columns: Array<{ id: string; name: string }>;
-  swimlanes: Array<{ id: string; name: string }>;
 };
 
 type PersonLimits = {
   limits: PersonLimit[];
 };
-export default class PersonalWIPLimit extends PageModification<[BoardData, any], Element> {
+export default class PersonalWIPLimit extends PageModification<[BoardData], Element> {
   static jiraSelectors = {
     panelConfig: `#${btnGroupIdForColumnsSettingsPage}`,
   };
@@ -61,28 +48,6 @@ export default class PersonalWIPLimit extends PageModification<[BoardData, any],
   private DOMeditBtn: Element | null = null;
 
   private popup: Popup | null = null;
-
-  private DOMselectColumns: HTMLSelectElement | null = null;
-
-  private DOMapplyColumnSelect: HTMLButtonElement | null = null;
-
-  private DOMselectSwimlane: HTMLSelectElement | null = null;
-
-  private DOMapplySwimlaneSelect: HTMLButtonElement | null = null;
-
-  private DOMfieldLimit: HTMLInputElement | null = null;
-
-  private DOMfieldPersonName: HTMLInputElement | null = null;
-
-  private DOMtablePersonalWipLimit: HTMLTableElement | null = null;
-
-  private DOMAddLimit: HTMLButtonElement | null = null;
-
-  private DOMEditLimit: HTMLButtonElement | null = null;
-
-  private idPersonalOfEdit: string | null = null;
-
-  private personLimits: PersonLimits = { limits: [] };
 
   private personLimitsRecovery: PersonLimits = { limits: [] };
 
@@ -99,25 +64,25 @@ export default class PersonalWIPLimit extends PageModification<[BoardData, any],
     return this.waitForElement(PersonalWIPLimit.jiraSelectors.panelConfig);
   }
 
-  loadData(): Promise<[any, any]> {
-    return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS)]);
+  async loadData(): Promise<[BoardData]> {
+    await loadPersonWipLimitsProperty();
+    const boardData = await this.getBoardEditData();
+    return [boardData];
   }
 
-  apply(data: [BoardData, any]): void {
+  apply(data: [BoardData]): void {
     if (!data) return;
-    const [boardData, personLimits = { limits: [] }] = data;
+    const [boardData] = data;
     if (!boardData.canEdit) return;
 
     this.boardData = boardData;
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter((i: any) => !i.isKanPlanColumn);
     this.boardDataSwimlanes = this.boardData.swimlanesConfig.swimlanes;
-    this.personLimits = personLimits;
-    this.personLimitsRecovery = window.structuredClone(personLimits);
+    this.personLimitsRecovery = window.structuredClone(
+      usePersonWipLimitsPropertyStore.getState().data
+    );
 
     this.renderEditButton();
-    this.onDOMChange('#columns', () => {
-      this.renderEditButton();
-    });
   }
 
   renderEditButton(): void {
@@ -140,33 +105,18 @@ export default class PersonalWIPLimit extends PageModification<[BoardData, any],
 
   openPersonalSettingsPopup = async (): Promise<void> => {
     await this.popup!.render();
-    this.popup!.appendReactComponentToContent(<FormPersonalWipLimit />);
-    await this.popup!.appendToContent(tablePersonalWipLimit());
 
-    this.DOMselectColumns = document.getElementById(settingsJiraDOM.idColumnSelect) as HTMLSelectElement;
-    this.DOMapplyColumnSelect = document.getElementById(settingsJiraDOM.idApplyColumnSelect) as HTMLButtonElement;
+    initFromProperty();
 
-    this.DOMselectSwimlane = document.getElementById(settingsJiraDOM.idSwimlaneSelect) as HTMLSelectElement;
-    this.DOMapplySwimlaneSelect = document.getElementById(settingsJiraDOM.idApplySwimlaneSelect) as HTMLButtonElement;
-
-    this.DOMfieldLimit = document.getElementById(settingsJiraDOM.idLimit) as HTMLInputElement;
-    this.DOMfieldPersonName = document.getElementById(settingsJiraDOM.idPersonName) as HTMLInputElement;
-    this.DOMtablePersonalWipLimit = document.getElementById(
-      settingsJiraDOM.idTablePersonalWipLimit
-    ) as HTMLTableElement;
-    this.DOMAddLimit = document.getElementById(settingsJiraDOM.idButtonAddLimit) as HTMLButtonElement;
-    this.DOMEditLimit = document.getElementById(settingsJiraDOM.idButtonEditLimit) as HTMLButtonElement;
-
-    this.addOptionsToSelect(this.DOMselectColumns, this.boardDataColumns!);
-    this.addOptionsToSelect(this.DOMselectSwimlane, this.boardDataSwimlanes!);
-
-    this.showRowsTable();
-
-    this.DOMAddLimit.addEventListener('click', async event => this.onAddLimit(event));
-    this.DOMEditLimit.addEventListener('click', async event => this.onEditLimit(event));
-
-    this.DOMapplyColumnSelect.addEventListener('click', async event => this.onApplyColumnForAllUser(event));
-    this.DOMapplySwimlaneSelect.addEventListener('click', async event => this.onApplySwimlaneForAllUser(event));
+    this.popup!.appendReactComponentToContent(
+      <PersonalWipLimitContainer
+        columns={this.boardDataColumns || []}
+        swimlanes={this.boardDataSwimlanes || []}
+        onAddLimit={async (formData: FormData) => {
+          await this.onAddLimit(formData);
+        }}
+      />
+    );
   };
 
   addOptionsToSelect = (DOMSelect: HTMLSelectElement, items: any[]): void => {
@@ -184,178 +134,95 @@ export default class PersonalWIPLimit extends PageModification<[BoardData, any],
   };
 
   handleSubmit = async (unmountPopup: Function): Promise<void> => {
-    await this.updateBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS, this.personLimits);
-    this.personLimitsRecovery = window.structuredClone(this.personLimits);
+    await saveToProperty();
+    this.personLimitsRecovery = window.structuredClone(
+      usePersonWipLimitsPropertyStore.getState().data
+    );
     unmountPopup();
   };
 
   handleClose = async (unmountPopup: Function): Promise<void> => {
-    this.personLimits = window.structuredClone(this.personLimitsRecovery);
+    initFromProperty();
     unmountPopup();
   };
 
-  updateLineLimits = (settingName: 'columns' | 'swimlanes'): void => {
-    const data = this.getDataForm();
-    const selectedPerson = this.getSelectedPerson();
+  onApplyColumnForAllUser = async (formData: FormData): Promise<void> => {
+    const columns: Array<{ id: string; name: string }> = formData.selectedColumns
+      .map(id => {
+        const col = this.boardDataColumns!.find(c => c.id === id);
+        if (!col) return null;
+        return { id: col.id, name: col.name };
+      })
+      .filter((col): col is { id: string; name: string } => col !== null);
 
-    this.personLimits.limits = this.personLimits.limits.map(limit => {
-      if (selectedPerson.includes(limit.id)) {
-        limit[settingName] = data[settingName];
-      }
-      return limit;
-    });
-    return this.renderAllRow(selectedPerson);
+    useSettingsUIStore.getState().actions.applyColumnsToSelected(columns);
+    // React component will automatically re-render via zustand
   };
 
-  onApplyColumnForAllUser = async (e: Event): Promise<void> => {
-    e.preventDefault();
-    return this.updateLineLimits('columns');
+  onApplySwimlaneForAllUser = async (formData: FormData): Promise<void> => {
+    const swimlanes: Array<{ id: string; name: string }> = formData.swimlanes
+      .map(id => {
+        const swim = this.boardDataSwimlanes!.find(s => (s as any).id === id || s.name === id);
+        if (!swim) return null;
+        return { id: (swim as any).id || swim.name, name: swim.name };
+      })
+      .filter((swim): swim is { id: string; name: string } => swim !== null);
+
+    useSettingsUIStore.getState().actions.applySwimlanesToSelected(swimlanes);
+    // React component will automatically re-render via zustand
   };
 
-  onApplySwimlaneForAllUser = async (e: Event): Promise<void> => {
-    e.preventDefault();
-    return this.updateLineLimits('swimlanes');
-  };
+  onAddLimit = async (formData: FormData): Promise<void> => {
+    const store = useSettingsUIStore.getState();
 
-  onAddLimit = async (e: Event): Promise<void> => {
-    e.preventDefault();
+    if (store.data.editingId !== null) {
+      await this.onEditLimit(formData);
+      return;
+    }
 
-    const data = this.getDataForm();
-    const fullPerson = await getUser(data.person.name);
+    const fullPerson = await getUser(formData.personName);
 
-    const personLimit = {
-      id: Date.now(),
+    const personLimit = createPersonLimit({
+      formData,
       person: {
         name: fullPerson.name ?? fullPerson.displayName,
         displayName: fullPerson.displayName,
         self: fullPerson.self,
         avatar: fullPerson.avatarUrls['32x32'],
       },
-      limit: data.limit,
-      columns: data.columns,
-      swimlanes: data.swimlanes,
-    };
+      columns: this.boardDataColumns || [],
+      swimlanes: this.boardDataSwimlanes || [],
+      id: Date.now(),
+    });
 
-    this.personLimits.limits.push(personLimit);
-
-    this.renderRow(personLimit);
+    store.actions.addLimit(personLimit);
   };
 
-  onEditLimit = async (e: Event): Promise<void> => {
-    e.preventDefault();
-    const personId = parseInt(this.idPersonalOfEdit!, 10);
-    (e.target as HTMLButtonElement).disabled = true;
+  onEditLimit = async (formData: FormData): Promise<void> => {
+    const store = useSettingsUIStore.getState();
+    const editingId = store.data.editingId;
+    
+    if (!editingId) return;
 
-    if (!personId) return;
+    const existingLimit = store.data.limits.find(limit => limit.id === editingId);
+    if (!existingLimit) return;
 
-    const index = this.personLimits.limits.findIndex(pl => pl.id === personId);
+    const updatedLimit = updatePersonLimit({
+      existingLimit,
+      formData,
+      columns: this.boardDataColumns || [],
+      swimlanes: this.boardDataSwimlanes || [],
+    });
 
-    if (index === -1) return;
-
-    const data = this.getDataForm();
-
-    this.personLimits.limits[index] = {
-      ...this.personLimits.limits[index],
-      ...data,
-      person: {
-        ...data.person,
-        ...this.personLimits.limits[index].person,
-      },
-    };
-
-    this.renderAllRow();
-
-    this.DOMAddLimit!.disabled = false;
-    this.DOMEditLimit!.disabled = true;
+    store.actions.updateLimit(editingId, updatedLimit);
   };
 
   onDeleteLimit = async (id: number): Promise<void> => {
-    this.personLimits.limits = this.personLimits.limits.filter(limit => limit.id !== id);
+    useSettingsUIStore.getState().actions.deleteLimit(id);
   };
 
   onEdit = async (id: number): Promise<void> => {
-    const personalWIPLimit = this.personLimits.limits.find(limit => limit.id === id);
-
-    if (personalWIPLimit) {
-      this.DOMfieldLimit!.value = String(personalWIPLimit.limit);
-      this.DOMfieldPersonName!.value = personalWIPLimit.person.name;
-
-      this.DOMAddLimit!.disabled = true;
-      this.DOMEditLimit!.disabled = false;
-      this.idPersonalOfEdit = id.toString();
-      document.getElementById(`row-${id}`)!.style.background = '#ffd989c2';
-
-      const selectedColumnsIds = personalWIPLimit.columns.map(c => c.id);
-      Array.from(this.DOMselectColumns!.options).forEach(option => {
-        option.selected = selectedColumnsIds.indexOf(option.value) > -1;
-      });
-
-      const selectedSwimlanesIds = personalWIPLimit.swimlanes.map(c => c.id);
-      Array.from(this.DOMselectSwimlane!.options).forEach(option => {
-        option.selected = selectedSwimlanesIds.indexOf(option.value) > -1;
-      });
-    }
+    useSettingsUIStore.getState().actions.setEditingId(id);
   };
 
-  showRowsTable(): void {
-    this.personLimits.limits.forEach(personLimit => this.renderRow(personLimit));
-  }
-
-  renderAllRow(idsUsersForChecked?: number[]): void {
-    this.popup!.htmlElement!.querySelectorAll('.person-row').forEach(row => row.remove());
-    this.personLimits.limits.forEach(personLimit =>
-      this.renderRow(personLimit, idsUsersForChecked != null ? idsUsersForChecked.indexOf(personLimit.id) > -1 : false)
-    );
-  }
-
-  renderRow(personLimit: any, isChecked?: boolean): void {
-    const { id } = personLimit;
-
-    this.DOMtablePersonalWipLimit!.insertAdjacentHTML('beforeend', addPersonalWipLimit(personLimit, isChecked!));
-
-    document.getElementById(`delete-${id}`)!.addEventListener('click', async () => {
-      await this.onDeleteLimit(id);
-      document.getElementById(`row-${id}`)!.remove();
-    });
-
-    document.getElementById(`edit-${id}`)!.addEventListener('click', async () => {
-      await this.onEdit(id);
-    });
-  }
-
-  getSelectedPerson(): number[] {
-    const DOMCheckboxUsers = document.querySelectorAll(
-      `#${settingsJiraDOM.idTablePersonalWipLimit} input.select-user-chb:checked`
-    );
-    return Array.from(DOMCheckboxUsers).map(cb => parseInt((cb as HTMLInputElement).getAttribute('data-id')!, 10));
-  }
-
-  getDataForm(): {
-    person: {
-      name: string;
-    };
-    limit: number;
-    columns: Array<{ id: string; name: string }>;
-    swimlanes: Array<{ id: string; name: string }>;
-  } {
-    const name = this.DOMfieldPersonName!.value;
-    const limit = this.DOMfieldLimit!.valueAsNumber;
-    const columns = Array.from(this.DOMselectColumns!.selectedOptions).map(option => ({
-      id: option.value,
-      name: option.text,
-    }));
-    const swimlanes = Array.from(this.DOMselectSwimlane!.selectedOptions).map(option => ({
-      id: option.value,
-      name: option.text,
-    }));
-
-    return {
-      person: {
-        name,
-      },
-      limit,
-      columns,
-      swimlanes,
-    };
-  }
 }

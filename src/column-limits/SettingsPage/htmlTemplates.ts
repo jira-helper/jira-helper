@@ -39,6 +39,7 @@ export const groupTemplate = ({
   customGroupColor,
   groupMax = '',
   columnsHtml = '',
+  issueTypesHtml = '',
 }: {
   dropzoneClass?: string;
   groupLimitsClass?: string;
@@ -47,20 +48,28 @@ export const groupTemplate = ({
   customGroupColor?: string;
   groupMax?: string;
   columnsHtml?: string;
+  issueTypesHtml?: string;
 }) => `
         <div
-          class="${style.columnGroupJH} "
-          style="${groupId !== withoutGroupId ? `background-color: ${customGroupColor || generateColor(groupId)}` : ''}"
+          class="${style.columnGroupJH}"
         >
             ${
               groupId === withoutGroupId
                 ? ''
                 : `<section class="${style.columnGroupLimitsJH}">
-                  <span>Limit for group:</span>
-                  <input data-group-id="${groupId}" class="${groupLimitsClass}" value="${groupMax}"/>
+                  <div>
+                    <span>Limit for group:</span>
+                    <input data-group-id="${groupId}" class="${groupLimitsClass}" value="${groupMax}"/>
+                    <button type="button" class="aui-button" data-group-id="${groupId}" data-color-picker-btn>Change color</button>
+                  </div>
                 </section>`
             }
-          <div class="${style.columnListJH} ${dropzoneClass}" data-group-id="${groupId}">${columnsHtml}</div>
+          <div 
+            class="${style.columnListJH} ${dropzoneClass}" 
+            data-group-id="${groupId}" 
+            style="margin-bottom: 0; ${groupId !== withoutGroupId ? `background-color: ${customGroupColor || generateColor(groupId)}` : ''}"
+          >${columnsHtml}</div>
+          ${groupId !== withoutGroupId && issueTypesHtml ? `<div data-issue-types-container="${groupId}" style="margin-top: 0; padding-top: 8px; padding-bottom: 0;">${issueTypesHtml}</div>` : ''}
       </div>
     `;
 
