@@ -1,6 +1,5 @@
-import type { FormData, PersonLimit } from '../state/types';
+import type { FormData, PersonLimit, Column, Swimlane } from '../state/types';
 import { transformFormData } from './transformFormData';
-import type { Column, Swimlane } from '../state/types';
 
 /**
  * Create a new PersonLimit from FormData

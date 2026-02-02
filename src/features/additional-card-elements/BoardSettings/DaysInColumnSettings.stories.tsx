@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DaysInColumnSettings } from './DaysInColumnSettings';
-import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { DiProvider } from 'src/shared/diContext';
 import { Container, Token } from 'dioma';
 import { IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
+import { DaysInColumnSettings } from './DaysInColumnSettings';
 
 // Mock BoardPagePageObject
 const mockBoardPagePageObject: IBoardPagePageObject = {
@@ -144,7 +144,7 @@ export const EnabledWithPerColumnThresholds: Story = {
             perColumnThresholds: {
               'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
               'Code Review': { warningThreshold: 2, dangerThreshold: 4 },
-              'Testing': { warningThreshold: 3, dangerThreshold: 7 },
+              Testing: { warningThreshold: 3, dangerThreshold: 7 },
             },
           },
           daysToDeadline: {
@@ -172,7 +172,7 @@ export const PerColumnWithNonExistentColumn: Story = {
             usePerColumnThresholds: true,
             perColumnThresholds: {
               'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
-              'Testing': { warningThreshold: 3, dangerThreshold: 7 },
+              Testing: { warningThreshold: 3, dangerThreshold: 7 },
               'Old Column That Was Removed': { warningThreshold: 2, dangerThreshold: 5 },
             },
           },
@@ -202,7 +202,7 @@ export const PerColumnWithPartialThresholds: Story = {
             perColumnThresholds: {
               'In Progress': { warningThreshold: 5, dangerThreshold: 10 },
               'Code Review': { warningThreshold: 2 }, // Only warning
-              'Testing': {}, // No thresholds set
+              Testing: {}, // No thresholds set
             },
           },
           daysToDeadline: {
@@ -215,4 +215,3 @@ export const PerColumnWithPartialThresholds: Story = {
     },
   ],
 };
-

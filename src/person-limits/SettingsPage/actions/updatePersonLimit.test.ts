@@ -132,10 +132,7 @@ describe('updatePersonLimit', () => {
   });
 
   it('should handle swimlanes without id (use name as id)', () => {
-    const swimlanesWithoutId = [
-      { name: 'Frontend' },
-      { name: 'Backend' },
-    ];
+    const swimlanesWithoutId = [{ name: 'Frontend' }, { name: 'Backend' }];
 
     const formData: FormData = {
       ...mockFormData,

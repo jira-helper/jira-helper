@@ -398,9 +398,11 @@ export const getProjectIssueTypes = async (
 
   const project = jsonDataResult.val;
   const issueTypes = project.issueTypes || [];
-  return Ok(issueTypes.map((type: any) => ({
-    id: type.id,
-    name: type.name,
-    subtask: type.subtask || false,
-  })));
+  return Ok(
+    issueTypes.map((type: any) => ({
+      id: type.id,
+      name: type.name,
+      subtask: type.subtask || false,
+    }))
+  );
 };

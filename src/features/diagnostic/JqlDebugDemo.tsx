@@ -141,7 +141,8 @@ export const JqlDebugDemoPure: React.FC<JqlDebugDemoPureProps> = ({
             border: node.matched ? '1px solid #b7eb8f' : '1px solid #ffccc7',
           }}
         >
-          {texts.actualValue}: <strong style={{ color: node.matched ? '#52c41a' : '#ff4d4f' }}>{formattedActual}</strong>
+          {texts.actualValue}:{' '}
+          <strong style={{ color: node.matched ? '#52c41a' : '#ff4d4f' }}>{formattedActual}</strong>
         </span>
       );
     }

@@ -16,19 +16,20 @@ const MockDaysToDeadlineBadge: React.FC<MockBadgeProps> = ({ days, settings }) =
   if (!settings.enabled || !settings.fieldId) {
     return <span style={{ color: '#999' }}>Feature disabled or no field selected</span>;
   }
-  
+
   const color = getDaysToDeadlineColor(days, settings);
   if (days === null || color === null) {
     return <span style={{ color: '#999' }}>No deadline data</span>;
   }
-  
+
   const text = formatDaysToDeadline(days, 'en');
   // For "Due today" (days === 0), use red text on yellow background
-  const content = days === 0 ? (
-    <span style={{ fontSize: '14px', lineHeight: '14px', color: '#de350b' }}>{text}</span>
-  ) : (
-    <span style={{ fontSize: '14px', lineHeight: '14px' }}>{text}</span>
-  );
+  const content =
+    days === 0 ? (
+      <span style={{ fontSize: '14px', lineHeight: '14px', color: '#de350b' }}>{text}</span>
+    ) : (
+      <span style={{ fontSize: '14px', lineHeight: '14px' }}>{text}</span>
+    );
   return <Badge color={color}>{content}</Badge>;
 };
 

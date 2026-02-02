@@ -68,9 +68,10 @@ export default class extends PageModification<any, Element> {
         const cellsDOM = document.querySelector(selector);
         if (cellsDOM) {
           const issues = cellsDOM.querySelectorAll(this.counterCssSelector);
-          const filteredIssues = range.includedIssueTypes && range.includedIssueTypes.length > 0
-            ? Array.from(issues).filter(issue => this.shouldCountIssue(issue, range.includedIssueTypes))
-            : issues;
+          const filteredIssues =
+            range.includedIssueTypes && range.includedIssueTypes.length > 0
+              ? Array.from(issues).filter(issue => this.shouldCountIssue(issue, range.includedIssueTypes))
+              : issues;
           countIssues += filteredIssues.length;
           cell.DOM = cellsDOM;
           const XY = this.excludeCells(ArrayOfCells, matrixRange, cellsDOM);

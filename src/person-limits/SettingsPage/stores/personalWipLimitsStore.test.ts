@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useSettingsUIStore } from './settingsUIStore';
 import type { PersonLimit } from '../state/types';

@@ -10,9 +10,7 @@ export interface IssueConditionCheckBadgesConnectedProps {
  * Connected component that fetches condition check results for an issue
  * and displays matching badges
  */
-export const IssueConditionCheckBadgesConnected: React.FC<IssueConditionCheckBadgesConnectedProps> = ({
-  issueKey,
-}) => {
+export const IssueConditionCheckBadgesConnected: React.FC<IssueConditionCheckBadgesConnectedProps> = ({ issueKey }) => {
   const results = useIssueConditionChecks(issueKey);
 
   if (results.length === 0) {

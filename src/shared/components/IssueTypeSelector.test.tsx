@@ -46,7 +46,7 @@ describe('IssueTypeSelector', () => {
       });
 
       // Change back to true
-      rerender(<IssueTypeSelector {...defaultProps} initialCountAllTypes={true} />);
+      rerender(<IssueTypeSelector {...defaultProps} initialCountAllTypes />);
 
       // Should update back to checked
       await waitFor(() => {
@@ -56,15 +56,9 @@ describe('IssueTypeSelector', () => {
   });
 
   describe('IT2: Should sync selectedTypes state with initialSelectedTypes prop changes', () => {
-    it('should initialize with initialSelectedTypes prop', async () => {
+    it('should initialize with selectedTypes prop', async () => {
       // Test that component initializes correctly with prop
-      render(
-        <IssueTypeSelector
-          {...defaultProps}
-          initialCountAllTypes={false}
-          initialSelectedTypes={['Task', 'Bug']}
-        />
-      );
+      render(<IssueTypeSelector {...defaultProps} initialCountAllTypes={false} selectedTypes={['Task', 'Bug']} />);
 
       // Should show selected types
       await waitFor(() => {
@@ -74,28 +68,18 @@ describe('IssueTypeSelector', () => {
       });
     });
 
-    it('should sync selectedTypes when initialSelectedTypes prop changes', async () => {
+    it('should sync selectedTypes when selectedTypes prop changes', async () => {
       // This test verifies that the useEffect we added syncs state with props
       // Start with empty selection
       const { rerender } = render(
-        <IssueTypeSelector
-          {...defaultProps}
-          initialCountAllTypes={false}
-          initialSelectedTypes={[]}
-        />
+        <IssueTypeSelector {...defaultProps} initialCountAllTypes={false} selectedTypes={[]} />
       );
 
       // Should not show selected types section
       expect(screen.queryByText(/selected issue types/i)).not.toBeInTheDocument();
 
       // Change prop to include types - useEffect should sync
-      rerender(
-        <IssueTypeSelector
-          {...defaultProps}
-          initialSelectedTypes={['Task']}
-          initialCountAllTypes={false}
-        />
-      );
+      rerender(<IssueTypeSelector {...defaultProps} selectedTypes={['Task']} initialCountAllTypes={false} />);
 
       // Should show new types (useEffect syncs state)
       await waitFor(
@@ -120,13 +104,7 @@ describe('IssueTypeSelector', () => {
     it('should call onSelectionChange when user unchecks countAllTypes', async () => {
       const user = userEvent.setup();
       const onSelectionChange = vi.fn();
-      render(
-        <IssueTypeSelector
-          {...defaultProps}
-          onSelectionChange={onSelectionChange}
-          initialCountAllTypes={true}
-        />
-      );
+      render(<IssueTypeSelector {...defaultProps} onSelectionChange={onSelectionChange} initialCountAllTypes />);
 
       const checkbox = screen.getByLabelText(/count all issue types/i);
       await user.click(checkbox);

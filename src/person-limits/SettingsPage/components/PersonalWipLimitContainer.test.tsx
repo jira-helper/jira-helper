@@ -34,19 +34,15 @@ vi.mock('../../../shared/components/IssueTypeSelector', () => ({
           type="checkbox"
           data-testid="count-all-types"
           checked={countAll}
-          onChange={(e) => {
+          onChange={e => {
             const newCountAll = e.target.checked;
             setCountAll(newCountAll);
             // When checking, pass empty array and true
             // When unchecking, pass current types (or empty if none) and false
-            onSelectionChange(newCountAll ? [] : (types.length > 0 ? types : []), newCountAll);
+            onSelectionChange(newCountAll ? [] : types.length > 0 ? types : [], newCountAll);
           }}
         />
-        {!countAll && types.length > 0 && (
-          <div data-testid="selected-types">
-            {types.join(', ')}
-          </div>
-        )}
+        {!countAll && types.length > 0 && <div data-testid="selected-types">{types.join(', ')}</div>}
       </div>
     );
   },
@@ -58,16 +54,10 @@ vi.mock('./PersonalWipLimitTable', () => ({
     <div data-testid="personal-wip-limit-table">
       {limits.map((limit: PersonLimit) => (
         <div key={limit.id} data-testid={`limit-row-${limit.id}`}>
-          <button
-            data-testid={`edit-button-${limit.id}`}
-            onClick={() => onEdit(limit.id)}
-          >
+          <button data-testid={`edit-button-${limit.id}`} onClick={() => onEdit(limit.id)}>
             Edit
           </button>
-          <button
-            data-testid={`delete-button-${limit.id}`}
-            onClick={() => onDelete(limit.id)}
-          >
+          <button data-testid={`delete-button-${limit.id}`} onClick={() => onDelete(limit.id)}>
             Delete
           </button>
         </div>
@@ -99,9 +89,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C1: Ввод в поле personName не переключает в режим Edit', () => {
     it('should keep Add limit button active when typing in personName field', async () => {
       const user = userEvent.setup();
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Use id selector for Ant Design input
       const personNameInput = document.getElementById('edit-person-wip-limit-person-name') as HTMLInputElement;
@@ -123,17 +111,17 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C2: Отжатие "All columns" показывает список', () => {
     it('should show column list when unchecking "All columns" and keep it visible', async () => {
       const user = userEvent.setup();
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Find "All columns" checkbox by finding the label and then the input
       const allColumnsLabel = screen.getByText('All columns');
-      const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      const allColumnsCheckbox = allColumnsLabel
+        .closest('label')
+        ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
 
       expect(allColumnsCheckbox).toBeInTheDocument();
       expect(allColumnsCheckbox.checked).toBe(true);
-      
+
       // Initially list should be hidden (all selected) - 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
       const initialCheckboxes = screen.getAllByRole('checkbox');
       expect(initialCheckboxes.length).toBe(3);
@@ -150,16 +138,19 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       }
 
       // Wait for list to appear - checkboxes should be visible
-      await waitFor(() => {
-        // After unchecking "All", we should have more checkboxes (the individual ones)
-        // Should have: IssueTypeSelector, All columns (unchecked), All swimlanes, col1, col2, col3 = 6
-        const checkboxes = screen.getAllByRole('checkbox');
-        expect(checkboxes.length).toBe(6);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // After unchecking "All", we should have more checkboxes (the individual ones)
+          // Should have: IssueTypeSelector, All columns (unchecked), All swimlanes, col1, col2, col3 = 6
+          const checkboxes = screen.getAllByRole('checkbox');
+          expect(checkboxes.length).toBe(6);
+        },
+        { timeout: 3000 }
+      );
 
       // Wait a bit more to ensure list doesn't disappear
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Verify list is still visible - should still have more than 3 checkboxes
       const checkboxes = screen.getAllByRole('checkbox');
       expect(checkboxes.length).toBeGreaterThan(3);
@@ -169,16 +160,16 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C3: Отжатие "All swimlanes" показывает список', () => {
     it('should show swimlanes list when unchecking "All swimlanes" and keep it visible', async () => {
       const user = userEvent.setup();
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Find "All swimlanes" checkbox
       const allSwimlanesLabel = screen.getByText('All swimlanes');
-      const allSwimlanesCheckbox = allSwimlanesLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      const allSwimlanesCheckbox = allSwimlanesLabel
+        .closest('label')
+        ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
 
       expect(allSwimlanesCheckbox).toBeInTheDocument();
-      
+
       // Initially list should be hidden - 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
       const initialCheckboxes = screen.getAllByRole('checkbox');
       expect(initialCheckboxes.length).toBe(3);
@@ -193,15 +184,18 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       }
 
       // Wait for list to appear
-      await waitFor(() => {
-        // After unchecking All swimlanes, we should have more checkboxes (individual swimlane checkboxes)
-        const checkboxes = screen.getAllByRole('checkbox');
-        expect(checkboxes.length).toBeGreaterThan(3);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // After unchecking All swimlanes, we should have more checkboxes (individual swimlane checkboxes)
+          const checkboxes = screen.getAllByRole('checkbox');
+          expect(checkboxes.length).toBeGreaterThan(3);
+        },
+        { timeout: 3000 }
+      );
 
       // Wait a bit more to ensure list doesn't disappear
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Verify list is still visible - should still have more than 3 checkboxes
       const checkboxes = screen.getAllByRole('checkbox');
       expect(checkboxes.length).toBeGreaterThan(3);
@@ -211,7 +205,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C4: Редактирование лимита с одной колонкой', () => {
     it('should show column list with one column selected when editing limit with partial columns', async () => {
       const user = userEvent.setup();
-      
+
       // Create a limit with only one column
       const limit: PersonLimit = {
         id: 1,
@@ -228,9 +222,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Click Edit button
       const editButton = screen.getByTestId('edit-button-1');
@@ -255,7 +247,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C5: Редактирование лимита со всеми колонками', () => {
     it('should show "All columns" checked and hide list when editing limit with empty columns array (all)', async () => {
       const user = userEvent.setup();
-      
+
       // Empty array means "all columns"
       const limit: PersonLimit = {
         id: 1,
@@ -272,9 +264,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Click Edit button
       const editButton = screen.getByTestId('edit-button-1');
@@ -284,12 +274,16 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       await waitFor(() => {
         // "All columns" should be checked
         const allColumnsLabel = screen.getByText('All columns');
-        const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        const allColumnsCheckbox = allColumnsLabel
+          .closest('label')
+          ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
         expect(allColumnsCheckbox).toBeChecked();
 
         // Column list should be hidden - no checkboxes with column values
         const checkboxes = screen.getAllByRole('checkbox');
-        const columnCheckboxes = checkboxes.filter(cb => ['col1', 'col2', 'col3'].includes(cb.getAttribute('value') || ''));
+        const columnCheckboxes = checkboxes.filter(cb =>
+          ['col1', 'col2', 'col3'].includes(cb.getAttribute('value') || '')
+        );
         expect(columnCheckboxes.length).toBe(0);
       });
     });
@@ -298,7 +292,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C5b: Отключение "All columns" при редактировании лимита с пустыми массивами', () => {
     it('should allow unchecking "All columns" when editing limit with empty arrays', async () => {
       const user = userEvent.setup();
-      
+
       // Empty array means "all columns"
       const limit: PersonLimit = {
         id: 1,
@@ -315,9 +309,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Click Edit button
       const editButton = screen.getByTestId('edit-button-1');
@@ -326,7 +318,9 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Wait for form to update - "All columns" should be checked
       await waitFor(() => {
         const allColumnsLabel = screen.getByText('All columns');
-        const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        const allColumnsCheckbox = allColumnsLabel
+          .closest('label')
+          ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
         expect(allColumnsCheckbox).toBeChecked();
       });
 
@@ -336,27 +330,36 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       if (checkboxWrapper) {
         fireEvent.click(checkboxWrapper);
       } else {
-        const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        const allColumnsCheckbox = allColumnsLabel
+          .closest('label')
+          ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
         fireEvent.click(allColumnsCheckbox);
       }
 
       // Wait for list to appear and checkbox to be unchecked
-      await waitFor(() => {
-        const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
-        expect(allColumnsCheckbox).not.toBeChecked();
-        
-        // List should be visible with all columns selected
-        const checkboxes = screen.getAllByRole('checkbox');
-        expect(checkboxes.length).toBeGreaterThan(3); // Should have individual column checkboxes
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          const allColumnsCheckbox = allColumnsLabel
+            .closest('label')
+            ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+          expect(allColumnsCheckbox).not.toBeChecked();
+
+          // List should be visible with all columns selected
+          const checkboxes = screen.getAllByRole('checkbox');
+          expect(checkboxes.length).toBeGreaterThan(3); // Should have individual column checkboxes
+        },
+        { timeout: 3000 }
+      );
 
       // Wait a bit more to ensure it doesn't flicker back
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Verify checkbox is still unchecked and list is still visible
-      const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      const allColumnsCheckbox = allColumnsLabel
+        .closest('label')
+        ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
       expect(allColumnsCheckbox).not.toBeChecked();
-      
+
       const checkboxes = screen.getAllByRole('checkbox');
       expect(checkboxes.length).toBeGreaterThan(3);
     });
@@ -365,7 +368,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C6: Cancel отменяет редактирование', () => {
     it('should clear form and activate Add limit button when clicking Cancel', async () => {
       const user = userEvent.setup();
-      
+
       const limit: PersonLimit = {
         id: 1,
         person: {
@@ -381,9 +384,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Click Edit
       const editButton = screen.getByTestId('edit-button-1');
@@ -412,7 +413,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         const saveButton = screen.getByText('Add limit').closest('button') as HTMLButtonElement;
         expect(saveButton).not.toBeDisabled();
         expect(saveButton).toHaveTextContent('Add limit');
-        
+
         // Form should be cleared
         const personNameInput = document.getElementById('edit-person-wip-limit-person-name') as HTMLInputElement;
         expect(personNameInput.value).toBe('');
@@ -423,13 +424,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C7: Выбор всех колонок скрывает список', () => {
     it('should hide column list when all columns are selected individually', async () => {
       const user = userEvent.setup();
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Uncheck "All columns" to show list
       const allColumnsLabel = screen.getByText('All columns');
-      const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      const allColumnsCheckbox = allColumnsLabel
+        .closest('label')
+        ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
       const checkboxWrapper = allColumnsLabel.closest('.ant-checkbox-wrapper');
       if (checkboxWrapper) {
         fireEvent.click(checkboxWrapper);
@@ -438,11 +439,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       }
 
       // Wait for list to appear - should have more checkboxes
-      await waitFor(() => {
-        const checkboxes = screen.getAllByRole('checkbox');
-        // Should have All columns, All swimlanes, and 3 column checkboxes = 5
-        expect(checkboxes.length).toBeGreaterThanOrEqual(5);
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          const checkboxes = screen.getAllByRole('checkbox');
+          // Should have All columns, All swimlanes, and 3 column checkboxes = 5
+          expect(checkboxes.length).toBeGreaterThanOrEqual(5);
+        },
+        { timeout: 2000 }
+      );
 
       // Find and uncheck one column - get all checkboxes and find the one that's not "All"
       const checkboxes = screen.getAllByRole('checkbox');
@@ -453,10 +457,10 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         return value && ['col1', 'col2', 'col3'].includes(value);
       });
       expect(columnCheckboxes.length).toBeGreaterThan(0);
-      
+
       const col1Checkbox = columnCheckboxes[0] as HTMLInputElement;
       const wasChecked = col1Checkbox.checked;
-      
+
       // If it's already checked, we need to uncheck it first, then check it back
       // to simulate the scenario where user unchecks and then checks all
       if (wasChecked) {
@@ -474,32 +478,37 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       // Now all should be checked - list should hide
       // The component should automatically hide the list when all columns are selected
-      await waitFor(() => {
-        // List should be hidden - should have only 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
-        const allCheckboxes = screen.getAllByRole('checkbox');
-        expect(allCheckboxes.length).toBeLessThanOrEqual(3);
-        
-        // Re-find the checkbox as it may have been re-rendered
-        const allColumnsLabelAfter = screen.getByText('All columns');
-        const allColumnsCheckboxAfter = allColumnsLabelAfter.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
-        // "All columns" should be checked when list is hidden
-        if (allCheckboxes.length <= 3) {
-          expect(allColumnsCheckboxAfter).toBeChecked();
-        }
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // List should be hidden - should have only 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
+          const allCheckboxes = screen.getAllByRole('checkbox');
+          expect(allCheckboxes.length).toBeLessThanOrEqual(3);
+
+          // Re-find the checkbox as it may have been re-rendered
+          const allColumnsLabelAfter = screen.getByText('All columns');
+          const allColumnsCheckboxAfter = allColumnsLabelAfter
+            .closest('label')
+            ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+          // "All columns" should be checked when list is hidden
+          if (allCheckboxes.length <= 3) {
+            expect(allColumnsCheckboxAfter).toBeChecked();
+          }
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
   describe('C8: Снятие колонки в списке не скрывает список', () => {
     it('should keep column list visible when unchecking a column', async () => {
       const user = userEvent.setup();
-      render(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />
-      );
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={mockOnAddLimit} />);
 
       // Uncheck "All columns" to show list
       const allColumnsLabel = screen.getByText('All columns');
-      const allColumnsCheckbox = allColumnsLabel.closest('label')?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      const allColumnsCheckbox = allColumnsLabel
+        .closest('label')
+        ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
       const checkboxWrapper = allColumnsLabel.closest('.ant-checkbox-wrapper');
       if (checkboxWrapper) {
         fireEvent.click(checkboxWrapper);
@@ -508,11 +517,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       }
 
       // Wait for list to appear - should have more checkboxes
-      await waitFor(() => {
-        const checkboxes = screen.getAllByRole('checkbox');
-        // Should have All columns, All swimlanes, and 3 column checkboxes = 5
-        expect(checkboxes.length).toBeGreaterThanOrEqual(5);
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          const checkboxes = screen.getAllByRole('checkbox');
+          // Should have All columns, All swimlanes, and 3 column checkboxes = 5
+          expect(checkboxes.length).toBeGreaterThanOrEqual(5);
+        },
+        { timeout: 2000 }
+      );
 
       // Find and uncheck one column
       let checkboxes = screen.getAllByRole('checkbox');
@@ -521,7 +533,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         return value && ['col1', 'col2', 'col3'].includes(value);
       });
       expect(columnCheckboxes.length).toBe(3);
-      
+
       const col1Checkbox = columnCheckboxes[0] as HTMLInputElement;
       await user.click(col1Checkbox);
 
@@ -541,7 +553,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
     describe('Issue types reset after add', () => {
       it('should reset issue types after adding a limit', async () => {
         const user = userEvent.setup();
-        
+
         // Create a mock that actually adds to store
         const onAddLimitMock = vi.fn(async (formData: FormData) => {
           // Simulate what index.tsx does - add limit to store
@@ -551,27 +563,27 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             self: 'https://test.com/user',
             avatar: 'https://test.com/avatar.png',
           };
-          
+
           const personLimit: PersonLimit = {
             id: Date.now(),
             person: mockPerson,
             limit: formData.limit,
             columns: [],
             swimlanes: [],
-            ...(formData.includedIssueTypes && formData.includedIssueTypes.length > 0 
-              ? { includedIssueTypes: formData.includedIssueTypes } 
+            ...(formData.includedIssueTypes && formData.includedIssueTypes.length > 0
+              ? { includedIssueTypes: formData.includedIssueTypes }
               : {}),
           };
-          
+
           useSettingsUIStore.getState().actions.addLimit(personLimit);
         });
-        
+
         render(
           <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
         );
 
         // Initially countAllTypes should be true (default)
-        let countAllTypesCheckbox = screen.getByTestId('count-all-types');
+        const countAllTypesCheckbox = screen.getByTestId('count-all-types');
         expect(countAllTypesCheckbox).toBeChecked();
 
         // Uncheck to select specific types
@@ -580,7 +592,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // Fill form and submit
         const personNameInput = document.getElementById('edit-person-wip-limit-person-name') as HTMLInputElement;
         await user.type(personNameInput, 'test.user');
-        
+
         const limitInput = document.getElementById('edit-person-wip-limit-person-limit') as HTMLInputElement;
         await user.clear(limitInput);
         await user.type(limitInput, '5');
@@ -606,19 +618,22 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // The component's useEffect should have reset countAllTypes to true when editingId is null
         // This gets passed to IssueTypeSelector as initialCountAllTypes
         // The mock should sync with this prop change via useEffect
-        await waitFor(() => {
-          const countAllTypesCheckboxAfter = screen.getByTestId('count-all-types');
-          // After useEffect runs (editingId === null), countAllTypes should be true
-          // This should be passed to mock as initialCountAllTypes=true
-          expect(countAllTypesCheckboxAfter).toBeChecked();
-        }, { timeout: 2000 });
+        await waitFor(
+          () => {
+            const countAllTypesCheckboxAfter = screen.getByTestId('count-all-types');
+            // After useEffect runs (editingId === null), countAllTypes should be true
+            // This should be passed to mock as initialCountAllTypes=true
+            expect(countAllTypesCheckboxAfter).toBeChecked();
+          },
+          { timeout: 2000 }
+        );
       });
     });
 
     describe('Issue types populated when editing', () => {
       it('should populate issue types when editing a limit with includedIssueTypes', async () => {
         const user = userEvent.setup();
-        
+
         const limit: PersonLimit = {
           id: 1,
           person: {
@@ -647,24 +662,27 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // setEditingId should populate formData.includedIssueTypes
         // useEffect should update selectedTypes and countAllTypes
         // IssueTypeSelector should receive updated props and sync
-        await waitFor(() => {
-          // Verify IssueTypeSelector receives correct props
-          // countAllTypes should be false when types are selected
-          const countAllTypesCheckbox = screen.getByTestId('count-all-types');
-          expect(countAllTypesCheckbox).not.toBeChecked();
-          
-          // Verify selected types are displayed
-          const selectedTypesDiv = screen.getByTestId('selected-types');
-          expect(selectedTypesDiv.textContent).toContain('Task');
-          expect(selectedTypesDiv.textContent).toContain('Bug');
-        }, { timeout: 2000 });
+        await waitFor(
+          () => {
+            // Verify IssueTypeSelector receives correct props
+            // countAllTypes should be false when types are selected
+            const countAllTypesCheckbox = screen.getByTestId('count-all-types');
+            expect(countAllTypesCheckbox).not.toBeChecked();
+
+            // Verify selected types are displayed
+            const selectedTypesDiv = screen.getByTestId('selected-types');
+            expect(selectedTypesDiv.textContent).toContain('Task');
+            expect(selectedTypesDiv.textContent).toContain('Bug');
+          },
+          { timeout: 2000 }
+        );
       });
     });
 
     describe('Issue types cleared when canceling edit', () => {
       it('should reset issue types when canceling edit', async () => {
         const user = userEvent.setup();
-        
+
         const limit: PersonLimit = {
           id: 1,
           person: {
@@ -703,11 +721,296 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         await waitFor(() => {
           // Verify editingId is cleared
           expect(useSettingsUIStore.getState().data.editingId).toBeNull();
-          
+
           // Verify issue types are reset to default (countAllTypes = true)
           const countAllTypesCheckbox = screen.getByTestId('count-all-types');
           expect(countAllTypesCheckbox).toBeChecked();
         });
+      });
+    });
+  });
+
+  describe('Bug fixes: Save and Add limit', () => {
+    describe('Save edited limit with specific columns', () => {
+      it('should save selected columns correctly when editing (not save as "all")', async () => {
+        const user = userEvent.setup();
+        const onAddLimitMock = vi.fn();
+
+        // Create a limit with specific columns (not all)
+        const limit: PersonLimit = {
+          id: 1,
+          person: {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+            avatar: 'https://test.com/avatar.png',
+          },
+          limit: 5,
+          columns: [
+            { id: 'col1', name: 'To Do' },
+            { id: 'col2', name: 'In Progress' },
+          ], // Only 2 out of 3 columns
+          swimlanes: [],
+        };
+
+        useSettingsUIStore.getState().actions.addLimit(limit);
+
+        render(
+          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+        );
+
+        // Click Edit button
+        const editButton = screen.getByTestId('edit-button-1');
+        await user.click(editButton);
+
+        // Wait for edit mode
+        await waitFor(() => {
+          const saveButton = screen.getByText('Edit limit').closest('button') as HTMLButtonElement;
+          expect(saveButton).toBeInTheDocument();
+        });
+
+        // Submit the form
+        const saveButton = screen.getByText('Edit limit').closest('button') as HTMLButtonElement;
+        await user.click(saveButton);
+
+        // Wait for onAddLimit to be called
+        await waitFor(() => {
+          expect(onAddLimitMock).toHaveBeenCalled();
+        });
+
+        // Verify that selectedColumns is NOT empty (should contain the 2 selected columns)
+        const callArgs = onAddLimitMock.mock.calls[0][0];
+        expect(callArgs.selectedColumns).not.toEqual([]);
+        expect(callArgs.selectedColumns.length).toBeGreaterThan(0);
+        // Should contain the column IDs that were selected
+        expect(callArgs.selectedColumns).toContain('col1');
+        expect(callArgs.selectedColumns).toContain('col2');
+      });
+
+      it('should handle numeric column IDs from board API correctly', async () => {
+        const user = userEvent.setup();
+        const onAddLimitMock = vi.fn();
+
+        // Simulate board API returning numeric IDs
+        const columnsWithNumericIds = [
+          { id: '123', name: 'To Do' },
+          { id: '456', name: 'In Progress' },
+          { id: '789', name: 'Done' },
+        ];
+
+        // Create a limit with specific columns using numeric IDs as strings
+        const limit: PersonLimit = {
+          id: 1,
+          person: {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+            avatar: 'https://test.com/avatar.png',
+          },
+          limit: 5,
+          columns: [
+            { id: '123', name: 'To Do' },
+            { id: '789', name: 'Done' },
+          ], // Only 2 out of 3 columns
+          swimlanes: [],
+        };
+
+        useSettingsUIStore.getState().actions.addLimit(limit);
+
+        render(
+          <PersonalWipLimitContainer
+            columns={columnsWithNumericIds}
+            swimlanes={mockSwimlanes}
+            onAddLimit={onAddLimitMock}
+          />
+        );
+
+        // Click Edit button
+        const editButton = screen.getByTestId('edit-button-1');
+        await user.click(editButton);
+
+        // Wait for edit mode
+        await waitFor(() => {
+          const saveButton = screen.getByText('Edit limit').closest('button') as HTMLButtonElement;
+          expect(saveButton).toBeInTheDocument();
+        });
+
+        // Submit the form
+        const saveButton = screen.getByText('Edit limit').closest('button') as HTMLButtonElement;
+        await user.click(saveButton);
+
+        // Wait for onAddLimit to be called
+        await waitFor(() => {
+          expect(onAddLimitMock).toHaveBeenCalled();
+        });
+
+        // Verify that selectedColumns contains the correct IDs
+        const callArgs = onAddLimitMock.mock.calls[0][0];
+        expect(callArgs.selectedColumns).not.toEqual([]);
+        expect(callArgs.selectedColumns).toContain('123');
+        expect(callArgs.selectedColumns).toContain('789');
+      });
+    });
+
+    describe('Add new limit', () => {
+      it('should call onAddLimit with correct data when adding a new limit', async () => {
+        const user = userEvent.setup();
+        const onAddLimitMock = vi.fn();
+
+        render(
+          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+        );
+
+        // Fill in the form
+        const personNameInput = document.getElementById('edit-person-wip-limit-person-name') as HTMLInputElement;
+        await user.type(personNameInput, 'newuser');
+
+        const limitInput = document.getElementById('edit-person-wip-limit-person-limit') as HTMLInputElement;
+        await user.clear(limitInput);
+        await user.type(limitInput, '3');
+
+        // Uncheck "All columns" to select specific columns
+        const allColumnsLabel = screen.getByText('All columns');
+        const allColumnsCheckbox = allColumnsLabel
+          .closest('label')
+          ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        await user.click(allColumnsCheckbox);
+
+        // Wait for column list to appear
+        await waitFor(() => {
+          const columnList = screen.getByText('To Do').closest('label');
+          expect(columnList).toBeInTheDocument();
+        });
+
+        // Uncheck one column (so not all are selected)
+        const toDoCheckbox = screen
+          .getByText('To Do')
+          .closest('label')
+          ?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        await user.click(toDoCheckbox);
+
+        // Submit the form
+        const saveButton = screen.getByText('Add limit').closest('button') as HTMLButtonElement;
+        await user.click(saveButton);
+
+        // Wait for onAddLimit to be called
+        await waitFor(() => {
+          expect(onAddLimitMock).toHaveBeenCalled();
+        });
+
+        // Verify the call arguments
+        const callArgs = onAddLimitMock.mock.calls[0][0];
+        expect(callArgs.personName).toBe('newuser');
+        expect(callArgs.limit).toBe(3);
+        // Should have selected columns (not empty, not all)
+        expect(callArgs.selectedColumns).not.toEqual([]);
+        expect(callArgs.selectedColumns.length).toBeLessThan(mockColumns.length);
+      });
+
+      it('should handle form submission when all columns are selected', async () => {
+        const user = userEvent.setup();
+        const onAddLimitMock = vi.fn();
+
+        render(
+          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+        );
+
+        // Fill in the form
+        const personNameInput = document.getElementById('edit-person-wip-limit-person-name') as HTMLInputElement;
+        await user.type(personNameInput, 'newuser');
+
+        const limitInput = document.getElementById('edit-person-wip-limit-person-limit') as HTMLInputElement;
+        await user.clear(limitInput);
+        await user.type(limitInput, '5');
+
+        // Submit with all columns selected (default state)
+        const saveButton = screen.getByText('Add limit').closest('button') as HTMLButtonElement;
+        await user.click(saveButton);
+
+        // Wait for onAddLimit to be called
+        await waitFor(() => {
+          expect(onAddLimitMock).toHaveBeenCalled();
+        });
+
+        // Verify the call arguments
+        const callArgs = onAddLimitMock.mock.calls[0][0];
+        expect(callArgs.personName).toBe('newuser');
+        expect(callArgs.limit).toBe(5);
+        // When all columns are selected, should save as empty array (meaning "all")
+        expect(callArgs.selectedColumns).toEqual([]);
+      });
+    });
+  });
+
+  describe('Bug fix: Count all issue types checkbox', () => {
+    it('should stay unchecked when user unchecks it in add new limit mode', async () => {
+      const user = userEvent.setup();
+      const onAddLimitMock = vi.fn();
+
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />);
+
+      // Initially checkbox should be checked (default state)
+      const countAllTypesCheckbox = screen.getByTestId('count-all-types');
+      expect(countAllTypesCheckbox).toBeChecked();
+
+      // User unchecks the checkbox
+      await user.click(countAllTypesCheckbox);
+
+      // Wait a bit to ensure any effects have run
+      await waitFor(
+        () => {
+          // The checkbox should stay unchecked (not reset back to checked)
+          expect(countAllTypesCheckbox).not.toBeChecked();
+        },
+        { timeout: 2000 }
+      );
+
+      // Verify it's still unchecked after a short delay (to catch any delayed resets)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(countAllTypesCheckbox).not.toBeChecked();
+    });
+
+    it('should reset to checked when switching from edit mode to add mode', async () => {
+      const user = userEvent.setup();
+      const onAddLimitMock = vi.fn();
+
+      // Create a limit with issue types
+      const limit: PersonLimit = {
+        id: 1,
+        person: {
+          name: 'testuser',
+          displayName: 'Test User',
+          self: 'https://test.com/user',
+          avatar: 'https://test.com/avatar.png',
+        },
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+        includedIssueTypes: ['Task', 'Bug'],
+      };
+
+      useSettingsUIStore.getState().actions.addLimit(limit);
+
+      render(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />);
+
+      // Click Edit button
+      const editButton = screen.getByTestId('edit-button-1');
+      await user.click(editButton);
+
+      // Wait for edit mode - checkbox should be unchecked (has issue types)
+      await waitFor(() => {
+        const countAllTypesCheckbox = screen.getByTestId('count-all-types');
+        expect(countAllTypesCheckbox).not.toBeChecked();
+      });
+
+      // Click Cancel to exit edit mode
+      const cancelButton = screen.getByText('Cancel');
+      await user.click(cancelButton);
+
+      // Wait for add mode - checkbox should reset to checked
+      await waitFor(() => {
+        const countAllTypesCheckbox = screen.getByTestId('count-all-types');
+        expect(countAllTypesCheckbox).toBeChecked();
       });
     });
   });

@@ -90,21 +90,30 @@ function filterSubtasksBySourcesMapped(
   // Get direct subtasks
   if (config.includeDirectSubtasks) {
     const directSubtasks = getDirectSubtasks(parentIssue, subtasks);
-    console.log('[DEBUG] Direct subtasks:', directSubtasks.map(s => s.key));
+    console.log(
+      '[DEBUG] Direct subtasks:',
+      directSubtasks.map(s => s.key)
+    );
     result.push(...directSubtasks);
   }
 
   // Get epic children
   if (config.includeEpicChildren) {
     const epicChildren = getEpicChildren(parentIssue, subtasks, epicLinkFieldId);
-    console.log('[DEBUG] Epic children:', epicChildren.map(s => s.key));
+    console.log(
+      '[DEBUG] Epic children:',
+      epicChildren.map(s => s.key)
+    );
     result.push(...epicChildren);
   }
 
   // Get linked issues
   if (config.includeLinkedIssues) {
     const linkedIssues = getLinkedIssues(parentIssue, subtasks);
-    console.log('[DEBUG] Linked issues:', linkedIssues.map(s => s.key));
+    console.log(
+      '[DEBUG] Linked issues:',
+      linkedIssues.map(s => s.key)
+    );
     result.push(...linkedIssues);
   }
 
@@ -244,9 +253,7 @@ export function useIssueConditionChecks(issueKey: string): ConditionCheckResult[
   const { fields } = useGetFields();
   const epicLinkFieldId = getEpicLinkFieldId(fields);
 
-  const issue = useJiraIssuesStore(
-    useShallow(state => state.issues.find(i => i.data.key === issueKey)?.data)
-  );
+  const issue = useJiraIssuesStore(useShallow(state => state.issues.find(i => i.data.key === issueKey)?.data));
 
   const subtasksData = useJiraSubtasksStore(useShallow(state => state.data[issueKey]));
   const subtasks = subtasksData?.subtasks || [];

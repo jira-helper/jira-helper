@@ -130,7 +130,10 @@ export const MultipleLimits: StoryObj = {
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 5,
-          columns: [{ id: 'col2', name: 'In Progress' }, { id: 'col3', name: 'Code Review' }],
+          columns: [
+            { id: 'col2', name: 'In Progress' },
+            { id: 'col3', name: 'Code Review' },
+          ],
           swimlanes: [{ id: 'swim2', name: 'Backend' }],
         },
       ]}

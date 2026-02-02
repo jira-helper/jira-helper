@@ -89,8 +89,8 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
           if (id !== null) {
             const limit = state.data.limits.find(l => l.id === id);
             if (limit) {
-              const selectedColumns = limit.columns.length === 0 ? [] : limit.columns.map(c => c.id);
-              const swimlanes = limit.swimlanes.length === 0 ? [] : limit.swimlanes.map(s => s.id);
+              const selectedColumns = limit.columns.length === 0 ? [] : limit.columns.map(c => String(c.id));
+              const swimlanes = limit.swimlanes.length === 0 ? [] : limit.swimlanes.map(s => String(s.id ?? s.name));
               state.data.formData = {
                 personName: limit.person.name,
                 limit: limit.limit,

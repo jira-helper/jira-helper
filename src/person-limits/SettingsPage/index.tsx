@@ -78,9 +78,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
     this.boardData = boardData;
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter((i: any) => !i.isKanPlanColumn);
     this.boardDataSwimlanes = this.boardData.swimlanesConfig.swimlanes;
-    this.personLimitsRecovery = window.structuredClone(
-      usePersonWipLimitsPropertyStore.getState().data
-    );
+    this.personLimitsRecovery = window.structuredClone(usePersonWipLimitsPropertyStore.getState().data);
 
     this.renderEditButton();
   }
@@ -135,9 +133,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
 
   handleSubmit = async (unmountPopup: Function): Promise<void> => {
     await saveToProperty();
-    this.personLimitsRecovery = window.structuredClone(
-      usePersonWipLimitsPropertyStore.getState().data
-    );
+    this.personLimitsRecovery = window.structuredClone(usePersonWipLimitsPropertyStore.getState().data);
     unmountPopup();
   };
 
@@ -200,8 +196,8 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
 
   onEditLimit = async (formData: FormData): Promise<void> => {
     const store = useSettingsUIStore.getState();
-    const editingId = store.data.editingId;
-    
+    const { editingId } = store.data;
+
     if (!editingId) return;
 
     const existingLimit = store.data.limits.find(limit => limit.id === editingId);
@@ -224,5 +220,4 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   onEdit = async (id: number): Promise<void> => {
     useSettingsUIStore.getState().actions.setEditingId(id);
   };
-
 }

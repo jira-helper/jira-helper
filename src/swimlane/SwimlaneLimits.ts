@@ -63,19 +63,17 @@ export default class extends PageModification<any, Element> {
       const swimlaneColumns = Array.from(swimlane.getElementsByClassName('ghx-columns')[0].childNodes || []);
 
       const { includedIssueTypes } = settings[swimlaneId!];
-      const numberIssues = swimlaneColumns.reduce(
-        (acc, column) => {
-          const issues = filter(
-            issue => !issue.classList.contains('ghx-done') && !issue.classList.contains('ghx-issue-subtask'),
-            (column as HTMLElement).querySelectorAll('.ghx-issue')
-          );
-          const filteredIssues = includedIssueTypes && includedIssueTypes.length > 0
+      const numberIssues = swimlaneColumns.reduce((acc, column) => {
+        const issues = filter(
+          issue => !issue.classList.contains('ghx-done') && !issue.classList.contains('ghx-issue-subtask'),
+          (column as HTMLElement).querySelectorAll('.ghx-issue')
+        );
+        const filteredIssues =
+          includedIssueTypes && includedIssueTypes.length > 0
             ? filter(issue => this.shouldCountIssue(issue, includedIssueTypes), issues)
             : issues;
-          return acc + filteredIssues.length;
-        },
-        0
-      );
+        return acc + filteredIssues.length;
+      }, 0);
 
       swimlanesIssuesCount[swimlaneId!] = numberIssues;
 

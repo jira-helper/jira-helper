@@ -154,11 +154,7 @@ describe('IssueConditionCheck utils', () => {
   });
 
   describe('checkIssueCondition - withSubtasks mode', () => {
-    const createWithSubtasksCheck = (
-      issueJql: string,
-      subtaskJql: string,
-      enabled = true
-    ): IssueConditionCheck => ({
+    const createWithSubtasksCheck = (issueJql: string, subtaskJql: string, enabled = true): IssueConditionCheck => ({
       id: 'test-check',
       name: 'Test Check',
       enabled,
@@ -181,9 +177,7 @@ describe('IssueConditionCheck utils', () => {
 
     it('should return matched=false when check is disabled', () => {
       const check = createWithSubtasksCheck('status = Open', 'status = "To Do"', false);
-      const issue = createIssueWithSubtasks({ status: 'Open' }, [
-        { key: 'TEST-2', fields: { status: 'To Do' } },
-      ]);
+      const issue = createIssueWithSubtasks({ status: 'Open' }, [{ key: 'TEST-2', fields: { status: 'To Do' } }]);
 
       const result = checkIssueCondition(issue, check);
 
@@ -192,9 +186,7 @@ describe('IssueConditionCheck utils', () => {
 
     it('should return matched=false when issueJql is empty', () => {
       const check = createWithSubtasksCheck('', 'status = "To Do"');
-      const issue = createIssueWithSubtasks({ status: 'Open' }, [
-        { key: 'TEST-2', fields: { status: 'To Do' } },
-      ]);
+      const issue = createIssueWithSubtasks({ status: 'Open' }, [{ key: 'TEST-2', fields: { status: 'To Do' } }]);
 
       const result = checkIssueCondition(issue, check);
 
@@ -203,9 +195,7 @@ describe('IssueConditionCheck utils', () => {
 
     it('should return matched=false when subtaskJql is empty', () => {
       const check = createWithSubtasksCheck('status = Open', '');
-      const issue = createIssueWithSubtasks({ status: 'Open' }, [
-        { key: 'TEST-2', fields: { status: 'To Do' } },
-      ]);
+      const issue = createIssueWithSubtasks({ status: 'Open' }, [{ key: 'TEST-2', fields: { status: 'To Do' } }]);
 
       const result = checkIssueCondition(issue, check);
 
@@ -239,9 +229,7 @@ describe('IssueConditionCheck utils', () => {
 
     it('should return matched=false when issue does not match', () => {
       const check = createWithSubtasksCheck('status = Closed', 'status = "To Do"');
-      const issue = createIssueWithSubtasks({ status: 'Open' }, [
-        { key: 'TEST-2', fields: { status: 'To Do' } },
-      ]);
+      const issue = createIssueWithSubtasks({ status: 'Open' }, [{ key: 'TEST-2', fields: { status: 'To Do' } }]);
 
       const result = checkIssueCondition(issue, check);
 
@@ -409,10 +397,7 @@ describe('IssueConditionCheck utils', () => {
         const issue: IssueData = {
           key: 'TEST-1',
           fields: { status: 'Open' },
-          subtasks: [
-            createSubtask('TEST-2', true),
-            createSubtask('TEST-3', false),
-          ],
+          subtasks: [createSubtask('TEST-2', true), createSubtask('TEST-3', false)],
         };
 
         const result = checkIssueCondition(issue, check);
@@ -458,10 +443,7 @@ describe('IssueConditionCheck utils', () => {
         const issue: IssueData = {
           key: 'TEST-1',
           fields: { status: 'Open' },
-          subtasks: [
-            createSubtask('TEST-2', true),
-            createSubtask('TEST-3', false),
-          ],
+          subtasks: [createSubtask('TEST-2', true), createSubtask('TEST-3', false)],
         };
 
         const result = checkIssueCondition(issue, check);

@@ -42,7 +42,7 @@ export const IssueConditionCheckSettings: React.FC = () => {
     actions.addIssueConditionCheck(newCheck);
   };
 
-  const handleUpdateCheck = (id: string, updates: Partial<typeof checks[0]>) => {
+  const handleUpdateCheck = (id: string, updates: Partial<(typeof checks)[0]>) => {
     actions.updateIssueConditionCheck(id, updates);
   };
 
@@ -90,12 +90,7 @@ export const IssueConditionCheckSettings: React.FC = () => {
           </Button>
 
           {checks.length > 0 && (
-            <Button
-              type="default"
-              onClick={handleClearAll}
-              danger
-              data-testid="clear-all-condition-checks-button"
-            >
+            <Button type="default" onClick={handleClearAll} danger data-testid="clear-all-condition-checks-button">
               {texts.clearAll}
             </Button>
           )}

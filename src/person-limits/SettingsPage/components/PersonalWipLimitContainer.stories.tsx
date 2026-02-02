@@ -43,11 +43,7 @@ const ContainerWrapper: React.FC<{
 export const EmptyState: Story = {
   render: () => (
     <ContainerWrapper>
-      <PersonalWipLimitContainer
-        columns={mockColumns}
-        swimlanes={mockSwimlanes}
-        onAddLimit={async () => {}}
-      />
+      <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
     </ContainerWrapper>
   ),
 };
@@ -55,11 +51,7 @@ export const EmptyState: Story = {
 export const AddMode: Story = {
   render: () => (
     <ContainerWrapper>
-      <PersonalWipLimitContainer
-        columns={mockColumns}
-        swimlanes={mockSwimlanes}
-        onAddLimit={async () => {}}
-      />
+      <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
     </ContainerWrapper>
   ),
 };
@@ -81,11 +73,7 @@ export const EditMode: Story = {
 
     return (
       <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          onAddLimit={async () => {}}
-        />
+        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
       </ContainerWrapper>
     );
   },
@@ -116,11 +104,7 @@ export const EditModeWithAllColumns: Story = {
 
     return (
       <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          onAddLimit={async () => {}}
-        />
+        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
       </ContainerWrapper>
     );
   },
@@ -164,11 +148,7 @@ export const WithMultipleLimits: Story = {
 
     return (
       <ContainerWrapper initialLimits={limits}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          onAddLimit={async () => {}}
-        />
+        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
       </ContainerWrapper>
     );
   },

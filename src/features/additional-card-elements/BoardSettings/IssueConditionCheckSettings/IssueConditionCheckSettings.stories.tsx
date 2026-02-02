@@ -302,9 +302,7 @@ export const RealWorldExamples: StoryObj = {
       <StoreInitializer checks={realWorldChecks}>
         <div style={{ padding: '20px', maxWidth: '800px' }}>
           <h2>Real World Configuration Examples</h2>
-          <p style={{ marginBottom: '16px', color: '#666' }}>
-            Common condition checks used in real Jira workflows.
-          </p>
+          <p style={{ marginBottom: '16px', color: '#666' }}>Common condition checks used in real Jira workflows.</p>
           <IssueConditionCheckSettings />
         </div>
       </StoreInitializer>
@@ -316,16 +314,106 @@ export const RealWorldExamples: StoryObj = {
 export const AllIconsAndColorsDemo: StoryObj = {
   render: () => {
     const allChecks: IssueConditionCheck[] = [
-      { id: 'warning-red', name: 'Warning Red', enabled: true, mode: 'simple', icon: 'warning', color: 'red', tooltipText: 'Warning red', jql: 'status = Open' },
-      { id: 'info-blue', name: 'Info Blue', enabled: true, mode: 'simple', icon: 'info', color: 'blue', tooltipText: 'Info blue', jql: 'status = Open' },
-      { id: 'check-green', name: 'Check Green', enabled: true, mode: 'simple', icon: 'check', color: 'green', tooltipText: 'Check green', jql: 'status = Open' },
-      { id: 'close-gray', name: 'Close Gray', enabled: true, mode: 'simple', icon: 'close', color: 'gray', tooltipText: 'Close gray', jql: 'status = Open' },
-      { id: 'question-yellow', name: 'Question Yellow', enabled: true, mode: 'simple', icon: 'question', color: 'yellow', tooltipText: 'Question yellow', jql: 'status = Open' },
-      { id: 'exclamation-orange', name: 'Exclamation Orange', enabled: true, mode: 'simple', icon: 'exclamation', color: 'orange', tooltipText: 'Exclamation orange', jql: 'status = Open' },
-      { id: 'flag-red', name: 'Flag Red', enabled: true, mode: 'simple', icon: 'flag', color: 'red', tooltipText: 'Flag red', jql: 'status = Open' },
-      { id: 'star-yellow', name: 'Star Yellow', enabled: true, mode: 'simple', icon: 'star', color: 'yellow', tooltipText: 'Star yellow', jql: 'status = Open' },
-      { id: 'bug-red', name: 'Bug Red', enabled: true, mode: 'simple', icon: 'bug', color: 'red', tooltipText: 'Bug red', jql: 'status = Open' },
-      { id: 'clock-orange', name: 'Clock Orange', enabled: true, mode: 'simple', icon: 'clock', color: 'orange', tooltipText: 'Clock orange', jql: 'status = Open' },
+      {
+        id: 'warning-red',
+        name: 'Warning Red',
+        enabled: true,
+        mode: 'simple',
+        icon: 'warning',
+        color: 'red',
+        tooltipText: 'Warning red',
+        jql: 'status = Open',
+      },
+      {
+        id: 'info-blue',
+        name: 'Info Blue',
+        enabled: true,
+        mode: 'simple',
+        icon: 'info',
+        color: 'blue',
+        tooltipText: 'Info blue',
+        jql: 'status = Open',
+      },
+      {
+        id: 'check-green',
+        name: 'Check Green',
+        enabled: true,
+        mode: 'simple',
+        icon: 'check',
+        color: 'green',
+        tooltipText: 'Check green',
+        jql: 'status = Open',
+      },
+      {
+        id: 'close-gray',
+        name: 'Close Gray',
+        enabled: true,
+        mode: 'simple',
+        icon: 'close',
+        color: 'gray',
+        tooltipText: 'Close gray',
+        jql: 'status = Open',
+      },
+      {
+        id: 'question-yellow',
+        name: 'Question Yellow',
+        enabled: true,
+        mode: 'simple',
+        icon: 'question',
+        color: 'yellow',
+        tooltipText: 'Question yellow',
+        jql: 'status = Open',
+      },
+      {
+        id: 'exclamation-orange',
+        name: 'Exclamation Orange',
+        enabled: true,
+        mode: 'simple',
+        icon: 'exclamation',
+        color: 'orange',
+        tooltipText: 'Exclamation orange',
+        jql: 'status = Open',
+      },
+      {
+        id: 'flag-red',
+        name: 'Flag Red',
+        enabled: true,
+        mode: 'simple',
+        icon: 'flag',
+        color: 'red',
+        tooltipText: 'Flag red',
+        jql: 'status = Open',
+      },
+      {
+        id: 'star-yellow',
+        name: 'Star Yellow',
+        enabled: true,
+        mode: 'simple',
+        icon: 'star',
+        color: 'yellow',
+        tooltipText: 'Star yellow',
+        jql: 'status = Open',
+      },
+      {
+        id: 'bug-red',
+        name: 'Bug Red',
+        enabled: true,
+        mode: 'simple',
+        icon: 'bug',
+        color: 'red',
+        tooltipText: 'Bug red',
+        jql: 'status = Open',
+      },
+      {
+        id: 'clock-orange',
+        name: 'Clock Orange',
+        enabled: true,
+        mode: 'simple',
+        icon: 'clock',
+        color: 'orange',
+        tooltipText: 'Clock orange',
+        jql: 'status = Open',
+      },
     ];
 
     return (

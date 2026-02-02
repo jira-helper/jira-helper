@@ -23,9 +23,7 @@ function buildTooltipContent(
     <div>
       <div style={{ marginBottom: '8px' }}>{tooltipText}</div>
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '8px' }}>
-        <div style={{ fontWeight: 500, marginBottom: '4px' }}>
-          Subtasks ({matchedSubtasks.length}):
-        </div>
+        <div style={{ fontWeight: 500, marginBottom: '4px' }}>Subtasks ({matchedSubtasks.length}):</div>
         {matchedSubtasks.map(subtask => (
           <div key={subtask.key} style={{ marginBottom: '2px' }}>
             <a
@@ -73,11 +71,7 @@ export const IssueConditionCheckBadge: React.FC<IssueConditionCheckBadgeProps> =
 
   return (
     <Tooltip title={tooltipContent}>
-      <span
-        className={badgeClasses}
-        style={badgeStyle}
-        data-testid={`condition-check-badge-${check.id}`}
-      >
+      <span className={badgeClasses} style={badgeStyle} data-testid={`condition-check-badge-${check.id}`}>
         {icon}
       </span>
     </Tooltip>

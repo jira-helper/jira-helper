@@ -43,6 +43,7 @@ describe('getProjectKeyFromURL', () => {
       constructor(search: string) {
         this.search = search;
       }
+
       get(key: string) {
         const params = new Map();
         this.search
@@ -117,6 +118,7 @@ describe('getProjectKeyFromURL', () => {
       constructor(search: string) {
         this.search = search;
       }
+
       get(key: string) {
         const params = new Map();
         this.search

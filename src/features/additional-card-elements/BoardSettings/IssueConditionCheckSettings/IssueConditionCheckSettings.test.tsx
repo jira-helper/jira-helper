@@ -52,9 +52,7 @@ describe('IssueConditionCheckSettings', () => {
   it('should show empty state when no checks configured', () => {
     render(<IssueConditionCheckSettings />);
 
-    expect(
-      screen.getByText(/No condition checks configured yet/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/No condition checks configured yet/)).toBeInTheDocument();
   });
 
   it('should add a new check when clicking add button', async () => {

@@ -89,7 +89,11 @@ const WipLimitsOnCellsSettingsDemo: React.FC<WipLimitsOnCellsSettingsDemoProps> 
 
         // Add issue type selector if configured
         if (range.includedIssueTypes && range.includedIssueTypes.length > 0) {
-          const selectorHtml = generateIssueTypeSelectorHTML(issueTypes, range.includedIssueTypes, `range-${range.name}`);
+          const selectorHtml = generateIssueTypeSelectorHTML(
+            issueTypes,
+            range.includedIssueTypes,
+            `range-${range.name}`
+          );
           const selectorRow = document.createElement('tr');
           selectorRow.innerHTML = `
             <td colspan="4" style="padding: 12px; background: #f4f5f7;">

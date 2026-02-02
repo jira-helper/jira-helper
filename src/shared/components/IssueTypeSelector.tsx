@@ -28,10 +28,10 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
 
   // Track if we should auto-load on mount
   const shouldAutoLoadRef = useRef(!countAllTypes && projectKey);
-  
+
   // Track if this is the first render to avoid calling onSelectionChange on mount
   const isFirstRenderRef = useRef(true);
-  
+
   // Track previous values to avoid unnecessary calls
   const prevSelectedTypesRef = useRef<string[]>(initialSelectedTypes);
   const prevCountAllTypesRef = useRef<boolean>(initialCountAllTypes);
@@ -53,13 +53,13 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
       prevCountAllTypesRef.current = countAllTypes;
       return;
     }
-    
+
     // Only call if values actually changed
-    const selectedTypesChanged = 
+    const selectedTypesChanged =
       selectedTypes.length !== prevSelectedTypesRef.current.length ||
       selectedTypes.some((type, idx) => type !== prevSelectedTypesRef.current[idx]);
     const countAllTypesChanged = countAllTypes !== prevCountAllTypesRef.current;
-    
+
     if (selectedTypesChanged || countAllTypesChanged) {
       prevSelectedTypesRef.current = selectedTypes;
       prevCountAllTypesRef.current = countAllTypes;
@@ -94,7 +94,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
 
   // Debounced load function using useRef to persist across renders
   const debouncedLoadTypesRef = useRef(debounce(loadTypes, 500));
-  
+
   // Update the debounced function when loadTypes changes
   useEffect(() => {
     debouncedLoadTypesRef.current = debounce(loadTypes, 500);
@@ -121,10 +121,10 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
     const newKey = e.target.value;
     setProjectKey(newKey);
     setError(null);
-    
+
     // Clear current project types (but keep selected types)
     setCurrentProjectTypes([]);
-    
+
     // Debounced load
     if (newKey.trim()) {
       debouncedLoadTypesRef.current(newKey);
@@ -231,7 +231,10 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
           </div>
 
           <div className="field-group" style={{ marginBottom: '8px' }}>
-            <label htmlFor={`project-input-${groupId}`} style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+            <label
+              htmlFor={`project-input-${groupId}`}
+              style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}
+            >
               Project Key:
             </label>
             <input
@@ -327,7 +330,9 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
           )}
 
           {currentProjectTypes.length === 0 && projectKey && !isLoading && !error && (
-            <div style={{ padding: '8px', background: '#f4f5f7', borderRadius: '3px', fontSize: '12px', color: '#5e6c84' }}>
+            <div
+              style={{ padding: '8px', background: '#f4f5f7', borderRadius: '3px', fontSize: '12px', color: '#5e6c84' }}
+            >
               No issue types found. Click "Load Types" to fetch types for project "{projectKey}".
             </div>
           )}

@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/button-has-type */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Alert, Form, Input, InputNumber, Button, Space, Row, Col, Checkbox } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector';
@@ -41,18 +41,18 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // Filter out kanban columns
   const availableColumns = useMemo(() => columns.filter(col => !col.isKanPlanColumn), [columns]);
 
-  // Prepare default values for swimlanes
+  // Prepare default values for swimlanes (normalize to strings for Checkbox.Group matching)
   const defaultSwimlaneIds = useMemo(
-    () => swimlanes.map((swim, index) => (swim as any).id || swim.name || `swimlane-${index}`),
+    () => swimlanes.map((swim, index) => String((swim as any).id ?? swim.name ?? `swimlane-${index}`)),
     [swimlanes]
   );
 
-  // Default form values (all columns and swimlanes selected)
+  // Default form values (all columns and swimlanes selected; ids as strings for Checkbox.Group)
   const defaultFormData = useMemo<FormData>(
     () => ({
       personName: '',
       limit: 0,
-      selectedColumns: availableColumns.map(col => col.id),
+      selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: defaultSwimlaneIds,
     }),
     [availableColumns, defaultSwimlaneIds]
@@ -68,13 +68,13 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       // If selectedColumns/swimlanes are empty arrays, it means "all" - populate with all IDs
       const columnsToShow =
         formData.selectedColumns.length === 0
-          ? availableColumns.map(col => col.id) // empty array = all columns
-          : formData.selectedColumns;
+          ? availableColumns.map(col => String(col.id)) // empty array = all columns
+          : formData.selectedColumns.map(String);
 
       const swimlanesToShow =
         formData.swimlanes.length === 0
           ? defaultSwimlaneIds // empty array = all swimlanes
-          : formData.swimlanes;
+          : formData.swimlanes.map(String);
 
       form.setFieldsValue({
         personName: formData.personName,
@@ -100,8 +100,29 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   );
   const [resetCounter, setResetCounter] = useState(0);
 
-  // Reset issue types when switching between add/edit modes
+  // Track previous editingId and formData to detect mode changes vs user input
+  const prevEditingIdRef = useRef<number | null>(null);
+  const prevFormDataRef = useRef<typeof formData>(formData);
+
+  // Reset issue types when switching between add/edit modes or after successful add
   useEffect(() => {
+    const editingIdChanged = prevEditingIdRef.current !== editingId;
+    const formDataCleared = prevFormDataRef.current !== null && formData === null;
+
+    prevEditingIdRef.current = editingId;
+    prevFormDataRef.current = formData;
+
+    // Reset when:
+    // 1. editingId changes (mode switch: add→edit, edit→add, edit→different edit)
+    // 2. formData becomes null after being non-null (form cleared after successful add/edit)
+    const shouldReset = editingIdChanged || formDataCleared;
+
+    if (!shouldReset) {
+      // Just a formData field change (user typing/selecting) - don't reset
+      return;
+    }
+
+    // Reset logic
     if (editingId === null) {
       // Reset to defaults when exiting edit mode or after successful add
       setSelectedTypes([]);
@@ -121,7 +142,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       countAllTypes,
       formDataTypes: formData?.includedIssueTypes,
     });
-  }, [editingId, formData?.includedIssueTypes]);
+  }, [editingId, formData]);
 
   // Track columns and swimlanes state for "All" checkboxes
   const [columnsValue, setColumnsValue] = useState<string[]>(currentFormData.selectedColumns);
@@ -132,10 +153,11 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
     // If formData has empty arrays, it means "all" - populate with all IDs for display
     const columnsToSet =
       currentFormData.selectedColumns.length === 0
-        ? availableColumns.map(col => col.id)
-        : currentFormData.selectedColumns;
+        ? availableColumns.map(col => String(col.id))
+        : currentFormData.selectedColumns.map(String);
 
-    const swimlanesToSet = currentFormData.swimlanes.length === 0 ? defaultSwimlaneIds : currentFormData.swimlanes;
+    const swimlanesToSet =
+      currentFormData.swimlanes.length === 0 ? defaultSwimlaneIds : currentFormData.swimlanes.map(String);
 
     setColumnsValue(columnsToSet);
     setSwimlanesValue(swimlanesToSet);
@@ -288,14 +310,14 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                     setUserToggledColumns(true); // Mark that user manually toggled
                     if (e.target.checked) {
                       // When checking "All" - select all and hide list
-                      const newValue = availableColumns.map(col => col.id);
+                      const newValue = availableColumns.map(col => String(col.id));
                       form.setFieldValue('selectedColumns', newValue);
                       setColumnsValue(newValue);
                       setShowColumnsList(false);
                       handleFormChange('selectedColumns', newValue);
                     } else {
                       // When unchecking "All" - show list with all selected
-                      const newValue = availableColumns.map(col => col.id);
+                      const newValue = availableColumns.map(col => String(col.id));
                       form.setFieldValue('selectedColumns', newValue);
                       setColumnsValue(newValue);
                       setShowColumnsList(true);
@@ -324,7 +346,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                       value={columnsValue}
                       options={availableColumns.map(col => ({
                         label: col.name,
-                        value: col.id,
+                        value: String(col.id),
                       }))}
                       onChange={values => {
                         const newValues = values as string[];
@@ -373,31 +395,24 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                   style={{ marginBottom: 8 }}
                   onChange={e => {
                     setUserToggledSwimlanes(true); // Mark that user manually toggled
-                    const allSwimlaneIds = swimlanes.map((swim, index) => {
-                      return (swim as any).id || swim.name || `swimlane-${index}`;
-                    });
                     if (e.target.checked) {
                       // When checking "All" - select all and hide list
-                      form.setFieldValue('swimlanes', allSwimlaneIds);
-                      setSwimlanesValue(allSwimlaneIds);
+                      form.setFieldValue('swimlanes', defaultSwimlaneIds);
+                      setSwimlanesValue(defaultSwimlaneIds);
                       setShowSwimlanesList(false);
-                      handleFormChange('swimlanes', allSwimlaneIds);
+                      handleFormChange('swimlanes', defaultSwimlaneIds);
                     } else {
                       // When unchecking "All" - show list with all selected
-                      form.setFieldValue('swimlanes', allSwimlaneIds);
-                      setSwimlanesValue(allSwimlaneIds);
+                      form.setFieldValue('swimlanes', defaultSwimlaneIds);
+                      setSwimlanesValue(defaultSwimlaneIds);
                       setShowSwimlanesList(true);
-                      handleFormChange('swimlanes', allSwimlaneIds);
+                      handleFormChange('swimlanes', defaultSwimlaneIds);
                     }
                   }}
                   checked={
                     !showSwimlanesList &&
-                    (() => {
-                      const allSwimlaneIds = swimlanes.map((swim, index) => {
-                        return (swim as any).id || swim.name || `swimlane-${index}`;
-                      });
-                      return swimlanesValue.length === allSwimlaneIds.length && allSwimlaneIds.length > 0;
-                    })()
+                    swimlanesValue.length === defaultSwimlaneIds.length &&
+                    defaultSwimlaneIds.length > 0
                   }
                 >
                   All swimlanes
@@ -417,11 +432,11 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                       style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}
                       value={swimlanesValue}
                       options={swimlanes.map((swim, index) => {
-                        // Use name as id if id is not available
+                        // Use name as id if id is not available; normalize to string for matching
                         const swimId = (swim as any).id || swim.name || `swimlane-${index}`;
                         return {
                           label: swim.name,
-                          value: swimId,
+                          value: String(swimId),
                         };
                       })}
                       onChange={values => {
@@ -429,11 +444,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                         form.setFieldValue('swimlanes', newValues);
                         setSwimlanesValue(newValues);
                         handleFormChange('swimlanes', newValues);
-                        // If all are selected again, hide the list
-                        const allSwimlaneIds = swimlanes.map((swim, index) => {
-                          return (swim as any).id || swim.name || `swimlane-${index}`;
-                        });
-                        if (newValues.length === allSwimlaneIds.length) {
+                        if (newValues.length === defaultSwimlaneIds.length) {
                           setShowSwimlanesList(false);
                         }
                       }}

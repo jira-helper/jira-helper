@@ -1,16 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  Input,
-  Select,
-  Switch,
-  Button,
-  Space,
-  Typography,
-  ColorPicker,
-  Radio,
-  Tooltip,
-} from 'antd';
+import { Card, Input, Select, Switch, Button, Space, Typography, ColorPicker, Radio, Tooltip } from 'antd';
 import { DeleteOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import {
@@ -21,8 +10,8 @@ import {
   IssueConditionCheckSubtaskMatchMode,
   IssueConditionCheckSubtaskSources,
 } from '../../types';
-import { DEFAULT_SUBTASK_SOURCES } from '../../IssueConditionCheck/utils';
 import {
+  DEFAULT_SUBTASK_SOURCES,
   validateJql,
   ICON_CONFIG,
   COLOR_PRESETS,
@@ -200,29 +189,18 @@ export interface IssueConditionCheckItemProps {
   onRemove: (id: string) => void;
 }
 
-export const IssueConditionCheckItem: React.FC<IssueConditionCheckItemProps> = ({
-  check,
-  onUpdate,
-  onRemove,
-}) => {
+export const IssueConditionCheckItem: React.FC<IssueConditionCheckItemProps> = ({ check, onUpdate, onRemove }) => {
   const texts = useGetTextsByLocale(TEXTS);
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Validate JQL fields
-  const jqlValidation =
-    check.mode === 'simple'
-      ? validateJql(check.jql || '')
-      : { valid: true, error: undefined };
+  const jqlValidation = check.mode === 'simple' ? validateJql(check.jql || '') : { valid: true, error: undefined };
 
   const issueJqlValidation =
-    check.mode === 'withSubtasks'
-      ? validateJql(check.issueJql || '')
-      : { valid: true, error: undefined };
+    check.mode === 'withSubtasks' ? validateJql(check.issueJql || '') : { valid: true, error: undefined };
 
   const subtaskJqlValidation =
-    check.mode === 'withSubtasks'
-      ? validateJql(check.subtaskJql || '')
-      : { valid: true, error: undefined };
+    check.mode === 'withSubtasks' ? validateJql(check.subtaskJql || '') : { valid: true, error: undefined };
 
   const handleChange = (field: keyof IssueConditionCheck, value: unknown) => {
     onUpdate(check.id, { [field]: value });
@@ -232,9 +210,7 @@ export const IssueConditionCheckItem: React.FC<IssueConditionCheckItemProps> = (
     onUpdate(check.id, {
       mode,
       // Clear irrelevant fields when switching modes
-      ...(mode === 'simple'
-        ? { issueJql: undefined, subtaskJql: undefined }
-        : { jql: undefined }),
+      ...(mode === 'simple' ? { issueJql: undefined, subtaskJql: undefined } : { jql: undefined }),
     });
   };
 
@@ -410,7 +386,9 @@ export const IssueConditionCheckItem: React.FC<IssueConditionCheckItemProps> = (
                   <div>
                     <Switch
                       size="small"
-                      checked={check.subtaskSources?.includeDirectSubtasks ?? DEFAULT_SUBTASK_SOURCES.includeDirectSubtasks}
+                      checked={
+                        check.subtaskSources?.includeDirectSubtasks ?? DEFAULT_SUBTASK_SOURCES.includeDirectSubtasks
+                      }
                       onChange={checked => {
                         const newSources: IssueConditionCheckSubtaskSources = {
                           ...DEFAULT_SUBTASK_SOURCES,

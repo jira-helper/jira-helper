@@ -24,10 +24,7 @@ interface ColumnLimitsSettingsDemoProps {
   issueTypes: string[];
 }
 
-const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
-  groups,
-  availableColumns,
-}) => {
+const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ groups, availableColumns }) => {
   const [wipLimits, setWipLimits] = useState<Record<string, any>>(() => {
     const limits: Record<string, any> = {};
     groups.forEach(group => {
@@ -43,19 +40,24 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
     return limits;
   });
 
-  const [issueTypeSelectorStates, setIssueTypeSelectorStates] = useState<Map<string, {
-    countAllTypes: boolean;
-    projectKey: string;
-    selectedTypes: string[];
-  }>>(() => {
-    const states = new Map();
+  const [issueTypeSelectorStates, setIssueTypeSelectorStates] = useState<
+    Record<
+      string,
+      {
+        countAllTypes: boolean;
+        projectKey: string;
+        selectedTypes: string[];
+      }
+    >
+  >(() => {
+    const states: Record<string, { countAllTypes: boolean; projectKey: string; selectedTypes: string[] }> = {};
     groups.forEach(group => {
       if (group.id !== 'Without Group') {
-        states.set(group.id, {
+        states[group.id] = {
           countAllTypes: !group.includedIssueTypes || group.includedIssueTypes.length === 0,
           projectKey: '',
           selectedTypes: group.includedIssueTypes || [],
-        });
+        };
       }
     });
     return states;
@@ -76,31 +78,35 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
     console.log('Change color for group:', groupId);
   }, []);
 
-  const handleIssueTypesChange = React.useCallback((groupId: string, selectedTypes: string[], countAllTypes: boolean) => {
-    setIssueTypeSelectorStates(prev => {
-      const newMap = new Map(prev);
-      newMap.set(groupId, {
-        countAllTypes,
-        projectKey: prev.get(groupId)?.projectKey || '',
-        selectedTypes,
-      });
-      return newMap;
-    });
-    setWipLimits(prev => ({
-      ...prev,
-      [groupId]: {
-        ...prev[groupId],
-        includedIssueTypes: countAllTypes ? undefined : selectedTypes,
-      },
-    }));
-  }, []);
+  const handleIssueTypesChange = React.useCallback(
+    (groupId: string, selectedTypes: string[], countAllTypes: boolean) => {
+      setIssueTypeSelectorStates(prev => ({
+        ...prev,
+        [groupId]: {
+          countAllTypes,
+          projectKey: prev[groupId]?.projectKey || '',
+          selectedTypes,
+        },
+      }));
+      setWipLimits(prev => ({
+        ...prev,
+        [groupId]: {
+          ...prev[groupId],
+          includedIssueTypes: countAllTypes ? undefined : selectedTypes,
+        },
+      }));
+    },
+    []
+  );
 
   const withoutGroupId = 'Without Group';
   const withoutGroup = groups.find(g => g.id === withoutGroupId);
-  const withoutGroupColumns = (withoutGroup?.columns || []).map(colId => {
-    const col = availableColumns.find(c => c.id === colId);
-    return col ? { id: col.id, name: col.name } : null;
-  }).filter(Boolean) as Array<{ id: string; name: string }>;
+  const withoutGroupColumns = (withoutGroup?.columns || [])
+    .map(colId => {
+      const col = availableColumns.find(c => c.id === colId);
+      return col ? { id: col.id, name: col.name } : null;
+    })
+    .filter(Boolean) as Array<{ id: string; name: string }>;
 
   const groupsData = groups
     .filter(g => g.id !== withoutGroupId)
@@ -108,10 +114,12 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
       const wipLimit = wipLimits[group.id] || {};
       return {
         id: group.id,
-        columns: group.columns.map(colId => {
-          const col = availableColumns.find(c => c.id === colId);
-          return col ? { id: col.id, name: col.name } : null;
-        }).filter(Boolean) as Array<{ id: string; name: string }>,
+        columns: group.columns
+          .map(colId => {
+            const col = availableColumns.find(c => c.id === colId);
+            return col ? { id: col.id, name: col.name } : null;
+          })
+          .filter(Boolean) as Array<{ id: string; name: string }>,
         max: wipLimit.max || group.max,
         customHexColor: wipLimit.customHexColor || group.customHexColor,
         includedIssueTypes: wipLimit.includedIssueTypes || group.includedIssueTypes,
@@ -130,17 +138,17 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
         onColumnDragStart={(e, columnId, groupId) => {
           console.log('Drag start:', columnId, groupId);
         }}
-        onColumnDragEnd={(e) => {
+        onColumnDragEnd={e => {
           console.log('Drag end');
         }}
         onDrop={(e, targetGroupId) => {
           e.preventDefault();
           console.log('Drop to group:', targetGroupId);
         }}
-        onDragOver={(e) => {
+        onDragOver={e => {
           e.preventDefault();
         }}
-        onDragLeave={(e) => {
+        onDragLeave={e => {
           // Handle drag leave
         }}
         issueTypeSelectorStates={issueTypeSelectorStates}
@@ -165,9 +173,7 @@ const mockIssueTypes = ['Task', 'Bug', 'Story', 'Epic', 'Sub-task', 'Idea', 'Fea
 export const EmptyState: StoryObj = {
   render: () => (
     <ColumnLimitsSettingsDemo
-      groups={[
-        { id: 'Without Group', name: 'Without Group', columns: ['col1', 'col2', 'col3'] },
-      ]}
+      groups={[{ id: 'Without Group', name: 'Without Group', columns: ['col1', 'col2', 'col3'] }]}
       availableColumns={mockColumns}
       issueTypes={mockIssueTypes}
     />

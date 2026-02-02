@@ -42,17 +42,37 @@ export function clearIssueTypesCache(projectKey?: string): void {
 }
 
 /**
+ * Load issue types with fallback to DOM
+ */
+export async function loadIssueTypes(): Promise<string[]> {
+  const projectKey = getProjectKeyFromURL();
+  if (projectKey) {
+    const types = await loadIssueTypesForProject(projectKey);
+    if (types.length > 0) {
+      return types.map(t => t.name);
+    }
+  }
+
+  // Fallback to DOM parsing
+  return getIssueTypesFromDOM();
+}
+
+/**
  * Generate HTML for issue type selector with "count all types" checkbox and project input
  */
 export function generateIssueTypeSelectorHTML(
+  issueTypes: (ProjectIssueType | string)[] = [],
   selectedTypes: string[] = [],
   groupId: string = '',
   countAllTypes: boolean = true,
   projectKey: string = '',
-  issueTypes: ProjectIssueType[] = [],
   isLoading: boolean = false,
   error: string | null = null
 ): string {
+  const normalizedIssueTypes: ProjectIssueType[] = issueTypes.map(type =>
+    typeof type === 'string' ? { id: type, name: type, subtask: false } : type
+  );
+
   const selectorId = `issue-type-selector-${groupId || 'default'}`;
   const projectInputId = `project-input-${groupId || 'default'}`;
   const loadBtnId = `load-types-btn-${groupId || 'default'}`;
@@ -98,13 +118,19 @@ export function generateIssueTypeSelectorHTML(
           </div>
         </div>
         
-        ${error ? `
+        ${
+          error
+            ? `
           <div style="padding: 8px; background: #fff4e6; border: 1px solid #ffab00; border-radius: 3px; color: #bf2600; font-size: 12px; margin-bottom: 8px;">
             ${error}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${isLoading ? `
+        ${
+          isLoading
+            ? `
           <div style="padding: 12px; text-align: center; color: #5e6c84; font-size: 13px;">
             <span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #dfe1e6; border-top-color: #0052cc; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;"></span>
             Loading issue types...
@@ -114,13 +140,17 @@ export function generateIssueTypeSelectorHTML(
               to { transform: rotate(360deg); }
             }
           </style>
-        ` : ''}
+        `
+            : ''
+        }
         
-        <div id="${typesContainerId}" style="display: ${issueTypes.length > 0 && !isLoading ? 'block' : 'none'};">
-          ${issueTypes.length > 0 ? `
+        <div id="${typesContainerId}" style="display: ${normalizedIssueTypes.length > 0 && !isLoading ? 'block' : 'none'};">
+          ${
+            normalizedIssueTypes.length > 0
+              ? `
             <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px;">Issue types to include:</div>
             <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dfe1e6; border-radius: 3px; padding: 8px; background: #fff;">
-              ${issueTypes
+              ${normalizedIssueTypes
                 .map(
                   type => `
                   <label style="display: block; margin: 4px 0; cursor: pointer;">
@@ -140,11 +170,15 @@ export function generateIssueTypeSelectorHTML(
             <div style="margin-top: 4px; font-size: 11px; color: #5e6c84;">
               Leave empty to count all issue types
             </div>
-          ` : issueTypes.length === 0 && projectKey && !isLoading ? `
+          `
+              : normalizedIssueTypes.length === 0 && !isLoading
+                ? `
             <div style="padding: 8px; background: #f4f5f7; border-radius: 3px; font-size: 12px; color: #5e6c84;">
-              No issue types found for project "${projectKey}". Please check the project key and try again.
+              No issue types found. If you cannot load types from API, you can manually enter types.
             </div>
-          ` : ''}
+          `
+                : ''
+          }
         </div>
       </div>
     </div>
@@ -155,9 +189,7 @@ export function generateIssueTypeSelectorHTML(
  * Get selected issue types from selector
  */
 export function getSelectedIssueTypes(container: Element, groupId: string = ''): string[] {
-  const selector = groupId
-    ? `input[data-issue-type-selector="${groupId}"]:checked`
-    : 'input[type="checkbox"]:checked';
+  const selector = groupId ? `input[data-issue-type-selector="${groupId}"]:checked` : 'input[type="checkbox"]:checked';
   const checkedBoxes = container.querySelectorAll<HTMLInputElement>(selector);
   return Array.from(checkedBoxes).map(box => box.value);
 }

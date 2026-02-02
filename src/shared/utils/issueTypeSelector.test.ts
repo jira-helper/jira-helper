@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { Ok, Err } from 'ts-results';
 import {
   generateIssueTypeSelectorHTML,
   getSelectedIssueTypes,
   loadIssueTypes,
+  clearIssueTypesCache,
 } from './issueTypeSelector';
 import { getProjectIssueTypes } from '../jiraApi';
 import { getIssueTypesFromDOM } from './getIssueTypesFromDOM';
@@ -16,6 +18,7 @@ vi.mock('./getProjectKeyFromURL');
 describe('issueTypeSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearIssueTypesCache();
   });
 
   describe('generateIssueTypeSelectorHTML', () => {
@@ -144,10 +147,7 @@ describe('issueTypeSelector', () => {
       ];
 
       vi.mocked(getProjectKeyFromURL).mockReturnValue(mockProjectKey);
-      vi.mocked(getProjectIssueTypes).mockResolvedValue({
-        err: false,
-        val: mockTypes,
-      });
+      vi.mocked(getProjectIssueTypes).mockResolvedValue(Ok(mockTypes));
 
       const types = await loadIssueTypes();
 
@@ -160,10 +160,7 @@ describe('issueTypeSelector', () => {
       const mockDomTypes = ['Task', 'Bug'];
 
       vi.mocked(getProjectKeyFromURL).mockReturnValue(mockProjectKey);
-      vi.mocked(getProjectIssueTypes).mockResolvedValue({
-        err: true,
-        val: new Error('API Error'),
-      });
+      vi.mocked(getProjectIssueTypes).mockResolvedValue(Err(new Error('API Error')));
       vi.mocked(getIssueTypesFromDOM).mockReturnValue(mockDomTypes);
 
       const types = await loadIssueTypes();

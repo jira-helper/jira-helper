@@ -44,15 +44,21 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
       title: 'Columns',
       dataIndex: 'columns',
       key: 'columns',
-      render: (columns: { name: string }[]) => 
-        columns.length === 0 ? 'All' : columns.map(c => c.name).join(', '),
+      render: (columns: { name: string }[]) => (columns.length === 0 ? 'All' : columns.map(c => c.name).join(', ')),
     },
     {
       title: 'Swimlanes',
       dataIndex: 'swimlanes',
       key: 'swimlanes',
-      render: (swimlanes: { name: string }[]) => 
+      render: (swimlanes: { name: string }[]) =>
         swimlanes.length === 0 ? 'All' : swimlanes.map(s => s.name).join(', '),
+    },
+    {
+      title: 'Issue types',
+      dataIndex: 'includedIssueTypes',
+      key: 'includedIssueTypes',
+      render: (includedIssueTypes: string[] | undefined) =>
+        !includedIssueTypes || includedIssueTypes.length === 0 ? 'All' : includedIssueTypes.join(', '),
     },
     {
       title: 'Actions',

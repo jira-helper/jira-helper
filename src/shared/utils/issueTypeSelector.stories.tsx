@@ -49,18 +49,13 @@ const IssueTypeSelectorDemo: React.FC<{
 
 export const WithIssueTypes: StoryObj = {
   render: () => (
-    <IssueTypeSelectorDemo
-      issueTypes={['Task', 'Bug', 'Story', 'Epic', 'Sub-task', 'Idea', 'Feature Request']}
-    />
+    <IssueTypeSelectorDemo issueTypes={['Task', 'Bug', 'Story', 'Epic', 'Sub-task', 'Idea', 'Feature Request']} />
   ),
 };
 
 export const WithPreSelectedTypes: StoryObj = {
   render: () => (
-    <IssueTypeSelectorDemo
-      issueTypes={['Task', 'Bug', 'Story', 'Epic', 'Sub-task']}
-      selectedTypes={['Task', 'Bug']}
-    />
+    <IssueTypeSelectorDemo issueTypes={['Task', 'Bug', 'Story', 'Epic', 'Sub-task']} selectedTypes={['Task', 'Bug']} />
   ),
 };
 
