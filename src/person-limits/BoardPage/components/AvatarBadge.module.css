@@ -1,0 +1,45 @@
+.avatar {
+  cursor: pointer;
+  position: relative;
+  margin-right: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.avatarImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+}
+
+.avatarImage.active {
+  border: solid 2px #0052cc;
+}
+
+.badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  border-radius: 50%;
+  color: white;
+  padding: 2px 5px;
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.under {
+  background: #1b855c;
+}
+
+.at {
+  background: #ffd700;
+}
+
+.over {
+  background: #ff5630;
+}

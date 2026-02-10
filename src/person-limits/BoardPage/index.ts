@@ -1,58 +1,35 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { settingsJiraDOM as DOM } from '../../swimlane/constants';
+import { registerPersonLimitsBoardPageObjectInDI, personLimitsBoardPageObjectToken } from './pageObject';
+import { useRuntimeStore } from './stores';
+import { applyLimits, showOnlyChosen } from './actions';
+import { AvatarsContainer } from './components';
 
-interface PersonLimit {
-  person: {
-    displayName: string;
-    name: string;
-    avatar: string;
-  };
-  columns: Array<{ id: string }>;
-  swimlanes: Array<{ id: string }>;
-  limit: number;
-  issues: HTMLElement[];
-  includedIssueTypes?: string[];
-}
-
-const isPersonLimitAppliedToIssue = (
-  personLimit: PersonLimit,
-  assignee: string | null,
-  columnId: string,
-  swimlaneId?: string | null
-): boolean => {
-  if (swimlaneId == null) {
-    return (
-      (personLimit.person.displayName === assignee || personLimit.person.name === assignee) &&
-      personLimit.columns.some(column => column.id === columnId)
-    );
-  }
-
-  return (
-    (personLimit.person.displayName === assignee || personLimit.person.name === assignee) &&
-    personLimit.columns.some(column => column.id === columnId) &&
-    personLimit.swimlanes.some(swimlane => swimlane.id === swimlaneId)
-  );
+type PersonLimitData = {
+  limits: Array<{
+    id: number;
+    person: {
+      displayName: string;
+      name: string;
+      avatar: string;
+    };
+    columns: Array<{ id: string; name: string }>;
+    swimlanes: Array<{ id: string; name: string }>;
+    limit: number;
+    includedIssueTypes?: string[];
+  }>;
 };
 
-const getNameFromTooltip = (tooltip: string): string => {
-  return tooltip.split(':')[1].split('[')[0].trim(); // Assignee: Pavel [x]
-};
-
-const getAssignee = (avatar: HTMLImageElement | null): string | null => {
-  if (!avatar) return null;
-
-  const label = avatar.alt ?? avatar.dataset.tooltip;
-  if (!label) return null;
-
-  return getNameFromTooltip(label);
-};
-
-export default class extends PageModification<[any, any], Element> {
-  private cssSelectorOfIssues: string | null = null;
-
-  private avatarsList: null | Element = null;
-
+/**
+ * BoardPage modification for PersonLimits feature.
+ *
+ * Displays WIP limit counters for each person and highlights
+ * issues when limits are exceeded.
+ */
+export default class extends PageModification<[any, PersonLimitData | null], Element> {
   shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -65,43 +42,6 @@ export default class extends PageModification<[any, any], Element> {
   appendStyles(): string {
     return `
     <style type="text/css">
-        #avatars-limits {
-            display: inline-flex;
-            margin-left: 30px;
-        }
-
-        #avatars-limits .person-avatar {
-            cursor: pointer;
-            position: relative;
-            margin-right: 4px;
-            width: 32px;
-            height: 32px;
-        }
-
-        #avatars-limits .person-avatar img {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            border: none;
-        }
-
-        #avatars-limits .person-avatar img[view-my-cards="block"] {
-            border: solid 1px red;
-        }
-
-        #avatars-limits .person-avatar .limit-stats {
-            position: absolute;
-            top: -10px;
-            right: -6px;
-            border-radius: 50%;
-            background: grey;
-            color: white;
-            padding: 5px 2px;
-            font-size: 12px;
-            line-height: 12px;
-            font-weight: 400;
-        }
-
         .ghx-issue.no-visibility {
             display: none!important;
         }
@@ -118,214 +58,66 @@ export default class extends PageModification<[any, any], Element> {
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement('.ghx-swimlane');
+    return this.waitForElement('.ghx-column, .ghx-swimlane');
   }
 
-  loadData(): Promise<[any, any]> {
+  loadData(): Promise<[any, PersonLimitData | null]> {
     return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.PERSON_LIMITS)]);
   }
 
-  apply(data: [any, any]): void {
+  apply(data: [any, PersonLimitData | null]): void {
     if (!data) return;
     const [editData = {}, personLimits] = data;
-    if (!personLimits || !personLimits.limits.length) return;
+    if (!personLimits?.limits?.length) return;
 
-    this.cssSelectorOfIssues = this.getCssSelectorOfIssues(editData);
-    this.applyLimits(personLimits);
-    this.onDOMChange('#ghx-pool', () => this.applyLimits(personLimits), { childList: true, subtree: true });
-  }
-
-  applyLimits(personLimits: { limits: PersonLimit[] }): void {
-    const stats = this.getLimitsStats(personLimits);
-
-    stats.forEach(personLimit => {
-      if (personLimit.issues.length > personLimit.limit) {
-        personLimit.issues.forEach(issue => {
-          issue.style.backgroundColor = '#ff5630';
-        });
-      }
-    });
-
-    if (!this.avatarsList || !document.body.contains(this.avatarsList)) {
-      const html = stats
-        .map(
-          personLimit => `
-        <div class="person-avatar">
-            <img src="${personLimit.person.avatar}" title="${personLimit.person.displayName}" class="jira-tooltip" />
-            <div class="limit-stats">
-                <span class="stats-current"></span>/<span>${personLimit.limit}</span>
-            </div>
-        </div>`
-        )
-        .join('');
-
-      this.avatarsList = document.createElement('div');
-
-      this.avatarsList.id = 'avatars-limits';
-      this.avatarsList.innerHTML = html;
-
-      // @ts-expect-error
-      this.addEventListener(this.avatarsList, 'click', event => this.onClickAvatar(event));
-      document.querySelector('#subnav-title')?.insertBefore(this.avatarsList, null);
+    // Register PageObject in DI (if not already registered)
+    try {
+      globalContainer.inject(personLimitsBoardPageObjectToken);
+    } catch {
+      registerPersonLimitsBoardPageObjectInDI(globalContainer);
     }
 
-    this.avatarsList.querySelectorAll('.limit-stats').forEach((stat, index) => {
-      const { style } = stat as HTMLElement;
-      if (stats[index].issues.length > stats[index].limit) style.background = '#ff5630';
-      else if (stats[index].issues.length === stats[index].limit) style.background = '#ffd700';
-      else style.background = '#1b855c';
+    // Initialize store
+    const { actions } = useRuntimeStore.getState();
+    const cssSelector = this.getCssSelectorOfIssues(editData);
+    actions.setCssSelectorOfIssues(cssSelector);
 
-      stat.querySelector('.stats-current')!.textContent = stats[index].issues.length.toString();
-    });
-  }
+    // Apply limits
+    applyLimits(personLimits);
 
-  onClickAvatar(event: MouseEvent): void {
-    const target = event.target as HTMLImageElement;
-    if (target.nodeName !== 'IMG') return;
-    const cardsVisibility = target.getAttribute('view-my-cards');
+    // Render React component
+    this.renderAvatarsContainer();
 
-    if (!cardsVisibility) {
-      target.setAttribute('view-my-cards', 'block');
-    } else {
-      target.removeAttribute('view-my-cards');
+    // Watch for DOM changes
+    const pool = document.getElementById('ghx-pool');
+    if (pool) {
+      this.onDOMChange(
+        '#ghx-pool',
+        () => {
+          applyLimits(personLimits);
+          showOnlyChosen();
+        },
+        { childList: true, subtree: true }
+      );
     }
-
-    this.showOnlyChosen();
   }
 
-  showOnlyChosen(): void {
-    const cards = Array.from(document.querySelectorAll('.ghx-issue'));
-    const isHaveChoose = document.querySelectorAll('[view-my-cards="block"]').length > 0;
-
-    if (!isHaveChoose) {
-      cards.forEach(node => {
-        node.classList.remove('no-visibility');
-      });
-      this.showOrHideTaskAggregations();
+  private renderAvatarsContainer(): void {
+    const existingContainer = document.getElementById('avatars-limits');
+    if (existingContainer) {
       return;
     }
 
-    const avatar = Array.from(document.querySelectorAll('[view-my-cards]'));
-    const avaTitles = avatar.map(el => (el as HTMLImageElement).title);
+    const container = document.createElement('div');
+    document.querySelector('#subnav-title')?.appendChild(container);
 
-    cards.forEach(node => {
-      /** there are can be two types of nodes:
-       * 1. assigned to user with avatar
-       * 2. assigned to user without avatar
-       *
-       * Example of node with avatar
-       * <div class="ghx-avatar"><img src="https://jira.domain.com/secure/useravatar?ownerId=JIRAUSER1337&amp;avatarId=1337" class="ghx-avatar-img" alt="Assignee: Leet Elite" data-tooltip="Assignee: Leet Elite"></div>
-       *
-       * Example of node without avatar
-       * <div class="ghx-avatar"><span class="ghx-avatar-img ghx-auto-avatar" data-tooltip="Assignee: Leet Elite" original-title="">L</span></div>
-       *
-       * We need to check data-tooltip attribute for both cases
-       */
-      const tooltipHolder = node.querySelector('.ghx-avatar img') || node.querySelector('.ghx-avatar span');
-      if (!tooltipHolder) {
-        // card without assignee at all
-        node.classList.add('no-visibility');
-        return;
-      }
+    const root = createRoot(container);
+    root.render(React.createElement(AvatarsContainer));
 
-      /**
-       * jira with version 8.x has tooltip text in attribute data-tooltip
-       * jira with version 9.x has tooltip text in attribute alt
-       */
-      const tooltipText = tooltipHolder.getAttribute('data-tooltip') || tooltipHolder.getAttribute('alt');
-      const name = getNameFromTooltip(tooltipText!);
-      if (avaTitles.includes(name)) {
-        node.classList.remove('no-visibility');
-      } else {
-        node.classList.add('no-visibility');
-      }
+    // Cleanup on unmount
+    this.sideEffects.push(() => {
+      root.unmount();
+      container.remove();
     });
-    this.showOrHideTaskAggregations();
-  }
-
-  showOrHideTaskAggregations(): void {
-    this.showOrHideSubTaskParentGroup();
-    this.showOrHideEmptySwimlanes();
-  }
-
-  showOrHideSubTaskParentGroup(): void {
-    const parentGroup = Array.from(document.querySelectorAll('.ghx-parent-group'));
-    parentGroup.forEach(el => {
-      this.showOrHideElementByVisibleIssueCards(el);
-    });
-  }
-
-  showOrHideEmptySwimlanes(): void {
-    const swimlanes = Array.from(document.querySelectorAll(DOM.swimlane));
-    swimlanes.forEach(el => {
-      this.showOrHideElementByVisibleIssueCards(el);
-    });
-  }
-
-  showOrHideElementByVisibleIssueCards(el: Element): void {
-    const lenNoVisibleCards = el.querySelectorAll('.ghx-issue.no-visibility').length;
-    const lenCard = el.querySelectorAll('.ghx-issue').length;
-
-    if (lenNoVisibleCards === lenCard) {
-      el.classList.add('no-visibility');
-    } else {
-      el.classList.remove('no-visibility');
-    }
-  }
-
-  hasCustomswimlanes(): boolean {
-    const someswimlane = document.querySelector(DOM.swimlaneHeaderContainer);
-
-    if (someswimlane == null) {
-      return false;
-    }
-
-    // TODO: Shouldn't work for any other language except English, so we have to think about it. F.e., in Russian, it is "Дорожка для custom"
-    return someswimlane.getAttribute('aria-label')?.includes('custom') ?? false;
-  }
-
-  countAmountPersonalIssuesInColumn(column: Element, stats: PersonLimit[], swimlaneId?: string | null): void {
-    const { columnId } = (column as HTMLElement).dataset;
-
-    column.querySelectorAll(this.cssSelectorOfIssues!).forEach(issue => {
-      const avatar = issue.querySelector('.ghx-avatar-img') as HTMLImageElement;
-      const assignee = getAssignee(avatar);
-
-      if (assignee) {
-        stats.forEach(personLimit => {
-          if (
-            isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId) &&
-            this.shouldCountIssue(issue, personLimit.includedIssueTypes)
-          ) {
-            personLimit.issues.push(issue as HTMLElement);
-          }
-        });
-      }
-    });
-  }
-
-  getLimitsStats(personLimits: { limits: PersonLimit[] }): PersonLimit[] {
-    const stats = personLimits.limits.map(personLimit => ({
-      ...personLimit,
-      issues: [] as HTMLElement[],
-    }));
-
-    if (this.hasCustomswimlanes()) {
-      document.querySelectorAll(DOM.swimlane).forEach(swimlane => {
-        const swimlaneId = swimlane.getAttribute('swimlane-id');
-
-        swimlane.querySelectorAll('.ghx-column').forEach(column => {
-          this.countAmountPersonalIssuesInColumn(column, stats, swimlaneId);
-        });
-      });
-
-      return stats;
-    }
-
-    document.querySelectorAll('.ghx-column').forEach(column => {
-      this.countAmountPersonalIssuesInColumn(column, stats);
-    });
-
-    return stats;
   }
 }
