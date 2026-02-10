@@ -66,14 +66,15 @@ handleClose = async (unmountPopup: Function): Promise<void> => {
 
 ## Результаты
 
-**Дата**: 
+**Дата**: 2026-02-10
 
-**Агент**: 
+**Агент**: Coder
 
-**Статус**: 
+**Статус**: COMPLETED
 
 **Комментарии**:
 
 ```
-(место для комментариев агента)
+Метод handleClose добавлен в класс SettingsWIPLimits после handleSubmit.
+Метод корректно выполняет unmount React-корня (columnLimitsFormRoot) и вызывает unmountPopup.
 ```

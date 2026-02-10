@@ -109,7 +109,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       title: 'Limits for groups',
       okButtonText: 'Save',
       onConfirm: this.handleSubmit,
-      onCancel: () => {},
+      onCancel: this.handleClose,
     });
     this.popup.render();
 
@@ -177,6 +177,14 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   handleSubmit = async (unmountPopup: () => void): Promise<void> => {
     await saveToProperty(this.getExistingColumnIds());
 
+    if (this.columnLimitsFormRoot) {
+      this.columnLimitsFormRoot.unmount();
+      this.columnLimitsFormRoot = null;
+    }
+    unmountPopup();
+  };
+
+  handleClose = (unmountPopup: () => void): void => {
     if (this.columnLimitsFormRoot) {
       this.columnLimitsFormRoot.unmount();
       this.columnLimitsFormRoot = null;
