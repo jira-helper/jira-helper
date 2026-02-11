@@ -1,9 +1,10 @@
 import React, { useRef, useCallback } from 'react';
-import { InputNumber, Button, Space, Card } from 'antd';
+import { InputNumber, Space, Card } from 'antd';
 import { IssueTypeSelector } from '../../shared/components/IssueTypeSelector';
 import { generateColorByFirstChars } from '../shared/utils';
 import type { Column, UIGroup, IssueTypeState } from '../types';
 import { WITHOUT_GROUP_ID } from '../types';
+import { ColorPickerButton } from './components/ColorPickerButton';
 import styles from './styles.module.css';
 
 export interface ColumnLimitsFormProps {
@@ -11,7 +12,7 @@ export interface ColumnLimitsFormProps {
   groups: UIGroup[];
   issueTypeSelectorStates: Record<string, IssueTypeState>;
   onLimitChange: (groupId: string, limit: number) => void;
-  onColorChange: (groupId: string) => void;
+  onColorChange: (groupId: string, color: string) => void;
   onIssueTypesChange: (groupId: string, selectedTypes: string[], countAllTypes: boolean) => void;
   onColumnDragStart: (e: React.DragEvent, columnId: string, groupId: string) => void;
   onColumnDragEnd: (e: React.DragEvent) => void;
@@ -111,15 +112,11 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
               }}
               style={{ flex: '0 0 auto', minWidth: 60, maxWidth: 100 }}
             />
-            <Button
-              type="default"
-              data-group-id={group.id}
-              data-color-picker-btn
-              onClick={() => onColorChange(group.id)}
-              style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-            >
-              Change color
-            </Button>
+            <ColorPickerButton
+              groupId={group.id}
+              currentColor={group.customHexColor}
+              onColorChange={color => onColorChange(group.id, color)}
+            />
           </div>
           <div
             className={`${styles.columnListJH} dropzone-jh`}

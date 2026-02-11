@@ -1,23 +1,19 @@
-import React, { useRef, useCallback } from 'react';
-import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
-import { moveColumn } from '../actions';
-import type { Column } from '../../types';
-import { ColumnLimitsForm } from '../ColumnLimitsForm';
-import { WITHOUT_GROUP_ID } from '../../types';
-import styles from '../styles.module.css';
+import React, { useState, useRef, useCallback } from 'react';
+import { SettingsModal } from './SettingsModal';
+import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
+import { ColumnLimitsForm } from '../../ColumnLimitsForm';
+import { moveColumn } from '../../actions';
+import { WITHOUT_GROUP_ID } from '../../../types';
+import type { Column } from '../../../types';
+import styles from '../../styles.module.css';
 
-export const FORM_IDS = {
-  formId: 'jh-wip-limits-form',
-  allGroupsId: 'jh-all-groups',
-  createGroupDropzoneId: 'jh-column-dropzone',
-} as const;
+export type SettingsModalContainerProps = {
+  onClose: () => void;
+  onSave: () => Promise<void>;
+};
 
-export interface ColumnLimitsContainerProps {
-  onColorChange: (groupId: string, color: string) => void;
-  formRefCallback?: (el: HTMLDivElement | null) => void;
-}
-
-export const ColumnLimitsContainer: React.FC<ColumnLimitsContainerProps> = ({ onColorChange, formRefCallback }) => {
+export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ onClose, onSave }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const draggingRef = useRef<{ column: Column; groupId: string } | null>(null);
 
   const withoutGroupColumns = useColumnLimitsSettingsUIStore(state => state.data.withoutGroupColumns);
@@ -25,9 +21,26 @@ export const ColumnLimitsContainer: React.FC<ColumnLimitsContainerProps> = ({ on
   const issueTypeSelectorStates = useColumnLimitsSettingsUIStore(state => state.data.issueTypeSelectorStates);
   const actions = useColumnLimitsSettingsUIStore(state => state.actions);
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handlers for ColumnLimitsForm
   const handleLimitChange = useCallback(
     (groupId: string, limit: number) => {
       actions.setGroupLimit(groupId, limit);
+    },
+    [actions]
+  );
+
+  const handleColorChange = useCallback(
+    (groupId: string, color: string) => {
+      actions.setGroupColor(groupId, color);
     },
     [actions]
   );
@@ -71,6 +84,9 @@ export const ColumnLimitsContainer: React.FC<ColumnLimitsContainerProps> = ({ on
       moveColumn(column, fromGroupId, targetGroupId);
     }
     draggingRef.current = null;
+    // Remove highlight
+    const target = e.currentTarget as HTMLElement;
+    target.classList.remove(styles.addGroupDropzoneActiveJH);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -88,22 +104,23 @@ export const ColumnLimitsContainer: React.FC<ColumnLimitsContainerProps> = ({ on
   }, []);
 
   return (
-    <ColumnLimitsForm
-      withoutGroupColumns={withoutGroupColumns}
-      groups={groups}
-      issueTypeSelectorStates={issueTypeSelectorStates}
-      onLimitChange={handleLimitChange}
-      onColorChange={onColorChange}
-      onIssueTypesChange={handleIssueTypesChange}
-      onColumnDragStart={handleColumnDragStart}
-      onColumnDragEnd={handleColumnDragEnd}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      formId={FORM_IDS.formId}
-      allGroupsId={FORM_IDS.allGroupsId}
-      createGroupDropzoneId={FORM_IDS.createGroupDropzoneId}
-      formRefCallback={formRefCallback}
-    />
+    <SettingsModal title="Limits for groups" onClose={onClose} onSave={handleSave} isSaving={isSaving}>
+      <ColumnLimitsForm
+        withoutGroupColumns={withoutGroupColumns}
+        groups={groups}
+        issueTypeSelectorStates={issueTypeSelectorStates}
+        onLimitChange={handleLimitChange}
+        onColorChange={handleColorChange}
+        onIssueTypesChange={handleIssueTypesChange}
+        onColumnDragStart={handleColumnDragStart}
+        onColumnDragEnd={handleColumnDragEnd}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        formId="jh-wip-limits-form"
+        allGroupsId="jh-all-groups"
+        createGroupDropzoneId="jh-column-dropzone"
+      />
+    </SettingsModal>
   );
 };

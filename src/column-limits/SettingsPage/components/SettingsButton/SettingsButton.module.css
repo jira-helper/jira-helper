@@ -1,0 +1,16 @@
+.button {
+  cursor: pointer;
+  padding: 8px 16px;
+  background: #f4f5f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.button:hover {
+  background: #ebecf0;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

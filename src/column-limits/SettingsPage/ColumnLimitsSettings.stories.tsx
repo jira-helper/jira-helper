@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColumnLimitsForm } from './ColumnLimitsForm';
 
 const meta: Meta = {
-  title: 'WIP Limits/Column Limits Settings',
+  title: 'ColumnLimits/ColumnLimitsSettings',
   parameters: {
     layout: 'padded',
   },
@@ -21,7 +21,6 @@ interface ColumnLimitsSettingsDemoProps {
     includedIssueTypes?: string[];
   }>;
   availableColumns: Array<{ id: string; name: string }>;
-  issueTypes: string[];
 }
 
 const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ groups, availableColumns }) => {
@@ -74,8 +73,16 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
     }));
   }, []);
 
-  const handleColorChange = React.useCallback((groupId: string) => {
-    console.log('Change color for group:', groupId);
+  const handleColorChange = React.useCallback((groupId: string, color: string) => {
+    /* eslint-disable-next-line no-console */
+    console.log('Change color for group:', groupId, color);
+    setWipLimits(prev => ({
+      ...prev,
+      [groupId]: {
+        ...prev[groupId],
+        customHexColor: color,
+      },
+    }));
   }, []);
 
   const handleIssueTypesChange = React.useCallback(
@@ -135,20 +142,23 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
         onLimitChange={handleLimitChange}
         onColorChange={handleColorChange}
         onIssueTypesChange={handleIssueTypesChange}
-        onColumnDragStart={(e, columnId, groupId) => {
+        onColumnDragStart={(columnId, groupId) => {
+          /* eslint-disable-next-line no-console */
           console.log('Drag start:', columnId, groupId);
         }}
-        onColumnDragEnd={e => {
+        onColumnDragEnd={() => {
+          /* eslint-disable-next-line no-console */
           console.log('Drag end');
         }}
         onDrop={(e, targetGroupId) => {
           e.preventDefault();
+          /* eslint-disable-next-line no-console */
           console.log('Drop to group:', targetGroupId);
         }}
         onDragOver={e => {
           e.preventDefault();
         }}
-        onDragLeave={e => {
+        onDragLeave={() => {
           // Handle drag leave
         }}
         issueTypeSelectorStates={issueTypeSelectorStates}
@@ -168,14 +178,11 @@ const mockColumns = [
   { id: 'col5', name: 'Done' },
 ];
 
-const mockIssueTypes = ['Task', 'Bug', 'Story', 'Epic', 'Sub-task', 'Idea', 'Feature Request'];
-
 export const EmptyState: StoryObj = {
   render: () => (
     <ColumnLimitsSettingsDemo
       groups={[{ id: 'Without Group', name: 'Without Group', columns: ['col1', 'col2', 'col3'] }]}
       availableColumns={mockColumns}
-      issueTypes={mockIssueTypes}
     />
   ),
 };
@@ -194,7 +201,6 @@ export const SingleGroup: StoryObj = {
         },
       ]}
       availableColumns={mockColumns}
-      issueTypes={mockIssueTypes}
     />
   ),
 };
@@ -220,7 +226,6 @@ export const MultipleGroups: StoryObj = {
         },
       ]}
       availableColumns={mockColumns}
-      issueTypes={mockIssueTypes}
     />
   ),
 };
@@ -248,7 +253,6 @@ export const WithIssueTypeFilter: StoryObj = {
         },
       ]}
       availableColumns={mockColumns}
-      issueTypes={mockIssueTypes}
     />
   ),
 };
@@ -283,7 +287,6 @@ export const ComplexConfiguration: StoryObj = {
         },
       ]}
       availableColumns={mockColumns}
-      issueTypes={mockIssueTypes}
     />
   ),
 };

@@ -1,0 +1,33 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+import { ColorPickerButton } from './ColorPickerButton';
+
+const meta: Meta<typeof ColorPickerButton> = {
+  title: 'ColumnLimits/ColorPickerButton',
+  component: ColorPickerButton,
+  parameters: {
+    layout: 'centered',
+  },
+  args: {
+    onColorChange: fn(),
+  },
+  tags: ['autodocs'],
+};
+
+export default meta;
+
+type Story = StoryObj<typeof ColorPickerButton>;
+
+export const Default: Story = {
+  args: {
+    groupId: 'group-1',
+    currentColor: '#ffffff',
+  },
+};
+
+export const WithColor: Story = {
+  args: {
+    groupId: 'group-1',
+    currentColor: '#4caf50',
+  },
+};
