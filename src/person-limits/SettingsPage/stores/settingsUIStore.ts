@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import type { PersonLimit } from '../../property/types';
-import type { FormData, SettingsUIData, SettingsUIStoreState } from './settingsUIStore.types';
+import type { SettingsUIData, SettingsUIStoreState } from './settingsUIStore.types';
 
 const initialData: SettingsUIData = {
   limits: [],
@@ -39,10 +38,10 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    updateLimit: (id, updatedLimit) =>
+    updateLimit: (id: number, updatedLimit: import('../../property/types').PersonLimit) =>
       set(
         produce(state => {
-          const index = state.data.limits.findIndex(l => l.id === id);
+          const index = state.data.limits.findIndex((l: import('../../property/types').PersonLimit) => l.id === id);
           if (index !== -1) {
             state.data.limits[index] = updatedLimit;
           }
@@ -51,11 +50,11 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    deleteLimit: id =>
+    deleteLimit: (id: number) =>
       set(
         produce(state => {
-          state.data.limits = state.data.limits.filter(l => l.id !== id);
-          state.data.checkedIds = state.data.checkedIds.filter(c => c !== id);
+          state.data.limits = state.data.limits.filter((l: import('../../property/types').PersonLimit) => l.id !== id);
+          state.data.checkedIds = state.data.checkedIds.filter((c: number) => c !== id);
           if (state.data.editingId === id) {
             state.data.editingId = null;
             state.data.formData = null;
@@ -63,14 +62,14 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    setCheckedIds: ids =>
+    setCheckedIds: (ids: number[]) =>
       set(
         produce(state => {
           state.data.checkedIds = ids;
         })
       ),
 
-    toggleChecked: id =>
+    toggleChecked: (id: number) =>
       set(
         produce(state => {
           const index = state.data.checkedIds.indexOf(id);
@@ -82,15 +81,19 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    setEditingId: id =>
+    setEditingId: (id: number | null) =>
       set(
         produce(state => {
           state.data.editingId = id;
           if (id !== null) {
-            const limit = state.data.limits.find(l => l.id === id);
+            const limit = state.data.limits.find((l: import('../../property/types').PersonLimit) => l.id === id);
             if (limit) {
-              const selectedColumns = limit.columns.length === 0 ? [] : limit.columns.map(c => String(c.id));
-              const swimlanes = limit.swimlanes.length === 0 ? [] : limit.swimlanes.map(s => String(s.id ?? s.name));
+              const selectedColumns =
+                limit.columns.length === 0 ? [] : limit.columns.map((c: { id: string | number }) => String(c.id));
+              const swimlanes =
+                limit.swimlanes.length === 0
+                  ? []
+                  : limit.swimlanes.map((s: { id?: string; name: string }) => String(s.id ?? s.name));
               state.data.formData = {
                 personName: limit.person.name,
                 limit: limit.limit,
@@ -105,17 +108,17 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    setFormData: formData =>
+    setFormData: (formData: import('./settingsUIStore.types').FormData | null) =>
       set(
         produce(state => {
           state.data.formData = formData;
         })
       ),
 
-    applyColumnsToSelected: columns =>
+    applyColumnsToSelected: (columns: Array<{ id: string; name: string }>) =>
       set(
         produce(state => {
-          state.data.limits.forEach(limit => {
+          state.data.limits.forEach((limit: import('../../property/types').PersonLimit) => {
             if (state.data.checkedIds.includes(limit.id)) {
               limit.columns = columns;
             }
@@ -123,10 +126,10 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    applySwimlanesToSelected: swimlanes =>
+    applySwimlanesToSelected: (swimlanes: Array<{ id: string; name: string }>) =>
       set(
         produce(state => {
-          state.data.limits.forEach(limit => {
+          state.data.limits.forEach((limit: import('../../property/types').PersonLimit) => {
             if (state.data.checkedIds.includes(limit.id)) {
               limit.swimlanes = swimlanes;
             }

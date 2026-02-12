@@ -37,7 +37,7 @@ const ContainerWrapper: React.FC<{
       useSettingsUIStore.getState().actions.setData(initialLimits);
     }
   }, [initialLimits]);
-  return <>{children}</>;
+  return children;
 };
 
 export const EmptyState: Story = {

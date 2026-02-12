@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createPersonLimit } from './createPersonLimit';
-import type { FormData, PersonLimit } from '../state/types';
+import type { FormData } from '../state/types';
 
 describe('createPersonLimit', () => {
   const mockFormData: FormData = {

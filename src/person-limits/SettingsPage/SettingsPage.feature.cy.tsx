@@ -79,14 +79,14 @@ describe('Feature: Personal WIP Limit Settings', () => {
     Step('Then I should see "john.doe" in the limits list', () => {
       cy.get('@onAddLimit').should('have.been.calledOnce');
       cy.get('@onAddLimit').should(stub => {
-        const call = (stub as sinon.SinonStub).getCall(0);
+        const call = (stub as unknown as sinon.SinonStub).getCall(0);
         expect(call.args[0].personName).to.equal('john.doe');
       });
     });
 
     Step('And the limit should show value 5', () => {
       cy.get('@onAddLimit').should(stub => {
-        const call = (stub as sinon.SinonStub).getCall(0);
+        const call = (stub as unknown as sinon.SinonStub).getCall(0);
         expect(call.args[0].limit).to.equal(5);
       });
     });
@@ -115,7 +115,7 @@ describe('Feature: Personal WIP Limit Settings', () => {
     Step('Then the limit for "jane.doe" should apply only to "To Do, In Progress"', () => {
       cy.get('@onAddLimit').should('have.been.calledOnce');
       cy.get('@onAddLimit').should(stub => {
-        const call = (stub as sinon.SinonStub).getCall(0);
+        const call = (stub as unknown as sinon.SinonStub).getCall(0);
         expect(call.args[0].selectedColumns).to.deep.equal(['col1', 'col2']);
       });
     });
@@ -171,7 +171,7 @@ describe('Feature: Personal WIP Limit Settings', () => {
     Step('Then the limit for "john.doe" should show value 10', () => {
       cy.get('@onAddLimit').should('have.been.calledOnce');
       cy.get('@onAddLimit').should(stub => {
-        const call = (stub as sinon.SinonStub).getCall(0);
+        const call = (stub as unknown as sinon.SinonStub).getCall(0);
         expect(call.args[0].limit).to.equal(10);
       });
     });
@@ -254,7 +254,7 @@ describe('Feature: Personal WIP Limit Settings', () => {
     Step('Then the limit for "john.doe" should apply only to swimlane "Frontend"', () => {
       cy.get('@onAddLimit').should('have.been.calledOnce');
       cy.get('@onAddLimit').should(stub => {
-        const call = (stub as sinon.SinonStub).getCall(0);
+        const call = (stub as unknown as sinon.SinonStub).getCall(0);
         expect(call.args[0].swimlanes).to.deep.equal(['swim1']);
       });
     });

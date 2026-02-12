@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { saveToProperty } from './saveToProperty';
 import { useColumnLimitsPropertyStore } from '../../property/store';
 import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
-import type { Column, UIGroup } from '../../types';
 
 vi.mock('src/routing', () => ({
   getBoardIdFromURL: vi.fn(() => '123'),

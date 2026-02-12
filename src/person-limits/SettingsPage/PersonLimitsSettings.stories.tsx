@@ -1,6 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { tablePersonalWipLimit, addPersonalWipLimit } from './htmlTemplates';
+import { fn } from '@storybook/test';
+import { PersonalWipLimitContainer } from './components/PersonalWipLimitContainer';
+import { useSettingsUIStore } from './stores/settingsUIStore';
+import type { PersonLimit, Column, Swimlane } from './state/types';
 
 const meta: Meta = {
   title: 'WIP Limits/Person Limits Settings',
@@ -11,91 +14,54 @@ const meta: Meta = {
 
 export default meta;
 
-interface PersonLimitsSettingsDemoProps {
-  limits: Array<{
-    id: number;
-    person: {
-      name: string;
-      displayName: string;
-      avatar: string;
-    };
-    limit: number;
-    columns: Array<{ id: string; name: string }>;
-    swimlanes: Array<{ id: string; name: string }>;
-    includedIssueTypes?: string[];
-  }>;
+interface PersonLimitsDemoProps {
+  limits?: PersonLimit[];
 }
 
-const PersonLimitsSettingsDemo: React.FC<PersonLimitsSettingsDemoProps> = ({ limits }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const defaultColumns: Column[] = [
+  { id: 'col1', name: 'To Do' },
+  { id: 'col2', name: 'In Progress' },
+  { id: 'col3', name: 'Code Review' },
+  { id: 'col4', name: 'Testing' },
+  { id: 'col5', name: 'Done' },
+];
 
+const defaultSwimlanes: Swimlane[] = [
+  { id: 'swim1', name: 'Frontend' },
+  { id: 'swim2', name: 'Backend' },
+  { id: 'swim3', name: 'DevOps' },
+];
+
+const PersonLimitsDemo: React.FC<PersonLimitsDemoProps> = ({ limits = [] }) => {
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    container.innerHTML = '';
-
-    // Add form placeholder
-    const formHtml = `
-      <form class="aui" style="margin-bottom: 20px; padding: 16px; background: #f4f5f7; border-radius: 4px;">
-        <fieldset>
-          <div class="field-group">
-            <label>Person JIRA name</label>
-            <input class="text medium-field" type="text" placeholder="john.doe" />
-          </div>
-          <div class="field-group">
-            <label>Max issues at work</label>
-            <input class="text medium-field" type="number" placeholder="3" />
-          </div>
-        </fieldset>
-      </form>
-    `;
-    container.innerHTML = formHtml;
-
-    // Add table
-    const tableContainer = document.createElement('div');
-    tableContainer.innerHTML = tablePersonalWipLimit();
-    container.appendChild(tableContainer);
-
-    // Add rows
-    const tbody = container.querySelector('tbody');
-    if (tbody) {
-      limits.forEach((limit, index) => {
-        tbody.innerHTML += addPersonalWipLimit(
-          {
-            id: limit.id.toString(),
-            person: { displayName: limit.person.displayName },
-            limit: limit.limit,
-            columns: limit.columns,
-            swimlanes: limit.swimlanes,
-          },
-          index === 0
-        );
-      });
+    useSettingsUIStore.getState().actions.reset();
+    if (limits.length > 0) {
+      useSettingsUIStore.getState().actions.setData(limits);
     }
   }, [limits]);
 
   return (
     <div style={{ padding: '20px', maxWidth: '1000px' }}>
       <h2 style={{ marginBottom: '20px' }}>Personal WIP Limits Settings</h2>
-      <div ref={containerRef} />
+      <PersonalWipLimitContainer columns={defaultColumns} swimlanes={defaultSwimlanes} onAddLimit={fn()} />
     </div>
   );
 };
 
 export const EmptyState: StoryObj = {
-  render: () => <PersonLimitsSettingsDemo limits={[]} />,
+  render: () => <PersonLimitsDemo limits={[]} />,
 };
 
 export const SingleLimit: StoryObj = {
   render: () => (
-    <PersonLimitsSettingsDemo
+    <PersonLimitsDemo
       limits={[
         {
           id: 1,
           person: {
             name: 'john.doe',
             displayName: 'John Doe',
+            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 3,
@@ -109,13 +75,14 @@ export const SingleLimit: StoryObj = {
 
 export const MultipleLimits: StoryObj = {
   render: () => (
-    <PersonLimitsSettingsDemo
+    <PersonLimitsDemo
       limits={[
         {
           id: 1,
           person: {
             name: 'john.doe',
             displayName: 'John Doe',
+            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 3,
@@ -127,6 +94,7 @@ export const MultipleLimits: StoryObj = {
           person: {
             name: 'jane.smith',
             displayName: 'Jane Smith',
+            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 5,
@@ -143,13 +111,14 @@ export const MultipleLimits: StoryObj = {
 
 export const WithIssueTypeFilter: StoryObj = {
   render: () => (
-    <PersonLimitsSettingsDemo
+    <PersonLimitsDemo
       limits={[
         {
           id: 1,
           person: {
             name: 'john.doe',
             displayName: 'John Doe',
+            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 3,
@@ -162,6 +131,7 @@ export const WithIssueTypeFilter: StoryObj = {
           person: {
             name: 'jane.smith',
             displayName: 'Jane Smith',
+            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
             avatar: 'https://via.placeholder.com/32',
           },
           limit: 5,

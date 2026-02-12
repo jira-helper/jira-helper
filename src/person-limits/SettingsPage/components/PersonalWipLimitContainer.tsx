@@ -9,7 +9,7 @@ import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector'
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { FormData, Column, Swimlane } from '../state/types';
-import { settingsJiraDOM } from '../htmlTemplates';
+import { settingsJiraDOM } from '../constants';
 
 const TEXTS = {
   avatarWarning: {
@@ -100,29 +100,21 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   );
   const [resetCounter, setResetCounter] = useState(0);
 
-  // Track previous editingId and formData to detect mode changes vs user input
+  // Track previous editingId to detect mode changes (not formData changes)
   const prevEditingIdRef = useRef<number | null>(null);
-  const prevFormDataRef = useRef<typeof formData>(formData);
 
-  // Reset issue types when switching between add/edit modes or after successful add
+  // Reset issue types when switching between add/edit modes (only when editingId changes)
   useEffect(() => {
     const editingIdChanged = prevEditingIdRef.current !== editingId;
-    const formDataCleared = prevFormDataRef.current !== null && formData === null;
-
     prevEditingIdRef.current = editingId;
-    prevFormDataRef.current = formData;
 
-    // Reset when:
-    // 1. editingId changes (mode switch: add→edit, edit→add, edit→different edit)
-    // 2. formData becomes null after being non-null (form cleared after successful add/edit)
-    const shouldReset = editingIdChanged || formDataCleared;
-
-    if (!shouldReset) {
-      // Just a formData field change (user typing/selecting) - don't reset
+    // Only reset state when editingId actually changes (mode switch), not on formData changes
+    if (!editingIdChanged) {
+      // formData changed but editingId didn't - don't reset user input
       return;
     }
 
-    // Reset logic
+    // Reset logic only runs when editingId changes
     if (editingId === null) {
       // Reset to defaults when exiting edit mode or after successful add
       setSelectedTypes([]);
@@ -135,14 +127,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       setSelectedTypes([]);
       setCountAllTypes(true);
     }
-
-    console.log('[PersonalWipLimit] IssueTypeSelector state:', {
-      editingId,
-      selectedTypes,
-      countAllTypes,
-      formDataTypes: formData?.includedIssueTypes,
-    });
-  }, [editingId, formData]);
+  }, [editingId, formData?.includedIssueTypes]);
 
   // Track columns and swimlanes state for "All" checkboxes
   const [columnsValue, setColumnsValue] = useState<string[]>(currentFormData.selectedColumns);
@@ -218,14 +203,17 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // Handle form field changes
   const handleFormChange = (field: string, value: any) => {
     const currentValues = form.getFieldsValue();
-    const currentFormData = formData || defaultFormData;
+    const formDataForUpdate = formData || defaultFormData;
     const newFormData: Partial<FormData> = {
-      ...currentFormData,
+      ...formDataForUpdate,
       ...currentValues,
       [field]: value,
     };
     actions.setFormData(newFormData as FormData);
   };
+
+  // Determine if edit button should be enabled
+  const isEditMode = editingId !== null;
 
   // Handle form submit
   const handleSubmit = (values: any) => {
@@ -248,20 +236,9 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
     };
 
-    console.log('[PersonalWipLimit] handleSubmit:', {
-      isEditMode,
-      editingId,
-      formData: formDataToSubmit,
-      columnsToSave,
-      swimlanesToSave,
-    });
-
     // onAddLimit callback will check editingId and handle add/edit accordingly
     onAddLimit(formDataToSubmit);
   };
-
-  // Determine if edit button should be enabled
-  const isEditMode = editingId !== null;
 
   return (
     <>

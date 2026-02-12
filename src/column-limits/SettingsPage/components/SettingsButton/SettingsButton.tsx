@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './SettingsButton.module.css';
+import { Button } from 'antd';
 
 export type SettingsButtonProps = {
   onClick: () => void;
@@ -7,7 +7,7 @@ export type SettingsButtonProps = {
 };
 
 export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick, disabled = false }) => (
-  <button id="jh-add-group-btn" className={styles.button} onClick={onClick} disabled={disabled} type="button">
+  <Button id="jh-add-group-btn" type="primary" onClick={onClick} disabled={disabled}>
     Group limits
-  </button>
+  </Button>
 );

@@ -3,7 +3,7 @@
  * PersonLimit is defined in property module; re-exported here for convenience.
  */
 
-export type { PersonLimit } from '../property/types';
+export type { PersonLimit } from '../../property/types';
 
 export type Column = {
   id: string;

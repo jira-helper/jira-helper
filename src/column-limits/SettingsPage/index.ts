@@ -3,6 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
+import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
 import { useColumnLimitsPropertyStore } from '../property/store';
 import { SettingsButtonContainer } from './components/SettingsButton';
 
@@ -62,15 +63,11 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   }
 
   renderSettingsButton(): void {
-    const container = document.createElement('div');
-    container.id = 'jh-group-limits-button-container';
+    const sharedContainer = getOrCreateButtonsContainer();
+    const buttonContainer = document.createElement('div');
+    sharedContainer.appendChild(buttonContainer);
 
-    const lastChild = document.querySelector(SettingsWIPLimits.jiraSelectors.columnsConfigLastChild);
-    if (lastChild) {
-      lastChild.insertAdjacentElement('beforebegin', container);
-    }
-
-    this.settingsButtonRoot = createRoot(container);
+    this.settingsButtonRoot = createRoot(buttonContainer);
     this.settingsButtonRoot.render(
       React.createElement(SettingsButtonContainer, {
         getColumns: () => this.getColumns(),

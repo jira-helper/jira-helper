@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Checkbox, Button, Space } from 'antd';
 import type { PersonLimit } from '../state/types';
-import { settingsJiraDOM } from '../htmlTemplates';
+import { settingsJiraDOM } from '../constants';
 
 export interface PersonalWipLimitTableProps {
   limits: PersonLimit[];
@@ -44,7 +44,8 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
       title: 'Columns',
       dataIndex: 'columns',
       key: 'columns',
-      render: (columns: { name: string }[]) => (columns.length === 0 ? 'All' : columns.map(c => c.name).join(', ')),
+      render: (columnList: { name: string }[]) =>
+        columnList.length === 0 ? 'All' : columnList.map(c => c.name).join(', '),
     },
     {
       title: 'Swimlanes',

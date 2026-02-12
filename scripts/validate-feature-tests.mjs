@@ -1,33 +1,55 @@
 #!/usr/bin/env node
 
 /**
- * Validates that Cypress .cy.tsx test files cover all scenarios and steps
+ * Validates that Cypress .feature.cy.tsx test files cover all scenarios and steps
  * from the corresponding .feature files.
  *
+ * Convention: for every `x.feature` there must be `x.feature.cy.tsx` in the same directory.
+ *
  * Usage:
- *   node scripts/validate-feature-tests.mjs <feature-file> <cy-file>
- *   node scripts/validate-feature-tests.mjs  # runs all known pairs
+ *   node scripts/validate-feature-tests.mjs                          # auto-discover all .feature files in src/
+ *   node scripts/validate-feature-tests.mjs <feature-file>           # validate one (test file inferred)
+ *   node scripts/validate-feature-tests.mjs <feature-file> <cy-file> # validate explicit pair
  *
  * Exit codes:
  *   0 — all scenarios and steps are covered
  *   1 — missing scenarios or steps found
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { resolve, relative } from 'path';
 
-// ── Known feature ↔ test pairs ──────────────────────────────────────────────
+// ── Auto-discovery ──────────────────────────────────────────────────────────
 
-const PAIRS = [
-  {
-    feature: 'src/person-limits/SettingsPage/settings-page.feature',
-    test: 'src/person-limits/SettingsPage/SettingsPage.cy.tsx',
-  },
-  {
-    feature: 'src/column-limits/SettingsPage/settings-page.feature',
-    test: 'src/column-limits/SettingsPage/SettingsPage.cy.tsx',
-  },
-];
+/**
+ * Recursively find all .feature files under a directory.
+ */
+function findFeatureFiles(dir) {
+  const results = [];
+
+  function walk(d) {
+    for (const entry of readdirSync(d, { withFileTypes: true })) {
+      const full = resolve(d, entry.name);
+
+      if (entry.isDirectory() && entry.name !== 'node_modules') {
+        walk(full);
+      } else if (entry.name.endsWith('.feature')) {
+        results.push(full);
+      }
+    }
+  }
+
+  walk(resolve(dir));
+  return results;
+}
+
+/**
+ * Infer the test file path from a .feature path.
+ * Convention: x.feature → x.feature.cy.tsx
+ */
+function inferTestPath(featurePath) {
+  return featurePath + '.cy.tsx';
+}
 
 // ── Feature parser ──────────────────────────────────────────────────────────
 
@@ -125,6 +147,7 @@ function validate(featurePath, testPath) {
 
   if (!existsSync(absTest)) {
     console.error(`  ERROR: Test file not found: ${testPath}`);
+    console.error(`  Expected: ${relative(process.cwd(), absTest)}`);
     return false;
   }
 
@@ -198,36 +221,51 @@ function main() {
   let pairs;
 
   if (args.length === 2) {
+    // Explicit pair
     pairs = [{ feature: args[0], test: args[1] }];
+  } else if (args.length === 1) {
+    // Single .feature file — infer test path
+    const feature = args[0];
+    const test = inferTestPath(feature);
+    pairs = [{ feature, test }];
   } else if (args.length === 0) {
-    pairs = PAIRS;
+    // Auto-discover: find all .feature files in src/, infer test paths
+    const featureFiles = findFeatureFiles('src');
+    pairs = featureFiles.map(f => ({
+      feature: f,
+      test: inferTestPath(f),
+    }));
+
+    if (pairs.length === 0) {
+      console.log('No .feature files found in src/');
+      process.exit(0);
+    }
+
+    console.log(`Found ${pairs.length} .feature file(s)\n`);
   } else {
     console.error('Usage:');
-    console.error('  node scripts/validate-feature-tests.mjs <feature-file> <test-file>');
-    console.error('  node scripts/validate-feature-tests.mjs  # validate all known pairs');
+    console.error('  node scripts/validate-feature-tests.mjs                          # auto-discover');
+    console.error('  node scripts/validate-feature-tests.mjs <feature-file>           # infer test');
+    console.error('  node scripts/validate-feature-tests.mjs <feature-file> <cy-file> # explicit pair');
     process.exit(1);
   }
 
   let allPassed = true;
 
   for (const { feature, test } of pairs) {
-    console.log(`\n── ${relative(process.cwd(), feature)} ↔ ${relative(process.cwd(), test)} ──`);
-
-    if (!existsSync(feature) && !existsSync(test)) {
-      console.log(`  SKIP: files not found`);
-      continue;
-    }
+    const relFeature = relative(process.cwd(), resolve(feature));
+    const relTest = relative(process.cwd(), resolve(test));
+    console.log(`── ${relFeature} ↔ ${relTest} ──`);
 
     const passed = validate(feature, test);
     if (!passed) allPassed = false;
+    console.log('');
   }
 
-  console.log('');
-
   if (allPassed) {
-    console.log('✅ All feature tests are in sync');
+    console.log('All feature tests are in sync');
   } else {
-    console.log('❌ Some feature tests are out of sync');
+    console.log('Some feature tests are out of sync');
     process.exit(1);
   }
 }

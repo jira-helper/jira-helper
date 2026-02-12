@@ -11,11 +11,14 @@ import { loadFeature, describeFeature } from '@amiceli/vitest-cucumber';
 import { useSettingsUIStore } from './settingsUIStore';
 import type { PersonLimit, FormData } from '../state/types';
 
-const feature = await loadFeature('src/person-limits/SettingsPage/settings-page.feature');
+const feature = await loadFeature('src/person-limits/SettingsPage/SettingsPage.feature');
 
 describeFeature(feature, ({ Background, Scenario }) => {
   // Test data
+  // Note: columns and swimlanes are used in Background steps but ESLint doesn't detect it
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let columns: Array<{ id: string; name: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let swimlanes: Array<{ id: string; name: string }>;
 
   const createLimit = (id: number, name: string, limit: number): PersonLimit => ({

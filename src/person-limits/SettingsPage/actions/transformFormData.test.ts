@@ -139,11 +139,6 @@ describe('transformFormData', () => {
   describe('Type mismatch: string IDs vs numeric column/swimlane IDs', () => {
     it('should match columns when selectedColumnIds are strings but columns[].id are numbers', () => {
       // Simulate board API returning numeric IDs
-      const columnsWithNumericIds: Column[] = [
-        { id: '123' as any, name: 'To Do' }, // TypeScript says string, but runtime could be number
-        { id: '456' as any, name: 'In Progress' },
-        { id: '789' as any, name: 'Done' },
-      ];
       // But we need to actually test with numbers - cast to bypass TypeScript
       const numericColumns = [
         { id: 123, name: 'To Do' },

@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AvatarBadge } from './AvatarBadge';
 
@@ -83,6 +84,7 @@ export const MultipleAvatars: Story = {
         limit={5}
         isActive={false}
         onClick={() => {}}
+        limitId={1}
       />
       <AvatarBadge
         avatar={defaultAvatar}
@@ -92,6 +94,7 @@ export const MultipleAvatars: Story = {
         limit={5}
         isActive
         onClick={() => {}}
+        limitId={2}
       />
       <AvatarBadge
         avatar={defaultAvatar}
@@ -101,6 +104,7 @@ export const MultipleAvatars: Story = {
         limit={5}
         isActive={false}
         onClick={() => {}}
+        limitId={3}
       />
     </div>
   ),

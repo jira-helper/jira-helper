@@ -1,7 +1,28 @@
 import { createAction } from 'src/shared/action';
-import { personLimitsBoardPageObjectToken } from '../pageObject';
+import { IPersonLimitsBoardPageObject, personLimitsBoardPageObjectToken } from '../pageObject';
 import { useRuntimeStore } from '../stores';
 import { isPersonLimitAppliedToIssue } from '../utils';
+
+/**
+ * Hide empty swimlanes and parent groups after filtering.
+ */
+function showOrHideTaskAggregations(pageObject: IPersonLimitsBoardPageObject, cssSelectorOfIssues: string): void {
+  // Hide/show parent groups (for subtasks)
+  const parentGroups = pageObject.getParentGroups();
+  parentGroups.forEach(group => {
+    const { total, hidden } = pageObject.countIssueVisibility(group, cssSelectorOfIssues);
+    const shouldShow = total === 0 || hidden < total;
+    pageObject.setParentGroupVisibility(group, shouldShow);
+  });
+
+  // Hide/show swimlanes
+  const swimlanes = pageObject.getSwimlanes();
+  swimlanes.forEach(swimlane => {
+    const { total, hidden } = pageObject.countIssueVisibility(swimlane, cssSelectorOfIssues);
+    const shouldShow = total === 0 || hidden < total;
+    pageObject.setSwimlaneVisibility(swimlane, shouldShow);
+  });
+}
 
 /**
  * Show only issues matching the active person's limit filter.
@@ -46,27 +67,3 @@ export const showOnlyChosen = createAction({
     showOrHideTaskAggregations(pageObject, cssSelectorOfIssues);
   },
 });
-
-/**
- * Hide empty swimlanes and parent groups after filtering.
- */
-function showOrHideTaskAggregations(
-  pageObject: ReturnType<(typeof personLimitsBoardPageObjectToken)['__type']>,
-  cssSelectorOfIssues: string
-): void {
-  // Hide/show parent groups (for subtasks)
-  const parentGroups = pageObject.getParentGroups();
-  parentGroups.forEach(group => {
-    const { total, hidden } = pageObject.countIssueVisibility(group, cssSelectorOfIssues);
-    const shouldShow = total === 0 || hidden < total;
-    pageObject.setParentGroupVisibility(group, shouldShow);
-  });
-
-  // Hide/show swimlanes
-  const swimlanes = pageObject.getSwimlanes();
-  swimlanes.forEach(swimlane => {
-    const { total, hidden } = pageObject.countIssueVisibility(swimlane, cssSelectorOfIssues);
-    const shouldShow = total === 0 || hidden < total;
-    pageObject.setSwimlaneVisibility(swimlane, shouldShow);
-  });
-}

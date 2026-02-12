@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import type { PersonLimit, PersonWipLimitsProperty } from './types';
+import type { PersonWipLimitsProperty } from './types';
 import type { PersonWipLimitsPropertyStoreState } from './interface';
 
 const initialData: PersonWipLimitsProperty = {
