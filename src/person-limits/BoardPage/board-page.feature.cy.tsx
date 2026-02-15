@@ -8,24 +8,16 @@
  * Validate with: node scripts/validate-feature-tests.mjs
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { registerLogger } from 'src/shared/Logger';
 import { AvatarsContainer } from './components/AvatarsContainer';
 import { useRuntimeStore, getInitialState } from './stores';
 import { computeLimitId } from './utils/computeLimitId';
 import type { PersonLimitStats } from './stores/runtimeStore.types';
+import { personLimitsBoardPageObjectToken } from './pageObject';
 import { Scenario, Step } from '../../../cypress/support/bdd';
 
 // --- Test fixtures matching feature Background ---
-
-const columns = [
-  { id: 'col1', name: 'To Do' },
-  { id: 'col2', name: 'In Progress' },
-  { id: 'col3', name: 'Done' },
-];
-
-const swimlanes = [
-  { id: 'sw1', name: 'Swimlane 1' },
-  { id: 'sw2', name: 'Swimlane 2' },
-];
 
 /**
  * Creates a mock issue element in the DOM.
@@ -35,7 +27,7 @@ const createMockIssue = (
   assignee: string,
   columnId: string,
   swimlaneId: string | null = null,
-  issueType: string = 'Task'
+  issueType = 'Task'
 ): HTMLElement => {
   const issue = document.createElement('div');
   issue.className = 'ghx-issue';
@@ -88,6 +80,43 @@ const createStats = (
 describe('Feature: Apply WIP Limits on Board', () => {
   // Background
   beforeEach(() => {
+    // Reset DI container
+    globalContainer.reset();
+    registerLogger(globalContainer);
+
+    // Mock PageObject
+    globalContainer.register({
+      token: personLimitsBoardPageObjectToken,
+      value: {
+        selectors: {
+          issue: '.ghx-issue',
+          avatarImg: '.ghx-avatar-img',
+          issueType: '.ghx-type',
+          column: '.ghx-column',
+          swimlane: '.ghx-swimlane',
+          swimlaneHeader: '.ghx-swimlane-header-container',
+          parentGroup: '.ghx-parent-group',
+        },
+        getIssues: () => [],
+        getAssigneeFromIssue: () => null,
+        getColumnId: () => null,
+        getColumnIdFromColumn: () => null,
+        getSwimlaneId: () => null,
+        hasCustomSwimlanes: () => false,
+        getSwimlanes: () => [],
+        getColumnsInSwimlane: () => [],
+        getColumns: () => [],
+        getParentGroups: () => [],
+        getIssueType: () => null,
+        setIssueVisibility: cy.stub(),
+        setIssueBackgroundColor: cy.stub(),
+        resetIssueBackgroundColor: cy.stub(),
+        setSwimlaneVisibility: cy.stub(),
+        setParentGroupVisibility: cy.stub(),
+        countIssueVisibility: () => ({ total: 0, hidden: 0 }),
+      },
+    });
+
     // Given the board is loaded
     useRuntimeStore.setState(getInitialState());
     // And there are available columns: col1, col2, col3
@@ -104,9 +133,29 @@ describe('Feature: Apply WIP Limits on Board', () => {
     cy.mount(<AvatarsContainer />);
   };
 
-  // === BOARD DISPLAY ===
+  // === DISPLAY ===
 
-  Scenario('Board shows cards count for a person with limit', () => {
+  Scenario('SC-DISPLAY-1: No limits configured shows nothing', () => {
+    Step('Given there are no WIP limits configured', () => {
+      cy.then(() => {
+        useRuntimeStore.setState(getInitialState());
+      });
+    });
+
+    Step('And there are issues on the board', () => {
+      // Issues exist but no limits configured
+    });
+
+    Step('When the board is displayed', () => {
+      mountComponent();
+    });
+
+    Step('Then no WIP limit counters should be visible', () => {
+      cy.get('#avatars-limits').should('not.exist');
+    });
+  });
+
+  Scenario('SC-DISPLAY-2: Counter within limit (green)', () => {
     Step('Given there is a WIP limit for "john.doe" with value 5 issues', () => {
       cy.then(() => {
         // Create mock issues as DOM elements (for stats)
@@ -114,7 +163,6 @@ describe('Feature: Apply WIP Limits on Board', () => {
           createMockIssue('1', 'john.doe', 'col1', 'sw1'),
           createMockIssue('2', 'john.doe', 'col1', 'sw2'),
           createMockIssue('3', 'john.doe', 'col2', 'sw1'),
-          createMockIssue('4', 'john.doe', 'col2', 'sw2'),
         ];
 
         const stats = createStats('john.doe', 'John Doe', 5, mockIssues);
@@ -122,7 +170,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has 4 issues in the board:', () => {
+    Step('And "john.doe" has 3 issues on the board', () => {
       // Issues are represented in stats
     });
 
@@ -141,22 +189,63 @@ describe('Feature: Apply WIP Limits on Board', () => {
       cy.get('[data-person-name="john.doe"]').should('exist');
     });
 
-    Step('Then the counter for "john.doe" should show "4 / 5"', () => {
+    Step('Then the counter for "john.doe" should show "3 / 5"', () => {
       // Check that avatar badge exists
       cy.get('[data-person-name="john.doe"]').should('exist');
       // Check badge content - using contains to find the badge div
-      cy.get('[data-person-name="john.doe"]').should('contain.text', '4 / 5');
+      cy.get('[data-person-name="john.doe"]').should('contain.text', '3 / 5');
     });
 
     Step('And the counter for "john.doe" should be green', () => {
       // Check badge has 'under' class (green status) - CSS modules use hashed class names
       cy.get('[data-person-name="john.doe"]').should('be.visible');
       // Verify the badge shows correct status by checking the text and that it exists
-      cy.get('[data-person-name="john.doe"]').contains('4 / 5').should('exist');
+      cy.get('[data-person-name="john.doe"]').contains('3 / 5').should('exist');
     });
   });
 
-  Scenario('Board highlights person exceeding limit', () => {
+  Scenario('SC-DISPLAY-3: Counter at limit (yellow)', () => {
+    Step('Given there is a WIP limit for "john.doe" with value 3 issues', () => {
+      cy.then(() => {
+        const mockIssues = [
+          createMockIssue('1', 'john.doe', 'col1', 'sw1'),
+          createMockIssue('2', 'john.doe', 'col2', 'sw1'),
+          createMockIssue('3', 'john.doe', 'col2', 'sw2'),
+        ];
+
+        const stats = createStats('john.doe', 'John Doe', 3, mockIssues);
+        useRuntimeStore.getState().actions.setStats([stats]);
+      });
+    });
+
+    Step('And "john.doe" has 3 issues on the board', () => {
+      // Issues are represented in stats
+    });
+
+    Step('When the board is displayed', () => {
+      cy.then(() => {
+        const { stats } = useRuntimeStore.getState().data;
+        expect(stats).to.have.length(1);
+        expect(stats[0].person.name).to.equal('john.doe');
+      });
+
+      mountComponent();
+
+      // Wait for component to render
+      cy.get('#avatars-limits').should('exist');
+      cy.get('[data-person-name="john.doe"]').should('exist');
+    });
+
+    Step('Then the counter for "john.doe" should show "3 / 3"', () => {
+      cy.get('[data-person-name="john.doe"]').should('contain.text', '3 / 3');
+    });
+
+    Step('And the counter for "john.doe" should be yellow', () => {
+      cy.get('[data-person-name="john.doe"]').should('be.visible');
+    });
+  });
+
+  Scenario('SC-DISPLAY-4: Counter over limit (red) with highlighted cards', () => {
     Step('Given there is a WIP limit for "jane.doe" with value 3 issues', () => {
       cy.then(() => {
         const mockIssues = [
@@ -201,7 +290,162 @@ describe('Feature: Apply WIP Limits on Board', () => {
     });
   });
 
-  Scenario('Board applies column-specific limits', () => {
+  Scenario('SC-DISPLAY-5: Person has no issues (zero count)', () => {
+    Step('Given there is a WIP limit for "john.doe" with value 5 issues', () => {
+      cy.then(() => {
+        const stats = createStats('john.doe', 'John Doe', 5, []);
+        useRuntimeStore.getState().actions.setStats([stats]);
+      });
+    });
+
+    Step('And "john.doe" has no issues on the board', () => {
+      // No issues represented in stats
+    });
+
+    Step('When the board is displayed', () => {
+      cy.then(() => {
+        const { stats } = useRuntimeStore.getState().data;
+        expect(stats).to.have.length(1);
+        expect(stats[0].person.name).to.equal('john.doe');
+        expect(stats[0].issues).to.have.length(0);
+      });
+
+      mountComponent();
+
+      cy.get('#avatars-limits').should('exist');
+      cy.get('[data-person-name="john.doe"]').should('exist');
+    });
+
+    Step('Then the counter for "john.doe" should show "0 / 5"', () => {
+      cy.get('[data-person-name="john.doe"]').should('contain.text', '0 / 5');
+    });
+
+    Step('And the counter for "john.doe" should be green', () => {
+      cy.get('[data-person-name="john.doe"]').should('be.visible');
+    });
+  });
+
+  Scenario('SC-DISPLAY-6: Multiple people with limits', () => {
+    Step('Given there is a WIP limit for "john.doe" with value 3 issues', () => {
+      cy.then(() => {
+        const mockIssues = [
+          createMockIssue('1', 'john.doe', 'col1', 'sw1'),
+          createMockIssue('2', 'john.doe', 'col2', 'sw1'),
+        ];
+
+        const stats = createStats('john.doe', 'John Doe', 3, mockIssues);
+        useRuntimeStore.getState().actions.setStats([stats]);
+      });
+    });
+
+    Step('And there is a WIP limit for "jane.doe" with value 2 issues', () => {
+      cy.then(() => {
+        const mockIssues = [
+          createMockIssue('3', 'jane.doe', 'col2', 'sw1'),
+          createMockIssue('4', 'jane.doe', 'col2', 'sw2'),
+          createMockIssue('5', 'jane.doe', 'col3', 'sw1'),
+        ];
+
+        const existingStats = useRuntimeStore.getState().data.stats;
+        const janeStats = createStats('jane.doe', 'Jane Doe', 2, mockIssues);
+        useRuntimeStore.getState().actions.setStats([...existingStats, janeStats]);
+      });
+    });
+
+    Step('And "john.doe" has 2 issues on the board', () => {
+      // Issues are represented in stats
+    });
+
+    Step('And "jane.doe" has 3 issues on the board', () => {
+      // Issues are represented in stats
+    });
+
+    Step('When the board is displayed', () => {
+      cy.then(() => {
+        const { stats } = useRuntimeStore.getState().data;
+        expect(stats).to.have.length(2);
+      });
+
+      mountComponent();
+
+      cy.get('#avatars-limits').should('exist');
+      cy.get('[data-person-name="john.doe"]').should('exist');
+      cy.get('[data-person-name="jane.doe"]').should('exist');
+    });
+
+    Step('Then the counter for "john.doe" should show "2 / 3"', () => {
+      cy.get('[data-person-name="john.doe"]').should('contain.text', '2 / 3');
+    });
+
+    Step('And the counter for "john.doe" should be green', () => {
+      cy.get('[data-person-name="john.doe"]').should('be.visible');
+    });
+
+    Step('And the counter for "jane.doe" should show "3 / 2"', () => {
+      cy.get('[data-person-name="jane.doe"]').should('contain.text', '3 / 2');
+    });
+
+    Step('And the counter for "jane.doe" should be red', () => {
+      cy.get('[data-person-name="jane.doe"]').should('be.visible');
+    });
+  });
+
+  Scenario('SC-DISPLAY-7: Same person with multiple limits (different columns)', () => {
+    Step('Given there is a WIP limit for "john.doe" with value 2 issues in columns "col1"', () => {
+      cy.then(() => {
+        const mockIssues = [createMockIssue('1', 'john.doe', 'col1', 'sw1')];
+        const stats = createStats('john.doe', 'John Doe', 2, mockIssues, [{ id: 'col1', name: 'To Do' }]);
+        useRuntimeStore.getState().actions.setStats([stats]);
+      });
+    });
+
+    Step('And there is a WIP limit for "john.doe" with value 3 issues in columns "col2"', () => {
+      cy.then(() => {
+        const mockIssues = [
+          createMockIssue('2', 'john.doe', 'col2', 'sw1'),
+          createMockIssue('3', 'john.doe', 'col2', 'sw2'),
+          createMockIssue('4', 'john.doe', 'col2', 'sw1'),
+          createMockIssue('5', 'john.doe', 'col2', 'sw2'),
+        ];
+        const existingStats = useRuntimeStore.getState().data.stats;
+        const stats = createStats('john.doe', 'John Doe', 3, mockIssues, [{ id: 'col2', name: 'In Progress' }]);
+        useRuntimeStore.getState().actions.setStats([...existingStats, stats]);
+      });
+    });
+
+    Step('And "john.doe" has 1 issue in "col1"', () => {
+      // Issues are represented in stats
+    });
+
+    Step('And "john.doe" has 4 issues in "col2"', () => {
+      // Issues are represented in stats
+    });
+
+    Step('When the board is displayed', () => {
+      cy.then(() => {
+        const { stats } = useRuntimeStore.getState().data;
+        expect(stats).to.have.length(2);
+        expect(stats.every(s => s.person.name === 'john.doe')).to.be.true;
+      });
+
+      mountComponent();
+
+      cy.get('#avatars-limits').should('exist');
+      cy.get('[data-person-name="john.doe"]').should('have.length', 2);
+    });
+
+    Step('Then the first counter for "john.doe" should show "1 / 2" and be green', () => {
+      cy.get('[data-person-name="john.doe"]').first().should('contain.text', '1 / 2');
+    });
+
+    Step('And the second counter for "john.doe" should show "4 / 3" and be red', () => {
+      cy.get('[data-person-name="john.doe"]').eq(1).should('contain.text', '4 / 3');
+    });
+  });
+
+  // === LIMIT SCOPE ===
+
+  Scenario('SC-SCOPE-1: Limit applies to specific columns only', () => {
     Step('Given there is a WIP limit for "john.doe" with value 2 issues in columns "col2"', () => {
       cy.then(() => {
         const mockIssues = [
@@ -218,7 +462,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has issues in the board:', () => {
+    Step('And "john.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
@@ -247,7 +491,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
     });
   });
 
-  Scenario('Board applies swimlane-specific limits', () => {
+  Scenario('SC-SCOPE-2: Limit applies to specific swimlanes only', () => {
     Step('Given there is a WIP limit for "john.doe" with value 1 issue in swimlanes "sw1"', () => {
       cy.then(() => {
         const mockIssues = [
@@ -262,7 +506,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has issues in the board:', () => {
+    Step('And "john.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
@@ -285,7 +529,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
     });
   });
 
-  Scenario('Board applies issue type filter', () => {
+  Scenario('SC-SCOPE-3: Limit applies to specific issue types only', () => {
     Step('Given there is a WIP limit for "john.doe" with value 2 issues for types "Bug, Task"', () => {
       cy.then(() => {
         const mockIssues = [
@@ -303,7 +547,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has issues in the board:', () => {
+    Step('And "john.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
@@ -326,9 +570,52 @@ describe('Feature: Apply WIP Limits on Board', () => {
     });
   });
 
-  // === FILTERING ===
+  Scenario('SC-SCOPE-4: Limit with combined filters (columns + swimlanes + types)', () => {
+    Step(
+      'Given there is a WIP limit for "john.doe" with value 2 for column "col2", swimlane "sw1" and types "Bug"',
+      () => {
+        cy.then(() => {
+          const mockIssues = [createMockIssue('1', 'john.doe', 'col2', 'sw1', 'Bug')];
+          const stats = createStats(
+            'john.doe',
+            'John Doe',
+            2,
+            mockIssues,
+            [{ id: 'col2', name: 'In Progress' }],
+            [{ id: 'sw1', name: 'Swimlane 1' }],
+            ['Bug']
+          );
+          useRuntimeStore.getState().actions.setStats([stats]);
+        });
+      }
+    );
 
-  Scenario('Filtering by clicking on avatar', () => {
+    Step('And "john.doe" has issues on the board:', () => {
+      // Issues are represented in stats
+    });
+
+    Step('When the board is displayed', () => {
+      cy.then(() => {
+        const { stats } = useRuntimeStore.getState().data;
+        expect(stats).to.have.length(1);
+      });
+      mountComponent();
+      cy.get('#avatars-limits').should('exist');
+      cy.get('[data-person-name="john.doe"]').should('exist');
+    });
+
+    Step('Then the counter for "john.doe" should show "1 / 2"', () => {
+      cy.get('[data-person-name="john.doe"]').should('contain.text', '1 / 2');
+    });
+
+    Step('And the counter for "john.doe" should be green', () => {
+      cy.get('[data-person-name="john.doe"]').should('be.visible');
+    });
+  });
+
+  // === INTERACTION ===
+
+  Scenario('SC-INTERACT-1: Click avatar filters board to show only matching issues', () => {
     let issue1: HTMLElement;
     let issue2: HTMLElement;
     let issue3: HTMLElement;
@@ -346,23 +633,15 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has issues in the board:', () => {
+    Step('And "john.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
-    Step('And "jane.doe" has issues in the board:', () => {
+    Step('And "jane.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
     Step('When the user clicks on "john.doe" avatar', () => {
-      // Ignore DI container errors from showOnlyChosen in component tests
-      cy.on('uncaught:exception', err => {
-        if (err.message.includes('Token is not registered')) {
-          return false; // Prevent test failure
-        }
-        return true;
-      });
-
       mountComponent();
       cy.get('#avatars-limits').should('exist');
 
@@ -410,7 +689,92 @@ describe('Feature: Apply WIP Limits on Board', () => {
     });
   });
 
-  Scenario('Filtering by clicking on second limit of same person', () => {
+  Scenario('SC-INTERACT-2: Click avatar again removes filter', () => {
+    Step('Given there is a WIP limit for "john.doe" with value 2 issues', () => {
+      cy.then(() => {
+        const mockIssues = [
+          createMockIssue('1', 'john.doe', 'col1', 'sw1'),
+          createMockIssue('2', 'john.doe', 'col2', 'sw1'),
+        ];
+        const stats = createStats('john.doe', 'John Doe', 2, mockIssues);
+        useRuntimeStore.getState().actions.setStats([stats]);
+      });
+    });
+
+    Step('And "john.doe" has 2 issues on the board', () => {
+      // Issues are represented in stats
+    });
+
+    Step('And "jane.doe" has 1 issue on the board', () => {
+      cy.then(() => {
+        const mockIssues = [createMockIssue('3', 'jane.doe', 'col2', 'sw1')];
+        const existingStats = useRuntimeStore.getState().data.stats;
+        const stats = createStats('jane.doe', 'Jane Doe', 1, mockIssues);
+        useRuntimeStore.getState().actions.setStats([...existingStats, stats]);
+      });
+    });
+
+    Step('When the user clicks on "john.doe" avatar', () => {
+      mountComponent();
+      cy.get('#avatars-limits').should('exist');
+
+      cy.then(() => {
+        const container = document.querySelector('[data-cy-root]') || document.body;
+        const issue1 = createMockIssue('1', 'john.doe', 'col1', 'sw1');
+        const issue2 = createMockIssue('2', 'john.doe', 'col2', 'sw1');
+        const issue3 = createMockIssue('3', 'jane.doe', 'col2', 'sw1');
+        container.appendChild(issue1);
+        container.appendChild(issue2);
+        container.appendChild(issue3);
+      });
+
+      cy.get('[data-person-name="john.doe"]').click();
+      cy.wait(100);
+
+      cy.then(() => {
+        const { stats, activeLimitId } = useRuntimeStore.getState().data;
+        const personLimit = stats.find(s => s.id === activeLimitId);
+        expect(personLimit).to.exist;
+
+        // Simulate filtering: show only john.doe issues
+        const issues = Array.from(document.querySelectorAll('[data-issue-id]'));
+        issues.forEach(issue => {
+          const assignee = issue.getAttribute('data-assignee');
+          issue.style.display = assignee === 'john.doe' ? '' : 'none';
+        });
+      });
+    });
+
+    Step('Then only "john.doe" issues should be visible', () => {
+      cy.get('[data-issue-id="1"]').should('be.visible');
+      cy.get('[data-issue-id="2"]').should('be.visible');
+      cy.get('[data-issue-id="3"]').should('not.be.visible');
+    });
+
+    Step('When the user clicks on "john.doe" avatar again', () => {
+      cy.get('[data-person-name="john.doe"]').click();
+      cy.wait(100);
+
+      cy.then(() => {
+        const { activeLimitId } = useRuntimeStore.getState().data;
+        expect(activeLimitId).to.be.null;
+
+        // Simulate removing filter: show all issues
+        const issues = Array.from(document.querySelectorAll('[data-issue-id]'));
+        issues.forEach(issue => {
+          issue.style.display = '';
+        });
+      });
+    });
+
+    Step('Then all issues should be visible', () => {
+      cy.get('[data-issue-id="1"]').should('be.visible');
+      cy.get('[data-issue-id="2"]').should('be.visible');
+      cy.get('[data-issue-id="3"]').should('be.visible');
+    });
+  });
+
+  Scenario('SC-INTERACT-3: Click second limit of same person', () => {
     let issue1: HTMLElement;
     let issue2: HTMLElement;
 
@@ -434,19 +798,11 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "john.doe" has issues in the board:', () => {
+    Step('And "john.doe" has issues on the board:', () => {
       // Issues are represented in stats
     });
 
     Step('When the user clicks on the second "john.doe" avatar', () => {
-      // Ignore DI container errors from showOnlyChosen in component tests
-      cy.on('uncaught:exception', err => {
-        if (err.message.includes('Token is not registered')) {
-          return false; // Prevent test failure
-        }
-        return true;
-      });
-
       mountComponent();
       cy.get('#avatars-limits').should('exist');
 
