@@ -28,9 +28,10 @@ export function updatePersonLimit({
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,
-    // Preserve person data
+    // Update person name if changed, preserve other person data
     person: {
       ...existingLimit.person,
+      name: formData.personName || existingLimit.person.name,
     },
   };
 

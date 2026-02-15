@@ -45,7 +45,10 @@ describe('updatePersonLimit', () => {
 
     expect(result).toEqual({
       id: 1,
-      person: existingLimit.person, // Person data should be preserved
+      person: {
+        ...existingLimit.person,
+        name: mockFormData.personName, // Person name should be updated from formData
+      },
       limit: 10,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
@@ -61,8 +64,31 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
     });
 
-    expect(result.person).toEqual(existingLimit.person);
+    // Person name should be updated from formData, but other fields preserved
+    expect(result.person.name).toEqual(mockFormData.personName);
+    expect(result.person.displayName).toEqual(existingLimit.person.displayName);
+    expect(result.person.self).toEqual(existingLimit.person.self);
+    expect(result.person.avatar).toEqual(existingLimit.person.avatar);
     expect(result.person).not.toBe(existingLimit.person); // Should be a copy
+  });
+
+  it('should update person name from formData', () => {
+    const formDataWithNewName: FormData = {
+      ...mockFormData,
+      personName: 'jane.doe',
+    };
+
+    const result = updatePersonLimit({
+      existingLimit,
+      formData: formDataWithNewName,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.person.name).toEqual('jane.doe');
+    expect(result.person.displayName).toEqual(existingLimit.person.displayName); // Other fields preserved
+    expect(result.person.self).toEqual(existingLimit.person.self);
+    expect(result.person.avatar).toEqual(existingLimit.person.avatar);
   });
 
   it('should remove includedIssueTypes if not provided in formData', () => {
