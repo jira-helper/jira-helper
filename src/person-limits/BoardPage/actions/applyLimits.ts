@@ -3,37 +3,22 @@ import { personLimitsBoardPageObjectToken } from '../pageObject';
 import { useRuntimeStore } from '../stores';
 import { calculateStats } from './calculateStats';
 
-type PersonLimitInput = {
-  id: number;
-  person: {
-    displayName: string;
-    name: string;
-    avatar: string;
-  };
-  columns: Array<{ id: string; name: string }>;
-  swimlanes: Array<{ id: string; name: string }>;
-  limit: number;
-  includedIssueTypes?: string[];
-};
-
 /**
  * Apply person WIP limits to the board.
  *
- * 1. Calculates statistics for each person's limit
+ * 1. Calculates statistics for each person's limit (reads from property store)
  * 2. Updates the runtime store with stats
  * 3. Highlights issues that exceed their person's limit
- *
- * @param personLimits - The configured person limits from board property
  */
 export const applyLimits = createAction({
   name: 'applyLimits',
-  handler(personLimits: { limits: PersonLimitInput[] }): void {
+  handler(): void {
     const pageObject = this.di.inject(personLimitsBoardPageObjectToken);
     const { actions } = useRuntimeStore.getState();
     const { cssSelectorOfIssues } = useRuntimeStore.getState().data;
 
-    // Calculate stats
-    const stats = calculateStats(personLimits);
+    // Calculate stats (reads limits from property store)
+    const stats = calculateStats();
     actions.setStats(stats);
 
     // Reset all issue backgrounds

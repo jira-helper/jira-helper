@@ -5,6 +5,7 @@ import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { registerPersonLimitsBoardPageObjectInDI, personLimitsBoardPageObjectToken } from './pageObject';
 import { useRuntimeStore } from './stores';
+import { usePersonWipLimitsPropertyStore } from '../property';
 import { applyLimits, showOnlyChosen } from './actions';
 import { AvatarsContainer } from './components';
 
@@ -77,13 +78,17 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
       registerPersonLimitsBoardPageObjectInDI(globalContainer);
     }
 
-    // Initialize store
+    // Initialize property store with loaded data
+    const propertyStore = usePersonWipLimitsPropertyStore.getState();
+    propertyStore.actions.setData(personLimits);
+
+    // Initialize runtime store
     const { actions } = useRuntimeStore.getState();
     const cssSelector = this.getCssSelectorOfIssues(editData);
     actions.setCssSelectorOfIssues(cssSelector);
 
-    // Apply limits
-    applyLimits(personLimits);
+    // Apply limits (reads from property store)
+    applyLimits();
 
     // Render React component
     this.renderAvatarsContainer();
@@ -94,7 +99,7 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
       this.onDOMChange(
         '#ghx-pool',
         () => {
-          applyLimits(personLimits);
+          applyLimits();
           showOnlyChosen();
         },
         { childList: true, subtree: true }

@@ -26,7 +26,7 @@ describe('SettingsButton', () => {
 
   it('should have correct className', () => {
     cy.mount(<SettingsButton onClick={cy.stub()} />);
-    cy.get('button').should('have.class', 'aui-button');
+    cy.get('button').should('have.class', 'ant-btn');
   });
 
   it('should have correct id from settingsJiraDOM', () => {

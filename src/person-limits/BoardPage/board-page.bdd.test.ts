@@ -3,6 +3,7 @@ import { loadFeature, describeFeature } from '@amiceli/vitest-cucumber';
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { useRuntimeStore, getInitialState } from './stores';
+import { usePersonWipLimitsPropertyStore } from '../property';
 import { personLimitsBoardPageObjectToken, type IPersonLimitsBoardPageObject } from './pageObject';
 import { applyLimits, showOnlyChosen } from './actions';
 
@@ -166,7 +167,6 @@ const createMockPageObject = (): IPersonLimitsBoardPageObject & {
 
 describeFeature(feature, ({ Background, Scenario }) => {
   let mockPageObject: ReturnType<typeof createMockPageObject>;
-  let limits: any[] = [];
 
   Background(({ Given, And }) => {
     Given('the board is loaded', () => {
@@ -174,6 +174,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
       globalContainer.reset();
       registerLogger(globalContainer);
       useRuntimeStore.setState(getInitialState());
+      usePersonWipLimitsPropertyStore.getState().actions.reset();
 
       mockPageObject = createMockPageObject();
       globalContainer.register({
@@ -182,7 +183,6 @@ describeFeature(feature, ({ Background, Scenario }) => {
       });
 
       useRuntimeStore.getState().actions.setCssSelectorOfIssues('.ghx-issue');
-      limits = [];
     });
 
     And('there are available columns:', () => {
@@ -196,7 +196,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-1: No limits configured shows nothing', ({ Given, And, When, Then }) => {
     Given('there are no WIP limits configured', () => {
-      limits = [];
+      // Property store is already reset in Background
     });
 
     And('there are issues on the board', () => {
@@ -205,7 +205,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('no WIP limit counters should be visible', () => {
@@ -216,13 +216,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-2: Counter within limit (green)', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 5 issues', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has 3 issues on the board', () => {
@@ -232,7 +234,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "3 / 5"', () => {
@@ -250,13 +252,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-3: Counter at limit (yellow)', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 3 issues', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 3,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 3,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has 3 issues on the board', () => {
@@ -266,7 +270,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "3 / 3"', () => {
@@ -284,13 +288,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-4: Counter over limit (red) with highlighted cards', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "jane.doe" with value 3 issues', () => {
-      limits.push({
-        id: 2,
-        person: { name: 'jane.doe', displayName: 'Jane Doe', avatar: '' },
-        limit: 3,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 2,
+          person: { name: 'jane.doe', displayName: 'Jane Doe', avatar: '' },
+          limit: 3,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"jane.doe" has 4 issues on the board', () => {
@@ -301,7 +307,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "jane.doe" should show "4 / 3"', () => {
@@ -326,13 +332,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-5: Person has no issues (zero count)', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 5 issues', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has no issues on the board', () => {
@@ -340,7 +348,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "0 / 5"', () => {
@@ -358,23 +366,29 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-6: Multiple people with limits', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 3 issues', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 3,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 3,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('there is a WIP limit for "jane.doe" with value 2 issues', () => {
-      limits.push({
-        id: 2,
-        person: { name: 'jane.doe', displayName: 'Jane Doe', avatar: '' },
-        limit: 2,
-        columns: [],
-        swimlanes: [],
-      });
+      const currentLimits = usePersonWipLimitsPropertyStore.getState().data.limits;
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        ...currentLimits,
+        {
+          id: 2,
+          person: { name: 'jane.doe', displayName: 'Jane Doe', avatar: '' },
+          limit: 2,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has 2 issues on the board', () => {
@@ -389,7 +403,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "2 / 3"', () => {
@@ -423,23 +437,29 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-DISPLAY-7: Same person with multiple limits (different columns)', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues in columns "col1"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [{ id: 'col1', name: 'To Do' }],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [{ id: 'col1', name: 'To Do' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('there is a WIP limit for "john.doe" with value 3 issues in columns "col2"', () => {
-      limits.push({
-        id: 2,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 3,
-        columns: [{ id: 'col2', name: 'In Progress' }],
-        swimlanes: [],
-      });
+      const currentLimits = usePersonWipLimitsPropertyStore.getState().data.limits;
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        ...currentLimits,
+        {
+          id: 2,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 3,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has 1 issue in "col1"', () => {
@@ -454,7 +474,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the first counter for "john.doe" should show "1 / 2" and be green', () => {
@@ -480,13 +500,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-SCOPE-1: Limit applies to specific columns only', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues in columns "col2"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [{ id: 'col2', name: 'In Progress' }],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -497,7 +519,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "3 / 2"', () => {
@@ -519,13 +541,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-SCOPE-2: Limit applies to specific swimlanes only', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 1 issue in swimlanes "sw1"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 1,
-        columns: [],
-        swimlanes: [{ id: 'sw1', name: 'Swimlane 1' }],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 1,
+          columns: [],
+          swimlanes: [{ id: 'sw1', name: 'Swimlane 1' }],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -535,7 +559,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "1 / 1"', () => {
@@ -553,14 +577,16 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-SCOPE-3: Limit applies to specific issue types only', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues for types "Bug, Task"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [],
-        swimlanes: [],
-        includedIssueTypes: ['Bug', 'Task'],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [],
+          swimlanes: [],
+          includedIssueTypes: ['Bug', 'Task'],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -570,7 +596,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "2 / 2"', () => {
@@ -588,14 +614,16 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-SCOPE-4: Limit with combined filters (columns + swimlanes + types)', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 for column "col2", swimlane "sw1" and types "Bug"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [{ id: 'col2', name: 'In Progress' }],
-        swimlanes: [{ id: 'sw1', name: 'Swimlane 1' }],
-        includedIssueTypes: ['Bug'],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [{ id: 'sw1', name: 'Swimlane 1' }],
+          includedIssueTypes: ['Bug'],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -607,7 +635,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the board is displayed', () => {
-      applyLimits({ limits });
+      applyLimits();
     });
 
     Then('the counter for "john.doe" should show "1 / 2"', () => {
@@ -628,13 +656,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-INTERACT-1: Click avatar filters board to show only matching issues', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues in columns "col2"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [{ id: 'col2', name: 'In Progress' }],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -647,7 +677,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the user clicks on "john.doe" avatar', () => {
-      applyLimits({ limits });
+      applyLimits();
       // Get the limit id from stats after applying limits
       const { stats } = useRuntimeStore.getState().data;
       const johnLimit = stats.find(s => s.person.name === 'john.doe');
@@ -674,13 +704,15 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-INTERACT-2: Click avatar again removes filter', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has 2 issues on the board', () => {
@@ -693,7 +725,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the user clicks on "john.doe" avatar', () => {
-      applyLimits({ limits });
+      applyLimits();
       const { stats } = useRuntimeStore.getState().data;
       const johnLimit = stats.find(s => s.person.name === 'john.doe');
       expect(johnLimit).toBeDefined();
@@ -730,23 +762,29 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   Scenario('SC-INTERACT-3: Click second limit of same person', ({ Given, And, When, Then }) => {
     Given('there is a WIP limit for "john.doe" with value 2 issues in columns "col1"', () => {
-      limits.push({
-        id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 2,
-        columns: [{ id: 'col1', name: 'To Do' }],
-        swimlanes: [],
-      });
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        {
+          id: 1,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 2,
+          columns: [{ id: 'col1', name: 'To Do' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('there is a second WIP limit for "john.doe" with value 1 issue in columns "col2"', () => {
-      limits.push({
-        id: 2,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-        limit: 1,
-        columns: [{ id: 'col2', name: 'In Progress' }],
-        swimlanes: [],
-      });
+      const currentLimits = usePersonWipLimitsPropertyStore.getState().data.limits;
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+        ...currentLimits,
+        {
+          id: 2,
+          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+          limit: 1,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [],
+        },
+      ]);
     });
 
     And('"john.doe" has issues on the board:', () => {
@@ -755,7 +793,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     When('the user clicks on the second "john.doe" avatar', () => {
-      applyLimits({ limits });
+      applyLimits();
       // Get the id of the second limit (col2) from stats
       const { stats } = useRuntimeStore.getState().data;
       const secondLimit = stats.find(s => s.columns.some(c => c.id === 'col2'));

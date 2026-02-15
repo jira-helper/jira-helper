@@ -2,20 +2,8 @@ import { createAction } from 'src/shared/action';
 import type { IPersonLimitsBoardPageObject } from '../pageObject';
 import { personLimitsBoardPageObjectToken } from '../pageObject';
 import { useRuntimeStore, type PersonLimitStats } from '../stores';
+import { usePersonWipLimitsPropertyStore } from '../../property';
 import { isPersonLimitAppliedToIssue, computeLimitId } from '../utils';
-
-type PersonLimitInput = {
-  id: number;
-  person: {
-    displayName: string;
-    name: string;
-    avatar: string;
-  };
-  columns: Array<{ id: string; name: string }>;
-  swimlanes: Array<{ id: string; name: string }>;
-  limit: number;
-  includedIssueTypes?: string[];
-};
 
 /**
  * Count issues for each person limit within a column.
@@ -48,15 +36,17 @@ const countIssuesInColumn = (
 /**
  * Calculate statistics for all person limits.
  * Collects issues matching each person's limit criteria.
+ * Reads limits from usePersonWipLimitsPropertyStore.
  */
 export const calculateStats = createAction({
   name: 'calculateStats',
-  handler(personLimits: { limits: PersonLimitInput[] }): PersonLimitStats[] {
+  handler(): PersonLimitStats[] {
     const pageObject = this.di.inject(personLimitsBoardPageObjectToken);
     const { cssSelectorOfIssues } = useRuntimeStore.getState().data;
+    const { limits } = usePersonWipLimitsPropertyStore.getState().data;
 
     // Initialize stats with empty issues arrays
-    const stats: PersonLimitStats[] = personLimits.limits.map(limit => ({
+    const stats: PersonLimitStats[] = limits.map(limit => ({
       ...limit,
       id: computeLimitId(limit), // Всегда вычисляем id из параметров для стабильности
       issues: [] as Element[],

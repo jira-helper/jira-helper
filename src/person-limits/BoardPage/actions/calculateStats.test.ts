@@ -3,6 +3,7 @@ import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { registerPersonLimitsBoardPageObjectInDI } from '../pageObject';
 import { useRuntimeStore, getInitialState } from '../stores';
+import { usePersonWipLimitsPropertyStore } from '../../property';
 import { calculateStats } from './calculateStats';
 
 describe('calculateStats', () => {
@@ -11,6 +12,7 @@ describe('calculateStats', () => {
     registerLogger(globalContainer);
     registerPersonLimitsBoardPageObjectInDI(globalContainer);
     useRuntimeStore.setState(getInitialState());
+    usePersonWipLimitsPropertyStore.getState().actions.reset();
   });
 
   afterEach(() => {
@@ -41,24 +43,22 @@ describe('calculateStats', () => {
       </div>
     `;
 
-    // Setup store
+    // Setup runtime store
     useRuntimeStore.getState().actions.setCssSelectorOfIssues('.ghx-issue');
 
-    // Setup limits
-    const personLimits = {
-      limits: [
-        {
-          id: 1,
-          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-          limit: 5,
-          columns: [],
-          swimlanes: [],
-        },
-      ],
-    };
+    // Setup property store with limits
+    usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+      {
+        id: 1,
+        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+      },
+    ]);
 
     // Act
-    const stats = calculateStats(personLimits);
+    const stats = calculateStats();
 
     // Assert
     expect(stats).toHaveLength(1);
@@ -87,19 +87,18 @@ describe('calculateStats', () => {
 
     useRuntimeStore.getState().actions.setCssSelectorOfIssues('.ghx-issue');
 
-    const personLimits = {
-      limits: [
-        {
-          id: 1,
-          person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
-          limit: 2,
-          columns: [{ id: 'col2', name: 'In Progress' }],
-          swimlanes: [],
-        },
-      ],
-    };
+    // Setup property store with limits
+    usePersonWipLimitsPropertyStore.getState().actions.setLimits([
+      {
+        id: 1,
+        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+        limit: 2,
+        columns: [{ id: 'col2', name: 'In Progress' }],
+        swimlanes: [],
+      },
+    ]);
 
-    const stats = calculateStats(personLimits);
+    const stats = calculateStats();
 
     expect(stats).toHaveLength(1);
     expect(stats[0].issues.length).toBe(2);
