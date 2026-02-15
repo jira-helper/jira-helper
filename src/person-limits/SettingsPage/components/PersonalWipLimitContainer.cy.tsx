@@ -378,11 +378,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // Wait for form to reset - person name should be cleared
         // This ensures the form has been reset by the component's useEffect
         cy.get('#edit-person-wip-limit-person-name').should('have.value', '');
-        // InputNumber may show '0' instead of empty string, so check for 0 or empty
-        cy.get('#edit-person-wip-limit-person-limit').should('satisfy', (el: any) => {
-          const value = el.val();
-          return value === '' || value === '0' || value === 0;
-        });
+        // InputNumber resets to default value 1
+        cy.get('#edit-person-wip-limit-person-limit').should('have.value', '1');
 
         // The component's useEffect (line 107-137) resets issue types when editingId changes
         // However, since editingId was already null, the useEffect won't trigger on formData change

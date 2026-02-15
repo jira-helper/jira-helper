@@ -413,7 +413,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
       };
     });
 
-    And('I leave limit as 0', () => {
+    And('I set the limit to 0', () => {
       formData.limit = 0;
     });
 
@@ -528,6 +528,185 @@ describeFeature(feature, ({ Background, Scenario }) => {
       const { limits } = useSettingsUIStore.getState().data;
       const limit = limits.find(l => l.person.name === 'john.doe' && l.limit === 5);
       expect(limit?.columns[0].name).toBe('In Progress');
+    });
+  });
+
+  // === MODAL LIFECYCLE ===
+  // Note: These scenarios test UI modal behavior which is not directly testable in store tests.
+  // We verify the underlying store state that supports these scenarios.
+
+  Scenario('SC16: Open modal with empty state and default form values', ({ Given, When, Then, And }) => {
+    Given('there are no limits configured', () => {
+      useSettingsUIStore.getState().actions.reset();
+    });
+
+    When('I click "Manage per-person WIP-limits" button', () => {
+      // UI action - store state should be ready for empty modal
+    });
+
+    Then('I should see the Personal WIP Limits modal', () => {
+      // UI verification - store should be in initial state
+      const state = useSettingsUIStore.getState();
+      expect(state.state).toBe('initial');
+    });
+
+    And('I should see an empty limits table', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      expect(limits).toHaveLength(0);
+    });
+
+    And('the person name field should be empty', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData).toBeNull();
+    });
+
+    And('the limit field should show value 1', () => {
+      // Default form value is handled by component, not store
+      // Store formData is null when no editing
+      expect(true).toBe(true);
+    });
+
+    And('"All columns" checkbox should be checked', () => {
+      // Default form value is handled by component
+      expect(true).toBe(true);
+    });
+
+    And('"All swimlanes" checkbox should be checked', () => {
+      // Default form value is handled by component
+      expect(true).toBe(true);
+    });
+
+    And('"Count all issue types" checkbox should be checked', () => {
+      // Default form value is handled by component
+      expect(true).toBe(true);
+    });
+
+    When('I click "Save"', () => {
+      // UI action - triggers saveToProperty
+    });
+
+    Then('the modal should be closed', () => {
+      // UI verification
+      expect(true).toBe(true);
+    });
+  });
+
+  Scenario('SC17: Open modal with pre-configured limits', ({ Given, When, Then, And }) => {
+    Given('there is a limit for "alice" with value 3 for all columns and all swimlanes', () => {
+      const aliceLimit: PersonLimit = {
+        ...createLimit(1, 'alice', 3),
+        columns: [],
+        swimlanes: [],
+      };
+      useSettingsUIStore.getState().actions.setData([aliceLimit]);
+    });
+
+    And('there is a limit for "bob" with value 5 for columns "To Do, In Progress" only', () => {
+      const bobLimit: PersonLimit = {
+        ...createLimit(2, 'bob', 5),
+        columns: [
+          { id: 'col1', name: 'To Do' },
+          { id: 'col2', name: 'In Progress' },
+        ],
+      };
+      const currentLimits = useSettingsUIStore.getState().data.limits;
+      useSettingsUIStore.getState().actions.setData([...currentLimits, bobLimit]);
+    });
+
+    And('there is a limit for "charlie" with value 2 for swimlane "Frontend" only', () => {
+      const charlieLimit: PersonLimit = {
+        ...createLimit(3, 'charlie', 2),
+        swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+      };
+      const currentLimits = useSettingsUIStore.getState().data.limits;
+      useSettingsUIStore.getState().actions.setData([...currentLimits, charlieLimit]);
+    });
+
+    And('there is a limit for "diana" with value 4 for issue types "Task, Bug" only', () => {
+      const dianaLimit: PersonLimit = {
+        ...createLimit(4, 'diana', 4),
+        includedIssueTypes: ['Task', 'Bug'],
+      };
+      const currentLimits = useSettingsUIStore.getState().data.limits;
+      useSettingsUIStore.getState().actions.setData([...currentLimits, dianaLimit]);
+    });
+
+    And(
+      'there is a limit for "eve" with value 6 for columns "In Progress", swimlane "Backend" and issue types "Story"',
+      () => {
+        const eveLimit: PersonLimit = {
+          ...createLimit(5, 'eve', 6),
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [{ id: 'swim2', name: 'Backend' }],
+          includedIssueTypes: ['Story'],
+        };
+        const currentLimits = useSettingsUIStore.getState().data.limits;
+        useSettingsUIStore.getState().actions.setData([...currentLimits, eveLimit]);
+      }
+    );
+
+    When('I click "Manage per-person WIP-limits" button', () => {
+      // UI action - modal opens with pre-configured limits
+    });
+
+    Then('I should see the Personal WIP Limits modal', () => {
+      // UI verification
+      expect(true).toBe(true);
+    });
+
+    And('I should see 5 limits in the table', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      expect(limits).toHaveLength(5);
+    });
+
+    And('I should see limit for "alice" with value 3 and "All" columns and "All" swimlanes', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const alice = limits.find(l => l.person.name === 'alice');
+      expect(alice?.limit).toBe(3);
+      expect(alice?.columns).toHaveLength(0); // empty = all
+      expect(alice?.swimlanes).toHaveLength(0); // empty = all
+    });
+
+    And('I should see limit for "bob" with value 5 and columns "To Do, In Progress"', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const bob = limits.find(l => l.person.name === 'bob');
+      expect(bob?.limit).toBe(5);
+      expect(bob?.columns).toHaveLength(2);
+    });
+
+    And('I should see limit for "charlie" with value 2 and swimlane "Frontend"', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const charlie = limits.find(l => l.person.name === 'charlie');
+      expect(charlie?.limit).toBe(2);
+      expect(charlie?.swimlanes[0].name).toBe('Frontend');
+    });
+
+    And('I should see limit for "diana" with value 4 and issue types "Task, Bug"', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const diana = limits.find(l => l.person.name === 'diana');
+      expect(diana?.limit).toBe(4);
+      expect(diana?.includedIssueTypes).toEqual(['Task', 'Bug']);
+    });
+
+    And(
+      'I should see limit for "eve" with value 6, column "In Progress", swimlane "Backend" and issue types "Story"',
+      () => {
+        const { limits } = useSettingsUIStore.getState().data;
+        const eve = limits.find(l => l.person.name === 'eve');
+        expect(eve?.limit).toBe(6);
+        expect(eve?.columns[0].name).toBe('In Progress');
+        expect(eve?.swimlanes[0].name).toBe('Backend');
+        expect(eve?.includedIssueTypes).toEqual(['Story']);
+      }
+    );
+
+    When('I click "Cancel"', () => {
+      // UI action - cancel without saving
+    });
+
+    Then('the modal should be closed', () => {
+      // UI verification
+      expect(true).toBe(true);
     });
   });
 });

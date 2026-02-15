@@ -8,6 +8,40 @@ Feature: Personal WIP Limit Settings
     And there are columns "To Do, In Progress, Done" on the board
     And there are swimlanes "Frontend, Backend" on the board
 
+  # === MODAL LIFECYCLE ===
+
+  @SC16
+  Scenario: SC16: Open modal with empty state and default form values
+    Given there are no limits configured
+    When I click "Manage per-person WIP-limits" button
+    Then I should see the Personal WIP Limits modal
+    And I should see an empty limits table
+    And the person name field should be empty
+    And the limit field should show value 1
+    And "All columns" checkbox should be checked
+    And "All swimlanes" checkbox should be checked
+    And "Count all issue types" checkbox should be checked
+    When I click "Save"
+    Then the modal should be closed
+
+  @SC17
+  Scenario: SC17: Open modal with pre-configured limits
+    Given there is a limit for "alice" with value 3 for all columns and all swimlanes
+    And there is a limit for "bob" with value 5 for columns "To Do, In Progress" only
+    And there is a limit for "charlie" with value 2 for swimlane "Frontend" only
+    And there is a limit for "diana" with value 4 for issue types "Task, Bug" only
+    And there is a limit for "eve" with value 6 for columns "In Progress", swimlane "Backend" and issue types "Story"
+    When I click "Manage per-person WIP-limits" button
+    Then I should see the Personal WIP Limits modal
+    And I should see 5 limits in the table
+    And I should see limit for "alice" with value 3 and "All" columns and "All" swimlanes
+    And I should see limit for "bob" with value 5 and columns "To Do, In Progress"
+    And I should see limit for "charlie" with value 2 and swimlane "Frontend"
+    And I should see limit for "diana" with value 4 and issue types "Task, Bug"
+    And I should see limit for "eve" with value 6, column "In Progress", swimlane "Backend" and issue types "Story"
+    When I click "Cancel"
+    Then the modal should be closed
+
   # === ADD LIMIT ===
 
   @SC1
@@ -109,7 +143,7 @@ Feature: Personal WIP Limit Settings
   @SC12
   Scenario: SC12: Cannot add limit with zero value
     When I enter person name "john.doe"
-    And I leave limit as 0
+    And I set the limit to 0
     And I click "Add limit"
     Then I should see a validation error for limit value
 

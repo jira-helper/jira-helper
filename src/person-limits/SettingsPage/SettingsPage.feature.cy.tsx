@@ -8,7 +8,13 @@
  * Validate with: node scripts/validate-feature-tests.mjs
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { registerLogger } from 'src/shared/Logger';
+import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
+import { updateBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
+import { usePersonWipLimitsPropertyStore } from 'src/person-limits/property/store';
 import { PersonalWipLimitContainer } from './components/PersonalWipLimitContainer';
+import { SettingsButtonContainer } from './components/SettingsButton/SettingsButtonContainer';
 import { useSettingsUIStore } from './stores/settingsUIStore';
 import type { PersonLimit } from './state/types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
@@ -48,6 +54,22 @@ describe('Feature: Personal WIP Limit Settings', () => {
 
   // Background
   beforeEach(() => {
+    // Setup DI container with mocks
+    globalContainer.reset();
+    registerLogger(globalContainer);
+
+    // Mock routing
+    globalContainer.register({
+      token: getBoardIdFromURLToken,
+      value: () => 'test-board-123',
+    });
+
+    // Mock jiraApi
+    globalContainer.register({
+      token: updateBoardPropertyToken,
+      value: cy.stub().as('updateBoardProperty'),
+    });
+
     // Given I am on the Personal WIP Limits settings page
     useSettingsUIStore.getState().actions.reset();
     onAddLimit = cy.stub().as('onAddLimit');
@@ -378,8 +400,8 @@ describe('Feature: Personal WIP Limit Settings', () => {
       cy.get('#edit-person-wip-limit-person-name').type('john.doe');
     });
 
-    Step('And I leave limit as 0', () => {
-      cy.get('#edit-person-wip-limit-person-limit').should('have.value', '0');
+    Step('And I set the limit to 0', () => {
+      cy.get('#edit-person-wip-limit-person-limit').type('{selectall}0');
     });
 
     Step('And I click "Add limit"', () => {
@@ -501,6 +523,190 @@ describe('Feature: Personal WIP Limit Settings', () => {
         const limit = limits.find(l => l.person.name === 'john.doe' && l.limit === 5);
         expect(limit?.columns[0].name).to.equal('In Progress');
       });
+    });
+  });
+
+  // === MODAL LIFECYCLE ===
+
+  Scenario('SC16: Open modal with empty state and default form values', () => {
+    Step('Given there are no limits configured', () => {
+      useSettingsUIStore.getState().actions.reset();
+      usePersonWipLimitsPropertyStore.getState().actions.reset();
+    });
+
+    Step('When I click "Manage per-person WIP-limits" button', () => {
+      cy.mount(<SettingsButtonContainer boardDataColumns={columns} boardDataSwimlanes={swimlanes} />);
+      cy.contains('button', 'Manage per-person WIP-limits').click();
+      // Wait for modal to appear
+      cy.get('[role="dialog"]').should('exist');
+    });
+
+    Step('Then I should see the Personal WIP Limits modal', () => {
+      cy.contains('Personal WIP Limit').scrollIntoView().should('be.visible');
+      cy.get('[role="dialog"]').scrollIntoView().should('be.visible');
+    });
+
+    Step('And I should see an empty limits table', () => {
+      cy.then(() => {
+        const { limits } = useSettingsUIStore.getState().data;
+        expect(limits).to.have.length(0);
+      });
+      // Check that table exists
+      cy.get('#edit-person-wip-limit-persons-limit-body').should('exist');
+      // Ant Design Table may render empty placeholder row, so check via store instead
+      // The table will show empty state message or no rows
+    });
+
+    Step('And the person name field should be empty', () => {
+      cy.get('#edit-person-wip-limit-person-name').should('have.value', '');
+    });
+
+    Step('And the limit field should show value 1', () => {
+      cy.get('#edit-person-wip-limit-person-limit').should('have.value', '1');
+    });
+
+    Step('And "All columns" checkbox should be checked', () => {
+      cy.contains('label', 'All columns').find('input[type="checkbox"]').should('be.checked');
+    });
+
+    Step('And "All swimlanes" checkbox should be checked', () => {
+      cy.contains('label', 'All swimlanes').find('input[type="checkbox"]').should('be.checked');
+    });
+
+    Step('And "Count all issue types" checkbox should be checked', () => {
+      cy.contains('label', 'Count all issue types').find('input[type="checkbox"]').should('be.checked');
+    });
+
+    Step('When I click "Save"', () => {
+      cy.contains('button', 'Save').click();
+    });
+
+    Step('Then the modal should be closed', () => {
+      // With DI mocks configured, the modal should close successfully after Save
+      cy.get('[role="dialog"]').should('not.exist');
+    });
+  });
+
+  Scenario('SC17: Open modal with pre-configured limits', () => {
+    Step('Given there is a limit for "alice" with value 3 for all columns and all swimlanes', () => {
+      const aliceLimit = createLimit(1, 'alice', 'Alice', 3, [], []);
+      // Set data in property store so initFromProperty can copy it to UI store
+      usePersonWipLimitsPropertyStore.getState().actions.setLimits([aliceLimit]);
+    });
+
+    Step('And there is a limit for "bob" with value 5 for columns "To Do, In Progress" only', () => {
+      const bobLimit = createLimit(2, 'bob', 'Bob', 5, [
+        { id: 'col1', name: 'To Do' },
+        { id: 'col2', name: 'In Progress' },
+      ]);
+      usePersonWipLimitsPropertyStore
+        .getState()
+        .actions.setLimits([...usePersonWipLimitsPropertyStore.getState().data.limits, bobLimit]);
+    });
+
+    Step('And there is a limit for "charlie" with value 2 for swimlane "Frontend" only', () => {
+      const charlieLimit = createLimit(3, 'charlie', 'Charlie', 2, [], [{ id: 'swim1', name: 'Frontend' }]);
+      usePersonWipLimitsPropertyStore
+        .getState()
+        .actions.setLimits([...usePersonWipLimitsPropertyStore.getState().data.limits, charlieLimit]);
+    });
+
+    Step('And there is a limit for "diana" with value 4 for issue types "Task, Bug" only', () => {
+      const dianaLimit: PersonLimit = {
+        ...createLimit(4, 'diana', 'Diana', 4),
+        includedIssueTypes: ['Task', 'Bug'],
+      };
+      usePersonWipLimitsPropertyStore
+        .getState()
+        .actions.setLimits([...usePersonWipLimitsPropertyStore.getState().data.limits, dianaLimit]);
+    });
+
+    Step(
+      'And there is a limit for "eve" with value 6 for columns "In Progress", swimlane "Backend" and issue types "Story"',
+      () => {
+        const eveLimit: PersonLimit = {
+          ...createLimit(5, 'eve', 'Eve', 6, [{ id: 'col2', name: 'In Progress' }], [{ id: 'swim2', name: 'Backend' }]),
+          includedIssueTypes: ['Story'],
+        };
+        usePersonWipLimitsPropertyStore
+          .getState()
+          .actions.setLimits([...usePersonWipLimitsPropertyStore.getState().data.limits, eveLimit]);
+      }
+    );
+
+    Step('When I click "Manage per-person WIP-limits" button', () => {
+      cy.mount(<SettingsButtonContainer boardDataColumns={columns} boardDataSwimlanes={swimlanes} />);
+      cy.contains('button', 'Manage per-person WIP-limits').click();
+    });
+
+    Step('Then I should see the Personal WIP Limits modal', () => {
+      cy.contains('Personal WIP Limit').scrollIntoView().should('be.visible');
+      cy.get('[role="dialog"]').scrollIntoView().should('be.visible');
+    });
+
+    Step('And I should see 5 limits in the table', () => {
+      cy.then(() => {
+        const { limits } = useSettingsUIStore.getState().data;
+        expect(limits).to.have.length(5);
+      });
+      // Check table rows - Ant Design Table uses .ant-table-tbody
+      cy.get('#edit-person-wip-limit-persons-limit-body .ant-table-tbody tr').should('have.length', 5);
+    });
+
+    Step('And I should see limit for "alice" with value 3 and "All" columns and "All" swimlanes', () => {
+      cy.contains('tr', 'Alice').within(() => {
+        cy.contains('3').should('be.visible');
+        // Check that "All" appears in both Columns and Swimlanes columns
+        cy.get('td').then($cells => {
+          // Find columns and swimlanes cells (typically 3rd and 4th columns)
+          const columnsText = $cells.eq(3).text(); // Columns column
+          const swimlanesText = $cells.eq(4).text(); // Swimlanes column
+          expect(columnsText).to.equal('All');
+          expect(swimlanesText).to.equal('All');
+        });
+      });
+    });
+
+    Step('And I should see limit for "bob" with value 5 and columns "To Do, In Progress"', () => {
+      cy.contains('tr', 'Bob').within(() => {
+        cy.contains('5').should('be.visible');
+        cy.contains('To Do, In Progress').should('be.visible');
+      });
+    });
+
+    Step('And I should see limit for "charlie" with value 2 and swimlane "Frontend"', () => {
+      cy.contains('tr', 'Charlie').within(() => {
+        cy.contains('2').should('be.visible');
+        cy.contains('Frontend').should('be.visible');
+      });
+    });
+
+    Step('And I should see limit for "diana" with value 4 and issue types "Task, Bug"', () => {
+      cy.contains('tr', 'Diana').within(() => {
+        cy.contains('4').should('be.visible');
+        cy.contains('Task, Bug').should('be.visible');
+      });
+    });
+
+    Step(
+      'And I should see limit for "eve" with value 6, column "In Progress", swimlane "Backend" and issue types "Story"',
+      () => {
+        cy.contains('tr', 'Eve').within(() => {
+          cy.contains('6').should('be.visible');
+          cy.contains('In Progress').should('be.visible');
+          cy.contains('Backend').should('be.visible');
+          cy.contains('Story').should('be.visible');
+        });
+      }
+    );
+
+    Step('When I click "Cancel"', () => {
+      cy.contains('button', 'Cancel').click();
+    });
+
+    Step('Then the modal should be closed', () => {
+      // Modal should be closed after Cancel
+      cy.get('[role="dialog"]').should('not.exist');
     });
   });
 });

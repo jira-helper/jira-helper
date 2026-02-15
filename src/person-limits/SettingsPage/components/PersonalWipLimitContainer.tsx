@@ -51,7 +51,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   const defaultFormData = useMemo<FormData>(
     () => ({
       personName: '',
-      limit: 0,
+      limit: 1,
       selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: defaultSwimlaneIds,
     }),
@@ -86,7 +86,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       // New limit mode - set defaults
       form.setFieldsValue({
         personName: '',
-        limit: 0,
+        limit: 1,
         selectedColumns: defaultFormData.selectedColumns,
         swimlanes: defaultFormData.swimlanes,
       });

@@ -30,6 +30,8 @@ import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
+import { registerRoutingInDI } from './shared/di/routingTokens';
+import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
 import { extensionApiService } from './shared/ExtensionApiService';
@@ -51,6 +53,8 @@ function initDiContainer() {
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
   registerLogger(container);
+  registerRoutingInDI(container);
+  registerJiraApiInDI(container);
 }
 
 async function start() {
