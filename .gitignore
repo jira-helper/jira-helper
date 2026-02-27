@@ -25,3 +25,4 @@ keys
 tools/local
 
 storybook-static
+cypress-coverage
