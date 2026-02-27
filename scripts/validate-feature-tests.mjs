@@ -44,11 +44,30 @@ function findFeatureFiles(dir) {
 }
 
 /**
- * Infer the test file path from a .feature path.
- * Convention: x.feature → x.feature.cy.tsx
+ * Infer the test file path(s) from a .feature path.
+ *
+ * Convention (in priority order):
+ *   1. x.feature.cy.tsx in the same directory (single file)
+ *   2. features/*.feature.cy.tsx in a sibling `features/` directory (split files)
+ *
+ * Returns an array of test file paths.
  */
-function inferTestPath(featurePath) {
-  return featurePath + '.cy.tsx';
+function inferTestPaths(featurePath) {
+  const single = featurePath + '.cy.tsx';
+  if (existsSync(single)) {
+    return [single];
+  }
+
+  const dir = resolve(featurePath, '..');
+  const featuresDir = resolve(dir, 'features');
+  if (existsSync(featuresDir)) {
+    const files = readdirSync(featuresDir)
+      .filter(f => f.endsWith('.feature.cy.tsx'))
+      .map(f => resolve(featuresDir, f));
+    if (files.length > 0) return files;
+  }
+
+  return [single];
 }
 
 // ── Feature parser ──────────────────────────────────────────────────────────
@@ -112,10 +131,10 @@ function parseTestFile(filePath) {
     });
   }
 
-  // Match Step('name', ...) calls
-  const stepRegex = /Step\(\s*'([^']+)'/g;
+  // Match Step('name', ...) or Step("name", ...) calls
+  const stepRegex = /Step\(\s*(?:'([^']+)'|"([^"]+)")/g;
   while ((match = stepRegex.exec(content)) !== null) {
-    const stepName = match[1];
+    const stepName = match[1] || match[2];
     const stepOffset = match.index;
 
     // Find which scenario this step belongs to (the last scenario before this offset)
@@ -136,23 +155,26 @@ function parseTestFile(filePath) {
 
 // ── Validator ───────────────────────────────────────────────────────────────
 
-function validate(featurePath, testPath) {
+function validate(featurePath, testPaths) {
   const absFeature = resolve(featurePath);
-  const absTest = resolve(testPath);
 
   if (!existsSync(absFeature)) {
     console.error(`  ERROR: Feature file not found: ${featurePath}`);
     return false;
   }
 
-  if (!existsSync(absTest)) {
-    console.error(`  ERROR: Test file not found: ${testPath}`);
-    console.error(`  Expected: ${relative(process.cwd(), absTest)}`);
-    return false;
+  const resolvedTestPaths = (Array.isArray(testPaths) ? testPaths : [testPaths]).map(p => resolve(p));
+
+  for (const absTest of resolvedTestPaths) {
+    if (!existsSync(absTest)) {
+      console.error(`  ERROR: Test file not found: ${relative(process.cwd(), absTest)}`);
+      return false;
+    }
   }
 
   const featureScenarios = parseFeature(absFeature);
-  const testScenarios = parseTestFile(absTest);
+
+  const testScenarios = resolvedTestPaths.flatMap(p => parseTestFile(p));
 
   const featureNames = new Set(featureScenarios.map(s => s.name));
   const testNames = new Set(testScenarios.map(s => s.name));
@@ -162,7 +184,7 @@ function validate(featurePath, testPath) {
   // Check missing scenarios
   const missingScenarios = [...featureNames].filter(n => !testNames.has(n));
   if (missingScenarios.length > 0) {
-    console.error(`  MISSING SCENARIOS in test file:`);
+    console.error(`  MISSING SCENARIOS in test file(s):`);
     for (const name of missingScenarios) {
       console.error(`    - ${name}`);
     }
@@ -172,7 +194,7 @@ function validate(featurePath, testPath) {
   // Check extra scenarios (in test but not in feature)
   const extraScenarios = [...testNames].filter(n => !featureNames.has(n));
   if (extraScenarios.length > 0) {
-    console.warn(`  EXTRA SCENARIOS in test file (not in .feature):`);
+    console.warn(`  EXTRA SCENARIOS in test file(s) (not in .feature):`);
     for (const name of extraScenarios) {
       console.warn(`    + ${name}`);
     }
@@ -206,7 +228,9 @@ function validate(featurePath, testPath) {
   }
 
   if (!hasErrors && missingScenarios.length === 0) {
-    console.log(`  ✓ All ${featureScenarios.length} scenarios covered`);
+    const testFileCount = resolvedTestPaths.length;
+    const suffix = testFileCount > 1 ? ` (across ${testFileCount} test files)` : '';
+    console.log(`  ✓ All ${featureScenarios.length} scenarios covered${suffix}`);
     console.log(`  ✓ All steps match`);
   }
 
@@ -221,19 +245,16 @@ function main() {
   let pairs;
 
   if (args.length === 2) {
-    // Explicit pair
-    pairs = [{ feature: args[0], test: args[1] }];
+    pairs = [{ feature: args[0], tests: [args[1]] }];
   } else if (args.length === 1) {
-    // Single .feature file — infer test path
     const feature = args[0];
-    const test = inferTestPath(feature);
-    pairs = [{ feature, test }];
+    const tests = inferTestPaths(feature);
+    pairs = [{ feature, tests }];
   } else if (args.length === 0) {
-    // Auto-discover: find all .feature files in src/, infer test paths
     const featureFiles = findFeatureFiles('src');
     pairs = featureFiles.map(f => ({
       feature: f,
-      test: inferTestPath(f),
+      tests: inferTestPaths(f),
     }));
 
     if (pairs.length === 0) {
@@ -252,12 +273,18 @@ function main() {
 
   let allPassed = true;
 
-  for (const { feature, test } of pairs) {
+  for (const { feature, tests } of pairs) {
     const relFeature = relative(process.cwd(), resolve(feature));
-    const relTest = relative(process.cwd(), resolve(test));
-    console.log(`── ${relFeature} ↔ ${relTest} ──`);
+    const relTests = tests.map(t => relative(process.cwd(), resolve(t)));
+    const testLabel = relTests.length === 1 ? relTests[0] : `${relTests.length} test files`;
+    console.log(`── ${relFeature} ↔ ${testLabel} ──`);
+    if (relTests.length > 1) {
+      for (const t of relTests) {
+        console.log(`     ${t}`);
+      }
+    }
 
-    const passed = validate(feature, test);
+    const passed = validate(feature, tests);
     if (!passed) allPassed = false;
     console.log('');
   }
