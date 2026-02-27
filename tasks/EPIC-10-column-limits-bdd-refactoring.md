@@ -1,6 +1,11 @@
 # EPIC-10: Column Limits BDD Test Refactoring
 
-**Status**: TODO
+**Status**: IN_PROGRESS
+
+---
+
+> **Note**: Swimlane filtering (SC-SWIM-1) вынесен в [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md).
+> TASK-80 создает `filters.feature` только для **issueType** фильтрации.
 
 ---
 
@@ -32,7 +37,7 @@
 src/column-limits/BoardPage/features/
 ├── display.feature              # SC-DISPLAY-1..3
 ├── exceed.feature               # SC-EXCEED-1..3
-├── filters.feature              # SC-SWIM-1, SC-ISSUE-1..2
+├── issue-type-filter.feature    # SC-ISSUE-1..2 (swimlane → EPIC-11)
 ├── multi-groups.feature         # SC-MULTI-1..3
 ├── display.feature.cy.tsx
 ├── exceed.feature.cy.tsx
@@ -82,7 +87,7 @@ Given the board has issues:
 | 1 | [TASK-77](./TASK-77-column-limits-boardpage-helpers.md) | Создать helpers.tsx для BoardPage | DONE |
 | 2 | [TASK-78](./TASK-78-column-limits-boardpage-display.md) | Создать display.feature и steps | DONE |
 | 3 | [TASK-79](./TASK-79-column-limits-boardpage-exceed.md) | Создать exceed.feature и steps | DONE |
-| 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (swimlane + issueType) | TODO |
+| 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (**только issueType**, swimlane → EPIC-11) | TODO |
 | 5 | [TASK-81](./TASK-81-column-limits-boardpage-multi.md) | Создать multi-groups.feature | TODO |
 | 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | TODO |
 | 7 | [TASK-83](./TASK-83-column-limits-settings-helpers.md) | Создать helpers.tsx для SettingsPage | TODO |
@@ -97,9 +102,9 @@ Given the board has issues:
 
 ## Ожидаемый результат
 
-- **BoardPage**: 12 тестов в 4 feature файлах
+- **BoardPage**: 11 тестов в 4 feature файлах (swimlane сценарий → EPIC-11)
 - **SettingsPage**: 30 тестов в 7 feature файлах
-- **Всего**: 42 теста
+- **Всего**: 41 тест (swimlane filtering → EPIC-11)
 - Все тесты используют новый BDD runner
 - DataTable для групп и issues
 - Общие step definitions в `common.steps.ts`
