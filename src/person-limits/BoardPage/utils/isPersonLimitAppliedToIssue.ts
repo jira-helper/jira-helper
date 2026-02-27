@@ -36,7 +36,8 @@ export const isPersonLimitAppliedToIssue = (
 ): boolean => {
   // 1. Check assignee match
   const isAssigneeMatch =
-    personLimit.person.name === assignee || (personLimit.person.displayName != null && personLimit.person.displayName === assignee);
+    personLimit.person.name === assignee ||
+    (personLimit.person.displayName != null && personLimit.person.displayName === assignee);
   if (!isAssigneeMatch) return false;
 
   // 2. Check column match (empty array = all columns)

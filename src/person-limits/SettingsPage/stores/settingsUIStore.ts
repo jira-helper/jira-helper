@@ -116,8 +116,7 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
 
         const existingTypes = [...(l.includedIssueTypes || [])].sort();
         const newTypes = [...(issueTypes || [])].sort();
-        const typeMatch =
-          existingTypes.length === newTypes.length && existingTypes.every((t, i) => t === newTypes[i]);
+        const typeMatch = existingTypes.length === newTypes.length && existingTypes.every((t, i) => t === newTypes[i]);
         return nameMatch && colMatch && swimMatch && typeMatch;
       });
     },

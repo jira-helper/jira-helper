@@ -26,26 +26,61 @@
 import { Parser, AstBuilder, GherkinClassicTokenMatcher } from '@cucumber/gherkin';
 import { IdGenerator } from '@cucumber/messages';
 
-type StepFn = (...args: string[]) => void;
+/** Parsed DataTable: array of row objects, first row = headers */
+export type DataTableRows = Record<string, string>[];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type StepFn = (...args: any[]) => void;
 
 interface StepDefinition {
   pattern: string | RegExp;
   fn: StepFn;
 }
 
+interface ParsedStep {
+  keyword: string;
+  text: string;
+  dataTable?: DataTableRows;
+}
+
 interface ParsedScenario {
   name: string;
   tags: string[];
-  steps: Array<{ keyword: string; text: string }>;
+  steps: ParsedStep[];
 }
 
 interface ParsedFeature {
   name: string;
-  background: Array<{ keyword: string; text: string }>;
+  background: ParsedStep[];
   scenarios: ParsedScenario[];
 }
 
 const stepDefinitions: StepDefinition[] = [];
+
+function parseDataTable(dataTable: { rows: Array<{ cells: Array<{ value: string }> }> }): DataTableRows {
+  const { rows } = dataTable;
+  if (rows.length < 2) return [];
+  const headers = rows[0].cells.map(c => c.value.trim());
+  return rows.slice(1).map(row => {
+    const obj: Record<string, string> = {};
+    row.cells.forEach((cell, i) => {
+      obj[headers[i]] = cell.value.trim();
+    });
+    return obj;
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapStep(s: any): ParsedStep {
+  const step: ParsedStep = {
+    keyword: s.keyword.trim(),
+    text: s.text,
+  };
+  if (s.dataTable?.rows) {
+    step.dataTable = parseDataTable(s.dataTable);
+  }
+  return step;
+}
 
 function parseFeatureFile(featureText: string): ParsedFeature {
   const uuidFn = IdGenerator.uuid();
@@ -54,30 +89,24 @@ function parseFeatureFile(featureText: string): ParsedFeature {
   const parser = new Parser(builder, matcher);
 
   const gherkinDoc = parser.parse(featureText);
-  const feature = gherkinDoc.feature;
+  const { feature } = gherkinDoc;
 
   if (!feature) {
     throw new Error('No feature found in file');
   }
 
-  let background: Array<{ keyword: string; text: string }> = [];
+  let background: ParsedStep[] = [];
   const scenarios: ParsedScenario[] = [];
 
   for (const child of feature.children) {
     if (child.background) {
-      background = child.background.steps.map(s => ({
-        keyword: s.keyword.trim(),
-        text: s.text,
-      }));
+      background = child.background.steps.map(mapStep);
     }
     if (child.scenario) {
       scenarios.push({
         name: child.scenario.name,
         tags: child.scenario.tags.map(t => t.name),
-        steps: child.scenario.steps.map(s => ({
-          keyword: s.keyword.trim(),
-          text: s.text,
-        })),
+        steps: child.scenario.steps.map(mapStep),
       });
     }
   }
@@ -90,20 +119,18 @@ function parseFeatureFile(featureText: string): ParsedFeature {
 }
 
 function convertPatternToRegex(pattern: string): RegExp {
-  let regexStr = pattern
+  const regexStr = pattern
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     .replace(/\\{string\\}/g, '"([^"]*)"')
     .replace(/\\{word\\}/g, '([^\\s]+)')
     .replace(/\\{text\\}/g, '([^)]+)')
     .replace(/\\{int\\}/g, '(\\d+)')
-    .replace(/\\{float\\}/g, '([\\d.]+)');
+    .replace(/\\{float\\}/g, '([\\d.]+)')
+    .replace(/\\{ordinal\\}/g, '(1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth)');
   return new RegExp(`^${regexStr}$`);
 }
 
-function matchStep(
-  stepText: string,
-  definitions: StepDefinition[]
-): { def: StepDefinition; args: string[] } | null {
+function matchStep(stepText: string, definitions: StepDefinition[]): { def: StepDefinition; args: string[] } | null {
   for (const def of definitions) {
     const regex = typeof def.pattern === 'string' ? convertPatternToRegex(def.pattern) : def.pattern;
     const match = stepText.match(regex);
@@ -114,7 +141,8 @@ function matchStep(
   return null;
 }
 
-function runStep(keyword: string, text: string) {
+function runStep(step: ParsedStep) {
+  const { keyword, text, dataTable } = step;
   const fullStep = `${keyword} ${text}`;
   const result = matchStep(text, stepDefinitions);
 
@@ -123,7 +151,11 @@ function runStep(keyword: string, text: string) {
   }
 
   cy.log(`**${fullStep}**`);
-  result.def.fn(...result.args);
+  const args: (string | DataTableRows)[] = [...result.args];
+  if (dataTable) {
+    args.push(dataTable);
+  }
+  result.def.fn(...args);
 }
 
 export function Given(pattern: string | RegExp, fn: StepFn) {
@@ -165,6 +197,22 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
     defineFn(ctx);
   }
 
+  const runScenario = (scenario: ParsedScenario, scenarioBeforeFn: (() => void) | null) => {
+    it(`Scenario: ${scenario.name}`, () => {
+      if (scenarioBeforeFn) {
+        scenarioBeforeFn();
+      }
+
+      for (const step of feature.background) {
+        runStep(step);
+      }
+
+      for (const step of scenario.steps) {
+        runStep(step);
+      }
+    });
+  };
+
   describe(`Feature: ${feature.name}`, () => {
     beforeEach(() => {
       if (backgroundFn) {
@@ -173,19 +221,7 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
     });
 
     for (const scenario of feature.scenarios) {
-      it(`Scenario: ${scenario.name}`, () => {
-        if (beforeScenarioFn) {
-          beforeScenarioFn();
-        }
-
-        for (const step of feature.background) {
-          runStep(step.keyword, step.text);
-        }
-
-        for (const step of scenario.steps) {
-          runStep(step.keyword, step.text);
-        }
-      });
+      runScenario(scenario, beforeScenarioFn);
     }
   });
 }

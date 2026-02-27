@@ -269,14 +269,17 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
-  Scenario('SC-CELL-1: Button changes to "Add cell" when range name matches existing range', ({ Given, When, And, Then }) => {
-    Given('there is a range "Critical Path" in the settings', () => {});
-    When('I open the settings popup', () => {});
-    And('I enter range name "Critical Path"', () => {});
-    Then('the button should show "Add cell"', () => {
-      expect(true).toBe(true);
-    });
-  });
+  Scenario(
+    'SC-CELL-1: Button changes to "Add cell" when range name matches existing range',
+    ({ Given, When, And, Then }) => {
+      Given('there is a range "Critical Path" in the settings', () => {});
+      When('I open the settings popup', () => {});
+      And('I enter range name "Critical Path"', () => {});
+      Then('the button should show "Add cell"', () => {
+        expect(true).toBe(true);
+      });
+    }
+  );
 
   Scenario('SC-CELL-2: Button shows "Add range" for new name', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" in the settings', () => {});

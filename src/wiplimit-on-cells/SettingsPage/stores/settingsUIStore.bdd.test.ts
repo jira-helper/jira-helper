@@ -321,26 +321,29 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC7: BUTTON CHANGES TO "ADD CELL" ===
 
-  Scenario('SC-CELL-1: Button changes to "Add cell" when range name matches existing range', ({ Given, When, And, Then }) => {
-    Given('there is a range "Critical Path" in the settings', () => {
-      const { actions } = useWipLimitCellsSettingsUIStore.getState();
-      actions.addRange('Critical Path');
-    });
+  Scenario(
+    'SC-CELL-1: Button changes to "Add cell" when range name matches existing range',
+    ({ Given, When, And, Then }) => {
+      Given('there is a range "Critical Path" in the settings', () => {
+        const { actions } = useWipLimitCellsSettingsUIStore.getState();
+        actions.addRange('Critical Path');
+      });
 
-    When('I open the settings popup', () => {
-      // Already opened
-    });
+      When('I open the settings popup', () => {
+        // Already opened
+      });
 
-    And('I enter range name "Critical Path"', () => {
-      // Form input - not store action
-    });
+      And('I enter range name "Critical Path"', () => {
+        // Form input - not store action
+      });
 
-    Then('the button should show "Add cell"', () => {
-      const { actions } = useWipLimitCellsSettingsUIStore.getState();
-      const found = actions.findRange('Critical Path');
-      expect(found).toBe(true);
-    });
-  });
+      Then('the button should show "Add cell"', () => {
+        const { actions } = useWipLimitCellsSettingsUIStore.getState();
+        const found = actions.findRange('Critical Path');
+        expect(found).toBe(true);
+      });
+    }
+  );
 
   // === SC9: ADD CELL TO EXISTING RANGE ===
 

@@ -50,7 +50,7 @@ src/person-limits/BoardPage/features/
 | # | Task | Описание | Status |
 |---|------|----------|--------|
 | 1 | [TASK-72](./TASK-72-boardpage-create-helpers.md) | Создать helpers.tsx с fixtures и setup | DONE |
-| 2 | [TASK-73](./TASK-73-boardpage-display-feature.md) | Создать display.feature и step definitions | TODO |
+| 2 | [TASK-73](./TASK-73-boardpage-display-feature.md) | Создать display.feature и step definitions | DONE |
 | 3 | [TASK-74](./TASK-74-boardpage-limit-scope-feature.md) | Создать limit-scope.feature и step definitions | TODO |
 | 4 | [TASK-75](./TASK-75-boardpage-interaction-feature.md) | Создать interaction.feature и step definitions | TODO |
 | 5 | [TASK-76](./TASK-76-boardpage-cleanup.md) | Удалить старые файлы, верификация | TODO |
