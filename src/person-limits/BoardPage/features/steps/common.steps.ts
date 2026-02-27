@@ -124,13 +124,14 @@ Given('the board has issues:', (dataTable: DataTableRows) => {
     const mock = mockPageObjectRef.current;
     if (!mock) throw new Error('No mock PageObject - setupBackground may not have run');
     dataTable.forEach((row, idx) => {
+      const id = row.id ?? `issue-${row.person ?? ''}-${row.column ?? ''}-${idx}`;
       const person = row.person ?? '';
       const personDisplayName = row.personDisplayName?.trim();
       const assignee = personDisplayName || person;
       const column = row.column ?? row.column;
       const swimlane = row.swimlane ?? row.swimlane;
       const issueType = row.issueType ?? row.issueType ?? 'Task';
-      mock.addIssue(`issue-${person}-${column}-${idx}`, assignee, column, issueType, swimlane === '' ? null : swimlane);
+      mock.addIssue(id, assignee, column, issueType, swimlane === '' ? null : swimlane);
     });
   });
 });
@@ -142,6 +143,17 @@ When('the board is displayed', () => {
     applyLimits();
   });
   mountComponent();
+});
+
+When(/^I click on "([^"]*)" avatar$/, (person: string) => {
+  cy.get(`[data-person-name="${person}"]`).first().click();
+  cy.wait(100); // Wait for showOnlyChosen (setTimeout)
+});
+
+When(/^I click on the (first|second|1st|2nd) "([^"]*)" avatar$/, (ordinal: string, person: string) => {
+  const index = parseOrdinalToIndex(ordinal);
+  cy.get(`[data-person-name="${person}"]`).eq(index).click();
+  cy.wait(100);
 });
 
 // --- Then steps ---
@@ -219,3 +231,48 @@ And(
       .should('exist');
   }
 );
+
+// --- Interaction steps ---
+
+Then(/^issue "([^"]*)" should be visible$/, (issueId: string) => {
+  cy.get(`[data-issue-id="${issueId}"]`).should('be.visible');
+});
+
+Then(/^issue "([^"]*)" should be hidden$/, (issueId: string) => {
+  cy.get(`[data-issue-id="${issueId}"]`).should('not.be.visible');
+});
+
+Then('all issues should be visible', () => {
+  cy.then(() => {
+    const mock = mockPageObjectRef.current;
+    if (!mock) throw new Error('No mock PageObject');
+    const issues = mock.getIssues('.ghx-issue');
+    issues.forEach(issue => {
+      const id = (issue as HTMLElement).getAttribute('data-issue-id');
+      if (id) cy.get(`[data-issue-id="${id}"]`).should('be.visible');
+    });
+  });
+});
+
+Then(/^only "([^"]*)" issues should be visible$/, (person: string) => {
+  cy.then(() => {
+    const mock = mockPageObjectRef.current;
+    if (!mock) throw new Error('No mock PageObject');
+    const { limits } = usePersonWipLimitsPropertyStore.getState().data;
+    const limit = limits.find(l => l.person.name === person);
+    const personDisplayName = limit?.person.displayName ?? toDisplayName(person);
+    const issues = mock.getIssues('.ghx-issue');
+    issues.forEach(issue => {
+      const id = (issue as HTMLElement).getAttribute('data-issue-id');
+      const assignee = mock.getAssigneeFromIssue(issue);
+      const shouldBeVisible = assignee === person || assignee === personDisplayName;
+      if (id) {
+        if (shouldBeVisible) {
+          cy.get(`[data-issue-id="${id}"]`).should('be.visible');
+        } else {
+          cy.get(`[data-issue-id="${id}"]`).should('not.be.visible');
+        }
+      }
+    });
+  });
+});

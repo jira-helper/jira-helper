@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { AvatarsContainer } from '../components/AvatarsContainer';
@@ -21,17 +21,41 @@ export const swimlanes = [
   { id: 'sw2', name: 'Swimlane 2' },
 ];
 
+/** Creates a real DOM element for an issue (for interaction tests with visibility checks). */
+function createMockIssueElement(
+  id: string,
+  assignee: string,
+  columnId: string,
+  type: string,
+  swimlaneId: string | null
+): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'ghx-issue';
+  el.setAttribute('data-issue-id', id);
+  el.setAttribute('data-assignee', assignee);
+  el.setAttribute('data-column-id', columnId);
+  el.setAttribute('data-issue-type', type);
+  if (swimlaneId) el.setAttribute('data-swimlane-id', swimlaneId);
+  el.textContent = `Issue ${id}`;
+  return el;
+}
+
+function getIssueId(issue: Element): string | null {
+  return (issue as HTMLElement).getAttribute?.('data-issue-id') ?? (issue as { id?: string }).id ?? null;
+}
+
 // --- Mock PageObject for tests ---
 
 export type MockPageObject = IPersonLimitsBoardPageObject & {
   addIssue: (id: string, assignee: string, columnId: string, type?: string, swimlaneId?: string | null) => Element;
   getHighlightedIssues: () => Element[];
+  appendIssuesToBoard: (container: HTMLElement) => void;
 };
 
 function createMockPageObject(): MockPageObject {
   const mockIssues = new Map<
     string,
-    { element: Element; assignee: string; columnId: string; swimlaneId: string | null; type: string }
+    { element: HTMLElement; assignee: string; columnId: string; swimlaneId: string | null; type: string }
   >();
   const highlightedIssues: Element[] = [];
 
@@ -47,9 +71,15 @@ function createMockPageObject(): MockPageObject {
     },
 
     addIssue(id, assignee, columnId, type = 'Task', swimlaneId = null) {
-      const element = { id } as unknown as Element;
+      const element = createMockIssueElement(id, assignee, columnId, type, swimlaneId);
       mockIssues.set(id, { element, assignee, columnId, swimlaneId, type });
       return element;
+    },
+
+    appendIssuesToBoard(container: HTMLElement) {
+      mockIssues.forEach(({ element }) => {
+        container.appendChild(element);
+      });
     },
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,17 +88,17 @@ function createMockPageObject(): MockPageObject {
     },
 
     getAssigneeFromIssue(issue: Element) {
-      const { id } = issue as { id?: string };
+      const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.assignee ?? null;
     },
 
     getIssueType(issue: Element) {
-      const { id } = issue as { id?: string };
+      const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.type ?? null;
     },
 
     getColumnId(issue: Element) {
-      const { id } = issue as { id?: string };
+      const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.columnId ?? null;
     },
 
@@ -77,7 +107,7 @@ function createMockPageObject(): MockPageObject {
     },
 
     getSwimlaneId(issue: Element) {
-      const { id } = issue as { id?: string };
+      const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.swimlaneId ?? null;
     },
 
@@ -155,7 +185,9 @@ function createMockPageObject(): MockPageObject {
       return [...highlightedIssues];
     },
     resetIssueBackgroundColor: cy.stub(),
-    setIssueVisibility: cy.stub(),
+    setIssueVisibility(issue: Element, visible: boolean) {
+      (issue as HTMLElement).style.display = visible ? '' : 'none';
+    },
     setSwimlaneVisibility: cy.stub(),
     setParentGroupVisibility: cy.stub(),
   };
@@ -187,6 +219,25 @@ export const setupBackground = () => {
 
 // --- Mount helpers ---
 
+/** Wrapper that mounts AvatarsContainer + board container for issues (interaction tests). */
+const BoardWithAvatars: React.FC = () => {
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mock = mockPageObjectRef.current;
+    if (mock && boardRef.current && 'appendIssuesToBoard' in mock) {
+      mock.appendIssuesToBoard(boardRef.current);
+    }
+  }, []);
+
+  return (
+    <>
+      <div ref={boardRef} data-cy="board-container" />
+      <AvatarsContainer />
+    </>
+  );
+};
+
 export const mountComponent = () => {
-  cy.mount(<AvatarsContainer />);
+  cy.mount(<BoardWithAvatars />);
 };

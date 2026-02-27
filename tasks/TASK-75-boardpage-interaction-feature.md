@@ -1,6 +1,6 @@
 # TASK-75: Создать interaction.feature и step definitions для BoardPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-9](./EPIC-9-person-limits-boardpage-bdd-refactoring.md)
 
@@ -93,12 +93,57 @@ Interaction тесты требуют:
 
 ## Критерии приёмки
 
-- [ ] `interaction.feature` содержит 3 сценария
-- [ ] ID только в тегах
-- [ ] Описание Feature добавлено
-- [ ] Step definitions создают mock issues и симулируют фильтрацию
-- [ ] Тесты проходят: `npx cypress run --component --spec "src/person-limits/BoardPage/features/interaction.feature.cy.tsx"`
+- [x] `interaction.feature` содержит 3 сценария
+- [x] ID только в тегах
+- [x] Описание Feature добавлено
+- [x] Step definitions создают mock issues и симулируют фильтрацию
+- [x] Тесты проходят: `npx cypress run --component --spec "src/person-limits/BoardPage/features/interaction.feature.cy.tsx"`
+
+---
+
+## Результаты
+
+**Дата**: 2025-02-27
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+- Создан `interaction.feature` с 3 сценариями (SC-INTERACT-1, SC-INTERACT-2, SC-INTERACT-3)
+- Проблема #1: удалён дублирующийся степ `When I click on "X" avatar again`, в feature заменён на `And I click on "X" avatar`
+- Добавлены step definitions в `common.steps.ts`: When (клик по аватару), Then (видимость issues)
+- Обновлён `helpers.tsx`: mock создаёт реальные DOM-элементы с `data-issue-id`, `setIssueVisibility` меняет display, добавлен `appendIssuesToBoard`, `mountComponent` монтирует `BoardWithAvatars` с контейнером для issues
+- Создан `interaction.feature.cy.tsx` (~10 строк)
+- Поддержка опциональной колонки `id` в "the board has issues" DataTable
 
 ## Зависимости
 
 - Зависит от: TASK-72 (helpers), TASK-73 (common steps)
+
+---
+
+## Проблема #1: Дублирующиеся степы
+
+### Проблема
+
+В `common.steps.ts` есть дублирующиеся степы:
+
+```typescript
+When(/^I click on "([^"]*)" avatar$/, (person: string) => { ... });
+When(/^I click on "([^"]*)" avatar again$/, (person: string) => { ... });
+```
+
+Они делают одно и то же — это дубликат.
+
+### Что исправить
+
+1. Удалить `When I click on "X" avatar again` из `common.steps.ts`
+2. В `interaction.feature` заменить `And I click on "X" avatar again` на `And I click on "X" avatar`
+
+### Критерий приёмки #1
+
+- [x] Дублирующийся степ удалён
+- [x] Feature файл обновлён
+- [x] Все тесты проходят
