@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 	"plugins": [{ "name": "typescript-plugin-css-modules" }],
-	  "target": "ES6",                        // Целевая версия JavaScript
-	  "module": "ESNext",                      // Тип модуля
+	  "target": "ES2022",                     // Целевая версия JavaScript (ES2022 для поддержки top-level await)
+	  "module": "ES2022",                     // Тип модуля (ES2022 для поддержки top-level await)
 	  "lib": ["DOM", "ESNext"],                // Библиотеки для браузера и современных возможностей
 	  "allowJs": true,                         // Разрешить импорт файлов .js
 	  "checkJs": false,                        // Проверять файлы .js
@@ -19,7 +19,8 @@
 	},
 	"include": [
 	  "src/**/*",                               // Включить все файлы из папки src
-	  "./test/setup.ts"
+	  "./test/setup.ts",
+	  "./cypress/support/cypress-augmentation.d.ts"
 	],
 	"exclude": [
 	  "node_modules",                          // Исключить node_modules
