@@ -153,3 +153,19 @@ Feature: Personal WIP Limits on Board - Display
     When the board is displayed
     Then the counter for "john.doe" should show "2 / 2"
     And the counter for "john.doe" should be yellow
+
+  @SC-DISPLAY-12
+  Scenario: Limit with combined filters (columns + swimlanes + issueTypes)
+    Given there are WIP limits:
+      | person   | personDisplayName | limit | columns | swimlanes | issueTypes |
+      | john.doe | John Doe          | 2     | col1    | sw1       | Bug        |
+    Given the board has issues:
+      | person   | personDisplayName | column | swimlane | issueType |
+      | john.doe | John Doe          | col1   | sw1      | Bug       |
+      | john.doe | John Doe          | col1   | sw1      | Bug       |
+      | john.doe | John Doe          | col1   | sw1      | Task      |
+      | john.doe | John Doe          | col1   | sw2      | Bug       |
+      | john.doe | John Doe          | col2   | sw1      | Bug       |
+    When the board is displayed
+    Then the counter for "john.doe" should show "2 / 2"
+    And the counter for "john.doe" should be yellow
