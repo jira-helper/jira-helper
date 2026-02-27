@@ -1,0 +1,52 @@
+---
+description: Use Mermaid syntax for all diagrams
+alwaysApply: true
+---
+
+# Diagrams with Mermaid
+
+Always use Mermaid syntax for diagrams in documentation and responses.
+
+## Supported Diagram Types
+
+```mermaid
+flowchart LR
+    A[Flowchart] --> B[Sequence]
+    B --> C[Class]
+    C --> D[State]
+    D --> E[ER]
+```
+
+## Examples
+
+### Component Flow
+
+```mermaid
+flowchart TD
+    User --> Component
+    Component --> Store
+    Store --> API
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    User->>UI: Click button
+    UI->>Store: Dispatch action
+    Store->>API: Fetch data
+    API-->>Store: Response
+    Store-->>UI: Update state
+```
+
+### State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Loading: fetch
+    Loading --> Success: resolve
+    Loading --> Error: reject
+    Success --> [*]
+    Error --> Idle: retry
+```

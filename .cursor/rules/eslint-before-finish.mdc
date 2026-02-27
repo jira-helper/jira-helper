@@ -1,0 +1,30 @@
+---
+description: Run eslint --fix before finishing editing session
+globs: src/**/*
+alwaysApply: false
+---
+
+# ESLint Before Session End
+
+Before completing a session that includes code changes, run ESLint to fix formatting and lint issues:
+
+```bash
+npx eslint src/path/to/file.ts --fix
+npm run lint:eslint -- --fix
+```
+
+## When to Run
+
+- After making edits to source files
+- Before committing changes
+- Before ending the conversation with code modifications
+
+## Example
+
+```bash
+# Fix all src files
+npm run lint:eslint -- --fix
+
+# Or fix specific files
+npx eslint src/path/to/file.ts --fix
+```

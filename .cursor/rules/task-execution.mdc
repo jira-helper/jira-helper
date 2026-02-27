@@ -1,0 +1,83 @@
+---
+description: Автоматический подхват workflow при выполнении задачи. Применяется при запросах "сделай задачу", "выполни таску", "реализуй".
+globs:
+alwaysApply: false
+---
+
+# Выполнение задач
+
+При запросе пользователя выполнить задачу (task file из `tasks/`) следуй этому workflow.
+
+## 1. Прочитай задачу
+
+Прочитай `.md` файл задачи целиком. Определи:
+- **Тип**: bugfix / feature / refactoring / testing / storybook
+- **Файлы**: что создать / изменить
+- **Зависимости**: от чего зависит задача
+- **Критерии приёмки**: что проверить
+
+## 2. Определи workflow по типу
+
+| Тип | Агент | Скиллы |
+|-----|-------|--------|
+| Bugfix | `coder` | `tdd/SKILL.md`, `testing/SKILL.md` |
+| Feature | `coder` | `tdd/SKILL.md`, `testing/SKILL.md` |
+| Refactoring | `coder` | `tdd/SKILL.md` |
+| Testing (store) | `coder` | `vitest-bdd-testing/SKILL.md`, `testing/SKILL.md` |
+| Testing (cypress) | `coder` | `cypress-bdd-testing/SKILL.md` |
+| Testing (оба) | `coder` | `vitest-bdd-testing/SKILL.md`, `cypress-bdd-testing/SKILL.md` |
+| Storybook | `coder` | — |
+
+## 3. Подготовь промпт для саб-агента
+
+Промпт должен включать:
+1. **Полное описание задачи** из task file
+2. **Конкретные файлы** для создания/изменения
+3. **Референсы** — аналогичные реализации в проекте
+4. **Скиллы** — какие SKILL.md прочитать
+5. **Acceptance criteria** — что проверить после реализации
+
+### Шаблон промпта
+
+```
+## Задача: {название}
+
+{Описание из task file}
+
+## Скиллы для изучения
+- Прочитай `.cursor/skills/{skill}/SKILL.md`
+
+## Файлы для создания/изменения
+- {список файлов}
+
+## Референсы
+- {аналогичные файлы в проекте}
+
+## Критерии приёмки
+- {чекбоксы из task file}
+- Тесты проходят: {команда}
+- ESLint: `npm run lint:eslint -- --fix`
+```
+
+## 4. Запусти coder саб-агента
+
+```
+Task(subagent_type: "coder", prompt: "...")
+```
+
+## 5. После завершения
+
+1. Обнови статус в файле задачи: `TODO` → `DONE`
+2. Обнови статус в EPIC таблице
+3. Заполни раздел "Результаты" в файле задачи
+4. Сообщи пользователю результат
+
+## Пример
+
+Пользователь: "Выполни TASK-20"
+
+1. Читаю `tasks/TASK-20-add-tests-coverage.md`
+2. Тип: testing (store + cypress)
+3. Скиллы: `vitest-bdd-testing/SKILL.md`, `cypress-bdd-testing/SKILL.md`
+4. Запускаю coder с полным контекстом
+5. Обновляю статус в TASK-20 и EPIC-1
