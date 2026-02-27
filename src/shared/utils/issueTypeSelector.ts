@@ -1,4 +1,6 @@
-import { getProjectIssueTypes, ProjectIssueType } from '../jiraApi';
+import { globalContainer } from 'dioma';
+import { getProjectIssueTypesToken } from '../di/jiraApiTokens';
+import type { ProjectIssueType } from '../jiraApi';
 import { getIssueTypesFromDOM } from './getIssueTypesFromDOM';
 import { getProjectKeyFromURL } from './getProjectKeyFromURL';
 
@@ -15,6 +17,7 @@ export async function loadIssueTypesForProject(projectKey: string): Promise<Proj
   }
 
   try {
+    const getProjectIssueTypes = globalContainer.inject(getProjectIssueTypesToken);
     const result = await getProjectIssueTypes(projectKey);
     if (!result.err) {
       const types = result.val;

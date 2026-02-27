@@ -3,13 +3,29 @@ import React from 'react';
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
-import { updateBoardPropertyToken, searchUsersToken } from 'src/shared/di/jiraApiTokens';
+import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
+import { Ok } from 'ts-results';
 import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
 import { PersonalWipLimitContainer } from '../components/PersonalWipLimitContainer';
+import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
+import { usePersonWipLimitsPropertyStore } from '../../property/store';
 import { createPersonLimit, updatePersonLimit } from '../actions';
 import type { PersonLimit, FormData } from '../state/types';
 import type { JiraUser } from '../../../shared/jiraApi';
+
+// --- Search mock configuration ---
+
+type SearchMockType = 'default' | 'empty' | 'error';
+let searchMockType: SearchMockType = 'default';
+
+export const setSearchMockType = (type: SearchMockType) => {
+  searchMockType = type;
+};
+
+export const resetSearchMockType = () => {
+  searchMockType = 'default';
+};
 
 // --- Fixtures matching feature Background ---
 
@@ -40,6 +56,13 @@ export const createLimit = (
 });
 
 export const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
+  if (searchMockType === 'empty') {
+    return [];
+  }
+  if (searchMockType === 'error') {
+    throw new Error('API error');
+  }
+
   const knownUsers: Record<string, { name: string; displayName: string }> = {
     john: { name: 'john.doe', displayName: 'John Doe' },
     'john.doe': { name: 'john.doe', displayName: 'John Doe' },
@@ -52,7 +75,7 @@ export const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
       {
         name: user.name,
         displayName: user.displayName,
-        avatarUrls: { '16x16': '', '32x32': '' },
+        avatarUrls: { '16x16': 'https://example.com/avatar.png', '32x32': 'https://example.com/avatar.png' },
         self: `https://jira.example.com/rest/api/2/user?username=${user.name}`,
       },
     ];
@@ -61,7 +84,7 @@ export const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
     {
       name: query,
       displayName: query,
-      avatarUrls: { '16x16': '', '32x32': '' },
+      avatarUrls: { '16x16': 'https://example.com/avatar.png', '32x32': 'https://example.com/avatar.png' },
       self: `https://jira.example.com/rest/api/2/user?username=${query}`,
     },
   ];
@@ -72,6 +95,7 @@ export const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
 export const setupBackground = () => {
   globalContainer.reset();
   registerLogger(globalContainer);
+  resetSearchMockType();
 
   globalContainer.register({
     token: getBoardIdFromURLToken,
@@ -89,7 +113,20 @@ export const setupBackground = () => {
   });
 
   useSettingsUIStore.getState().actions.reset();
+  usePersonWipLimitsPropertyStore.getState().actions.reset();
   clearIssueTypesCache();
+
+  // Mock issue types API via DI
+  globalContainer.register({
+    token: getProjectIssueTypesToken,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    value: async (_projectKey: string) =>
+      Ok([
+        { id: '1', name: 'Task', subtask: false },
+        { id: '2', name: 'Bug', subtask: false },
+        { id: '3', name: 'Story', subtask: false },
+      ]),
+  });
 };
 
 // --- Mount helpers ---
@@ -147,6 +184,12 @@ export const selectIssueTypes = (...types: string[]) => {
   types.forEach(type => {
     cy.get(`input[type="checkbox"][value="${type}"]`).check();
   });
+};
+
+export const mountSettingsButton = () => {
+  cy.mount(
+    <SettingsButtonContainer boardDataColumns={columns} boardDataSwimlanes={swimlanes} searchUsers={mockSearchUsers} />
+  );
 };
 
 export { PersonLimit, FormData, JiraUser };
