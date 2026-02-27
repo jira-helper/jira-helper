@@ -1,6 +1,6 @@
 # TASK-79: Создать exceed.feature для Column Limits BoardPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-10](./EPIC-10-column-limits-bdd-refactoring.md)
 
@@ -54,10 +54,27 @@ Feature: Column Group WIP Limits - Limit Exceeded
 
 ## Критерии приёмки
 
-- [ ] `exceed.feature` содержит 3 сценария
-- [ ] Step definitions для проверки background созданы
-- [ ] Тесты проходят
+- [x] `exceed.feature` содержит 3 сценария
+- [x] Step definitions для проверки background созданы
+- [x] Тесты проходят
 
 ## Зависимости
 
 - Зависит от: TASK-77 (helpers), TASK-78 (общие steps)
+
+---
+
+## Результаты
+
+**Дата**: 2025-02-27
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+- Создан `src/column-limits/BoardPage/features/exceed.feature` с 3 сценариями (SC-EXCEED-1..3)
+- Создан `src/column-limits/BoardPage/features/exceed.feature.cy.tsx`
+- Добавлен step `Then('the badge should show {string}', ...)` в `steps/common.steps.ts`
+- Все 3 теста проходят: `npx cypress run --component --spec "src/column-limits/BoardPage/features/exceed.feature.cy.tsx"`

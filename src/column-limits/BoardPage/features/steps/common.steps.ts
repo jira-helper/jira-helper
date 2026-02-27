@@ -121,6 +121,14 @@ Then('the badge on {string} should show {string}', (columnName: string, badgeTex
 });
 
 /**
+ * Then the badge should show "3/3"
+ * Used when there is a single group and badge location is implicit.
+ */
+Then('the badge should show {string}', (badgeText: string) => {
+  cy.get('[data-column-limits-badge="true"]').should('contain', badgeText);
+});
+
+/**
  * Then {string} column cells should have red background
  */
 Then('{string} column cells should have red background', (columnName: string) => {

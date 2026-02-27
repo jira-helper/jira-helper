@@ -81,7 +81,7 @@ Given the board has issues:
 |---|--------|----------|--------|
 | 1 | [TASK-77](./TASK-77-column-limits-boardpage-helpers.md) | Создать helpers.tsx для BoardPage | DONE |
 | 2 | [TASK-78](./TASK-78-column-limits-boardpage-display.md) | Создать display.feature и steps | DONE |
-| 3 | [TASK-79](./TASK-79-column-limits-boardpage-exceed.md) | Создать exceed.feature и steps | TODO |
+| 3 | [TASK-79](./TASK-79-column-limits-boardpage-exceed.md) | Создать exceed.feature и steps | DONE |
 | 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (swimlane + issueType) | TODO |
 | 5 | [TASK-81](./TASK-81-column-limits-boardpage-multi.md) | Создать multi-groups.feature | TODO |
 | 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | TODO |
