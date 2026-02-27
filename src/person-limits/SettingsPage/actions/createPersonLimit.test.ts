@@ -4,7 +4,12 @@ import type { FormData } from '../state/types';
 
 describe('createPersonLimit', () => {
   const mockFormData: FormData = {
-    personName: 'john.doe',
+    person: {
+      name: 'john.doe',
+      displayName: 'John Doe',
+      avatar: 'https://jira.example.com/avatar.png',
+      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+    },
     limit: 5,
     selectedColumns: ['col1', 'col2'],
     swimlanes: ['swim1', 'swim2'],

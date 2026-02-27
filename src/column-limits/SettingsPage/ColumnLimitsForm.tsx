@@ -104,7 +104,7 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
               onBlur={e => {
                 const inputValue = e.target.value;
                 const numValue = inputValue ? Number(inputValue) : localLimit;
-                if (numValue !== null && numValue !== undefined && !isNaN(numValue) && numValue >= 1) {
+                if (numValue !== null && numValue !== undefined && !Number.isNaN(numValue) && numValue >= 1) {
                   onLimitChange(group.id, numValue);
                 } else if (localLimit !== undefined) {
                   setLocalLimit(group.max);

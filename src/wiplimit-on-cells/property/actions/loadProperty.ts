@@ -1,5 +1,6 @@
-import { getBoardIdFromURL } from 'src/routing';
-import { getBoardProperty } from 'src/shared/jiraApi';
+import { createAction } from 'src/shared/action';
+import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
+import { getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { useWipLimitCellsPropertyStore } from '../store';
 import type { WipLimitRange, WipLimitCell } from '../../types';
@@ -57,31 +58,33 @@ export function normalizeRange(range: LegacyRange): WipLimitRange {
 /**
  * Loads WIP limit cells property from Jira Board Property.
  * Handles backward compatibility: converts swimline → swimlane.
- *
- * @param getBoardProperty - Function to get board property (for dependency injection in tests)
  */
-export const loadWipLimitCellsProperty = async (
-  getBoardPropertyFn: typeof getBoardProperty = getBoardProperty
-): Promise<void> => {
-  const store = useWipLimitCellsPropertyStore.getState();
-  if (store.state !== 'initial') return;
+export const loadWipLimitCellsProperty = createAction({
+  name: 'loadWipLimitCellsProperty',
+  async handler() {
+    const getBoardId = this.di.inject(getBoardIdFromURLToken);
+    const getProperty = this.di.inject(getBoardPropertyToken);
 
-  store.actions.setState('loading');
+    const store = useWipLimitCellsPropertyStore.getState();
+    if (store.state !== 'initial') return;
 
-  const boardId = getBoardIdFromURL();
-  if (!boardId) {
-    store.actions.setData([]);
-    store.actions.setState('loaded');
-    return;
-  }
+    store.actions.setState('loading');
 
-  try {
-    const data = await getBoardPropertyFn<LegacyRange[]>(boardId, BOARD_PROPERTIES.WIP_LIMITS_CELLS);
-    const normalizedData = data ? data.map(normalizeRange) : [];
-    store.actions.setData(normalizedData);
-    store.actions.setState('loaded');
-  } catch (error) {
-    store.actions.setState('error');
-    throw error;
-  }
-};
+    const boardId = getBoardId();
+    if (!boardId) {
+      store.actions.setData([]);
+      store.actions.setState('loaded');
+      return;
+    }
+
+    try {
+      const data = await getProperty<LegacyRange[]>(boardId, BOARD_PROPERTIES.WIP_LIMITS_CELLS);
+      const normalizedData = data ? data.map(normalizeRange) : [];
+      store.actions.setData(normalizedData);
+      store.actions.setState('loaded');
+    } catch (error) {
+      store.actions.setState('error');
+      throw error;
+    }
+  },
+});

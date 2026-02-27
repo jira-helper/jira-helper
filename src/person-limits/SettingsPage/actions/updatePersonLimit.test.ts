@@ -18,7 +18,12 @@ describe('updatePersonLimit', () => {
   };
 
   const mockFormData: FormData = {
-    personName: 'john.doe',
+    person: {
+      name: 'john.doe',
+      displayName: 'John Doe',
+      avatar: 'https://jira.example.com/avatar.png',
+      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+    },
     limit: 10,
     selectedColumns: ['col1', 'col2'],
     swimlanes: ['swim1', 'swim2'],
@@ -46,8 +51,10 @@ describe('updatePersonLimit', () => {
     expect(result).toEqual({
       id: 1,
       person: {
-        ...existingLimit.person,
-        name: mockFormData.personName, // Person name should be updated from formData
+        name: mockFormData.person!.name,
+        displayName: mockFormData.person!.displayName,
+        avatar: mockFormData.person!.avatar,
+        self: mockFormData.person!.self,
       },
       limit: 10,
       columns: mockColumns,
@@ -56,7 +63,7 @@ describe('updatePersonLimit', () => {
     });
   });
 
-  it('should preserve person data from existing limit', () => {
+  it('should use person data from formData when provided', () => {
     const result = updatePersonLimit({
       existingLimit,
       formData: mockFormData,
@@ -64,31 +71,50 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
     });
 
-    // Person name should be updated from formData, but other fields preserved
-    expect(result.person.name).toEqual(mockFormData.personName);
-    expect(result.person.displayName).toEqual(existingLimit.person.displayName);
-    expect(result.person.self).toEqual(existingLimit.person.self);
-    expect(result.person.avatar).toEqual(existingLimit.person.avatar);
-    expect(result.person).not.toBe(existingLimit.person); // Should be a copy
+    expect(result.person.name).toEqual(mockFormData.person!.name);
+    expect(result.person.displayName).toEqual(mockFormData.person!.displayName);
+    expect(result.person.self).toEqual(mockFormData.person!.self);
+    expect(result.person.avatar).toEqual(mockFormData.person!.avatar);
+    expect(result.person).not.toBe(existingLimit.person);
   });
 
-  it('should update person name from formData', () => {
-    const formDataWithNewName: FormData = {
+  it('should update person from formData with new user', () => {
+    const formDataWithNewPerson: FormData = {
       ...mockFormData,
-      personName: 'jane.doe',
+      person: {
+        name: 'jane.doe',
+        displayName: 'Jane Doe',
+        avatar: 'https://jira.example.com/jane-avatar.png',
+        self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
+      },
     };
 
     const result = updatePersonLimit({
       existingLimit,
-      formData: formDataWithNewName,
+      formData: formDataWithNewPerson,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
     });
 
     expect(result.person.name).toEqual('jane.doe');
-    expect(result.person.displayName).toEqual(existingLimit.person.displayName); // Other fields preserved
-    expect(result.person.self).toEqual(existingLimit.person.self);
-    expect(result.person.avatar).toEqual(existingLimit.person.avatar);
+    expect(result.person.displayName).toEqual('Jane Doe');
+    expect(result.person.avatar).toEqual('https://jira.example.com/jane-avatar.png');
+  });
+
+  it('should preserve existing person when formData.person is null', () => {
+    const formDataNoPerson: FormData = {
+      ...mockFormData,
+      person: null,
+    };
+
+    const result = updatePersonLimit({
+      existingLimit,
+      formData: formDataNoPerson,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.person).toEqual(existingLimit.person);
   });
 
   it('should remove includedIssueTypes if not provided in formData', () => {

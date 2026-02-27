@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettingsModalContainer } from './SettingsModalContainer';
-import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
-import * as actions from '../../actions';
 
 // Mock store
 vi.mock('../../stores/settingsUIStore', () => {
@@ -47,8 +45,12 @@ vi.mock('./SettingsModal', () => ({
   SettingsModal: ({ children, title, onSave, onClose, isSaving }: any) => (
     <div data-testid="mock-modal">
       <h1>{title}</h1>
-      <button onClick={onClose}>Close</button>
-      <button onClick={onSave}>{isSaving ? 'Saving...' : 'Save'}</button>
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
+      <button type="button" onClick={onSave}>
+        {isSaving ? 'Saving...' : 'Save'}
+      </button>
       {children}
     </div>
   ),

@@ -4,6 +4,7 @@ import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
 import { loadPersonWipLimitsProperty } from '../property';
+import { searchUsers } from '../../shared/jiraApi';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import type { Column, Swimlane } from './state/types';
 
@@ -92,6 +93,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
       React.createElement(SettingsButtonContainer, {
         boardDataColumns: columns,
         boardDataSwimlanes: swimlanes,
+        searchUsers,
       })
     );
   }

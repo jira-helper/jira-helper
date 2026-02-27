@@ -16,11 +16,14 @@ export type Swimlane = {
   name: string;
 };
 
+export type { SelectedPerson } from '../stores/settingsUIStore.types';
+
 /**
- * Form data structure - represents the current state of the form
+ * Form data structure - represents the current state of the form.
+ * `person` holds the fully resolved Jira user selected via PersonNameSelect.
  */
 export type FormData = {
-  personName: string;
+  person: import('../stores/settingsUIStore.types').SelectedPerson | null;
   limit: number;
   selectedColumns: string[];
   swimlanes: string[];
@@ -32,6 +35,5 @@ export type FormData = {
  */
 export type PersonalWipLimitsState = {
   limits: import('../property/types').PersonLimit[];
-  checkedIds: number[];
   editingId: number | null;
 };

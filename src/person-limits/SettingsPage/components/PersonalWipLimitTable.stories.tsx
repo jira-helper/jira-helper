@@ -57,27 +57,11 @@ const mockLimits: PersonLimit[] = [
 ];
 
 export const EmptyState: Story = {
-  render: () => (
-    <PersonalWipLimitTable
-      limits={[]}
-      checkedIds={[]}
-      onDelete={() => {}}
-      onEdit={() => {}}
-      onCheckboxChange={() => {}}
-    />
-  ),
+  render: () => <PersonalWipLimitTable limits={[]} onDelete={() => {}} onEdit={() => {}} />,
 };
 
 export const WithLimits: Story = {
-  render: () => (
-    <PersonalWipLimitTable
-      limits={mockLimits}
-      checkedIds={[]}
-      onDelete={() => {}}
-      onEdit={() => {}}
-      onCheckboxChange={() => {}}
-    />
-  ),
+  render: () => <PersonalWipLimitTable limits={mockLimits} onDelete={() => {}} onEdit={() => {}} />,
 };
 
 export const WithAllColumnsAndSwimlanes: Story = {
@@ -95,26 +79,6 @@ export const WithAllColumnsAndSwimlanes: Story = {
       swimlanes: [], // should display "All"
     };
 
-    return (
-      <PersonalWipLimitTable
-        limits={[limitWithAll]}
-        checkedIds={[]}
-        onDelete={() => {}}
-        onEdit={() => {}}
-        onCheckboxChange={() => {}}
-      />
-    );
+    return <PersonalWipLimitTable limits={[limitWithAll]} onDelete={() => {}} onEdit={() => {}} />;
   },
-};
-
-export const WithSelectedRows: Story = {
-  render: () => (
-    <PersonalWipLimitTable
-      limits={mockLimits}
-      checkedIds={[1, 2]}
-      onDelete={() => {}}
-      onEdit={() => {}}
-      onCheckboxChange={() => {}}
-    />
-  ),
 };

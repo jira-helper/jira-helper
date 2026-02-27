@@ -43,18 +43,17 @@ export default class WipLimitOnCellsBoard extends PageModification<[any, WipLimi
     } catch {
       registerWipLimitCellsBoardPageObjectInDI(globalContainer);
     }
-    const pageObject = globalContainer.inject(wipLimitCellsBoardPageObjectToken);
 
     // Set CSS selector in runtime store
     const cssSelectorOfIssues = this.getCssSelectorOfIssues(editData);
     useWipLimitCellsRuntimeStore.getState().actions.setCssSelectorOfIssues(cssSelectorOfIssues);
 
     // Initial render
-    renderWipLimitCells(settings, pageObject, cssSelectorOfIssues, this.shouldCountIssue.bind(this));
+    renderWipLimitCells(settings, this.shouldCountIssue.bind(this));
 
     // Re-render on DOM changes
     this.onDOMChange('#ghx-pool', () => {
-      renderWipLimitCells(settings, pageObject, cssSelectorOfIssues, this.shouldCountIssue.bind(this));
+      renderWipLimitCells(settings, this.shouldCountIssue.bind(this));
     });
   }
 

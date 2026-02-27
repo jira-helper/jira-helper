@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { WITHOUT_GROUP_ID } from '../../types';
-import type { Column, UIGroup, IssueTypeState } from '../../types';
 import type { SettingsUIData, SettingsUIStoreState } from './settingsUIStore.types';
 
 const getInitialData = (): SettingsUIData => ({

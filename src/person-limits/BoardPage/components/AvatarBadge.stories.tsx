@@ -21,7 +21,6 @@ const defaultAvatar = 'https://avatar-management.jira.com/default.png';
 export const UnderLimit: Story = {
   args: {
     avatar: defaultAvatar,
-    displayName: 'John Doe',
     personName: 'john.doe',
     currentCount: 3,
     limit: 5,
@@ -32,7 +31,6 @@ export const UnderLimit: Story = {
 export const AtLimit: Story = {
   args: {
     avatar: defaultAvatar,
-    displayName: 'Jane Smith',
     personName: 'jane.smith',
     currentCount: 5,
     limit: 5,
@@ -43,7 +41,6 @@ export const AtLimit: Story = {
 export const OverLimit: Story = {
   args: {
     avatar: defaultAvatar,
-    displayName: 'Bob Johnson',
     personName: 'bob.johnson',
     currentCount: 7,
     limit: 5,
@@ -54,7 +51,6 @@ export const OverLimit: Story = {
 export const Active: Story = {
   args: {
     avatar: defaultAvatar,
-    displayName: 'Alice Brown',
     personName: 'alice.brown',
     currentCount: 2,
     limit: 4,
@@ -65,7 +61,6 @@ export const Active: Story = {
 export const ActiveOverLimit: Story = {
   args: {
     avatar: defaultAvatar,
-    displayName: 'Charlie Wilson',
     personName: 'charlie.wilson',
     currentCount: 6,
     limit: 3,
@@ -78,7 +73,6 @@ export const MultipleAvatars: Story = {
     <div style={{ display: 'inline-flex', gap: 4 }}>
       <AvatarBadge
         avatar={defaultAvatar}
-        displayName="John Doe"
         personName="john.doe"
         currentCount={3}
         limit={5}
@@ -88,7 +82,6 @@ export const MultipleAvatars: Story = {
       />
       <AvatarBadge
         avatar={defaultAvatar}
-        displayName="Jane Smith"
         personName="jane.smith"
         currentCount={5}
         limit={5}
@@ -98,7 +91,6 @@ export const MultipleAvatars: Story = {
       />
       <AvatarBadge
         avatar={defaultAvatar}
-        displayName="Bob Johnson"
         personName="bob.johnson"
         currentCount={7}
         limit={5}

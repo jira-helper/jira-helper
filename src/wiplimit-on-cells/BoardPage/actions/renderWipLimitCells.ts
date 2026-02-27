@@ -1,5 +1,8 @@
+import { createAction } from 'src/shared/action';
 import type { WipLimitCellRuntime, WipLimitRange } from '../../types';
 import type { IWipLimitCellsBoardPageObject } from '../pageObject';
+import { wipLimitCellsBoardPageObjectToken } from '../pageObject';
+import { useWipLimitCellsRuntimeStore } from '../stores';
 import { getEmptyMatrix, cloneMatrix, findCellCoordinates, invertMatrix } from '../utils/matrix';
 import { calculateBorders } from '../utils/borders';
 import { getBadgeColor, getBadgeHtml } from '../utils/badge';
@@ -65,88 +68,86 @@ function addCellStatusClasses(
  * 4. Применяет стили и badge к ячейкам
  *
  * @param ranges - массив диапазонов WIP лимитов
- * @param pageObject - PageObject для работы с DOM
- * @param cssSelectorOfIssues - CSS селектор для поиска issues в ячейках
  * @param shouldCountIssue - функция для фильтрации issues по типу
  */
-export function renderWipLimitCells(
-  ranges: WipLimitRange[],
-  pageObject: IWipLimitCellsBoardPageObject,
-  cssSelectorOfIssues: string,
-  shouldCountIssue: ShouldCountIssueFn
-): void {
-  const allCells = pageObject.getAllCells();
-  const emptyMatrix = getEmptyMatrix(allCells.length, allCells[0]?.length || 0);
+export const renderWipLimitCells = createAction({
+  name: 'renderWipLimitCells',
+  handler(ranges: WipLimitRange[], shouldCountIssue: ShouldCountIssueFn): void {
+    const pageObject = this.di.inject(wipLimitCellsBoardPageObjectToken);
+    const { cssSelectorOfIssues } = useWipLimitCellsRuntimeStore.getState();
+    const allCells = pageObject.getAllCells();
+    const emptyMatrix = getEmptyMatrix(allCells.length, allCells[0]?.length || 0);
 
-  for (const range of ranges) {
-    let countIssues = 0;
-    const matrixRange = cloneMatrix(emptyMatrix);
-    const cellsRuntime: WipLimitCellRuntime[] = [];
+    for (const range of ranges) {
+      let countIssues = 0;
+      const matrixRange = cloneMatrix(emptyMatrix);
+      const cellsRuntime: WipLimitCellRuntime[] = [];
 
-    // Находим все ячейки диапазона и подсчитываем issues
-    for (const cell of range.cells) {
-      const cellDOM = pageObject.getCellElement(cell.swimlane, cell.column);
-      const cellRuntime: WipLimitCellRuntime = { ...cell };
+      // Находим все ячейки диапазона и подсчитываем issues
+      for (const cell of range.cells) {
+        const cellDOM = pageObject.getCellElement(cell.swimlane, cell.column);
+        const cellRuntime: WipLimitCellRuntime = { ...cell };
 
-      if (!cellDOM) {
-        cellRuntime.notFoundOnBoard = true;
+        if (!cellDOM) {
+          cellRuntime.notFoundOnBoard = true;
+          cellsRuntime.push(cellRuntime);
+          continue;
+        }
+
+        cellRuntime.DOM = cellDOM;
+        const issues = pageObject.getIssuesInCell(cellDOM, cssSelectorOfIssues);
+        const filteredIssues =
+          range.includedIssueTypes && range.includedIssueTypes.length > 0
+            ? issues.filter(issue => shouldCountIssue(issue, range.includedIssueTypes))
+            : issues;
+
+        countIssues += filteredIssues.length;
+
+        // Находим координаты ячейки в матрице
+        const coordinates = findCellCoordinates(allCells, matrixRange, cellDOM);
+        cellRuntime.x = coordinates.row;
+        cellRuntime.y = coordinates.col;
+
         cellsRuntime.push(cellRuntime);
-        continue;
       }
 
-      cellRuntime.DOM = cellDOM;
-      const issues = pageObject.getIssuesInCell(cellDOM, cssSelectorOfIssues);
-      const filteredIssues =
-        range.includedIssueTypes && range.includedIssueTypes.length > 0
-          ? issues.filter(issue => shouldCountIssue(issue, range.includedIssueTypes))
-          : issues;
+      // Инвертируем матрицу для вычисления границ
+      // invertMatrix возвращает матрицу, где 1 заменены на [Element], 0 остаются 0
+      const invertedMatrix = invertMatrix(allCells, matrixRange);
+      // Преобразуем в матрицу 0/1 для calculateBorders (0 если пусто, 1 если есть элемент)
+      const borderMatrix = invertedMatrix.map(row => row.map(cell => (Array.isArray(cell) ? 1 : 0)));
 
-      countIssues += filteredIssues.length;
+      // Вычисляем цвет badge
+      const badgeColor = getBadgeColor(countIssues, range.wipLimit);
 
-      // Находим координаты ячейки в матрице
-      const coordinates = findCellCoordinates(allCells, matrixRange, cellDOM);
-      cellRuntime.x = coordinates.row;
-      cellRuntime.y = coordinates.col;
+      // Применяем стили и badge к ячейкам
+      for (const cellRuntime of cellsRuntime) {
+        if (cellRuntime.notFoundOnBoard || !cellRuntime.DOM) {
+          continue;
+        }
 
-      cellsRuntime.push(cellRuntime);
-    }
+        const cellDOM = cellRuntime.DOM;
 
-    // Инвертируем матрицу для вычисления границ
-    // invertMatrix возвращает матрицу, где 1 заменены на [Element], 0 остаются 0
-    const invertedMatrix = invertMatrix(allCells, matrixRange);
-    // Преобразуем в матрицу 0/1 для calculateBorders (0 если пусто, 1 если есть элемент)
-    const borderMatrix = invertedMatrix.map(row => row.map(cell => (Array.isArray(cell) ? 1 : 0)));
+        // Добавляем класс disable если нужно
+        if (range.disable) {
+          pageObject.addCellClass(cellDOM, 'WipLimitCells_disable');
+        }
 
-    // Вычисляем цвет badge
-    const badgeColor = getBadgeColor(countIssues, range.wipLimit);
+        // Вычисляем границы ячейки
+        if (cellRuntime.x !== undefined && cellRuntime.y !== undefined) {
+          cellRuntime.border = calculateBorders(cellRuntime.x, cellRuntime.y, borderMatrix);
+          addCellBorderClasses(cellDOM, cellRuntime.border, pageObject);
+        }
 
-    // Применяем стили и badge к ячейкам
-    for (const cellRuntime of cellsRuntime) {
-      if (cellRuntime.notFoundOnBoard || !cellRuntime.DOM) {
-        continue;
-      }
+        // Добавляем классы статуса лимита
+        addCellStatusClasses(cellDOM, countIssues, range.wipLimit, pageObject);
 
-      const cellDOM = cellRuntime.DOM;
-
-      // Добавляем класс disable если нужно
-      if (range.disable) {
-        pageObject.addCellClass(cellDOM, 'WipLimitCells_disable');
-      }
-
-      // Вычисляем границы ячейки
-      if (cellRuntime.x !== undefined && cellRuntime.y !== undefined) {
-        cellRuntime.border = calculateBorders(cellRuntime.x, cellRuntime.y, borderMatrix);
-        addCellBorderClasses(cellDOM, cellRuntime.border, pageObject);
-      }
-
-      // Добавляем классы статуса лимита
-      addCellStatusClasses(cellDOM, countIssues, range.wipLimit, pageObject);
-
-      // Вставляем badge если нужно
-      if (cellRuntime.showBadge) {
-        const badgeHtml = getBadgeHtml(countIssues, range.wipLimit, badgeColor);
-        pageObject.insertBadge(cellDOM, badgeHtml);
+        // Вставляем badge если нужно
+        if (cellRuntime.showBadge) {
+          const badgeHtml = getBadgeHtml(countIssues, range.wipLimit, badgeColor);
+          pageObject.insertBadge(cellDOM, badgeHtml);
+        }
       }
     }
-  }
-}
+  },
+});

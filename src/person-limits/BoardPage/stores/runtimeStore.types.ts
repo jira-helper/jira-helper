@@ -6,7 +6,8 @@ export type PersonLimitStats = {
   id: number;
   person: {
     name: string;
-    displayName: string;
+    /** @deprecated Use `name` instead. */
+    displayName?: string;
     avatar: string;
   };
   limit: number;

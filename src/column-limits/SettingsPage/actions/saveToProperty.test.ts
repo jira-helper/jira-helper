@@ -1,25 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { globalContainer } from 'dioma';
+import { registerLogger } from 'src/shared/Logger';
+import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
+import { updateBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { saveToProperty } from './saveToProperty';
 import { useColumnLimitsPropertyStore } from '../../property/store';
 import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
 
-vi.mock('src/routing', () => ({
-  getBoardIdFromURL: vi.fn(() => '123'),
-}));
-
-vi.mock('src/shared/jiraApi', () => ({
-  updateBoardProperty: vi.fn(),
-}));
-
-vi.mock('../../property', () => ({
-  saveColumnLimitsProperty: vi.fn(() => Promise.resolve()),
-}));
-
 describe('saveToProperty', () => {
   beforeEach(() => {
+    // Setup DI container
+    globalContainer.reset();
+    registerLogger(globalContainer);
+    globalContainer.register({
+      token: getBoardIdFromURLToken,
+      value: () => '123',
+    });
+    globalContainer.register({
+      token: updateBoardPropertyToken,
+      value: vi.fn(),
+    });
+
     useColumnLimitsPropertyStore.getState().actions.reset();
     useColumnLimitsSettingsUIStore.setState(useColumnLimitsSettingsUIStore.getInitialState());
-    vi.clearAllMocks();
   });
 
   it('should build WipLimitsProperty from UI store and write to property store', async () => {

@@ -12,5 +12,4 @@ export const initFromProperty = (): void => {
   uiStore.actions.setLimits([...propertyStore.data.limits]);
   uiStore.actions.setEditingId(null);
   uiStore.actions.setFormData(null);
-  uiStore.actions.setCheckedIds([]);
 };

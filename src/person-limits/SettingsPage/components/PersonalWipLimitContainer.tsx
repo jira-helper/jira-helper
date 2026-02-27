@@ -3,12 +3,15 @@
 /* eslint-disable react/button-has-type */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Alert, Form, Input, InputNumber, Button, Space, Row, Col, Checkbox } from 'antd';
+import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';
+import type { SearchUsers } from 'src/shared/di/jiraApiTokens';
 import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
+import { PersonNameSelect } from './PersonNameSelect';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { FormData, Column, Swimlane } from '../state/types';
+import type { SelectedPerson } from '../stores/settingsUIStore.types';
 import { settingsJiraDOM } from '../constants';
 
 const TEXTS = {
@@ -19,22 +22,21 @@ const TEXTS = {
 };
 
 export interface PersonalWipLimitContainerProps {
-  // Available options
   columns: Column[];
   swimlanes: Swimlane[];
-
-  // Callbacks
+  searchUsers: SearchUsers;
   onAddLimit: (data: FormData) => void;
 }
 
 export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps> = ({
   columns,
   swimlanes,
+  searchUsers,
   onAddLimit,
 }) => {
   // Zustand automatically subscribes component to changes
   const { data, actions } = useSettingsUIStore();
-  const { limits, checkedIds, editingId, formData } = data;
+  const { limits, editingId, formData } = data;
   const texts = useGetTextsByLocale(TEXTS);
   const [form] = Form.useForm();
 
@@ -50,7 +52,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // Default form values (all columns and swimlanes selected; ids as strings for Checkbox.Group)
   const defaultFormData = useMemo<FormData>(
     () => ({
-      personName: '',
+      person: null,
       limit: 1,
       selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: defaultSwimlaneIds,
@@ -64,28 +66,22 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // Initialize form when formData changes
   useEffect(() => {
     if (formData) {
-      // Editing mode - set form values from formData
-      // If selectedColumns/swimlanes are empty arrays, it means "all" - populate with all IDs
       const columnsToShow =
         formData.selectedColumns.length === 0
-          ? availableColumns.map(col => String(col.id)) // empty array = all columns
+          ? availableColumns.map(col => String(col.id))
           : formData.selectedColumns.map(String);
 
-      const swimlanesToShow =
-        formData.swimlanes.length === 0
-          ? defaultSwimlaneIds // empty array = all swimlanes
-          : formData.swimlanes.map(String);
+      const swimlanesToShow = formData.swimlanes.length === 0 ? defaultSwimlaneIds : formData.swimlanes.map(String);
 
       form.setFieldsValue({
-        personName: formData.personName,
+        person: formData.person,
         limit: formData.limit,
         selectedColumns: columnsToShow,
         swimlanes: swimlanesToShow,
       });
     } else {
-      // New limit mode - set defaults
       form.setFieldsValue({
-        personName: '',
+        person: null,
         limit: 1,
         selectedColumns: defaultFormData.selectedColumns,
         swimlanes: defaultFormData.swimlanes,
@@ -100,26 +96,30 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   );
   const [resetCounter, setResetCounter] = useState(0);
 
-  // Track previous editingId to detect mode changes (not formData changes)
+  // Track previous editingId and formData null-ness to detect mode changes
   const prevEditingIdRef = useRef<number | null>(null);
+  const prevIsFormDataNullRef = useRef(formData === null);
 
-  // Reset issue types when switching between add/edit modes (only when editingId changes)
+  const isFormDataNull = formData === null;
+
+  // Reset issue types when switching between add/edit modes or after successful add
   useEffect(() => {
     const editingIdChanged = prevEditingIdRef.current !== editingId;
     prevEditingIdRef.current = editingId;
 
-    // Only reset state when editingId actually changes (mode switch), not on formData changes
-    if (!editingIdChanged) {
-      // formData changed but editingId didn't - don't reset user input
+    // Detect formData clearing (non-null → null) for the "Add" mode reset case:
+    // when editingId stays null but addLimit sets formData to null
+    const formDataCleared = !prevIsFormDataNullRef.current && isFormDataNull;
+    prevIsFormDataNullRef.current = isFormDataNull;
+
+    if (!editingIdChanged && !formDataCleared) {
       return;
     }
 
-    // Reset logic only runs when editingId changes
     if (editingId === null) {
-      // Reset to defaults when exiting edit mode or after successful add
       setSelectedTypes([]);
       setCountAllTypes(true);
-      setResetCounter(prev => prev + 1); // Force remount of IssueTypeSelector
+      setResetCounter(prev => prev + 1);
     } else if (formData?.includedIssueTypes) {
       setSelectedTypes(formData.includedIssueTypes);
       setCountAllTypes(false);
@@ -127,7 +127,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       setSelectedTypes([]);
       setCountAllTypes(true);
     }
-  }, [editingId, formData?.includedIssueTypes]);
+  }, [editingId, isFormDataNull, formData?.includedIssueTypes]);
 
   // Track columns and swimlanes state for "All" checkboxes
   const [columnsValue, setColumnsValue] = useState<string[]>(currentFormData.selectedColumns);
@@ -194,49 +194,56 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
     }
   }, [editingId, formData, availableColumns, defaultSwimlaneIds, userToggledColumns, userToggledSwimlanes]);
 
-  // Reset toggle flags when editingId changes
+  // Reset toggle flags and clear validation errors when editingId changes
   useEffect(() => {
     setUserToggledColumns(false);
     setUserToggledSwimlanes(false);
-  }, [editingId]);
+    form.setFields([{ name: 'person', errors: [] }]);
+  }, [editingId, form]);
 
-  // Handle form field changes
+  // Handle form field changes — only update the specific field to avoid
+  // cross-contamination (e.g., swimlane change overwriting columns representation)
   const handleFormChange = (field: string, value: any) => {
-    const currentValues = form.getFieldsValue();
     const formDataForUpdate = formData || defaultFormData;
-    const newFormData: Partial<FormData> = {
+    actions.setFormData({
       ...formDataForUpdate,
-      ...currentValues,
       [field]: value,
-    };
-    actions.setFormData(newFormData as FormData);
+    } as FormData);
   };
 
   // Determine if edit button should be enabled
   const isEditMode = editingId !== null;
 
   // Handle form submit
-  const handleSubmit = (values: any) => {
-    // If all columns/swimlanes are selected, save empty array (meaning "all")
-    const columnsToSave =
-      values.selectedColumns?.length === availableColumns.length
-        ? [] // all selected = empty array (meaning "all")
-        : values.selectedColumns || [];
+  const handleSubmit = () => {
+    const currentPerson: SelectedPerson | null = currentFormData.person;
+    const values = form.getFieldsValue();
 
-    const swimlanesToSave =
-      values.swimlanes?.length === defaultSwimlaneIds.length
-        ? [] // all selected = empty array (meaning "all")
-        : values.swimlanes || [];
+    const columnsToSave =
+      values.selectedColumns?.length === availableColumns.length ? [] : values.selectedColumns || [];
+
+    const swimlanesToSave = values.swimlanes?.length === defaultSwimlaneIds.length ? [] : values.swimlanes || [];
+
+    const issueTypesToCheck = selectedTypes.length > 0 && !countAllTypes ? selectedTypes : undefined;
+
+    if (!currentPerson) {
+      form.setFields([{ name: 'person', errors: ['Select a person'] }]);
+      return;
+    }
+
+    if (!isEditMode && actions.isDuplicate(currentPerson.name, columnsToSave, swimlanesToSave, issueTypesToCheck)) {
+      form.setFields([{ name: 'person', errors: ['A limit with the same filters already exists for this person'] }]);
+      return;
+    }
 
     const formDataToSubmit: FormData = {
-      personName: values.personName || '',
+      person: currentPerson,
       limit: values.limit || 0,
       selectedColumns: columnsToSave,
       swimlanes: swimlanesToSave,
       ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
     };
 
-    // onAddLimit callback will check editingId and handle add/edit accordingly
     onAddLimit(formDataToSubmit);
   };
 
@@ -246,15 +253,20 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
         <Alert type="warning" showIcon style={{ marginBottom: 16 }} message={<span>{texts.avatarWarning}</span>} />
         <Row gutter={16}>
           <Col span={12} style={{ paddingRight: 8 }}>
-            <Form.Item label="Person JIRA name" name="personName">
-              <Input
+            <Form.Item label="Person JIRA name" name="person" rules={[{ required: true, message: 'Select a person' }]}>
+              <PersonNameSelect
                 id={settingsJiraDOM.idPersonName}
-                placeholder=""
-                onChange={e => handleFormChange('personName', e.target.value)}
+                searchUsers={searchUsers}
+                value={currentFormData.person}
+                onChange={person => handleFormChange('person', person)}
               />
             </Form.Item>
 
-            <Form.Item label="Max issues at work" name="limit">
+            <Form.Item
+              label="Max issues at work"
+              name="limit"
+              rules={[{ required: true, type: 'number', min: 1, message: 'Limit must be at least 1' }]}
+            >
               <InputNumber
                 id={settingsJiraDOM.idLimit}
                 style={{ width: '100%' }}
@@ -338,31 +350,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                     />
                   </div>
                 )}
-                <Button
-                  id={settingsJiraDOM.idApplyColumnSelect}
-                  type="link"
-                  style={{ padding: 0 }}
-                  onClick={() => {
-                    const values = form.getFieldsValue();
-                    const formDataForApply: FormData = {
-                      personName: values.personName || '',
-                      limit: values.limit || 0,
-                      selectedColumns: values.selectedColumns || [],
-                      swimlanes: values.swimlanes || [],
-                      ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
-                    };
-                    // Apply columns to selected limits
-                    const columnsToApply = formDataForApply.selectedColumns
-                      .map(id => {
-                        const col = columns.find(c => c.id === id);
-                        return col ? { id: col.id, name: col.name } : null;
-                      })
-                      .filter((col): col is { id: string; name: string } => col !== null);
-                    actions.applyColumnsToSelected(columnsToApply);
-                  }}
-                >
-                  Apply columns for selected users
-                </Button>
               </div>
             </Form.Item>
 
@@ -428,31 +415,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                     />
                   </div>
                 )}
-                <Button
-                  id={settingsJiraDOM.idApplySwimlaneSelect}
-                  type="link"
-                  style={{ padding: 0 }}
-                  onClick={() => {
-                    const values = form.getFieldsValue();
-                    const formDataForApply: FormData = {
-                      personName: values.personName || '',
-                      limit: values.limit || 0,
-                      selectedColumns: values.selectedColumns || [],
-                      swimlanes: values.swimlanes || [],
-                      ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
-                    };
-                    // Apply swimlanes to selected limits
-                    const swimlanesToApply = formDataForApply.swimlanes
-                      .map(id => {
-                        const swim = swimlanes.find(s => (s as any).id === id || s.name === id);
-                        return swim ? { id: (swim as any).id || swim.name, name: swim.name } : null;
-                      })
-                      .filter((swim): swim is { id: string; name: string } => swim !== null);
-                    actions.applySwimlanesToSelected(swimlanesToApply);
-                  }}
-                >
-                  Apply swimlanes for selected users
-                </Button>
               </div>
             </Form.Item>
           </Col>
@@ -477,14 +439,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
           limits={limits}
           onDelete={(id: number) => actions.deleteLimit(id)}
           onEdit={(id: number) => actions.setEditingId(id)}
-          onCheckboxChange={(id: number, checked: boolean) => {
-            if (checked) {
-              actions.toggleChecked(id);
-            } else {
-              actions.setCheckedIds(checkedIds.filter(pid => pid !== id));
-            }
-          }}
-          checkedIds={checkedIds}
         />
       </div>
     </>

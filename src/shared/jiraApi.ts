@@ -262,8 +262,18 @@ export const loadFlaggedIssues = async (keys: string[]): Promise<any> => {
   return internalSearchIssues(`key in (${keys.join(',')})&fields=${flagField}`).then(getFlaggedIssues(flagField!));
 };
 
-// Fetch user based on a query
-export const getUser = (query: string): Promise<any> =>
+export type JiraUser = {
+  name: string;
+  displayName: string;
+  avatarUrls: Record<string, string>;
+  self: string;
+};
+
+/**
+ * Search users via Jira API. Returns an array of matching users.
+ * Tries both `query` and `username` params (Cloud vs Server compatibility).
+ */
+export const searchUsers = (query: string): Promise<JiraUser[]> =>
   Promise.allSettled([
     requestJira({
       url: 'api/2/user/search',
@@ -275,20 +285,24 @@ export const getUser = (query: string): Promise<any> =>
       query: { username: query },
       type: 'json',
     }),
-  ])
-    .then(([res1, res2]) => {
-      if (res1.status === 'fulfilled') return res1.value;
-      if (res2.status === 'fulfilled') return res2.value;
-    })
-    .then((users: any[]) => {
-      if (!query) return users[0];
+  ]).then(([res1, res2]) => {
+    if (res1.status === 'fulfilled' && Array.isArray(res1.value) && res1.value.length > 0) return res1.value;
+    if (res2.status === 'fulfilled' && Array.isArray(res2.value)) return res2.value;
+    return [];
+  });
 
-      const exactMatch = users.find(user => user.name === query || user.displayName === query);
-      if (exactMatch) return exactMatch;
+// Fetch user based on a query (returns single best match)
+export const getUser = (query: string): Promise<any> =>
+  searchUsers(query).then((users: JiraUser[]) => {
+    if (!users.length) return undefined;
+    if (!query) return users[0];
 
-      const substringMatch = users.find(user => user.name?.includes(query) || user.displayName?.includes(query));
-      return substringMatch || users[0];
-    });
+    const exactMatch = users.find(user => user.name === query || user.displayName === query);
+    if (exactMatch) return exactMatch;
+
+    const substringMatch = users.find(user => user.name?.includes(query) || user.displayName?.includes(query));
+    return substringMatch || users[0];
+  });
 
 export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> => {
   const result = await requestJiraViaFetch(`api/2/issue/${issueId}`, options, 5);

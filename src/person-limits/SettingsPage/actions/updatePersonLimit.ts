@@ -28,11 +28,14 @@ export function updatePersonLimit({
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,
-    // Update person name if changed, preserve other person data
-    person: {
-      ...existingLimit.person,
-      name: formData.personName || existingLimit.person.name,
-    },
+    person: formData.person
+      ? {
+          name: formData.person.name,
+          displayName: formData.person.displayName,
+          avatar: formData.person.avatar,
+          self: formData.person.self,
+        }
+      : existingLimit.person,
   };
 
   // Update or remove includedIssueTypes

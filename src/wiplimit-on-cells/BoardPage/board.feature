@@ -19,8 +19,8 @@ Feature: WIP Limit on Cells Board Display
 
   # === BADGE DISPLAY ===
 
-  @SC1
-  Scenario: SC1: Show badge with issue count and limit on cell with showBadge enabled
+  @SC-BADGE-1
+  Scenario: SC-BADGE-1: Show badge with issue count and limit on cell with showBadge enabled
     Given there is a range "Critical Path" with WIP limit 5
     And the range has cells:
       | swimlane | column | showBadge |
@@ -32,8 +32,8 @@ Feature: WIP Limit on Cells Board Display
     Then the cell "sw1 / col2" should show a badge "4/5"
     And the cell "sw2 / col2" should not show a badge
 
-  @SC2
-  Scenario: SC2: Badge counts issues across all cells in range
+  @SC-BADGE-2
+  Scenario: SC-BADGE-2: Badge counts issues across all cells in range
     Given there is a range "Sprint Work" with WIP limit 10
     And the range has cells:
       | swimlane | column | showBadge |
@@ -48,24 +48,24 @@ Feature: WIP Limit on Cells Board Display
 
   # === COLOR INDICATORS ===
 
-  @SC3
-  Scenario: SC3: Green badge when within limit
+  @SC-COLOR-1
+  Scenario: SC-COLOR-1: Green badge when within limit
     Given there is a range "My Range" with WIP limit 5
     And the range has a cell "sw1 / col2" with showBadge enabled
     And there are 3 issues in the range cells
     When the board is displayed
     Then the badge should have green background color "#1b855c"
 
-  @SC4
-  Scenario: SC4: Yellow badge when at limit
+  @SC-COLOR-2
+  Scenario: SC-COLOR-2: Yellow badge when at limit
     Given there is a range "My Range" with WIP limit 5
     And the range has a cell "sw1 / col2" with showBadge enabled
     And there are 5 issues in the range cells
     When the board is displayed
     Then the badge should have yellow background color "#ffd700"
 
-  @SC5
-  Scenario: SC5: Red badge when exceeding limit
+  @SC-COLOR-3
+  Scenario: SC-COLOR-3: Red badge when exceeding limit
     Given there is a range "My Range" with WIP limit 5
     And the range has a cell "sw1 / col2" with showBadge enabled
     And there are 7 issues in the range cells
@@ -74,8 +74,8 @@ Feature: WIP Limit on Cells Board Display
 
   # === CELL BACKGROUND ===
 
-  @SC6
-  Scenario: SC6: Red background on cells exceeding limit
+  @SC-BG-1
+  Scenario: SC-BG-1: Red background on cells exceeding limit
     Given there is a range "My Range" with WIP limit 3
     And the range has cells "sw1 / col2" and "sw2 / col2"
     And there are 5 issues total in the range cells
@@ -83,8 +83,8 @@ Feature: WIP Limit on Cells Board Display
     Then all cells in the range should have red background overlay
     And the cells should have class "WipLimit_NotRespected"
 
-  @SC7
-  Scenario: SC7: No background change when within limit
+  @SC-BG-2
+  Scenario: SC-BG-2: No background change when within limit
     Given there is a range "My Range" with WIP limit 10
     And the range has cells "sw1 / col2" and "sw2 / col2"
     And there are 5 issues total in the range cells
@@ -94,15 +94,15 @@ Feature: WIP Limit on Cells Board Display
 
   # === DASHED BORDERS ===
 
-  @SC8
-  Scenario: SC8: Single cell gets all four borders
+  @SC-BORDER-1
+  Scenario: SC-BORDER-1: Single cell gets all four borders
     Given there is a range "Solo" with WIP limit 5
     And the range has only cell "sw1 / col2"
     When the board is displayed
     Then cell "sw1 / col2" should have dashed border on all sides (top, bottom, left, right)
 
-  @SC9
-  Scenario: SC9: Adjacent cells in same row share inner borders
+  @SC-BORDER-2
+  Scenario: SC-BORDER-2: Adjacent cells in same row share inner borders
     Given there is a range "Row Range" with WIP limit 10
     And the range has cells in the same swimlane:
       | swimlane | column |
@@ -114,8 +114,8 @@ Feature: WIP Limit on Cells Board Display
     And cell "sw1 / col3" should have dashed border on top, bottom, and right
     And cell "sw1 / col3" should not have dashed border on left
 
-  @SC10
-  Scenario: SC10: Adjacent cells in same column share inner borders
+  @SC-BORDER-3
+  Scenario: SC-BORDER-3: Adjacent cells in same column share inner borders
     Given there is a range "Column Range" with WIP limit 10
     And the range has cells in the same column:
       | swimlane | column |
@@ -127,8 +127,8 @@ Feature: WIP Limit on Cells Board Display
     And cell "sw2 / col2" should have dashed border on left, right, and bottom
     And cell "sw2 / col2" should not have dashed border on top
 
-  @SC11
-  Scenario: SC11: L-shaped range has correct borders
+  @SC-BORDER-4
+  Scenario: SC-BORDER-4: L-shaped range has correct borders
     Given there is a range "L-Shape" with WIP limit 10
     And the range has cells:
       | swimlane | column |
@@ -140,16 +140,16 @@ Feature: WIP Limit on Cells Board Display
 
   # === DISABLED RANGE ===
 
-  @SC12
-  Scenario: SC12: Disabled range shows diagonal stripe pattern
+  @SC-DISABLE-1
+  Scenario: SC-DISABLE-1: Disabled range shows diagonal stripe pattern
     Given there is a range "Blocked" with WIP limit 5 and disable flag set to true
     And the range has cell "sw1 / col2"
     When the board is displayed
     Then cell "sw1 / col2" should have the diagonal stripe pattern background
     And cell "sw1 / col2" should have class "WipLimitCells_disable"
 
-  @SC13
-  Scenario: SC13: Disabled range still shows borders but no limit indicators
+  @SC-DISABLE-2
+  Scenario: SC-DISABLE-2: Disabled range still shows borders but no limit indicators
     Given there is a range "Blocked" with WIP limit 5 and disable flag set to true
     And the range has cell "sw1 / col2"
     When the board is displayed
@@ -158,8 +158,8 @@ Feature: WIP Limit on Cells Board Display
 
   # === ISSUE TYPE FILTER ===
 
-  @SC14
-  Scenario: SC14: Count only specified issue types
+  @SC-FILTER-1
+  Scenario: SC-FILTER-1: Count only specified issue types
     Given there is a range "Bugs Only" with WIP limit 3
     And the range has includedIssueTypes "Bug, Task"
     And the range has cell "sw1 / col2" with showBadge enabled
@@ -173,8 +173,8 @@ Feature: WIP Limit on Cells Board Display
     Then the badge should show "3/3"
     And the "Story" issue should not be counted
 
-  @SC15
-  Scenario: SC15: Count all issues when no type filter is set
+  @SC-FILTER-2
+  Scenario: SC-FILTER-2: Count all issues when no type filter is set
     Given there is a range "All Types" with WIP limit 10
     And the range has no includedIssueTypes filter
     And the range has cell "sw1 / col2" with showBadge enabled
@@ -184,8 +184,8 @@ Feature: WIP Limit on Cells Board Display
 
   # === MULTIPLE RANGES ===
 
-  @SC16
-  Scenario: SC16: Multiple ranges displayed independently
+  @SC-MULTI-1
+  Scenario: SC-MULTI-1: Multiple ranges displayed independently
     Given there is a range "Range A" with WIP limit 3 and cell "sw1 / col2"
     And there is a range "Range B" with WIP limit 5 and cell "sw2 / col3"
     And there are 4 issues in cell "sw1 / col2"
@@ -198,8 +198,8 @@ Feature: WIP Limit on Cells Board Display
 
   # === DYNAMIC UPDATE ===
 
-  @SC17
-  Scenario: SC17: Board updates when issues are moved
+  @SC-UPDATE-1
+  Scenario: SC-UPDATE-1: Board updates when issues are moved
     Given there is a range "My Range" with WIP limit 3 and cell "sw1 / col2" with showBadge
     And there are 2 issues in cell "sw1 / col2"
     And the badge shows "2/3" with green color
@@ -207,8 +207,8 @@ Feature: WIP Limit on Cells Board Display
     Then the board should re-render
     And the badge should update to "3/3" with yellow color
 
-  @SC18
-  Scenario: SC18: Board updates when issues are removed
+  @SC-UPDATE-2
+  Scenario: SC-UPDATE-2: Board updates when issues are removed
     Given there is a range "My Range" with WIP limit 3 and cell "sw1 / col2" with showBadge
     And there are 4 issues in cell "sw1 / col2"
     And the badge shows "4/3" with red color
@@ -216,10 +216,10 @@ Feature: WIP Limit on Cells Board Display
     Then the board should re-render
     And the badge should update to "3/3" with yellow color
 
-  # === CELL NOT FOUND ===
+  # === EDGE CASES ===
 
-  @SC19
-  Scenario: SC19: Skip cells not found on current board
+  @SC-EDGE-1
+  Scenario: SC-EDGE-1: Skip cells not found on current board
     Given there is a range "Mixed" with WIP limit 5
     And the range has cells:
       | swimlane | column |
@@ -231,10 +231,8 @@ Feature: WIP Limit on Cells Board Display
     Then cell "sw1 / col2" should show badge "3/5"
     And the non-existent cell should be silently skipped
 
-  # === NO SETTINGS ===
-
-  @SC20
-  Scenario: SC20: Board shows normally when no WIP limit settings exist
+  @SC-EDGE-2
+  Scenario: SC-EDGE-2: Board shows normally when no WIP limit settings exist
     Given there are no WIP limit on cells settings configured
     When the board is displayed
     Then no WIP limit badges should be shown

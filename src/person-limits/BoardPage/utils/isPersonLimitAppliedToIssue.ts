@@ -4,7 +4,7 @@ import type { PersonLimitStats } from '../stores';
  * Checks if a person's WIP limit applies to a given issue.
  *
  * The limit applies when ALL conditions are met:
- * 1. Assignee matches the person (by displayName or name)
+ * 1. Assignee matches the person (by name, or legacy displayName)
  * 2. Issue is in one of the specified columns (or all columns if empty)
  * 3. Issue is in one of the specified swimlanes (or all swimlanes if empty)
  * 4. Issue type matches one of the included types (or all types if empty/undefined)
@@ -35,7 +35,8 @@ export const isPersonLimitAppliedToIssue = (
   issueType?: string | null
 ): boolean => {
   // 1. Check assignee match
-  const isAssigneeMatch = personLimit.person.displayName === assignee || personLimit.person.name === assignee;
+  const isAssigneeMatch =
+    personLimit.person.name === assignee || (personLimit.person.displayName != null && personLimit.person.displayName === assignee);
   if (!isAssigneeMatch) return false;
 
   // 2. Check column match (empty array = all columns)

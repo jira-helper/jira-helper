@@ -29,8 +29,12 @@ vi.mock('../../actions', () => ({
 vi.mock('../SettingsModal', () => ({
   SettingsModalContainer: ({ onClose, onSave }: any) => (
     <div data-testid="mock-modal">
-      <button onClick={onClose}>Close</button>
-      <button onClick={onSave}>Save</button>
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
+      <button type="button" onClick={onSave}>
+        Save
+      </button>
     </div>
   ),
 }));

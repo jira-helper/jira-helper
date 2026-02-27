@@ -8,8 +8,12 @@
  *
  * Validate with: node scripts/validate-feature-tests.mjs
  */
+import { globalContainer } from 'dioma';
+import { registerLogger } from 'src/shared/Logger';
 import { renderWipLimitCells } from './actions/renderWipLimitCells';
 import type { IWipLimitCellsBoardPageObject } from './pageObject';
+import { wipLimitCellsBoardPageObjectToken } from './pageObject';
+import { useWipLimitCellsRuntimeStore, getInitialState } from './stores';
 import type { WipLimitRange } from '../../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
 
@@ -187,11 +191,27 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // Background
   beforeEach(() => {
+    // Reset DI container
+    globalContainer.reset();
+    registerLogger(globalContainer);
+
+    // Reset runtime store
+    useWipLimitCellsRuntimeStore.getState().actions.reset();
+
     // Given the board is loaded
     const board = createMockBoard();
     container = board.container;
     cells = board.cells;
     pageObject = createMockPageObject(cells);
+
+    // Register PageObject in DI
+    globalContainer.register({
+      token: wipLimitCellsBoardPageObjectToken,
+      value: pageObject,
+    });
+
+    // Set CSS selector in runtime store
+    useWipLimitCellsRuntimeStore.getState().actions.setCssSelectorOfIssues('.ghx-issue');
 
     // Mount container to DOM for Cypress
     cy.then(() => {
@@ -212,7 +232,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === BADGE DISPLAY ===
 
-  Scenario('SC1: Show badge with issue count and limit on cell with showBadge enabled', () => {
+  Scenario('SC-BADGE-1: Show badge with issue count and limit on cell with showBadge enabled', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Critical Path" with WIP limit 5', () => {
@@ -246,7 +266,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -268,7 +288,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC2: Badge counts issues across all cells in range', () => {
+  Scenario('SC-BADGE-2: Badge counts issues across all cells in range', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Sprint Work" with WIP limit 10', () => {
@@ -310,7 +330,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -329,7 +349,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === COLOR INDICATORS ===
 
-  Scenario('SC3: Green badge when within limit', () => {
+  Scenario('SC-COLOR-1: Green badge when within limit', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 5', () => {
@@ -353,7 +373,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -367,7 +387,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC4: Yellow badge when at limit', () => {
+  Scenario('SC-COLOR-2: Yellow badge when at limit', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 5', () => {
@@ -391,7 +411,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -405,7 +425,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC5: Red badge when exceeding limit', () => {
+  Scenario('SC-COLOR-3: Red badge when exceeding limit', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 5', () => {
@@ -429,7 +449,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -445,7 +465,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === CELL BACKGROUND ===
 
-  Scenario('SC6: Red background on cells exceeding limit', () => {
+  Scenario('SC-BG-1: Red background on cells exceeding limit', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 3', () => {
@@ -476,7 +496,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -504,7 +524,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC7: No background change when within limit', () => {
+  Scenario('SC-BG-2: No background change when within limit', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 10', () => {
@@ -535,7 +555,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -567,7 +587,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === DASHED BORDERS ===
 
-  Scenario('SC8: Single cell gets all four borders', () => {
+  Scenario('SC-BORDER-1: Single cell gets all four borders', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Solo" with WIP limit 5', () => {
@@ -584,7 +604,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -600,7 +620,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC9: Adjacent cells in same row share inner borders', () => {
+  Scenario('SC-BORDER-2: Adjacent cells in same row share inner borders', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Row Range" with WIP limit 10', () => {
@@ -620,7 +640,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -661,7 +681,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC10: Adjacent cells in same column share inner borders', () => {
+  Scenario('SC-BORDER-3: Adjacent cells in same column share inner borders', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Column Range" with WIP limit 10', () => {
@@ -681,7 +701,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -722,7 +742,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC11: L-shaped range has correct borders', () => {
+  Scenario('SC-BORDER-4: L-shaped range has correct borders', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "L-Shape" with WIP limit 10', () => {
@@ -743,7 +763,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -778,7 +798,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === DISABLED RANGE ===
 
-  Scenario('SC12: Disabled range shows diagonal stripe pattern', () => {
+  Scenario('SC-DISABLE-1: Disabled range shows diagonal stripe pattern', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Blocked" with WIP limit 5 and disable flag set to true', () => {
@@ -796,7 +816,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -819,7 +839,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC13: Disabled range still shows borders but no limit indicators', () => {
+  Scenario('SC-DISABLE-2: Disabled range still shows borders but no limit indicators', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Blocked" with WIP limit 5 and disable flag set to true', () => {
@@ -837,7 +857,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -866,7 +886,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === ISSUE TYPE FILTER ===
 
-  Scenario('SC14: Count only specified issue types', () => {
+  Scenario('SC-FILTER-1: Count only specified issue types', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Bugs Only" with WIP limit 3', () => {
@@ -895,7 +915,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -917,7 +937,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC15: Count all issues when no type filter is set', () => {
+  Scenario('SC-FILTER-2: Count all issues when no type filter is set', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "All Types" with WIP limit 10', () => {
@@ -945,7 +965,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -960,7 +980,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === MULTIPLE RANGES ===
 
-  Scenario('SC16: Multiple ranges displayed independently', () => {
+  Scenario('SC-MULTI-1: Multiple ranges displayed independently', () => {
     let rangeA: WipLimitRange;
     let rangeB: WipLimitRange;
 
@@ -996,7 +1016,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([rangeA, rangeB], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([rangeA, rangeB], shouldCountIssue);
       });
     });
 
@@ -1042,7 +1062,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
   // === DYNAMIC UPDATE ===
 
-  Scenario('SC17: Board updates when issues are moved', () => {
+  Scenario('SC-UPDATE-1: Board updates when issues are moved', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 3 and cell "sw1 / col2" with showBadge', () => {
@@ -1062,7 +1082,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('And the badge shows "2/3" with green color', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
         const cell = cells.get('sw1/col2');
         expect(cell).to.exist;
         expect(cellHasBadge(cell!, '2/3')).to.be.true;
@@ -1077,7 +1097,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
         if (cell) {
           addIssuesToCell(cell, ['3']);
           // Re-render to update badge
-          renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+          renderWipLimitCells([range], shouldCountIssue);
         }
       });
     });
@@ -1097,7 +1117,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  Scenario('SC18: Board updates when issues are removed', () => {
+  Scenario('SC-UPDATE-2: Board updates when issues are removed', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "My Range" with WIP limit 3 and cell "sw1 / col2" with showBadge', () => {
@@ -1117,7 +1137,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('And the badge shows "4/3" with red color', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
         const cell = cells.get('sw1/col2');
         expect(cell).to.exist;
         expect(cellHasBadge(cell!, '4/3')).to.be.true;
@@ -1136,7 +1156,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
             issue.remove();
           }
           // Re-render to update badge
-          renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+          renderWipLimitCells([range], shouldCountIssue);
         }
       });
     });
@@ -1156,9 +1176,9 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  // === CELL NOT FOUND ===
+  // === EDGE CASES ===
 
-  Scenario('SC19: Skip cells not found on current board', () => {
+  Scenario('SC-EDGE-1: Skip cells not found on current board', () => {
     let range: WipLimitRange;
 
     Step('Given there is a range "Mixed" with WIP limit 5', () => {
@@ -1189,7 +1209,7 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([range], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([range], shouldCountIssue);
       });
     });
 
@@ -1214,16 +1234,14 @@ describe('Feature: WIP Limit on Cells Board Display', () => {
     });
   });
 
-  // === NO SETTINGS ===
-
-  Scenario('SC20: Board shows normally when no WIP limit settings exist', () => {
+  Scenario('SC-EDGE-2: Board shows normally when no WIP limit settings exist', () => {
     Step('Given there are no WIP limit on cells settings configured', () => {
       // No ranges defined
     });
 
     Step('When the board is displayed', () => {
       cy.then(() => {
-        renderWipLimitCells([], pageObject, '.ghx-issue', shouldCountIssue);
+        renderWipLimitCells([], shouldCountIssue);
       });
     });
 

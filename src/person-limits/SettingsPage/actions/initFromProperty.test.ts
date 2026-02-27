@@ -27,13 +27,11 @@ describe('initFromProperty', () => {
     usePersonWipLimitsPropertyStore.getState().actions.setData({ limits: [limit] });
     useSettingsUIStore.getState().actions.setEditingId(1);
     useSettingsUIStore.getState().actions.setFormData({
-      personName: 'u',
+      person: { name: 'u', displayName: 'u', avatar: '', self: '' },
       limit: 5,
       selectedColumns: [],
       swimlanes: [],
     });
-    useSettingsUIStore.getState().actions.setCheckedIds([1]);
-
     initFromProperty();
 
     const uiState = useSettingsUIStore.getState();
@@ -41,13 +39,12 @@ describe('initFromProperty', () => {
     expect(uiState.data.limits[0].limit).toBe(5);
     expect(uiState.data.editingId).toBeNull();
     expect(uiState.data.formData).toBeNull();
-    expect(uiState.data.checkedIds).toEqual([]);
   });
 
   it('should reset UI store when property store is empty', () => {
     useSettingsUIStore.getState().actions.setEditingId(1);
     useSettingsUIStore.getState().actions.setFormData({
-      personName: 'u',
+      person: { name: 'u', displayName: 'u', avatar: '', self: '' },
       limit: 5,
       selectedColumns: [],
       swimlanes: [],

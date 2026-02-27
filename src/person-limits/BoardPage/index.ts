@@ -13,8 +13,9 @@ type PersonLimitData = {
   limits: Array<{
     id: number;
     person: {
-      displayName: string;
       name: string;
+      displayName?: string;
+      self: string;
       avatar: string;
     };
     columns: Array<{ id: string; name: string }>;

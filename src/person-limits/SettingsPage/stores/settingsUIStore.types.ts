@@ -1,7 +1,14 @@
 import type { PersonLimit } from '../../property/types';
 
+export type SelectedPerson = {
+  name: string;
+  displayName: string;
+  avatar: string;
+  self: string;
+};
+
 export type FormData = {
-  personName: string;
+  person: SelectedPerson | null;
   limit: number;
   selectedColumns: string[];
   swimlanes: string[];
@@ -10,7 +17,6 @@ export type FormData = {
 
 export type SettingsUIData = {
   limits: PersonLimit[];
-  checkedIds: number[];
   editingId: number | null;
   formData: FormData | null;
 };
@@ -25,12 +31,9 @@ export interface SettingsUIStoreState {
     addLimit: (limit: PersonLimit) => void;
     updateLimit: (id: number, limit: PersonLimit) => void;
     deleteLimit: (id: number) => void;
-    setCheckedIds: (ids: number[]) => void;
-    toggleChecked: (id: number) => void;
     setEditingId: (id: number | null) => void;
     setFormData: (formData: FormData | null) => void;
-    applyColumnsToSelected: (columns: Array<{ id: string; name: string }>) => void;
-    applySwimlanesToSelected: (swimlanes: Array<{ id: string; name: string }>) => void;
+    isDuplicate: (personName: string, columns: string[], swimlanes: string[], issueTypes?: string[]) => boolean;
     reset: () => void;
   };
 }

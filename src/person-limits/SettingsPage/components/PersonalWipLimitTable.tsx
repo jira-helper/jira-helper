@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Button, Space } from 'antd';
+import { Table, Button, Space } from 'antd';
 import type { PersonLimit } from '../state/types';
 import { settingsJiraDOM } from '../constants';
 
@@ -7,33 +7,14 @@ export interface PersonalWipLimitTableProps {
   limits: PersonLimit[];
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
-  onCheckboxChange: (id: number, checked: boolean) => void;
-  checkedIds: number[];
 }
 
-export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
-  limits,
-  onDelete,
-  onEdit,
-  onCheckboxChange,
-  checkedIds,
-}) => {
+export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ limits, onDelete, onEdit }) => {
   const columns = [
     {
-      title: '',
-      key: 'checkbox',
-      width: 50,
-      render: (_: any, record: PersonLimit) => (
-        <Checkbox
-          checked={checkedIds.includes(Number(record.id))}
-          onChange={e => onCheckboxChange(Number(record.id), e.target.checked)}
-        />
-      ),
-    },
-    {
       title: 'Person',
-      dataIndex: ['person', 'displayName'],
       key: 'person',
+      render: (_: any, record: PersonLimit) => record.person.displayName || record.person.name,
     },
     {
       title: 'Limit',

@@ -4,7 +4,6 @@ import type { SettingsUIData, SettingsUIStoreState } from './settingsUIStore.typ
 
 const initialData: SettingsUIData = {
   limits: [],
-  checkedIds: [],
   editingId: null,
   formData: null,
 };
@@ -54,29 +53,9 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
       set(
         produce(state => {
           state.data.limits = state.data.limits.filter((l: import('../../property/types').PersonLimit) => l.id !== id);
-          state.data.checkedIds = state.data.checkedIds.filter((c: number) => c !== id);
           if (state.data.editingId === id) {
             state.data.editingId = null;
             state.data.formData = null;
-          }
-        })
-      ),
-
-    setCheckedIds: (ids: number[]) =>
-      set(
-        produce(state => {
-          state.data.checkedIds = ids;
-        })
-      ),
-
-    toggleChecked: (id: number) =>
-      set(
-        produce(state => {
-          const index = state.data.checkedIds.indexOf(id);
-          if (index === -1) {
-            state.data.checkedIds.push(id);
-          } else {
-            state.data.checkedIds.splice(index, 1);
           }
         })
       ),
@@ -95,7 +74,12 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
                   ? []
                   : limit.swimlanes.map((s: { id?: string; name: string }) => String(s.id ?? s.name));
               state.data.formData = {
-                personName: limit.person.name,
+                person: {
+                  name: limit.person.name,
+                  displayName: limit.person.displayName || limit.person.name,
+                  avatar: limit.person.avatar,
+                  self: limit.person.self,
+                },
                 limit: limit.limit,
                 selectedColumns,
                 swimlanes,
@@ -115,27 +99,28 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
         })
       ),
 
-    applyColumnsToSelected: (columns: Array<{ id: string; name: string }>) =>
-      set(
-        produce(state => {
-          state.data.limits.forEach((limit: import('../../property/types').PersonLimit) => {
-            if (state.data.checkedIds.includes(limit.id)) {
-              limit.columns = columns;
-            }
-          });
-        })
-      ),
+    isDuplicate: (personName: string, columns: string[], swimlanes: string[], issueTypes?: string[]): boolean => {
+      const { limits } = useSettingsUIStore.getState().data;
+      return limits.some(l => {
+        const nameMatch = l.person.name === personName;
 
-    applySwimlanesToSelected: (swimlanes: Array<{ id: string; name: string }>) =>
-      set(
-        produce(state => {
-          state.data.limits.forEach((limit: import('../../property/types').PersonLimit) => {
-            if (state.data.checkedIds.includes(limit.id)) {
-              limit.swimlanes = swimlanes;
-            }
-          });
-        })
-      ),
+        const existingColIds = l.columns.map(c => c.id).sort();
+        const newColIds = [...columns].sort();
+        const colMatch =
+          existingColIds.length === newColIds.length && existingColIds.every((id, i) => id === newColIds[i]);
+
+        const existingSwimIds = l.swimlanes.map(s => s.id).sort();
+        const newSwimIds = [...swimlanes].sort();
+        const swimMatch =
+          existingSwimIds.length === newSwimIds.length && existingSwimIds.every((id, i) => id === newSwimIds[i]);
+
+        const existingTypes = [...(l.includedIssueTypes || [])].sort();
+        const newTypes = [...(issueTypes || [])].sort();
+        const typeMatch =
+          existingTypes.length === newTypes.length && existingTypes.every((t, i) => t === newTypes[i]);
+        return nameMatch && colMatch && swimMatch && typeMatch;
+      });
+    },
 
     reset: () => set({ data: { ...initialData }, state: 'initial' }),
   },
@@ -143,7 +128,6 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
 
 const getInitialData = (): SettingsUIData => ({
   limits: [],
-  checkedIds: [],
   editingId: null,
   formData: null,
 });

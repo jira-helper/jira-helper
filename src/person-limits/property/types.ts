@@ -10,7 +10,8 @@ export type PersonLimit = {
   id: number;
   person: {
     name: string;
-    displayName: string;
+    /** @deprecated Use `name` instead. Kept optional for backward compatibility with old saved data. */
+    displayName?: string;
     self: string;
     avatar: string;
   };

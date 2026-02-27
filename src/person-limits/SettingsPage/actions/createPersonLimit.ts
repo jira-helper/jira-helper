@@ -14,7 +14,7 @@ export function createPersonLimit({
   formData: FormData;
   person: {
     name: string;
-    displayName: string;
+    displayName?: string;
     self: string;
     avatar: string;
   };

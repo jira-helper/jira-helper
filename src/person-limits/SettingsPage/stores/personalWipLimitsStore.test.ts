@@ -12,7 +12,6 @@ describe('settingsUIStore', () => {
     it('should have empty limits array', () => {
       const state = useSettingsUIStore.getState();
       expect(state.data.limits).toEqual([]);
-      expect(state.data.checkedIds).toEqual([]);
       expect(state.data.editingId).toBeNull();
       expect(state.data.formData).toBeNull();
       expect(state.state).toBe('initial');
@@ -68,7 +67,7 @@ describe('settingsUIStore', () => {
 
     it('should clear formData when adding a limit', () => {
       useSettingsUIStore.getState().actions.setFormData({
-        personName: 'test',
+        person: { name: 'test', displayName: 'test', avatar: '', self: '' },
         limit: 5,
         selectedColumns: [],
         swimlanes: [],
@@ -192,29 +191,6 @@ describe('settingsUIStore', () => {
       expect(state.data.limits[0].id).toBe(2);
     });
 
-    it('should remove limit from checkedIds when deleted', () => {
-      const limit: PersonLimit = {
-        id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
-        },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-      };
-
-      useSettingsUIStore.getState().actions.addLimit(limit);
-      useSettingsUIStore.getState().actions.setCheckedIds([1]);
-
-      useSettingsUIStore.getState().actions.deleteLimit(1);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.checkedIds).not.toContain(1);
-    });
-
     it('should clear editingId and formData if deleted limit was being edited', () => {
       const limit: PersonLimit = {
         id: 1,
@@ -240,33 +216,6 @@ describe('settingsUIStore', () => {
     });
   });
 
-  describe('setCheckedIds', () => {
-    it('should set checked IDs', () => {
-      useSettingsUIStore.getState().actions.setCheckedIds([1, 2, 3]);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.checkedIds).toEqual([1, 2, 3]);
-    });
-  });
-
-  describe('toggleChecked', () => {
-    it('should add ID to checkedIds if not present', () => {
-      useSettingsUIStore.getState().actions.toggleChecked(1);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.checkedIds).toContain(1);
-    });
-
-    it('should remove ID from checkedIds if present', () => {
-      useSettingsUIStore.getState().actions.setCheckedIds([1, 2]);
-      useSettingsUIStore.getState().actions.toggleChecked(1);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.checkedIds).not.toContain(1);
-      expect(state.data.checkedIds).toContain(2);
-    });
-  });
-
   describe('setEditingId', () => {
     it('should set editingId and formData when editing', () => {
       const limit: PersonLimit = {
@@ -289,7 +238,12 @@ describe('settingsUIStore', () => {
       const state = useSettingsUIStore.getState();
       expect(state.data.editingId).toBe(1);
       expect(state.data.formData).toEqual({
-        personName: 'testuser',
+        person: {
+          name: 'testuser',
+          displayName: 'Test User',
+          avatar: 'https://test.com/avatar.png',
+          self: 'https://test.com/user',
+        },
         limit: 5,
         selectedColumns: ['col1'],
         swimlanes: ['swim1'],
@@ -299,7 +253,7 @@ describe('settingsUIStore', () => {
 
     it('should clear formData when setting editingId to null', () => {
       useSettingsUIStore.getState().actions.setFormData({
-        personName: 'test',
+        person: { name: 'test', displayName: 'test', avatar: '', self: '' },
         limit: 5,
         selectedColumns: [],
         swimlanes: [],
@@ -316,7 +270,7 @@ describe('settingsUIStore', () => {
   describe('setFormData', () => {
     it('should set formData', () => {
       const formData = {
-        personName: 'testuser',
+        person: { name: 'testuser', displayName: 'testuser', avatar: '', self: '' },
         limit: 5,
         selectedColumns: ['col1'],
         swimlanes: ['swim1'],
@@ -326,88 +280,6 @@ describe('settingsUIStore', () => {
 
       const state = useSettingsUIStore.getState();
       expect(state.data.formData).toEqual(formData);
-    });
-  });
-
-  describe('applyColumnsToSelected', () => {
-    it('should apply columns to selected limits', () => {
-      const limit1: PersonLimit = {
-        id: 1,
-        person: {
-          name: 'testuser1',
-          displayName: 'Test User 1',
-          self: 'https://test.com/user1',
-          avatar: 'https://test.com/avatar1.png',
-        },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-      };
-
-      const limit2: PersonLimit = {
-        id: 2,
-        person: {
-          name: 'testuser2',
-          displayName: 'Test User 2',
-          self: 'https://test.com/user2',
-          avatar: 'https://test.com/avatar2.png',
-        },
-        limit: 10,
-        columns: [],
-        swimlanes: [],
-      };
-
-      useSettingsUIStore.getState().actions.addLimit(limit1);
-      useSettingsUIStore.getState().actions.addLimit(limit2);
-      useSettingsUIStore.getState().actions.setCheckedIds([1]);
-
-      const columns = [{ id: 'col1', name: 'Column 1' }];
-      useSettingsUIStore.getState().actions.applyColumnsToSelected(columns);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.limits[0].columns).toEqual(columns);
-      expect(state.data.limits[1].columns).toEqual([]);
-    });
-  });
-
-  describe('applySwimlanesToSelected', () => {
-    it('should apply swimlanes to selected limits', () => {
-      const limit1: PersonLimit = {
-        id: 1,
-        person: {
-          name: 'testuser1',
-          displayName: 'Test User 1',
-          self: 'https://test.com/user1',
-          avatar: 'https://test.com/avatar1.png',
-        },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-      };
-
-      const limit2: PersonLimit = {
-        id: 2,
-        person: {
-          name: 'testuser2',
-          displayName: 'Test User 2',
-          self: 'https://test.com/user2',
-          avatar: 'https://test.com/avatar2.png',
-        },
-        limit: 10,
-        columns: [],
-        swimlanes: [],
-      };
-
-      useSettingsUIStore.getState().actions.addLimit(limit1);
-      useSettingsUIStore.getState().actions.addLimit(limit2);
-      useSettingsUIStore.getState().actions.setCheckedIds([1]);
-
-      const swimlanes = [{ id: 'swim1', name: 'Swimlane 1' }];
-      useSettingsUIStore.getState().actions.applySwimlanesToSelected(swimlanes);
-
-      const state = useSettingsUIStore.getState();
-      expect(state.data.limits[0].swimlanes).toEqual(swimlanes);
-      expect(state.data.limits[1].swimlanes).toEqual([]);
     });
   });
 
@@ -427,7 +299,6 @@ describe('settingsUIStore', () => {
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
-      useSettingsUIStore.getState().actions.setCheckedIds([1]);
       useSettingsUIStore.getState().actions.setEditingId(1);
       useSettingsUIStore.getState().actions.setState('loaded');
 
@@ -435,7 +306,6 @@ describe('settingsUIStore', () => {
 
       const state = useSettingsUIStore.getState();
       expect(state.data.limits).toEqual([]);
-      expect(state.data.checkedIds).toEqual([]);
       expect(state.data.editingId).toBeNull();
       expect(state.data.formData).toBeNull();
       expect(state.state).toBe('initial');
@@ -544,9 +414,8 @@ describe('settingsUIStore', () => {
 
     describe('S3: addLimit очищает formData', () => {
       it('should clear formData after adding a limit', () => {
-        // Set some formData first
         useSettingsUIStore.getState().actions.setFormData({
-          personName: 'test',
+          person: { name: 'test', displayName: 'test', avatar: '', self: '' },
           limit: 5,
           selectedColumns: [],
           swimlanes: [],
@@ -622,9 +491,8 @@ describe('settingsUIStore', () => {
         // editingId should be null initially
         expect(useSettingsUIStore.getState().data.editingId).toBeNull();
 
-        // Set formData
         useSettingsUIStore.getState().actions.setFormData({
-          personName: 'test',
+          person: { name: 'test', displayName: 'test', avatar: '', self: '' },
           limit: 5,
           selectedColumns: [],
           swimlanes: [],
@@ -652,9 +520,8 @@ describe('settingsUIStore', () => {
         useSettingsUIStore.getState().actions.addLimit(limit);
         useSettingsUIStore.getState().actions.setEditingId(1);
 
-        // Set formData during edit
         useSettingsUIStore.getState().actions.setFormData({
-          personName: 'updated',
+          person: { name: 'updated', displayName: 'updated', avatar: '', self: '' },
           limit: 10,
           selectedColumns: [],
           swimlanes: [],
@@ -662,7 +529,7 @@ describe('settingsUIStore', () => {
 
         const state = useSettingsUIStore.getState();
         expect(state.data.editingId).toBe(1);
-        expect(state.data.formData?.personName).toBe('updated');
+        expect(state.data.formData?.person?.name).toBe('updated');
       });
     });
   });

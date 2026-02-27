@@ -4,13 +4,13 @@
  * These tests validate the store behavior against the feature specification.
  * They test store actions and state transitions in isolation.
  *
- * Feature file: ../settings.feature
+ * Feature file: ../SettingsPage.feature
  */
 import { expect } from 'vitest';
 import { loadFeature, describeFeature } from '@amiceli/vitest-cucumber';
 import { useWipLimitCellsSettingsUIStore } from './settingsUIStore';
 
-const feature = await loadFeature('src/wiplimit-on-cells/SettingsPage/settings.feature');
+const feature = await loadFeature('src/wiplimit-on-cells/SettingsPage/SettingsPage.feature');
 
 describeFeature(feature, ({ Background, Scenario }) => {
   // Test data
@@ -45,7 +45,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC1-SC3: UI SCENARIOS (not store logic) ===
 
-  Scenario('SC1: Open settings popup', ({ When, Then, And }) => {
+  Scenario('SC-MODAL-1: Open settings popup', ({ When, Then, And }) => {
     When('I click "Edit Wip limits by cells"', () => {
       // UI action - not store logic
     });
@@ -81,7 +81,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
-  Scenario('SC2: Save and close popup', ({ Given, And, When, Then }) => {
+  Scenario('SC-MODAL-2: Save and close popup', ({ Given, And, When, Then }) => {
     Given('I have opened the "Edit WipLimit on cells" popup', () => {
       // UI state - not store logic
     });
@@ -109,7 +109,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
-  Scenario('SC3: Cancel closes popup without saving', ({ Given, And, When, Then }) => {
+  Scenario('SC-MODAL-3: Cancel closes popup without saving', ({ Given, And, When, Then }) => {
     Given('I have opened the "Edit WipLimit on cells" popup', () => {
       // UI state - not store logic
     });
@@ -135,9 +135,35 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
+  Scenario('SC-MODAL-4: Close button (X) closes popup without saving', ({ Given, And, When, Then }) => {
+    Given('I have opened the "Edit WipLimit on cells" popup', () => {
+      // UI state - not store logic
+    });
+
+    And('I have made some changes', () => {
+      const { actions } = useWipLimitCellsSettingsUIStore.getState();
+      actions.addRange('Test Range');
+    });
+
+    When('I click the close button (X)', () => {
+      const { actions } = useWipLimitCellsSettingsUIStore.getState();
+      actions.reset();
+    });
+
+    Then('the popup should close', () => {
+      // UI assertion - not store logic
+      expect(true).toBe(true);
+    });
+
+    And('the changes should not be saved', () => {
+      const { data } = useWipLimitCellsSettingsUIStore.getState();
+      expect(data.ranges).toHaveLength(0);
+    });
+  });
+
   // === SC4: ADD RANGE WITH CELL ===
 
-  Scenario('SC4: Add a new range with a cell', ({ When, And, Then }) => {
+  Scenario('SC-ADD-1: Add a new range with a cell', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -200,7 +226,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC5: CANNOT ADD RANGE WITHOUT NAME ===
 
-  Scenario('SC5: Cannot add range without name', ({ When, And, Then }) => {
+  Scenario('SC-ADD-2: Cannot add range without name', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -235,7 +261,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC6: CANNOT ADD RANGE WITH DUPLICATE NAME ===
 
-  Scenario('SC6: Cannot add range with duplicate name', ({ Given, When, And, Then }) => {
+  Scenario('SC-ADD-3: Cannot add range with duplicate name', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" in the settings', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -272,7 +298,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC8: BUTTON SHOWS "ADD RANGE" FOR NEW NAME ===
 
-  Scenario('SC8: Button shows "Add range" for new name', ({ Given, When, And, Then }) => {
+  Scenario('SC-CELL-2: Button shows "Add range" for new name', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" in the settings', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -295,7 +321,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC7: BUTTON CHANGES TO "ADD CELL" ===
 
-  Scenario('SC7: Button changes to "Add cell" when range name matches existing range', ({ Given, When, And, Then }) => {
+  Scenario('SC-CELL-1: Button changes to "Add cell" when range name matches existing range', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" in the settings', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -318,7 +344,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC9: ADD CELL TO EXISTING RANGE ===
 
-  Scenario('SC9: Add cell to existing range', ({ Given, When, And, Then }) => {
+  Scenario('SC-CELL-3: Add cell to existing range', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" with cell "Frontend / In Progress"', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -370,7 +396,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC10: CANNOT ADD DUPLICATE CELL ===
 
-  Scenario('SC10: Cannot add duplicate cell to range', ({ Given, When, And, Then }) => {
+  Scenario('SC-CELL-4: Cannot add duplicate cell to range', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" with cell "Frontend / In Progress"', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -418,7 +444,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC13: EDIT RANGE NAME INLINE ===
 
-  Scenario('SC13: Edit range name inline', ({ Given, When, And, Then }) => {
+  Scenario('SC-EDIT-1: Edit range name inline', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" with WIP limit 5', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -455,7 +481,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC14: EDIT WIP LIMIT INLINE ===
 
-  Scenario('SC14: Edit WIP limit inline', ({ Given, When, And, Then }) => {
+  Scenario('SC-EDIT-2: Edit WIP limit inline', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" with WIP limit 5', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -484,7 +510,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC11-SC12: VALIDATION (UI level, not store) ===
 
-  Scenario('SC11: Cannot add range or cell without selecting swimlane', ({ When, And, Then }) => {
+  Scenario('SC-VALID-1: Cannot add range or cell without selecting swimlane', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -511,7 +537,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
-  Scenario('SC12: Cannot add range or cell without selecting column', ({ When, And, Then }) => {
+  Scenario('SC-VALID-2: Cannot add range or cell without selecting column', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -540,7 +566,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC15: TOGGLE DISABLE CHECKBOX ===
 
-  Scenario('SC15: Toggle disable checkbox', ({ Given, When, And, Then }) => {
+  Scenario('SC-EDIT-3: Toggle disable checkbox', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" that is not disabled', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -565,7 +591,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC17: DELETE A RANGE ===
 
-  Scenario('SC17: Delete a range', ({ Given, When, And, Then }) => {
+  Scenario('SC-DELETE-1: Delete a range', ({ Given, When, And, Then }) => {
     Given('there are ranges "Critical Path" and "Review Path"', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -594,7 +620,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC18: DELETE A CELL FROM RANGE ===
 
-  Scenario('SC18: Delete a cell from range', ({ Given, When, And, Then }) => {
+  Scenario('SC-DELETE-2: Delete a cell from range', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path" with cells "Frontend / In Progress" and "Backend / Review"', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -636,7 +662,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC16: SELECT RANGE FOR EDITING ===
 
-  Scenario('SC16: Select range for editing via edit icon', ({ Given, When, And, Then }) => {
+  Scenario('SC-EDIT-4: Select range for editing via edit icon', ({ Given, When, And, Then }) => {
     Given('there is a range "Critical Path"', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -667,7 +693,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC19: CLEAR ALL SETTINGS ===
 
-  Scenario('SC19: Clear all settings', ({ Given, When, And, Then }) => {
+  Scenario('SC-CLEAR-1: Clear all settings', ({ Given, When, And, Then }) => {
     Given('there are ranges "Critical Path" and "Review Path" with configured cells', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -714,7 +740,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC23-SC24: SHOW BADGE (already covered in SC4) ===
 
-  Scenario('SC23: Add cell with show badge indicator', ({ When, And, Then }) => {
+  Scenario('SC-BADGE-1: Add cell with show badge indicator', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -752,7 +778,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
   });
 
-  Scenario('SC24: Add cell without show badge indicator', ({ When, And, Then }) => {
+  Scenario('SC-BADGE-2: Add cell without show badge indicator', ({ When, And, Then }) => {
     When('I open the settings popup', () => {
       // Store is already reset in Background
     });
@@ -792,7 +818,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC20: SAVE PERSISTS (tested in property store, but verify UI store has data) ===
 
-  Scenario('SC20: Save persists to Jira board property', ({ Given, When, Then }) => {
+  Scenario('SC-PERSIST-1: Save persists to Jira board property', ({ Given, When, Then }) => {
     Given('I have configured range "Critical Path" with WIP limit 5 and cells', () => {
       const { actions } = useWipLimitCellsSettingsUIStore.getState();
       actions.addRange('Critical Path');
@@ -823,7 +849,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC21: SETTINGS LOAD (tested in property store) ===
 
-  Scenario('SC21: Settings load on page open', ({ Given, When, Then }) => {
+  Scenario('SC-PERSIST-2: Settings load on page open', ({ Given, When, Then }) => {
     Given('there are saved WIP limit settings in the Jira board property', () => {
       // This is tested in property store tests
       // Here we simulate loading into UI store
@@ -856,7 +882,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC22: BACKWARD COMPATIBILITY (tested in property store) ===
 
-  Scenario('SC22: Load settings with legacy "swimline" field', ({ Given, When, Then, And }) => {
+  Scenario('SC-COMPAT-1: Load settings with legacy "swimline" field', ({ Given, When, Then, And }) => {
     Given('there are saved settings with the legacy "swimline" field instead of "swimlane"', () => {
       // This is tested in property store tests
       // Here we simulate that normalized data is loaded into UI store
@@ -896,7 +922,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // === SC25: EMPTY STATE ===
 
-  Scenario('SC25: Show empty table when no ranges configured', ({ Given, When, Then, And }) => {
+  Scenario('SC-EMPTY-1: Show empty table when no ranges configured', ({ Given, When, Then, And }) => {
     Given('there are no WIP limit settings configured', () => {
       useWipLimitCellsSettingsUIStore.setState(useWipLimitCellsSettingsUIStore.getInitialState());
     });

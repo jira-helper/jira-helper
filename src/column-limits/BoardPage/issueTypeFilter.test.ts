@@ -66,12 +66,12 @@ vi.mock('../../shared/PageModification', async () => {
 });
 
 describe('Column Limits - Issue Type Filtering', () => {
-  let instance: ColumnLimitsBoardPage;
   let getIssuesInColumn: (columnId: string, ignoredSwimlanes: string[], includedIssueTypes?: string[]) => number;
 
   beforeEach(() => {
     document.body.innerHTML = '';
-    instance = new ColumnLimitsBoardPage();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const instance = new ColumnLimitsBoardPage();
 
     // Access the method through the instance
     getIssuesInColumn = (columnId: string, ignoredSwimlanes: string[], includedIssueTypes?: string[]) => {

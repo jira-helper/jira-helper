@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { SettingsButton } from './SettingsButton';
 import { SettingsModalContainer } from '../SettingsModal';
 import { initFromProperty, saveToProperty } from '../../actions';
+import type { SearchUsers } from '../../../../shared/di/jiraApiTokens';
 import type { Column, Swimlane } from '../../state/types';
 
 export type SettingsButtonContainerProps = {
   boardDataColumns: Column[];
   boardDataSwimlanes: Swimlane[];
+  searchUsers: SearchUsers;
 };
 
 export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = ({
   boardDataColumns,
   boardDataSwimlanes,
+  searchUsers,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -21,7 +24,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   };
 
   const handleClose = () => {
-    initFromProperty(); // restore state on cancel
+    initFromProperty();
     setIsModalOpen(false);
   };
 
@@ -37,6 +40,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
         <SettingsModalContainer
           columns={boardDataColumns}
           swimlanes={boardDataSwimlanes}
+          searchUsers={searchUsers}
           onClose={handleClose}
           onSave={handleSave}
         />

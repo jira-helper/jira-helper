@@ -66,7 +66,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
 
   // === OPEN / CLOSE POPUP ===
 
-  Scenario('SC1: Open settings popup', () => {
+  Scenario('SC-MODAL-1: Open settings popup', () => {
     mountComponent();
 
     Step('When I click "Edit Wip limits by cells"', () => {
@@ -98,7 +98,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC2: Save and close popup', () => {
+  Scenario('SC-MODAL-2: Save and close popup', () => {
     mountComponent();
 
     Step('Given I have opened the "Edit WipLimit on cells" popup', () => {
@@ -127,7 +127,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC3: Cancel closes popup without saving', () => {
+  Scenario('SC-MODAL-3: Cancel closes popup without saving', () => {
     mountComponent();
 
     Step('Given I have opened the "Edit WipLimit on cells" popup', () => {
@@ -159,7 +159,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC26: Close button (X) closes popup without saving', () => {
+  Scenario('SC-MODAL-4: Close button (X) closes popup without saving', () => {
     mountComponent();
 
     Step('Given I have opened the "Edit WipLimit on cells" popup', () => {
@@ -194,7 +194,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
 
   // === ADD RANGE ===
 
-  Scenario('SC4: Add a new range with a cell', () => {
+  Scenario('SC-ADD-1: Add a new range with a cell', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -245,7 +245,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC5: Cannot add range without name', () => {
+  Scenario('SC-ADD-2: Cannot add range without name', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -284,7 +284,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC6: Cannot add range with duplicate name', () => {
+  Scenario('SC-ADD-3: Cannot add range with duplicate name', () => {
     Step('Given there is a range "Critical Path" in the settings', () => {
       const existingRange = createRange('Critical Path');
       mountComponent([existingRange]);
@@ -331,7 +331,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC7: Button changes to "Add cell" when range name matches existing range', () => {
+  Scenario('SC-CELL-1: Button changes to "Add cell" when range name matches existing range', () => {
     Step('Given there is a range "Critical Path" in the settings', () => {
       const existingRange = createRange('Critical Path');
       mountComponent([existingRange]);
@@ -351,7 +351,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC8: Button shows "Add range" for new name', () => {
+  Scenario('SC-CELL-2: Button shows "Add range" for new name', () => {
     Step('Given there is a range "Critical Path" in the settings', () => {
       const existingRange = createRange('Critical Path');
       mountComponent([existingRange]);
@@ -371,7 +371,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC9: Add cell to existing range', () => {
+  Scenario('SC-CELL-3: Add cell to existing range', () => {
     Step('Given there is a range "Critical Path" with cell "Frontend / In Progress"', () => {
       const existingRange = createRange('Critical Path', 0, [{ swimlane: 'sw1', column: 'col2', showBadge: false }]);
       mountComponent([existingRange]);
@@ -408,7 +408,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC10: Cannot add duplicate cell to range', () => {
+  Scenario('SC-CELL-4: Cannot add duplicate cell to range', () => {
     Step('Given there is a range "Critical Path" with cell "Frontend / In Progress"', () => {
       const existingRange = createRange('Critical Path', 0, [{ swimlane: 'sw1', column: 'col2', showBadge: false }]);
       mountComponent([existingRange]);
@@ -451,7 +451,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC11: Cannot add range or cell without selecting swimlane', () => {
+  Scenario('SC-VALID-1: Cannot add range or cell without selecting swimlane', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -484,7 +484,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC12: Cannot add range or cell without selecting column', () => {
+  Scenario('SC-VALID-2: Cannot add range or cell without selecting column', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -517,7 +517,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC13: Edit range name inline', () => {
+  Scenario('SC-EDIT-1: Edit range name inline', () => {
     Step('Given there is a range "Critical Path" with WIP limit 5', () => {
       const existingRange = createRange('Critical Path', 5);
       mountComponent([existingRange]);
@@ -545,7 +545,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC14: Edit WIP limit inline', () => {
+  Scenario('SC-EDIT-2: Edit WIP limit inline', () => {
     Step('Given there is a range "Critical Path" with WIP limit 5', () => {
       const existingRange = createRange('Critical Path', 5);
       mountComponent([existingRange]);
@@ -572,7 +572,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC15: Toggle disable checkbox', () => {
+  Scenario('SC-EDIT-3: Toggle disable checkbox', () => {
     Step('Given there is a range "Critical Path" that is not disabled', () => {
       const existingRange = createRange('Critical Path', 0, []);
       mountComponent([existingRange]);
@@ -597,7 +597,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
 
   // === DELETE ===
 
-  Scenario('SC16: Select range for editing via edit icon', () => {
+  Scenario('SC-EDIT-4: Select range for editing via edit icon', () => {
     Step('Given there is a range "Critical Path"', () => {
       const existingRange = createRange('Critical Path');
       mountComponent([existingRange]);
@@ -624,7 +624,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC17: Delete a range', () => {
+  Scenario('SC-DELETE-1: Delete a range', () => {
     Step('Given there are ranges "Critical Path" and "Review Path"', () => {
       const ranges = [createRange('Critical Path'), createRange('Review Path')];
       mountComponent(ranges);
@@ -654,7 +654,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC18: Delete a cell from range', () => {
+  Scenario('SC-DELETE-2: Delete a cell from range', () => {
     Step('Given there is a range "Critical Path" with cells "Frontend / In Progress" and "Backend / Review"', () => {
       const range = createRange('Critical Path', 0, [
         { swimlane: 'sw1', column: 'col2', showBadge: false },
@@ -691,7 +691,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
 
   // === SHOW BADGE ===
 
-  Scenario('SC19: Clear all settings', () => {
+  Scenario('SC-CLEAR-1: Clear all settings', () => {
     Step('Given there are ranges "Critical Path" and "Review Path" with configured cells', () => {
       const ranges = [
         createRange('Critical Path', 0, [{ swimlane: 'sw1', column: 'col2', showBadge: false }]),
@@ -748,7 +748,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC20: Save persists to Jira board property', () => {
+  Scenario('SC-PERSIST-1: Save persists to Jira board property', () => {
     Step('Given I have configured range "Critical Path" with WIP limit 5 and cells', () => {
       const existingRange = createRange('Critical Path', 5, [{ swimlane: 'sw1', column: 'col2', showBadge: false }]);
       mountComponent([existingRange]);
@@ -774,7 +774,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC21: Settings load on page open', () => {
+  Scenario('SC-PERSIST-2: Settings load on page open', () => {
     Step('Given there are saved WIP limit settings in the Jira board property', () => {
       const savedRanges = [
         createRange('Critical Path', 5, [{ swimlane: 'sw1', column: 'col2', showBadge: false }]),
@@ -800,7 +800,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC22: Load settings with legacy "swimline" field', () => {
+  Scenario('SC-COMPAT-1: Load settings with legacy "swimline" field', () => {
     Step('Given there are saved settings with the legacy "swimline" field instead of "swimlane"', () => {
       // Simulate legacy format with "swimline" field
       const legacyRanges: any[] = [
@@ -834,7 +834,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC23: Add cell with show badge indicator', () => {
+  Scenario('SC-BADGE-1: Add cell with show badge indicator', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -872,7 +872,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC24: Add cell without show badge indicator', () => {
+  Scenario('SC-BADGE-2: Add cell without show badge indicator', () => {
     mountComponent();
 
     Step('When I open the settings popup', () => {
@@ -915,7 +915,7 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     });
   });
 
-  Scenario('SC25: Show empty table when no ranges configured', () => {
+  Scenario('SC-EMPTY-1: Show empty table when no ranges configured', () => {
     Step('Given there are no WIP limit settings configured', () => {
       mountComponent([]);
     });

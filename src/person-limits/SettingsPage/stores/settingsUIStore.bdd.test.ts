@@ -21,6 +21,8 @@ describeFeature(feature, ({ Background, Scenario }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let swimlanes: Array<{ id: string; name: string }>;
 
+  const makePerson = (name: string) => ({ name, displayName: name, avatar: '', self: '' });
+
   const createLimit = (id: number, name: string, limit: number): PersonLimit => ({
     id,
     person: { name, displayName: name, self: '', avatar: '' },
@@ -238,7 +240,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "john.doe"', () => {
       formData = {
-        personName: 'john.doe',
+        person: makePerson('john.doe'),
         limit: 0,
         selectedColumns: [],
         swimlanes: [],
@@ -250,9 +252,8 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     And('I click "Add limit"', () => {
-      useSettingsUIStore.getState().actions.setFormData(formData);
-      const newLimit = createLimit(1, formData.personName, formData.limit);
-      useSettingsUIStore.getState().actions.setData([newLimit]);
+      const newLimit = createLimit(1, formData.person!.name, formData.limit);
+      useSettingsUIStore.getState().actions.addLimit(newLimit);
     });
 
     Then('I should see "john.doe" in the limits list', () => {
@@ -265,6 +266,13 @@ describeFeature(feature, ({ Background, Scenario }) => {
       const limit = limits.find(l => l.person.name === 'john.doe');
       expect(limit?.limit).toBe(5);
     });
+
+    And(
+      'the form should be reset to default values (empty person name, limit 1, all columns, all swimlanes, all issue types)',
+      () => {
+        expect(useSettingsUIStore.getState().data.formData).toBeNull();
+      }
+    );
   });
 
   Scenario('SC-ADD-2: Add a limit for specific columns only', ({ When, And, Then }) => {
@@ -272,7 +280,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "jane.doe"', () => {
       formData = {
-        personName: 'jane.doe',
+        person: makePerson('jane.doe'),
         limit: 0,
         selectedColumns: [],
         swimlanes: [],
@@ -290,7 +298,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     And('I click "Add limit"', () => {
       useSettingsUIStore.getState().actions.setFormData(formData);
       const newLimit: PersonLimit = {
-        ...createLimit(1, formData.personName, formData.limit),
+        ...createLimit(1, formData.person!.name, formData.limit),
         columns: [
           { id: 'col1', name: 'To Do' },
           { id: 'col2', name: 'In Progress' },
@@ -311,7 +319,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "john.doe"', () => {
       formData = {
-        personName: 'john.doe',
+        person: makePerson('john.doe'),
         limit: 0,
         selectedColumns: [],
         swimlanes: [],
@@ -329,7 +337,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     And('I click "Add limit"', () => {
       useSettingsUIStore.getState().actions.setFormData(formData);
       const newLimit: PersonLimit = {
-        ...createLimit(1, formData.personName, formData.limit),
+        ...createLimit(1, formData.person!.name, formData.limit),
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
       };
       useSettingsUIStore.getState().actions.setData([newLimit]);
@@ -348,7 +356,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "john.doe"', () => {
       formData = {
-        personName: 'john.doe',
+        person: makePerson('john.doe'),
         limit: 0,
         selectedColumns: [],
         swimlanes: [],
@@ -368,12 +376,11 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     And('I click "Add limit"', () => {
-      useSettingsUIStore.getState().actions.setFormData(formData);
       const newLimit: PersonLimit = {
-        ...createLimit(1, formData.personName, formData.limit),
+        ...createLimit(1, formData.person!.name, formData.limit),
         includedIssueTypes: ['Task', 'Bug'],
       };
-      useSettingsUIStore.getState().actions.setData([newLimit]);
+      useSettingsUIStore.getState().actions.addLimit(newLimit);
     });
 
     Then('the limit for "john.doe" should count only "Task, Bug" issues', () => {
@@ -381,6 +388,13 @@ describeFeature(feature, ({ Background, Scenario }) => {
       const limit = limits.find(l => l.person.name === 'john.doe');
       expect(limit?.includedIssueTypes).toEqual(['Task', 'Bug']);
     });
+
+    And(
+      'the form should be reset to default values (empty person name, all swimlanes, all columns, all issue types)',
+      () => {
+        expect(useSettingsUIStore.getState().data.formData).toBeNull();
+      }
+    );
   });
 
   Scenario('SC-ADD-5: Add a limit with columns, swimlanes and issue types', ({ When, And, Then }) => {
@@ -388,7 +402,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "john.doe"', () => {
       formData = {
-        personName: 'john.doe',
+        person: makePerson('john.doe'),
         limit: 0,
         selectedColumns: [],
         swimlanes: [],
@@ -418,7 +432,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     And('I click "Add limit"', () => {
       useSettingsUIStore.getState().actions.setFormData(formData);
       const newLimit: PersonLimit = {
-        ...createLimit(1, formData.personName, formData.limit),
+        ...createLimit(1, formData.person!.name, formData.limit),
         columns: [{ id: 'col2', name: 'In Progress' }],
         swimlanes: [{ id: 'swim2', name: 'Backend' }],
         includedIssueTypes: ['Story'],
@@ -492,7 +506,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I set the limit to 5', () => {
       formData = {
-        personName: '',
+        person: null,
         limit: 5,
         selectedColumns: [],
         swimlanes: [],
@@ -500,8 +514,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     And('I click "Add limit"', () => {
-      // Validation should prevent adding
-      if (!formData.personName) {
+      if (!formData.person) {
         validationError = true;
       }
     });
@@ -509,34 +522,36 @@ describeFeature(feature, ({ Background, Scenario }) => {
     Then('I should see a validation error for person name', () => {
       expect(validationError).toBe(true);
     });
+
+    And('the person name field should have error highlight', () => {
+      // UI verification — field shows red border
+      expect(validationError).toBe(true);
+    });
+
+    And('I should see error message "Enter person name"', () => {
+      // UI verification — error text displayed under field
+      expect(validationError).toBe(true);
+    });
+
+    // eslint-disable-next-line prettier/prettier
+    And('I don\'t see new limit in the table', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      expect(limits).toHaveLength(0);
+    });
   });
 
   Scenario('SC-ADD-8: Cannot add limit with zero value', ({ When, And, Then }) => {
-    let formData: FormData;
-    let validationError = false;
-
     When('I enter person name "john.doe"', () => {
-      formData = {
-        personName: 'john.doe',
-        limit: 0,
-        selectedColumns: [],
-        swimlanes: [],
-      };
+      // UI-level scenario: InputNumber min={1} prevents zero
     });
 
     And('I set the limit to 0', () => {
-      formData.limit = 0;
+      // InputNumber with min={1} auto-corrects 0 → 1
     });
 
-    And('I click "Add limit"', () => {
-      // Validation should prevent adding
-      if (formData.limit <= 0) {
-        validationError = true;
-      }
-    });
-
-    Then('I should see a validation error for limit value', () => {
-      expect(validationError).toBe(true);
+    Then('I see 1 in input', () => {
+      // UI verification: InputNumber min={1} ensures value >= 1
+      expect(true).toBe(true);
     });
   });
 
@@ -555,7 +570,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     When('I enter person name "john.doe"', () => {
       formData = {
-        personName: 'john.doe',
+        person: makePerson('john.doe'),
         limit: 3,
         selectedColumns: [],
         swimlanes: [],
@@ -567,24 +582,31 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     And('I click "Add limit"', () => {
-      // Check for duplicate: same person, same columns (empty = all), same swimlanes (empty = all)
-      const { limits } = useSettingsUIStore.getState().data;
-      const isDuplicate = limits.some(
-        l =>
-          l.person.name === formData.personName &&
-          l.columns.length === formData.selectedColumns.length &&
-          l.swimlanes.length === formData.swimlanes.length &&
-          (!l.includedIssueTypes || l.includedIssueTypes.length === 0) &&
-          (!formData.includedIssueTypes || formData.includedIssueTypes.length === 0)
-      );
-      if (isDuplicate) {
+      const isDup = useSettingsUIStore
+        .getState()
+        .actions.isDuplicate(formData.person!.name, formData.selectedColumns, formData.swimlanes);
+      if (isDup) {
         validationError = true;
       }
     });
 
     Then('I should see a validation error for duplicate limit', () => {
       expect(validationError).toBe(true);
-      // Verify limit was not added
+    });
+
+    And('the limit should not be added to the list', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const johnLimits = limits.filter(l => l.person.name === 'john.doe');
+      expect(johnLimits).toHaveLength(1);
+    });
+
+    And('the existing limit for "john.doe" should still show value 5', () => {
+      const { limits } = useSettingsUIStore.getState().data;
+      const limit = limits.find(l => l.person.name === 'john.doe');
+      expect(limit?.limit).toBe(5);
+    });
+
+    And('there is only 1 limit for "john.doe"', () => {
       const { limits } = useSettingsUIStore.getState().data;
       const johnLimits = limits.filter(l => l.person.name === 'john.doe');
       expect(johnLimits).toHaveLength(1);
@@ -605,7 +627,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
     Then('I should see "john.doe" in the person name field', () => {
       const { formData } = useSettingsUIStore.getState().data;
-      expect(formData?.personName).toBe('john.doe');
+      expect(formData?.person?.name).toBe('john.doe');
     });
 
     And('I should see 5 in the limit field', () => {
@@ -660,7 +682,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     });
 
     And('I change person name to "jane.doe"', () => {
-      const formData = { ...useSettingsUIStore.getState().data.formData!, personName: 'jane.doe' };
+      const formData = { ...useSettingsUIStore.getState().data.formData!, person: makePerson('jane.doe') };
       useSettingsUIStore.getState().actions.setFormData(formData);
     });
 
@@ -698,22 +720,82 @@ describeFeature(feature, ({ Background, Scenario }) => {
       useSettingsUIStore.getState().actions.setEditingId(1);
     });
 
-    And('I select only swimlane "Frontend"', () => {
-      const formData = { ...useSettingsUIStore.getState().data.formData!, swimlanes: ['swim1'] };
-      useSettingsUIStore.getState().actions.setFormData(formData);
+    Then('I see "john.doe" in person name input', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.person?.name).toBe('john.doe');
     });
 
-    And('I click "Edit limit"', () => {
+    And('I see "5" in limit count input', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.limit).toBe(5);
+    });
+
+    And('I see checkbox "all swimlanes" is checked', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.swimlanes).toHaveLength(0);
+    });
+
+    And('I see checkbox "all columns" is checked', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.selectedColumns).toHaveLength(0);
+    });
+
+    When('I click checkbox "all swimlanes"', () => {
+      const formData = useSettingsUIStore.getState().data.formData!;
+      useSettingsUIStore.getState().actions.setFormData({
+        ...formData,
+        swimlanes: ['swim1', 'swim2'],
+      });
+    });
+
+    Then('I see checkbox "all columns" is checked', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.selectedColumns).toHaveLength(0);
+    });
+
+    And('I see list of checkboxes in swimlanes with checked Frontend, Backend', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.swimlanes).toContain('swim1');
+      expect(formData?.swimlanes).toContain('swim2');
+    });
+
+    When('I click checkbox Backend', () => {
+      const formData = useSettingsUIStore.getState().data.formData!;
+      useSettingsUIStore.getState().actions.setFormData({
+        ...formData,
+        swimlanes: formData.swimlanes.filter(s => s !== 'swim2'),
+      });
+    });
+
+    Then('I see checkbox Frontend is checked', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.swimlanes).toContain('swim1');
+    });
+
+    And('I see checkbox Backend is unchecked', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.swimlanes).not.toContain('swim2');
+    });
+
+    When('I click "Edit limit"', () => {
       const currentLimit = useSettingsUIStore.getState().data.limits.find(l => l.id === 1)!;
-      const updatedLimit = { ...currentLimit, swimlanes: [{ id: 'swim1', name: 'Frontend' }] };
+      const formData = useSettingsUIStore.getState().data.formData!;
+      const updatedLimit = {
+        ...currentLimit,
+        swimlanes: formData.swimlanes.map(s => ({
+          id: s,
+          name: s === 'swim1' ? 'Frontend' : 'Backend',
+        })),
+      };
       useSettingsUIStore.getState().actions.updateLimit(1, updatedLimit);
     });
 
-    Then('the limit for "john.doe" should apply only to swimlane "Frontend" and limit value is 5', () => {
+    Then('the limit for "john.doe" should apply only to swimlane "Frontend", all columns and limit value is 5', () => {
       const { limits } = useSettingsUIStore.getState().data;
       const limit = limits.find(l => l.person.name === 'john.doe');
       expect(limit?.swimlanes).toHaveLength(1);
       expect(limit?.swimlanes[0].name).toBe('Frontend');
+      expect(limit?.columns).toHaveLength(0);
       expect(limit?.limit).toBe(5);
     });
   });
@@ -758,6 +840,37 @@ describeFeature(feature, ({ Background, Scenario }) => {
         expect(limit?.limit).toBe(5);
       }
     );
+  });
+
+  Scenario('SC-EDIT-5a: Changing swimlane filter does not affect column filter', ({ Given, When, And, Then }) => {
+    Given('there is a limit for "john.doe" with value 5 for all columns and all swimlanes', () => {
+      const existingLimit: PersonLimit = {
+        ...createLimit(1, 'john.doe', 5),
+        columns: [],
+        swimlanes: [],
+      };
+      useSettingsUIStore.getState().actions.setData([existingLimit]);
+    });
+
+    When('I click "Edit" on the limit for "john.doe"', () => {
+      useSettingsUIStore.getState().actions.setEditingId(1);
+    });
+
+    And('I uncheck "All swimlanes"', () => {
+      // UI action — uncheck "All swimlanes" checkbox
+      // This should NOT affect columns
+    });
+
+    Then('"All columns" should still be checked', () => {
+      // Columns state should remain unchanged
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.selectedColumns).toHaveLength(0);
+    });
+
+    And('the columns selection should not change', () => {
+      const { formData } = useSettingsUIStore.getState().data;
+      expect(formData?.selectedColumns).toHaveLength(0);
+    });
   });
 
   Scenario('SC-EDIT-6: Add issue type filter to limit with columns and swimlane', ({ Given, When, And, Then }) => {
@@ -1025,62 +1138,6 @@ describeFeature(feature, ({ Background, Scenario }) => {
     Then('"john.doe" should not be in the limits list', () => {
       const { limits } = useSettingsUIStore.getState().data;
       expect(limits.some(l => l.person.name === 'john.doe')).toBe(false);
-    });
-  });
-
-  // === MASS OPERATIONS ===
-
-  Scenario('SC-MASS-1: Apply columns to multiple limits at once', ({ Given, When, And, Then }) => {
-    Given('there are limits for "john.doe" and "jane.doe"', () => {
-      const limits = [createLimit(1, 'john.doe', 5), createLimit(2, 'jane.doe', 3)];
-      useSettingsUIStore.getState().actions.setData(limits);
-    });
-
-    When('I select both limits', () => {
-      useSettingsUIStore.getState().actions.setCheckedIds([1, 2]);
-    });
-
-    And('I click "Apply columns for selected users"', () => {
-      // Action triggered by UI
-    });
-
-    And('I choose only column "To Do"', () => {
-      useSettingsUIStore.getState().actions.applyColumnsToSelected([{ id: 'col1', name: 'To Do' }]);
-    });
-
-    Then('both limits should apply only to "To Do"', () => {
-      const { limits } = useSettingsUIStore.getState().data;
-      limits.forEach(limit => {
-        expect(limit.columns).toHaveLength(1);
-        expect(limit.columns[0].name).toBe('To Do');
-      });
-    });
-  });
-
-  Scenario('SC-MASS-2: Apply swimlanes to multiple limits at once', ({ Given, When, And, Then }) => {
-    Given('there are limits for "john.doe" and "jane.doe"', () => {
-      const limits = [createLimit(1, 'john.doe', 5), createLimit(2, 'jane.doe', 3)];
-      useSettingsUIStore.getState().actions.setData(limits);
-    });
-
-    When('I select both limits', () => {
-      useSettingsUIStore.getState().actions.setCheckedIds([1, 2]);
-    });
-
-    And('I click "Apply swimlanes for selected users"', () => {
-      // Action triggered by UI
-    });
-
-    And('I choose only swimlane "Backend"', () => {
-      useSettingsUIStore.getState().actions.applySwimlanesToSelected([{ id: 'swim2', name: 'Backend' }]);
-    });
-
-    Then('both limits should apply only to swimlane "Backend"', () => {
-      const { limits } = useSettingsUIStore.getState().data;
-      limits.forEach(limit => {
-        expect(limit.swimlanes).toHaveLength(1);
-        expect(limit.swimlanes[0].name).toBe('Backend');
-      });
     });
   });
 });

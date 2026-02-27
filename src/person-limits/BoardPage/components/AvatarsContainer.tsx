@@ -32,7 +32,6 @@ export const AvatarsContainer: React.FC = () => {
         <AvatarBadge
           key={stat.id}
           avatar={stat.person.avatar}
-          displayName={stat.person.displayName}
           personName={stat.person.name}
           limitId={stat.id}
           currentCount={stat.issues.length}

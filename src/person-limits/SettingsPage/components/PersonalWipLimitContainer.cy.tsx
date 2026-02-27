@@ -7,9 +7,19 @@
  * All test cases (C1-C8, IssueTypeSelector, Save/Add, Count all) are preserved.
  */
 import React from 'react';
+import type { JiraUser } from 'src/shared/jiraApi';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../state/types';
+
+const mockSearchUsers = async (query: string): Promise<JiraUser[]> => [
+  {
+    name: query,
+    displayName: query,
+    avatarUrls: { '16x16': '', '32x32': '' },
+    self: `https://jira.example.com/rest/api/2/user?username=${query}`,
+  },
+];
 
 describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   const mockColumns = [
@@ -24,14 +34,20 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   ];
 
   beforeEach(() => {
-    // Reset store to initial state
     useSettingsUIStore.setState(useSettingsUIStore.getInitialState());
   });
 
   describe('C1: Ввод в поле personName не переключает в режим Edit', () => {
     it('should keep Add limit button active when typing in personName field', () => {
       const onAddLimit = cy.stub().as('onAddLimit');
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Type in the input
       cy.get('#edit-person-wip-limit-person-name').type('test.user');
@@ -50,7 +66,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C2: Отжатие "All columns" показывает список', () => {
     it('should show column list when unchecking "All columns" and keep it visible', () => {
       const onAddLimit = cy.stub().as('onAddLimit');
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Initially list should be hidden (all selected) - 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
       cy.get('input[type="checkbox"]').should('have.length.at.least', 3);
@@ -73,7 +96,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C3: Отжатие "All swimlanes" показывает список', () => {
     it('should show swimlanes list when unchecking "All swimlanes" and keep it visible', () => {
       const onAddLimit = cy.stub().as('onAddLimit');
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Initially list should be hidden - 3 checkboxes (IssueTypeSelector, All columns, All swimlanes)
       cy.get('input[type="checkbox"]').should('have.length.at.least', 3);
@@ -113,7 +143,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Click Edit button
       cy.contains('button', 'Edit').click();
@@ -149,7 +186,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Click Edit button
       cy.contains('button', 'Edit').click();
@@ -189,7 +233,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Click Edit button
       cy.contains('button', 'Edit').click();
@@ -234,7 +285,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       useSettingsUIStore.getState().actions.addLimit(limit);
 
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Click Edit
       cy.contains('button', 'Edit').click();
@@ -264,7 +322,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C7: Выбор всех колонок скрывает список', () => {
     it('should hide column list when all columns are selected individually', () => {
       const onAddLimit = cy.stub().as('onAddLimit');
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Uncheck "All columns" to show list
       cy.contains('label', 'All columns').click();
@@ -293,7 +358,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('C8: Снятие колонки в списке не скрывает список', () => {
     it('should keep column list visible when unchecking a column', () => {
       const onAddLimit = cy.stub().as('onAddLimit');
-      cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
 
       // Uncheck "All columns" to show list
       cy.contains('label', 'All columns').click();
@@ -319,16 +391,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('IssueTypeSelector Integration', () => {
     describe('Issue types reset after add', () => {
       it('should reset issue types after adding a limit', () => {
-        // Create a mock that actually adds to store
         const onAddLimitMock = cy
           .stub()
           .callsFake((formData: any) => {
-            // Simulate what index.tsx does - add limit to store
             const mockPerson = {
-              name: formData.personName,
-              displayName: formData.personName,
-              self: 'https://test.com/user',
-              avatar: 'https://test.com/avatar.png',
+              name: formData.person?.name || 'unknown',
+              displayName: formData.person?.displayName || 'unknown',
+              self: formData.person?.self || 'https://test.com/user',
+              avatar: formData.person?.avatar || 'https://test.com/avatar.png',
             };
 
             const personLimit: PersonLimit = {
@@ -347,7 +417,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           .as('onAddLimit');
 
         cy.mount(
-          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimitMock}
+          />
         );
 
         // Initially countAllTypes should be true (default)
@@ -361,13 +436,10 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('#edit-person-wip-limit-person-name').type('test.user');
         cy.get('#edit-person-wip-limit-person-limit').clear().type('5');
 
-        // Submit form - this will call onAddLimit which should add the limit to store
         cy.contains('button', 'Add limit').click();
 
-        // Wait for onAddLimit to be called
         cy.get('@onAddLimit').should('have.been.called');
 
-        // Wait for store to update (addLimit clears formData)
         // eslint-disable-next-line no-unused-expressions
         cy.then(() => {
           const store = useSettingsUIStore.getState();
@@ -375,53 +447,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           expect(store.data.editingId).to.be.null;
         });
 
-        // Wait for form to reset - person name should be cleared
-        // This ensures the form has been reset by the component's useEffect
+        // All form fields should reset to defaults
         cy.get('#edit-person-wip-limit-person-name').should('have.value', '');
-        // InputNumber resets to default value 1
         cy.get('#edit-person-wip-limit-person-limit').should('have.value', '1');
 
-        // The component's useEffect (line 107-137) resets issue types when editingId changes
-        // However, since editingId was already null, the useEffect won't trigger on formData change
-        // But the component should still reset issue types when formData becomes null
-        // Wait for the component to process the formData change and re-render
-        // The IssueTypeSelector receives initialCountAllTypes prop which should update when countAllTypes changes
-        // But countAllTypes is local state that only resets when editingId changes
-        //
-        // Note: This is a known limitation - the component doesn't reset issue types when formData becomes null
-        // if editingId was already null. The checkbox state is managed by local state and won't reset automatically.
-        //
-        // For this test, we verify that the form was reset (personName cleared) and store was updated.
-        // The checkbox reset would require editingId to change, which doesn't happen in this scenario.
-
-        // Verify store state is correct
-        // eslint-disable-next-line no-unused-expressions
-        cy.then(() => {
-          const store = useSettingsUIStore.getState();
-          expect(store.data.editingId).to.be.null;
-          expect(store.data.formData).to.be.null;
-        });
-
-        // The component's useEffect only resets issue types when editingId changes
-        // Since editingId was already null, the useEffect won't trigger
-        // However, the form was reset (personName cleared), which is the main behavior
-        // The checkbox reset is a secondary behavior that depends on editingId change
-        //
-        // Note: The original RTL test expected the checkbox to reset, but the component's
-        // useEffect logic (line 107-137) only triggers on editingId change, not formData change.
-        // This is a known limitation - issue types won't reset automatically when formData
-        // becomes null if editingId was already null.
-        //
-        // For now, we verify the form was reset (main behavior) and document the limitation.
-        // If the component should reset issue types when formData becomes null (even if
-        // editingId doesn't change), that would require a code change to the component.
-
-        // Verify the form was reset (main behavior)
-        cy.get('#edit-person-wip-limit-person-name').should('have.value', '');
-
-        // The checkbox may not reset automatically because editingId didn't change
-        // This is expected based on the component's useEffect logic
-        // We skip checking the checkbox reset as it's a known limitation
+        // Issue types should reset: "Count all issue types" must be checked again
+        cy.contains('label', 'Count all issue types').find('input[type="checkbox"]').should('be.checked');
       });
     });
 
@@ -445,7 +476,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         useSettingsUIStore.getState().actions.addLimit(limit);
 
-        cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+        cy.mount(
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimit}
+          />
+        );
 
         // Click Edit button
         cy.contains('button', 'Edit').click();
@@ -483,7 +521,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         useSettingsUIStore.getState().actions.addLimit(limit);
 
-        cy.mount(<PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimit} />);
+        cy.mount(
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimit}
+          />
+        );
 
         // Click Edit button
         cy.contains('button', 'Edit').click();
@@ -525,7 +570,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         useSettingsUIStore.getState().actions.addLimit(limit);
 
         cy.mount(
-          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimitMock}
+          />
         );
 
         // Click Edit button
@@ -585,6 +635,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           <PersonalWipLimitContainer
             columns={columnsWithNumericIds}
             swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
             onAddLimit={onAddLimitMock}
           />
         );
@@ -617,7 +668,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         const onAddLimitMock = cy.stub().as('onAddLimit');
 
         cy.mount(
-          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimitMock}
+          />
         );
 
         // Fill in the form
@@ -643,7 +699,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // eslint-disable-next-line no-unused-expressions
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
-          expect(callArgs.personName).to.eq('newuser');
+          expect(callArgs.person?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(3);
           // Should have selected columns (not empty, not all)
           expect(callArgs.selectedColumns).to.not.be.empty;
@@ -655,7 +711,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         const onAddLimitMock = cy.stub().as('onAddLimit');
 
         cy.mount(
-          <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+          <PersonalWipLimitContainer
+            columns={mockColumns}
+            swimlanes={mockSwimlanes}
+            searchUsers={mockSearchUsers}
+            onAddLimit={onAddLimitMock}
+          />
         );
 
         // Fill in the form
@@ -672,11 +733,106 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // eslint-disable-next-line no-unused-expressions
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
-          expect(callArgs.personName).to.eq('newuser');
+          expect(callArgs.person?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(5);
           // When all columns are selected, should save as empty array (meaning "all")
           expect(callArgs.selectedColumns).to.be.empty;
         });
+      });
+    });
+  });
+
+  describe('SC-EDIT-5a: Changing swimlane filter does not affect column filter', () => {
+    it('should keep "All columns" checked when unchecking "All swimlanes" in edit mode', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      const limit: PersonLimit = {
+        id: 1,
+        person: {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: 'https://test.com/user',
+          avatar: 'https://test.com/avatar.png',
+        },
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+      };
+
+      useSettingsUIStore.getState().actions.addLimit(limit);
+
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.contains('button', 'Edit').click();
+      cy.contains('button', 'Edit limit').should('be.visible');
+
+      cy.contains('label', 'All columns').find('input[type="checkbox"]').should('be.checked');
+      cy.contains('label', 'All swimlanes').find('input[type="checkbox"]').should('be.checked');
+
+      cy.contains('label', 'All swimlanes').click();
+
+      cy.contains('label', 'All columns').find('input[type="checkbox"]').should('be.checked');
+      cy.contains('label', 'To Do').should('not.exist');
+      cy.contains('label', 'In Progress').should('not.exist');
+      cy.contains('label', 'Done').should('not.exist');
+
+      // Store's selectedColumns must stay [] (empty = all), not get replaced with explicit IDs
+      cy.then(() => {
+        const { formData: fd } = useSettingsUIStore.getState().data;
+        expect(fd!.selectedColumns).to.deep.equal([]);
+      });
+    });
+
+    it('should keep "All swimlanes" checked when unchecking "All columns" in edit mode', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      const limit: PersonLimit = {
+        id: 1,
+        person: {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: 'https://test.com/user',
+          avatar: 'https://test.com/avatar.png',
+        },
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+      };
+
+      useSettingsUIStore.getState().actions.addLimit(limit);
+
+      cy.mount(
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.contains('button', 'Edit').click();
+      cy.contains('button', 'Edit limit').should('be.visible');
+
+      cy.contains('label', 'All columns').find('input[type="checkbox"]').should('be.checked');
+      cy.contains('label', 'All swimlanes').find('input[type="checkbox"]').should('be.checked');
+
+      cy.contains('label', 'All columns').click();
+
+      cy.contains('label', 'All swimlanes').find('input[type="checkbox"]').should('be.checked');
+      cy.contains('label', 'Frontend').should('not.exist');
+      cy.contains('label', 'Backend').should('not.exist');
+
+      // Store's swimlanes must stay [] (empty = all), not get replaced with explicit IDs
+      cy.then(() => {
+        const { formData: fd } = useSettingsUIStore.getState().data;
+        expect(fd!.swimlanes).to.deep.equal([]);
       });
     });
   });
@@ -686,7 +842,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       const onAddLimitMock = cy.stub().as('onAddLimit');
 
       cy.mount(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimitMock}
+        />
       );
 
       // Initially checkbox should be checked (default state)
@@ -724,7 +885,12 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       useSettingsUIStore.getState().actions.addLimit(limit);
 
       cy.mount(
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={onAddLimitMock} />
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimitMock}
+        />
       );
 
       // Click Edit button

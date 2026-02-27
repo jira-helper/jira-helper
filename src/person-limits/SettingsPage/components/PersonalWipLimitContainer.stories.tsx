@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import type { JiraUser } from 'src/shared/jiraApi';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../../property/types';
@@ -26,7 +27,34 @@ const mockSwimlanes = [
   { id: 'swim2', name: 'Backend' },
 ];
 
-// Wrapper to reset store before each story
+const mockJiraUsers: JiraUser[] = [
+  {
+    name: 'john.doe',
+    displayName: 'John Doe',
+    avatarUrls: { '16x16': 'https://via.placeholder.com/16', '32x32': 'https://via.placeholder.com/32' },
+    self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+  },
+  {
+    name: 'jane.smith',
+    displayName: 'Jane Smith',
+    avatarUrls: { '16x16': 'https://via.placeholder.com/16', '32x32': 'https://via.placeholder.com/32' },
+    self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+  },
+  {
+    name: 'bob.jones',
+    displayName: 'Bob Jones',
+    avatarUrls: { '16x16': 'https://via.placeholder.com/16', '32x32': 'https://via.placeholder.com/32' },
+    self: 'https://jira.example.com/rest/api/2/user?username=bob.jones',
+  },
+];
+
+const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockJiraUsers.filter(
+    u => u.name.toLowerCase().includes(query.toLowerCase()) || u.displayName.toLowerCase().includes(query.toLowerCase())
+  );
+};
+
 const ContainerWrapper: React.FC<{
   children: React.ReactNode;
   initialLimits?: PersonLimit[];
@@ -43,7 +71,12 @@ const ContainerWrapper: React.FC<{
 export const EmptyState: Story = {
   render: () => (
     <ContainerWrapper>
-      <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
     </ContainerWrapper>
   ),
 };
@@ -51,7 +84,12 @@ export const EmptyState: Story = {
 export const AddMode: Story = {
   render: () => (
     <ContainerWrapper>
-      <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
     </ContainerWrapper>
   ),
 };
@@ -73,12 +111,16 @@ export const EditMode: Story = {
 
     return (
       <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={async () => {}}
+        />
       </ContainerWrapper>
     );
   },
   play: async ({ canvasElement }) => {
-    // Auto-click edit button
     const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
     if (editButton) {
       editButton.click();
@@ -88,7 +130,6 @@ export const EditMode: Story = {
 
 export const EditModeWithAllColumns: Story = {
   render: () => {
-    // Empty array means "all columns"
     const limit: PersonLimit = {
       id: 1,
       person: {
@@ -98,18 +139,22 @@ export const EditModeWithAllColumns: Story = {
         avatar: 'https://via.placeholder.com/32',
       },
       limit: 5,
-      columns: [], // empty = all columns
-      swimlanes: [], // empty = all swimlanes
+      columns: [],
+      swimlanes: [],
     };
 
     return (
       <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={async () => {}}
+        />
       </ContainerWrapper>
     );
   },
   play: async ({ canvasElement }) => {
-    // Auto-click edit button
     const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
     if (editButton) {
       editButton.click();
@@ -141,14 +186,19 @@ export const WithMultipleLimits: Story = {
           avatar: 'https://via.placeholder.com/32',
         },
         limit: 5,
-        columns: [], // all columns
-        swimlanes: [], // all swimlanes
+        columns: [],
+        swimlanes: [],
       },
     ];
 
     return (
       <ContainerWrapper initialLimits={limits}>
-        <PersonalWipLimitContainer columns={mockColumns} swimlanes={mockSwimlanes} onAddLimit={async () => {}} />
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={async () => {}}
+        />
       </ContainerWrapper>
     );
   },

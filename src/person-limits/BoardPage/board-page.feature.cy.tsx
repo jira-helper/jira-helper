@@ -260,7 +260,7 @@ describe('Feature: Apply WIP Limits on Board', () => {
       });
     });
 
-    Step('And "jane.doe" has 4 issues in the board:', () => {
+    Step('And "jane.doe" has 4 issues on the board', () => {
       // Issues are represented in stats
     });
 
