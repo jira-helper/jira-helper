@@ -87,8 +87,8 @@ Given the board has issues:
 | 1 | [TASK-77](./TASK-77-column-limits-boardpage-helpers.md) | Создать helpers.tsx для BoardPage | DONE |
 | 2 | [TASK-78](./TASK-78-column-limits-boardpage-display.md) | Создать display.feature и steps | DONE |
 | 3 | [TASK-79](./TASK-79-column-limits-boardpage-exceed.md) | Создать exceed.feature и steps | DONE |
-| 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (**только issueType**, swimlane → EPIC-11) | TODO |
-| 5 | [TASK-81](./TASK-81-column-limits-boardpage-multi.md) | Создать multi-groups.feature | TODO |
+| 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (**только issueType**, swimlane → EPIC-11) | DONE |
+| 5 | [TASK-81](./TASK-81-column-limits-boardpage-multi.md) | Создать multi-groups.feature | DONE |
 | 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | TODO |
 | 7 | [TASK-83](./TASK-83-column-limits-settings-helpers.md) | Создать helpers.tsx для SettingsPage | TODO |
 | 8 | [TASK-84](./TASK-84-column-limits-settings-modal.md) | Создать modal-lifecycle.feature | TODO |

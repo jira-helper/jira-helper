@@ -1,6 +1,6 @@
 # TASK-80: Создать issue-type-filter.feature для Column Limits BoardPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-10](./EPIC-10-column-limits-bdd-refactoring.md)
 

@@ -183,14 +183,11 @@ Then('{string} should have a badge', (columnName: string) => {
 });
 
 /**
- * Then {string} columns should have {word} border
+ * Then {string} columns should have {string} border
+ * Accepts hex color (e.g., "#36B37E") and converts to RGB for comparison.
  */
-Then('{string} columns should have {word} border', (groupName: string, colorWord: string) => {
-  const colorMap: Record<string, string> = {
-    green: 'rgb(54, 179, 126)',
-    red: 'rgb(255, 86, 48)',
-  };
-  const expectedColor = colorMap[colorWord] || colorWord;
+Then('{string} columns should have {string} border', (groupName: string, hexColor: string) => {
+  const expectedColor = hexToRgb(hexColor);
 
   const groupData = useColumnLimitsPropertyStore.getState().data[groupName];
   if (groupData?.columns) {
