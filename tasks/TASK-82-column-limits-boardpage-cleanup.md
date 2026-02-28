@@ -1,6 +1,6 @@
 # TASK-82: Удалить старые файлы Column Limits BoardPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-10](./EPIC-10-column-limits-bdd-refactoring.md)
 

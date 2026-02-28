@@ -1,4 +1,3 @@
-import map from '@tinkoff/utils/array/map';
 import type { IColumnLimitsBoardPageObject } from './IColumnLimitsBoardPageObject';
 
 /**

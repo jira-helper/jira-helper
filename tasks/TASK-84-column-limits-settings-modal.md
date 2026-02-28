@@ -1,6 +1,6 @@
 # TASK-84: Создать modal-lifecycle.feature для Column Limits SettingsPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-10](./EPIC-10-column-limits-bdd-refactoring.md)
 
@@ -31,9 +31,27 @@ Given there are configured column groups:
 
 ## Критерии приёмки
 
-- [ ] `modal-lifecycle.feature` содержит 5 сценариев
-- [ ] Step definitions для модалки созданы
-- [ ] Тесты проходят
+- [x] `modal-lifecycle.feature` содержит 5 сценариев
+- [x] Step definitions для модалки созданы
+- [x] Тесты проходят
+
+## Acceptance (исправление)
+
+**Проблема:** SC-MODAL-3 кликает Cancel без изменений. Нужно проверить что Cancel **после изменений** не сохраняет изменения.
+
+**Решение:** Обновить SC-MODAL-3 чтобы сначала сделать изменения (drag column, set limit), потом Cancel, и проверить что `@updateBoardProperty` не вызван.
+
+```gherkin
+@SC-MODAL-3
+Scenario: Cancel button closes modal without saving
+  Given no column groups are configured
+  When I open the settings modal
+  And I drag "In Progress" column to create a new group
+  And I set limit to 5
+  And I click "Cancel"
+  Then the modal should be closed
+  And no changes should be saved
+```
 
 ## Зависимости
 

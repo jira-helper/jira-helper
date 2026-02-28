@@ -89,9 +89,9 @@ Given the board has issues:
 | 3 | [TASK-79](./TASK-79-column-limits-boardpage-exceed.md) | Создать exceed.feature и steps | DONE |
 | 4 | [TASK-80](./TASK-80-column-limits-boardpage-filters.md) | Создать filters.feature (**только issueType**, swimlane → EPIC-11) | DONE |
 | 5 | [TASK-81](./TASK-81-column-limits-boardpage-multi.md) | Создать multi-groups.feature | DONE |
-| 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | TODO |
-| 7 | [TASK-83](./TASK-83-column-limits-settings-helpers.md) | Создать helpers.tsx для SettingsPage | TODO |
-| 8 | [TASK-84](./TASK-84-column-limits-settings-modal.md) | Создать modal-lifecycle.feature | TODO |
+| 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | DONE |
+| 7 | [TASK-83](./TASK-83-column-limits-settings-helpers.md) | Создать helpers.tsx для SettingsPage | DONE |
+| 8 | [TASK-84](./TASK-84-column-limits-settings-modal.md) | Создать modal-lifecycle.feature | DONE |
 | 9 | [TASK-85](./TASK-85-column-limits-settings-add.md) | Создать add-group.feature | TODO |
 | 10 | [TASK-86](./TASK-86-column-limits-settings-dnd.md) | Создать drag-drop.feature | TODO |
 | 11 | [TASK-87](./TASK-87-column-limits-settings-edit.md) | Создать edit-group.feature | TODO |
