@@ -38,6 +38,8 @@ src/[feature]/SettingsPage/features/
 
 cypress/support/
 ├── bdd-runner.ts                  # BDD runner (парсинг + выполнение)
+├── gherkin-steps/
+│   └── common.ts                  # Глобальные step definitions
 ├── commands.ts                    # Custom Cypress commands
 └── component.ts                   # mount setup
 ```
@@ -59,6 +61,7 @@ Runner автоматически:
 import { defineFeature } from '../../../../cypress/support/bdd-runner';
 import { setupBackground } from './helpers';
 import featureText from './add-limit.feature?raw';
+import 'cypress/support/gherkin-steps/common';
 import './steps/common.steps';
 
 defineFeature(featureText, ({ Background }) => {
@@ -66,11 +69,19 @@ defineFeature(featureText, ({ Background }) => {
 });
 ```
 
-**Всего 6 строк!** Вся логика — в step definitions и helpers.
+**Всего 7 строк!** Вся логика — в step definitions и helpers.
+
+**ESLint правило** `require-gherkin-steps-import` автоматически добавит импорт при `npm run lint:eslint -- --fix`.
+
+**Vite alias** в `cypress.config.ts` резолвит `cypress/support/gherkin-steps/common` в проект.
 
 ---
 
 ## Step Definitions
+
+**Глобальные степы** доступны в (cypress/support/gherkin-steps/common.ts).
+- Импортируй в каждый `.feature.cy.tsx` (делает автоматом eslint)
+- Используй их как базовые для построения сценариев
 
 Степы регистрируются глобально в `steps/common.steps.ts`:
 
@@ -129,6 +140,7 @@ Then(/^I should see (\d+) limits? in the table$/, (count: string) => {
 | `{word}` | `([^\s]+)` | `john.doe` |
 
 ---
+
 
 ## Best Practices для Step Definitions
 
@@ -330,6 +342,7 @@ npx cypress open --component
 
 - [ ] Первая строка: `/// <reference types="cypress" />`
 - [ ] Импорт feature через `?raw`: `import featureText from './x.feature?raw'`
+- [ ] Импорт глобальных степов: `import 'cypress/support/gherkin-steps/common'` (ESLint добавит автоматически)
 - [ ] Импорт общих степов: `import './steps/common.steps'`
 - [ ] `defineFeature` с `Background(() => setupBackground())`
 - [ ] Step definitions в отдельном файле `steps/common.steps.ts`

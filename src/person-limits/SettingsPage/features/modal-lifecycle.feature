@@ -13,11 +13,11 @@ Feature: Personal WIP Limit Settings - Modal Lifecycle
     And I should see the avatar warning message
     And the person name select should be empty
     And the limit field should show value 1
-    And checkbox "All columns" should be checked
-    And checkbox "All swimlanes" should be checked
-    And checkbox "Count all issue types" should be checked
+    And I see checkbox "All columns" is checked
+    And I see checkbox "All swimlanes" is checked
+    And I see checkbox "Count all issue types" is checked
     When I click "Save"
-    Then the modal should be closed
+    Then I do not see the modal
 
   @SC-MODAL-2
   Scenario: Open modal with pre-configured limits
@@ -35,4 +35,4 @@ Feature: Personal WIP Limit Settings - Modal Lifecycle
     And I should see limit: name "Diana Prince" value 4 columns "all" swimlanes "all" issueTypes "Task, Bug"
     And I should see limit: name "Eve Wilson" value 6 columns "In Progress" swimlanes "Backend" issueTypes "Story"
     When I click "Cancel"
-    Then the modal should be closed
+    Then I do not see the modal

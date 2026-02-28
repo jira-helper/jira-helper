@@ -82,10 +82,6 @@ When('I click {string} on the first limit for {string}', (action: string, person
   cy.contains('tr', personName).first().contains(action).click();
 });
 
-When('I click {string}', (buttonText: string) => {
-  cy.contains('button', buttonText).click();
-});
-
 When('I search for {string} in person name field', (searchText: string) => {
   cy.get('.ant-select').first().click();
   cy.get('.ant-select-selection-search-input').first().clear({ force: true }).type(searchText, { force: true });
@@ -102,14 +98,6 @@ When('I select {string} from search results', (optionText: string) => {
 
 When(/^I set the limit to (\d+)$/, (value: string) => {
   cy.get('.ant-input-number-input').clear().type(value).blur();
-});
-
-When('I uncheck {string}', (checkboxLabel: string) => {
-  cy.contains('label', checkboxLabel).find('input[type="checkbox"]').uncheck({ force: true });
-});
-
-When('I check {string}', (checkboxLabel: string) => {
-  cy.contains('label', checkboxLabel).find('input[type="checkbox"]').check({ force: true });
 });
 
 When('I select only columns {string}', (columnNames: string) => {
@@ -215,14 +203,6 @@ Then('the button should show {string}', (buttonText: string) => {
   cy.get('button[type="submit"], button.ant-btn-primary').should('contain.text', buttonText);
 });
 
-Then('checkbox {string} should be checked', (checkboxLabel: string) => {
-  cy.contains('label', checkboxLabel).find('input[type="checkbox"]').should('be.checked');
-});
-
-Then('checkbox {string} should be unchecked', (checkboxLabel: string) => {
-  cy.contains('label', checkboxLabel).find('input[type="checkbox"]').should('not.be.checked');
-});
-
 Then('issue types {string} should be selected', (issueTypesStr: string) => {
   const types = issueTypesStr.split(',').map(s => s.trim());
   cy.contains('Selected issue types:').should('be.visible');
@@ -236,10 +216,6 @@ Then('issue types {string} should be selected', (issueTypesStr: string) => {
 Then('I should see the Personal WIP Limits modal', () => {
   cy.contains('Personal WIP Limit').scrollIntoView().should('be.visible');
   cy.get('[role="dialog"]').scrollIntoView().should('be.visible');
-});
-
-Then('the modal should be closed', () => {
-  cy.get('[role="dialog"]').should('not.exist');
 });
 
 Then('I should see the avatar warning message', () => {

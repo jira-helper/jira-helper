@@ -31,7 +31,7 @@ Feature: Column Limits Settings Modal Lifecycle
     And I drag "In Progress" column to create a new group
     And I set limit to 5
     And I click "Cancel"
-    Then the modal should be closed
+    Then I do not see the modal
     And no changes should be saved
 
   @SC-MODAL-4
@@ -41,7 +41,7 @@ Feature: Column Limits Settings Modal Lifecycle
     And I drag "In Progress" column to create a new group
     And I set limit to 5
     And I click "Save"
-    Then the modal should be closed
+    Then I do not see the modal
     And changes should be saved
 
   @SC-MODAL-5

@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['airbnb', 'prettier', 'plugin:storybook/recommended'],
-  plugins: ['prettier', '@typescript-eslint/eslint-plugin'],
+  plugins: ['prettier', '@typescript-eslint/eslint-plugin', 'local-rules'],
   env: {
     browser: true,
     jest: true,
@@ -43,5 +43,6 @@ module.exports = {
     'guard-for-in': 'off',
     'jsx-a11y/click-events-have-key-events': 'off',
     'jsx-a11y/no-static-element-interactions': 'off',
+    'local-rules/require-gherkin-steps-import': 'error',
   },
 };

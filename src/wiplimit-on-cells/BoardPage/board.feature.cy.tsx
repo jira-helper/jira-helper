@@ -16,6 +16,7 @@ import { wipLimitCellsBoardPageObjectToken } from './pageObject';
 import { useWipLimitCellsRuntimeStore, getInitialState } from './stores';
 import type { WipLimitRange } from '../../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
+import 'cypress/support/gherkin-steps/common';
 
 // --- Test fixtures matching feature Background ---
 

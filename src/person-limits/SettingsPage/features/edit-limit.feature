@@ -44,8 +44,8 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I click "Edit" on the limit for "John Doe"
     Then the person select should show "John Doe"
     And the limit field should show value 5
-    And checkbox "All swimlanes" should be checked
-    And checkbox "All columns" should be checked
+    And I see checkbox "All swimlanes" is checked
+    And I see checkbox "All columns" is checked
     When I uncheck "All swimlanes"
     And I select only swimlane "Frontend"
     And I click "Edit limit"
@@ -67,7 +67,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     And I uncheck "All swimlanes"
-    Then checkbox "All columns" should be checked
+    Then I see checkbox "All columns" is checked
 
   @SC-EDIT-6
   Scenario: Add issue type filter to limit with columns and swimlane
@@ -116,7 +116,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     Then issue types "Task, Bug" should be selected
-    And checkbox "Count all issue types" should be unchecked
+    And I see checkbox "Count all issue types" is unchecked
 
   # === CANCEL ===
 

@@ -13,6 +13,7 @@ import { SettingsButtonContainer } from './components/SettingsButton';
 import { useWipLimitCellsSettingsUIStore } from './stores/settingsUIStore';
 import type { WipLimitRange } from '../../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
+import 'cypress/support/gherkin-steps/common';
 
 // --- Test fixtures matching feature Background ---
 

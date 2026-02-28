@@ -71,10 +71,6 @@ When('I open the settings modal', () => {
   cy.get('[role="dialog"]').should('exist');
 });
 
-When('I click {string}', (buttonText: string) => {
-  cy.contains('button', buttonText).click();
-});
-
 When(/^I drag "([^"]*)" column to create a new group$/, (columnName: string) => {
   const col = columns.find(c => c.name === columnName);
   if (!col) throw new Error(`Column "${columnName}" not found`);
@@ -187,10 +183,6 @@ When(/^I enable "Count all issue types" for group "([^"]*)"$/, (groupId: string)
 Then('I should see the modal', () => {
   cy.get('[role="dialog"]').should('be.visible');
   cy.contains('Limits for groups').should('be.visible');
-});
-
-Then('the modal should be closed', () => {
-  cy.get('[role="dialog"]').should('not.exist');
 });
 
 Then(/^the "Without Group" section should contain all columns$/, () => {

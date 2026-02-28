@@ -1,4 +1,8 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'cypress';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   component: {
@@ -12,6 +16,7 @@ export default defineConfig({
         resolve: {
           alias: {
             src: '/src',
+            'cypress/support/gherkin-steps/common': path.resolve(__dirname, 'cypress/support/gherkin-steps/common.ts'),
           },
         },
       },
