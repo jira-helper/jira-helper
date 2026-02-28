@@ -1,6 +1,6 @@
 # EPIC-10: Column Limits BDD Test Refactoring
 
-**Status**: IN_PROGRESS
+**Status**: DONE
 
 ---
 
@@ -92,13 +92,13 @@ Given the board has issues:
 | 6 | [TASK-82](./TASK-82-column-limits-boardpage-cleanup.md) | Удалить старые файлы BoardPage | DONE |
 | 7 | [TASK-83](./TASK-83-column-limits-settings-helpers.md) | Создать helpers.tsx для SettingsPage | DONE |
 | 8 | [TASK-84](./TASK-84-column-limits-settings-modal.md) | Создать modal-lifecycle.feature | DONE |
-| 9 | [TASK-85](./TASK-85-column-limits-settings-add.md) | Создать add-group.feature | TODO |
-| 10 | [TASK-86](./TASK-86-column-limits-settings-dnd.md) | Создать drag-drop.feature | TODO |
-| 11 | [TASK-87](./TASK-87-column-limits-settings-edit.md) | Создать edit-group.feature | TODO |
-| 12 | [TASK-88](./TASK-88-column-limits-settings-delete.md) | Создать delete-group.feature | TODO |
-| 13 | [TASK-89](./TASK-89-column-limits-settings-validation.md) | Создать validation.feature | TODO |
-| 14 | [TASK-90](./TASK-90-column-limits-settings-edge.md) | Создать edge-cases.feature | TODO |
-| 15 | [TASK-91](./TASK-91-column-limits-settings-cleanup.md) | Удалить старые файлы SettingsPage | TODO |
+| 9 | [TASK-85](./TASK-85-column-limits-settings-add.md) | Создать add-group.feature | DONE |
+| 10 | [TASK-86](./TASK-86-column-limits-settings-dnd.md) | Создать drag-drop.feature | DONE |
+| 11 | [TASK-87](./TASK-87-column-limits-settings-edit.md) | Создать edit-group.feature | DONE |
+| 12 | [TASK-88](./TASK-88-column-limits-settings-delete.md) | Создать delete-group.feature | DONE |
+| 13 | [TASK-89](./TASK-89-column-limits-settings-validation.md) | Создать validation.feature | DONE |
+| 14 | [TASK-90](./TASK-90-column-limits-settings-edge.md) | Создать edge-cases.feature | DONE |
+| 15 | [TASK-91](./TASK-91-column-limits-settings-cleanup.md) | Удалить старые файлы SettingsPage | DONE |
 
 ## Ожидаемый результат
 

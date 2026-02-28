@@ -1,6 +1,6 @@
 # TASK-88: Создать delete-group.feature для Column Limits SettingsPage
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-10](./EPIC-10-column-limits-bdd-refactoring.md)
 
