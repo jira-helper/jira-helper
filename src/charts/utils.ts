@@ -6,7 +6,7 @@ interface Tick {
 // Gets chart ticks based on specific conditions
 export const getChartTicks = (chartElement: Element): Tick[] => {
   const ticks = Array.from(chartElement.querySelectorAll('.tick')).filter(
-    // @ts-expect-error
+    // @ts-expect-error - legacy
     elem => elem.lastChild?.attributes.y.value === '0' && elem.lastChild.textContent
   );
 

@@ -26,7 +26,7 @@ export const calculateGroupStats = createAction({
 
     Object.entries(propertyData).forEach(([groupName, group]) => {
       const { columns, max, customHexColor, includedIssueTypes } = group;
-      if (!columns || !max) return;
+      if (!columns || columns.length === 0 || !max) return;
 
       const currentCount = columns.reduce(
         (acc, columnId) =>

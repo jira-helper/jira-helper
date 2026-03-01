@@ -34,6 +34,6 @@ export type FormData = {
  * @deprecated Legacy type; state is managed by settingsUIStore
  */
 export type PersonalWipLimitsState = {
-  limits: import('../property/types').PersonLimit[];
+  limits: import('../../property/types').PersonLimit[];
   editingId: number | null;
 };

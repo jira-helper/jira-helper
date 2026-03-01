@@ -5,8 +5,7 @@
  */
 function fixCSPErrorInResizeObvserverPolyfill() {
   if (globalThis) {
-    // @ts-expect-error
-    globalThis.global = globalThis;
+    (globalThis as Record<string, unknown>).global = globalThis;
   }
 }
 

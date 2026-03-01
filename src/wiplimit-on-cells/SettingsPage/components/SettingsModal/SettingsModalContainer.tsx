@@ -92,7 +92,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
         columns={columns}
         onAddRange={handleAddRange}
         onAddCell={handleAddCell}
-        existingRangeNames={data.ranges.map(r => r.name)}
+        existingRangeNames={data.ranges.map((r: { name: string }) => r.name)}
         selectedRangeName={selectedRangeName}
         onRangeNameChange={setSelectedRangeName}
       />

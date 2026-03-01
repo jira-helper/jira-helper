@@ -53,7 +53,7 @@ function setup({
       }) as Promise<BoardProperty>
   );
   const updateBoardPropertySpy = vi.fn();
-  // @ts-expect-error
+  // @ts-expect-error - legacy
   container.register({
     token: BoardPropertyServiceToken,
     value: {

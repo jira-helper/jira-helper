@@ -29,10 +29,10 @@ const useGetLocale = () => {
 export const useGetTextsByLocale = <textsKeys extends string>(texts: Texts<textsKeys>): Record<textsKeys, string> => {
   const locale = useGetLocale();
 
-  // @ts-expect-error
+  // @ts-expect-error - legacy
   return Object.fromEntries(
     Object.entries(texts).map(([key, value]) => {
-      // @ts-expect-error
+      // @ts-expect-error - legacy
       return [key, value[locale]];
     })
   );

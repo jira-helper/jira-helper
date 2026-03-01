@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Ok, Err } from 'ts-results';
+import { globalContainer } from 'dioma';
 import {
   generateIssueTypeSelectorHTML,
   getSelectedIssueTypes,
@@ -7,6 +8,7 @@ import {
   clearIssueTypesCache,
 } from './issueTypeSelector';
 import { getProjectIssueTypes } from '../jiraApi';
+import { getProjectIssueTypesToken } from '../di/jiraApiTokens';
 import { getIssueTypesFromDOM } from './getIssueTypesFromDOM';
 import { getProjectKeyFromURL } from './getProjectKeyFromURL';
 
@@ -19,6 +21,11 @@ describe('issueTypeSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     clearIssueTypesCache();
+    // Register mocked getProjectIssueTypes in DI container
+    globalContainer.register({
+      token: getProjectIssueTypesToken,
+      value: getProjectIssueTypes,
+    });
   });
 
   describe('generateIssueTypeSelectorHTML', () => {

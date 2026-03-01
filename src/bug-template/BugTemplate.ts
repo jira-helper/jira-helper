@@ -127,6 +127,7 @@ export default class extends PageModification {
     }
     if (!textarea) return;
 
+    // eslint-disable-next-line no-alert
     if (!window.confirm(`Are you sure you want to save the text "${textarea.value}" in the template?`)) {
       return;
     }

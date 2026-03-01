@@ -50,7 +50,12 @@ describe('calculateStats', () => {
     usePersonWipLimitsPropertyStore.getState().actions.setLimits([
       {
         id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+        person: {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+          avatar: '',
+        },
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -91,7 +96,12 @@ describe('calculateStats', () => {
     usePersonWipLimitsPropertyStore.getState().actions.setLimits([
       {
         id: 1,
-        person: { name: 'john.doe', displayName: 'John Doe', avatar: '' },
+        person: {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+          avatar: '',
+        },
         limit: 2,
         columns: [{ id: 'col2', name: 'In Progress' }],
         swimlanes: [],

@@ -156,7 +156,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
         this.settings!.limits[dataId].bkgColor = hexStrColor;
         this.renderRows();
       },
-      // @ts-expect-error
+      // @ts-expect-error - legacy
       addEventListener: (target: EventTarget, event: string, cb: EventListener) =>
         this.addEventListener(target, event, cb),
     });
@@ -289,7 +289,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
       }
 
       this.renderRows();
-      // @ts-expect-error
+      // @ts-expect-error - legacy
       btnEdit.disabled = true;
       this.limitKeyOfEditable = undefined;
     };
@@ -300,7 +300,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
 
     this.addEventListener(btnEdit, 'click', () => {
       if (this.limitKeyOfEditable == null) {
-        // @ts-expect-error
+        // @ts-expect-error - legacy
         btnEdit.disabled = true;
         return;
       }
@@ -348,7 +348,7 @@ export default class FieldLimitsSettingsPage extends PageModification<[any, any]
     this.colorPickerTooltip!.init(this.popup!.contentBlock!, 'colorpicker-data-id');
 
     this.addEventListener(table, 'click', event => {
-      // @ts-expect-error
+      // @ts-expect-error - legacy
       this.colorPickerTooltip!.showTooltip(event);
     });
   };

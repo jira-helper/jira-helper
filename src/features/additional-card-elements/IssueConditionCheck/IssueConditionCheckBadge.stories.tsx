@@ -69,7 +69,7 @@ export const BadgeWithSubtasks: StoryObj = {
       issueJql: 'status = "In Progress"',
       subtaskJql: 'status = "To Do"',
     });
-    const result = createMockResult(check, true, ['TEST-2', 'TEST-3', 'TEST-5']);
+    const result = createMockResult(check, true, [{ key: 'TEST-2' }, { key: 'TEST-3' }, { key: 'TEST-5' }]);
 
     return (
       <div style={{ padding: '20px' }}>

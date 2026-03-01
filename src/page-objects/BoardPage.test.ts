@@ -74,7 +74,9 @@ describe('BoardPagePageObject', () => {
       expect(callback).toHaveBeenCalledTimes(1);
       const cards = callback.mock.calls[0][0];
       expect(cards).toHaveLength(2);
-      expect(cards.map(c => c.getIssueId())).toEqual(expect.arrayContaining(['TEST-1', 'TEST-2']));
+      expect(cards.map((c: { getIssueId: () => string }) => c.getIssueId())).toEqual(
+        expect.arrayContaining(['TEST-1', 'TEST-2'])
+      );
     });
 
     it('should call callback when cards are removed', () => {
@@ -263,7 +265,7 @@ describe('BoardPagePageObject', () => {
       expect(callback).toHaveBeenCalledTimes(1);
       const cards = callback.mock.calls[0][0];
       expect(cards).toHaveLength(2);
-      const issueIds = cards.map(c => c.getIssueId()).sort();
+      const issueIds = cards.map((c: { getIssueId: () => string }) => c.getIssueId()).sort();
       expect(issueIds).toEqual(['TEST-1', 'TEST-2']);
     });
   });

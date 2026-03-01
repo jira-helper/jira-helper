@@ -1,4 +1,6 @@
 /// <reference types="cypress" />
+/// <reference types="sinon" />
+
 /**
  * @module column-limits/SettingsPage/features/helpers
  *
@@ -44,9 +46,12 @@ export const setupBackground = () => {
     value: () => 'test-board-123',
   });
 
+  const updateBoardPropertyStub = cy.stub().resolves();
+  cy.wrap(updateBoardPropertyStub).as('updateBoardProperty');
+
   globalContainer.register({
     token: updateBoardPropertyToken,
-    value: cy.stub().resolves().as('updateBoardProperty'),
+    value: updateBoardPropertyStub,
   });
 
   globalContainer.register({
@@ -62,14 +67,17 @@ export const setupBackground = () => {
 // --- Mount helpers ---
 
 export type ModalStubs = {
-  onClose: Cypress.Agent<sinon.SinonStub>;
-  onSave: Cypress.Agent<sinon.SinonStub>;
+  onClose: sinon.SinonStub;
+  onSave: sinon.SinonStub;
 };
 
-export const createModalStubs = (): ModalStubs => ({
-  onClose: cy.stub().as('onClose'),
-  onSave: cy.stub().resolves().as('onSave'),
-});
+export const createModalStubs = (): ModalStubs => {
+  const onClose = cy.stub();
+  cy.wrap(onClose).as('onClose');
+  const onSave = cy.stub().resolves();
+  cy.wrap(onSave).as('onSave');
+  return { onClose, onSave };
+};
 
 export const mountModal = (stubs: ModalStubs) => {
   cy.mount(<SettingsModalContainer onClose={stubs.onClose} onSave={stubs.onSave} />);
@@ -90,7 +98,7 @@ export const createButtonStubs = (): ButtonStubs => {
         writable: false,
       });
       return mockElement;
-    }) as NodeListOf<Element>
+    }) as unknown as NodeListOf<Element>
   );
 
   const getColumnName = cy.stub().callsFake((el: HTMLElement) => {
@@ -98,7 +106,10 @@ export const createButtonStubs = (): ButtonStubs => {
     return columns.find(c => c.id === colId)?.name || '';
   });
 
-  return { getColumns, getColumnName };
+  return {
+    getColumns: getColumns as Cypress.Agent<sinon.SinonStub>,
+    getColumnName: getColumnName as Cypress.Agent<sinon.SinonStub>,
+  };
 };
 
 export const mountButton = (stubs: ButtonStubs) => {

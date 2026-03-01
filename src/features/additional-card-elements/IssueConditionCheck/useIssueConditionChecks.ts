@@ -226,7 +226,7 @@ export function useIssueConditionChecks(issueKey: string): ConditionCheckResult[
     // Check all conditions and return only matching ones
     return checks
       .filter(check => check.enabled)
-      .map(check => checkCondition(check, issue, subtasks, fields, epicLinkFieldId))
+      .map(check => checkCondition(check, issue, subtasks, fields, epicLinkFieldId ?? null))
       .filter(result => result.matched);
   }, [checks, issue, subtasks, fields, epicLinkFieldId]);
 }

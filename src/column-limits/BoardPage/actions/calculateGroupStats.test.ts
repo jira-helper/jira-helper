@@ -27,6 +27,7 @@ describe('calculateGroupStats', () => {
       }),
       styleColumn: vi.fn(),
       insertBadge: vi.fn(),
+      removeBadges: vi.fn(),
       getSwimlaneIds: vi.fn(() => []),
       shouldCountIssue: vi.fn(() => true),
     };

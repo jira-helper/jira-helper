@@ -41,7 +41,7 @@ type LegacyRange = {
     column: string;
     showBadge: boolean;
     swimlane?: string;
-    // @ts-expect-error backward compatibility - old typo in saved data
+    /** @deprecated backward compatibility - old typo in saved data */
     swimline?: string;
   }>;
   includedIssueTypes?: string[];

@@ -41,7 +41,6 @@ import { AdditionalCardElementsBoardBacklogPage } from './features/additional-ca
 setAutoFreeze(false);
 
 const domLoaded = () =>
-  // eslint-disable-next-line consistent-return
   new Promise(resolve => {
     if (document.readyState === 'interactive' || document.readyState === 'complete') return resolve(undefined);
     window.addEventListener('DOMContentLoaded', resolve);
@@ -99,11 +98,11 @@ async function start() {
     [Routes.ALL]: [BugTemplate],
   };
 
-  // @ts-expect-error
+  // @ts-expect-error - legacy
   runModifications(modificationsMap);
 }
 
 start();
 
-// @ts-expect-error
+// @ts-expect-error - legacy
 window.SettingsPage = SettingsPage;

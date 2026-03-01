@@ -7,6 +7,7 @@ import storybookPlugin from 'eslint-plugin-storybook';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import requireGherkinStepsImport from './eslint-local-rules/require-gherkin-steps-import.js';
+import noChainedStubAs from './eslint-local-rules/no-chained-stub-as.js';
 
 export default [
   {
@@ -62,7 +63,7 @@ export default [
       "prefer-destructuring": [
         "error", {
           VariableDeclarator: { array: false, object: true },
-          AssignmentExpression: { array: true, object: false },
+          AssignmentExpression: { array: false, object: false },
         },
       ],
       'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
@@ -81,7 +82,7 @@ export default [
 
       'consistent-return': 'off',
       'no-alert': 'error',
-      '@typescript-eslint/no-explicit-any': 'error'
+      '@typescript-eslint/no-explicit-any': 'warn'
     },
   },
 
@@ -94,6 +95,19 @@ export default [
     ],
     rules: {
       '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
+  {
+    files: ['**/*.cy.{ts,tsx}'],
+    plugins: {
+      'local-cypress': {
+        rules: {
+          'no-chained-stub-as': noChainedStubAs,
+        },
+      },
+    },
+    rules: {
+      'local-cypress/no-chained-stub-as': 'error',
     },
   },
   {

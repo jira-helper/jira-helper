@@ -11,7 +11,7 @@ import React from 'react';
 import { normalizeRange } from 'src/wiplimit-on-cells/property/actions/loadProperty';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import { useWipLimitCellsSettingsUIStore } from './stores/settingsUIStore';
-import type { WipLimitRange } from '../../types';
+import type { WipLimitRange } from '../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
 import 'cypress/support/gherkin-steps/common';
 
@@ -49,7 +49,9 @@ describe('Feature: WIP Limit on Cells Settings', () => {
   beforeEach(() => {
     // Given I am on the WIP Limit on Cells settings page
     useWipLimitCellsSettingsUIStore.setState(useWipLimitCellsSettingsUIStore.getInitialState());
-    onSaveToProperty = cy.stub().resolves().as('onSaveToProperty');
+    const saveStub = cy.stub().resolves();
+    (saveStub as sinon.SinonStub & { as: (alias: string) => void }).as('onSaveToProperty');
+    onSaveToProperty = saveStub as Cypress.Agent<sinon.SinonStub>;
     // And there are columns "To Do, In Progress, Review, Done" on the board
     // And there are swimlanes "Frontend, Backend, QA" on the board
   });
@@ -728,7 +730,8 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     Step('And the Jira board property should be cleared', () => {
       cy.get('@onSaveToProperty').should('have.been.called');
       cy.get('@onSaveToProperty').then(stub => {
-        const call = stub.getCall(stub.callCount - 1);
+        const sinonStub = stub as unknown as sinon.SinonStub;
+        const call = sinonStub.getCall(sinonStub.callCount - 1);
         expect(call.args[0]).to.deep.equal([]);
       });
     });
@@ -767,7 +770,8 @@ describe('Feature: WIP Limit on Cells Settings', () => {
     Step('Then the settings should be saved to the Jira board property "WIP_LIMITS_CELLS"', () => {
       cy.get('@onSaveToProperty').should('have.been.called');
       cy.get('@onSaveToProperty').then(stub => {
-        const call = stub.getCall(stub.callCount - 1);
+        const sinonStub = stub as unknown as sinon.SinonStub;
+        const call = sinonStub.getCall(sinonStub.callCount - 1);
         expect(call.args[0]).to.be.an('array');
         expect(call.args[0][0]).to.have.property('name', 'Critical Path');
         expect(call.args[0][0]).to.have.property('wipLimit', 5);

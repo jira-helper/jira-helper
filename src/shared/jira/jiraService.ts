@@ -309,7 +309,8 @@ export class JiraService implements IJiraService {
       if (Array.isArray(field)) {
         return field.some(item => item?.value === 'Impediment');
       }
-      // @ts-expect-error
+
+      // @ts-expect-error - legacy
       if (field?.value === 'Impediment') {
         return true;
       }

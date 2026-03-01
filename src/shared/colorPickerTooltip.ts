@@ -1,4 +1,4 @@
-// @ts-expect-error
+// @ts-expect-error - unknown lib
 import ColorPicker from 'simple-color-picker';
 import noop from '@tinkoff/utils/function/noop';
 import { colorPickerTooltipTemplate } from './htmlTemplates';

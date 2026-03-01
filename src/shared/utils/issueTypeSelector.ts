@@ -297,30 +297,29 @@ export function initIssueTypeSelector(
     countAllCheckbox.addEventListener('change', handleCountAllChange);
   }
 
-  // Handle load button
+  // Handle load button and Enter key - declared here for cleanup scope
   const loadBtn = selectorElement.querySelector(`#${loadBtnId}`) as HTMLButtonElement;
-  if (loadBtn) {
-    const handleLoadClick = () => {
-      const projectInput = selectorElement.querySelector(`#${projectInputId}`) as HTMLInputElement;
+  const projectInput = selectorElement.querySelector(`#${projectInputId}`) as HTMLInputElement;
+  const handleLoadClick = () => {
+    if (projectInput) {
+      const projectKey = projectInput.value.trim();
+      updateState({ projectKey });
+      loadIssueTypes(projectKey);
+    }
+  };
+  const handleInputKeyPress = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
       if (projectInput) {
         const projectKey = projectInput.value.trim();
         updateState({ projectKey });
         loadIssueTypes(projectKey);
       }
-    };
+    }
+  };
+  if (loadBtn) {
     loadBtn.addEventListener('click', handleLoadClick);
   }
-
-  // Handle Enter key in project input
-  const projectInput = selectorElement.querySelector(`#${projectInputId}`) as HTMLInputElement;
   if (projectInput) {
-    const handleInputKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        const projectKey = projectInput.value.trim();
-        updateState({ projectKey });
-        loadIssueTypes(projectKey);
-      }
-    };
     projectInput.addEventListener('keypress', handleInputKeyPress);
   }
 

@@ -8,7 +8,7 @@ export interface IBoardBacklogPagePageObject {
     backlogIssueCard: string;
   };
 
-  classlist: {};
+  classlist: object;
 
   getHtml(): string;
   listenCards(callback: (cards: BacklogIssueCardPageObject[]) => void): () => void;

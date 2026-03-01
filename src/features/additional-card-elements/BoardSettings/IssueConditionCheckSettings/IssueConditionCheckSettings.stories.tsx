@@ -124,7 +124,7 @@ export const SingleItemSimpleMode: StoryObj = {
         <IssueConditionCheckItem
           check={check}
           onUpdate={(id, updates) => setCheck(prev => ({ ...prev, ...updates }))}
-          onRemove={() => console.log('Remove clicked')}
+          onRemove={() => {}}
         />
       </div>
     );
@@ -152,7 +152,7 @@ export const SingleItemWithSubtasksMode: StoryObj = {
         <IssueConditionCheckItem
           check={check}
           onUpdate={(id, updates) => setCheck(prev => ({ ...prev, ...updates }))}
-          onRemove={() => console.log('Remove clicked')}
+          onRemove={() => {}}
         />
       </div>
     );
@@ -179,7 +179,7 @@ export const SingleItemInvalidJql: StoryObj = {
         <IssueConditionCheckItem
           check={check}
           onUpdate={(id, updates) => setCheck(prev => ({ ...prev, ...updates }))}
-          onRemove={() => console.log('Remove clicked')}
+          onRemove={() => {}}
         />
       </div>
     );
@@ -206,7 +206,7 @@ export const SingleItemDisabled: StoryObj = {
         <IssueConditionCheckItem
           check={check}
           onUpdate={(id, updates) => setCheck(prev => ({ ...prev, ...updates }))}
-          onRemove={() => console.log('Remove clicked')}
+          onRemove={() => {}}
         />
       </div>
     );

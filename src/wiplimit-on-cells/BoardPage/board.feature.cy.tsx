@@ -14,7 +14,7 @@ import { renderWipLimitCells } from './actions/renderWipLimitCells';
 import type { IWipLimitCellsBoardPageObject } from './pageObject';
 import { wipLimitCellsBoardPageObjectToken } from './pageObject';
 import { useWipLimitCellsRuntimeStore } from './stores';
-import type { WipLimitRange } from '../../types';
+import type { WipLimitRange } from '../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
 import 'cypress/support/gherkin-steps/common';
 

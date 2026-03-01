@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { RangeForm } from './RangeForm';
-import type { WipLimitCell } from '../../../types';
 
 const meta: Meta<typeof RangeForm> = {
   title: 'WIP Limits on Cells/RangeForm',

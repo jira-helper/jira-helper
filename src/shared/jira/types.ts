@@ -250,9 +250,9 @@ export type RemoteLink = {
     url: string;
     // "SMEDE-5372",
     title: string;
-    icon: {};
+    icon: object;
     status: {
-      icon: {};
+      icon: object;
     };
   };
 };

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DiProvider } from 'src/shared/diContext';
+import { WithDi } from 'src/shared/diContext';
 import { Container, Token } from 'dioma';
 import { IBoardPagePageObject } from 'src/page-objects/BoardPage';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
@@ -42,11 +42,11 @@ const meta: Meta<typeof DaysInColumnSettings> = {
   component: DaysInColumnSettings,
   decorators: [
     Story => (
-      <DiProvider container={mockContainer}>
+      <WithDi container={mockContainer}>
         <div style={{ padding: '16px', maxWidth: '600px' }}>
           <Story />
         </div>
-      </DiProvider>
+      </WithDi>
     ),
   ],
   tags: ['autodocs'],
@@ -64,6 +64,7 @@ export const Disabled: Story = {
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: false,
           },
@@ -87,6 +88,7 @@ export const EnabledWithGlobalThresholds: Story = {
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: true,
             warningThreshold: 3,
@@ -113,6 +115,7 @@ export const EnabledWithInvalidGlobalThresholds: Story = {
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: true,
             warningThreshold: 7,
@@ -139,6 +142,7 @@ export const EnabledWithPerColumnThresholds: Story = {
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: true,
             usePerColumnThresholds: true,
@@ -168,6 +172,7 @@ export const PerColumnWithNonExistentColumn: Story = {
           columnsToTrack: ['In Progress', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: true,
             usePerColumnThresholds: true,
@@ -197,6 +202,7 @@ export const PerColumnWithPartialThresholds: Story = {
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
           issueLinks: [],
+          issueConditionChecks: [],
           daysInColumn: {
             enabled: true,
             usePerColumnThresholds: true,

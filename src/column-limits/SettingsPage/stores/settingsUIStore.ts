@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { WITHOUT_GROUP_ID } from '../../types';
+import type { Column, UIGroup } from '../../types';
 import type { SettingsUIData, SettingsUIStoreState } from './settingsUIStore.types';
 
 const getInitialData = (): SettingsUIData => ({
@@ -39,7 +40,7 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
     setGroupLimit: (groupId, limit) =>
       set(
         produce(state => {
-          const group = state.data.groups.find(g => g.id === groupId);
+          const group = state.data.groups.find((g: UIGroup) => g.id === groupId);
           if (group) group.max = limit;
         })
       ),
@@ -47,7 +48,7 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
     setGroupColor: (groupId, customHexColor) =>
       set(
         produce(state => {
-          const group = state.data.groups.find(g => g.id === groupId);
+          const group = state.data.groups.find((g: UIGroup) => g.id === groupId);
           if (group) group.customHexColor = customHexColor;
         })
       ),
@@ -63,13 +64,13 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
       set(
         produce(state => {
           if (fromGroupId === WITHOUT_GROUP_ID) {
-            state.data.withoutGroupColumns = state.data.withoutGroupColumns.filter(c => c.id !== column.id);
+            state.data.withoutGroupColumns = state.data.withoutGroupColumns.filter((c: Column) => c.id !== column.id);
           } else {
-            const fromGroup = state.data.groups.find(g => g.id === fromGroupId);
+            const fromGroup = state.data.groups.find((g: UIGroup) => g.id === fromGroupId);
             if (fromGroup) {
-              fromGroup.columns = fromGroup.columns.filter(c => c.id !== column.id);
+              fromGroup.columns = fromGroup.columns.filter((c: Column) => c.id !== column.id);
               if (fromGroup.columns.length === 0) {
-                state.data.groups = state.data.groups.filter(g => g.id !== fromGroupId);
+                state.data.groups = state.data.groups.filter((g: UIGroup) => g.id !== fromGroupId);
               }
             }
           }
@@ -77,7 +78,7 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
           if (toGroupId === WITHOUT_GROUP_ID) {
             state.data.withoutGroupColumns = [...state.data.withoutGroupColumns, column];
           } else {
-            const toGroup = state.data.groups.find(g => g.id === toGroupId);
+            const toGroup = state.data.groups.find((g: UIGroup) => g.id === toGroupId);
             if (toGroup) {
               toGroup.columns.push(column);
             } else {
@@ -85,7 +86,7 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
                 id: toGroupId,
                 columns: [column],
                 max: 100,
-              });
+              } as UIGroup);
             }
           }
         })

@@ -16,7 +16,7 @@ export const loadLocalSettings = createAction({
 
       LOCAL_SETTINGS_WHITELIST.forEach(key => {
         if (settings[key]) {
-          // @ts-expect-error
+          // @ts-expect-error - legacy
           newSettings[key] = settings[key];
         }
       });

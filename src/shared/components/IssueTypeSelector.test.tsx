@@ -123,7 +123,7 @@ describe('IssueTypeSelector', () => {
           {...defaultProps}
           onSelectionChange={onSelectionChange}
           initialCountAllTypes={false}
-          initialSelectedTypes={['Task', 'Bug']}
+          selectedTypes={['Task', 'Bug']}
         />
       );
 
@@ -143,7 +143,7 @@ describe('IssueTypeSelector', () => {
           {...defaultProps}
           onSelectionChange={onSelectionChange}
           initialCountAllTypes={false}
-          initialSelectedTypes={[]}
+          selectedTypes={[]}
         />
       );
 
@@ -153,7 +153,7 @@ describe('IssueTypeSelector', () => {
           {...defaultProps}
           onSelectionChange={onSelectionChange}
           initialCountAllTypes={false}
-          initialSelectedTypes={['Task']}
+          selectedTypes={['Task']}
         />
       );
 

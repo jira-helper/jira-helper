@@ -21,8 +21,10 @@ const swimlanes = [
 describe('RangeForm', () => {
   describe('Form filling', () => {
     it('should allow filling all form fields', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -40,17 +42,19 @@ describe('RangeForm', () => {
       cy.get('#WIPLC_showBadge').check();
 
       cy.get('#WIP_inputRange').should('have.value', 'My Range');
-      // For antd Select, check that the selected value is displayed
-      cy.get('#WIPLC_swimlane').should('contain', 'Frontend');
-      cy.get('#WIPLC_Column').should('contain', 'In Progress');
+      // For antd Select, check that the selected value is displayed in the container
+      cy.get('#WIPLC_swimlane').closest('.ant-select').should('contain', 'Frontend');
+      cy.get('#WIPLC_Column').closest('.ant-select').should('contain', 'In Progress');
       cy.get('#WIPLC_showBadge').should('be.checked');
     });
   });
 
   describe('Add range / Add cell mode switching', () => {
     it('should show "Add range" button for new range name', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -67,8 +71,10 @@ describe('RangeForm', () => {
     });
 
     it('should show "Add cell" button when range name matches existing range', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -85,8 +91,10 @@ describe('RangeForm', () => {
     });
 
     it('should switch to "Add cell" mode when typing existing range name', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -108,8 +116,10 @@ describe('RangeForm', () => {
 
   describe('Validation', () => {
     it('should disable submit when swimlane is not selected', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -134,8 +144,10 @@ describe('RangeForm', () => {
     });
 
     it('should disable submit when column is not selected', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -160,8 +172,10 @@ describe('RangeForm', () => {
     });
 
     it('should not submit when range name is empty', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -185,8 +199,10 @@ describe('RangeForm', () => {
 
   describe('Form submission', () => {
     it('should call onAddRange and onAddCell when submitting new range', () => {
-      const onAddRange = cy.stub().returns(true).as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub().returns(true);
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -213,8 +229,10 @@ describe('RangeForm', () => {
     });
 
     it('should call only onAddCell when submitting existing range', () => {
-      const onAddRange = cy.stub().as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub();
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -240,8 +258,10 @@ describe('RangeForm', () => {
     });
 
     it('should reset form after successful submission', () => {
-      const onAddRange = cy.stub().returns(true).as('onAddRange');
-      const onAddCell = cy.stub().as('onAddCell');
+      const onAddRange = cy.stub().returns(true);
+      cy.wrap(onAddRange).as('onAddRange');
+      const onAddCell = cy.stub();
+      cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
         <RangeForm
@@ -260,8 +280,8 @@ describe('RangeForm', () => {
       cy.get('#WIP_buttonRange').click();
 
       cy.get('#WIP_inputRange').should('have.value', '');
-      cy.get('#WIPLC_swimlane').should('have.value', '-');
-      cy.get('#WIPLC_Column').should('have.value', '-');
+      cy.get('#WIPLC_swimlane').closest('.ant-select').should('contain', '-');
+      cy.get('#WIPLC_Column').closest('.ant-select').should('contain', '-');
       cy.get('#WIPLC_showBadge').should('not.be.checked');
     });
   });

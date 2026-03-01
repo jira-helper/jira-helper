@@ -43,7 +43,12 @@ const PersonLimitsDemo: React.FC<PersonLimitsDemoProps> = ({ limits = [] }) => {
   return (
     <div style={{ padding: '20px', maxWidth: '1000px' }}>
       <h2 style={{ marginBottom: '20px' }}>Personal WIP Limits Settings</h2>
-      <PersonalWipLimitContainer columns={defaultColumns} swimlanes={defaultSwimlanes} onAddLimit={fn()} />
+      <PersonalWipLimitContainer
+        columns={defaultColumns}
+        swimlanes={defaultSwimlanes}
+        onAddLimit={fn()}
+        searchUsers={async () => []}
+      />
     </div>
   );
 };

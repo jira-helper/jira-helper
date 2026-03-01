@@ -53,7 +53,7 @@ class Action<Payload extends any[], Result> {
         return result;
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - legacy
       return result.then(
         r => {
           logFinished();

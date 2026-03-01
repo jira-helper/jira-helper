@@ -26,9 +26,10 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should render modal with PersonalWipLimitContainer inside', () => {
-    const onClose = cy.stub().as('onClose');
-    // @ts-expect-error
-    const onSave = cy.stub().resolves().as('onSave');
+    const onClose = cy.stub();
+    cy.wrap(onClose).as('onClose');
+    const onSave = cy.stub().resolves();
+    cy.wrap(onSave).as('onSave');
 
     cy.mount(
       <SettingsModalContainer
@@ -45,9 +46,10 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should call onClose when Cancel is clicked', () => {
-    const onClose = cy.stub().as('onClose');
-    // @ts-expect-error
-    const onSave = cy.stub().resolves().as('onSave');
+    const onClose = cy.stub();
+    cy.wrap(onClose).as('onClose');
+    const onSave = cy.stub().resolves();
+    cy.wrap(onSave).as('onSave');
 
     cy.mount(
       <SettingsModalContainer
@@ -64,9 +66,10 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should call onSave when Save is clicked', () => {
-    const onClose = cy.stub().as('onClose');
-    // @ts-expect-error
-    const onSave = cy.stub().resolves().as('onSave');
+    const onClose = cy.stub();
+    cy.wrap(onClose).as('onClose');
+    const onSave = cy.stub().resolves();
+    cy.wrap(onSave).as('onSave');
 
     cy.mount(
       <SettingsModalContainer
@@ -83,17 +86,15 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should show loading state while saving', () => {
-    const onClose = cy.stub().as('onClose');
+    const onClose = cy.stub();
+    cy.wrap(onClose).as('onClose');
     let resolveSave: () => void;
-    const onSave = cy
-      .stub()
-      .returns(
-        new Promise<void>(resolve => {
-          resolveSave = resolve;
-        })
-      )
-      // @ts-expect-error
-      .as('onSave');
+    const onSave = cy.stub().returns(
+      new Promise<void>(resolve => {
+        resolveSave = resolve;
+      })
+    );
+    cy.wrap(onSave).as('onSave');
 
     cy.mount(
       <SettingsModalContainer
@@ -116,17 +117,15 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should disable Cancel button while saving', () => {
-    const onClose = cy.stub().as('onClose');
+    const onClose = cy.stub();
+    cy.wrap(onClose).as('onClose');
     let resolveSave: () => void;
-    const onSave = cy
-      .stub()
-      .returns(
-        new Promise<void>(resolve => {
-          resolveSave = resolve;
-        })
-      )
-      // @ts-expect-error
-      .as('onSave');
+    const onSave = cy.stub().returns(
+      new Promise<void>(resolve => {
+        resolveSave = resolve;
+      })
+    );
+    cy.wrap(onSave).as('onSave');
 
     cy.mount(
       <SettingsModalContainer

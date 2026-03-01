@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
+import type { WipLimitRange, WipLimitCell } from '../../types';
 import type { SettingsUIStoreState } from './types';
 
 const initialData: SettingsUIStoreState['data'] = {
@@ -8,7 +9,7 @@ const initialData: SettingsUIStoreState['data'] = {
   columns: [],
 };
 
-export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(set => ({
+export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()((set, get) => ({
   data: initialData,
   state: 'initial',
   actions: {
@@ -42,7 +43,7 @@ export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(se
       let added = false;
       set(
         produce(state => {
-          const searchDouble = state.data.ranges.filter(element => element.name === name);
+          const searchDouble = state.data.ranges.filter((element: WipLimitRange) => element.name === name);
           if (searchDouble.length > 0) {
             return;
           }
@@ -62,7 +63,7 @@ export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(se
     deleteRange: name =>
       set(
         produce(state => {
-          state.data.ranges = state.data.ranges.filter(elem => elem.name !== name);
+          state.data.ranges = state.data.ranges.filter((elem: WipLimitRange) => elem.name !== name);
         })
       ),
 
@@ -70,7 +71,7 @@ export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(se
       set(
         produce(state => {
           const searchDouble = state.data.ranges.filter(
-            element => element.name.toLowerCase() === rangeName.toLowerCase()
+            (element: WipLimitRange) => element.name.toLowerCase() === rangeName.toLowerCase()
           );
           if (searchDouble.length !== 1) {
             return;
@@ -96,10 +97,10 @@ export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(se
         produce(state => {
           const swimlaneStr = String(swimlane);
           const columnStr = String(column);
-          state.data.ranges.forEach(range => {
+          state.data.ranges.forEach((range: WipLimitRange) => {
             if (range.name === rangeName) {
               range.cells = range.cells.filter(
-                elem => !(String(elem.swimlane) === swimlaneStr && String(elem.column) === columnStr)
+                (elem: WipLimitCell) => !(String(elem.swimlane) === swimlaneStr && String(elem.column) === columnStr)
               );
             }
           });
@@ -109,18 +110,19 @@ export const useWipLimitCellsSettingsUIStore = create<SettingsUIStoreState>()(se
     changeField: (name, field, value) =>
       set(
         produce(state => {
-          for (const range of state.data.ranges) {
+          for (const range of state.data.ranges as WipLimitRange[]) {
             if (range.name === name) {
-              // @ts-expect-error dynamic field assignment
-              range[field] = value;
+              (range as Record<string, unknown>)[field] = value;
             }
           }
         })
       ),
 
-    findRange: name => {
-      const state = useWipLimitCellsSettingsUIStore.getState();
-      const searchDouble = state.data.ranges.filter(element => element.name.toLowerCase() === name.toLowerCase());
+    findRange: (name: string): boolean => {
+      const state = get();
+      const searchDouble = state.data.ranges.filter(
+        (element: WipLimitRange) => element.name.toLowerCase() === name.toLowerCase()
+      );
       return searchDouble.length > 0;
     },
 

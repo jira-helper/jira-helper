@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { RangeTable } from './RangeTable';
-import type { WipLimitRange } from '../../../../types';
+import type { WipLimitRange } from '../../../types';
 
 const columns = [
   { id: 'col1', name: 'To Do' },
@@ -198,8 +198,8 @@ describe('RangeTable', () => {
         />
       );
 
-      // Find the badge containing "Frontend / In Progress" and click delete icon inside it
-      cy.contains('Frontend / In Progress').parent().find('.WipLimitHover').last().click();
+      // Find the Tag containing "Frontend / In Progress" and click its close icon
+      cy.contains('.ant-tag', 'Frontend / In Progress').find('.ant-tag-close-icon').click();
       cy.get('@onDeleteCell').should('have.been.calledWith', 'Critical Path', 'sw1', 'col2');
     });
   });

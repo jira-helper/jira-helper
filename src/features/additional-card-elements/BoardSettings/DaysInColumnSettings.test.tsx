@@ -87,6 +87,7 @@ describe('DaysInColumnSettings', () => {
         columnsToTrack: ['In Progress', 'Testing'],
         showInBacklog: false,
         issueLinks: [],
+        issueConditionChecks: [],
         daysInColumn: {
           enabled: false,
           warningThreshold: undefined,

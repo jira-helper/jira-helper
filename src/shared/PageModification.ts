@@ -26,7 +26,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   waitForLoading(): Promise<TargetElement> {
-    // @ts-expect-error
+    // @ts-expect-error - legacy
     return Promise.resolve(undefined);
   }
 

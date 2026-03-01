@@ -391,30 +391,28 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   describe('IssueTypeSelector Integration', () => {
     describe('Issue types reset after add', () => {
       it('should reset issue types after adding a limit', () => {
-        const onAddLimitMock = cy
-          .stub()
-          .callsFake((formData: any) => {
-            const mockPerson = {
-              name: formData.person?.name || 'unknown',
-              displayName: formData.person?.displayName || 'unknown',
-              self: formData.person?.self || 'https://test.com/user',
-              avatar: formData.person?.avatar || 'https://test.com/avatar.png',
-            };
+        const onAddLimitMock = cy.stub().callsFake((formData: any) => {
+          const mockPerson = {
+            name: formData.person?.name || 'unknown',
+            displayName: formData.person?.displayName || 'unknown',
+            self: formData.person?.self || 'https://test.com/user',
+            avatar: formData.person?.avatar || 'https://test.com/avatar.png',
+          };
 
-            const personLimit: PersonLimit = {
-              id: Date.now(),
-              person: mockPerson,
-              limit: formData.limit,
-              columns: [],
-              swimlanes: [],
-              ...(formData.includedIssueTypes && formData.includedIssueTypes.length > 0
-                ? { includedIssueTypes: formData.includedIssueTypes }
-                : {}),
-            };
+          const personLimit: PersonLimit = {
+            id: Date.now(),
+            person: mockPerson,
+            limit: formData.limit,
+            columns: [],
+            swimlanes: [],
+            ...(formData.includedIssueTypes && formData.includedIssueTypes.length > 0
+              ? { includedIssueTypes: formData.includedIssueTypes }
+              : {}),
+          };
 
-            useSettingsUIStore.getState().actions.addLimit(personLimit);
-          })
-          .as('onAddLimit');
+          useSettingsUIStore.getState().actions.addLimit(personLimit);
+        });
+        cy.wrap(onAddLimitMock).as('onAddLimit');
 
         cy.mount(
           <PersonalWipLimitContainer
@@ -432,8 +430,10 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.contains('label', 'Count all issue types').click();
         cy.contains('label', 'Count all issue types').find('input[type="checkbox"]').should('not.be.checked');
 
-        // Fill form and submit
+        // Fill form and submit - need to select from dropdown
         cy.get('#edit-person-wip-limit-person-name').type('test.user');
+        // Wait for dropdown and select the user
+        cy.get('.ant-select-dropdown:visible .ant-select-item-option').first().click();
         cy.get('#edit-person-wip-limit-person-limit').clear().type('5');
 
         cy.contains('button', 'Add limit').click();
@@ -591,8 +591,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         // Verify that selectedColumns is NOT empty (should contain the 2 selected columns)
 
-        cy.get('@onAddLimit').then(stub => {
-          const callArgs = (stub as any).getCall(0).args[0];
+        cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
+          const callArgs = stub.getCall(0).args[0];
           expect(callArgs.selectedColumns).to.not.be.empty;
           expect(callArgs.selectedColumns.length).to.be.greaterThan(0);
           // Should contain the column IDs that were selected
@@ -653,8 +653,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         // Verify that selectedColumns contains the correct IDs
 
-        cy.get('@onAddLimit').then(stub => {
-          const callArgs = (stub as any).getCall(0).args[0];
+        cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
+          const callArgs = stub.getCall(0).args[0];
           expect(callArgs.selectedColumns).to.not.be.empty;
           expect(callArgs.selectedColumns).to.include('123');
           expect(callArgs.selectedColumns).to.include('789');
@@ -675,8 +675,9 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           />
         );
 
-        // Fill in the form
+        // Fill in the form - need to select from dropdown
         cy.get('#edit-person-wip-limit-person-name').type('newuser');
+        cy.get('.ant-select-dropdown:visible .ant-select-item-option').first().click();
         cy.get('#edit-person-wip-limit-person-limit').clear().type('3');
 
         // Uncheck "All columns" to select specific columns
@@ -696,8 +697,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         // Verify the call arguments
 
-        cy.get('@onAddLimit').then(stub => {
-          const callArgs = (stub as any).getCall(0).args[0];
+        cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
+          const callArgs = stub.getCall(0).args[0];
           expect(callArgs.person?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(3);
           // Should have selected columns (not empty, not all)
@@ -718,8 +719,9 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           />
         );
 
-        // Fill in the form
+        // Fill in the form - need to select from dropdown
         cy.get('#edit-person-wip-limit-person-name').type('newuser');
+        cy.get('.ant-select-dropdown:visible .ant-select-item-option').first().click();
         cy.get('#edit-person-wip-limit-person-limit').clear().type('5');
 
         // Submit with all columns selected (default state)
@@ -730,8 +732,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         // Verify the call arguments
 
-        cy.get('@onAddLimit').then(stub => {
-          const callArgs = (stub as any).getCall(0).args[0];
+        cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
+          const callArgs = stub.getCall(0).args[0];
           expect(callArgs.person?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(5);
           // When all columns are selected, should save as empty array (meaning "all")
