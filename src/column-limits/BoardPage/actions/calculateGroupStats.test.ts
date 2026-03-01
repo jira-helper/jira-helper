@@ -172,7 +172,7 @@ describe('calculateGroupStats', () => {
         max: 10,
       },
       'Group 2': {
-        // No columns
+        columns: [],
         max: 5,
       },
       'Group 3': {

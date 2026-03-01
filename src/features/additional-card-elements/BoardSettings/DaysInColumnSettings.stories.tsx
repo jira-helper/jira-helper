@@ -4,6 +4,7 @@ import { Container, Token } from 'dioma';
 import { IBoardPagePageObject } from 'src/page-objects/BoardPage';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
+import React from 'react';
 
 // Mock BoardPagePageObject
 const mockBoardPagePageObject: IBoardPagePageObject = {
