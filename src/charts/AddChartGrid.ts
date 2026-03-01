@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import Draggable from 'gsap/Draggable';
 import { TweenLite, gsap } from 'gsap';
 import { PageModification } from '../shared/PageModification';
@@ -75,7 +74,6 @@ class ResizableDraggableGrid {
     this.gridDraggable = null;
 
     // gsap don't work in firefox, so we load library only when we create this chart
-    // eslint-disable-next-line global-require
 
     this.tweenLite = TweenLite;
     this.gsap = gsap;

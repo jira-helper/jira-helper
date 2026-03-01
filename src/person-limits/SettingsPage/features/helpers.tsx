@@ -119,8 +119,7 @@ export const setupBackground = () => {
   // Mock issue types API via DI
   globalContainer.register({
     token: getProjectIssueTypesToken,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    value: async (_projectKey: string) =>
+    value: async () =>
       Ok([
         { id: '1', name: 'Task', subtask: false },
         { id: '2', name: 'Bug', subtask: false },

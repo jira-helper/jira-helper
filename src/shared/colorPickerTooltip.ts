@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 // @ts-expect-error
 import ColorPicker from 'simple-color-picker';
 import noop from '@tinkoff/utils/function/noop';

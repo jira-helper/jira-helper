@@ -82,8 +82,7 @@ function createMockPageObject(): MockPageObject {
       });
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getIssues(_cssSelector: string) {
+    getIssues() {
       return Array.from(mockIssues.values()).map(i => i.element);
     },
 
@@ -177,8 +176,7 @@ function createMockPageObject(): MockPageObject {
       return { total: 0, hidden: 0 };
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setIssueBackgroundColor(issue: Element, _color: string) {
+    setIssueBackgroundColor(issue: Element) {
       highlightedIssues.push(issue);
     },
     getHighlightedIssues() {

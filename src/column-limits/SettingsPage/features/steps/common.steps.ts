@@ -323,7 +323,7 @@ Then(/^the group should filter by "([^"]*)"$/, (expectedTypes: string) => {
     const groupId = groups[0]?.id;
     if (!groupId) throw new Error('No group found');
     const state = useColumnLimitsSettingsUIStore.getState().data.issueTypeSelectorStates[groupId];
-    // eslint-disable-next-line no-unused-expressions
+
     expect(state?.countAllTypes).to.be.false;
     expect(state?.selectedTypes).to.deep.equal(typeNames);
   });
@@ -359,7 +359,7 @@ Then(/^group "([^"]*)" should have limit (\d+) in property$/, (groupId: string, 
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
     const { data } = useColumnLimitsPropertyStore.getState();
-    // eslint-disable-next-line no-unused-expressions
+
     expect(data[groupId]).to.exist;
     expect(data[groupId]?.max).to.equal(limit);
   });
@@ -369,7 +369,7 @@ Then(/^group "([^"]*)" should have color "([^"]*)" in property$/, (groupId: stri
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
     const { data } = useColumnLimitsPropertyStore.getState();
-    // eslint-disable-next-line no-unused-expressions
+
     expect(data[groupId]).to.exist;
     expect((data[groupId]?.customHexColor ?? '').toLowerCase()).to.equal(expectedColor.toLowerCase());
   });
@@ -380,7 +380,7 @@ Then(/^group "([^"]*)" should filter by "([^"]*)" in property$/, (groupId: strin
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
     const { data } = useColumnLimitsPropertyStore.getState();
-    // eslint-disable-next-line no-unused-expressions
+
     expect(data[groupId]).to.exist;
     expect(data[groupId]?.includedIssueTypes).to.deep.equal(typeNames);
   });
@@ -390,10 +390,10 @@ Then(/^group "([^"]*)" should count all issue types in property$/, (groupId: str
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
     const { data } = useColumnLimitsPropertyStore.getState();
-    // eslint-disable-next-line no-unused-expressions
+
     expect(data[groupId]).to.exist;
     const included = data[groupId]?.includedIssueTypes;
-    // eslint-disable-next-line no-unused-expressions
+
     expect(!included || included.length === 0).to.be.true;
   });
 });

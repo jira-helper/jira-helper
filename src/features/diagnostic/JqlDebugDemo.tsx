@@ -206,7 +206,6 @@ export const JqlDebugDemoPure: React.FC<JqlDebugDemoPureProps> = ({
           <b>{texts.tokens}</b>{' '}
           {tokens.map((t, i) => (
             <span
-              // eslint-disable-next-line react/no-array-index-key
               key={`${t}-${i}`}
               style={{
                 display: 'inline-block',

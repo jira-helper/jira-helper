@@ -54,10 +54,8 @@ describe('IssueConditionCheck utils', () => {
     });
 
     it('should return null for empty JQL', () => {
-      // Empty JQL is technically valid and matches everything
       const matchFn = safeParseJql('');
-      // parseJql with empty string might throw or return a function
-      // depending on implementation
+      expect(matchFn).toBeNull();
     });
   });
 

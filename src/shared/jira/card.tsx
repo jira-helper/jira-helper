@@ -21,7 +21,6 @@ const IssueCard = forwardRef<HTMLDivElement, IssueCardProps>(({ issueKey: key, s
       data-issue-id="11265152"
       data-issue-key="HTLS-2502"
       role="listitem"
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
       aria-label={`${key} ${summary}`}
       style={{

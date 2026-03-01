@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/* eslint-disable no-unused-expressions */
+
 /**
  * Cypress Component Tests for PersonalWipLimitContainer
  *
@@ -56,7 +56,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       cy.contains('button', 'Add limit').should('be.visible').should('not.be.disabled');
 
       // Verify editingId is still null
-      // eslint-disable-next-line no-unused-expressions
+
       cy.then(() => {
         expect(useSettingsUIStore.getState().data.editingId).to.be.null;
       });
@@ -304,7 +304,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       cy.contains('button', 'Cancel').click();
 
       // Wait for cancel to take effect
-      // eslint-disable-next-line no-unused-expressions
+
       cy.then(() => {
         // Verify editingId is cleared in store first
         expect(useSettingsUIStore.getState().data.editingId).to.be.null;
@@ -440,7 +440,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         cy.get('@onAddLimit').should('have.been.called');
 
-        // eslint-disable-next-line no-unused-expressions
         cy.then(() => {
           const store = useSettingsUIStore.getState();
           expect(store.data.formData).to.be.null;
@@ -591,7 +590,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('@onAddLimit').should('have.been.called');
 
         // Verify that selectedColumns is NOT empty (should contain the 2 selected columns)
-        // eslint-disable-next-line no-unused-expressions
+
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
           expect(callArgs.selectedColumns).to.not.be.empty;
@@ -653,7 +652,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('@onAddLimit').should('have.been.called');
 
         // Verify that selectedColumns contains the correct IDs
-        // eslint-disable-next-line no-unused-expressions
+
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
           expect(callArgs.selectedColumns).to.not.be.empty;
@@ -696,7 +695,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('@onAddLimit').should('have.been.called');
 
         // Verify the call arguments
-        // eslint-disable-next-line no-unused-expressions
+
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
           expect(callArgs.person?.name).to.eq('newuser');
@@ -730,7 +729,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('@onAddLimit').should('have.been.called');
 
         // Verify the call arguments
-        // eslint-disable-next-line no-unused-expressions
+
         cy.get('@onAddLimit').then(stub => {
           const callArgs = (stub as any).getCall(0).args[0];
           expect(callArgs.person?.name).to.eq('newuser');

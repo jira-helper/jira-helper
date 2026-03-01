@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-/* eslint-disable no-unused-expressions */
+
 /**
  * Cypress Component Tests for WIP Limit on Cells Board Page
  *
@@ -13,7 +13,7 @@ import { registerLogger } from 'src/shared/Logger';
 import { renderWipLimitCells } from './actions/renderWipLimitCells';
 import type { IWipLimitCellsBoardPageObject } from './pageObject';
 import { wipLimitCellsBoardPageObjectToken } from './pageObject';
-import { useWipLimitCellsRuntimeStore, getInitialState } from './stores';
+import { useWipLimitCellsRuntimeStore } from './stores';
 import type { WipLimitRange } from '../../types';
 import { Scenario, Step } from '../../../cypress/support/bdd';
 import 'cypress/support/gherkin-steps/common';

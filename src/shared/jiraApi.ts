@@ -201,9 +201,7 @@ export const searchIssues = async (
   };
   let counter = 0;
   const maxRetries = 3;
-  // eslint-disable-next-line no-plusplus
   while (counter++ < maxRetries) {
-    // eslint-disable-next-line no-await-in-loop
     const response = await fetch(
       `${BASE_URL}api/2/search?jql=${jql}&maxResults=${searchOptions.maxResults}&expand=${searchOptions.expand.join(',')}`,
       {
@@ -219,7 +217,6 @@ export const searchIssues = async (
     }
 
     if (response.val.status === 429) {
-      // eslint-disable-next-line no-await-in-loop
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
       continue;
     }

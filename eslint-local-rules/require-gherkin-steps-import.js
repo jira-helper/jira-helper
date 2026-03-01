@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   meta: {
     type: 'problem',
     docs: {
@@ -8,7 +8,7 @@ module.exports = {
     schema: [],
   },
   create(context) {
-    const filename = context.getFilename();
+    const filename = context.filename ?? context.getFilename?.();
 
     if (!filename.endsWith('.feature.cy.tsx')) {
       return {};

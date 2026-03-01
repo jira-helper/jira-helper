@@ -34,8 +34,10 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return Promise.resolve(undefined);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  apply(_?: InitData, __?: Element): any {}
+  apply(data?: InitData, el?: Element): any {
+    void data;
+    void el;
+  }
 
   clear(): void {
     this.sideEffects.forEach(se => se());

@@ -17,7 +17,7 @@ const feature = await loadFeature('src/column-limits/SettingsPage/SettingsPage.f
 describeFeature(feature, ({ Background, Scenario }) => {
   // Test data
   // Note: columns and issue types are used in Background steps but ESLint doesn't detect it
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   let columns: Column[];
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let issueTypes: string[];

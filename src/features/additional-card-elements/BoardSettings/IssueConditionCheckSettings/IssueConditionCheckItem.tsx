@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, Input, Select, Switch, Button, Space, Typography, ColorPicker, Radio, Tooltip } from 'antd';
 import { DeleteOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
@@ -191,7 +191,6 @@ export interface IssueConditionCheckItemProps {
 
 export const IssueConditionCheckItem: React.FC<IssueConditionCheckItemProps> = ({ check, onUpdate, onRemove }) => {
   const texts = useGetTextsByLocale(TEXTS);
-  const [isExpanded, setIsExpanded] = useState(true);
 
   // Validate JQL fields
   const jqlValidation = check.mode === 'simple' ? validateJql(check.jql || '') : { valid: true, error: undefined };

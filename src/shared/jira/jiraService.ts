@@ -445,7 +445,6 @@ export class JiraService implements IJiraService {
 
     const result: ExternalIssueMapped[] = [];
     for (const issue of issues) {
-      // eslint-disable-next-line no-await-in-loop
       const render = await this.queue.register({
         key: `renderRemoteLink-${issue.id}`,
         cb: () => renderRemoteLink(issue.id, { signal }),

@@ -220,7 +220,6 @@ export const GroupingSettings = () => {
               <div className={styles.examples}>
                 <h4 className={styles.examplesTitle}>{texts.examples}</h4>
                 <div className={styles.examplesContent}>
-                  {/* eslint-disable-next-line no-nested-ternary */}
                   {settings.showGroupsByFieldAsCounters ? (
                     settings.enableGroupByField ? (
                       <>

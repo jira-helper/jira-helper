@@ -74,7 +74,6 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
   }, []);
 
   const handleColorChange = React.useCallback((groupId: string, color: string) => {
-    /* eslint-disable-next-line no-console */
     console.log('Change color for group:', groupId, color);
     setWipLimits(prev => ({
       ...prev,
@@ -143,16 +142,13 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
         onColorChange={handleColorChange}
         onIssueTypesChange={handleIssueTypesChange}
         onColumnDragStart={(columnId, groupId) => {
-          /* eslint-disable-next-line no-console */
           console.log('Drag start:', columnId, groupId);
         }}
         onColumnDragEnd={() => {
-          /* eslint-disable-next-line no-console */
           console.log('Drag end');
         }}
         onDrop={(e, targetGroupId) => {
           e.preventDefault();
-          /* eslint-disable-next-line no-console */
           console.log('Drop to group:', targetGroupId);
         }}
         onDragOver={e => {

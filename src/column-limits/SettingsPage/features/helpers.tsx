@@ -51,8 +51,7 @@ export const setupBackground = () => {
 
   globalContainer.register({
     token: getProjectIssueTypesToken,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    value: async (_projectKey: string) => Ok(issueTypes),
+    value: async () => Ok(issueTypes),
   });
 
   useColumnLimitsSettingsUIStore.getState().actions.reset();

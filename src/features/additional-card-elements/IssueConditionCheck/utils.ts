@@ -58,8 +58,7 @@ function isDirectSubtask(issue: IssueData): boolean {
  */
 export function filterSubtasksBySources(
   subtasks: IssueData[],
-  sources: IssueConditionCheckSubtaskSources | undefined,
-  _parentIssue?: IssueData
+  sources: IssueConditionCheckSubtaskSources | undefined
 ): IssueData[] {
   const config = sources ?? DEFAULT_SUBTASK_SOURCES;
 
@@ -163,7 +162,7 @@ export function checkIssueCondition(issue: IssueData, check: IssueConditionCheck
 
     // Filter subtasks based on configured sources
     const allSubtasks = issue.subtasks || [];
-    const subtasks = filterSubtasksBySources(allSubtasks, check.subtaskSources, issue);
+    const subtasks = filterSubtasksBySources(allSubtasks, check.subtaskSources);
 
     // Then, check subtasks based on match mode
     const matchedSubtasks: MatchedSubtaskInfo[] = [];

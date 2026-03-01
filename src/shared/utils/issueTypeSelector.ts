@@ -26,6 +26,7 @@ export async function loadIssueTypesForProject(projectKey: string): Promise<Proj
       return types;
     }
   } catch (error) {
+    // eslint-disable-next-line no-console -- fallback logging when API fails
     console.warn('Failed to load issue types from API', error);
   }
 

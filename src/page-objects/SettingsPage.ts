@@ -15,7 +15,6 @@ class SettingsPage {
 
   constructor() {
     if (SettingsPage.instance) {
-      // eslint-disable-next-line no-constructor-return
       return SettingsPage.instance;
     }
     SettingsPage.instance = this;

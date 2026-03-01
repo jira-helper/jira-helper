@@ -71,17 +71,8 @@ function filterSubtasksBySourcesMapped(
 ): JiraIssueMapped[] {
   const config = sources ?? DEFAULT_SUBTASK_SOURCES;
 
-  console.log('[DEBUG] filterSubtasksBySourcesMapped:', {
-    parentKey: parentIssue.key,
-    inputCount: subtasks.length,
-    sourcesProvided: sources,
-    effectiveConfig: config,
-    epicLinkFieldId,
-  });
-
   // If all sources are disabled, return empty
   if (!config.includeDirectSubtasks && !config.includeEpicChildren && !config.includeLinkedIssues) {
-    console.log('[DEBUG] All sources disabled, returning empty');
     return [];
   }
 
@@ -90,39 +81,22 @@ function filterSubtasksBySourcesMapped(
   // Get direct subtasks
   if (config.includeDirectSubtasks) {
     const directSubtasks = getDirectSubtasks(parentIssue, subtasks);
-    console.log(
-      '[DEBUG] Direct subtasks:',
-      directSubtasks.map(s => s.key)
-    );
     result.push(...directSubtasks);
   }
 
   // Get epic children
   if (config.includeEpicChildren) {
     const epicChildren = getEpicChildren(parentIssue, subtasks, epicLinkFieldId);
-    console.log(
-      '[DEBUG] Epic children:',
-      epicChildren.map(s => s.key)
-    );
     result.push(...epicChildren);
   }
 
   // Get linked issues
   if (config.includeLinkedIssues) {
     const linkedIssues = getLinkedIssues(parentIssue, subtasks);
-    console.log(
-      '[DEBUG] Linked issues:',
-      linkedIssues.map(s => s.key)
-    );
     result.push(...linkedIssues);
   }
 
   const deduplicated = deduplicateIssues(result);
-
-  console.log('[DEBUG] Filtered result:', {
-    resultCount: deduplicated.length,
-    resultKeys: deduplicated.map(s => s.key),
-  });
 
   return deduplicated;
 }
@@ -193,11 +167,6 @@ function checkCondition(
         const subtaskGetFieldValue = createJqlFieldValueGetter(subtask, fields);
         try {
           const matches = subtaskMatchFn(subtaskGetFieldValue);
-          // DEBUG: Log each subtask check
-          console.log('[DEBUG] Subtask JQL Check:', {
-            subtaskKey: subtask.key,
-            matches,
-          });
           if (matches) {
             matchedSubtasks.push({
               key: subtask.key,
@@ -218,16 +187,6 @@ function checkCondition(
         // All subtasks must match (and there must be at least one subtask)
         matched = filteredSubtasks.length > 0 && matchedSubtasks.length === filteredSubtasks.length;
       }
-
-      // DEBUG: Final result
-      console.log('[DEBUG] Final Result:', {
-        checkName: check.name,
-        issueKey: issue.key,
-        matchMode,
-        filteredSubtasksCount: filteredSubtasks.length,
-        matchedSubtasksCount: matchedSubtasks.length,
-        matched,
-      });
 
       return {
         matched,

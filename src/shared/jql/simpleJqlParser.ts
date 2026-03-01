@@ -1,6 +1,4 @@
-/* eslint-disable eqeqeq */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-plusplus */
 /*
 Simple JQL Parser Documentation
 ===============================

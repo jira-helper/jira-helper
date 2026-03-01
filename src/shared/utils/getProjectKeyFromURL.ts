@@ -5,7 +5,6 @@
  * - New: https://company.atlassian.net/jira/software/c/projects/MP/boards/138
  */
 export function getProjectKeyFromURL(): string | null {
-  const url = window.location.href;
   const searchParams = new URLSearchParams(window.location.search);
 
   // Try old format: ?projectKey=PN

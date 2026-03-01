@@ -1,6 +1,6 @@
 # TASK-93: Миграция на ESLint 9 (flat config)
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: Standalone
 

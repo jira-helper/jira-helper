@@ -1,7 +1,3 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable react/button-has-type */
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';

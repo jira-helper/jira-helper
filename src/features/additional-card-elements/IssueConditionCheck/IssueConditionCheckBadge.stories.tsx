@@ -290,7 +290,7 @@ export const IconColorMatrix: StoryObj = {
           <thead>
             <tr>
               <th style={{ padding: '8px', border: '1px solid #ddd' }} />
-              {colors.map((color, i) => (
+              {colors.map(color => (
                 <th key={color || 'none'} style={{ padding: '8px', border: '1px solid #ddd', fontSize: '12px' }}>
                   {color || 'none'}
                 </th>
@@ -301,7 +301,7 @@ export const IconColorMatrix: StoryObj = {
             {icons.map(icon => (
               <tr key={icon}>
                 <td style={{ padding: '8px', border: '1px solid #ddd', fontSize: '12px' }}>{icon}</td>
-                {colors.map((color, i) => (
+                {colors.map(color => (
                   <td key={color || 'none'} style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                     <IssueConditionCheckBadgePreview
                       icon={icon}

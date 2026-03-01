@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { getCurrentRoute, onUrlChange, Routes } from '../routing';
 import type { PageModification } from './PageModification';
 

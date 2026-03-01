@@ -26,16 +26,11 @@ const mockColumns = [
   { id: 'column-3', name: 'Done' },
 ];
 
-const mockOnAddRange = (name: string): boolean => {
-  // eslint-disable-next-line no-console
-  console.log('onAddRange called with:', name);
+const mockOnAddRange = (): boolean => {
   return true;
 };
 
-const mockOnAddCell = (rangeName: string, cell: WipLimitCell): void => {
-  // eslint-disable-next-line no-console
-  console.log('onAddCell called with:', rangeName, cell);
-};
+const mockOnAddCell = (): void => {};
 
 export const EmptyForm: Story = {
   render: () => (
