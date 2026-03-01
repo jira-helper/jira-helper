@@ -59,24 +59,29 @@ export default [
     rules: {
       'no-console': 'error',
       quotes: ['error', 'single'],
-      'prefer-destructuring': 'warn',
+      "prefer-destructuring": [
+        "error", {
+          VariableDeclarator: { array: false, object: true },
+          AssignmentExpression: { array: true, object: false },
+        },
+      ],
       'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
 
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-use-before-define': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/ban-ts-comment': 'warn',
-      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/ban-ts-comment': 'error',
+      '@typescript-eslint/no-empty-object-type': 'error',
       'no-useless-assignment': 'warn',
 
       'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'off',
 
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
 
-      'consistent-return': 'warn',
-      'no-alert': 'error'
+      'consistent-return': 'off',
+      'no-alert': 'error',
+      '@typescript-eslint/no-explicit-any': 'error'
     },
   },
 
