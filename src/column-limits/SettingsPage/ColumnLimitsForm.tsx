@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { InputNumber, Space, Card } from 'antd';
 import { IssueTypeSelector } from '../../shared/components/IssueTypeSelector';
+import { SwimlaneSelector } from 'src/shared/components/SwimlaneSelector';
 import { generateColorByFirstChars } from '../shared/utils';
 import type { Column, UIGroup, IssueTypeState } from '../types';
 import { WITHOUT_GROUP_ID } from '../types';
@@ -11,8 +12,10 @@ export interface ColumnLimitsFormProps {
   withoutGroupColumns: Column[];
   groups: UIGroup[];
   issueTypeSelectorStates: Record<string, IssueTypeState>;
+  swimlanes?: Array<{ id: string; name: string }>;
   onLimitChange: (groupId: string, limit: number) => void;
   onColorChange: (groupId: string, color: string) => void;
+  onSwimlanesChange?: (groupId: string, selectedSwimlanes: Array<{ id: string; name: string }>) => void;
   onIssueTypesChange: (groupId: string, selectedTypes: string[], countAllTypes: boolean) => void;
   onColumnDragStart: (e: React.DragEvent, columnId: string, groupId: string) => void;
   onColumnDragEnd: (e: React.DragEvent) => void;
@@ -29,8 +32,10 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
   withoutGroupColumns,
   groups,
   issueTypeSelectorStates,
+  swimlanes = [],
   onLimitChange,
   onColorChange,
+  onSwimlanesChange,
   onIssueTypesChange,
   onColumnDragStart,
   onColumnDragEnd,
@@ -84,6 +89,16 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
       [group.id, onIssueTypesChange]
     );
 
+    const selectedSwimlaneIds = group.swimlanes?.map(s => s.id) ?? [];
+    const handleSwimlanesChange = React.useCallback(
+      (ids: string[]) => {
+        if (!onSwimlanesChange) return;
+        const selectedSwimlanes = ids.length === 0 ? [] : swimlanes.filter(s => ids.includes(s.id));
+        onSwimlanesChange(group.id, selectedSwimlanes);
+      },
+      [group.id, onSwimlanesChange, swimlanes]
+    );
+
     return (
       <Card className={styles.columnGroupJH} style={{ marginBottom: 10 }}>
         <Space direction="vertical" style={{ width: '100%' }} size="small">
@@ -133,6 +148,17 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
               <DraggableColumn key={column.id} column={column} groupId={group.id} />
             ))}
           </div>
+          {onSwimlanesChange && swimlanes.length > 0 && (
+            <div style={{ marginTop: 0, paddingTop: 8, paddingBottom: 0 }}>
+              <SwimlaneSelector
+                swimlanes={swimlanes}
+                value={selectedSwimlaneIds}
+                onChange={handleSwimlanesChange}
+                label="Swimlanes"
+                allLabel="All swimlanes"
+              />
+            </div>
+          )}
           <div style={{ marginTop: 0, paddingTop: 8, paddingBottom: 0 }}>
             <IssueTypeSelector
               groupId={group.id}

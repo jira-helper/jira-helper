@@ -1,6 +1,6 @@
 # TASK-109: Интегрировать SwimlaneSelector в ColumnLimitsForm
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 
@@ -58,11 +58,29 @@ const ColumnGroup: React.FC<{ group: UIGroup }> = ({ group }) => {
 
 ## Критерии приёмки
 
-- [ ] `SwimlaneSelector` рендерится в каждой группе
-- [ ] `onChange` вызывает `actions.setGroupSwimlanes`
-- [ ] Swimlanes отображаются корректно
-- [ ] Lint проходит
+- [x] `SwimlaneSelector` рендерится в каждой группе
+- [x] `onChange` вызывает `actions.setGroupSwimlanes`
+- [x] Swimlanes отображаются корректно
+- [x] Lint проходит
 
 ## Зависимости
 
 - Зависит от: TASK-104 (shared component), TASK-108 (store action)
+
+---
+
+## Результаты
+
+**Дата**: 2025-03-02
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+- Добавлен SwimlaneSelector в каждую группу в ColumnLimitsForm
+- Swimlanes загружаются из board edit data (swimlanesConfig) в SettingsWIPLimits
+- Цепочка: SettingsWIPLimits → SettingsButtonContainer → SettingsModalContainer → ColumnLimitsForm
+- SwimlaneSelector показывается только при swimlanes.length > 0 и onSwimlanesChange
+- Добавлена story WithSwimlaneSelector в ColumnLimitsSettings.stories.tsx

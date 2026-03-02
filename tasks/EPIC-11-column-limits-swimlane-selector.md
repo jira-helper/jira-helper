@@ -67,10 +67,10 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 5 | [TASK-106](./TASK-106-column-limits-types-swimlanes.md) | Обновить `types.ts` — добавить `swimlanes` в типы | TODO |
-| 6 | [TASK-107](./TASK-107-column-limits-property-swimlanes.md) | Обновить property store (`initFromProperty`, `saveToProperty`) | TODO |
-| 7 | [TASK-108](./TASK-108-settings-ui-store-swimlanes.md) | Обновить `settingsUIStore` — добавить `setGroupSwimlanes` action | TODO |
-| 8 | [TASK-109](./TASK-109-column-limits-form-swimlane-selector.md) | Интегрировать `SwimlaneSelector` в `ColumnLimitsForm` | TODO |
+| 5 | [TASK-106](./TASK-106-column-limits-types-swimlanes.md) | Обновить `types.ts` — добавить `swimlanes` в типы | DONE |
+| 6 | [TASK-107](./TASK-107-column-limits-property-swimlanes.md) | Обновить property store (`initFromProperty`, `saveToProperty`) | DONE |
+| 7 | [TASK-108](./TASK-108-settings-ui-store-swimlanes.md) | Обновить `settingsUIStore` — добавить `setGroupSwimlanes` action | DONE |
+| 8 | [TASK-109](./TASK-109-column-limits-form-swimlane-selector.md) | Интегрировать `SwimlaneSelector` в `ColumnLimitsForm` | DONE |
 
 ---
 
@@ -87,7 +87,7 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 11 | [TASK-112](./TASK-112-swimlane-selector-cypress-tests.md) | Реализовать `swimlane-selector.feature.cy.tsx` (SettingsPage) | TODO |
+| 11 | [TASK-112](./TASK-112-swimlane-selector-cypress-tests.md) | Реализовать `swimlane-selector.feature.cy.tsx` (SettingsPage) | DONE |
 | 12 | [TASK-113](./TASK-113-swimlane-filter-cypress-tests.md) | Реализовать `swimlane-filter.feature.cy.tsx` (BoardPage) | TODO |
 
 ---

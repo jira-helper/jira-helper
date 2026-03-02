@@ -19,11 +19,17 @@ interface ColumnLimitsSettingsDemoProps {
     max?: number;
     customHexColor?: string;
     includedIssueTypes?: string[];
+    swimlanes?: Array<{ id: string; name: string }>;
   }>;
   availableColumns: Array<{ id: string; name: string }>;
+  swimlanes?: Array<{ id: string; name: string }>;
 }
 
-const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ groups, availableColumns }) => {
+const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({
+  groups,
+  availableColumns,
+  swimlanes = [],
+}) => {
   const [wipLimits, setWipLimits] = useState<Record<string, any>>(() => {
     const limits: Record<string, any> = {};
     groups.forEach(group => {
@@ -113,6 +119,23 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
     })
     .filter(Boolean) as Array<{ id: string; name: string }>;
 
+  const [swimlanesByGroup, setSwimlanesByGroup] = useState<Record<string, Array<{ id: string; name: string }>>>(() => {
+    const initial: Record<string, Array<{ id: string; name: string }>> = {};
+    groups.forEach(group => {
+      if (group.id !== withoutGroupId && group.swimlanes) {
+        initial[group.id] = group.swimlanes;
+      }
+    });
+    return initial;
+  });
+
+  const handleSwimlanesChange = React.useCallback(
+    (groupId: string, selectedSwimlanes: Array<{ id: string; name: string }>) => {
+      setSwimlanesByGroup(prev => ({ ...prev, [groupId]: selectedSwimlanes }));
+    },
+    []
+  );
+
   const groupsData = groups
     .filter(g => g.id !== withoutGroupId)
     .map(group => {
@@ -128,6 +151,7 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
         max: wipLimit.max || group.max,
         customHexColor: wipLimit.customHexColor || group.customHexColor,
         includedIssueTypes: wipLimit.includedIssueTypes || group.includedIssueTypes,
+        swimlanes: swimlanesByGroup[group.id] ?? group.swimlanes,
       };
     });
 
@@ -137,8 +161,10 @@ const ColumnLimitsSettingsDemo: React.FC<ColumnLimitsSettingsDemoProps> = ({ gro
       <ColumnLimitsForm
         withoutGroupColumns={withoutGroupColumns}
         groups={groupsData}
+        swimlanes={swimlanes}
         onLimitChange={handleLimitChange}
         onColorChange={handleColorChange}
+        onSwimlanesChange={handleSwimlanesChange}
         onIssueTypesChange={handleIssueTypesChange}
         onColumnDragStart={() => {}}
         onColumnDragEnd={() => {}}
@@ -166,6 +192,12 @@ const mockColumns = [
   { id: 'col3', name: 'Code Review' },
   { id: 'col4', name: 'Testing' },
   { id: 'col5', name: 'Done' },
+];
+
+const mockSwimlanes = [
+  { id: 'sw1', name: 'Frontend' },
+  { id: 'sw2', name: 'Backend' },
+  { id: 'sw3', name: 'QA' },
 ];
 
 export const EmptyState: StoryObj = {
@@ -277,6 +309,33 @@ export const ComplexConfiguration: StoryObj = {
         },
       ]}
       availableColumns={mockColumns}
+    />
+  ),
+};
+
+export const WithSwimlaneSelector: StoryObj = {
+  render: () => (
+    <ColumnLimitsSettingsDemo
+      groups={[
+        { id: 'Without Group', name: 'Without Group', columns: ['col1'] },
+        {
+          id: 'group1',
+          name: 'Development Flow',
+          columns: ['col2', 'col3'],
+          max: 5,
+          customHexColor: '#70cde0',
+          swimlanes: [{ id: 'sw1', name: 'Frontend' }],
+        },
+        {
+          id: 'group2',
+          name: 'Testing Flow',
+          columns: ['col4'],
+          max: 3,
+          customHexColor: '#d3d1ff',
+        },
+      ]}
+      availableColumns={mockColumns}
+      swimlanes={mockSwimlanes}
     />
   ),
 };

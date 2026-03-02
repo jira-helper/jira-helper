@@ -18,6 +18,7 @@ export interface SettingsUIStoreState {
     setGroups: (groups: UIGroup[]) => void;
     setGroupLimit: (groupId: string, limit: number) => void;
     setGroupColor: (groupId: string, customHexColor: string) => void;
+    setGroupSwimlanes: (groupId: string, swimlanes: Array<{ id: string; name: string }>) => void;
     setIssueTypeState: (groupId: string, state: IssueTypeState) => void;
     moveColumn: (column: Column, fromGroupId: string, toGroupId: string) => void;
     setState: (state: 'initial' | 'loaded') => void;

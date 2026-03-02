@@ -58,13 +58,13 @@ export const SwimlaneSelector: React.FC<SwimlaneSelectorProps> = ({
 
   const handleAllChange = (e: { target: { checked: boolean } }) => {
     if (e.target.checked) {
-      // User checked "All" - collapse the list
+      // User checked "All" - collapse the list and emit empty (= all)
       setExpanded(false);
       onChange([]);
     } else {
-      // User unchecked "All" - expand the list, emit all IDs
+      // User unchecked "All" - just expand the list to show individual checkboxes
+      // NO onChange here - selection hasn't changed yet, user just wants to see the list
       setExpanded(true);
-      onChange(allIds);
     }
   };
 

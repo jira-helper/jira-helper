@@ -11,9 +11,14 @@ import { SettingsModalContainer } from '../SettingsModal';
 export type SettingsButtonContainerProps = {
   getColumns: () => NodeListOf<Element>;
   getColumnName: (el: HTMLElement) => string;
+  swimlanes?: Array<{ id: string; name: string }>;
 };
 
-export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = ({ getColumns, getColumnName }) => {
+export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = ({
+  getColumns,
+  getColumnName,
+  swimlanes = [],
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpen = () => {
@@ -50,7 +55,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   return (
     <>
       <SettingsButton onClick={handleOpen} />
-      {isModalOpen && <SettingsModalContainer onClose={handleClose} onSave={handleSave} />}
+      {isModalOpen && <SettingsModalContainer onClose={handleClose} onSave={handleSave} swimlanes={swimlanes} />}
     </>
   );
 };

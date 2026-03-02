@@ -25,6 +25,7 @@ export const saveToProperty = async (existingColumnIds: string[]): Promise<void>
       columns: columnIds,
       max: group.max,
       customHexColor: group.customHexColor,
+      swimlanes: group.swimlanes?.length ? group.swimlanes : undefined, // empty = undefined
     };
 
     const issueState = uiStore.data.issueTypeSelectorStates[group.id];

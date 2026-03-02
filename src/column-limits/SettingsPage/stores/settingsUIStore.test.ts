@@ -61,6 +61,45 @@ describe('columnLimitsSettingsUIStore', () => {
     });
   });
 
+  describe('setGroupSwimlanes', () => {
+    it('should set specific swimlanes for group', () => {
+      const swimlanes = [
+        { id: 'sw1', name: 'Swimlane 1' },
+        { id: 'sw2', name: 'Swimlane 2' },
+      ];
+      useColumnLimitsSettingsUIStore.getState().actions.setData({
+        withoutGroupColumns: [],
+        groups: [{ id: 'g1', columns: [], max: 5 }],
+      });
+
+      useColumnLimitsSettingsUIStore.getState().actions.setGroupSwimlanes('g1', swimlanes);
+
+      expect(useColumnLimitsSettingsUIStore.getState().data.groups[0].swimlanes).toEqual(swimlanes);
+    });
+
+    it('should store empty array as undefined (all swimlanes convention)', () => {
+      useColumnLimitsSettingsUIStore.getState().actions.setData({
+        withoutGroupColumns: [],
+        groups: [{ id: 'g1', columns: [], swimlanes: [{ id: 'sw1', name: 'S1' }] }],
+      });
+
+      useColumnLimitsSettingsUIStore.getState().actions.setGroupSwimlanes('g1', []);
+
+      expect(useColumnLimitsSettingsUIStore.getState().data.groups[0].swimlanes).toBeUndefined();
+    });
+
+    it('should do nothing when group not found', () => {
+      useColumnLimitsSettingsUIStore.getState().actions.setData({
+        withoutGroupColumns: [],
+        groups: [{ id: 'g1', columns: [], max: 5 }],
+      });
+
+      useColumnLimitsSettingsUIStore.getState().actions.setGroupSwimlanes('nonExistent', [{ id: 'sw1', name: 'S1' }]);
+
+      expect(useColumnLimitsSettingsUIStore.getState().data.groups[0].swimlanes).toBeUndefined();
+    });
+  });
+
   describe('moveColumn', () => {
     it('should move column from withoutGroup to new group', () => {
       const col: Column = { id: 'col1', name: 'To Do' };

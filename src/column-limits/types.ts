@@ -21,6 +21,8 @@ export type ColumnLimitGroup = {
   max?: number;
   customHexColor?: string;
   includedIssueTypes?: string[];
+  /** Swimlanes: undefined/[] = all, [{id, name}] = specific swimlanes only */
+  swimlanes?: Array<{ id: string; name: string }>;
 };
 
 /**
@@ -46,6 +48,8 @@ export type UIGroup = {
   max?: number;
   customHexColor?: string;
   includedIssueTypes?: string[];
+  /** Swimlanes: undefined/[] = all, [{id, name}] = specific swimlanes only */
+  swimlanes?: Array<{ id: string; name: string }>;
 };
 
 /**

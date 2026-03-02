@@ -35,6 +35,15 @@ export const issueTypes = [
   { id: '3', name: 'Story', subtask: false },
 ];
 
+/** Swimlanes for the board, set by "Given the board has swimlanes" step */
+let boardSwimlanes: Array<{ id: string; name: string }> = [];
+
+export const setBoardSwimlanes = (swimlanes: Array<{ id: string; name: string }>) => {
+  boardSwimlanes = swimlanes;
+};
+
+export const getBoardSwimlanes = () => boardSwimlanes;
+
 // --- Background setup ---
 
 export const setupBackground = () => {
@@ -62,6 +71,7 @@ export const setupBackground = () => {
   useColumnLimitsSettingsUIStore.getState().actions.reset();
   useColumnLimitsPropertyStore.getState().actions.reset();
   clearIssueTypesCache();
+  boardSwimlanes = [];
 };
 
 // --- Mount helpers ---
@@ -113,7 +123,11 @@ export const createButtonStubs = (): ButtonStubs => {
 };
 
 export const mountButton = (stubs: ButtonStubs) => {
-  cy.mount(<SettingsButtonContainer getColumns={stubs.getColumns} getColumnName={stubs.getColumnName} />);
+  const swimlanes = getBoardSwimlanes();
+
+  cy.mount(
+    <SettingsButtonContainer getColumns={stubs.getColumns} getColumnName={stubs.getColumnName} swimlanes={swimlanes} />
+  );
 };
 
 // Re-export types for convenience

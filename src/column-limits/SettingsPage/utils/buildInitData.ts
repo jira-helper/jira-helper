@@ -30,6 +30,7 @@ export function buildInitDataFromGroupMap(
         max: wipLimit.max,
         customHexColor: wipLimit.customHexColor,
         includedIssueTypes: wipLimit.includedIssueTypes,
+        swimlanes: wipLimit.swimlanes, // pass through (undefined = all)
       };
     });
 

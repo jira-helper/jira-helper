@@ -35,6 +35,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_SETTINGS)]);
   }
 
+  private boardSwimlanes: Array<{ id: string; name: string }> = [];
+
   apply(data: [any, any] | undefined): void {
     if (!data) return;
     const [boardData = {}, wipLimits = {}] = data;
@@ -42,6 +44,14 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
 
     useColumnLimitsPropertyStore.getState().actions.setData(wipLimits);
     useColumnLimitsPropertyStore.getState().actions.setState('loaded');
+
+    const rawSwimlanes =
+      (boardData as { swimlanesConfig?: { swimlanes?: Array<{ id?: string; name: string }> } }).swimlanesConfig
+        ?.swimlanes ?? [];
+    this.boardSwimlanes = rawSwimlanes.map((swim, index) => ({
+      id: String((swim as { id?: string }).id ?? swim.name ?? `swimlane-${index}`),
+      name: swim.name,
+    }));
 
     this.renderSettingsButton();
   }
@@ -72,6 +82,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       React.createElement(SettingsButtonContainer, {
         getColumns: () => this.getColumns(),
         getColumnName: (el: HTMLElement) => this.getColumnName(el),
+        swimlanes: this.boardSwimlanes,
       })
     );
   }

@@ -53,6 +53,17 @@ export const useColumnLimitsSettingsUIStore = create<SettingsUIStoreState>()(set
         })
       ),
 
+    setGroupSwimlanes: (groupId, swimlanes) =>
+      set(
+        produce(state => {
+          const group = state.data.groups.find((g: UIGroup) => g.id === groupId);
+          if (group) {
+            // Empty array = all (convention)
+            group.swimlanes = swimlanes.length === 0 ? undefined : swimlanes;
+          }
+        })
+      ),
+
     setIssueTypeState: (groupId, issueState) =>
       set(
         produce(state => {

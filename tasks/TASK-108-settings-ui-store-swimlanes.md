@@ -1,6 +1,6 @@
 # TASK-108: Обновить settingsUIStore — добавить setGroupSwimlanes
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 

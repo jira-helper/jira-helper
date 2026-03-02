@@ -6,13 +6,21 @@ import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
 import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
 import { useColumnLimitsPropertyStore } from '../../../property/store';
 import { WITHOUT_GROUP_ID } from '../../../types';
-import { columns, createButtonStubs, mountButton } from '../helpers';
+import { columns, createButtonStubs, mountButton, setBoardSwimlanes } from '../helpers';
 
 // Re-export for convenience
 export { Given, When, Then };
 export type { DataTableRows };
 
 // --- Background steps ---
+
+Given('the board has swimlanes:', (dataTable: DataTableRows) => {
+  const swimlanes = dataTable.map((row, index) => ({
+    id: `sw-${index + 1}`,
+    name: row.name,
+  }));
+  setBoardSwimlanes(swimlanes);
+});
 
 Given('I am on the Column WIP Limits settings page', () => {
   // Background setup is handled in setupBackground()
@@ -395,5 +403,19 @@ Then(/^group "([^"]*)" should count all issue types in property$/, (groupId: str
     const included = data[groupId]?.includedIssueTypes;
 
     expect(!included || included.length === 0).to.be.true;
+  });
+});
+
+Then(/^group "([^"]*)" should have swimlanes "([^"]*)" in property$/, (groupId: string, swimlanesStr: string) => {
+  const expectedNames = swimlanesStr.split(',').map(s => s.trim());
+  cy.get('@updateBoardProperty').should('have.been.called');
+  cy.then(() => {
+    const { data } = useColumnLimitsPropertyStore.getState();
+
+    expect(data[groupId]).to.exist;
+    const savedSwimlanes = data[groupId]?.swimlanes ?? [];
+    const savedNames = savedSwimlanes.map(s => s.name);
+
+    expect(savedNames).to.deep.equal(expectedNames);
   });
 });

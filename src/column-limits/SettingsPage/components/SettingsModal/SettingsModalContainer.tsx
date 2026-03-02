@@ -10,9 +10,10 @@ import styles from '../../styles.module.css';
 export type SettingsModalContainerProps = {
   onClose: () => void;
   onSave: () => Promise<void>;
+  swimlanes?: Array<{ id: string; name: string }>;
 };
 
-export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ onClose, onSave }) => {
+export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ onClose, onSave, swimlanes = [] }) => {
   const [isSaving, setIsSaving] = useState(false);
   const draggingRef = useRef<{ column: Column; groupId: string } | null>(null);
 
@@ -103,14 +104,23 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ 
     target.classList.remove(styles.addGroupDropzoneActiveJH);
   }, []);
 
+  const handleSwimlanesChange = useCallback(
+    (groupId: string, selectedSwimlanes: Array<{ id: string; name: string }>) => {
+      actions.setGroupSwimlanes(groupId, selectedSwimlanes);
+    },
+    [actions]
+  );
+
   return (
     <SettingsModal title="Limits for groups" onClose={onClose} onSave={handleSave} isSaving={isSaving}>
       <ColumnLimitsForm
         withoutGroupColumns={withoutGroupColumns}
         groups={groups}
         issueTypeSelectorStates={issueTypeSelectorStates}
+        swimlanes={swimlanes}
         onLimitChange={handleLimitChange}
         onColorChange={handleColorChange}
+        onSwimlanesChange={handleSwimlanesChange}
         onIssueTypesChange={handleIssueTypesChange}
         onColumnDragStart={handleColumnDragStart}
         onColumnDragEnd={handleColumnDragEnd}
