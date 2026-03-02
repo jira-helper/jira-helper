@@ -49,8 +49,8 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 1 | [TASK-102](./TASK-102-swimlane-selector-settings-feature.md) | Feature файл для SwimlaneSelector UI (5 сценариев) | TODO |
-| 2 | [TASK-103](./TASK-103-swimlane-filter-board-feature.md) | Feature файл для BoardPage swimlane filtering (3 сценария) | TODO |
+| 1 | [TASK-102](./TASK-102-swimlane-selector-settings-feature.md) | Feature файл для SwimlaneSelector UI (5 сценариев) | DONE |
+| 2 | [TASK-103](./TASK-103-swimlane-filter-board-feature.md) | Feature файл для BoardPage swimlane filtering (3 сценария) | DONE |
 
 ---
 

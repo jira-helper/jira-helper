@@ -1,6 +1,6 @@
 # TASK-103: Feature файл для BoardPage swimlane filtering
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 
@@ -78,10 +78,59 @@ Feature: Swimlane filtering for column groups
 
 ## Критерии приёмки
 
-- [ ] Feature файл создан
-- [ ] 3 сценария описаны в Gherkin
-- [ ] Сценарии покрывают: per-group filtering, empty = all, different groups
+- [x] Feature файл создан
+- [x] 3 сценария описаны в Gherkin
+- [x] Сценарии покрывают: per-group filtering, empty = all, different groups
+
+## Acceptance Criteria: Унификация степов
+
+### Переиспользовать существующие степы
+
+| Степ | Источник |
+|------|----------|
+| `Given there are column groups:` | BoardPage common.steps.ts |
+| `Given the board has issues:` | BoardPage common.steps.ts |
+| `When the board is displayed` | BoardPage common.steps.ts |
+| `Then the badge on {string} should show {string}` | BoardPage common.steps.ts |
+| `Then the limit should be exceeded` | BoardPage common.steps.ts |
+
+### Изменения
+
+1. `Then the badge on "Dev" should show "2/2"` → `Then the badge on "In Progress" should show "2/2"` (бейдж на колонке, не на группе)
+2. `Then the badge on "Frontend" should show "2/2"` → `Then the badge on "In Progress" should show "2/2"` для группы Frontend
+
+### Обновить существующий степ в BoardPage common.steps.ts
+
+Добавить поддержку `swimlanes` в DataTable `Given there are column groups:`:
+
+```typescript
+const swimlanesRaw = row.swimlanes?.trim() || '';
+const swimlaneNames = swimlanesRaw ? swimlanesRaw.split(',').map(s => s.trim()) : [];
+const swimlaneObjs = swimlaneNames.map(name => ({
+  id: swimlaneNameToId[name] || name,
+  name
+}));
+
+data[name] = {
+  // ... existing fields ...
+  ...(swimlaneObjs.length > 0 && { swimlanes: swimlaneObjs }),
+};
+```
 
 ## Зависимости
 
 - Нет зависимостей (это первая задача Phase 1)
+
+---
+
+## Результаты
+
+**Дата**: 2025-03-02
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+Создан `src/column-limits/BoardPage/features/swimlane-filter.feature` с 3 сценариями (SC-SWIM-BOARD-1 — SC-SWIM-BOARD-3). Feature описывает фильтрацию по свимлейнам на BoardPage: per-group filtering, empty = all, different groups.

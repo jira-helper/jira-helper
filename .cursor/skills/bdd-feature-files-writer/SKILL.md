@@ -9,7 +9,6 @@ description: Написание .feature файлов (Gherkin) для acceptanc
 
 ## Когда использовать
 
-- После написания Specification.md
 - Перед реализацией фичи
 - Когда нужно задокументировать acceptance criteria
 
@@ -82,34 +81,14 @@ Gherkin разрешает произвольный текст между `Featu
 
 ## Правила написания
 
-### 1. ID сценариев — только в тегах
+### 1. Используй Семантические ID сценариев с префиксом группы в тегах
 
 ```gherkin
-# ✅ ХОРОШО: ID в теге, название читаемое
 @SC-ADD-1
 Scenario: Add a new limit for a person
-
-# ❌ ПЛОХО: ID дублируется в названии
-@SC-ADD-1
-Scenario: SC-ADD-1: Add a new limit for a person
 ```
 
-### 2. Семантические ID с префиксом группы
-
-```
-@SC-{GROUP}-{N}
-```
-
-| Группа | Префикс | Пример |
-|--------|---------|--------|
-| Modal lifecycle | `SC-MODAL-` | `@SC-MODAL-1` |
-| Add | `SC-ADD-` | `@SC-ADD-1` |
-| Edit | `SC-EDIT-` | `@SC-EDIT-1` |
-| Delete | `SC-DELETE-` | `@SC-DELETE-1` |
-| Search | `SC-SEARCH-` | `@SC-SEARCH-1` |
-| Validation | `SC-VAL-` | `@SC-VAL-1` |
-
-### 3. Background — только если действительно общий
+### 2. Background — только если действительно общий
 
 Используй Background только когда **все** сценарии в файле требуют одинаковых предусловий.
 Иначе — явные Given степы в каждом сценарии.
@@ -125,44 +104,16 @@ Background:
   Given I open the settings modal  # Не все сценарии начинаются с открытой модалки!
 ```
 
-### 4. Группировка по user job
-
-**Принцип: группируй по действию пользователя, не по фичам системы.**
-
-```gherkin
-# === BASIC ===
-@SC-ADD-1
-Scenario: Add a new limit
-
-# === COLUMN FILTERING ===
-@SC-ADD-2
-Scenario: Add limit for specific columns
-
-# === VALIDATION ===
-@SC-ADD-7
-Scenario: Cannot add without person name
-```
-
----
-
 ## Best Practices для степов
 
-### 1. Универсальные степы
+### 1. Использовать глобальные степы по возможности
+Глобальные степы расположены тут `cypress/support/gherkin-steps/common.ts`
+
+### 2. Универсальные степы
 
 Степы должны быть **переиспользуемыми** между сценариями и файлами.
 
-```gherkin
-# ✅ ХОРОШО: универсальный степ с параметрами
-Given a limit: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
-Then I should see limit: name "John Doe" value 5 columns "To Do" swimlanes "Frontend" issueTypes "Task"
-
-# ❌ ПЛОХО: специфичные степы для каждого случая
-Given there is a limit for john.doe with value 5
-Given there is a limit for alice with value 3 for columns To Do
-Given there is a limit for bob with value 7 for swimlane Frontend and columns In Progress
-```
-
-### 2. UI-first проверки
+### 3. UI-first проверки
 
 Then-степы должны проверять через **UI**, а не только через store:
 
@@ -206,17 +157,7 @@ Then I should see "John Doe" in the limits list
 When I set the limit to "5"
 And I select only columns To Do, In Progress
 ```
-
-### 5. Специальное значение "all"
-
-Для обозначения "все" / "без фильтра" используй строку `"all"`:
-
-```gherkin
-Given a limit: login "john" name "John" value 5 columns "all" swimlanes "all" issueTypes "all"
-Then I should see limit: name "John" value 5 columns "all" swimlanes "Frontend" issueTypes "all"
-```
-
-### 6. Не дублируй бизнес-логику в степах
+### 5. Не дублируй бизнес-логику в степах
 
 Степ должен описывать **что** делает пользователь, а не **как** это реализовано:
 
@@ -256,9 +197,9 @@ Then the store.data.limits array should have length 1
 
 - [ ] Feature файл разбит по функциональной области (add, edit, delete, etc.)
 - [ ] Есть описание Feature (2-3 строки после `Feature:`)
-- [ ] ID сценариев только в тегах, не в названиях
-- [ ] Семантические ID (@SC-ADD-1, @SC-EDIT-1, ...)
+- [ ] Семантические (@SC-ADD-1, @SC-EDIT-1, ...) ID сценариев в тегах
 - [ ] Background только для действительно общих предусловий
+- [ ] По возможности используются глобальные степы
 - [ ] Степы универсальные и переиспользуемые
 - [ ] Then-степы проверяют через UI
 - [ ] Атомарные действия (один степ = одно действие)
