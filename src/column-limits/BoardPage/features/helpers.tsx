@@ -18,7 +18,7 @@ export const columns = [
 export const swimlanes = [
   { id: 'sw1', name: 'Frontend' },
   { id: 'sw2', name: 'Backend' },
-  { id: 'sw3', name: 'Excluded' },
+  { id: 'sw3', name: 'Expedite' },
 ];
 
 export const issueTypes = [
@@ -39,7 +39,7 @@ export const columnNameToId: Record<string, string> = {
 export const swimlaneNameToId: Record<string, string> = {
   Frontend: 'sw1',
   Backend: 'sw2',
-  Excluded: 'sw3',
+  Expedite: 'sw3',
 };
 
 // --- DOM helpers ---

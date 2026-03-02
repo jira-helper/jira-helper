@@ -19,15 +19,15 @@ Feature: Column Group WIP Limits - Swimlane Filtering
   Scenario: Count issues only from selected swimlanes
     Given there are column groups:
       | name | columns     | limit | swimlanes         |
-      | Dev  | In Progress | 2     | Frontend, Backend |
+      | Dev  | In Progress | 1     | Frontend, Backend |
     And the board has issues:
       | column      | swimlane |
       | In Progress | Frontend |
       | In Progress | Backend  |
       | In Progress | Expedite |
     When the board is displayed
-    Then the badge on "In Progress" should show "2/2"
-    And the limit should be exceeded
+    Then the badge on "In Progress" should show "2/1"
+    And "In Progress" cells should have red background
 
   @SC-SWIM-BOARD-2
   Scenario: All swimlanes when empty selection

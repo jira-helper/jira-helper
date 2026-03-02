@@ -117,20 +117,62 @@ describe('calculateGroupStats', () => {
     expect(stats[0].color.startsWith('#')).toBe(true);
   });
 
-  it('should filter by ignored swimlanes', () => {
+  it('should filter by per-group swimlanes', () => {
+    // Mock getSwimlaneIds to return all available swimlanes
+    mockPageObject.getSwimlaneIds = vi.fn(() => ['sw1', 'sw2', 'sw3']);
+
     useColumnLimitsPropertyStore.getState().actions.setData({
       'Group 1': {
         columns: ['col1'],
         max: 10,
+        swimlanes: [{ id: 'sw1', name: 'Frontend' }], // Only count sw1
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(['swimlane1']);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     calculateGroupStats();
 
-    expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', ['swimlane1'], undefined, '');
+    // Should ignore sw2 and sw3 (all except sw1)
+    expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', ['sw2', 'sw3'], undefined, '');
+  });
+
+  it('should count all swimlanes when group.swimlanes is empty', () => {
+    mockPageObject.getSwimlaneIds = vi.fn(() => ['sw1', 'sw2', 'sw3']);
+
+    useColumnLimitsPropertyStore.getState().actions.setData({
+      'Group 1': {
+        columns: ['col1'],
+        max: 10,
+        swimlanes: [], // Empty = all swimlanes
+      },
+    });
+
+    useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
+
+    calculateGroupStats();
+
+    // Should not ignore any swimlanes
+    expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', [], undefined, '');
+  });
+
+  it('should count all swimlanes when group.swimlanes is undefined', () => {
+    mockPageObject.getSwimlaneIds = vi.fn(() => ['sw1', 'sw2', 'sw3']);
+
+    useColumnLimitsPropertyStore.getState().actions.setData({
+      'Group 1': {
+        columns: ['col1'],
+        max: 10,
+        // No swimlanes property = all swimlanes
+      },
+    });
+
+    useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
+
+    calculateGroupStats();
+
+    // Should not ignore any swimlanes
+    expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', [], undefined, '');
   });
 
   it('should filter by included issue types', () => {

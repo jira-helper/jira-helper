@@ -28,15 +28,43 @@ function hexToRgb(hex: string): string {
 // --- Given steps ---
 
 /**
+ * Given the board has columns:
+ * | name        |
+ * | In Progress |
+ *
+ * Documents available columns (actual DOM setup done in setupBackground).
+ */
+Given('the board has columns:', () => {
+  // No-op: columns are pre-configured in helpers.tsx setupBoardDOM()
+});
+
+/**
+ * Given the board has swimlanes:
+ * | name     |
+ * | Frontend |
+ *
+ * Documents available swimlanes (actual DOM setup done in setupBackground).
+ */
+Given('the board has swimlanes:', () => {
+  // No-op: swimlanes are pre-configured in helpers.tsx setupBoardDOM()
+});
+
+/**
  * Given there are column groups:
- * | name        | columns             | limit | color   | issueTypes |
- * | Development | In Progress, Review | 5     | #36B37E |            |
+ * | name        | columns             | limit | color   | issueTypes | swimlanes         |
+ * | Development | In Progress, Review | 5     | #36B37E |            | Frontend, Backend |
  */
 Given('there are column groups:', (table: DataTableRows) => {
   resetIssueCounter();
   const data: Record<
     string,
-    { columns: string[]; max: number; customHexColor?: string; includedIssueTypes?: string[] }
+    {
+      columns: string[];
+      max: number;
+      customHexColor?: string;
+      includedIssueTypes?: string[];
+      swimlanes?: Array<{ id: string; name: string }>;
+    }
   > = {};
 
   table.forEach(row => {
@@ -47,12 +75,19 @@ Given('there are column groups:', (table: DataTableRows) => {
     const color = row.color?.trim() || undefined;
     const issueTypesRaw = row.issueTypes?.trim() || '';
     const issueTypes = issueTypesRaw ? issueTypesRaw.split(',').map((s: string) => s.trim()) : undefined;
+    const swimlanesRaw = row.swimlanes?.trim() || '';
+    const swimlaneNames = swimlanesRaw ? swimlanesRaw.split(',').map((s: string) => s.trim()) : [];
+    const swimlaneObjs = swimlaneNames.map(swName => ({
+      id: swimlaneNameToId[swName] || swName,
+      name: swName,
+    }));
 
     data[name] = {
       columns: columnIds,
       max: limit,
       ...(color && { customHexColor: color }),
       ...(issueTypes && { includedIssueTypes: issueTypes }),
+      ...(swimlaneObjs.length > 0 && { swimlanes: swimlaneObjs }),
     };
   });
 

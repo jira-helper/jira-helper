@@ -1,6 +1,6 @@
 # TASK-110: Обновить calculateGroupStats — использовать group.swimlanes
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 
@@ -70,3 +70,22 @@ export function calculateGroupStats(
 ## Зависимости
 
 - Зависит от: TASK-106 (types), TASK-107 (property)
+
+---
+
+## Результаты
+
+**Дата**: 2026-03-02
+
+**Статус**: DONE
+
+**Изменения**:
+
+1. Обновлён `calculateGroupStats.ts`:
+   - Теперь использует per-group `swimlanes` вместо глобального `ignoredSwimlanes`
+   - Получает все swimlane IDs через `pageObject.getSwimlaneIds()`
+   - Логика: empty/undefined swimlanes = all (no ignored), specific swimlanes = ignore others
+
+2. Обновлены unit тесты в `calculateGroupStats.test.ts`:
+   - Добавлены 3 новых теста для swimlane filtering логики
+   - Заменён тест для глобального ignoredSwimlanes на per-group swimlanes

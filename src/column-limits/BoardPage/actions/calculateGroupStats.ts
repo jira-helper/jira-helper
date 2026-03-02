@@ -9,9 +9,13 @@ import { generateColorByFirstChars } from '../../shared/utils';
  * Calculate statistics for all column limit groups.
  *
  * Reads groups from property store and computes:
- * - Current issue count per group
+ * - Current issue count per group (filtered by per-group swimlanes)
  * - Whether group exceeds its limit
  * - Color for group visualization
+ *
+ * Swimlane filtering logic:
+ * - If group.swimlanes is undefined or empty → count all swimlanes
+ * - If group.swimlanes has specific swimlanes → count only those, ignore others
  *
  * @returns Array of GroupStats, one per configured group
  */
@@ -20,13 +24,23 @@ export const calculateGroupStats = createAction({
   handler(): GroupStats[] {
     const pageObject = this.di.inject(columnLimitsBoardPageObjectToken);
     const { data: propertyData } = useColumnLimitsPropertyStore.getState();
-    const { ignoredSwimlanes, cssNotIssueSubTask } = useColumnLimitsRuntimeStore.getState().data;
+    const { cssNotIssueSubTask } = useColumnLimitsRuntimeStore.getState().data;
+
+    // Get all swimlane IDs from the board for filtering calculation
+    const allSwimlaneIds = pageObject.getSwimlaneIds();
 
     const stats: GroupStats[] = [];
 
     Object.entries(propertyData).forEach(([groupName, group]) => {
-      const { columns, max, customHexColor, includedIssueTypes } = group;
+      const { columns, max, customHexColor, includedIssueTypes, swimlanes } = group;
       if (!columns || columns.length === 0 || !max) return;
+
+      // Calculate ignored swimlanes for this group
+      // Empty or undefined swimlanes = all (no ignored)
+      // Specific swimlanes = ignore all others
+      const groupSwimlaneIds = swimlanes?.map(s => s.id) ?? [];
+      const ignoredSwimlanes =
+        groupSwimlaneIds.length === 0 ? [] : allSwimlaneIds.filter(id => !groupSwimlaneIds.includes(id));
 
       const currentCount = columns.reduce(
         (acc, columnId) =>

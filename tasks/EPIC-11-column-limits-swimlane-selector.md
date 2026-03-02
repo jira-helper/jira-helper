@@ -78,7 +78,7 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 9 | [TASK-110](./TASK-110-calculate-group-stats-swimlanes.md) | Обновить `calculateGroupStats.ts` — использовать `group.swimlanes` | TODO |
+| 9 | [TASK-110](./TASK-110-calculate-group-stats-swimlanes.md) | Обновить `calculateGroupStats.ts` — использовать `group.swimlanes` | DONE |
 | 10 | [TASK-111](./TASK-111-cleanup-global-ignored-swimlanes.md) | Удалить глобальный `ignoredSwimlanes` из runtimeStore и index.ts | TODO |
 
 ---
@@ -88,7 +88,7 @@ src/person-limits/SettingsPage/
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
 | 11 | [TASK-112](./TASK-112-swimlane-selector-cypress-tests.md) | Реализовать `swimlane-selector.feature.cy.tsx` (SettingsPage) | DONE |
-| 12 | [TASK-113](./TASK-113-swimlane-filter-cypress-tests.md) | Реализовать `swimlane-filter.feature.cy.tsx` (BoardPage) | TODO |
+| 12 | [TASK-113](./TASK-113-swimlane-filter-cypress-tests.md) | Реализовать `swimlane-filter.feature.cy.tsx` (BoardPage) | DONE |
 
 ---
 
