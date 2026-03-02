@@ -17,11 +17,6 @@ describe('useColumnLimitsRuntimeStore', () => {
       const state = useColumnLimitsRuntimeStore.getState();
       expect(state.data.cssNotIssueSubTask).toBe('');
     });
-
-    it('should have empty ignoredSwimlanes', () => {
-      const state = useColumnLimitsRuntimeStore.getState();
-      expect(state.data.ignoredSwimlanes).toEqual([]);
-    });
   });
 
   describe('setGroupStats', () => {
@@ -36,6 +31,7 @@ describe('useColumnLimitsRuntimeStore', () => {
           limit: 10,
           isOverLimit: false,
           color: '#ff0000',
+          ignoredSwimlanes: [],
         },
       ];
 
@@ -60,6 +56,7 @@ describe('useColumnLimitsRuntimeStore', () => {
           limit: 5,
           isOverLimit: false,
           color: '#ff0000',
+          ignoredSwimlanes: [],
         },
       ];
       useColumnLimitsRuntimeStore.getState().actions.setGroupStats(initialStats);
@@ -73,6 +70,7 @@ describe('useColumnLimitsRuntimeStore', () => {
           limit: 10,
           isOverLimit: false,
           color: '#00ff00',
+          ignoredSwimlanes: [],
         },
       ];
 
@@ -114,47 +112,6 @@ describe('useColumnLimitsRuntimeStore', () => {
     });
   });
 
-  describe('setIgnoredSwimlanes', () => {
-    it('should update ignoredSwimlanes', () => {
-      // Arrange
-      const ids = ['swimlane1', 'swimlane2'];
-
-      // Act
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(ids);
-
-      // Assert
-      const state = useColumnLimitsRuntimeStore.getState();
-      expect(state.data.ignoredSwimlanes).toEqual(ids);
-      expect(state.data.ignoredSwimlanes).toHaveLength(2);
-    });
-
-    it('should replace existing ignoredSwimlanes', () => {
-      // Arrange
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(['old1', 'old2']);
-      const newIds = ['new1'];
-
-      // Act
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(newIds);
-
-      // Assert
-      const state = useColumnLimitsRuntimeStore.getState();
-      expect(state.data.ignoredSwimlanes).toEqual(newIds);
-      expect(state.data.ignoredSwimlanes).toHaveLength(1);
-    });
-
-    it('should handle empty array', () => {
-      // Arrange
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(['swimlane1']);
-
-      // Act
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
-
-      // Assert
-      const state = useColumnLimitsRuntimeStore.getState();
-      expect(state.data.ignoredSwimlanes).toEqual([]);
-    });
-  });
-
   describe('reset', () => {
     it('should reset to initial state', () => {
       // Arrange
@@ -167,11 +124,11 @@ describe('useColumnLimitsRuntimeStore', () => {
           limit: 10,
           isOverLimit: false,
           color: '#ff0000',
+          ignoredSwimlanes: [],
         },
       ];
       useColumnLimitsRuntimeStore.getState().actions.setGroupStats(stats);
       useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('.ghx-subtask');
-      useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes(['swimlane1']);
 
       // Act
       useColumnLimitsRuntimeStore.getState().actions.reset();
@@ -180,7 +137,6 @@ describe('useColumnLimitsRuntimeStore', () => {
       const state = useColumnLimitsRuntimeStore.getState();
       expect(state.data.groupStats).toEqual([]);
       expect(state.data.cssNotIssueSubTask).toBe('');
-      expect(state.data.ignoredSwimlanes).toEqual([]);
     });
 
     it('should reset multiple times without issues', () => {
@@ -194,6 +150,7 @@ describe('useColumnLimitsRuntimeStore', () => {
           limit: 10,
           isOverLimit: false,
           color: '#ff0000',
+          ignoredSwimlanes: [],
         },
       ]);
       useColumnLimitsRuntimeStore.getState().actions.reset();
@@ -203,7 +160,6 @@ describe('useColumnLimitsRuntimeStore', () => {
       const state = useColumnLimitsRuntimeStore.getState();
       expect(state.data.groupStats).toEqual([]);
       expect(state.data.cssNotIssueSubTask).toBe('');
-      expect(state.data.ignoredSwimlanes).toEqual([]);
     });
   });
 });

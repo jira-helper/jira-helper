@@ -37,13 +37,6 @@ export const useColumnLimitsRuntimeStore = create<RuntimeStoreState>()(set => ({
         })
       ),
 
-    setIgnoredSwimlanes: ids =>
-      set(
-        produce(state => {
-          state.data.ignoredSwimlanes = ids;
-        })
-      ),
-
     reset: () =>
       set({
         data: getInitialData(),

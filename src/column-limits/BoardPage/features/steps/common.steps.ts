@@ -6,7 +6,6 @@
 import { Given, When, Then } from '../../../../../cypress/support/bdd-runner';
 import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
 import { useColumnLimitsPropertyStore } from '../../../property';
-import { useColumnLimitsRuntimeStore } from '../../stores';
 import { applyLimits } from '../../actions';
 import {
   createMockIssue,
@@ -112,14 +111,6 @@ Given('the board has issues:', (table: DataTableRows) => {
     const issue = createMockIssue(issueId, columnId, swimlaneId, issueType);
     addIssueToDOM(issue, columnId, swimlaneId);
   });
-});
-
-/**
- * Given swimlane "Excluded" is set to ignore WIP limits
- */
-Given('swimlane {string} is set to ignore WIP limits', (swimlaneName: string) => {
-  const swimlaneId = swimlaneNameToId[swimlaneName] || swimlaneName;
-  useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([swimlaneId]);
 });
 
 // --- When steps ---

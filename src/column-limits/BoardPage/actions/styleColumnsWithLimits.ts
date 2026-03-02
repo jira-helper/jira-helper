@@ -16,29 +16,27 @@ export const styleColumnsWithLimits = createAction({
   name: 'styleColumnsWithLimits',
   handler(): void {
     const pageObject = this.di.inject(columnLimitsBoardPageObjectToken);
-    const { groupStats, ignoredSwimlanes } = useColumnLimitsRuntimeStore.getState().data;
+    const { groupStats } = useColumnLimitsRuntimeStore.getState().data;
     const columnsInOrder = pageObject.getOrderedColumnIds();
 
     // Collect all columns that should have badges
     const columnsWithBadges = new Set<string>();
 
-    // First pass: clear old badges and reset background colors
+    // First pass: clear old badges and reset background colors for all columns
     columnsInOrder.forEach(columnId => {
       pageObject.removeBadges(columnId);
-      // Reset background color for all columns in swimlanes
-      const swimlanesFilter = ignoredSwimlanes.map(id => `:not([swimlane-id="${id}"])`).join('');
-      document
-        .querySelectorAll<HTMLElement>(`.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"]`)
-        .forEach(el => {
-          el.style.backgroundColor = '';
-        });
+      // Reset background color for all columns in all swimlanes
+      const selector = `.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`;
+      document.querySelectorAll<HTMLElement>(selector).forEach(el => {
+        el.style.backgroundColor = '';
+      });
     });
 
-    // Second pass: apply new styles and badges
+    // Second pass: apply new styles and badges using per-group ignoredSwimlanes
     groupStats.forEach(stat => {
-      // Highlight columns if over limit
+      // Highlight columns if over limit (use per-group ignoredSwimlanes)
       if (stat.isOverLimit) {
-        const swimlanesFilter = ignoredSwimlanes.map(id => `:not([swimlane-id="${id}"])`).join('');
+        const swimlanesFilter = stat.ignoredSwimlanes.map(id => `:not([swimlane-id="${id}"])`).join('');
         stat.columns.forEach(columnId => {
           document
             .querySelectorAll<HTMLElement>(`.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"]`)

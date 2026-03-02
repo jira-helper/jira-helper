@@ -1,6 +1,6 @@
 # TASK-111: Удалить глобальный ignoredSwimlanes
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 
@@ -66,12 +66,52 @@ apply(data: [EditData?, BoardGroup?]): void {
 
 ## Критерии приёмки
 
-- [ ] `ignoredSwimlanes` удалён из runtimeStore
-- [ ] `setIgnoredSwimlanes` action удалён
-- [ ] SwimlanesSettings больше не загружается в BoardPage
-- [ ] Build проходит
-- [ ] Lint проходит
+- [x] `ignoredSwimlanes` удалён из runtimeStore (RuntimeData)
+- [x] `setIgnoredSwimlanes` action удалён
+- [x] SwimlanesSettings больше не загружается в BoardPage
+- [x] Build проходит (TypeScript ✓)
+- [x] Lint проходит (ESLint ✓)
 
 ## Зависимости
 
 - Зависит от: TASK-110 (calculateGroupStats)
+
+---
+
+## Результат
+
+### Изменения
+
+1. **runtimeStore.types.ts**:
+   - Удалён `ignoredSwimlanes: string[]` из `RuntimeData`
+   - Удалён `setIgnoredSwimlanes` из `RuntimeActions`
+   - Удалён из `getInitialData()`
+   - Добавлен `ignoredSwimlanes: string[]` в `GroupStats` (per-group)
+
+2. **runtimeStore.ts**:
+   - Удалён action `setIgnoredSwimlanes`
+
+3. **runtimeStore.test.ts**:
+   - Удалены тесты для `setIgnoredSwimlanes`
+   - Обновлены GroupStats объекты с `ignoredSwimlanes: []`
+
+4. **BoardPage/index.ts**:
+   - Удалён импорт `mergeSwimlaneSettings`
+   - Удалён интерфейс `SwimlanesSettings`
+   - `loadData()` больше не загружает SwimlanesSettings
+   - `apply()` больше не вызывает `setIgnoredSwimlanes()`
+
+5. **calculateGroupStats.ts**:
+   - Добавлено `ignoredSwimlanes` в возвращаемый `GroupStats`
+
+6. **styleColumnsWithLimits.ts**:
+   - Использует `stat.ignoredSwimlanes` вместо глобального
+
+7. **common.steps.ts**:
+   - Удалён степ `swimlane {string} is set to ignore WIP limits`
+   - Удалён неиспользуемый импорт `useColumnLimitsRuntimeStore`
+
+### Тесты
+
+- Unit tests: 555 passed ✓
+- Cypress component tests: 213 passed ✓

@@ -56,6 +56,7 @@ export const calculateGroupStats = createAction({
         limit: max,
         isOverLimit: currentCount > max,
         color: customHexColor || generateColorByFirstChars(groupName),
+        ignoredSwimlanes,
       });
     });
 

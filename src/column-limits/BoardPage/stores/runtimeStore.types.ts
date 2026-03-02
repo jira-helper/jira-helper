@@ -10,6 +10,8 @@ export type GroupStats = {
   limit: number;
   isOverLimit: boolean;
   color: string;
+  /** Swimlane IDs to ignore when counting/styling for this group */
+  ignoredSwimlanes: string[];
 };
 
 /**
@@ -22,14 +24,11 @@ export type RuntimeData = {
   groupStats: GroupStats[];
   /** CSS selector to exclude subtasks from counting */
   cssNotIssueSubTask: string;
-  /** IDs of swimlanes to ignore when calculating limits */
-  ignoredSwimlanes: string[];
 };
 
 export type RuntimeActions = {
   setGroupStats: (stats: GroupStats[]) => void;
   setCssNotIssueSubTask: (css: string) => void;
-  setIgnoredSwimlanes: (ids: string[]) => void;
   reset: () => void;
 };
 
@@ -45,5 +44,4 @@ export type RuntimeStoreState = {
 export const getInitialData = (): RuntimeData => ({
   groupStats: [],
   cssNotIssueSubTask: '',
-  ignoredSwimlanes: [],
 });

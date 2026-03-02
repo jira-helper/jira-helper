@@ -56,8 +56,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    // Setup runtime store
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     // Act
@@ -73,6 +71,7 @@ describe('calculateGroupStats', () => {
       limit: 5,
       isOverLimit: false,
       color: '#ff5630',
+      ignoredSwimlanes: [],
     });
 
     expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', [], undefined, '');
@@ -87,7 +86,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     const stats = calculateGroupStats();
@@ -106,7 +104,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     const stats = calculateGroupStats();
@@ -117,7 +114,7 @@ describe('calculateGroupStats', () => {
     expect(stats[0].color.startsWith('#')).toBe(true);
   });
 
-  it('should filter by per-group swimlanes', () => {
+  it('should filter by per-group swimlanes and include ignoredSwimlanes in stats', () => {
     // Mock getSwimlaneIds to return all available swimlanes
     mockPageObject.getSwimlaneIds = vi.fn(() => ['sw1', 'sw2', 'sw3']);
 
@@ -131,10 +128,11 @@ describe('calculateGroupStats', () => {
 
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
-    calculateGroupStats();
+    const stats = calculateGroupStats();
 
     // Should ignore sw2 and sw3 (all except sw1)
     expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', ['sw2', 'sw3'], undefined, '');
+    expect(stats[0].ignoredSwimlanes).toEqual(['sw2', 'sw3']);
   });
 
   it('should count all swimlanes when group.swimlanes is empty', () => {
@@ -150,10 +148,11 @@ describe('calculateGroupStats', () => {
 
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
-    calculateGroupStats();
+    const stats = calculateGroupStats();
 
     // Should not ignore any swimlanes
     expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', [], undefined, '');
+    expect(stats[0].ignoredSwimlanes).toEqual([]);
   });
 
   it('should count all swimlanes when group.swimlanes is undefined', () => {
@@ -169,10 +168,11 @@ describe('calculateGroupStats', () => {
 
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
-    calculateGroupStats();
+    const stats = calculateGroupStats();
 
     // Should not ignore any swimlanes
     expect(mockPageObject.getIssuesInColumn).toHaveBeenCalledWith('col1', [], undefined, '');
+    expect(stats[0].ignoredSwimlanes).toEqual([]);
   });
 
   it('should filter by included issue types', () => {
@@ -184,7 +184,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     calculateGroupStats();
@@ -200,7 +199,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask(':not(.ghx-subtask)');
 
     calculateGroupStats();
@@ -228,7 +226,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     const stats = calculateGroupStats();
@@ -255,7 +252,6 @@ describe('calculateGroupStats', () => {
       },
     });
 
-    useColumnLimitsRuntimeStore.getState().actions.setIgnoredSwimlanes([]);
     useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
 
     const stats = calculateGroupStats();

@@ -42,12 +42,16 @@ export const SwimlaneSelector: React.FC<SwimlaneSelectorProps> = ({
   // Track if user has expanded the list by unchecking "All"
   const [expanded, setExpanded] = useState(false);
 
-  // Reset expanded state when value changes to partial selection from parent
-  // This ensures controlled behavior when parent sets a partial selection
+  // Sync expanded state with selection:
+  // - Partial selection: expand to show individual checkboxes
+  // - All selected (empty array or full array): collapse the list
   useEffect(() => {
     const isPartialSelection = safeValue.length > 0 && safeValue.length < safeSwimlanes.length;
+    const isAllSelected = safeValue.length === 0 || safeValue.length === safeSwimlanes.length;
     if (isPartialSelection) {
       setExpanded(true);
+    } else if (isAllSelected) {
+      setExpanded(false);
     }
   }, [safeValue.length, safeSwimlanes.length]);
 

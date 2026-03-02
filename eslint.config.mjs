@@ -75,6 +75,7 @@ export default [
       'no-useless-assignment': 'warn',
 
       'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
+      'react/no-unstable-nested-components': 'error',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'off',
 

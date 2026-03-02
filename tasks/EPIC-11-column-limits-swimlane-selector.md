@@ -1,6 +1,6 @@
 # EPIC-11: Column Limits Swimlane Selector
 
-**Status**: TODO  
+**Status**: DONE  
 **Depends on**: EPIC-10 (finish BDD refactoring first)  
 **Target Design**: [target-design-column-limits-swimlane-selector.md](./target-design-column-limits-swimlane-selector.md)
 
@@ -79,7 +79,7 @@ src/person-limits/SettingsPage/
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
 | 9 | [TASK-110](./TASK-110-calculate-group-stats-swimlanes.md) | Обновить `calculateGroupStats.ts` — использовать `group.swimlanes` | DONE |
-| 10 | [TASK-111](./TASK-111-cleanup-global-ignored-swimlanes.md) | Удалить глобальный `ignoredSwimlanes` из runtimeStore и index.ts | TODO |
+| 10 | [TASK-111](./TASK-111-cleanup-global-ignored-swimlanes.md) | Удалить глобальный `ignoredSwimlanes` из runtimeStore и index.ts | DONE |
 
 ---
 
@@ -96,7 +96,7 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 13 | [TASK-114](./TASK-114-swimlane-selector-verification.md) | Верификация: build, lint, tests, manual testing | TODO |
+| 13 | [TASK-114](./TASK-114-swimlane-selector-verification.md) | Верификация: build, lint, tests, manual testing | DONE |
 
 ---
 
