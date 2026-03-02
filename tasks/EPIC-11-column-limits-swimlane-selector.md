@@ -58,8 +58,8 @@ src/person-limits/SettingsPage/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 3 | [TASK-104](./TASK-104-shared-swimlane-selector.md) | Создать shared `SwimlaneSelector` компонент + Storybook | TODO |
-| 4 | [TASK-105](./TASK-105-refactor-personal-wip-limit-container.md) | Рефакторинг `PersonalWipLimitContainer` — использовать shared компонент | TODO |
+| 3 | [TASK-104](./TASK-104-shared-swimlane-selector.md) | Создать shared `SwimlaneSelector` компонент + Storybook | DONE |
+| 4 | [TASK-105](./TASK-105-refactor-personal-wip-limit-container.md) | Рефакторинг `PersonalWipLimitContainer` — использовать shared компонент | DONE |
 
 ---
 

@@ -6,3 +6,4 @@ export {
   type ColumnSelectorProps,
   type ColumnSelectorContainerProps,
 } from './ColumnSelector';
+export { SwimlaneSelector, type Swimlane, type SwimlaneSelectorProps } from './SwimlaneSelector';

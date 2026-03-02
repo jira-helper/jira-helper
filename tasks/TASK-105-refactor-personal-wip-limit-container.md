@@ -1,6 +1,6 @@
 # TASK-105: Рефакторинг PersonalWipLimitContainer
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-11](./EPIC-11-column-limits-swimlane-selector.md)
 

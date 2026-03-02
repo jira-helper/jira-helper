@@ -44,11 +44,15 @@ Then('I see checkbox {string} is unchecked', (label: string) => {
 });
 
 When('I check {string}', (label: string) => {
-  cy.contains('label', label).find('input[type="checkbox"]').check({ force: true });
+  // Use click instead of check for Ant Design Checkbox compatibility
+  cy.contains('label', label).find('input[type="checkbox"]').should('not.be.checked');
+  cy.contains('label', label).click();
 });
 
 When('I uncheck {string}', (label: string) => {
-  cy.contains('label', label).find('input[type="checkbox"]').uncheck({ force: true });
+  // Use click instead of uncheck for Ant Design Checkbox compatibility
+  cy.contains('label', label).find('input[type="checkbox"]').should('be.checked');
+  cy.contains('label', label).click();
 });
 
 // === Modal ===

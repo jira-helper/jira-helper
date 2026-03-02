@@ -113,6 +113,8 @@ When('I select only columns {string}', (columnNames: string) => {
 });
 
 When('I select only swimlane {string}', (swimlaneName: string) => {
+  // Wait for swimlane list to be visible
+  cy.get('[data-testid="swimlane-list"]').should('be.visible');
   swimlanes.forEach(swim => {
     const checkbox = cy.contains('label', swim.name).find('input[type="checkbox"]');
     if (swim.name === swimlaneName) {
