@@ -13,7 +13,7 @@ Feature: WIP Limit on Cells - Validation
     And I type "My Range" into "Add range" input
     And I see "-" selected in "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
-    And I click "Add range"
+    And I click "Add range" button
     Then I see text "Select swimlane"
     And I see "swimlane" field has error
 
@@ -22,7 +22,7 @@ Feature: WIP Limit on Cells - Validation
     When I open the settings popup
     And I type "My Range" into "Add range" input
     And I select "In Progress" from "Column" dropdown
-    And I click "Add range"
+    And I click "Add range" button
     Then I see text "Select swimlane"
     And I see "swimlane" field has error
     When I select "Frontend" from "swimlane" dropdown
@@ -34,6 +34,6 @@ Feature: WIP Limit on Cells - Validation
     And I type "My Range" into "Add range" input
     And I select "Frontend" from "swimlane" dropdown
     And I see "-" selected in "Column" dropdown
-    And I click "Add range"
-    Then I see text "Select column"
-    And I see "column" field has error
+    And I click "Add range" button
+    Then I see text "Select Column"
+    And I see "Column" field has error

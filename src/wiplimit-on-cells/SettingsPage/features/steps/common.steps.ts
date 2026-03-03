@@ -75,23 +75,6 @@ When('I open the settings popup', () => {
   cy.contains('Edit WipLimit on cells').should('exist');
 });
 
-When(/^I click "([^"]*)"$/, (buttonText: string) => {
-  if (buttonText === 'Add range' || buttonText === 'Add cell') {
-    cy.window().then(win => {
-      if (!(win.alert as sinon.SinonStub)?.restore) {
-        cy.stub(win, 'alert').as('alert');
-      }
-    });
-    cy.get('#WIP_buttonRange').click();
-  } else {
-    cy.contains('button', buttonText).click();
-  }
-});
-
-Then(/^I should see the "([^"]*)" popup$/, (title: string) => {
-  cy.contains(title).should('exist');
-});
-
 Given(/^I have opened the "([^"]*)" popup$/, (popupTitle: string) => {
   mountComponent([]);
   cy.contains('button', 'Edit Wip limits by cells').click();
@@ -102,42 +85,10 @@ When('I click the close button (X)', () => {
   cy.get('.ant-modal-close').click();
 });
 
-// --- Form inputs ---
-
-When(/^I check "([^"]*)"$/, (label: string) => {
-  if (label === 'show indicator') {
-    cy.get('#WIPLC_showBadge').check();
-  } else {
-    cy.contains('label', label).click();
-  }
-});
-
 // --- Range table ---
 
 Then('I should see the ranges table', () => {
   cy.get('#WipLimitCells_table').should('exist');
-});
-
-// === Modal Lifecycle Additional ===
-
-Then(/^I should see the "([^"]*)" form$/, (formName: string) => {
-  if (formName === 'Add range') {
-    cy.get('#WIP_inputRange').should('exist');
-  }
-});
-
-Then('I should see the swimlane dropdown', () => {
-  cy.get('#WIPLC_swimlane').should('exist');
-});
-
-Then('I should see the column dropdown', () => {
-  cy.get('#WIPLC_Column').should('exist');
-});
-
-Then(/^I should see the "([^"]*)" checkbox$/, (label: string) => {
-  if (label === 'show indicator') {
-    cy.get('#WIPLC_showBadge').should('exist');
-  }
 });
 
 Then(/^I should see "([^"]*)" in the ranges table$/, (rangeName: string) => {

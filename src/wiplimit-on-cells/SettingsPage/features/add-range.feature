@@ -14,7 +14,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
     And I select "Frontend" from "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I check "show indicator"
-    And I click "Add range"
+    And I click "Add range" button
     Then I should see "Critical Path" in the ranges table
     And the range "Critical Path" should have WIP limit 0
     And the range "Critical Path" should contain cell "Frontend / In Progress"
@@ -25,7 +25,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
     When I open the settings popup
     And I select "Frontend" from "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
-    And I click "Add range"
+    And I click "Add range" button
     Then I see text "Enter range name"
     And the ranges table should be empty
 
@@ -34,7 +34,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
     When I open the settings popup
     And I select "Frontend" from "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
-    And I click "Add range"
+    And I click "Add range" button
     Then I see text "Enter range name"
     When I type "My Range" into "Add range" input
     Then I do not see text "Enter range name"
@@ -73,7 +73,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
     And I type "Critical Path" into "Add range" input
     And I select "Backend" from "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
-    And I click "Add cell"
+    And I click "Add cell" button
     Then the range "Critical Path" should contain cells:
       | swimlane | column      |
       | Frontend | In Progress |
@@ -91,7 +91,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
     And I type "Critical Path" into "Add range" input
     And I select "Frontend" from "swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
-    And I click "Add cell"
+    And I click "Add cell" button
     Then the range "Critical Path" should contain cells:
       | swimlane | column      |
       | Frontend | In Progress |

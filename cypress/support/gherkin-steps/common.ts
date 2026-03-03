@@ -35,6 +35,10 @@ When('I click {string}', (text: string) => {
 });
 
 // === Checkboxes ===
+Then('I see checkbox {string}', (label: string) => {
+  cy.contains('label', label).should('be.visible');
+});
+
 Then('I see checkbox {string} is checked', (label: string) => {
   cy.contains('label', label).find('input[type="checkbox"]').should('be.checked');
 });
@@ -76,6 +80,10 @@ Then('I do not see the modal {string}', (title: string) => {
 // Works with Ant Design Form.Item and standard HTML forms
 // Uses 'for' attribute if available, otherwise closest('.ant-form-item')
 
+Then('I see input {string}', (label: string) => {
+  cy.contains('label', label).should('be.visible');
+});
+
 const findInputByLabel = (label: string) => {
   return cy.contains('label', label).then($label => {
     const forAttr = $label.attr('for');
@@ -100,6 +108,10 @@ When('I clear {string} input', (label: string) => {
 
 // === Dropdowns/Select ===
 // Works with Ant Design Select inside Form.Item
+
+Then('I see dropdown {string}', (label: string) => {
+  cy.contains('label', label).closest('.ant-form-item').find('.ant-select').should('be.visible');
+});
 
 When('I select {string} from {string} dropdown', (optionText: string, label: string) => {
   cy.contains('label', label).then($label => {

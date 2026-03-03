@@ -46,6 +46,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
   const [showBadge, setShowBadge] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [swimlaneError, setSwimlaneError] = useState<string | null>(null);
+  const [columnError, setColumnError] = useState<string | null>(null);
 
   // Обновление формы при изменении selectedRangeName
   useEffect(() => {
@@ -60,6 +61,14 @@ export const RangeForm: React.FC<RangeFormProps> = ({
     setSwimlane(value);
     if (swimlaneError && value !== '-') {
       setSwimlaneError(null);
+    }
+  };
+
+  // Очистка ошибки column при выборе значения
+  const handleColumnChange = (value: string) => {
+    setColumn(value);
+    if (columnError && value !== '-') {
+      setColumnError(null);
     }
   };
 
@@ -90,7 +99,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
 
     // Валидация: column должен быть выбран
     if (column === '-') {
-      setSwimlaneError('Select column');
+      setColumnError('Select Column');
       return;
     }
 
@@ -125,6 +134,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
     setShowBadge(false);
     setNameError(null);
     setSwimlaneError(null);
+    setColumnError(null);
     // Сбросить selectedRangeName если был установлен
     if (onRangeNameChange) {
       onRangeNameChange(null);
@@ -181,12 +191,18 @@ export const RangeForm: React.FC<RangeFormProps> = ({
           />
         </Form.Item>
 
-        <Form.Item label="Column" style={{ marginBottom: '16px' }}>
+        <Form.Item
+          label="Column"
+          validateStatus={columnError ? 'error' : undefined}
+          help={columnError}
+          style={{ marginBottom: '16px' }}
+        >
           <Select
             id="WIPLC_Column"
             style={{ width: '100%' }}
             value={column}
-            onChange={value => setColumn(value)}
+            status={columnError ? 'error' : undefined}
+            onChange={handleColumnChange}
             options={[
               { label: '-', value: '-' },
               ...columns.map(element => ({
