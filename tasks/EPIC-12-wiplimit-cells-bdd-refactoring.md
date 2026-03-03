@@ -72,10 +72,10 @@ src/wiplimit-on-cells/BoardPage/features/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 1 | [TASK-115](./TASK-115-wiplimit-cells-settings-helpers.md) | Создать `helpers.tsx` и `steps/common.steps.ts` для SettingsPage | TODO |
-| 2 | [TASK-116](./TASK-116-wiplimit-cells-settings-modal.md) | Создать `modal-lifecycle.feature` (4 сценария) | TODO |
-| 3 | [TASK-117](./TASK-117-wiplimit-cells-settings-add-range.md) | Создать `add-range.feature` (7 сценариев) | TODO |
-| 4 | [TASK-118](./TASK-118-wiplimit-cells-settings-validation.md) | Создать `validation.feature` (2 сценария) | TODO |
+| 1 | [TASK-115](./TASK-115-wiplimit-cells-settings-helpers.md) | Создать `helpers.tsx` и `steps/common.steps.ts` для SettingsPage | DONE |
+| 2 | [TASK-116](./TASK-116-wiplimit-cells-settings-modal.md) | Создать `modal-lifecycle.feature` (4 сценария) | DONE |
+| 3 | [TASK-117](./TASK-117-wiplimit-cells-settings-add-range.md) | Создать `add-range.feature` (7 сценариев) | DONE |
+| 4 | [TASK-118](./TASK-118-wiplimit-cells-settings-validation.md) | Создать `validation.feature` (2 сценария) | DONE |
 | 5 | [TASK-119](./TASK-119-wiplimit-cells-settings-edit.md) | Создать `edit-range.feature` (4 сценария) | TODO |
 | 6 | [TASK-120](./TASK-120-wiplimit-cells-settings-delete.md) | Создать `delete.feature` (3 сценария) | TODO |
 | 7 | [TASK-121](./TASK-121-wiplimit-cells-settings-persistence.md) | Создать `persistence.feature` (3 сценария) | TODO |

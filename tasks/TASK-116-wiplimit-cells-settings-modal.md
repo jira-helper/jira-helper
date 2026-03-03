@@ -1,6 +1,6 @@
 # TASK-116: modal-lifecycle.feature для SettingsPage
 
-**Status**: TODO  
+**Status**: DONE  
 **Epic**: [EPIC-12](./EPIC-12-wiplimit-cells-bdd-refactoring.md)  
 **Phase**: 1 - SettingsPage Refactoring  
 **Depends on**: TASK-115
@@ -142,7 +142,21 @@ Then('I should see the {string} checkbox', (label: string) => {
 
 ## Acceptance Criteria
 
-- [ ] Feature файл соответствует оригинальным сценариям SC-MODAL-1..4
-- [ ] cy.tsx файл использует `defineFeature`
-- [ ] Все 4 сценария проходят
-- [ ] Step definitions переиспользуются
+- [x] Feature файл соответствует оригинальным сценариям SC-MODAL-1..4
+- [x] cy.tsx файл использует `defineFeature`
+- [x] Все 4 сценария проходят
+- [x] Step definitions переиспользуются
+
+---
+
+## Результаты
+
+**Дата**: 2025-03-02
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+Созданы `modal-lifecycle.feature` и `modal-lifecycle.feature.cy.tsx`. Добавлены недостающие step definitions в `steps/common.steps.ts` (I should see the "Add range" form, swimlane dropdown, column dropdown, "show indicator" checkbox). Все 4 сценария проходят.

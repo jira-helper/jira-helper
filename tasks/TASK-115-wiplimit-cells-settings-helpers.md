@@ -1,6 +1,6 @@
 # TASK-115: Helpers и common.steps для SettingsPage
 
-**Status**: TODO  
+**Status**: DONE  
 **Epic**: [EPIC-12](./EPIC-12-wiplimit-cells-bdd-refactoring.md)  
 **Phase**: 1 - SettingsPage Refactoring
 
@@ -180,7 +180,23 @@ Given('there is a range {string} with WIP limit {int}', (rangeName: string, limi
 
 ## Acceptance Criteria
 
-- [ ] `helpers.tsx` создан с setupBackground и mountComponent
-- [ ] `steps/common.steps.ts` содержит базовые step definitions
-- [ ] Все импорты корректны
-- [ ] Типизация без ошибок
+- [x] `helpers.tsx` создан с setupBackground и mountComponent
+- [x] `steps/common.steps.ts` содержит базовые step definitions
+- [x] Все импорты корректны
+- [x] Типизация без ошибок
+
+---
+
+## Результаты
+
+**Дата**: 2025-03-02
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+Созданы файлы:
+- `src/wiplimit-on-cells/SettingsPage/features/helpers.tsx` — fixtures (columns, swimlanes), createRange, setupBackground, mountComponent, getOnSaveToProperty
+- `src/wiplimit-on-cells/SettingsPage/features/steps/common.steps.ts` — step definitions для Background, modal lifecycle, form inputs, range table, save/cancel, pre-configured ranges

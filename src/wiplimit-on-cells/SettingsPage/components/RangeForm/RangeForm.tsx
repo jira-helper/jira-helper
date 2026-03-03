@@ -44,13 +44,24 @@ export const RangeForm: React.FC<RangeFormProps> = ({
   const [swimlane, setSwimlane] = useState('-');
   const [column, setColumn] = useState('-');
   const [showBadge, setShowBadge] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [swimlaneError, setSwimlaneError] = useState<string | null>(null);
 
   // Обновление формы при изменении selectedRangeName
   useEffect(() => {
     if (selectedRangeName) {
       setName(selectedRangeName);
+      setNameError(null);
     }
   }, [selectedRangeName]);
+
+  // Очистка ошибки swimlane при выборе значения
+  const handleSwimlaneChange = (value: string) => {
+    setSwimlane(value);
+    if (swimlaneError && value !== '-') {
+      setSwimlaneError(null);
+    }
+  };
 
   // Определение режима: "Add range" или "Add cell"
   const isAddCellMode = useMemo(() => {
@@ -60,18 +71,32 @@ export const RangeForm: React.FC<RangeFormProps> = ({
 
   const buttonText = isAddCellMode ? 'Add cell' : 'Add range';
 
+  // Очистка ошибки при изменении имени
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (nameError) {
+      setNameError(null);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Валидация: swimlane и column должны быть выбраны
-    if (swimlane === '-' || column === '-') {
-      // eslint-disable-next-line no-alert
-      alert('need choose swimlane and column and try again.');
+    // Валидация: swimlane должен быть выбран
+    if (swimlane === '-') {
+      setSwimlaneError('Select swimlane');
+      return;
+    }
+
+    // Валидация: column должен быть выбран
+    if (column === '-') {
+      setSwimlaneError('Select column');
       return;
     }
 
     const trimmedName = name.trim();
     if (!trimmedName) {
+      setNameError('Enter range name');
       return;
     }
 
@@ -84,14 +109,13 @@ export const RangeForm: React.FC<RangeFormProps> = ({
       });
     } else {
       // Режим "Add range": сначала создаём range, затем добавляем cell
-      const addRangeResult = onAddRange(trimmedName);
-      if (addRangeResult) {
-        onAddCell(trimmedName, {
-          swimlane,
-          column,
-          showBadge,
-        });
-      }
+      // Note: дублирование имени невозможно - если имя совпадает, isAddCellMode = true
+      onAddRange(trimmedName);
+      onAddCell(trimmedName, {
+        swimlane,
+        column,
+        showBadge,
+      });
     }
 
     // Сброс формы после успешного добавления
@@ -99,6 +123,8 @@ export const RangeForm: React.FC<RangeFormProps> = ({
     setSwimlane('-');
     setColumn('-');
     setShowBadge(false);
+    setNameError(null);
+    setSwimlaneError(null);
     // Сбросить selectedRangeName если был установлен
     if (onRangeNameChange) {
       onRangeNameChange(null);
@@ -109,13 +135,19 @@ export const RangeForm: React.FC<RangeFormProps> = ({
     <>
       {/* Add range section */}
       <form onSubmit={handleSubmit}>
-        <Form.Item label="Add range" style={{ marginBottom: '16px' }}>
+        <Form.Item
+          label="Add range"
+          validateStatus={nameError ? 'error' : undefined}
+          help={nameError}
+          style={{ marginBottom: '16px' }}
+        >
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
             <Input
               id="WIP_inputRange"
               placeholder="name"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={handleNameChange}
+              status={nameError ? 'error' : undefined}
               style={{ flex: 1 }}
             />
             <Button id="WIP_buttonRange" type="primary" htmlType="submit">
@@ -127,12 +159,18 @@ export const RangeForm: React.FC<RangeFormProps> = ({
 
       {/* Cell selection section */}
       <div style={{ marginTop: '1rem' }}>
-        <Form.Item label="swimlane" style={{ marginBottom: '16px' }}>
+        <Form.Item
+          label="swimlane"
+          validateStatus={swimlaneError ? 'error' : undefined}
+          help={swimlaneError}
+          style={{ marginBottom: '16px' }}
+        >
           <Select
             id="WIPLC_swimlane"
             style={{ width: '100%' }}
             value={swimlane}
-            onChange={value => setSwimlane(value)}
+            status={swimlaneError ? 'error' : undefined}
+            onChange={handleSwimlaneChange}
             options={[
               { label: '-', value: '-' },
               ...swimlanes.map(element => ({

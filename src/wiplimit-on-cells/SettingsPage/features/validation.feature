@@ -1,0 +1,39 @@
+Feature: WIP Limit on Cells - Validation
+
+  Валидация форм при добавлении ranges и cells.
+
+  Background:
+    Given I am on the WIP Limit on Cells settings page
+    And there are columns "To Do, In Progress, Review, Done" on the board
+    And there are swimlanes "Frontend, Backend, QA" on the board
+
+  @SC-VALID-1
+  Scenario: Cannot add range or cell without selecting swimlane
+    When I open the settings popup
+    And I type "My Range" into "Add range" input
+    And I see "-" selected in "swimlane" dropdown
+    And I select "In Progress" from "Column" dropdown
+    And I click "Add range"
+    Then I see text "Select swimlane"
+    And I see "swimlane" field has error
+
+  @SC-VALID-1a
+  Scenario: Swimlane validation error disappears after selecting value
+    When I open the settings popup
+    And I type "My Range" into "Add range" input
+    And I select "In Progress" from "Column" dropdown
+    And I click "Add range"
+    Then I see text "Select swimlane"
+    And I see "swimlane" field has error
+    When I select "Frontend" from "swimlane" dropdown
+    Then I do not see text "Select swimlane"
+
+  @SC-VALID-2
+  Scenario: Cannot add range or cell without selecting column
+    When I open the settings popup
+    And I type "My Range" into "Add range" input
+    And I select "Frontend" from "swimlane" dropdown
+    And I see "-" selected in "Column" dropdown
+    And I click "Add range"
+    Then I see text "Select column"
+    And I see "column" field has error

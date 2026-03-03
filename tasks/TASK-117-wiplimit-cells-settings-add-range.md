@@ -1,6 +1,6 @@
 # TASK-117: add-range.feature для SettingsPage
 
-**Status**: TODO  
+**Status**: DONE  
 **Epic**: [EPIC-12](./EPIC-12-wiplimit-cells-bdd-refactoring.md)  
 **Phase**: 1 - SettingsPage Refactoring  
 **Depends on**: TASK-115
@@ -23,6 +23,20 @@
 
 ## Acceptance Criteria
 
-- [ ] Feature файл содержит 7 сценариев
-- [ ] cy.tsx файл использует `defineFeature`
-- [ ] Все сценарии проходят
+- [x] Feature файл содержит 7 сценариев
+- [x] cy.tsx файл использует `defineFeature`
+- [x] Все сценарии проходят
+
+---
+
+## Результаты
+
+**Дата**: 2025-03-02
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Комментарии**:
+
+Созданы `add-range.feature` и `add-range.feature.cy.tsx` с 7 сценариями (SC-ADD-1..3, SC-CELL-1..4). Добавлены step definitions в `steps/common.steps.ts`: the range should contain cell, the cell should have badge icon, ranges table remain unchanged, ranges table still have only one range, range should contain cells (DataTable), range should still have only one cell, I click (Add range/Add cell). Все тесты проходят.
