@@ -105,7 +105,7 @@ src/wiplimit-on-cells/BoardPage/features/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 20 | [TASK-134](./TASK-134-wiplimit-cells-bdd-verification.md) | Верификация: все 49 сценариев проходят | TODO |
+| 20 | [TASK-134](./TASK-134-wiplimit-cells-bdd-verification.md) | Верификация: все 47 сценариев проходят | DONE |
 
 ---
 

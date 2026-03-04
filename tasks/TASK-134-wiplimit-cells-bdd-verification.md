@@ -1,6 +1,6 @@
 # TASK-134: WipLimit Cells BDD Verification
 
-**Status**: TODO  
+**Status**: DONE  
 **Epic**: [EPIC-12](./EPIC-12-wiplimit-cells-bdd-refactoring.md)  
 **Phase**: 3 - Verification  
 **Depends on**: TASK-123, TASK-133
@@ -23,15 +23,15 @@ npx cypress run --component --spec "src/wiplimit-on-cells/SettingsPage/features/
 
 | Feature | Сценарии | Статус |
 |---------|----------|--------|
-| modal-lifecycle | SC-MODAL-1..4 (4) | [ ] |
-| add-range | SC-ADD-1..3, SC-CELL-1..4 (7) | [ ] |
-| validation | SC-VALID-1..2 (2) | [ ] |
-| edit-range | SC-EDIT-1..4 (4) | [ ] |
-| delete | SC-DELETE-1..2, SC-CLEAR-1 (3) | [ ] |
-| persistence | SC-PERSIST-1..2, SC-COMPAT-1 (3) | [ ] |
-| show-badge | SC-BADGE-1..2, SC-EMPTY-1 (3) | [ ] |
+| modal-lifecycle | SC-MODAL-1..4 (4) | [x] |
+| add-range | SC-ADD-1..3, SC-CELL-1..4 (7) | [x] |
+| validation | SC-VALID-1..3 (3) | [x] |
+| edit-range | SC-EDIT-1..4 (4) | [x] |
+| delete | SC-DELETE-1..2, SC-CLEAR-1 (3) | [x] |
+| persistence | SC-PERSIST-1..2, SC-COMPAT-1 (3) | [x] |
+| show-badge | SC-BADGE-1..2, SC-EMPTY-1 (3) | [x] |
 
-**Всего SettingsPage**: 26 сценариев
+**Всего SettingsPage**: 27 сценариев (all passed)
 
 ### 2. BoardPage тесты
 
@@ -41,23 +41,23 @@ npx cypress run --component --spec "src/wiplimit-on-cells/BoardPage/features/**/
 
 | Feature | Сценарии | Статус |
 |---------|----------|--------|
-| badge-display | SC-BADGE-1..2 (2) | [ ] |
-| color-indicators | SC-COLOR-1..3 (3) | [ ] |
-| cell-background | SC-BG-1..2 (2) | [ ] |
-| dashed-borders | SC-BORDER-1..4 (4) | [ ] |
-| disabled-range | SC-DISABLE-1..2 (2) | [ ] |
-| issue-type-filter | SC-FILTER-1..2 (2) | [ ] |
-| multiple-ranges | SC-MULTI-1, SC-UPDATE-1..2 (3) | [ ] |
-| edge-cases | SC-EDGE-1..2 (2) | [ ] |
+| badge-display | SC-BADGE-1..2 (2) | [x] |
+| color-indicators | SC-COLOR-1..3 (3) | [x] |
+| cell-background | SC-BG-1..2 (2) | [x] |
+| dashed-borders | SC-BORDER-1..4 (4) | [x] |
+| disabled-range | SC-DISABLE-1..2 (2) | [x] |
+| issue-type-filter | SC-FILTER-1..2 (2) | [x] |
+| multiple-ranges | SC-MULTI-1, SC-UPDATE-1..2 (3) | [x] |
+| edge-cases | SC-EDGE-1..2 (2) | [x] |
 
-**Всего BoardPage**: 20 сценариев
+**Всего BoardPage**: 20 сценариев (all passed)
 
 ### 3. Старые файлы удалены
 
-- [ ] `src/wiplimit-on-cells/SettingsPage/SettingsPage.feature` — удален
-- [ ] `src/wiplimit-on-cells/SettingsPage/SettingsPage.feature.cy.tsx` — удален
-- [ ] `src/wiplimit-on-cells/BoardPage/board.feature` — удален
-- [ ] `src/wiplimit-on-cells/BoardPage/board.feature.cy.tsx` — удален
+- [x] `src/wiplimit-on-cells/SettingsPage/SettingsPage.feature` — удален
+- [x] `src/wiplimit-on-cells/SettingsPage/SettingsPage.feature.cy.tsx` — удален
+- [x] `src/wiplimit-on-cells/BoardPage/board.feature` — удален
+- [x] `src/wiplimit-on-cells/BoardPage/board.feature.cy.tsx` — удален
 
 ### 4. Lint
 
@@ -65,7 +65,7 @@ npx cypress run --component --spec "src/wiplimit-on-cells/BoardPage/features/**/
 npm run lint:eslint -- src/wiplimit-on-cells/**/features/**
 ```
 
-- [ ] Нет ошибок ESLint
+- [x] Нет ошибок ESLint
 
 ### 5. TypeScript
 
@@ -73,27 +73,38 @@ npm run lint:eslint -- src/wiplimit-on-cells/**/features/**
 npx tsc --noEmit
 ```
 
-- [ ] Нет ошибок TypeScript
+- [x] Нет ошибок TypeScript
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] Все 46 сценариев проходят (26 + 20)
-- [ ] Старые файлы удалены
-- [ ] Нет ошибок lint/typescript
-- [ ] CI проходит
+- [x] Все 47 сценариев проходят (27 + 20)
+- [x] Старые файлы удалены
+- [x] Нет ошибок lint/typescript
+- [ ] CI проходит (требует push)
 
 ---
 
 ## Результаты
 
-**Дата**: _заполнить_
+**Дата**: 2026-03-04
 
-**Агент**: _Coder / Manual_
+**Агент**: Manual (Assistant)
 
-**Статус**: _TODO / DONE_
+**Статус**: DONE
 
 **Комментарии**:
 
-_Результаты верификации_
+### Результаты верификации
+
+| Компонент | Тесты | Результат |
+|-----------|-------|-----------|
+| SettingsPage | 27 | ✅ All passed |
+| BoardPage | 20 | ✅ All passed |
+| **Итого** | **47** | ✅ |
+
+**Дополнительные проверки:**
+- ESLint: ✅ Нет ошибок
+- TypeScript: ✅ Нет ошибок
+- Старые файлы: ✅ Удалены (4 файла)
