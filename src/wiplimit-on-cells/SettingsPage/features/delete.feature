@@ -33,19 +33,3 @@ Feature: WIP Limit on Cells - Delete
     And I click "Delete" button in "cell Frontend / In Progress"
     Then I do not see "Frontend / In Progress" in "ranges table"
     And I see "Backend / Review" in "ranges table"
-
-  @SC-CLEAR-1
-  Scenario: Clear all settings
-    Given there is a range "Critical Path" with:
-      | wipLimit | disable |
-      | 0        | false   |
-    And the range "Critical Path" has cells:
-      | swimlane | column      | showBadge |
-      | Frontend | In Progress | false     |
-    And there is a range "Review Path" with:
-      | wipLimit | disable |
-      | 0        | false   |
-    When I open the settings popup
-    And I click "Clear and save all data" button
-    Then I do not see the modal "Edit WipLimit on cells"
-    And the changes should be saved to Jira board property

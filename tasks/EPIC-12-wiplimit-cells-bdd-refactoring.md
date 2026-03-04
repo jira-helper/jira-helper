@@ -107,6 +107,12 @@ src/wiplimit-on-cells/BoardPage/features/
 |---|--------|----------|--------|
 | 20 | [TASK-134](./TASK-134-wiplimit-cells-bdd-verification.md) | Верификация: все 47 сценариев проходят | DONE |
 
+## Phase 4: Post-refactoring improvements
+
+| # | Задача | Описание | Статус |
+|---|--------|----------|--------|
+| 21 | [TASK-135](./TASK-135-settings-modal-fixes.md) | Settings Modal: удалить Clear, фикс save bug, maxLength/ellipsis | DONE |
+
 ---
 
 ## Граф зависимостей

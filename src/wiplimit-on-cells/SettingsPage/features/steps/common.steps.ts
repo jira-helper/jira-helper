@@ -94,6 +94,29 @@ When('I click the close button (X)', () => {
   cy.get('.ant-modal-close').click();
 });
 
+When('I reopen the modal', () => {
+  // Modal is closed after Save - click the settings button again to reopen
+  cy.contains('button', 'Edit Wip limits by cells').click();
+  cy.contains('Edit WipLimit on cells').should('exist');
+});
+
+When(/^I add a range "([^"]*)"$/, (rangeName: string) => {
+  // Type range name in Add range input
+  cy.get('#WIP_inputRange').clear().type(rangeName);
+  // Select swimlane (required for Add range) - click the Select container, not the hidden input
+  cy.contains('label', 'swimlane').closest('.ant-form-item').find('.ant-select').click();
+  cy.get('.ant-select-dropdown:visible').contains('Frontend').click();
+  // Select column (required for Add range)
+  cy.contains('label', 'Column').closest('.ant-form-item').find('.ant-select').click();
+  cy.get('.ant-select-dropdown:visible').contains('To Do').click();
+  // Click Add range button
+  cy.contains('button', 'Add range').click();
+});
+
+Then(/^I should see range "([^"]*)" in the table$/, (rangeName: string) => {
+  cy.get(`input[aria-label*="${rangeName}"]`, { timeout: 5000 }).should('exist');
+});
+
 // --- Range table ---
 
 Then('I should see the ranges table', () => {

@@ -131,15 +131,11 @@ describe('RangeForm', () => {
         />
       );
 
-      cy.window().then(win => {
-        cy.stub(win, 'alert').as('alert');
-      });
-
       cy.get('#WIP_inputRange').type('My Range');
       cy.selectAntdOption('#WIPLC_Column', 'In Progress');
       cy.get('#WIP_buttonRange').click();
 
-      cy.get('@alert').should('have.been.calledWith', 'need choose swimlane and column and try again.');
+      cy.contains('Select swimlane').should('exist');
       cy.get('@onAddRange').should('not.have.been.called');
     });
 
@@ -159,15 +155,11 @@ describe('RangeForm', () => {
         />
       );
 
-      cy.window().then(win => {
-        cy.stub(win, 'alert').as('alert');
-      });
-
       cy.get('#WIP_inputRange').type('My Range');
       cy.selectAntdOption('#WIPLC_swimlane', 'Frontend');
       cy.get('#WIP_buttonRange').click();
 
-      cy.get('@alert').should('have.been.calledWith', 'need choose swimlane and column and try again.');
+      cy.contains('Select Column').should('exist');
       cy.get('@onAddRange').should('not.have.been.called');
     });
 

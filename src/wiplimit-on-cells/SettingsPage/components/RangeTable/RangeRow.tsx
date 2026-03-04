@@ -68,6 +68,7 @@ export const RangeRow: React.FC<RangeRowProps> = ({
             onBlur={handleNameBlur}
             style={{ maxWidth: '150px' }}
             aria-label={`Range name for ${range.name}`}
+            maxLength={30}
           />
           <Button
             type="text"

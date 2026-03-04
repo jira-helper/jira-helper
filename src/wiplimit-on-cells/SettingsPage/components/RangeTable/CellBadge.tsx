@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Button } from 'antd';
+import { Tag, Button, Tooltip } from 'antd';
 import { InfoCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 
 export interface CellBadgeProps {
@@ -14,12 +14,20 @@ export interface CellBadgeProps {
 /**
  * CellBadge - View компонент для отображения badge ячейки.
  * Показывает label, иконку info (если showBadge=true) и кнопку удаления.
+ * Длинные названия обрезаются с ellipsis и показываются в Tooltip.
  */
 export const CellBadge: React.FC<CellBadgeProps> = ({ label, showBadge, onDelete }) => {
   return (
     <Tag
       data-testid={`cell ${label}`}
-      style={{ margin: '2px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+      style={{
+        margin: '2px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        maxWidth: '200px',
+        overflow: 'hidden',
+      }}
       closable
       onClose={onDelete}
       closeIcon={
@@ -32,8 +40,20 @@ export const CellBadge: React.FC<CellBadgeProps> = ({ label, showBadge, onDelete
         />
       }
     >
-      {label}
-      {showBadge && <InfoCircleOutlined style={{ fontSize: '12px' }} />}
+      <Tooltip title={label}>
+        <span
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {label}
+        </span>
+      </Tooltip>
+      {showBadge && <InfoCircleOutlined style={{ fontSize: '12px', flexShrink: 0 }} />}
     </Tag>
   );
 };

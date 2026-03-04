@@ -19,6 +19,14 @@ Feature: WIP Limit on Cells - Persistence
     And I click "Save" button
     Then the changes should be saved to Jira board property
 
+  @SC-PERSIST-3
+  Scenario: Changes persist after reopening modal
+    When I open the settings popup
+    And I add a range "Test Range"
+    And I click "Save" button
+    And I reopen the modal
+    Then I should see range "Test Range" in the table
+
   @SC-PERSIST-2
   Scenario: Settings load on page open
     Given there is a range "Critical Path" with:

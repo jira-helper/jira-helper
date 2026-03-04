@@ -32,7 +32,6 @@ export const EmptyModal: Story = {
     title: 'Edit WipLimit on cells',
     onClose: fn(),
     onSave: fn(),
-    onClear: fn(),
     children: null,
   },
 };
@@ -42,7 +41,6 @@ export const WithRanges: Story = {
     title: 'Edit WipLimit on cells',
     onClose: fn(),
     onSave: fn(),
-    onClear: fn(),
     children: (
       <div style={{ padding: '20px' }}>
         <p>Settings content with ranges goes here</p>
@@ -64,7 +62,7 @@ export const WithForm: Story = {
     ];
 
     return (
-      <SettingsModal title="Edit WipLimit on cells" onClose={fn()} onSave={fn()} onClear={fn()}>
+      <SettingsModal title="Edit WipLimit on cells" onClose={fn()} onSave={fn()}>
         <RangeForm
           swimlanes={mockSwimlanes}
           columns={mockColumns}

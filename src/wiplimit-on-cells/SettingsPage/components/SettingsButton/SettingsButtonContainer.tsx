@@ -26,11 +26,12 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   initialRanges,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentRanges, setCurrentRanges] = useState(initialRanges);
   const { actions } = useWipLimitCellsSettingsUIStore();
 
   const handleOpen = () => {
-    // Загрузить данные в UI Store из initialRanges
-    actions.setRanges(initialRanges);
+    // Загрузить данные в UI Store из currentRanges (актуальные данные после сохранения)
+    actions.setRanges(currentRanges);
     // Установить swimlanes и columns в store
     actions.setSwimlanes(swimlanes);
     actions.setColumns(columns);
@@ -39,8 +40,8 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   };
 
   const handleClose = () => {
-    // Сбросить store к initialRanges (отмена изменений)
-    actions.setRanges(initialRanges);
+    // Сбросить store к currentRanges (отмена изменений)
+    actions.setRanges(currentRanges);
     // Закрыть модал
     setIsModalOpen(false);
   };
@@ -50,6 +51,8 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
     const { data } = useWipLimitCellsSettingsUIStore.getState();
     // Вызвать onSaveToProperty с текущими ranges
     await onSaveToProperty(data.ranges);
+    // Обновить локальное состояние для следующего открытия
+    setCurrentRanges(data.ranges);
     // Закрыть модал
     setIsModalOpen(false);
   };

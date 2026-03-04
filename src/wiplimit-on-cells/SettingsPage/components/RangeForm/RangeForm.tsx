@@ -159,6 +159,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
               onChange={handleNameChange}
               status={nameError ? 'error' : undefined}
               style={{ flex: 1 }}
+              maxLength={30}
             />
             <Button id="WIP_buttonRange" type="primary" htmlType="submit">
               {buttonText}

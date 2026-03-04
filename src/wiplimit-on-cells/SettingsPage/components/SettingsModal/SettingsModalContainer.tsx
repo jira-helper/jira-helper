@@ -47,12 +47,6 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
     }
   };
 
-  const handleClear = () => {
-    actions.setRanges([]);
-    // Сохранить пустые данные
-    onSave();
-  };
-
   const handleAddRange = (name: string): boolean => {
     return actions.addRange(name);
   };
@@ -80,13 +74,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   };
 
   return (
-    <SettingsModal
-      title="Edit WipLimit on cells"
-      onSave={handleSave}
-      onClose={onClose}
-      onClear={handleClear}
-      isSaving={isSaving}
-    >
+    <SettingsModal title="Edit WipLimit on cells" onSave={handleSave} onClose={onClose} isSaving={isSaving}>
       <RangeForm
         swimlanes={swimlanes}
         columns={columns}
