@@ -31,7 +31,7 @@ export const RangeTable: React.FC<RangeTableProps> = ({
 }) => {
   return (
     <form className="aui">
-      <table id="WipLimitCells_table" className="aui aui-table-list">
+      <table id="WipLimitCells_table" data-testid="ranges table" className="aui aui-table-list">
         <thead>
           <tr>
             <th style={{ width: '2%' }} scope="col" aria-label="Edit column" />

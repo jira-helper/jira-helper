@@ -8,6 +8,8 @@
  */
 import { When, Then } from '../bdd-runner';
 
+const { assert } = chai;
+
 // === Text Visibility ===
 Then('I see text {string}', (text: string) => {
   cy.contains(text).should('be.visible');
@@ -15,6 +17,29 @@ Then('I see text {string}', (text: string) => {
 
 Then('I do not see text {string}', (text: string) => {
   cy.contains(text).should('not.exist');
+});
+
+// I see "Critical Path" in "ranges table" — текст или input value внутри контейнера
+Then('I see {string} in {string}', (text: string, container: string) => {
+  cy.get(`[data-testid="${container}"], [aria-label="${container}"]`)
+    .first()
+    .then($container => {
+      const hasText = $container.text().includes(text);
+      const hasInputValue = $container.find(`input[value*="${text}"]`).length > 0;
+      const found = hasText || hasInputValue;
+      assert.isTrue(found, `Expected to find "${text}" in container`);
+    });
+});
+
+Then('I do not see {string} in {string}', (text: string, container: string) => {
+  cy.get(`[data-testid="${container}"], [aria-label="${container}"]`)
+    .first()
+    .then($container => {
+      const hasText = $container.text().includes(text);
+      const hasInputValue = $container.find(`input[value*="${text}"]`).length > 0;
+      const found = hasText || hasInputValue;
+      assert.isFalse(found, `Expected NOT to find "${text}" in container`);
+    });
 });
 
 // === Buttons ===
@@ -26,8 +51,18 @@ Then('I do not see {string} button', (text: string) => {
   cy.contains('button', text).should('not.exist');
 });
 
-When('I click {string} button', (text: string) => {
-  cy.contains('button', text).click();
+// I click "Save" button — обычный клик
+// I click "Delete" button in "range Critical Path" — клик внутри контейнера
+When(/^I click "([^"]*)" button(?: in "([^"]*)")?$/, (text: string, container?: string) => {
+  if (container) {
+    cy.get(`[data-testid="${container}"], [aria-label="${container}"]`)
+      .first()
+      .find(`[aria-label*="${text}"], button:contains("${text}")`)
+      .first()
+      .click();
+  } else {
+    cy.contains('button', text).click();
+  }
 });
 
 When('I click {string}', (text: string) => {
@@ -132,6 +167,55 @@ Then('I see {string} selected in {string} dropdown', (optionText: string, label:
       cy.get(`#${forAttr}`).closest('.ant-select').should('contain', optionText);
     } else {
       cy.wrap($label).closest('.ant-form-item').find('.ant-select').should('contain', optionText);
+    }
+  });
+});
+
+// === Checkboxes ===
+Then('I see checkbox {string}', (label: string) => {
+  cy.contains('label', label).should('be.visible');
+});
+
+Then('I see checkbox {string} is checked', (label: string) => {
+  cy.contains('label', label).then($label => {
+    const forAttr = $label.attr('for');
+    if (forAttr) {
+      cy.get(`#${forAttr}`).should('be.checked');
+    } else {
+      cy.wrap($label).closest('.ant-form-item').find('input[type="checkbox"]').should('be.checked');
+    }
+  });
+});
+
+Then('I see checkbox {string} is unchecked', (label: string) => {
+  cy.contains('label', label).then($label => {
+    const forAttr = $label.attr('for');
+    if (forAttr) {
+      cy.get(`#${forAttr}`).should('not.be.checked');
+    } else {
+      cy.wrap($label).closest('.ant-form-item').find('input[type="checkbox"]').should('not.be.checked');
+    }
+  });
+});
+
+When('I check {string} checkbox', (label: string) => {
+  cy.contains('label', label).then($label => {
+    const forAttr = $label.attr('for');
+    if (forAttr) {
+      cy.get(`#${forAttr}`).check();
+    } else {
+      cy.wrap($label).closest('.ant-form-item').find('input[type="checkbox"]').check();
+    }
+  });
+});
+
+When('I uncheck {string} checkbox', (label: string) => {
+  cy.contains('label', label).then($label => {
+    const forAttr = $label.attr('for');
+    if (forAttr) {
+      cy.get(`#${forAttr}`).uncheck();
+    } else {
+      cy.wrap($label).closest('.ant-form-item').find('input[type="checkbox"]').uncheck();
     }
   });
 });

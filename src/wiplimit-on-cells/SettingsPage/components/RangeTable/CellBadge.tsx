@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag } from 'antd';
+import { Tag, Button } from 'antd';
 import { InfoCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 
 export interface CellBadgeProps {
@@ -18,10 +18,19 @@ export interface CellBadgeProps {
 export const CellBadge: React.FC<CellBadgeProps> = ({ label, showBadge, onDelete }) => {
   return (
     <Tag
+      data-testid={`cell ${label}`}
       style={{ margin: '2px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
       closable
       onClose={onDelete}
-      closeIcon={<DeleteOutlined />}
+      closeIcon={
+        <Button
+          type="text"
+          size="small"
+          icon={<DeleteOutlined />}
+          aria-label="Delete"
+          style={{ padding: 0, height: 'auto', width: 'auto', minWidth: 'auto' }}
+        />
+      }
     >
       {label}
       {showBadge && <InfoCircleOutlined style={{ fontSize: '12px' }} />}

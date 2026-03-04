@@ -46,7 +46,7 @@ export const RangeRow: React.FC<RangeRowProps> = ({
   };
 
   return (
-    <tr id={range.name}>
+    <tr id={range.name} data-testid={`range ${range.name}`}>
       {/* Edit icon column (2%) */}
       <td style={{ width: '2%' }}>
         <Button

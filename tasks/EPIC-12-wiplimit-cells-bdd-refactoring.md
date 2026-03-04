@@ -76,11 +76,11 @@ src/wiplimit-on-cells/BoardPage/features/
 | 2 | [TASK-116](./TASK-116-wiplimit-cells-settings-modal.md) | Создать `modal-lifecycle.feature` (4 сценария) | DONE |
 | 3 | [TASK-117](./TASK-117-wiplimit-cells-settings-add-range.md) | Создать `add-range.feature` (7 сценариев) | DONE |
 | 4 | [TASK-118](./TASK-118-wiplimit-cells-settings-validation.md) | Создать `validation.feature` (2 сценария) | DONE |
-| 5 | [TASK-119](./TASK-119-wiplimit-cells-settings-edit.md) | Создать `edit-range.feature` (4 сценария) | TODO |
-| 6 | [TASK-120](./TASK-120-wiplimit-cells-settings-delete.md) | Создать `delete.feature` (3 сценария) | TODO |
-| 7 | [TASK-121](./TASK-121-wiplimit-cells-settings-persistence.md) | Создать `persistence.feature` (3 сценария) | TODO |
-| 8 | [TASK-122](./TASK-122-wiplimit-cells-settings-show-badge.md) | Создать `show-badge.feature` (3 сценария) | TODO |
-| 9 | [TASK-123](./TASK-123-wiplimit-cells-settings-cleanup.md) | Удалить старые файлы SettingsPage | TODO |
+| 5 | [TASK-119](./TASK-119-wiplimit-cells-settings-edit.md) | Создать `edit-range.feature` (4 сценария) | DONE |
+| 6 | [TASK-120](./TASK-120-wiplimit-cells-settings-delete.md) | Создать `delete.feature` (3 сценария) | DONE |
+| 7 | [TASK-121](./TASK-121-wiplimit-cells-settings-persistence.md) | Создать `persistence.feature` (3 сценария) | DONE |
+| 8 | [TASK-122](./TASK-122-wiplimit-cells-settings-show-badge.md) | Создать `show-badge.feature` (3 сценария) | DONE |
+| 9 | [TASK-123](./TASK-123-wiplimit-cells-settings-cleanup.md) | Удалить старые файлы SettingsPage | DONE |
 
 ---
 

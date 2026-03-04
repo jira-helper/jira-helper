@@ -4,6 +4,7 @@
 import { Given, When, Then } from '../../../../../cypress/support/bdd-runner';
 import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
 import { setupBackground, mountComponent, createRange, columns, swimlanes } from '../helpers';
+import { normalizeRange } from 'src/wiplimit-on-cells/property/actions/loadProperty';
 
 // Re-export for convenience
 export { Given, When, Then };
@@ -16,11 +17,14 @@ const pendingRanges: Map<
   { wipLimit: number; disable: boolean; cells: Array<{ swimlane: string; column: string; showBadge: boolean }> }
 > = new Map();
 
+let componentMounted = false;
+
 // --- Background steps ---
 
 Given('I am on the WIP Limit on Cells settings page', () => {
   setupBackground();
   pendingRanges.clear();
+  componentMounted = false;
 });
 
 Given(/^there are columns "([^"]*)" on the board$/, () => {
@@ -35,10 +39,12 @@ Given(/^there are swimlanes "([^"]*)" on the board$/, () => {
 
 Given(/^there is a range "([^"]*)" with:$/, (rangeName: string, dataTable: DataTableRows) => {
   const config: { wipLimit: number; disable: boolean } = { wipLimit: 0, disable: false };
-  dataTable.forEach(row => {
+  // DataTable format: | wipLimit | disable | -> | 5 | false |
+  if (dataTable.length > 0) {
+    const row = dataTable[0];
     if (row.wipLimit !== undefined) config.wipLimit = parseInt(row.wipLimit, 10);
     if (row.disable !== undefined) config.disable = row.disable === 'true';
-  });
+  }
   pendingRanges.set(rangeName, { ...config, cells: [] });
 });
 
@@ -64,12 +70,15 @@ Given(/^the range "([^"]*)" has cells:$/, (rangeName: string, dataTable: DataTab
 // --- Modal lifecycle ---
 
 When('I open the settings popup', () => {
-  // Build and mount pending ranges
-  const ranges = Array.from(pendingRanges.entries()).map(([name, config]) =>
-    createRange(name, config.wipLimit, config.cells, config.disable)
-  );
-  pendingRanges.clear();
-  mountComponent(ranges);
+  // Build and mount pending ranges (skip if already mounted by a special Given step)
+  if (!componentMounted) {
+    const ranges = Array.from(pendingRanges.entries()).map(([name, config]) =>
+      createRange(name, config.wipLimit, config.cells, config.disable)
+    );
+    pendingRanges.clear();
+    mountComponent(ranges);
+  }
+  componentMounted = false;
 
   cy.contains('button', 'Edit Wip limits by cells').click();
   cy.contains('Edit WipLimit on cells').should('exist');
@@ -96,7 +105,7 @@ Then(/^I should see "([^"]*)" in the ranges table$/, (rangeName: string) => {
 });
 
 Then(/^the range "([^"]*)" should have WIP limit (\d+)$/, (rangeName: string, limit: string) => {
-  cy.get(`input[aria-label*="WIP limit for ${rangeName}"]`).should('have.value', limit);
+  cy.get(`input[aria-label*="WIP limit for ${rangeName}"]`, { timeout: 5000 }).should('have.value', String(limit));
 });
 
 Then(/^the range "([^"]*)" should contain cell "([^"]*)"$/, (_rangeName: string, cellName: string) => {
@@ -128,6 +137,41 @@ Then(/^the range "([^"]*)" should contain cells:$/, (_rangeName: string, dataTab
   });
 });
 
+// --- Edit Range ---
+
+When(/^I change the name of range "([^"]*)" to "([^"]*)"$/, (oldName: string, newName: string) => {
+  cy.get(`input[aria-label*="Range name for ${oldName}"]`).clear().type(newName);
+});
+
+When(/^I change the WIP limit of range "([^"]*)" to "([^"]*)"$/, (rangeName: string, newLimit: string) => {
+  cy.get(`input[aria-label*="WIP limit for ${rangeName}"]`).clear().type(newLimit);
+});
+
+When('I click away to confirm', () => {
+  cy.get('body').click(0, 0);
+  cy.wait(100);
+});
+
+When(/^I check "Disable" for range "([^"]*)"$/, (rangeName: string) => {
+  cy.get(`input[aria-label*="Disable range ${rangeName}"]`).check();
+});
+
+Then(/^I see "Disable" checked for range "([^"]*)"$/, (rangeName: string) => {
+  cy.get(`input[aria-label*="Disable range ${rangeName}"]`).should('be.checked');
+});
+
+When(/^I click the edit icon for range "([^"]*)"$/, (rangeName: string) => {
+  cy.get(`[aria-label*="Select range ${rangeName}"]`).click();
+});
+
+Then(/^I see input "([^"]*)" in ranges table$/, (value: string) => {
+  cy.get(`input[aria-label*="${value}"]`).should('exist');
+});
+
+Then(/^I do not see input "([^"]*)" in ranges table$/, (value: string) => {
+  cy.get(`input[aria-label*="${value}"]`).should('not.exist');
+});
+
 // --- Save/Cancel ---
 
 Then('the changes should be saved to Jira board property', () => {
@@ -136,4 +180,51 @@ Then('the changes should be saved to Jira board property', () => {
 
 Then('the changes should not be saved', () => {
   cy.get('@onSaveToProperty').should('not.have.been.called');
+});
+
+// --- Show Badge ---
+
+Then(/^the cell "([^"]*)" should show the badge icon$/, (cellName: string) => {
+  cy.get('#WipLimitCells_table').contains(cellName).closest('.ant-tag').find('.anticon-info-circle').should('exist');
+});
+
+Then(/^the cell "([^"]*)" should not show the badge icon$/, (cellName: string) => {
+  cy.get('#WipLimitCells_table').contains(cellName).should('exist');
+  cy.get('#WipLimitCells_table')
+    .contains(cellName)
+    .closest('.ant-tag')
+    .find('.anticon-info-circle')
+    .should('not.exist');
+});
+
+Then('I see the ranges table with headers', () => {
+  cy.get('#WipLimitCells_table').should('exist');
+  cy.get('#WipLimitCells_table thead').should('exist');
+  cy.get('#WipLimitCells_table thead').contains('Range name').should('exist');
+  cy.get('#WipLimitCells_table thead').contains('WIP limit').should('exist');
+  cy.get('#WipLimitCells_table thead').contains('Disable').should('exist');
+  cy.get('#WipLimitCells_table thead').contains('Cells (swimlane/column)').should('exist');
+});
+
+// --- Legacy compatibility ---
+
+Given(/^there are legacy settings with swimline "([^"]*)" cell "([^"]*)"$/, (rangeName: string, cellName: string) => {
+  // Parse cell name "Frontend / In Progress" to get swimlane and column
+  const [swName, colName] = cellName.split(' / ');
+  const sw = swimlanes.find(s => s.name === swName);
+  const col = columns.find(c => c.name === colName);
+  if (!sw || !col) throw new Error(`Invalid cell "${cellName}"`);
+
+  // Create legacy range with "swimline" instead of "swimlane"
+  const legacyRange = {
+    name: rangeName,
+    wipLimit: 5,
+    cells: [{ swimline: sw.id, column: col.id, showBadge: false }],
+  };
+
+  // Normalize and mount - normalizeRange converts swimline to swimlane
+  const normalizedRange = normalizeRange(legacyRange);
+  pendingRanges.clear();
+  mountComponent([normalizedRange]);
+  componentMounted = true;
 });
