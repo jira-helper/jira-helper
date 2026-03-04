@@ -177,12 +177,14 @@ export function And(pattern: string | RegExp, fn: StepFn) {
 interface FeatureContext {
   Background: (fn: () => void) => void;
   BeforeScenario: (fn: () => void) => void;
+  AfterScenario: (fn: () => void) => void;
 }
 
 export function defineFeature(featureText: string, defineFn?: (ctx: FeatureContext) => void) {
   const feature = parseFeatureFile(featureText);
   let backgroundFn: (() => void) | null = null;
   let beforeScenarioFn: (() => void) | null = null;
+  let afterScenarioFn: (() => void) | null = null;
 
   if (defineFn) {
     const ctx: FeatureContext = {
@@ -192,12 +194,19 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
       BeforeScenario: (fn: () => void) => {
         beforeScenarioFn = fn;
       },
+      AfterScenario: (fn: () => void) => {
+        afterScenarioFn = fn;
+      },
     };
 
     defineFn(ctx);
   }
 
-  const runScenario = (scenario: ParsedScenario, scenarioBeforeFn: (() => void) | null) => {
+  const runScenario = (
+    scenario: ParsedScenario,
+    scenarioBeforeFn: (() => void) | null,
+    scenarioAfterFn: (() => void) | null
+  ) => {
     it(`Scenario: ${scenario.name}`, () => {
       if (scenarioBeforeFn) {
         scenarioBeforeFn();
@@ -210,6 +219,10 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
       for (const step of scenario.steps) {
         runStep(step);
       }
+
+      if (scenarioAfterFn) {
+        scenarioAfterFn();
+      }
     });
   };
 
@@ -221,7 +234,7 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
     });
 
     for (const scenario of feature.scenarios) {
-      runScenario(scenario, beforeScenarioFn);
+      runScenario(scenario, beforeScenarioFn, afterScenarioFn);
     }
   });
 }

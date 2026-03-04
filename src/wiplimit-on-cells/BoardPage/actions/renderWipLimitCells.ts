@@ -142,8 +142,8 @@ export const renderWipLimitCells = createAction({
         // Добавляем классы статуса лимита
         addCellStatusClasses(cellDOM, countIssues, range.wipLimit, pageObject);
 
-        // Вставляем badge если нужно
-        if (cellRuntime.showBadge) {
+        // Вставляем badge если нужно (не показываем для disabled range)
+        if (cellRuntime.showBadge && !range.disable) {
           const badgeHtml = getBadgeHtml(countIssues, range.wipLimit, badgeColor);
           pageObject.insertBadge(cellDOM, badgeHtml);
         }

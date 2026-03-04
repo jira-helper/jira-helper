@@ -1,6 +1,6 @@
 # TASK-133: Cleanup старых файлов BoardPage
 
-**Status**: TODO  
+**Status**: DONE  
 **Epic**: [EPIC-12](./EPIC-12-wiplimit-cells-bdd-refactoring.md)  
 **Phase**: 2 - BoardPage Refactoring  
 **Depends on**: TASK-125..132
@@ -27,3 +27,24 @@ rm src/wiplimit-on-cells/BoardPage/board.feature.cy.tsx
 
 - [ ] Старые файлы удалены
 - [ ] CI проходит
+
+---
+
+## Результаты
+
+**Дата**: 2026-03-04
+
+**Агент**: Coder
+
+**Статус**: DONE
+
+**Что сделано**:
+
+- Проверены все 20 новых сценариев — все прошли
+- Удалены старые файлы: `board.feature`, `board.feature.cy.tsx`
+- Повторный прогон тестов — успешен
+- ESLint — без ошибок
+
+**Проблемы и решения**:
+
+Проблем не возникло.

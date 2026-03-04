@@ -88,16 +88,16 @@ src/wiplimit-on-cells/BoardPage/features/
 
 | # | Задача | Описание | Статус |
 |---|--------|----------|--------|
-| 10 | [TASK-124](./TASK-124-wiplimit-cells-board-helpers.md) | Создать `helpers.tsx` и `steps/common.steps.ts` для BoardPage | TODO |
-| 11 | [TASK-125](./TASK-125-wiplimit-cells-board-badge-display.md) | Создать `badge-display.feature` (2 сценария) | TODO |
-| 12 | [TASK-126](./TASK-126-wiplimit-cells-board-color-indicators.md) | Создать `color-indicators.feature` (3 сценария) | TODO |
-| 13 | [TASK-127](./TASK-127-wiplimit-cells-board-cell-background.md) | Создать `cell-background.feature` (2 сценария) | TODO |
-| 14 | [TASK-128](./TASK-128-wiplimit-cells-board-dashed-borders.md) | Создать `dashed-borders.feature` (4 сценария) | TODO |
-| 15 | [TASK-129](./TASK-129-wiplimit-cells-board-disabled-range.md) | Создать `disabled-range.feature` (2 сценария) | TODO |
-| 16 | [TASK-130](./TASK-130-wiplimit-cells-board-issue-filter.md) | Создать `issue-type-filter.feature` (2 сценария) | TODO |
-| 17 | [TASK-131](./TASK-131-wiplimit-cells-board-multiple-ranges.md) | Создать `multiple-ranges.feature` (3 сценария) | TODO |
-| 18 | [TASK-132](./TASK-132-wiplimit-cells-board-edge-cases.md) | Создать `edge-cases.feature` (2 сценария) | TODO |
-| 19 | [TASK-133](./TASK-133-wiplimit-cells-board-cleanup.md) | Удалить старые файлы BoardPage | TODO |
+| 10 | [TASK-124](./TASK-124-wiplimit-cells-board-helpers.md) | Создать `helpers.tsx` и `steps/common.steps.ts` для BoardPage | DONE |
+| 11 | [TASK-125](./TASK-125-wiplimit-cells-board-badge-display.md) | Создать `badge-display.feature` (2 сценария) | DONE |
+| 12 | [TASK-126](./TASK-126-wiplimit-cells-board-color-indicators.md) | Создать `color-indicators.feature` (3 сценария) | DONE |
+| 13 | [TASK-127](./TASK-127-wiplimit-cells-board-cell-background.md) | Создать `cell-background.feature` (2 сценария) | DONE |
+| 14 | [TASK-128](./TASK-128-wiplimit-cells-board-dashed-borders.md) | Создать `dashed-borders.feature` (4 сценария) | DONE |
+| 15 | [TASK-129](./TASK-129-wiplimit-cells-board-disabled-range.md) | Создать `disabled-range.feature` (2 сценария) | DONE |
+| 16 | [TASK-130](./TASK-130-wiplimit-cells-board-issue-filter.md) | Создать `issue-type-filter.feature` (2 сценария) | DONE |
+| 17 | [TASK-131](./TASK-131-wiplimit-cells-board-multiple-ranges.md) | Создать `multiple-ranges.feature` (3 сценария) | DONE |
+| 18 | [TASK-132](./TASK-132-wiplimit-cells-board-edge-cases.md) | Создать `edge-cases.feature` (2 сценария) | DONE |
+| 19 | [TASK-133](./TASK-133-wiplimit-cells-board-cleanup.md) | Удалить старые файлы BoardPage | DONE |
 
 ---
 
