@@ -80,13 +80,13 @@ When('I open the settings popup', () => {
   }
   componentMounted = false;
 
-  cy.contains('button', 'Edit Wip limits by cells').click();
+  cy.contains('button', 'Edit WIP limits by cells').click();
   cy.contains('Edit WipLimit on cells').should('exist');
 });
 
 Given(/^I have opened the "([^"]*)" popup$/, (popupTitle: string) => {
   mountComponent([]);
-  cy.contains('button', 'Edit Wip limits by cells').click();
+  cy.contains('button', 'Edit WIP limits by cells').click();
   cy.contains(popupTitle).should('exist');
 });
 
@@ -96,7 +96,7 @@ When('I click the close button (X)', () => {
 
 When('I reopen the modal', () => {
   // Modal is closed after Save - click the settings button again to reopen
-  cy.contains('button', 'Edit Wip limits by cells').click();
+  cy.contains('button', 'Edit WIP limits by cells').click();
   cy.contains('Edit WipLimit on cells').should('exist');
 });
 

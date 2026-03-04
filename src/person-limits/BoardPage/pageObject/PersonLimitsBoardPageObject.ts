@@ -6,11 +6,13 @@ const NO_VISIBILITY_CLASS = 'no-visibility';
 /**
  * Parses assignee name from tooltip string.
  * Format: "Assignee: Pavel [x]" -> "Pavel"
+ * Handles names with brackets like "Иван [В]" correctly.
+ * Only removes trailing " [x]" suffix (inactive user marker), preserves other brackets.
  */
-const getNameFromTooltip = (tooltip: string): string => {
+export const getNameFromTooltip = (tooltip: string): string => {
   const parts = tooltip.split(':');
-  if (parts.length < 2) return tooltip.trim();
-  return parts[1].split('[')[0].trim();
+  const name = parts.length < 2 ? tooltip : parts.slice(1).join(':');
+  return name.replace(/ \[x\]$/, '').trim();
 };
 
 /**

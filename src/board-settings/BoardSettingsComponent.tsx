@@ -4,18 +4,20 @@ import { Tabs } from 'antd';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { Image } from '../shared/components/Image';
 import logoUrl from '../assets/jira_helper_512x512.png';
 import styles from './BoardSettingsComponent.module.css';
 import { useBoardSettingsStore } from './stores/boardSettings/boardSettings';
+import { BOARD_SETTINGS_TEXTS } from './texts';
 
-export const BoardSettingsComponent = () => {
+const BoardSettingsModalInner = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const texts = useGetTextsByLocale(BOARD_SETTINGS_TEXTS);
   const settings = useBoardSettingsStore(state => state.data.settings);
 
   return (
-    <WithDi container={globalContainer}>
+    <>
       <div className={styles.wrapper} data-jh-component="boardSettingsComponent" onClick={() => setIsModalOpen(true)}>
         <Image src={logoUrl} width={32} height={32} />
       </div>
@@ -25,6 +27,9 @@ export const BoardSettingsComponent = () => {
         onClose={() => setIsModalOpen(false)}
         onOk={() => setIsModalOpen(false)}
         width="auto"
+        getContainer={false}
+        okText={texts.ok}
+        cancelText={texts.cancel}
       >
         <Tabs defaultActiveKey="1">
           {settings.map(setting => (
@@ -36,6 +41,12 @@ export const BoardSettingsComponent = () => {
           ))}
         </Tabs>
       </Modal>
-    </WithDi>
+    </>
   );
 };
+
+export const BoardSettingsComponent = () => (
+  <WithDi container={globalContainer}>
+    <BoardSettingsModalInner />
+  </WithDi>
+);

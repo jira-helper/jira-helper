@@ -69,6 +69,10 @@ export const WIPLIMIT_CELLS_TEXTS = {
     en: 'Edit',
     ru: 'Редактировать',
   },
+  settingsButton: {
+    en: 'Edit WIP limits by cells',
+    ru: 'WIP-лимиты на ячейки',
+  },
 } as const satisfies Texts;
 
 export type WiplimitCellsTextKeys = keyof typeof WIPLIMIT_CELLS_TEXTS;

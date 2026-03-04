@@ -9,7 +9,8 @@ export const loadLocalSettings = createAction({
   async handler() {
     const newSettings = {};
     try {
-      const settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const settings = JSON.parse(raw || '{}');
       /**
        * guard to avoid unknown properties
        */

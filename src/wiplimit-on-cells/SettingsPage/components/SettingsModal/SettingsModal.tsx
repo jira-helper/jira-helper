@@ -31,6 +31,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     width={800}
     maskClosable={false}
     destroyOnClose
+    getContainer={false}
     footer={[
       <Button key="cancel" onClick={onClose} disabled={isSaving}>
         {cancelButtonText}

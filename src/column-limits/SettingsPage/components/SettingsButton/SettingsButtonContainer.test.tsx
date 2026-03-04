@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsButtonContainer } from './SettingsButtonContainer';
 import { useColumnLimitsPropertyStore } from '../../../property/store';
 import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
@@ -39,12 +42,24 @@ vi.mock('../SettingsModal', () => ({
   ),
 }));
 
+const renderWithDi = (ui: React.ReactElement) => {
+  return render(<WithDi container={globalContainer}>{ui}</WithDi>);
+};
+
 describe('SettingsButtonContainer', () => {
   const mockGetColumns = vi.fn();
   const mockGetColumnName = vi.fn();
+  const buttonLabel = 'Column group WIP limits';
 
   beforeEach(() => {
     vi.clearAllMocks();
+    globalContainer.reset();
+
+    // Register locale provider for i18n
+    globalContainer.register({
+      token: localeProviderToken,
+      value: new MockLocaleProvider('en'),
+    });
 
     // Default mock implementation for stores
     (useColumnLimitsPropertyStore.getState as any).mockReturnValue({
@@ -59,8 +74,8 @@ describe('SettingsButtonContainer', () => {
   });
 
   it('should render SettingsButton', () => {
-    render(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
-    expect(screen.getByText('Group limits')).toBeInTheDocument();
+    renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
+    expect(screen.getByText(buttonLabel)).toBeInTheDocument();
   });
 
   it('should open modal and initialize store on click', async () => {
@@ -73,9 +88,9 @@ describe('SettingsButtonContainer', () => {
     mockGetColumns.mockReturnValue(mockColumns);
     mockGetColumnName.mockReturnValue('Column 1');
 
-    render(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
+    renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
-    fireEvent.click(screen.getByText('Group limits'));
+    fireEvent.click(screen.getByText(buttonLabel));
 
     expect(useColumnLimitsSettingsUIStore.getState().actions.reset).toHaveBeenCalled();
     expect(actions.initFromProperty).toHaveBeenCalled();
@@ -83,10 +98,10 @@ describe('SettingsButtonContainer', () => {
   });
 
   it('should close modal when handleClose is called', async () => {
-    render(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
+    renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
     // Open modal
-    fireEvent.click(screen.getByText('Group limits'));
+    fireEvent.click(screen.getByText(buttonLabel));
     expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
 
     // Close modal
@@ -102,10 +117,10 @@ describe('SettingsButtonContainer', () => {
       },
     ]);
 
-    render(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
+    renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
     // Open modal
-    fireEvent.click(screen.getByText('Group limits'));
+    fireEvent.click(screen.getByText(buttonLabel));
 
     // Click save in mock modal
     fireEvent.click(screen.getByText('Save'));

@@ -9,7 +9,7 @@ Feature: WIP Limit on Cells Settings Modal Lifecycle
 
   @SC-MODAL-1
   Scenario: Open settings popup
-    When I click "Edit Wip limits by cells"
+    When I click "Edit WIP limits by cells"
     Then I see the modal "Edit WipLimit on cells"
     And I see input "Add range"
     And I see dropdown "Swimlane"

@@ -75,7 +75,7 @@ Given('there are configured column groups:', (table: DataTableRows) => {
 When('I open the settings modal', () => {
   const buttonStubs = createButtonStubs();
   mountButton(buttonStubs);
-  cy.contains('Group limits').click();
+  cy.contains('Column group WIP limits').click();
   cy.get('[role="dialog"]').should('exist');
 });
 

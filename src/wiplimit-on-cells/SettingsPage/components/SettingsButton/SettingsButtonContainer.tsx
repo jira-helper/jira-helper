@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './SettingsButton';
 import { SettingsModalContainer } from '../SettingsModal';
 import { useWipLimitCellsSettingsUIStore } from '../../stores/settingsUIStore';
+import { WIPLIMIT_CELLS_TEXTS } from '../../texts';
 import type { WipLimitRange } from '../../../types';
 
 export type SettingsButtonContainerProps = {
@@ -25,6 +27,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   onSaveToProperty,
   initialRanges,
 }) => {
+  const texts = useGetTextsByLocale(WIPLIMIT_CELLS_TEXTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRanges, setCurrentRanges] = useState(initialRanges);
   const { actions } = useWipLimitCellsSettingsUIStore();
@@ -59,7 +62,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
 
   return (
     <>
-      <SettingsButton onClick={handleOpen} />
+      <SettingsButton onClick={handleOpen} label={texts.settingsButton} />
       {isModalOpen && (
         <SettingsModalContainer swimlanes={swimlanes} columns={columns} onClose={handleClose} onSave={handleSave} />
       )}

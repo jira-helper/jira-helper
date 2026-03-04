@@ -5,10 +5,11 @@ import { settingsJiraDOM } from '../../constants';
 export type SettingsButtonProps = {
   onClick: () => void;
   disabled?: boolean;
+  label: string;
 };
 
-export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick, disabled = false }) => (
+export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick, disabled = false, label }) => (
   <Button id={settingsJiraDOM.openEditorBtn} type="primary" onClick={onClick} disabled={disabled}>
-    Manage per-person WIP-limits
+    {label}
   </Button>
 );

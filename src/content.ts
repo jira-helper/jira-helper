@@ -35,6 +35,7 @@ import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
 import { extensionApiService } from './shared/ExtensionApiService';
 import { AdditionalCardElementsBoardPage } from './features/additional-card-elements/BoardPage';
 import { AdditionalCardElementsBoardBacklogPage } from './features/additional-card-elements/BoardBacklogPage';
@@ -69,6 +70,9 @@ async function start() {
 
   await domLoaded();
   initDiContainer();
+
+  // Load local settings (locale, etc.) on all pages
+  loadLocalSettings();
 
   setUpBlurSensitiveOnPage();
 

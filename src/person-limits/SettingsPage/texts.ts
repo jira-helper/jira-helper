@@ -85,6 +85,10 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'Update limit',
     ru: 'Обновить лимит',
   },
+  settingsButton: {
+    en: 'Manage per-person WIP-limits',
+    ru: 'WIP-лимиты на человека',
+  },
 } as const satisfies Texts;
 
 export type PersonLimitsTextKeys = keyof typeof PERSON_LIMITS_TEXTS;

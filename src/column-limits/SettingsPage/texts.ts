@@ -37,6 +37,10 @@ export const COLUMN_LIMITS_TEXTS = {
     en: 'Cancel',
     ru: 'Отмена',
   },
+  settingsButton: {
+    en: 'Column group WIP limits',
+    ru: 'WIP-лимиты на группы колонок',
+  },
 } as const satisfies Texts;
 
 export type ColumnLimitsTextKeys = keyof typeof COLUMN_LIMITS_TEXTS;

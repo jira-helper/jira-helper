@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './SettingsButton';
 import { useColumnLimitsPropertyStore } from '../../../property/store';
 import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
@@ -7,6 +8,7 @@ import { buildInitDataFromGroupMap } from '../../utils/buildInitData';
 import { initFromProperty, saveToProperty } from '../../actions';
 import { WITHOUT_GROUP_ID } from '../../../types';
 import { SettingsModalContainer } from '../SettingsModal';
+import { COLUMN_LIMITS_TEXTS } from '../../texts';
 
 export type SettingsButtonContainerProps = {
   getColumns: () => NodeListOf<Element>;
@@ -19,6 +21,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
   getColumnName,
   swimlanes = [],
 }) => {
+  const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpen = () => {
@@ -54,7 +57,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
 
   return (
     <>
-      <SettingsButton onClick={handleOpen} />
+      <SettingsButton onClick={handleOpen} label={texts.settingsButton} />
       {isModalOpen && <SettingsModalContainer onClose={handleClose} onSave={handleSave} swimlanes={swimlanes} />}
     </>
   );

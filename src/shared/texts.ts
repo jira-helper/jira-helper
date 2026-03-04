@@ -13,10 +13,10 @@ export type Texts<textsKeys extends string = string> = {
 const useGetLocale = (): 'ru' | 'en' => {
   const container = useDi();
   const localeProvider = container.inject(localeProviderToken);
-  const { settings } = useLocalSettingsStore();
+  const settingsLocale = useLocalSettingsStore(state => state.settings.locale);
 
-  if (settings.locale !== 'auto') {
-    return settings.locale;
+  if (settingsLocale !== 'auto') {
+    return settingsLocale;
   }
 
   const jiraLocale = localeProvider.getJiraLocale();
