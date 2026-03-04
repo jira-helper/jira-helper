@@ -3,6 +3,10 @@
  * Cypress Component Tests for SettingsModalContainer
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsModalContainer } from './SettingsModalContainer';
 import { useSettingsUIStore } from '../../stores/settingsUIStore';
 import type { Column, Swimlane } from '../../state/types';
@@ -22,6 +26,12 @@ describe('SettingsModalContainer', () => {
   ];
 
   beforeEach(() => {
+    globalContainer.reset();
+    registerLogger(globalContainer);
+    globalContainer.register({
+      token: localeProviderToken,
+      value: new MockLocaleProvider('en'),
+    });
     useSettingsUIStore.getState().actions.reset();
   });
 
@@ -32,13 +42,15 @@ describe('SettingsModalContainer', () => {
     cy.wrap(onSave).as('onSave');
 
     cy.mount(
-      <SettingsModalContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onClose={onClose}
-        onSave={onSave}
-      />
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </WithDi>
     );
 
     cy.contains('Personal WIP Limit').should('be.visible');
@@ -52,13 +64,15 @@ describe('SettingsModalContainer', () => {
     cy.wrap(onSave).as('onSave');
 
     cy.mount(
-      <SettingsModalContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onClose={onClose}
-        onSave={onSave}
-      />
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </WithDi>
     );
 
     cy.contains('button', 'Cancel').click();
@@ -72,13 +86,15 @@ describe('SettingsModalContainer', () => {
     cy.wrap(onSave).as('onSave');
 
     cy.mount(
-      <SettingsModalContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onClose={onClose}
-        onSave={onSave}
-      />
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </WithDi>
     );
 
     cy.contains('button', 'Save').click();
@@ -97,13 +113,15 @@ describe('SettingsModalContainer', () => {
     cy.wrap(onSave).as('onSave');
 
     cy.mount(
-      <SettingsModalContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onClose={onClose}
-        onSave={onSave}
-      />
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </WithDi>
     );
 
     cy.contains('button', 'Save').click();
@@ -128,13 +146,15 @@ describe('SettingsModalContainer', () => {
     cy.wrap(onSave).as('onSave');
 
     cy.mount(
-      <SettingsModalContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onClose={onClose}
-        onSave={onSave}
-      />
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </WithDi>
     );
 
     cy.contains('button', 'Save').click();

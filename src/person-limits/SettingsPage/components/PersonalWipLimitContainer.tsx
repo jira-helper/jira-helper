@@ -10,13 +10,7 @@ import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { FormData, Column, Swimlane } from '../state/types';
 import type { SelectedPerson } from '../stores/settingsUIStore.types';
 import { settingsJiraDOM } from '../constants';
-
-const TEXTS = {
-  avatarWarning: {
-    en: 'To work correctly, the person must have a Jira avatar.',
-    ru: 'Чтобы WIP-лимиты на человека работали корректно, у пользователя должен быть установлен аватар.',
-  },
-};
+import { PERSON_LIMITS_TEXTS } from '../texts';
 
 export interface PersonalWipLimitContainerProps {
   columns: Column[];
@@ -34,7 +28,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // Zustand automatically subscribes component to changes
   const { data, actions } = useSettingsUIStore();
   const { limits, editingId, formData } = data;
-  const texts = useGetTextsByLocale(TEXTS);
+  const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
   const [form] = Form.useForm();
 
   // Filter out kanban columns
@@ -206,7 +200,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
     const issueTypesToCheck = selectedTypes.length > 0 && !countAllTypes ? selectedTypes : undefined;
 
     if (!currentPerson) {
-      form.setFields([{ name: 'person', errors: ['Select a person'] }]);
+      form.setFields([{ name: 'person', errors: [texts.selectPerson] }]);
       return;
     }
 
@@ -232,7 +226,11 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
         <Alert type="warning" showIcon style={{ marginBottom: 16 }} message={<span>{texts.avatarWarning}</span>} />
         <Row gutter={16}>
           <Col span={12} style={{ paddingRight: 8 }}>
-            <Form.Item label="Person JIRA name" name="person" rules={[{ required: true, message: 'Select a person' }]}>
+            <Form.Item
+              label={texts.personJiraName}
+              name="person"
+              rules={[{ required: true, message: texts.selectPerson }]}
+            >
               <PersonNameSelect
                 id={settingsJiraDOM.idPersonName}
                 searchUsers={searchUsers}
@@ -242,9 +240,9 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
             </Form.Item>
 
             <Form.Item
-              label="Max issues at work"
+              label={texts.maxIssuesAtWork}
               name="limit"
-              rules={[{ required: true, type: 'number', min: 1, message: 'Limit must be at least 1' }]}
+              rules={[{ required: true, type: 'number', min: 1, message: texts.limitMinError }]}
             >
               <InputNumber
                 id={settingsJiraDOM.idLimit}
@@ -270,7 +268,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
             </Form.Item>
           </Col>
           <Col span={12} style={{ paddingLeft: 8 }}>
-            <Form.Item label="Columns" name="selectedColumns">
+            <Form.Item label={texts.columns} name="selectedColumns">
               <div>
                 <Checkbox
                   style={{ marginBottom: 8 }}
@@ -296,7 +294,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                     !showColumnsList && columnsValue.length === availableColumns.length && availableColumns.length > 0
                   }
                 >
-                  All columns
+                  {texts.allColumns}
                 </Checkbox>
                 {showColumnsList && (
                   <div
@@ -332,12 +330,13 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               </div>
             </Form.Item>
 
-            <Form.Item label="Swimlanes">
+            <Form.Item label={texts.swimlanes}>
               <SwimlaneSelector
                 swimlanes={swimlanesForSelector}
                 value={currentFormData.swimlanes}
                 onChange={ids => handleFormChange('swimlanes', ids)}
                 label={null}
+                allLabel={texts.allSwimlanes}
               />
             </Form.Item>
           </Col>
@@ -350,15 +349,16 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                 type="primary"
                 htmlType="submit"
               >
-                {isEditMode ? 'Edit limit' : 'Add limit'}
+                {isEditMode ? texts.updateLimit : texts.addLimit}
               </Button>
-              {isEditMode && <Button onClick={() => actions.setEditingId(null)}>Cancel</Button>}
+              {isEditMode && <Button onClick={() => actions.setEditingId(null)}>{texts.cancel}</Button>}
             </Space>
           </Col>
         </Row>
       </Form>
       <div style={{ marginTop: 24 }}>
         <PersonalWipLimitTable
+          texts={texts}
           limits={limits}
           onDelete={(id: number) => actions.deleteLimit(id)}
           onEdit={(id: number) => actions.setEditingId(id)}

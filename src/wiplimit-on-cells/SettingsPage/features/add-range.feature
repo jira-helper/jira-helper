@@ -11,7 +11,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
   Scenario: Add a new range with a cell
     When I open the settings popup
     And I type "Critical Path" into "Add range" input
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I check "show indicator"
     And I click "Add range" button
@@ -23,7 +23,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
   @SC-ADD-2
   Scenario: Cannot add range without name - shows validation error
     When I open the settings popup
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add range" button
     Then I see text "Enter range name"
@@ -32,7 +32,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
   @SC-ADD-2a
   Scenario: Validation error disappears after entering name
     When I open the settings popup
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add range" button
     Then I see text "Enter range name"
@@ -71,7 +71,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
       | Frontend | In Progress | false     |
     When I open the settings popup
     And I type "Critical Path" into "Add range" input
-    And I select "Backend" from "swimlane" dropdown
+    And I select "Backend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add cell" button
     Then the range "Critical Path" should contain cells:
@@ -89,7 +89,7 @@ Feature: WIP Limit on Cells - Add Range and Cells
       | Frontend | In Progress | false     |
     When I open the settings popup
     And I type "Critical Path" into "Add range" input
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add cell" button
     Then the range "Critical Path" should contain cells:

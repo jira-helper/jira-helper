@@ -1,9 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsModal } from './SettingsModal';
 import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
 import { ColumnLimitsForm } from '../../ColumnLimitsForm';
 import { moveColumn } from '../../actions';
 import { WITHOUT_GROUP_ID } from '../../../types';
+import { COLUMN_LIMITS_TEXTS } from '../../texts';
 import type { Column } from '../../../types';
 import styles from '../../styles.module.css';
 
@@ -14,6 +16,7 @@ export type SettingsModalContainerProps = {
 };
 
 export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ onClose, onSave, swimlanes = [] }) => {
+  const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
   const draggingRef = useRef<{ column: Column; groupId: string } | null>(null);
 
@@ -112,7 +115,14 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ 
   );
 
   return (
-    <SettingsModal title="Limits for groups" onClose={onClose} onSave={handleSave} isSaving={isSaving}>
+    <SettingsModal
+      title={texts.modalTitle}
+      onClose={onClose}
+      onSave={handleSave}
+      isSaving={isSaving}
+      okButtonText={texts.save}
+      cancelButtonText={texts.cancel}
+    >
       <ColumnLimitsForm
         withoutGroupColumns={withoutGroupColumns}
         groups={groups}

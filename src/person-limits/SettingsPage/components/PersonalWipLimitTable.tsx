@@ -1,57 +1,59 @@
 import React from 'react';
 import { Table, Button, Space } from 'antd';
 import type { PersonLimit } from '../state/types';
+import type { PersonLimitsTextKeys } from '../texts';
 import { settingsJiraDOM } from '../constants';
 
 export interface PersonalWipLimitTableProps {
+  texts: Record<PersonLimitsTextKeys, string>;
   limits: PersonLimit[];
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
 }
 
-export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ limits, onDelete, onEdit }) => {
+export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ texts, limits, onDelete, onEdit }) => {
   const columns = [
     {
-      title: 'Person',
+      title: texts.person,
       key: 'person',
       render: (_: any, record: PersonLimit) => record.person.displayName || record.person.name,
     },
     {
-      title: 'Limit',
+      title: texts.limit,
       dataIndex: 'limit',
       key: 'limit',
     },
     {
-      title: 'Columns',
+      title: texts.columns,
       dataIndex: 'columns',
       key: 'columns',
       render: (columnList: { name: string }[]) =>
-        columnList.length === 0 ? 'All' : columnList.map(c => c.name).join(', '),
+        columnList.length === 0 ? texts.allColumns : columnList.map(c => c.name).join(', '),
     },
     {
-      title: 'Swimlanes',
+      title: texts.swimlanes,
       dataIndex: 'swimlanes',
       key: 'swimlanes',
       render: (swimlanes: { name: string }[]) =>
-        swimlanes.length === 0 ? 'All' : swimlanes.map(s => s.name).join(', '),
+        swimlanes.length === 0 ? texts.allSwimlanes : swimlanes.map(s => s.name).join(', '),
     },
     {
-      title: 'Issue types',
+      title: texts.issueTypes,
       dataIndex: 'includedIssueTypes',
       key: 'includedIssueTypes',
       render: (includedIssueTypes: string[] | undefined) =>
-        !includedIssueTypes || includedIssueTypes.length === 0 ? 'All' : includedIssueTypes.join(', '),
+        !includedIssueTypes || includedIssueTypes.length === 0 ? texts.allTypes : includedIssueTypes.join(', '),
     },
     {
-      title: 'Actions',
+      title: texts.actions,
       key: 'actions',
       render: (_: any, record: PersonLimit) => (
         <Space split={<span>|</span>}>
           <Button type="link" danger onClick={() => onDelete(Number(record.id))}>
-            Delete
+            {texts.delete}
           </Button>
           <Button type="link" onClick={() => onEdit(Number(record.id))}>
-            Edit
+            {texts.edit}
           </Button>
         </Space>
       ),

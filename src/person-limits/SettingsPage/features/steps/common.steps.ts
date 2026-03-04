@@ -158,9 +158,9 @@ Then(
     cy.contains('tr', displayName).within(() => {
       cy.contains(value).should('be.visible');
 
-      const colDisplay = columnsStr === 'all' ? 'All' : columnsStr;
-      const swimDisplay = swimlanesStr === 'all' ? 'All' : swimlanesStr;
-      const issueDisplay = issueTypesStr === 'all' ? 'All' : issueTypesStr;
+      const colDisplay = columnsStr === 'all' ? 'All columns' : columnsStr;
+      const swimDisplay = swimlanesStr === 'all' ? 'All swimlanes' : swimlanesStr;
+      const issueDisplay = issueTypesStr === 'all' ? 'All types' : issueTypesStr;
 
       cy.get('td').eq(2).should('contain.text', colDisplay);
       cy.get('td').eq(3).should('contain.text', swimDisplay);

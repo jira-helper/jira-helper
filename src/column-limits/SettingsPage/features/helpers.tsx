@@ -9,7 +9,9 @@
  */
 import React from 'react';
 import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
 import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { Ok } from 'ts-results';
@@ -51,6 +53,10 @@ export const setupBackground = () => {
   registerLogger(globalContainer);
 
   globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
+  globalContainer.register({
     token: getBoardIdFromURLToken,
     value: () => 'test-board-123',
   });
@@ -90,7 +96,11 @@ export const createModalStubs = (): ModalStubs => {
 };
 
 export const mountModal = (stubs: ModalStubs) => {
-  cy.mount(<SettingsModalContainer onClose={stubs.onClose} onSave={stubs.onSave} />);
+  cy.mount(
+    <WithDi container={globalContainer}>
+      <SettingsModalContainer onClose={stubs.onClose} onSave={stubs.onSave} />
+    </WithDi>
+  );
 };
 
 export type ButtonStubs = {
@@ -126,7 +136,13 @@ export const mountButton = (stubs: ButtonStubs) => {
   const swimlanes = getBoardSwimlanes();
 
   cy.mount(
-    <SettingsButtonContainer getColumns={stubs.getColumns} getColumnName={stubs.getColumnName} swimlanes={swimlanes} />
+    <WithDi container={globalContainer}>
+      <SettingsButtonContainer
+        getColumns={stubs.getColumns}
+        getColumnName={stubs.getColumnName}
+        swimlanes={swimlanes}
+      />
+    </WithDi>
   );
 };
 

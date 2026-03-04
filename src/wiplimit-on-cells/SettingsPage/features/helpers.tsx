@@ -8,6 +8,10 @@
  * Provides fixtures, setup functions, and mount helpers.
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsButtonContainer } from '../components/SettingsButton';
 import { useWipLimitCellsSettingsUIStore } from '../stores/settingsUIStore';
 import type { WipLimitRange } from '../../types';
@@ -42,6 +46,13 @@ export const createRange = (
 let onSaveToProperty: Cypress.Agent<sinon.SinonStub>;
 
 export const setupBackground = () => {
+  globalContainer.reset();
+  registerLogger(globalContainer);
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
+
   useWipLimitCellsSettingsUIStore.setState(useWipLimitCellsSettingsUIStore.getInitialState());
   const saveStub = cy.stub().resolves();
   cy.wrap(saveStub).as('onSaveToProperty');
@@ -50,12 +61,14 @@ export const setupBackground = () => {
 
 export const mountComponent = (initialRanges: WipLimitRange[] = []) => {
   cy.mount(
-    <SettingsButtonContainer
-      swimlanes={swimlanes}
-      columns={columns}
-      initialRanges={initialRanges}
-      onSaveToProperty={onSaveToProperty}
-    />
+    <WithDi container={globalContainer}>
+      <SettingsButtonContainer
+        swimlanes={swimlanes}
+        columns={columns}
+        initialRanges={initialRanges}
+        onSaveToProperty={onSaveToProperty}
+      />
+    </WithDi>
   );
 };
 

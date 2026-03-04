@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 
-import { registerLogger } from 'src/shared/Logger';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { step } from 'src/shared/testTools/step';
 import { useLocalSettingsStore } from '../stores/localSettingsStore';
 import { LocalSettingsTab } from './LocalSettingsTab';
@@ -17,7 +17,7 @@ describe('GlobalSettingsTab', () => {
     globalContainer.reset();
 
     useLocalSettingsStore.setState(useLocalSettingsStore.getInitialState());
-    registerLogger(globalContainer);
+    registerTestDependencies(globalContainer);
   });
 
   it('should render default settings', async () => {

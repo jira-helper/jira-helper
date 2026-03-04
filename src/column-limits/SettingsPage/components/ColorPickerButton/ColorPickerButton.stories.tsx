@@ -9,6 +9,7 @@ const meta: Meta<typeof ColorPickerButton> = {
     layout: 'centered',
   },
   args: {
+    selectColorText: 'Select color',
     onColorChange: fn(),
   },
   tags: ['autodocs'],
@@ -22,6 +23,7 @@ export const Default: Story = {
   args: {
     groupId: 'group-1',
     currentColor: '#ffffff',
+    selectColorText: 'Select color',
   },
 };
 
@@ -29,5 +31,6 @@ export const WithColor: Story = {
   args: {
     groupId: 'group-1',
     currentColor: '#4caf50',
+    selectColorText: 'Select color',
   },
 };

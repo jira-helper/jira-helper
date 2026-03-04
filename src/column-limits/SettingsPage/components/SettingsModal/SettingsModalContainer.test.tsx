@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { SettingsModalContainer } from './SettingsModalContainer';
 
 // Mock store
@@ -67,10 +70,16 @@ describe('SettingsModalContainer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    globalContainer.reset();
+    registerTestDependencies(globalContainer);
   });
 
   it('should render SettingsModal and ColumnLimitsForm', () => {
-    render(<SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />);
+    render(
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />
+      </WithDi>
+    );
 
     expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
     expect(screen.getByTestId('mock-form')).toBeInTheDocument();
@@ -80,7 +89,11 @@ describe('SettingsModalContainer', () => {
   it('should call onSave when save button is clicked and handle isSaving state', async () => {
     mockOnSave.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
 
-    render(<SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />);
+    render(
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />
+      </WithDi>
+    );
 
     fireEvent.click(screen.getByText('Save'));
 
@@ -93,7 +106,11 @@ describe('SettingsModalContainer', () => {
   });
 
   it('should call onClose when close button is clicked', () => {
-    render(<SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />);
+    render(
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer onClose={mockOnClose} onSave={mockOnSave} />
+      </WithDi>
+    );
 
     fireEvent.click(screen.getByText('Close'));
     expect(mockOnClose).toHaveBeenCalled();

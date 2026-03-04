@@ -2,6 +2,12 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
 import type { PersonLimit } from '../state/types';
+import { PERSON_LIMITS_TEXTS } from '../texts';
+
+// Mock texts for storybook (using English)
+const mockTexts = Object.fromEntries(
+  Object.entries(PERSON_LIMITS_TEXTS).map(([key, value]) => [key, value.en])
+) as Record<keyof typeof PERSON_LIMITS_TEXTS, string>;
 
 const meta: Meta<typeof PersonalWipLimitTable> = {
   title: 'WIP Limits/PersonalWipLimitTable',
@@ -57,11 +63,11 @@ const mockLimits: PersonLimit[] = [
 ];
 
 export const EmptyState: Story = {
-  render: () => <PersonalWipLimitTable limits={[]} onDelete={() => {}} onEdit={() => {}} />,
+  render: () => <PersonalWipLimitTable texts={mockTexts} limits={[]} onDelete={() => {}} onEdit={() => {}} />,
 };
 
 export const WithLimits: Story = {
-  render: () => <PersonalWipLimitTable limits={mockLimits} onDelete={() => {}} onEdit={() => {}} />,
+  render: () => <PersonalWipLimitTable texts={mockTexts} limits={mockLimits} onDelete={() => {}} onEdit={() => {}} />,
 };
 
 export const WithAllColumnsAndSwimlanes: Story = {
@@ -79,6 +85,6 @@ export const WithAllColumnsAndSwimlanes: Story = {
       swimlanes: [], // should display "All"
     };
 
-    return <PersonalWipLimitTable limits={[limitWithAll]} onDelete={() => {}} onEdit={() => {}} />;
+    return <PersonalWipLimitTable texts={mockTexts} limits={[limitWithAll]} onDelete={() => {}} onEdit={() => {}} />;
   },
 };

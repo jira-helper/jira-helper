@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { AvatarsContainer } from '../components/AvatarsContainer';
 import { useRuntimeStore, getInitialState } from '../stores';
 import { usePersonWipLimitsPropertyStore } from '../../property';
@@ -206,6 +207,10 @@ export const setupBackground = () => {
   const mockPageObject = createMockPageObject();
   mockPageObjectRef.current = mockPageObject;
 
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
   globalContainer.register({
     token: personLimitsBoardPageObjectToken,
     value: mockPageObject,

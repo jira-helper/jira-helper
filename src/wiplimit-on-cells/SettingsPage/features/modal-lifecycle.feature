@@ -12,7 +12,7 @@ Feature: WIP Limit on Cells Settings Modal Lifecycle
     When I click "Edit Wip limits by cells"
     Then I see the modal "Edit WipLimit on cells"
     And I see input "Add range"
-    And I see dropdown "swimlane"
+    And I see dropdown "Swimlane"
     And I see dropdown "Column"
     And I see checkbox "show indicator" is unchecked
     And I should see the ranges table
@@ -21,7 +21,7 @@ Feature: WIP Limit on Cells Settings Modal Lifecycle
   Scenario: Save and close popup
     Given I have opened the "Edit WipLimit on cells" popup
     And I type "Test Range" into "Add range" input
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add range" button
     And I should see "Test Range" in the ranges table
@@ -33,7 +33,7 @@ Feature: WIP Limit on Cells Settings Modal Lifecycle
   Scenario: Cancel closes popup without saving
     Given I have opened the "Edit WipLimit on cells" popup
     And I type "Test Range" into "Add range" input
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add range" button
     And I should see "Test Range" in the ranges table
@@ -45,7 +45,7 @@ Feature: WIP Limit on Cells Settings Modal Lifecycle
   Scenario: Close button (X) closes popup without saving
     Given I have opened the "Edit WipLimit on cells" popup
     And I type "Test Range" into "Add range" input
-    And I select "Frontend" from "swimlane" dropdown
+    And I select "Frontend" from "Swimlane" dropdown
     And I select "In Progress" from "Column" dropdown
     And I click "Add range" button
     And I should see "Test Range" in the ranges table

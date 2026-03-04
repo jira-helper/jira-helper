@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Input, Select, Checkbox, Button, Form } from 'antd';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { WIPLIMIT_CELLS_TEXTS } from '../../texts';
 import type { WipLimitCell } from '../../../types';
 
 export interface RangeFormProps {
@@ -39,6 +41,8 @@ export const RangeForm: React.FC<RangeFormProps> = ({
   selectedRangeName,
   onRangeNameChange,
 }) => {
+  const texts = useGetTextsByLocale(WIPLIMIT_CELLS_TEXTS);
+
   // Local state для формы
   const [name, setName] = useState('');
   const [swimlane, setSwimlane] = useState('-');
@@ -78,7 +82,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
     return existingRangeNames.some(existingName => existingName.toLowerCase() === name.trim().toLowerCase());
   }, [name, existingRangeNames]);
 
-  const buttonText = isAddCellMode ? 'Add cell' : 'Add range';
+  const buttonText = isAddCellMode ? texts.addCell : texts.addRange;
 
   // Очистка ошибки при изменении имени
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,19 +97,19 @@ export const RangeForm: React.FC<RangeFormProps> = ({
 
     // Валидация: swimlane должен быть выбран
     if (swimlane === '-') {
-      setSwimlaneError('Select swimlane');
+      setSwimlaneError(texts.selectSwimlane);
       return;
     }
 
     // Валидация: column должен быть выбран
     if (column === '-') {
-      setColumnError('Select Column');
+      setColumnError(texts.selectColumn);
       return;
     }
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setNameError('Enter range name');
+      setNameError(texts.enterRangeName);
       return;
     }
 
@@ -146,7 +150,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
       {/* Add range section */}
       <form onSubmit={handleSubmit}>
         <Form.Item
-          label="Add range"
+          label={texts.addRange}
           validateStatus={nameError ? 'error' : undefined}
           help={nameError}
           style={{ marginBottom: '16px' }}
@@ -154,7 +158,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
             <Input
               id="WIP_inputRange"
-              placeholder="name"
+              placeholder={texts.namePlaceholder}
               value={name}
               onChange={handleNameChange}
               status={nameError ? 'error' : undefined}
@@ -171,7 +175,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
       {/* Cell selection section */}
       <div style={{ marginTop: '1rem' }}>
         <Form.Item
-          label="swimlane"
+          label={texts.swimlane}
           validateStatus={swimlaneError ? 'error' : undefined}
           help={swimlaneError}
           style={{ marginBottom: '16px' }}
@@ -193,7 +197,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
         </Form.Item>
 
         <Form.Item
-          label="Column"
+          label={texts.column}
           validateStatus={columnError ? 'error' : undefined}
           help={columnError}
           style={{ marginBottom: '16px' }}
@@ -216,7 +220,7 @@ export const RangeForm: React.FC<RangeFormProps> = ({
 
         <Form.Item style={{ marginBottom: '16px' }}>
           <Checkbox id="WIPLC_showBadge" checked={showBadge} onChange={e => setShowBadge(e.target.checked)}>
-            show indicator
+            {texts.showIndicator}
           </Checkbox>
         </Form.Item>
       </div>

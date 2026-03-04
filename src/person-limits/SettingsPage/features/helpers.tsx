@@ -1,7 +1,9 @@
 /// <reference types="cypress" />
 import React from 'react';
 import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
 import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { Ok } from 'ts-results';
@@ -98,6 +100,10 @@ export const setupBackground = () => {
   resetSearchMockType();
 
   globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
+  globalContainer.register({
     token: getBoardIdFromURLToken,
     value: () => 'test-board-123',
   });
@@ -156,12 +162,14 @@ export const mountComponent = () => {
     }
   };
   cy.mount(
-    <PersonalWipLimitContainer
-      columns={columns}
-      swimlanes={swimlanes}
-      searchUsers={mockSearchUsers}
-      onAddLimit={handleAddLimit}
-    />
+    <WithDi container={globalContainer}>
+      <PersonalWipLimitContainer
+        columns={columns}
+        swimlanes={swimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={handleAddLimit}
+      />
+    </WithDi>
   );
 };
 
@@ -187,7 +195,13 @@ export const selectIssueTypes = (...types: string[]) => {
 
 export const mountSettingsButton = () => {
   cy.mount(
-    <SettingsButtonContainer boardDataColumns={columns} boardDataSwimlanes={swimlanes} searchUsers={mockSearchUsers} />
+    <WithDi container={globalContainer}>
+      <SettingsButtonContainer
+        boardDataColumns={columns}
+        boardDataSwimlanes={swimlanes}
+        searchUsers={mockSearchUsers}
+      />
+    </WithDi>
   );
 };
 

@@ -1,5 +1,7 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { globalContainer } from 'dioma';
+import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
@@ -98,11 +100,14 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
     // Render React
     this.root = createRoot(buttonContainer);
     this.root.render(
-      React.createElement(SettingsButtonContainer, {
-        swimlanes,
-        columns,
-        initialRanges: ranges,
-        onSaveToProperty: handleSaveToProperty,
+      React.createElement(WithDi, {
+        container: globalContainer,
+        children: React.createElement(SettingsButtonContainer, {
+          swimlanes,
+          columns,
+          initialRanges: ranges,
+          onSaveToProperty: handleSaveToProperty,
+        }),
       })
     );
   }

@@ -6,7 +6,7 @@ import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
-import { registerLogger } from 'src/shared/Logger';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { step } from 'src/shared/testTools/step';
 import { JiraServiceToken } from 'src/shared/jira/jiraService';
 import { Err } from 'ts-results';
@@ -72,7 +72,7 @@ function setup({
 
   useSubTaskProgressBoardPropertyStore.setState(useSubTaskProgressBoardPropertyStore.getInitialState());
 
-  registerLogger(container);
+  registerTestDependencies(container);
 
   return { container };
 }

@@ -8,6 +8,7 @@ export type SettingsModalProps = {
   onSave: () => void;
   isSaving?: boolean;
   okButtonText?: string;
+  cancelButtonText?: string;
 };
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -17,6 +18,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSave,
   isSaving = false,
   okButtonText = 'Save',
+  cancelButtonText = 'Cancel',
 }) => (
   <Modal
     open
@@ -26,7 +28,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     maskClosable={false}
     footer={[
       <Button key="cancel" onClick={onClose} disabled={isSaving}>
-        Cancel
+        {cancelButtonText}
       </Button>,
       <Button key="save" type="primary" onClick={onSave} loading={isSaving}>
         {okButtonText}

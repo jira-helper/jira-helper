@@ -5,6 +5,10 @@
  * Tests component behavior: display, inline editing, delete callbacks.
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { RangeTable } from './RangeTable';
 import type { WipLimitRange } from '../../../types';
 
@@ -38,6 +42,15 @@ const getNameLabel = (swimlaneId: string, columnId: string): string => {
 };
 
 describe('RangeTable', () => {
+  beforeEach(() => {
+    globalContainer.reset();
+    registerLogger(globalContainer);
+    globalContainer.register({
+      token: localeProviderToken,
+      value: new MockLocaleProvider('en'),
+    });
+  });
+
   describe('Empty table', () => {
     it('should display empty table with headers', () => {
       const onDeleteRange = cy.stub().as('onDeleteRange');
@@ -46,14 +59,16 @@ describe('RangeTable', () => {
       const onSelectRange = cy.stub().as('onSelectRange');
 
       cy.mount(
-        <RangeTable
-          ranges={[]}
-          onDeleteRange={onDeleteRange}
-          onDeleteCell={onDeleteCell}
-          onChangeField={onChangeField}
-          onSelectRange={onSelectRange}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={[]}
+            onDeleteRange={onDeleteRange}
+            onDeleteCell={onDeleteCell}
+            onChangeField={onChangeField}
+            onSelectRange={onSelectRange}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('#WipLimitCells_table').should('exist');
@@ -81,14 +96,16 @@ describe('RangeTable', () => {
       const onSelectRange = cy.stub().as('onSelectRange');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={onDeleteRange}
-          onDeleteCell={onDeleteCell}
-          onChangeField={onChangeField}
-          onSelectRange={onSelectRange}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={onDeleteRange}
+            onDeleteCell={onDeleteCell}
+            onChangeField={onChangeField}
+            onSelectRange={onSelectRange}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('#WipLimitCells_tbody').find('tr').should('have.length', 2);
@@ -106,14 +123,16 @@ describe('RangeTable', () => {
       const onChangeField = cy.stub().as('onChangeField');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={cy.stub()}
-          onDeleteCell={cy.stub()}
-          onChangeField={onChangeField}
-          onSelectRange={cy.stub()}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={cy.stub()}
+            onDeleteCell={cy.stub()}
+            onChangeField={onChangeField}
+            onSelectRange={cy.stub()}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       // Type new value and trigger blur - use first() to select the name input specifically
@@ -126,14 +145,16 @@ describe('RangeTable', () => {
       const onChangeField = cy.stub().as('onChangeField');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={cy.stub()}
-          onDeleteCell={cy.stub()}
-          onChangeField={onChangeField}
-          onSelectRange={cy.stub()}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={cy.stub()}
+            onDeleteCell={cy.stub()}
+            onChangeField={onChangeField}
+            onSelectRange={cy.stub()}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('input[aria-label*="WIP limit for Critical Path"]').type('{selectall}10');
@@ -146,14 +167,16 @@ describe('RangeTable', () => {
       const onChangeField = cy.stub().as('onChangeField');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={cy.stub()}
-          onDeleteCell={cy.stub()}
-          onChangeField={onChangeField}
-          onSelectRange={cy.stub()}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={cy.stub()}
+            onDeleteCell={cy.stub()}
+            onChangeField={onChangeField}
+            onSelectRange={cy.stub()}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('input[aria-label*="Disable range Critical Path"]').check();
@@ -167,14 +190,16 @@ describe('RangeTable', () => {
       const onDeleteRange = cy.stub().as('onDeleteRange');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={onDeleteRange}
-          onDeleteCell={cy.stub()}
-          onChangeField={cy.stub()}
-          onSelectRange={cy.stub()}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={onDeleteRange}
+            onDeleteCell={cy.stub()}
+            onChangeField={cy.stub()}
+            onSelectRange={cy.stub()}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('[aria-label="Delete range Critical Path"]').click();
@@ -188,14 +213,16 @@ describe('RangeTable', () => {
       const onDeleteCell = cy.stub().as('onDeleteCell');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={cy.stub()}
-          onDeleteCell={onDeleteCell}
-          onChangeField={cy.stub()}
-          onSelectRange={cy.stub()}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={cy.stub()}
+            onDeleteCell={onDeleteCell}
+            onChangeField={cy.stub()}
+            onSelectRange={cy.stub()}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       // Find the Tag containing "Frontend / In Progress" and click its close icon
@@ -210,14 +237,16 @@ describe('RangeTable', () => {
       const onSelectRange = cy.stub().as('onSelectRange');
 
       cy.mount(
-        <RangeTable
-          ranges={ranges}
-          onDeleteRange={cy.stub()}
-          onDeleteCell={cy.stub()}
-          onChangeField={cy.stub()}
-          onSelectRange={onSelectRange}
-          getNameLabel={getNameLabel}
-        />
+        <WithDi container={globalContainer}>
+          <RangeTable
+            ranges={ranges}
+            onDeleteRange={cy.stub()}
+            onDeleteCell={cy.stub()}
+            onChangeField={cy.stub()}
+            onSelectRange={onSelectRange}
+            getNameLabel={getNameLabel}
+          />
+        </WithDi>
       );
 
       cy.get('[aria-label*="Select range Critical Path"]').click();

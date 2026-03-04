@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useColumnLimitsPropertyStore } from '../../property';
 import { useColumnLimitsRuntimeStore, getInitialState } from '../stores';
 import { columnLimitsBoardPageObjectToken } from '../pageObject';
@@ -139,6 +140,10 @@ export const setupBackground = () => {
 
   setupBoardDOM();
 
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
   globalContainer.register({
     token: columnLimitsBoardPageObjectToken,
     value: new ColumnLimitsBoardPageObject(),

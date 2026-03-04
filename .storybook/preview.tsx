@@ -4,6 +4,7 @@ import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
 import { registerLogger } from '../src/shared/Logger';
 import { WithDi } from '../src/shared/diContext';
+import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
 const preview: Preview = {
   parameters: {
     controls: {
@@ -28,6 +29,10 @@ globalContainer.register({
     updateBoardProperty: () => {},
     deleteBoardProperty: () => {},
   },
+});
+globalContainer.register({
+  token: localeProviderToken,
+  value: new MockLocaleProvider('en'),
 });
 registerLogger(globalContainer)
 

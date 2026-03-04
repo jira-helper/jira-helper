@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
+import { useDi } from './diContext';
+import { localeProviderToken } from './locale';
 
 export type Texts<textsKeys extends string = string> = {
   [key in textsKeys]: {
@@ -7,39 +10,27 @@ export type Texts<textsKeys extends string = string> = {
   };
 };
 
-const getJiraLocale = () => {
-  const jiraLocale = document.querySelector('meta[name="ajs-user-locale"]')?.getAttribute('content');
-  return jiraLocale || null;
-};
-
-const useGetLocale = () => {
+const useGetLocale = (): 'ru' | 'en' => {
+  const container = useDi();
+  const localeProvider = container.inject(localeProviderToken);
   const { settings } = useLocalSettingsStore();
-  const { locale } = settings;
-  if (locale !== 'auto') {
-    return locale;
+
+  if (settings.locale !== 'auto') {
+    return settings.locale;
   }
 
-  const jiralocale = getJiraLocale();
-  if (jiralocale === 'ru') {
-    return 'ru';
-  }
-  return 'en';
+  const jiraLocale = localeProvider.getJiraLocale();
+  return jiraLocale === 'ru' ? 'ru' : 'en';
 };
 
 export const useGetTextsByLocale = <textsKeys extends string>(texts: Texts<textsKeys>): Record<textsKeys, string> => {
   const locale = useGetLocale();
 
-  // @ts-expect-error - legacy
-  return Object.fromEntries(
-    Object.entries(texts).map(([key, value]) => {
-      // @ts-expect-error - legacy
-      return [key, value[locale]];
-    })
+  return useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(texts).map(([key, value]) => [key, (value as { ru: string; en: string })[locale]])
+      ) as Record<textsKeys, string>,
+    [texts, locale]
   );
-};
-
-export const useGetText = <textsKeys extends string>(texts: Texts<textsKeys>, key: textsKeys) => {
-  const locale = useGetLocale();
-
-  return texts[key][locale];
 };

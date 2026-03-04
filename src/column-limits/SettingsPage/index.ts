@@ -1,9 +1,11 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
+import { WithDi } from '../../shared/diContext';
 import { useColumnLimitsPropertyStore } from '../property/store';
 import { SettingsButtonContainer } from './components/SettingsButton';
 
@@ -79,10 +81,13 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
 
     this.settingsButtonRoot = createRoot(buttonContainer);
     this.settingsButtonRoot.render(
-      React.createElement(SettingsButtonContainer, {
-        getColumns: () => this.getColumns(),
-        getColumnName: (el: HTMLElement) => this.getColumnName(el),
-        swimlanes: this.boardSwimlanes,
+      React.createElement(WithDi, {
+        container: globalContainer,
+        children: React.createElement(SettingsButtonContainer, {
+          getColumns: () => this.getColumns(),
+          getColumnName: (el: HTMLElement) => this.getColumnName(el),
+          swimlanes: this.boardSwimlanes,
+        }),
       })
     );
   }

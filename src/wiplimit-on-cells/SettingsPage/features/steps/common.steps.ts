@@ -104,7 +104,7 @@ When(/^I add a range "([^"]*)"$/, (rangeName: string) => {
   // Type range name in Add range input
   cy.get('#WIP_inputRange').clear().type(rangeName);
   // Select swimlane (required for Add range) - click the Select container, not the hidden input
-  cy.contains('label', 'swimlane').closest('.ant-form-item').find('.ant-select').click();
+  cy.contains('label', 'Swimlane').closest('.ant-form-item').find('.ant-select').click();
   cy.get('.ant-select-dropdown:visible').contains('Frontend').click();
   // Select column (required for Add range)
   cy.contains('label', 'Column').closest('.ant-form-item').find('.ant-select').click();

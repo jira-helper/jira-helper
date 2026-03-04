@@ -14,6 +14,10 @@ export type ColorPickerButtonProps = {
    */
   currentColor?: string;
   /**
+   * Localized "Select color" text for aria-label.
+   */
+  selectColorText: string;
+  /**
    * Callback called when color is changed.
    */
   onColorChange: (color: string) => void;
@@ -45,6 +49,7 @@ const PRESET_COLORS = [
 export const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({
   groupId,
   currentColor = '#ffffff',
+  selectColorText,
   onColorChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -89,7 +94,7 @@ export const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({
                 className={styles.colorOption}
                 style={{ backgroundColor: color }}
                 onClick={() => handleColorSelect(color)}
-                aria-label={`Select color ${color}`}
+                aria-label={`${selectColorText} ${color}`}
               />
             ))}
           </div>

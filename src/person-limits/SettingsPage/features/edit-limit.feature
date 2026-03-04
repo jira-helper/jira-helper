@@ -13,7 +13,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I click "Edit" on the limit for "John Doe"
     Then the person select should show "John Doe"
     And the limit field should show value 5
-    And the button should show "Edit limit"
+    And the button should show "Update limit"
 
   @SC-EDIT-2
   Scenario: Update limit value
@@ -21,7 +21,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     And I set the limit to 10
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 10 columns "all" swimlanes "all" issueTypes "all"
 
   @SC-EDIT-3
@@ -31,7 +31,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I click "Edit" on the limit for "John Doe"
     And I search for "jane" in person name field
     And I select "Jane Doe (jane.doe)" from search results
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see "Jane Doe" in the limits list
     And "John Doe" should not be in the limits list
 
@@ -48,7 +48,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I see checkbox "All columns" is checked
     When I uncheck "All swimlanes"
     And I select only swimlane "Frontend"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "all" swimlanes "Frontend" issueTypes "all"
 
   @SC-EDIT-5
@@ -58,7 +58,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I click "Edit" on the limit for "John Doe"
     And I uncheck "All columns"
     And I select only columns "To Do, In Progress"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "To Do, In Progress" swimlanes "Frontend" issueTypes "all"
 
   @SC-EDIT-5a
@@ -76,7 +76,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     And I click "Edit" on the limit for "John Doe"
     And I uncheck "Count all issue types"
     And I select issue types "Task, Bug"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "To Do, In Progress" swimlanes "Frontend" issueTypes "Task, Bug"
 
   # === REMOVE FILTERS (EXPAND TO ALL) ===
@@ -87,7 +87,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     And I check "All columns"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
 
   @SC-EDIT-8
@@ -96,7 +96,7 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     And I check "All swimlanes"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
 
   @SC-EDIT-9
@@ -105,13 +105,13 @@ Feature: Personal WIP Limit Settings - Edit Limit
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
     And I check "Count all issue types"
-    And I click "Edit limit"
+    And I click "Update limit"
     Then I should see limit: name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
 
   # === PRESERVE FILTERS ===
 
   @SC-EDIT-10
-  Scenario: Edit limit preserves issue type filter
+  Scenario: Update limit preserves issue type filter
     Given a limit: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "Task, Bug"
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"

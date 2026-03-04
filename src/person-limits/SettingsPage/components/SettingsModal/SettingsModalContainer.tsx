@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsModal } from './SettingsModal';
 import { PersonalWipLimitContainer } from '../PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../../stores/settingsUIStore';
 import { createPersonLimit, updatePersonLimit } from '../../actions';
+import { PERSON_LIMITS_TEXTS } from '../../texts';
 import type { SearchUsers } from '../../../../shared/di/jiraApiTokens';
 import type { FormData, Column, Swimlane } from '../../state/types';
 
@@ -21,6 +23,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   onClose,
   onSave,
 }) => {
+  const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -59,7 +62,14 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   };
 
   return (
-    <SettingsModal title="Personal WIP Limit" onClose={onClose} onSave={handleSave} isSaving={isSaving}>
+    <SettingsModal
+      title={texts.modalTitle}
+      onClose={onClose}
+      onSave={handleSave}
+      isSaving={isSaving}
+      okButtonText={texts.save}
+      cancelButtonText={texts.cancel}
+    >
       <PersonalWipLimitContainer
         columns={columns}
         swimlanes={swimlanes}

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { WIPLIMIT_CELLS_TEXTS } from '../../texts';
 import type { WipLimitRange } from '../../../types';
 import { RangeRow } from './RangeRow';
 
@@ -29,23 +31,25 @@ export const RangeTable: React.FC<RangeTableProps> = ({
   onSelectRange,
   getNameLabel,
 }) => {
+  const texts = useGetTextsByLocale(WIPLIMIT_CELLS_TEXTS);
+
   return (
     <form className="aui">
       <table id="WipLimitCells_table" data-testid="ranges table" className="aui aui-table-list">
         <thead>
           <tr>
-            <th style={{ width: '2%' }} scope="col" aria-label="Edit column" />
+            <th style={{ width: '2%' }} scope="col" aria-label={texts.editColumn} />
             <th style={{ width: '30%' }} scope="col">
-              Range name
+              {texts.rangeName}
             </th>
             <th style={{ width: '10%' }} scope="col">
-              WIP limit
+              {texts.wipLimit}
             </th>
             <th style={{ width: '3%' }} scope="col">
-              Disable
+              {texts.disable}
             </th>
             <th style={{ width: '50%' }} scope="col">
-              Cells (swimlane/column)
+              {texts.cellsHeader}
             </th>
           </tr>
         </thead>

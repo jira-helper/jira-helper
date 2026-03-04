@@ -1,8 +1,10 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
+import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
 import { searchUsers } from '../../shared/jiraApi';
 import { SettingsButtonContainer } from './components/SettingsButton';
@@ -90,10 +92,13 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
 
     this.settingsButtonRoot = createRoot(buttonContainer);
     this.settingsButtonRoot.render(
-      React.createElement(SettingsButtonContainer, {
-        boardDataColumns: columns,
-        boardDataSwimlanes: swimlanes,
-        searchUsers,
+      React.createElement(WithDi, {
+        container: globalContainer,
+        children: React.createElement(SettingsButtonContainer, {
+          boardDataColumns: columns,
+          boardDataSwimlanes: swimlanes,
+          searchUsers,
+        }),
       })
     );
   }

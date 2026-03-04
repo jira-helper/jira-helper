@@ -2,10 +2,12 @@ import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { InputNumber, Space, Card } from 'antd';
 import { IssueTypeSelector } from '../../shared/components/IssueTypeSelector';
 import { SwimlaneSelector } from 'src/shared/components/SwimlaneSelector';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { generateColorByFirstChars } from '../shared/utils';
 import type { Column, UIGroup, IssueTypeState } from '../types';
 import { WITHOUT_GROUP_ID } from '../types';
 import { ColorPickerButton } from './components/ColorPickerButton';
+import { COLUMN_LIMITS_TEXTS } from './texts';
 import styles from './styles.module.css';
 
 // --- Extracted Components ---
@@ -34,6 +36,7 @@ interface ColumnGroupProps {
   group: UIGroup;
   issueTypeSelectorState: IssueTypeState;
   swimlanes: Array<{ id: string; name: string }>;
+  texts: { limitForGroup: string; swimlanes: string; allSwimlanes: string; selectColor: string };
   onLimitChange: (groupId: string, limit: number) => void;
   onColorChange: (groupId: string, color: string) => void;
   onSwimlanesChange?: (groupId: string, selectedSwimlanes: Array<{ id: string; name: string }>) => void;
@@ -49,6 +52,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
   group,
   issueTypeSelectorState,
   swimlanes,
+  texts,
   onLimitChange,
   onColorChange,
   onSwimlanesChange,
@@ -86,7 +90,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
     <Card className={styles.columnGroupJH} style={{ marginBottom: 10 }}>
       <Space direction="vertical" style={{ width: '100%' }} size="small">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
-          <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>Limit for group:</span>
+          <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{texts.limitForGroup}</span>
           <InputNumber
             data-group-id={group.id}
             className="group-limits-input-jh"
@@ -113,6 +117,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
           <ColorPickerButton
             groupId={group.id}
             currentColor={group.customHexColor}
+            selectColorText={texts.selectColor}
             onColorChange={color => onColorChange(group.id, color)}
           />
         </div>
@@ -143,8 +148,8 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
               swimlanes={swimlanes}
               value={selectedSwimlaneIds}
               onChange={handleSwimlanesChange}
-              label="Swimlanes"
-              allLabel="All swimlanes"
+              label={texts.swimlanes}
+              allLabel={texts.allSwimlanes}
             />
           </div>
         )}
@@ -164,12 +169,19 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
 interface CreateGroupDropzoneProps {
   dropzoneId: string;
+  dragColumnToCreateGroup: string;
   onDrop: (e: React.DragEvent, targetGroupId: string) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;
 }
 
-const CreateGroupDropzone: React.FC<CreateGroupDropzoneProps> = ({ dropzoneId, onDrop, onDragOver, onDragLeave }) => (
+const CreateGroupDropzone: React.FC<CreateGroupDropzoneProps> = ({
+  dropzoneId,
+  dragColumnToCreateGroup,
+  onDrop,
+  onDragOver,
+  onDragLeave,
+}) => (
   <div
     className={`${styles.addGroupDropzoneJH} dropzone-jh`}
     id={dropzoneId}
@@ -180,7 +192,7 @@ const CreateGroupDropzone: React.FC<CreateGroupDropzoneProps> = ({ dropzoneId, o
     onDragOver={onDragOver}
     onDragLeave={onDragLeave}
   >
-    Drag column over here to create group
+    {dragColumnToCreateGroup}
   </div>
 );
 
@@ -225,6 +237,7 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
   createGroupDropzoneId,
   formRefCallback,
 }) => {
+  const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const formRef = useRef<HTMLDivElement | null>(null);
   const setFormRef = useCallback(
     (el: HTMLDivElement | null) => {
@@ -248,7 +261,7 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
   return (
     <div id={formId} ref={setFormRef} className={styles.form}>
       <div className={styles.formLeftBlock}>
-        <Card title="Without Group" className={styles.columnGroupJH} style={{ marginBottom: 10 }}>
+        <Card title={texts.withoutGroup} className={styles.columnGroupJH} style={{ marginBottom: 10 }}>
           <div
             className={`${styles.columnListJH} dropzone-jh`}
             data-group-id={WITHOUT_GROUP_ID}
@@ -275,6 +288,7 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
             group={group}
             issueTypeSelectorState={getIssueTypeSelectorState(group.id)}
             swimlanes={swimlanes}
+            texts={texts}
             onLimitChange={onLimitChange}
             onColorChange={onColorChange}
             onSwimlanesChange={onSwimlanesChange}
@@ -288,6 +302,7 @@ export const ColumnLimitsForm: React.FC<ColumnLimitsFormProps> = ({
         ))}
         <CreateGroupDropzone
           dropzoneId={createGroupDropzoneId}
+          dragColumnToCreateGroup={texts.dragColumnToCreateGroup}
           onDrop={onDrop}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}

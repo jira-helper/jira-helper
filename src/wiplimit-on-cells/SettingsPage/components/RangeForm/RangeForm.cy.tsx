@@ -5,6 +5,10 @@
  * Tests form behavior: filling, Add range / Add cell mode switching, validation.
  */
 import React from 'react';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { RangeForm } from './RangeForm';
 
 const columns = [
@@ -19,6 +23,15 @@ const swimlanes = [
 ];
 
 describe('RangeForm', () => {
+  beforeEach(() => {
+    globalContainer.reset();
+    registerLogger(globalContainer);
+    globalContainer.register({
+      token: localeProviderToken,
+      value: new MockLocaleProvider('en'),
+    });
+  });
+
   describe('Form filling', () => {
     it('should allow filling all form fields', () => {
       const onAddRange = cy.stub();
@@ -27,13 +40,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('My Range');
@@ -57,13 +72,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={['Critical Path']}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={['Critical Path']}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('New Range');
@@ -77,13 +94,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={['Critical Path']}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={['Critical Path']}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('Critical Path');
@@ -97,13 +116,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={['Critical Path']}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={['Critical Path']}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('New');
@@ -122,13 +143,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('My Range');
@@ -146,13 +169,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('My Range');
@@ -170,13 +195,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.selectAntdOption('#WIPLC_swimlane', 'Frontend');
@@ -197,13 +224,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('My Range');
@@ -227,13 +256,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={['Critical Path']}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={['Critical Path']}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('Critical Path');
@@ -256,13 +287,15 @@ describe('RangeForm', () => {
       cy.wrap(onAddCell).as('onAddCell');
 
       cy.mount(
-        <RangeForm
-          swimlanes={swimlanes}
-          columns={columns}
-          onAddRange={onAddRange}
-          onAddCell={onAddCell}
-          existingRangeNames={[]}
-        />
+        <WithDi container={globalContainer}>
+          <RangeForm
+            swimlanes={swimlanes}
+            columns={columns}
+            onAddRange={onAddRange}
+            onAddCell={onAddCell}
+            existingRangeNames={[]}
+          />
+        </WithDi>
       );
 
       cy.get('#WIP_inputRange').type('My Range');

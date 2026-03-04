@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import type { IWipLimitCellsBoardPageObject } from '../pageObject';
 import { wipLimitCellsBoardPageObjectToken } from '../pageObject';
 import { useWipLimitCellsRuntimeStore } from '../stores';
@@ -151,6 +152,10 @@ export const setupBackground = (): BoardContext => {
 
   const board = createMockBoard();
 
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
   globalContainer.register({
     token: wipLimitCellsBoardPageObjectToken,
     value: board.pageObject,

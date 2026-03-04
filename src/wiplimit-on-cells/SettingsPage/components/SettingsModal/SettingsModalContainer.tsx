@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { WIPLIMIT_CELLS_TEXTS } from '../../texts';
 import { SettingsModal } from './SettingsModal';
 import { RangeForm } from '../RangeForm/RangeForm';
 import { RangeTable } from '../RangeTable/RangeTable';
@@ -26,6 +28,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   onClose,
   onSave,
 }) => {
+  const texts = useGetTextsByLocale(WIPLIMIT_CELLS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
   const { data, actions } = useWipLimitCellsSettingsUIStore();
 
@@ -74,7 +77,14 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   };
 
   return (
-    <SettingsModal title="Edit WipLimit on cells" onSave={handleSave} onClose={onClose} isSaving={isSaving}>
+    <SettingsModal
+      title={texts.modalTitle}
+      onSave={handleSave}
+      onClose={onClose}
+      isSaving={isSaving}
+      okButtonText={texts.save}
+      cancelButtonText={texts.cancel}
+    >
       <RangeForm
         swimlanes={swimlanes}
         columns={columns}
