@@ -88,8 +88,16 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
     const swimlanes = boardEditData.swimlanesConfig?.swimlanes ?? [];
     const columns = (boardEditData.rapidListConfig?.mappedColumns ?? []).filter(col => !col.isKanPlanColumn);
 
+    const buttonContainerId = 'jh-wiplimit-cells-settings-btn';
+
+    // Check if button already exists
+    if (document.getElementById(buttonContainerId)) {
+      return;
+    }
+
     const sharedContainer = getOrCreateButtonsContainer();
     const buttonContainer = document.createElement('div');
+    buttonContainer.id = buttonContainerId;
     sharedContainer.appendChild(buttonContainer);
 
     // Save callback

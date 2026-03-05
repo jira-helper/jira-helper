@@ -76,8 +76,16 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   }
 
   renderEditButton(): void {
+    const buttonContainerId = 'jh-person-limits-settings-btn';
+
+    // Check if button already exists
+    if (document.getElementById(buttonContainerId)) {
+      return;
+    }
+
     const sharedContainer = getOrCreateButtonsContainer();
     const buttonContainer = document.createElement('div');
+    buttonContainer.id = buttonContainerId;
     sharedContainer.appendChild(buttonContainer);
 
     const columns: Column[] = (this.boardDataColumns || []).map(col => ({
