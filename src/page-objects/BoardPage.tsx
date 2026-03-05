@@ -2,6 +2,61 @@ import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
+/**
+ * Swimlane DOM element with id, row element and header container.
+ */
+export interface SwimlaneElement {
+  id: string;
+  element: Element;
+  header: Element;
+}
+
+export interface IssueCountOptions {
+  excludeDone?: boolean;
+  excludeSubtasks?: boolean;
+}
+
+const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
+
+type BoardSelectors = Pick<
+  IBoardPagePageObject['selectors'],
+  'pool' | 'swimlaneRow' | 'swimlaneHeader' | 'issue' | 'column' | 'columnHeader' | 'columnTitle'
+>;
+
+function getSwimlaneColumns(swimlane: Element): Element[] {
+  const columnsContainer = swimlane.querySelector('.ghx-columns');
+  if (columnsContainer) {
+    return Array.from(columnsContainer.children).filter(el => el.classList.contains('ghx-column'));
+  }
+  return Array.from(swimlane.querySelectorAll(':scope > .ghx-column'));
+}
+
+function getColumnTitleToIdMap(selectors: BoardSelectors): Map<string, string> {
+  const header = document.querySelector(selectors.columnHeader);
+  const titleElements = header?.querySelectorAll(selectors.columnTitle);
+  if (!titleElements) return new Map();
+  const map = new Map<string, string>();
+  titleElements.forEach(titleEl => {
+    const column = titleEl.closest(selectors.column);
+    const id = column?.getAttribute('data-id') || column?.getAttribute('data-column-id');
+    const title = titleEl.textContent?.trim();
+    if (id && title) map.set(title, id);
+  });
+  return map;
+}
+
+function countIssuesInColumn(column: Element, issueSelector: string, options?: IssueCountOptions): number {
+  const issues = column.querySelectorAll(issueSelector);
+  if (!options?.excludeDone && !options?.excludeSubtasks) {
+    return issues.length;
+  }
+  return Array.from(issues).filter(issue => {
+    if (options.excludeDone && issue.classList.contains('ghx-done')) return false;
+    if (options.excludeSubtasks && issue.classList.contains('ghx-issue-subtask')) return false;
+    return true;
+  }).length;
+}
+
 class CardPageObject {
   selectors = {
     issueKey: '.ghx-key',
@@ -83,6 +138,8 @@ export interface IBoardPagePageObject {
     columnHeader: string;
     columnTitle: string;
     daysInColumn: string;
+    swimlaneHeader: string;
+    swimlaneRow: string;
   };
 
   classlist: {
@@ -95,6 +152,14 @@ export interface IBoardPagePageObject {
   getDaysInColumn(issueId: string): number | null;
   hideDaysInColumn(): void;
   getHtml(): string;
+  getSwimlanes(): SwimlaneElement[];
+  getSwimlaneHeader(swimlaneId: string): Element | null;
+  getIssueCountInSwimlane(swimlaneId: string, options?: IssueCountOptions): number;
+  getIssueCountByColumn(swimlaneId: string, options?: IssueCountOptions): number[];
+  getIssueCountForColumns(swimlaneId: string, columns: string[], options?: IssueCountOptions): number;
+  insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void;
+  removeSwimlaneComponent(header: Element, key: string): void;
+  highlightSwimlane(header: Element, exceeded: boolean): void;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
@@ -109,6 +174,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     columnHeader: '#ghx-column-headers',
     columnTitle: '.ghx-column-title',
     daysInColumn: '.ghx-days',
+    swimlaneHeader: '.ghx-swimlane-header',
+    swimlaneRow: '.ghx-swimlane',
   },
 
   classlist: {
@@ -116,9 +183,9 @@ export const BoardPagePageObject: IBoardPagePageObject = {
   },
 
   getColumns(): string[] {
-    return Array.from(
-      document.querySelector(this.selectors.columnHeader)?.querySelectorAll(this.selectors.columnTitle) || []
-    ).map(column => column.textContent?.trim() || '');
+    return Array.from(document.querySelectorAll('.ghx-column-title, #ghx-column-headers .ghx-column h2')).map(
+      el => el.textContent?.trim() || ''
+    );
   },
 
   listenCards(callback: (cards: CardPageObject[]) => void) {
@@ -242,6 +309,115 @@ export const BoardPagePageObject: IBoardPagePageObject = {
 
   getHtml(): string {
     return document.body.innerHTML;
+  },
+
+  getSwimlanes(): SwimlaneElement[] {
+    const pool = document.querySelector(this.selectors.pool);
+    const swimlanes = pool
+      ? pool.querySelectorAll(this.selectors.swimlaneRow)
+      : document.querySelectorAll(this.selectors.swimlaneRow);
+    return Array.from(swimlanes)
+      .map(swimlane => {
+        const id = swimlane.getAttribute('swimlane-id');
+        const header = swimlane.querySelector(this.selectors.swimlaneHeader);
+        if (!id || !header) return null;
+        return { id, element: swimlane, header };
+      })
+      .filter((s): s is SwimlaneElement => s !== null);
+  },
+
+  getSwimlaneHeader(swimlaneId: string): Element | null {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    return swimlane?.querySelector(this.selectors.swimlaneHeader) ?? null;
+  },
+
+  getIssueCountInSwimlane(swimlaneId: string, options?: IssueCountOptions): number {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return 0;
+    const columns = getSwimlaneColumns(swimlane);
+    return columns.reduce(
+      (acc: number, column: Element) => acc + countIssuesInColumn(column, this.selectors.issue, options),
+      0
+    );
+  },
+
+  getIssueCountByColumn(swimlaneId: string, options?: IssueCountOptions): number[] {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return [];
+    const columnsContainer = swimlane.querySelector('.ghx-columns');
+    if (!columnsContainer) return [];
+    const counts: number[] = [];
+    columnsContainer.childNodes.forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const column = node as HTMLElement;
+        counts.push(countIssuesInColumn(column, this.selectors.issue, options));
+      }
+    });
+    return counts;
+  },
+
+  getIssueCountForColumns(swimlaneId: string, columns: string[], options?: IssueCountOptions): number {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return 0;
+    const columnTitleToId = getColumnTitleToIdMap(this.selectors);
+    const swimlaneColumns = getSwimlaneColumns(swimlane);
+    return columns.reduce((acc: number, columnTitle: string) => {
+      const columnId = columnTitleToId.get(columnTitle);
+      if (!columnId) return acc;
+      const column = swimlaneColumns.find((col: Element) => col.getAttribute('data-column-id') === columnId);
+      if (!column) return acc;
+      return acc + countIssuesInColumn(column, this.selectors.issue, options);
+    }, 0);
+  },
+
+  insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void {
+    let container = header.querySelector(`[data-jh-attached-key="${key}"]`);
+    if (container) return;
+
+    // Make header a flex container so histogram appears inline with title
+    (header as HTMLElement).style.display = 'flex';
+
+    container = document.createElement('span');
+    container.setAttribute('data-jh-attached-key', key);
+    header.insertAdjacentElement('afterbegin', container);
+
+    const root = createRoot(container);
+    root.render(component);
+
+    let rootsByKey = swimlaneRootsStore.get(header);
+    if (!rootsByKey) {
+      rootsByKey = new Map<string, Root>();
+      swimlaneRootsStore.set(header, rootsByKey);
+    }
+    rootsByKey.set(key, root);
+  },
+
+  removeSwimlaneComponent(header: Element, key: string): void {
+    const container = header.querySelector(`[data-jh-attached-key="${key}"]`);
+    if (!container) return;
+
+    const rootsByKey = swimlaneRootsStore.get(header);
+    if (rootsByKey) {
+      const root = rootsByKey.get(key);
+      if (root) {
+        root.unmount();
+        rootsByKey.delete(key);
+      }
+    }
+    container.remove();
+  },
+
+  highlightSwimlane(header: Element, exceeded: boolean): void {
+    const swimlane = header.closest(this.selectors.swimlaneRow) as HTMLElement;
+    const swimlaneDescription = swimlane?.querySelector('.ghx-description') as HTMLElement | null;
+    const innerHeader = header as HTMLElement;
+
+    const bgColor = exceeded ? 'rgb(255, 86, 48)' : '';
+    const textColor = exceeded ? 'rgb(255, 215, 0)' : '';
+
+    if (swimlane) swimlane.style.backgroundColor = bgColor;
+    if (swimlaneDescription) swimlaneDescription.style.color = textColor;
+    if (innerHeader) innerHeader.style.backgroundColor = bgColor;
   },
 };
 

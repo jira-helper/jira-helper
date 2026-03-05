@@ -1,3 +1,5 @@
+import React from 'react';
+import { act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BoardPagePageObject } from './BoardPage';
 
@@ -271,7 +273,214 @@ describe('BoardPagePageObject', () => {
   });
 });
 
+describe('BoardPagePageObject swimlane methods', () => {
+  const setupSwimlaneDOM = () => {
+    const headerGroup = document.createElement('div');
+    headerGroup.id = 'ghx-column-headers';
+    headerGroup.innerHTML = `
+      <ul class="ghx-columns">
+        <li class="ghx-column" data-id="col1" data-column-id="col1"><span class="ghx-column-title">To Do</span></li>
+        <li class="ghx-column" data-id="col2" data-column-id="col2"><span class="ghx-column-title">In Progress</span></li>
+        <li class="ghx-column" data-id="col3" data-column-id="col3"><span class="ghx-column-title">Done</span></li>
+      </ul>
+    `;
+    document.body.appendChild(headerGroup);
+
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="sw1">
+        <div class="ghx-swimlane-header">
+          <span class="ghx-heading">Swimlane 1</span>
+        </div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" data-issue-key="ISSUE-1"></div>
+            <div class="ghx-issue ghx-done" data-issue-key="ISSUE-2"></div>
+            <div class="ghx-issue ghx-issue-subtask" data-issue-key="ISSUE-3"></div>
+          </div>
+          <div class="ghx-column" data-column-id="col2">
+            <div class="ghx-issue" data-issue-key="ISSUE-4"></div>
+          </div>
+          <div class="ghx-column" data-column-id="col3"></div>
+        </div>
+      </div>
+      <div class="ghx-swimlane" swimlane-id="sw2">
+        <div class="ghx-swimlane-header">
+          <span class="ghx-heading">Swimlane 2</span>
+        </div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1"></div>
+          <div class="ghx-column" data-column-id="col2">
+            <div class="ghx-issue" data-issue-key="ISSUE-5"></div>
+          </div>
+          <div class="ghx-column" data-column-id="col3"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+    return { pool, headerGroup };
+  };
+
+  it('getSwimlanes should return all swimlanes with id, element and header', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const swimlanes = BoardPagePageObject.getSwimlanes();
+
+    expect(swimlanes).toHaveLength(2);
+    expect(swimlanes[0].id).toBe('sw1');
+    expect(swimlanes[0].element).toBeInstanceOf(Element);
+    expect(swimlanes[0].header).toBeInstanceOf(Element);
+    expect(swimlanes[0].header.querySelector('.ghx-heading')?.textContent).toBe('Swimlane 1');
+    expect(swimlanes[1].id).toBe('sw2');
+  });
+
+  it('getSwimlaneHeader should return header for given swimlane id', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const header = BoardPagePageObject.getSwimlaneHeader('sw1');
+
+    expect(header).not.toBeNull();
+    expect(header?.querySelector('.ghx-heading')?.textContent).toBe('Swimlane 1');
+  });
+
+  it('getSwimlaneHeader should return null for non-existent swimlane', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const header = BoardPagePageObject.getSwimlaneHeader('non-existent');
+
+    expect(header).toBeNull();
+  });
+
+  it('getIssueCountInSwimlane should count all issues by default', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    expect(BoardPagePageObject.getIssueCountInSwimlane('sw1')).toBe(4); // ISSUE-1, ISSUE-2, ISSUE-3, ISSUE-4
+    expect(BoardPagePageObject.getIssueCountInSwimlane('sw2')).toBe(1); // ISSUE-5
+  });
+
+  it('getIssueCountInSwimlane should exclude done and subtasks when options provided', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const options = { excludeDone: true, excludeSubtasks: true };
+    expect(BoardPagePageObject.getIssueCountInSwimlane('sw1', options)).toBe(2); // ISSUE-1, ISSUE-4
+    expect(BoardPagePageObject.getIssueCountInSwimlane('sw2', options)).toBe(1); // ISSUE-5
+  });
+
+  it('getIssueCountByColumn should return counts per column in order', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const counts = BoardPagePageObject.getIssueCountByColumn('sw1');
+
+    expect(counts).toEqual([3, 1, 0]); // col1: 3 (all issues), col2: 1 (ISSUE-4), col3: 0
+  });
+
+  it('getIssueCountByColumn should exclude done and subtasks when options provided', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const options = { excludeDone: true, excludeSubtasks: true };
+    const counts = BoardPagePageObject.getIssueCountByColumn('sw1', options);
+
+    expect(counts).toEqual([1, 1, 0]); // col1: 1 (ISSUE-1 only), col2: 1 (ISSUE-4), col3: 0
+  });
+
+  it('getIssueCountForColumns should count all issues by default', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    expect(BoardPagePageObject.getIssueCountForColumns('sw1', ['To Do', 'In Progress'])).toBe(4);
+    expect(BoardPagePageObject.getIssueCountForColumns('sw1', ['To Do'])).toBe(3);
+    expect(BoardPagePageObject.getIssueCountForColumns('sw1', ['Done'])).toBe(0);
+  });
+
+  it('getIssueCountForColumns should exclude done and subtasks when options provided', () => {
+    document.body.innerHTML = '';
+    setupSwimlaneDOM();
+
+    const options = { excludeDone: true, excludeSubtasks: true };
+    expect(BoardPagePageObject.getIssueCountForColumns('sw1', ['To Do', 'In Progress'], options)).toBe(2);
+    expect(BoardPagePageObject.getIssueCountForColumns('sw1', ['To Do'], options)).toBe(1);
+  });
+
+  it('insertSwimlaneComponent should insert React component into header', () => {
+    document.body.innerHTML = '';
+    const { pool } = setupSwimlaneDOM();
+    const header = pool.querySelector('.ghx-swimlane-header')!;
+    const Badge = () => React.createElement('span', { 'data-testid': 'limit-badge' }, '3/5');
+
+    act(() => {
+      BoardPagePageObject.insertSwimlaneComponent(header, React.createElement(Badge), 'limit-badge');
+    });
+
+    const container = header.querySelector('[data-jh-attached-key="limit-badge"]');
+    expect(container).not.toBeNull();
+    expect(container?.querySelector('[data-testid="limit-badge"]')?.textContent).toBe('3/5');
+  });
+
+  it('insertSwimlaneComponent should not duplicate when called twice with same key', () => {
+    document.body.innerHTML = '';
+    const { pool } = setupSwimlaneDOM();
+    const header = pool.querySelector('.ghx-swimlane-header')!;
+    const Badge = () => React.createElement('span', { 'data-testid': 'limit-badge' }, '3/5');
+
+    BoardPagePageObject.insertSwimlaneComponent(header, React.createElement(Badge), 'limit-badge');
+    BoardPagePageObject.insertSwimlaneComponent(header, React.createElement(Badge), 'limit-badge');
+
+    const containers = header.querySelectorAll('[data-jh-attached-key="limit-badge"]');
+    expect(containers).toHaveLength(1);
+  });
+
+  it('removeSwimlaneComponent should remove component and unmount React root', () => {
+    document.body.innerHTML = '';
+    const { pool } = setupSwimlaneDOM();
+    const header = pool.querySelector('.ghx-swimlane-header')!;
+    const Badge = () => React.createElement('span', { 'data-testid': 'limit-badge' }, '3/5');
+
+    BoardPagePageObject.insertSwimlaneComponent(header, React.createElement(Badge), 'limit-badge');
+    expect(header.querySelector('[data-jh-attached-key="limit-badge"]')).not.toBeNull();
+
+    BoardPagePageObject.removeSwimlaneComponent(header, 'limit-badge');
+    expect(header.querySelector('[data-jh-attached-key="limit-badge"]')).toBeNull();
+  });
+
+  it('highlightSwimlane should apply exceeded styles when exceeded is true', () => {
+    document.body.innerHTML = '';
+    const { pool } = setupSwimlaneDOM();
+    const header = pool.querySelector('.ghx-swimlane-header')!;
+    const swimlane = header.closest('.ghx-swimlane') as HTMLElement;
+
+    BoardPagePageObject.highlightSwimlane(header, true);
+
+    expect(swimlane.style.backgroundColor).toBe('rgb(255, 86, 48)');
+    expect((header as HTMLElement).style.backgroundColor).toBe('rgb(255, 86, 48)');
+  });
+
+  it('highlightSwimlane should remove styles when exceeded is false', () => {
+    document.body.innerHTML = '';
+    const { pool } = setupSwimlaneDOM();
+    const header = pool.querySelector('.ghx-swimlane-header')!;
+    const swimlane = header.closest('.ghx-swimlane') as HTMLElement;
+
+    BoardPagePageObject.highlightSwimlane(header, true);
+    BoardPagePageObject.highlightSwimlane(header, false);
+
+    expect(swimlane.style.backgroundColor).toBe('');
+    expect((header as HTMLElement).style.backgroundColor).toBe('');
+  });
+});
+
 describe('CardPageObject', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
   it('getCardElement should return the card element', () => {
     // ARRANGE
     const cardElement = document.createElement('div');

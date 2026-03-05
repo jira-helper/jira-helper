@@ -1,4 +1,4 @@
-import { IBoardPagePageObject } from './BoardPage';
+import { IBoardPagePageObject, SwimlaneElement } from './BoardPage';
 
 export const BoardPagePageObjectMock: IBoardPagePageObject = {
   selectors: {
@@ -12,6 +12,8 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
     columnHeader: '.ghx-column-header',
     columnTitle: '.ghx-column-title',
     daysInColumn: '.ghx-days',
+    swimlaneHeader: '.ghx-swimlane-header',
+    swimlaneRow: '.ghx-swimlane',
   },
   classlist: {
     flagged: 'ghx-flagged',
@@ -22,4 +24,12 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   getDaysInColumn: () => null,
   hideDaysInColumn: () => {},
   getHtml: () => '',
+  getSwimlanes: (): SwimlaneElement[] => [],
+  getSwimlaneHeader: () => null,
+  getIssueCountInSwimlane: () => 0,
+  getIssueCountByColumn: () => [],
+  getIssueCountForColumns: () => 0,
+  insertSwimlaneComponent: () => {},
+  removeSwimlaneComponent: () => {},
+  highlightSwimlane: () => {},
 };

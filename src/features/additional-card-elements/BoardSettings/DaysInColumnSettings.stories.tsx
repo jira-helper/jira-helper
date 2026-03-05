@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { WithDi } from 'src/shared/diContext';
 import { Container, Token } from 'dioma';
-import { IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
 import React from 'react';
@@ -19,6 +19,8 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
     columnHeader: '#ghx-column-headers',
     columnTitle: '.ghx-column-title',
     daysInColumn: '.ghx-days',
+    swimlaneHeader: '.ghx-swimlane-header',
+    swimlaneRow: '.ghx-swimlane',
   },
   classlist: {
     flagged: 'ghx-flagged',
@@ -29,6 +31,14 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
   getDaysInColumn: () => 3,
   hideDaysInColumn: () => {},
   getHtml: () => '',
+  getSwimlanes: (): SwimlaneElement[] => [],
+  getSwimlaneHeader: () => null,
+  getIssueCountInSwimlane: () => 0,
+  getIssueCountByColumn: () => [],
+  getIssueCountForColumns: () => 0,
+  insertSwimlaneComponent: () => {},
+  removeSwimlaneComponent: () => {},
+  highlightSwimlane: () => {},
 };
 
 const mockContainer = new Container();

@@ -1,0 +1,1 @@
+export { PropertyModel } from './PropertyModel';

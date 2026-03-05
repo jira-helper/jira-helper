@@ -9,7 +9,7 @@ type Message = {
 export type LoggerLevel = 'info' | 'error' | 'warn';
 const levels: LoggerLevel[] = ['info', 'error', 'warn'];
 
-class Logger {
+export class Logger {
   private messagesSize: number = 2000;
 
   private messages: Message[] = [];

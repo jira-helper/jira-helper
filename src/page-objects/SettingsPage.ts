@@ -1,7 +1,8 @@
 import { getSettingsTab } from '../routing';
 import { CardColorsSettingsTabPageObject } from './CardColorsSettingsTabPageObject';
+import { SwimlaneLimitsSettingsTabPageObject } from './SwimlaneLimitsSettingsTabPageObject';
 
-type SettingsTabs = 'cardColors';
+type SettingsTabs = 'cardColors' | 'swimlanes';
 
 /**
  * PageObject for SettingsPage
@@ -41,6 +42,10 @@ class SettingsPage {
 
   public static getCardColorsSettingsTabPageObject() {
     return new CardColorsSettingsTabPageObject();
+  }
+
+  public static getSwimlaneLimitsSettingsTabPageObject() {
+    return new SwimlaneLimitsSettingsTabPageObject();
   }
 }
 

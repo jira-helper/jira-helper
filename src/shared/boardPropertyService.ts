@@ -2,7 +2,7 @@ import { getBoardIdFromURL } from 'src/routing';
 import { Container, Token } from 'dioma';
 import { deleteBoardProperty, getBoardProperty, updateBoardProperty } from './jiraApi';
 
-interface BoardPropertyServiceI {
+export interface BoardPropertyServiceI {
   getBoardProperty<T>(property: string): Promise<T | undefined>;
   updateBoardProperty<T>(property: string, value: T, params: Record<string, any>): void;
   deleteBoardProperty(property: string, params: Record<string, any>): void;

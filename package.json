@@ -129,6 +129,7 @@
     "svelte": "^5.1.12",
     "ts-results": "^3.3.0",
     "typed-emitter": "^2.1.0",
+    "valtio": "^2.3.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

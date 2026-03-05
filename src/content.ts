@@ -6,9 +6,15 @@ import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';
 import AddChartGrid from './charts/AddChartGrid';
 import runModifications from './shared/runModifications';
-import SwimlaneStats from './swimlane/SwimlaneStats';
-import SwimlaneLimits from './swimlane/SwimlaneLimits';
-import SwimlaneSettingsPopup from './swimlane/SwimlaneSettingsPopup';
+// Legacy swimlane code - replaced by new implementations
+// import SwimlaneStats from './swimlane/SwimlaneStats';
+// import SwimlaneLimits from './swimlane/SwimlaneLimits';
+// import SwimlaneSettingsPopup from './swimlane/SwimlaneSettingsPopup';
+
+// New swimlane implementations
+import { BoardPageModification as SwimlaneLimitsBoardPage } from './swimlane-wip-limits/BoardPage';
+import { SettingsPageModification as SwimlaneLimitsSettingsPage } from './swimlane-wip-limits/SettingsPage';
+import { HistogramModification as SwimlaneHistogramBoardPage } from './swimlane-histogram';
 import WIPLimitsSettingsPage from './column-limits/SettingsPage';
 import WIPLimitsBoardPage from './column-limits/BoardPage';
 import BugTemplate from './bug-template/BugTemplate';
@@ -78,10 +84,12 @@ async function start() {
 
   const modificationsMap = {
     [Routes.BOARD]: [
-      SwimlaneStats,
+      // SwimlaneStats, // Legacy - replaced by SwimlaneHistogramBoardPage
+      SwimlaneHistogramBoardPage,
       PersonLimits,
       WIPLimitsBoardPage,
-      SwimlaneLimits,
+      // SwimlaneLimits, // Legacy - replaced by SwimlaneLimitsBoardPage
+      SwimlaneLimitsBoardPage,
       MarkFlaggedIssues,
       FieldLimitsBoardPage,
       WiplimitOnCells,
@@ -94,7 +102,8 @@ async function start() {
     ],
     [Routes.BOARD_BACKLOG]: [AdditionalCardElementsBoardBacklogPage],
     [Routes.SETTINGS]: [
-      SwimlaneSettingsPopup,
+      // SwimlaneSettingsPopup, // Legacy - replaced by SwimlaneLimitsSettingsPage
+      SwimlaneLimitsSettingsPage,
       WIPLimitsSettingsPage,
       PersonLimitsSettings,
       FieldLimitsSettingsPage,

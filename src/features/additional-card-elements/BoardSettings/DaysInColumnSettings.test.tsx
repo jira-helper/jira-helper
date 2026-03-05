@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Container } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
-import { boardPagePageObjectToken, IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { boardPagePageObjectToken, IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import * as useDaysInColumnSettingsModule from './hooks/useDaysInColumnSettings';
@@ -61,6 +61,8 @@ describe('DaysInColumnSettings', () => {
         columnHeader: '#ghx-column-headers',
         columnTitle: '.ghx-column-title',
         daysInColumn: '.ghx-days',
+        swimlaneHeader: '.ghx-swimlane-header',
+        swimlaneRow: '.ghx-swimlane',
       },
       classlist: {
         flagged: 'ghx-flagged',
@@ -71,6 +73,14 @@ describe('DaysInColumnSettings', () => {
       getDaysInColumn: () => null,
       hideDaysInColumn: () => {},
       getHtml: () => '',
+      getSwimlanes: (): SwimlaneElement[] => [],
+      getSwimlaneHeader: () => null,
+      getIssueCountInSwimlane: () => 0,
+      getIssueCountByColumn: () => [],
+      getIssueCountForColumns: () => 0,
+      insertSwimlaneComponent: () => {},
+      removeSwimlaneComponent: () => {},
+      highlightSwimlane: () => {},
     };
 
     container.register({

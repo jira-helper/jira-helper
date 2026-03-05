@@ -1,8 +1,9 @@
 ---
-description: Cursor Memory Bank Rules
-globs: 
-alwaysApply: true
+description: 
+globs: **.kek
+alwaysApply: false
 ---
+
 # Memory Bank Instructions
 
 This file provides instructions for using and maintaining the Memory Bank in this project. The Memory Bank is a structured documentation system designed to preserve project context, requirements, and decisions across sessions and contributors. It is inspired by the Cline Memory Bank and extended for use with Model Context Protocol (MCP) tools.
@@ -40,4 +41,4 @@ Add custom documentation (e.g., features, API, deployment) as needed. Reference 
 - Ensure the Memory Bank directory is included in your project and kept up to date.
 
 ---
-For more information, see the official Memory Bank MCP documentation or contact your project lead. 
+For more information, see the official Memory Bank MCP documentation or contact your project lead.
