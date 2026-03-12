@@ -77,7 +77,6 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
                 person: {
                   name: limit.person.name,
                   displayName: limit.person.displayName || limit.person.name,
-                  avatar: limit.person.avatar,
                   self: limit.person.self,
                 },
                 limit: limit.limit,

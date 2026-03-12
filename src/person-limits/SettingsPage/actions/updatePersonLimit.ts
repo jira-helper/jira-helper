@@ -32,7 +32,6 @@ export function updatePersonLimit({
       ? {
           name: formData.person.name,
           displayName: formData.person.displayName,
-          avatar: formData.person.avatar,
           self: formData.person.self,
         }
       : existingLimit.person,

@@ -13,7 +13,11 @@ export type PersonLimit = {
     /** @deprecated Use `name` instead. Kept optional for backward compatibility with old saved data. */
     displayName?: string;
     self: string;
-    avatar: string;
+    /**
+     * @deprecated Avatar URL is now generated dynamically from `name`.
+     * Kept optional for backward compatibility.
+     */
+    avatar?: string;
   };
   limit: number;
   columns: Array<{ id: string; name: string }>;

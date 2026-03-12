@@ -3,7 +3,6 @@ import type { PersonLimit } from '../../property/types';
 export type SelectedPerson = {
   name: string;
   displayName: string;
-  avatar: string;
   self: string;
 };
 

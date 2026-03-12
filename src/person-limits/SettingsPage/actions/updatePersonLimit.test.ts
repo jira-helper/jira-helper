@@ -21,7 +21,6 @@ describe('updatePersonLimit', () => {
     person: {
       name: 'john.doe',
       displayName: 'John Doe',
-      avatar: 'https://jira.example.com/avatar.png',
       self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
     },
     limit: 10,
@@ -53,7 +52,6 @@ describe('updatePersonLimit', () => {
       person: {
         name: mockFormData.person!.name,
         displayName: mockFormData.person!.displayName,
-        avatar: mockFormData.person!.avatar,
         self: mockFormData.person!.self,
       },
       limit: 10,
@@ -74,7 +72,6 @@ describe('updatePersonLimit', () => {
     expect(result.person.name).toEqual(mockFormData.person!.name);
     expect(result.person.displayName).toEqual(mockFormData.person!.displayName);
     expect(result.person.self).toEqual(mockFormData.person!.self);
-    expect(result.person.avatar).toEqual(mockFormData.person!.avatar);
     expect(result.person).not.toBe(existingLimit.person);
   });
 
@@ -84,7 +81,6 @@ describe('updatePersonLimit', () => {
       person: {
         name: 'jane.doe',
         displayName: 'Jane Doe',
-        avatar: 'https://jira.example.com/jane-avatar.png',
         self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
       },
     };
@@ -98,7 +94,6 @@ describe('updatePersonLimit', () => {
 
     expect(result.person.name).toEqual('jane.doe');
     expect(result.person.displayName).toEqual('Jane Doe');
-    expect(result.person.avatar).toEqual('https://jira.example.com/jane-avatar.png');
   });
 
   it('should preserve existing person when formData.person is null', () => {

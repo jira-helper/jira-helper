@@ -151,7 +151,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'testuser',
           displayName: 'Test User',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }], // Only one column
@@ -194,7 +193,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'testuser',
           displayName: 'Test User',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [], // empty = all columns
@@ -241,7 +239,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'testuser',
           displayName: 'Test User',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [], // empty = all columns
@@ -293,7 +290,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'testuser',
           displayName: 'Test User',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }],
@@ -413,7 +409,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             name: formData.person?.name || 'unknown',
             displayName: formData.person?.displayName || 'unknown',
             self: formData.person?.self || 'https://test.com/user',
-            avatar: formData.person?.avatar || 'https://test.com/avatar.png',
           };
 
           const personLimit: PersonLimit = {
@@ -482,7 +477,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             name: 'testuser',
             displayName: 'Test User',
             self: 'https://test.com/user',
-            avatar: 'https://test.com/avatar.png',
           },
           limit: 5,
           columns: [],
@@ -527,7 +521,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             name: 'testuser',
             displayName: 'Test User',
             self: 'https://test.com/user',
-            avatar: 'https://test.com/avatar.png',
           },
           limit: 5,
           columns: [],
@@ -573,7 +566,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             name: 'testuser',
             displayName: 'Test User',
             self: 'https://test.com/user',
-            avatar: 'https://test.com/avatar.png',
           },
           limit: 5,
           columns: [
@@ -635,7 +627,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             name: 'testuser',
             displayName: 'Test User',
             self: 'https://test.com/user',
-            avatar: 'https://test.com/avatar.png',
           },
           limit: 5,
           columns: [
@@ -770,7 +761,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'john.doe',
           displayName: 'John Doe',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [],
@@ -817,7 +807,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'john.doe',
           displayName: 'John Doe',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [],
@@ -892,7 +881,6 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           name: 'testuser',
           displayName: 'Test User',
           self: 'https://test.com/user',
-          avatar: 'https://test.com/avatar.png',
         },
         limit: 5,
         columns: [],

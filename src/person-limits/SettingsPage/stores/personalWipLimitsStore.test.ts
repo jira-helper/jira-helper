@@ -67,7 +67,7 @@ describe('settingsUIStore', () => {
 
     it('should clear formData when adding a limit', () => {
       useSettingsUIStore.getState().actions.setFormData({
-        person: { name: 'test', displayName: 'test', avatar: '', self: '' },
+        person: { name: 'test', displayName: 'test', self: '' },
         limit: 5,
         selectedColumns: [],
         swimlanes: [],
@@ -241,7 +241,6 @@ describe('settingsUIStore', () => {
         person: {
           name: 'testuser',
           displayName: 'Test User',
-          avatar: 'https://test.com/avatar.png',
           self: 'https://test.com/user',
         },
         limit: 5,
@@ -253,7 +252,7 @@ describe('settingsUIStore', () => {
 
     it('should clear formData when setting editingId to null', () => {
       useSettingsUIStore.getState().actions.setFormData({
-        person: { name: 'test', displayName: 'test', avatar: '', self: '' },
+        person: { name: 'test', displayName: 'test', self: '' },
         limit: 5,
         selectedColumns: [],
         swimlanes: [],
@@ -270,7 +269,7 @@ describe('settingsUIStore', () => {
   describe('setFormData', () => {
     it('should set formData', () => {
       const formData = {
-        person: { name: 'testuser', displayName: 'testuser', avatar: '', self: '' },
+        person: { name: 'testuser', displayName: 'testuser', self: '' },
         limit: 5,
         selectedColumns: ['col1'],
         swimlanes: ['swim1'],
@@ -415,7 +414,7 @@ describe('settingsUIStore', () => {
     describe('S3: addLimit очищает formData', () => {
       it('should clear formData after adding a limit', () => {
         useSettingsUIStore.getState().actions.setFormData({
-          person: { name: 'test', displayName: 'test', avatar: '', self: '' },
+          person: { name: 'test', displayName: 'test', self: '' },
           limit: 5,
           selectedColumns: [],
           swimlanes: [],
@@ -492,7 +491,7 @@ describe('settingsUIStore', () => {
         expect(useSettingsUIStore.getState().data.editingId).toBeNull();
 
         useSettingsUIStore.getState().actions.setFormData({
-          person: { name: 'test', displayName: 'test', avatar: '', self: '' },
+          person: { name: 'test', displayName: 'test', self: '' },
           limit: 5,
           selectedColumns: [],
           swimlanes: [],
@@ -521,7 +520,7 @@ describe('settingsUIStore', () => {
         useSettingsUIStore.getState().actions.setEditingId(1);
 
         useSettingsUIStore.getState().actions.setFormData({
-          person: { name: 'updated', displayName: 'updated', avatar: '', self: '' },
+          person: { name: 'updated', displayName: 'updated', self: '' },
           limit: 10,
           selectedColumns: [],
           swimlanes: [],

@@ -96,7 +96,6 @@ export const WithSelectedUser: Story = {
       initialValue={{
         name: 'john.doe',
         displayName: 'John Doe',
-        avatar: 'https://via.placeholder.com/32',
         self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
       }}
     />

@@ -42,7 +42,7 @@ Given(
 
     const limit: PersonLimit = {
       id: getNextLimitId(),
-      person: { name: login, displayName, self: '', avatar: '' },
+      person: { name: login, displayName, self: '' },
       limit: parseInt(value, 10),
       columns: findColumnsByNames(colNames),
       swimlanes: findSwimlanesByNames(swimNames),

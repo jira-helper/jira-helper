@@ -67,7 +67,6 @@ export const PersonNameSelect: React.FC<PersonNameSelectProps> = ({
         onChange({
           name: user.name,
           displayName: user.displayName,
-          avatar: user.avatarUrls?.['32x32'] || user.avatarUrls?.['16x16'] || '',
           self: user.self,
         });
       }

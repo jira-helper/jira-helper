@@ -2,6 +2,7 @@ import { Token, Container } from 'dioma';
 import { updateBoardProperty, getBoardProperty, searchUsers, getProjectIssueTypes } from 'src/shared/jiraApi';
 import type { JiraUser, ProjectIssueType } from 'src/shared/jiraApi';
 import type { Result } from 'ts-results';
+import { buildAvatarUrl } from 'src/shared/utils/avatarUrl';
 
 export type UpdateBoardProperty = typeof updateBoardProperty;
 export const updateBoardPropertyToken = new Token<UpdateBoardProperty>('updateBoardProperty');
@@ -15,9 +16,13 @@ export const searchUsersToken = new Token<SearchUsers>('searchUsers');
 export type GetProjectIssueTypes = (projectKey: string) => Promise<Result<ProjectIssueType[], Error>>;
 export const getProjectIssueTypesToken = new Token<GetProjectIssueTypes>('getProjectIssueTypes');
 
+export type BuildAvatarUrl = typeof buildAvatarUrl;
+export const buildAvatarUrlToken = new Token<BuildAvatarUrl>('buildAvatarUrl');
+
 export const registerJiraApiInDI = (container: Container) => {
   container.register({ token: updateBoardPropertyToken, value: updateBoardProperty });
   container.register({ token: getBoardPropertyToken, value: getBoardProperty });
   container.register({ token: searchUsersToken, value: searchUsers });
   container.register({ token: getProjectIssueTypesToken, value: getProjectIssueTypes });
+  container.register({ token: buildAvatarUrlToken, value: buildAvatarUrl });
 };

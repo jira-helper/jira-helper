@@ -2,7 +2,9 @@
 import React, { useRef, useEffect } from 'react';
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
+import { registerJiraApiInDI } from 'src/shared/di/jiraApiTokens';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { WithDi } from 'src/shared/diContext';
 import { AvatarsContainer } from '../components/AvatarsContainer';
 import { useRuntimeStore, getInitialState } from '../stores';
 import { usePersonWipLimitsPropertyStore } from '../../property';
@@ -215,6 +217,7 @@ export const setupBackground = () => {
     token: personLimitsBoardPageObjectToken,
     value: mockPageObject,
   });
+  registerJiraApiInDI(globalContainer);
 
   usePersonWipLimitsPropertyStore.getState().actions.reset();
   useRuntimeStore.setState(getInitialState());
@@ -234,10 +237,10 @@ const BoardWithAvatars: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <WithDi container={globalContainer}>
       <div ref={boardRef} data-cy="board-container" />
       <AvatarsContainer />
-    </>
+    </WithDi>
   );
 };
 

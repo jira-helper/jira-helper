@@ -8,7 +8,6 @@ export type PersonLimitStats = {
     name: string;
     /** @deprecated Use `name` instead. */
     displayName?: string;
-    avatar: string;
   };
   limit: number;
   /** Issues that match this person's limit criteria */

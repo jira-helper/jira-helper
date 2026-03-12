@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { globalContainer } from 'dioma';
+import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { registerPersonLimitsBoardPageObjectInDI, personLimitsBoardPageObjectToken } from './pageObject';
@@ -16,7 +17,7 @@ type PersonLimitData = {
       name: string;
       displayName?: string;
       self: string;
-      avatar: string;
+      avatar?: string;
     };
     columns: Array<{ id: string; name: string }>;
     swimlanes: Array<{ id: string; name: string }>;
@@ -118,7 +119,12 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
     document.querySelector('#subnav-title')?.appendChild(container);
 
     const root = createRoot(container);
-    root.render(React.createElement(AvatarsContainer));
+    root.render(
+      React.createElement(WithDi, {
+        container: globalContainer,
+        children: React.createElement(AvatarsContainer),
+      })
+    );
 
     // Cleanup on unmount
     this.sideEffects.push(() => {

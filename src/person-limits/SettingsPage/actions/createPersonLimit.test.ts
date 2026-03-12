@@ -7,7 +7,6 @@ describe('createPersonLimit', () => {
     person: {
       name: 'john.doe',
       displayName: 'John Doe',
-      avatar: 'https://jira.example.com/avatar.png',
       self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
     },
     limit: 5,
@@ -20,7 +19,6 @@ describe('createPersonLimit', () => {
     name: 'john.doe',
     displayName: 'John Doe',
     self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-    avatar: 'https://jira.example.com/avatar.png',
   };
 
   const mockColumns = [

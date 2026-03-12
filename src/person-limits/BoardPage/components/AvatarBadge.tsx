@@ -76,7 +76,7 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
         className={cn(styles.avatarImage, 'jira-tooltip', { [styles.active]: isActive })}
       />
       <div className={cn(styles.badge, styles[status])} data-status={status}>
-        {currentCount} / {limit}
+        {currentCount}/{limit}
       </div>
     </div>
   );

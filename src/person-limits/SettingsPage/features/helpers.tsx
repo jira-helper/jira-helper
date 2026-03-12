@@ -51,7 +51,7 @@ export const createLimit = (
   swims: Array<{ id: string; name: string }> = []
 ): PersonLimit => ({
   id,
-  person: { name, displayName, self: '', avatar: '' },
+  person: { name, displayName, self: '' },
   limit,
   columns: cols,
   swimlanes: swims,
@@ -152,7 +152,6 @@ export const mountComponent = () => {
           name: formData.person.name,
           displayName: formData.person.displayName,
           self: formData.person.self,
-          avatar: formData.person.avatar,
         },
         columns,
         swimlanes,

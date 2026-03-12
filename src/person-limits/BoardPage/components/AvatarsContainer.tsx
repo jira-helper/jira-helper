@@ -1,4 +1,6 @@
 import React from 'react';
+import { useDi } from 'src/shared/diContext';
+import { buildAvatarUrlToken } from 'src/shared/di/jiraApiTokens';
 import { useRuntimeStore } from '../stores';
 import { showOnlyChosen } from '../actions';
 import { AvatarBadge } from './AvatarBadge';
@@ -10,6 +12,8 @@ import { AvatarBadge } from './AvatarBadge';
  * Handles click events to toggle person filter.
  */
 export const AvatarsContainer: React.FC = () => {
+  const container = useDi();
+  const buildAvatarUrl = container.inject(buildAvatarUrlToken);
   const stats = useRuntimeStore(s => s.data.stats);
   const activeLimitId = useRuntimeStore(s => s.data.activeLimitId);
   const { toggleActiveLimitId } = useRuntimeStore(s => s.actions);
@@ -31,7 +35,7 @@ export const AvatarsContainer: React.FC = () => {
       {stats.map(stat => (
         <AvatarBadge
           key={stat.id}
-          avatar={stat.person.avatar}
+          avatar={buildAvatarUrl(stat.person.name)}
           personName={stat.person.name}
           limitId={stat.id}
           currentCount={stat.issues.length}

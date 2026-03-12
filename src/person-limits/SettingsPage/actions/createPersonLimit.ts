@@ -16,7 +16,6 @@ export function createPersonLimit({
     name: string;
     displayName?: string;
     self: string;
-    avatar: string;
   };
   columns: Column[];
   swimlanes: Swimlane[];

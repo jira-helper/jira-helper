@@ -51,7 +51,6 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
           name: formData.person.name,
           displayName: formData.person.displayName,
           self: formData.person.self,
-          avatar: formData.person.avatar,
         },
         columns,
         swimlanes,
