@@ -7,7 +7,9 @@ description: Проектирование архитектуры фич jira-hel
 
 ## Обязательный контекст
 
-**Перед началом работы прочитай**: `docs/architecture_guideline.md` — полное описание архитектуры.
+**Перед началом работы прочитай**:
+- `docs/architecture_guideline.md` — **единый источник истины** по архитектуре, сущностям, принципам
+- `docs/state-valtio.md` (новые фичи) или `docs/state-zustand.md` (legacy) — best practices state management
 
 ---
 
@@ -21,7 +23,7 @@ description: Проектирование архитектуры фич jira-hel
 **Выходные данные для оркестратора**:
 - Mermaid-диаграммы (компоненты, data flow)
 - Типы в `types.ts` с JSDoc
-- Интерфейсы stores
+- Интерфейсы models/stores
 - Структура файлов
 
 ---
@@ -33,59 +35,16 @@ description: Проектирование архитектуры фич jira-hel
 - Понять, что должна делать фича
 - Определить, где данные хранятся (Jira Property, локально, runtime)
 - Определить точки интеграции с существующим кодом
+- Решить: Valtio (новая фича) или Zustand (расширение legacy)
 
 ### 2. Декомпозиция на слои
 
-Для каждой фичи определи:
+Следуй структуре из `docs/architecture_guideline.md`:
+- **Types** → **State (Model/Store)** → **Logic** → **View (Container/Presentation)**
 
-| Слой | Что нужно | Ответственность |
-|------|-----------|-----------------|
-| **Types** | `types.ts` | Доменные типы с JSDoc |
-| **Property Store** | `property/store.ts` | Синхронизация с Jira (если нужно) |
-| **UI Store** | `stores/settingsUIStore.ts` | Состояние экрана (формы, редактирование) |
-| **Runtime Store** | `stores/runtimeStore.ts` | Состояние на доске (если нужно) |
-| **Actions** | `actions/*.ts` | Бизнес-логика, координация stores |
-| **Utils** | `utils/*.ts` | Чистые функции (трансформации, валидация) |
-| **Container** | `components/*Container.tsx` | Подписка на store, DI |
-| **Presentation** | `components/*.tsx` | Чистые UI-компоненты |
+### 3. Mermaid-диаграммы
 
-### 3. Описание интерфейсов
-
-Для каждого store и сервиса опиши:
-
-```typescript
-/**
- * @module FeatureUIStore
- * 
- * Стор для состояния экрана настроек.
- * 
- * ## Жизненный цикл
- * Живёт пока открыто модальное окно настроек.
- * 
- * ## Использование
- * ```ts
- * const { data, actions } = useFeatureUIStore();
- * actions.setEditingId(123);
- * ```
- */
-interface FeatureUIStoreState {
-  /** Текущие данные для редактирования */
-  data: FeatureData;
-  
-  /** Состояние загрузки */
-  state: 'initial' | 'loading' | 'loaded';
-  
-  actions: {
-    /** Установить ID редактируемого элемента */
-    setEditingId: (id: number | null) => void;
-    // ...
-  };
-}
-```
-
-### 4. Mermaid-диаграммы
-
-Для каждой фичи создай диаграммы:
+Для каждой фичи создай:
 
 #### Диаграмма компонентов
 
@@ -93,151 +52,90 @@ interface FeatureUIStoreState {
 flowchart TD
     subgraph SettingsPage
         Container[FeatureContainer]
+        style Container fill:#4169E1,color:white
         Form[FeatureForm]
-        Table[FeatureTable]
+        style Form fill:#20B2AA,color:white
     end
     
-    subgraph Stores
-        UIStore[UIStore]
-        PropertyStore[PropertyStore]
+    subgraph Models
+        UIModel[UIModel]
+        style UIModel fill:#9370DB,color:white
     end
     
-    Container --> UIStore
+    Container -->|useSnapshot| UIModel
     Container --> Form
-    Container --> Table
-    UIStore --> PropertyStore
 ```
 
-Диаграмма должна следовать следующим правилам:
-- При описании фичей sub-графы должны отображать иерархию папок. Т.е. в фалйах есть фича, в ней Board и Settings, внутри каждой свои модели и компонент. Это должно быть отражено и на диаграмме
-- Используй color coding. Нужно чтобы компоненты были бирюзовые, контейнеры - синие, page-object - оранжевые, сервисы - оранжевые, модели - фиолетовые
+Color coding:
+- Контейнеры — синие (#4169E1)
+- Компоненты — бирюзовые (#20B2AA)
+- Models — фиолетовые (#9370DB)
+- PageObject / Services — оранжевые (#FFA500)
 
 #### Диаграмма Data Flow
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant Component
-    participant UIStore
-    participant Action
-    participant PropertyStore
+    participant Container
+    participant UIModel
+    participant PropertyModel
     participant JiraAPI
     
-    User->>Component: Click Add
-    Component->>Action: addItem()
-    Action->>UIStore: updateData()
-    Action->>PropertyStore: save()
-    PropertyStore->>JiraAPI: setBoardProperty()
-    JiraAPI-->>PropertyStore: OK
-    PropertyStore-->>UIStore: notify
-    UIStore-->>Component: re-render
+    User->>Container: Click Add
+    Container->>UIModel: model.addItem()
+    UIModel->>PropertyModel: this.propertyModel.save()
+    PropertyModel->>JiraAPI: setBoardProperty()
+    Note over Container: useSnapshot auto re-renders
 ```
 
-### 5. Формат плана реализации
-
-Выдавай план в таком формате:
+### 4. Формат плана реализации
 
 ```markdown
 ## План реализации: [Название фичи]
 
 ### Обзор
-[1-2 предложения о том, что делает фича]
+[1-2 предложения]
 
 ### Диаграммы
-[Mermaid-диаграммы компонентов и data flow]
+[Mermaid-диаграммы]
 
 ### Структура файлов
-```
-src/my-feature/
-├── types.ts
-├── property/
-│   ├── store.ts
-│   └── actions/
-├── SettingsPage/
-│   ├── stores/
-│   ├── actions/
-│   └── components/
-└── BoardPage/
-```
+[Дерево — см. примеры в docs/architecture_guideline.md]
 
 ### Типы (`types.ts`)
-[Описание основных типов с примерами]
+[Типы с JSDoc]
 
-### Stores
-
-#### Property Store
-- **Назначение**: [что хранит]
-- **Жизненный цикл**: [когда создаётся/уничтожается]
-- **Интерфейс**: [основные поля и actions]
-
-#### UI Store  
-- **Назначение**: [что хранит]
-- **Жизненный цикл**: [когда создаётся/уничтожается]
-- **Интерфейс**: [основные поля и actions]
-
-### Actions
-| Action | Что делает | Какие stores использует |
-|--------|-----------|------------------------|
+### Models / Stores
+[State + Methods для каждого, жизненный цикл]
 
 ### Компоненты
 | Компонент | Тип | Ответственность |
 |-----------|-----|-----------------|
 
 ### Шаги реализации
-1. [ ] Создать types.ts с JSDoc
-2. [ ] Создать Property Store + тесты
-3. [ ] Создать UI Store + тесты
-4. [ ] Написать actions + тесты
-5. [ ] Создать Container + Presentation компоненты
-6. [ ] Написать component тесты + stories
+[Чек-лист задач]
 ```
 
 ---
 
-## Ключевые принципы
+## Анализ существующей архитектуры
 
-### Разделение Stores
-
-- **Property Store** — синхронизация с Jira, живёт пока открыта доска
-- **UI Store** — состояние экрана, живёт пока открыто модальное окно
-- **Runtime Store** — состояние фичи на странице
-
-> Если данные имеют разный жизненный цикл — это разные stores.
-
-### CQS (Command Query Separation)
-
-- **Query** — чтение данных, без side effects
-- **Command** — изменение состояния
-
-### Result вместо throw
-
-Все async функции с внешним миром возвращают `Result<T, Error>`.
-
-### Actions как посредники
-
-Stores НЕ вызывают друг друга напрямую. Координация — через actions.
-
+```bash
+npm run analyze -- src/person-limits
+npm run analyze -- src/person-limits --output src/person-limits/ARCHITECTURE.md
 ```
-PropertyStore ←─actions─→ UIStore ←─actions─→ RuntimeStore
-```
+
+Скрипт `analyze-modules.mjs` находит Models, Stores, Actions, DI Tokens, Containers и показывает зависимости + Mermaid-диаграмму.
 
 ---
 
 ## Чек-лист при проектировании
 
-- [ ] Stores разделены по жизненному циклу?
-- [ ] Вся логика вне React-компонентов?
-- [ ] Queries не имеют side effects?
-- [ ] Есть `getInitialState()` в каждом store?
-- [ ] Сервисы через DI?
-- [ ] Actions логируют? Ошибки через Result?
-
----
-
-## Антипаттерны
-
-- Бизнес-логика в React-компонентах
-- `useState` для данных из store
-- Один store для property И UI состояния
-- Прямые вызовы между stores
-- `throw/catch` вместо `Result<T, Error>`
+- [ ] State разделён по жизненному циклу (property / UI / runtime)?
+- [ ] Вся логика в state layer, не в React-компонентах?
+- [ ] Queries не имеют side effects (CQS)?
+- [ ] Есть `reset()` / `getInitialState()` для тестов?
+- [ ] Зависимости через DI (constructor для Valtio, inject для Zustand)?
+- [ ] Логирование и Result для async операций?
+- [ ] DOM работа через PageObject + DI?

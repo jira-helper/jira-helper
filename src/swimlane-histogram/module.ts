@@ -7,33 +7,20 @@ import { HistogramModel } from './models/HistogramModel';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { loggerToken } from 'src/shared/Logger';
 
-type HistogramModelInjection = {
-  model: HistogramModel;
-  useModel: () => HistogramModel;
-};
-
-const histogramModelCache = new WeakMap<Container, HistogramModelInjection>();
-
 /**
  * Регистрирует HistogramModel в DI-контейнере.
  */
 export function registerSwimlaneHistogramModule(container: Container = globalContainer): void {
+  const pageObject = container.inject(boardPagePageObjectToken);
+  const logger = container.inject(loggerToken);
+
+  const model = proxy(new HistogramModel(pageObject, logger));
+
   container.register({
     token: histogramModelToken,
-    factory: c => {
-      let cached = histogramModelCache.get(c);
-      if (!cached) {
-        const pageObject = c.inject(boardPagePageObjectToken);
-        const logger = c.inject(loggerToken);
-
-        const model = proxy(new HistogramModel(pageObject, logger));
-        cached = {
-          model,
-          useModel: () => useSnapshot(model) as HistogramModel,
-        };
-        histogramModelCache.set(c, cached);
-      }
-      return cached;
+    value: {
+      model,
+      useModel: () => useSnapshot(model) as HistogramModel,
     },
   });
 }

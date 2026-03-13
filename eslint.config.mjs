@@ -8,6 +8,14 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import requireGherkinStepsImport from './eslint-local-rules/require-gherkin-steps-import.js';
 import noChainedStubAs from './eslint-local-rules/no-chained-stub-as.js';
+import noDirectValtioSnapshot from './eslint-local-rules/no-direct-valtio-snapshot.js';
+
+const localPlugin = {
+  rules: {
+    'no-direct-valtio-snapshot': noDirectValtioSnapshot,
+    'require-gherkin-steps-import': requireGherkinStepsImport,
+  },
+};
 
 export default [
   {
@@ -53,6 +61,7 @@ export default [
       prettier: prettierPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
+      local: localPlugin,
     },
     settings: {
       react: { version: 'detect' },
@@ -83,7 +92,9 @@ export default [
 
       'consistent-return': 'off',
       'no-alert': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn'
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      'local/no-direct-valtio-snapshot': 'error',
     },
   },
 
@@ -120,13 +131,6 @@ export default [
 
   {
     files: ['**/*.feature.cy.tsx'],
-    plugins: {
-      local: {
-        rules: {
-          'require-gherkin-steps-import': requireGherkinStepsImport,
-        },
-      },
-    },
     rules: {
       'local/require-gherkin-steps-import': 'error',
     },

@@ -22,7 +22,7 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col2   |          | Task      |
       | john.doe | John Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "3 / 5"
+    Then the counter for "john.doe" should show "3/5"
     And the counter for "john.doe" should be green
 
   @SC-DISPLAY-3
@@ -36,7 +36,7 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col2   |          | Task      |
       | john.doe | John Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "3 / 3"
+    Then the counter for "john.doe" should show "3/3"
     And the counter for "john.doe" should be yellow
 
   @SC-DISPLAY-4
@@ -51,7 +51,7 @@ Feature: Personal WIP Limits on Board - Display
       | jane.doe | Jane Doe          | col2   |          | Task      |
       | jane.doe | Jane Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "jane.doe" should show "4 / 3"
+    Then the counter for "jane.doe" should show "4/3"
     And the counter for "jane.doe" should be red
     And all 4 issues for "jane.doe" should be highlighted red
 
@@ -65,7 +65,7 @@ Feature: Personal WIP Limits on Board - Display
       | jane.doe | Jane Doe          | col2   |          | Task      |
       | jane.doe | Jane Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "0 / 5"
+    Then the counter for "john.doe" should show "0/5"
     And the counter for "john.doe" should be green
 
   @SC-DISPLAY-6
@@ -82,9 +82,9 @@ Feature: Personal WIP Limits on Board - Display
       | jane.doe | Jane Doe          | col2   |          | Task      |
       | jane.doe | Jane Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "2 / 3"
+    Then the counter for "john.doe" should show "2/3"
     And the counter for "john.doe" should be green
-    And the counter for "jane.doe" should show "3 / 2"
+    And the counter for "jane.doe" should show "3/2"
     And the counter for "jane.doe" should be red
 
   @SC-DISPLAY-7
@@ -101,8 +101,8 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col2   |          | Task      |
       | john.doe | John Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the 1st counter for "john.doe" should show "1 / 2" and be green
-    And the 2nd counter for "john.doe" should show "4 / 3" and be red
+    Then the 1st counter for "john.doe" should show "1/2" and be green
+    And the 2nd counter for "john.doe" should show "4/3" and be red
 
   @SC-DISPLAY-8
   Scenario: Limits configured but board is empty
@@ -110,7 +110,7 @@ Feature: Personal WIP Limits on Board - Display
       | person   | personDisplayName | limit | columns | swimlanes | issueTypes |
       | john.doe | John Doe          | 5     |         |           |            |
     When the board is displayed
-    Then the counter for "john.doe" should show "0 / 5"
+    Then the counter for "john.doe" should show "0/5"
     And the counter for "john.doe" should be green
 
   @SC-DISPLAY-9
@@ -124,7 +124,7 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col2   | sw1      | Task      |
       | john.doe | John Doe          | col2   | sw2      | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "2 / 2"
+    Then the counter for "john.doe" should show "2/2"
     And the counter for "john.doe" should be yellow
 
   @SC-DISPLAY-10
@@ -138,7 +138,7 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col2   |          | Bug       |
       | john.doe | John Doe          | col2   |          | Bug       |
     When the board is displayed
-    Then the counter for "john.doe" should show "2 / 2"
+    Then the counter for "john.doe" should show "2/2"
     And the counter for "john.doe" should be yellow
 
   @SC-DISPLAY-11
@@ -151,7 +151,7 @@ Feature: Personal WIP Limits on Board - Display
       | j.doe    | John Doe          | col2   |          | Task      |
       | j.doe    | John Doe          | col2   |          | Task      |
     When the board is displayed
-    Then the counter for "john.doe" should show "2 / 2"
+    Then the counter for "john.doe" should show "2/2"
     And the counter for "john.doe" should be yellow
 
   @SC-DISPLAY-12
@@ -167,5 +167,5 @@ Feature: Personal WIP Limits on Board - Display
       | john.doe | John Doe          | col1   | sw2      | Bug       |
       | john.doe | John Doe          | col2   | sw1      | Bug       |
     When the board is displayed
-    Then the counter for "john.doe" should show "2 / 2"
+    Then the counter for "john.doe" should show "2/2"
     And the counter for "john.doe" should be yellow

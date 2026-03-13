@@ -12,80 +12,47 @@ import { loggerToken } from 'src/shared/Logger';
 import { getBoardIdFromURL } from 'src/routing';
 import { getBoardEditData } from 'src/shared/jiraApi';
 
-const propertyModelCache = new WeakMap<Container, { model: PropertyModel; useModel: () => PropertyModel }>();
-const settingsUIModelCache = new WeakMap<Container, { model: SettingsUIModel; useModel: () => SettingsUIModel }>();
-const boardRuntimeModelCache = new WeakMap<
-  Container,
-  { model: BoardRuntimeModel; useModel: () => BoardRuntimeModel }
->();
-
 /**
  * Регистрирует все модели фичи swimlane-wip-limits.
  */
 export function registerSwimlaneWipLimitsModule(container: Container = globalContainer): void {
-  // PropertyModel (singleton per container)
+  const boardPropertyService = container.inject(BoardPropertyServiceToken);
+  const pageObject = container.inject(boardPagePageObjectToken);
+  const logger = container.inject(loggerToken);
+
+  // PropertyModel
+  const propertyModel = proxy(new PropertyModel(boardPropertyService, logger));
   container.register({
     token: propertyModelToken,
-    factory: c => {
-      let cached = propertyModelCache.get(c);
-      if (!cached) {
-        const boardPropertyService = c.inject(BoardPropertyServiceToken);
-        const logger = c.inject(loggerToken);
-        const model = proxy(new PropertyModel(boardPropertyService, logger));
-        cached = {
-          model,
-          useModel: () => useSnapshot(model) as PropertyModel,
-        };
-        propertyModelCache.set(c, cached);
-      }
-      return cached;
+    value: {
+      model: propertyModel,
+      useModel: () => useSnapshot(propertyModel) as PropertyModel,
     },
   });
 
-  // SettingsUIModel (singleton per container)
+  // SettingsUIModel
+  const getBoardData = async () => {
+    const boardId = getBoardIdFromURL();
+    if (!boardId) throw new Error('No board ID');
+    return getBoardEditData(boardId);
+  };
+
+  const settingsUIModel = proxy(new SettingsUIModel(propertyModel, getBoardData, logger));
   container.register({
     token: settingsUIModelToken,
-    factory: c => {
-      let cached = settingsUIModelCache.get(c);
-      if (!cached) {
-        const { model: propertyModel } = c.inject(propertyModelToken);
-        const logger = c.inject(loggerToken);
-
-        const getBoardData = async () => {
-          const boardId = getBoardIdFromURL();
-          if (!boardId) throw new Error('No board ID');
-          return getBoardEditData(boardId);
-        };
-
-        const model = proxy(new SettingsUIModel(propertyModel as PropertyModel, getBoardData, logger));
-        cached = {
-          model,
-          useModel: () => useSnapshot(model) as SettingsUIModel,
-        };
-        settingsUIModelCache.set(c, cached);
-      }
-      return cached;
+    value: {
+      model: settingsUIModel,
+      useModel: () => useSnapshot(settingsUIModel) as SettingsUIModel,
     },
   });
 
-  // BoardRuntimeModel (singleton per container)
+  // BoardRuntimeModel
+  const boardRuntimeModel = proxy(new BoardRuntimeModel(propertyModel, pageObject, logger));
   container.register({
     token: boardRuntimeModelToken,
-    factory: c => {
-      let cached = boardRuntimeModelCache.get(c);
-      if (!cached) {
-        const { model: propertyModel } = c.inject(propertyModelToken);
-        const pageObject = c.inject(boardPagePageObjectToken);
-        const logger = c.inject(loggerToken);
-
-        const model = proxy(new BoardRuntimeModel(propertyModel as PropertyModel, pageObject, logger));
-        cached = {
-          model,
-          useModel: () => useSnapshot(model) as BoardRuntimeModel,
-        };
-        boardRuntimeModelCache.set(c, cached);
-      }
-      return cached;
+    value: {
+      model: boardRuntimeModel,
+      useModel: () => useSnapshot(boardRuntimeModel) as BoardRuntimeModel,
     },
   });
 }
