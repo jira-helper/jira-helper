@@ -1,0 +1,29 @@
+.badge {
+  margin-bottom: 2px;
+  height: 25px;
+  font-size: 0.8rem;
+  line-height: 25px;
+  margin-left: 4px;
+  min-width: 20px;
+  text-align: center;
+  border-radius: 5px;
+  color: white;
+  cursor: help;
+  position: relative;
+  background-color: #3366ff;
+  padding-left: 3px;
+  padding-right: 3px;
+  display: inline-block;
+}
+
+.stats {
+  position: absolute;
+  top: -15px;
+  left: -6px;
+  border-radius: 50%;
+  color: white;
+  padding: 5px 2px;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 400;
+}

@@ -13,10 +13,23 @@ Cypress.Commands.add('drag', (sourceSelector, targetSelector) => {
  * @param optionLabel - Label text of the option to select (e.g., 'Frontend')
  */
 Cypress.Commands.add('selectAntdOption', (selector: string, optionLabel: string) => {
-  // Click on the Select container - find the parent ant-select element
-  cy.get(selector).closest('.ant-select').click();
-  // Wait for dropdown to appear
-  cy.get('.ant-select-dropdown', { timeout: 5000 }).should('be.visible');
-  // Find option by label text and click
-  cy.get('.ant-select-dropdown').contains(optionLabel).click();
+  cy.get(selector)
+    .closest('.ant-select')
+    .then($select => {
+      if (!$select.hasClass('ant-select-open')) {
+        cy.wrap($select).click();
+      }
+    });
+  cy.get('.ant-select-dropdown', { timeout: 5000 })
+    .not('.ant-select-dropdown-hidden')
+    .should('be.visible')
+    .contains(optionLabel)
+    .click();
+  cy.get(selector)
+    .closest('.ant-select')
+    .then($select => {
+      if ($select.hasClass('ant-select-open')) {
+        cy.get('body').click(0, 0, { force: true });
+      }
+    });
 });
