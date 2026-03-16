@@ -11,6 +11,7 @@ export interface IFieldLimitsBoardPageObject {
   getExtraFieldTexts(extraField: Element): string[];
   colorCard(issue: Element, color: string): void;
   resetCardColor(issue: Element): void;
+  resetAllCardColors(issueSelector: string): void;
   insertSubnavComponent(component: React.ReactNode, key: string): void;
   removeSubnavComponent(key: string): void;
 }
@@ -65,6 +66,15 @@ export class FieldLimitsBoardPageObject implements IFieldLimitsBoardPageObject {
   }
 
   /**
+   * Сбрасывает цвет фона всех карточек по CSS-селектору.
+   */
+  resetAllCardColors(issueSelector: string): void {
+    document.querySelectorAll(issueSelector).forEach(issue => {
+      (issue as HTMLElement).style.backgroundColor = '';
+    });
+  }
+
+  /**
    * Вставляет React-компонент в subnav.
    */
   insertSubnavComponent(component: React.ReactNode, key: string): void {
@@ -75,8 +85,7 @@ export class FieldLimitsBoardPageObject implements IFieldLimitsBoardPageObject {
 
     const wrapper = document.createElement('div');
     wrapper.setAttribute('data-jh-field-limits', key);
-    wrapper.style.display = 'inline-block';
-    wrapper.style.marginLeft = '8px';
+    wrapper.style.display = 'contents';
     subnavTitle.appendChild(wrapper);
 
     const root = createRoot(wrapper);

@@ -27,6 +27,7 @@ describe('BoardRuntimeModel', () => {
       getExtraFieldTexts: vi.fn(),
       colorCard: vi.fn(),
       resetCardColor: vi.fn(),
+      resetAllCardColors: vi.fn(),
       insertSubnavComponent: vi.fn(),
       removeSubnavComponent: vi.fn(),
     } as unknown as IFieldLimitsBoardPageObject;
@@ -151,7 +152,6 @@ describe('BoardRuntimeModel', () => {
         isOverLimit: true,
         isOnLimit: false,
         calcType: CalcType.EXACT_VALUE,
-        issues: [],
       };
       model.stats = { 'limit-1': stats };
 
@@ -171,7 +171,6 @@ describe('BoardRuntimeModel', () => {
         isOverLimit: false,
         isOnLimit: true,
         calcType: CalcType.EXACT_VALUE,
-        issues: [],
       };
       model.stats = { 'limit-1': stats };
 
@@ -191,7 +190,6 @@ describe('BoardRuntimeModel', () => {
         isOverLimit: false,
         isOnLimit: false,
         calcType: CalcType.EXACT_VALUE,
-        issues: [],
       };
       model.stats = { 'limit-1': stats };
 
@@ -224,7 +222,6 @@ describe('BoardRuntimeModel', () => {
         isOverLimit: false,
         isOnLimit: false,
         calcType: CalcType.EXACT_VALUE,
-        issues: [],
       };
       model.stats = { 'limit-1': stats };
 
@@ -258,7 +255,6 @@ describe('BoardRuntimeModel', () => {
           isOverLimit: true,
           isOnLimit: false,
           calcType: CalcType.EXACT_VALUE,
-          issues: [],
         },
       };
 
@@ -279,7 +275,6 @@ describe('BoardRuntimeModel', () => {
           isOverLimit: false,
           isOnLimit: false,
           calcType: CalcType.EXACT_VALUE,
-          issues: [],
         },
       };
 
@@ -333,8 +328,7 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('destroy', () => {
-    it('should call resetCardColor for all issues and reset state', () => {
-      const mockIssue = document.createElement('div');
+    it('should call resetAllCardColors and reset state', () => {
       const model = new BoardRuntimeModel(
         mockPropertyModel,
         mockFieldLimitsPageObject,
@@ -348,14 +342,13 @@ describe('BoardRuntimeModel', () => {
           isOverLimit: true,
           isOnLimit: false,
           calcType: CalcType.EXACT_VALUE,
-          issues: [{ issue: mockIssue, countValues: 1 }],
         },
       };
       model.isInitialized = true;
 
       model.destroy();
 
-      expect(mockFieldLimitsPageObject.resetCardColor).toHaveBeenCalledWith(mockIssue);
+      expect(mockFieldLimitsPageObject.resetAllCardColors).toHaveBeenCalledWith('.ghx-issue');
       expect(model.settings).toEqual({ limits: {} });
       expect(model.stats).toEqual({});
       expect(model.isInitialized).toBe(false);
@@ -376,7 +369,6 @@ describe('BoardRuntimeModel', () => {
         isOverLimit: false,
         isOnLimit: false,
         calcType: CalcType.EXACT_VALUE,
-        issues: [],
       };
       model.stats = { 'limit-1': expectedStats };
 

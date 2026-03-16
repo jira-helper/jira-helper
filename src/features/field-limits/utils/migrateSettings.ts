@@ -86,5 +86,10 @@ export function migrateSettings(settings: unknown): FieldLimitsSettings {
     }
   }
 
+  for (const limit of Object.values(migratedLimits)) {
+    limit.columns = limit.columns.map(String);
+    limit.swimlanes = limit.swimlanes.map(String);
+  }
+
   return { limits: migratedLimits };
 }

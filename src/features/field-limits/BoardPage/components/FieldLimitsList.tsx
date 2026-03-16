@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FieldLimitBadge } from './FieldLimitBadge';
 import { boardRuntimeModelToken } from '../../tokens';
 import { useDi } from 'src/shared/diContext';
@@ -20,6 +20,23 @@ export const FieldLimitsList: React.FC = () => {
   const actions = model as BoardRuntimeModel;
 
   const limitKeys = Object.keys(snap.settings.limits);
+
+  useEffect(() => {
+    const statsKeys = Object.keys(snap.stats);
+    window.console.log(
+      `[jira-helper] FieldLimitsList render: ${limitKeys.length} limits in settings, ${statsKeys.length} in stats. ` +
+        `LimitKeys: [${limitKeys.join(', ')}]. StatsKeys: [${statsKeys.join(', ')}]`
+    );
+    for (const key of limitKeys) {
+      const limit = snap.settings.limits[key];
+      const hasStats = key in snap.stats;
+      window.console.log(
+        `[jira-helper]   limit "${key}": fieldId=${limit.fieldId}, calcType=${limit.calcType}, ` +
+          `fieldValue="${limit.fieldValue}", columns=[${limit.columns}], swimlanes=[${limit.swimlanes}], ` +
+          `hasStats=${hasStats}`
+      );
+    }
+  });
 
   if (limitKeys.length === 0) return null;
 

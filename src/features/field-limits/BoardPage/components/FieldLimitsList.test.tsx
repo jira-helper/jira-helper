@@ -95,7 +95,6 @@ describe('FieldLimitsList', () => {
           isOverLimit: false,
           isOnLimit: false,
           calcType: CalcType.EXACT_VALUE,
-          issues: [],
         };
       if (limitKey === 'fieldId:Bug')
         return {
@@ -104,7 +103,6 @@ describe('FieldLimitsList', () => {
           isOverLimit: false,
           isOnLimit: false,
           calcType: CalcType.EXACT_VALUE,
-          issues: [],
         };
       return undefined;
     });

@@ -116,6 +116,7 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
     }
 
     const container = document.createElement('div');
+    container.style.display = 'contents';
     document.querySelector('#subnav-title')?.appendChild(container);
 
     const root = createRoot(container);

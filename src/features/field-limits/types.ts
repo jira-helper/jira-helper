@@ -48,7 +48,6 @@ export interface FieldLimitStats {
   isOverLimit: boolean;
   isOnLimit: boolean;
   calcType: CalcType;
-  issues: Array<{ issue: Element; countValues: number }>;
 }
 
 /** Поле из card layout настроек Jira */

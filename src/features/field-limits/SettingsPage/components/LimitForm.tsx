@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Input, InputNumber, Button, Space } from 'antd';
+import { Select, Input, InputNumber, Button, Space, Tag } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import type { CardLayoutField, BoardColumn, BoardSwimlane, FieldLimit, LimitFormInput } from '../../types';
 import { CalcType } from '../../types';
 
@@ -30,12 +31,14 @@ export const LimitForm: React.FC<LimitFormProps> = ({
   const [limit, setLimit] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [selectedSwimlanes, setSelectedSwimlanes] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   const resetForm = () => {
     setCalcType(CalcType.EXACT_VALUE);
     setFieldId('');
     setFieldValue('');
     setMultipleValues([]);
+    setTagInput('');
     setVisualValue('');
     setLimit(0);
     setSelectedColumns([]);
@@ -154,18 +157,50 @@ export const LimitForm: React.FC<LimitFormProps> = ({
 
         {calcType === CalcType.MULTIPLE_VALUES && (
           <>
-            <label htmlFor="field-value-tags">Field value</label>
-            <Select
-              id="field-value-tags"
-              mode="tags"
-              placeholder="Type values and press Enter"
-              value={multipleValues}
-              onChange={setMultipleValues}
-              style={{ width: '100%' }}
-              disabled={disabled}
-              data-testid="field-value-tags"
-              tokenSeparators={[',']}
-            />
+            <label htmlFor="field-value-tags">Field values</label>
+            {multipleValues.length > 0 && (
+              <div style={{ marginBottom: 4 }} data-testid="field-value-tags">
+                {multipleValues.map(val => (
+                  <Tag
+                    key={val}
+                    closable={!disabled}
+                    onClose={() => setMultipleValues(prev => prev.filter(v => v !== val))}
+                    style={{ marginBottom: 4 }}
+                  >
+                    {val}
+                  </Tag>
+                ))}
+              </div>
+            )}
+            <Space.Compact style={{ width: '100%' }}>
+              <Input
+                id="field-value-tags"
+                placeholder="Type value and press Enter"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                disabled={disabled}
+                onPressEnter={() => {
+                  const val = tagInput.trim();
+                  if (val && !multipleValues.includes(val)) {
+                    setMultipleValues(prev => [...prev, val]);
+                  }
+                  setTagInput('');
+                }}
+                data-testid="field-value-tag-input"
+              />
+              <Button
+                icon={<PlusOutlined />}
+                disabled={disabled || !tagInput.trim()}
+                onClick={() => {
+                  const val = tagInput.trim();
+                  if (val && !multipleValues.includes(val)) {
+                    setMultipleValues(prev => [...prev, val]);
+                  }
+                  setTagInput('');
+                }}
+                data-testid="field-value-tag-add"
+              />
+            </Space.Compact>
           </>
         )}
 
@@ -196,6 +231,7 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           id="columns-select"
           mode="multiple"
           allowClear
+          showSearch={false}
           placeholder="Columns (all if empty)"
           value={selectedColumns}
           onChange={setSelectedColumns}
@@ -210,6 +246,7 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           id="swimlanes-select"
           mode="multiple"
           allowClear
+          showSearch={false}
           placeholder="Swimlanes (all if empty)"
           value={selectedSwimlanes}
           onChange={setSelectedSwimlanes}

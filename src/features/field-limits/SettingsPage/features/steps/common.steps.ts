@@ -122,10 +122,7 @@ When('I click {string} on the limit for {string}', (action: string, visualName: 
 });
 
 When('I add tag {string} to field values', (tag: string) => {
-  cy.get('[data-testid="field-value-tags"]')
-    .closest('.ant-select')
-    .find('.ant-select-selection-search input')
-    .type(`${tag}{enter}`, { force: true });
+  cy.get('[data-testid="field-value-tag-input"]').clear().type(`${tag}{enter}`, { force: true });
 });
 
 When('I clear {string} dropdown', (label: string) => {

@@ -41,6 +41,13 @@ export class BoardRuntimeModel {
     this.cssSelectorOfIssues = this.getCssSelectorOfIssues(boardEditData);
     this.isInitialized = true;
 
+    const limitKeys = Object.keys(this.settings.limits);
+    log(
+      `Settings loaded: ${limitKeys.length} limits, ${this.cardLayoutFields.length} cardLayoutFields. ` +
+        `LimitKeys: [${limitKeys.join(', ')}]. ` +
+        `CardLayoutFieldIds: [${this.cardLayoutFields.map(f => `${f.fieldId}(${f.name})`).join(', ')}]`
+    );
+
     this.recalculate();
 
     log('Initialized');
@@ -59,17 +66,26 @@ export class BoardRuntimeModel {
   }
 
   /**
-   * Пересчитать все stats по DOM.
+   * Пересчитать все stats по DOM и покрасить карточки.
    */
   recalculate(): void {
     const log = this.logger.getPrefixedLog('BoardRuntimeModel.recalculate');
     const newStats: Record<string, FieldLimitStats> = {};
+    const issuesByLimit: Array<{ isOverLimit: boolean; issues: Array<{ issue: Element; countValues: number }> }> = [];
+
+    this.fieldLimitsPageObject.resetAllCardColors(this.cssSelectorOfIssues);
 
     for (const [limitKey, limit] of Object.entries(this.settings.limits)) {
       const { calcType, fieldValue } = limit;
       const fieldName = this.getFieldNameById(limit.fieldId);
 
-      if (!fieldName) continue;
+      if (!fieldName) {
+        log(
+          `SKIP limit "${limitKey}": fieldId="${limit.fieldId}" not found in cardLayoutFields. ` +
+            `calcType=${calcType}, fieldValue="${fieldValue}", columns=[${limit.columns}], swimlanes=[${limit.swimlanes}]`
+        );
+        continue;
+      }
 
       const issues: Array<{ issue: Element; countValues: number }> = [];
 
@@ -106,21 +122,43 @@ export class BoardRuntimeModel {
       }
 
       const current = issues.reduce((acc, i) => acc + i.countValues, 0);
+      const isOverLimit = current > limit.limit;
+
+      log(
+        `Limit "${limitKey}": fieldName="${fieldName}", calcType=${calcType}, fieldValue="${fieldValue}", ` +
+          `columns=[${columns.join(',')}], swimlanes=[${swimlanes.join(',')}], ` +
+          `hasCustomSwimlanes=${hasCustomSwimlanes}, issuesFound=${issues.length}, current=${current}/${limit.limit}`
+      );
 
       newStats[limitKey] = {
         current,
         limit: limit.limit,
-        isOverLimit: current > limit.limit,
+        isOverLimit,
         isOnLimit: current === limit.limit,
         calcType,
-        issues,
       };
+
+      issuesByLimit.push({ isOverLimit, issues });
+    }
+
+    for (const { isOverLimit, issues } of issuesByLimit) {
+      if (!isOverLimit) continue;
+      for (const { issue, countValues } of issues) {
+        if (countValues > 0) {
+          this.fieldLimitsPageObject.colorCard(issue, COLORS.OVER_WIP_LIMITS);
+        }
+      }
     }
 
     this.stats = newStats;
-    this.colorCards();
 
-    log(`Recalculated ${Object.keys(newStats).length} limits`);
+    const processedKeys = Object.keys(newStats);
+    const allKeys = Object.keys(this.settings.limits);
+    const skippedKeys = allKeys.filter(k => !processedKeys.includes(k));
+    log(
+      `Recalculated ${processedKeys.length}/${allKeys.length} limits` +
+        (skippedKeys.length > 0 ? `. Skipped: [${skippedKeys.join(', ')}]` : '')
+    );
   }
 
   private countIssuesInColumn(
@@ -162,31 +200,8 @@ export class BoardRuntimeModel {
     return header.getAttribute('aria-label')?.includes('custom:') ?? false;
   }
 
-  /**
-   * Покрасить карточки превышающих лимитов.
-   */
-  colorCards(): void {
-    for (const stats of Object.values(this.stats)) {
-      for (const { issue } of stats.issues) {
-        this.fieldLimitsPageObject.resetCardColor(issue);
-      }
-    }
-
-    for (const stats of Object.values(this.stats)) {
-      if (!stats.isOverLimit) continue;
-      for (const { issue, countValues } of stats.issues) {
-        if (countValues === 0) continue;
-        this.fieldLimitsPageObject.colorCard(issue, COLORS.OVER_WIP_LIMITS);
-      }
-    }
-  }
-
   destroy(): void {
-    for (const stats of Object.values(this.stats)) {
-      for (const { issue } of stats.issues) {
-        this.fieldLimitsPageObject.resetCardColor(issue);
-      }
-    }
+    this.fieldLimitsPageObject.resetAllCardColors(this.cssSelectorOfIssues);
     this.reset();
   }
 

@@ -82,8 +82,11 @@ export class SettingsUIModel {
       this.cardLayoutFields = boardData.cardLayoutConfig?.currentFields ?? [];
       this.columns = (boardData.rapidListConfig?.mappedColumns ?? [])
         .filter(col => !col.isKanPlanColumn)
-        .map(({ id, name }) => ({ id, name }));
-      this.swimlanes = boardData.swimlanesConfig?.swimlanes ?? [];
+        .map(({ id, name }) => ({ id: String(id), name }));
+      this.swimlanes = (boardData.swimlanesConfig?.swimlanes ?? []).map(({ id, name }) => ({
+        id: String(id),
+        name,
+      }));
 
       this.editingLimitKey = null;
       this.isLoading = false;
