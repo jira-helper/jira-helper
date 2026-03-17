@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, Button, ColorPicker, Space, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { FieldLimit, BoardColumn, BoardSwimlane, CardLayoutField } from '../../types';
+import type { FieldLimitsTextKeys } from '../../texts';
 
 export interface LimitsTableProps {
   limits: Record<string, FieldLimit>;
@@ -11,6 +12,7 @@ export interface LimitsTableProps {
   onEdit: (limitKey: string) => void;
   onDelete: (limitKey: string) => void;
   onColorChange: (limitKey: string, color: string) => void;
+  texts: Record<FieldLimitsTextKeys, string>;
 }
 
 type TableRow = { key: string } & FieldLimit;
@@ -23,6 +25,7 @@ export const LimitsTable: React.FC<LimitsTableProps> = ({
   onEdit,
   onDelete,
   onColorChange,
+  texts,
 }) => {
   const dataSource: TableRow[] = Object.entries(limits).map(([key, limit]) => ({
     key,
@@ -32,25 +35,25 @@ export const LimitsTable: React.FC<LimitsTableProps> = ({
   const getFieldName = (fieldId: string) => fields.find(f => f.fieldId === fieldId)?.name ?? fieldId;
 
   const getColumnNames = (colIds: string[]) =>
-    colIds.length === 0 ? 'All' : colIds.map(id => columns.find(c => c.id === id)?.name ?? id).join(', ');
+    colIds.length === 0 ? texts.all : colIds.map(id => columns.find(c => c.id === id)?.name ?? id).join(', ');
 
   const getSwimlaneNames = (swimIds: string[]) =>
-    swimIds.length === 0 ? 'All' : swimIds.map(id => swimlanes.find(s => s.id === id)?.name ?? id).join(', ');
+    swimIds.length === 0 ? texts.all : swimIds.map(id => swimlanes.find(s => s.id === id)?.name ?? id).join(', ');
 
   const tableColumns = [
     {
-      title: 'Field',
+      title: texts.field,
       dataIndex: 'fieldId',
       key: 'field',
       render: (fieldId: string) => getFieldName(fieldId),
     },
     {
-      title: 'Value',
+      title: texts.value,
       dataIndex: 'fieldValue',
       key: 'fieldValue',
     },
     {
-      title: 'Name',
+      title: texts.name,
       key: 'visualValue',
       render: (_: unknown, record: TableRow) => (
         <Space>
@@ -64,25 +67,25 @@ export const LimitsTable: React.FC<LimitsTableProps> = ({
       ),
     },
     {
-      title: 'Limit',
+      title: texts.limit,
       dataIndex: 'limit',
       key: 'limit',
       width: 70,
     },
     {
-      title: 'Columns',
+      title: texts.columns,
       dataIndex: 'columns',
       key: 'columns',
       render: (colIds: string[]) => getColumnNames(colIds),
     },
     {
-      title: 'Swimlanes',
+      title: texts.swimlanes,
       dataIndex: 'swimlanes',
       key: 'swimlanes',
       render: (swimIds: string[]) => getSwimlaneNames(swimIds),
     },
     {
-      title: 'Actions',
+      title: texts.actions,
       key: 'actions',
       width: 100,
       render: (_: unknown, record: TableRow) => (

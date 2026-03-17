@@ -3,6 +3,7 @@ import { Select, Input, InputNumber, Button, Space, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { CardLayoutField, BoardColumn, BoardSwimlane, FieldLimit, LimitFormInput } from '../../types';
 import { CalcType } from '../../types';
+import type { FieldLimitsTextKeys } from '../../texts';
 
 export interface LimitFormProps {
   fields: CardLayoutField[];
@@ -12,6 +13,7 @@ export interface LimitFormProps {
   onAdd: (input: LimitFormInput) => void;
   onEdit: (input: LimitFormInput) => void;
   disabled?: boolean;
+  texts: Record<FieldLimitsTextKeys, string>;
 }
 
 export const LimitForm: React.FC<LimitFormProps> = ({
@@ -22,6 +24,7 @@ export const LimitForm: React.FC<LimitFormProps> = ({
   onAdd,
   onEdit,
   disabled = false,
+  texts,
 }) => {
   const [calcType, setCalcType] = useState<CalcType>(CalcType.EXACT_VALUE);
   const [fieldId, setFieldId] = useState<string>('');
@@ -108,10 +111,10 @@ export const LimitForm: React.FC<LimitFormProps> = ({
   return (
     <div data-testid="field-limits-form">
       <Space direction="vertical" style={{ width: '100%' }} size="small">
-        <label htmlFor="field-select">Field</label>
+        <label htmlFor="field-select">{texts.field}</label>
         <Select
           id="field-select"
-          placeholder="Select field"
+          placeholder={texts.selectField}
           value={fieldId || undefined}
           onChange={setFieldId}
           options={fields.map(f => ({ value: f.fieldId, label: f.name }))}
@@ -120,10 +123,10 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           data-testid="field-select"
         />
 
-        <label htmlFor="calc-type-select">Calculation type</label>
+        <label htmlFor="calc-type-select">{texts.calculationType}</label>
         <Select
           id="calc-type-select"
-          placeholder="Calculation type"
+          placeholder={texts.calculationType}
           value={calcType}
           onChange={(value: CalcType) => {
             setCalcType(value);
@@ -131,10 +134,10 @@ export const LimitForm: React.FC<LimitFormProps> = ({
             setMultipleValues([]);
           }}
           options={[
-            { value: CalcType.HAS_FIELD, label: 'Cards with filled field' },
-            { value: CalcType.EXACT_VALUE, label: 'Cards with exact value' },
-            { value: CalcType.MULTIPLE_VALUES, label: 'Cards with any of values' },
-            { value: CalcType.SUM_NUMBERS, label: 'Sum of numeric field' },
+            { value: CalcType.HAS_FIELD, label: texts.calcHasField },
+            { value: CalcType.EXACT_VALUE, label: texts.calcExactValue },
+            { value: CalcType.MULTIPLE_VALUES, label: texts.calcMultipleValues },
+            { value: CalcType.SUM_NUMBERS, label: texts.calcSumNumbers },
           ]}
           style={{ width: '100%' }}
           disabled={disabled}
@@ -143,10 +146,10 @@ export const LimitForm: React.FC<LimitFormProps> = ({
 
         {calcType === CalcType.EXACT_VALUE && (
           <>
-            <label htmlFor="field-value-input">Field value</label>
+            <label htmlFor="field-value-input">{texts.fieldValue}</label>
             <Input
               id="field-value-input"
-              placeholder="Field value"
+              placeholder={texts.fieldValue}
               value={fieldValue}
               onChange={e => setFieldValue(e.target.value)}
               disabled={disabled}
@@ -157,7 +160,7 @@ export const LimitForm: React.FC<LimitFormProps> = ({
 
         {calcType === CalcType.MULTIPLE_VALUES && (
           <>
-            <label htmlFor="field-value-tags">Field values</label>
+            <label htmlFor="field-value-tags">{texts.fieldValues}</label>
             {multipleValues.length > 0 && (
               <div style={{ marginBottom: 4 }} data-testid="field-value-tags">
                 {multipleValues.map(val => (
@@ -175,7 +178,7 @@ export const LimitForm: React.FC<LimitFormProps> = ({
             <Space.Compact style={{ width: '100%' }}>
               <Input
                 id="field-value-tags"
-                placeholder="Type value and press Enter"
+                placeholder={texts.typeValuePlaceholder}
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 disabled={disabled}
@@ -204,20 +207,20 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           </>
         )}
 
-        <label htmlFor="visual-value-input">Visual name</label>
+        <label htmlFor="visual-value-input">{texts.visualName}</label>
         <Input
           id="visual-value-input"
-          placeholder="Visual name (displayed on badge)"
+          placeholder={texts.visualNamePlaceholder}
           value={visualValue}
           onChange={e => setVisualValue(e.target.value)}
           disabled={disabled}
           data-testid="visual-value-input"
         />
 
-        <label htmlFor="limit-input">WIP Limit</label>
+        <label htmlFor="limit-input">{texts.wipLimit}</label>
         <InputNumber
           id="limit-input"
-          placeholder="WIP Limit"
+          placeholder={texts.wipLimit}
           value={limit}
           onChange={val => setLimit(val ?? 0)}
           min={0}
@@ -226,13 +229,13 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           data-testid="limit-input"
         />
 
-        <label htmlFor="columns-select">Columns</label>
+        <label htmlFor="columns-select">{texts.columns}</label>
         <Select
           id="columns-select"
           mode="multiple"
           allowClear
           showSearch={false}
-          placeholder="Columns (all if empty)"
+          placeholder={texts.columnsPlaceholder}
           value={selectedColumns}
           onChange={setSelectedColumns}
           options={columns.map(c => ({ value: c.id, label: c.name }))}
@@ -241,13 +244,13 @@ export const LimitForm: React.FC<LimitFormProps> = ({
           data-testid="columns-select"
         />
 
-        <label htmlFor="swimlanes-select">Swimlanes</label>
+        <label htmlFor="swimlanes-select">{texts.swimlanes}</label>
         <Select
           id="swimlanes-select"
           mode="multiple"
           allowClear
           showSearch={false}
-          placeholder="Swimlanes (all if empty)"
+          placeholder={texts.swimlanesPlaceholder}
           value={selectedSwimlanes}
           onChange={setSelectedSwimlanes}
           options={swimlanes.map(s => ({ value: s.id, label: s.name }))}
@@ -258,10 +261,10 @@ export const LimitForm: React.FC<LimitFormProps> = ({
 
         <Space>
           <Button type="primary" onClick={handleAdd} disabled={disabled || !isValid || !!editingLimit}>
-            Add limit
+            {texts.addLimit}
           </Button>
           <Button onClick={handleEdit} disabled={disabled || !isValid || !editingLimit}>
-            Edit limit
+            {texts.editLimit}
           </Button>
         </Space>
       </Space>

@@ -5,22 +5,22 @@ import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
 import { getSettingsTab } from 'src/routing';
 import { useDi } from 'src/shared/diContext';
+import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
 import { registerFieldLimitsModule } from '../module';
 import { settingsUIModelToken } from '../tokens';
+import { FIELD_LIMITS_TEXTS } from '../texts';
 import type { SettingsUIModel } from './models/SettingsUIModel';
 
-/**
- * Wrapper that connects SettingsButton to the SettingsUIModel via DI.
- */
 const ConnectedSettingsButton: React.FC = () => {
   const container = useDi();
   const { model } = container.inject(settingsUIModelToken);
+  const texts = useGetTextsByLocale(FIELD_LIMITS_TEXTS);
   const handleClick = async () => {
     await (model as SettingsUIModel).open();
   };
-  return React.createElement(SettingsButton, { onClick: handleClick });
+  return React.createElement(SettingsButton, { onClick: handleClick, label: texts.settingsButton });
 };
 
 export class SettingsPageModification extends PageModification<void, Element> {

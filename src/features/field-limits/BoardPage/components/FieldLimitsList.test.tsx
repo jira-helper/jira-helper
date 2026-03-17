@@ -5,6 +5,7 @@ import { Container } from 'dioma';
 import { FieldLimitsList } from './FieldLimitsList';
 import { WithDi } from 'src/shared/diContext';
 import { boardRuntimeModelToken } from '../../tokens';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import type { FieldLimitsSettings, FieldLimitStats, CardLayoutField } from '../../types';
 import { CalcType } from '../../types';
 import type { BoardRuntimeModel } from '../models/BoardRuntimeModel';
@@ -44,6 +45,10 @@ describe('FieldLimitsList', () => {
 
   beforeEach(() => {
     container = new Container();
+    container.register({
+      token: localeProviderToken,
+      value: new MockLocaleProvider('en'),
+    });
   });
 
   const renderWithProvider = (modelOverrides: Parameters<typeof createMockBoardRuntimeModel>[0] = {}) => {

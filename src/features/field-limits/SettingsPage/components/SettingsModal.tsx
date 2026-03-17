@@ -4,6 +4,8 @@ import { LimitForm } from './LimitForm';
 import { LimitsTable } from './LimitsTable';
 import { settingsUIModelToken } from '../../tokens';
 import { useDi } from 'src/shared/diContext';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { FIELD_LIMITS_TEXTS } from '../../texts';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 import type { LimitFormInput } from '../../types';
 
@@ -11,6 +13,7 @@ export const SettingsModal: React.FC = () => {
   const { model, useModel } = useDi().inject(settingsUIModelToken);
   const snap = useModel();
   const actions = model as SettingsUIModel;
+  const texts = useGetTextsByLocale(FIELD_LIMITS_TEXTS);
 
   const handleOk = async () => {
     await actions.save();
@@ -47,7 +50,7 @@ export const SettingsModal: React.FC = () => {
 
   return (
     <Modal
-      title="Field WIP Limits"
+      title={texts.modalTitle}
       open={snap.isOpen}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -76,6 +79,7 @@ export const SettingsModal: React.FC = () => {
             onAdd={handleAdd}
             onEdit={handleEdit}
             disabled={snap.isSaving}
+            texts={texts}
           />
 
           <LimitsTable
@@ -86,6 +90,7 @@ export const SettingsModal: React.FC = () => {
             onEdit={handleEditClick}
             onDelete={handleDelete}
             onColorChange={handleColorChange}
+            texts={texts}
           />
         </>
       )}

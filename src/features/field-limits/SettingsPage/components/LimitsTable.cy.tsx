@@ -6,6 +6,12 @@ import React from 'react';
 import { LimitsTable } from './LimitsTable';
 import type { FieldLimit, BoardColumn, BoardSwimlane, CardLayoutField } from '../../types';
 import { CalcType } from '../../types';
+import { FIELD_LIMITS_TEXTS } from '../../texts';
+
+const texts = Object.fromEntries(Object.entries(FIELD_LIMITS_TEXTS).map(([key, value]) => [key, value.en])) as Record<
+  keyof typeof FIELD_LIMITS_TEXTS,
+  string
+>;
 
 const mockFields: CardLayoutField[] = [
   { fieldId: 'priority', name: 'Priority' },
@@ -56,6 +62,7 @@ describe('LimitsTable', () => {
         onEdit={cy.stub()}
         onDelete={cy.stub()}
         onColorChange={cy.stub()}
+        texts={texts}
       />
     );
     cy.get('[data-testid="field-limits-table"]').should('be.visible');
@@ -71,6 +78,7 @@ describe('LimitsTable', () => {
         onEdit={cy.stub()}
         onDelete={cy.stub()}
         onColorChange={cy.stub()}
+        texts={texts}
       />
     );
     cy.get('[data-testid="field-limits-table"]').should('be.visible');
@@ -87,6 +95,7 @@ describe('LimitsTable', () => {
         onEdit={cy.stub()}
         onDelete={cy.stub()}
         onColorChange={cy.stub()}
+        texts={texts}
       />
     );
     cy.contains('th', 'Field').should('be.visible');
@@ -112,6 +121,7 @@ describe('LimitsTable', () => {
         onEdit={onEdit}
         onDelete={cy.stub()}
         onColorChange={cy.stub()}
+        texts={texts}
       />
     );
     cy.get('.ant-table-tbody tr').first().find('button').first().click();
@@ -129,6 +139,7 @@ describe('LimitsTable', () => {
         onEdit={cy.stub()}
         onDelete={onDelete}
         onColorChange={cy.stub()}
+        texts={texts}
       />
     );
     cy.get('.ant-table-tbody tr').first().find('button.ant-btn-dangerous').click();

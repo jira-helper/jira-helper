@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { FieldLimitBadge } from './FieldLimitBadge';
 import { boardRuntimeModelToken } from '../../tokens';
 import { useDi } from 'src/shared/diContext';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { FIELD_LIMITS_TEXTS } from '../../texts';
 import type { BoardRuntimeModel } from '../models/BoardRuntimeModel';
 
 const containerStyle: React.CSSProperties = {
@@ -18,6 +20,7 @@ export const FieldLimitsList: React.FC = () => {
   const { model, useModel } = useDi().inject(boardRuntimeModelToken);
   const snap = useModel();
   const actions = model as BoardRuntimeModel;
+  const texts = useGetTextsByLocale(FIELD_LIMITS_TEXTS);
 
   const limitKeys = Object.keys(snap.settings.limits);
 
@@ -51,7 +54,7 @@ export const FieldLimitsList: React.FC = () => {
         const current = stats?.current ?? 0;
         const limitValue = limit.limit;
         const badgeColor = actions.getBadgeColor(limitKey);
-        const tooltip = `current: ${current}\nlimit: ${limitValue}\nfield name: ${fieldName}\nfield value: ${limit.fieldValue}`;
+        const tooltip = `${texts.tooltipCurrent}: ${current}\n${texts.tooltipLimit}: ${limitValue}\n${texts.tooltipFieldName}: ${fieldName}\n${texts.tooltipFieldValue}: ${limit.fieldValue}`;
 
         return (
           <FieldLimitBadge

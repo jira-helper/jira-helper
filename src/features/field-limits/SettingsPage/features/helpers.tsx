@@ -3,6 +3,7 @@ import React from 'react';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { registerLogger, loggerToken } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { proxy } from 'valtio';
 import { useSnapshot } from 'valtio'; // eslint-disable-line local/no-direct-valtio-snapshot -- test DI setup mirrors module.ts
 import { PropertyModel } from '../../property/PropertyModel';
@@ -10,6 +11,7 @@ import { SettingsUIModel } from '../models/SettingsUIModel';
 import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 import { SettingsButton } from '../components/SettingsButton';
 import { SettingsModal } from '../components/SettingsModal';
+import { FIELD_LIMITS_TEXTS } from '../../texts';
 import type {
   FieldLimit,
   FieldLimitsSettings,
@@ -89,6 +91,10 @@ export const getSettingsUIModel = () => settingsUIModel;
 export const setupBackground = () => {
   globalContainer.reset();
   registerLogger(globalContainer);
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
 
   storedSettings = { limits: {} };
   currentFields = [];
@@ -127,7 +133,7 @@ export const setupBackground = () => {
 export const mountSettingsPage = () => {
   cy.mount(
     <WithDi container={globalContainer}>
-      <SettingsButton onClick={() => settingsUIModel.open()} />
+      <SettingsButton onClick={() => settingsUIModel.open()} label={FIELD_LIMITS_TEXTS.settingsButton.en} />
       <SettingsModal />
     </WithDi>
   );
