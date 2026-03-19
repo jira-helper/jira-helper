@@ -14,6 +14,7 @@ export interface SwimlaneElement {
 export interface IssueCountOptions {
   excludeDone?: boolean;
   excludeSubtasks?: boolean;
+  includedIssueTypes?: string[];
 }
 
 const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
@@ -45,14 +46,27 @@ function getColumnTitleToIdMap(selectors: BoardSelectors): Map<string, string> {
   return map;
 }
 
+function getIssueTypeFromCard(card: Element): string | null {
+  const typeElement = card.querySelector('.ghx-type');
+  if (!typeElement) return null;
+  const title = typeElement.getAttribute('title');
+  if (!title) return null;
+  const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
+  return typeName || null;
+}
+
 function countIssuesInColumn(column: Element, issueSelector: string, options?: IssueCountOptions): number {
   const issues = column.querySelectorAll(issueSelector);
-  if (!options?.excludeDone && !options?.excludeSubtasks) {
+  if (!options?.excludeDone && !options?.excludeSubtasks && !options?.includedIssueTypes?.length) {
     return issues.length;
   }
   return Array.from(issues).filter(issue => {
-    if (options.excludeDone && issue.classList.contains('ghx-done')) return false;
-    if (options.excludeSubtasks && issue.classList.contains('ghx-issue-subtask')) return false;
+    if (options?.excludeDone && issue.classList.contains('ghx-done')) return false;
+    if (options?.excludeSubtasks && issue.classList.contains('ghx-issue-subtask')) return false;
+    if (options?.includedIssueTypes?.length) {
+      const issueType = getIssueTypeFromCard(issue);
+      if (!issueType || !options.includedIssueTypes.includes(issueType)) return false;
+    }
     return true;
   }).length;
 }

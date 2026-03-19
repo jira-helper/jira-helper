@@ -3,6 +3,8 @@ import { Modal, Alert, Spin } from 'antd';
 import { SwimlaneLimitsTable } from './SwimlaneLimitsTable';
 import { settingsUIModelToken } from '../../tokens';
 import { useDi } from 'src/shared/diContext';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { SWIMLANE_WIP_LIMITS_TEXTS } from '../../texts';
 import type { SwimlaneSetting } from '../../types';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 
@@ -10,6 +12,7 @@ export const SettingsModal: React.FC = () => {
   const { model, useModel } = useDi().inject(settingsUIModelToken);
   const snap = useModel();
   const actions = model as SettingsUIModel;
+  const texts = useGetTextsByLocale(SWIMLANE_WIP_LIMITS_TEXTS);
 
   const handleOk = async () => {
     await actions.save();
@@ -25,10 +28,12 @@ export const SettingsModal: React.FC = () => {
 
   return (
     <Modal
-      title="Swimlane WIP Limits"
+      title={texts.modalTitle}
       open={snap.isOpen}
       onOk={handleOk}
       onCancel={handleCancel}
+      okText={texts.ok}
+      cancelText={texts.cancel}
       confirmLoading={snap.isSaving}
       width={600}
       data-testid="settings-modal"
@@ -47,6 +52,7 @@ export const SettingsModal: React.FC = () => {
           settings={snap.draft}
           onChange={handleChange}
           disabled={snap.isSaving}
+          texts={texts}
         />
       )}
     </Modal>

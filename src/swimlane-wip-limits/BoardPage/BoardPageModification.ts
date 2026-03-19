@@ -1,7 +1,9 @@
 import { globalContainer } from 'dioma';
 import { PageModification } from 'src/shared/PageModification';
+import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { boardRuntimeModelToken } from '../tokens';
 import { registerSwimlaneWipLimitsModule } from '../module';
+import { renderSwimlaneVisuals } from './renderSwimlaneVisuals';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 
 export class BoardPageModification extends PageModification<void, Element> {
@@ -14,6 +16,16 @@ export class BoardPageModification extends PageModification<void, Element> {
 
   getModificationId(): string {
     return `swimlane-wip-limits-board-${this.getBoardId()}`;
+  }
+
+  appendStyles(): string | undefined {
+    return `
+    <style>
+      #js-swimlane-header-stalker .ghx-description {
+        color: inherit !important;
+      }
+    </style>
+    `;
   }
 
   waitForLoading(): Promise<Element> {
@@ -32,8 +44,13 @@ export class BoardPageModification extends PageModification<void, Element> {
       return;
     }
 
+    const pageObject = globalContainer.inject(boardPagePageObjectToken);
+    renderSwimlaneVisuals(this.runtimeModel, pageObject);
+
     this.onDOMChange('#ghx-pool', () => {
-      this.runtimeModel?.render();
+      if (!this.runtimeModel) return;
+      this.runtimeModel.render();
+      renderSwimlaneVisuals(this.runtimeModel, pageObject);
     });
 
     this.sideEffects.push(() => {

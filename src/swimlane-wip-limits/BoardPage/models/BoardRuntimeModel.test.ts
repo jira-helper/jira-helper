@@ -21,6 +21,7 @@ describe('BoardRuntimeModel', () => {
       getColumns: vi.fn().mockReturnValue(['To Do', 'In Progress', 'Done']),
       getSwimlanes: vi.fn().mockReturnValue([]),
       getSwimlaneHeader: vi.fn().mockReturnValue(null),
+      getIssueCountInSwimlane: vi.fn().mockReturnValue(0),
       getIssueCountForColumns: vi.fn().mockReturnValue(0),
       getIssueCountByColumn: vi.fn().mockReturnValue([]),
       removeSwimlaneComponent: vi.fn(),
@@ -68,12 +69,10 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('calculateStats', () => {
-    it('should use all columns when setting.columns is empty', () => {
+    it('should use getIssueCountInSwimlane when setting.columns is empty', () => {
       // Arrange
       const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
-      model.columnNames = ['To Do', 'In Progress', 'Done'];
-      vi.mocked(mockPageObject.getColumns).mockReturnValue(['To Do', 'In Progress', 'Done']);
-      vi.mocked(mockPageObject.getIssueCountForColumns).mockReturnValue(3);
+      vi.mocked(mockPageObject.getIssueCountInSwimlane).mockReturnValue(3);
       vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([1, 2, 0]);
 
       const setting: SwimlaneSetting = { limit: 5, columns: [] };
@@ -82,10 +81,11 @@ describe('BoardRuntimeModel', () => {
       const stats = model.calculateStats('swim1', setting);
 
       // Assert
-      expect(mockPageObject.getIssueCountForColumns).toHaveBeenCalledWith('swim1', ['To Do', 'In Progress', 'Done'], {
+      expect(mockPageObject.getIssueCountInSwimlane).toHaveBeenCalledWith('swim1', {
         excludeDone: true,
         excludeSubtasks: true,
       });
+      expect(mockPageObject.getIssueCountForColumns).not.toHaveBeenCalled();
       expect(stats.count).toBe(3);
       expect(stats.columnCounts).toEqual([1, 2, 0]);
       expect(stats.isOverLimit).toBe(false);
@@ -113,7 +113,7 @@ describe('BoardRuntimeModel', () => {
     it('should return isOverLimit=true when count > limit', () => {
       // Arrange
       const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
-      vi.mocked(mockPageObject.getIssueCountForColumns).mockReturnValue(6);
+      vi.mocked(mockPageObject.getIssueCountInSwimlane).mockReturnValue(6);
       vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([2, 4, 0]);
 
       const setting: SwimlaneSetting = { limit: 5, columns: [] };
@@ -128,7 +128,7 @@ describe('BoardRuntimeModel', () => {
     it('should return isOverLimit=false when count <= limit', () => {
       // Arrange
       const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
-      vi.mocked(mockPageObject.getIssueCountForColumns).mockReturnValue(5);
+      vi.mocked(mockPageObject.getIssueCountInSwimlane).mockReturnValue(5);
       vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([2, 3, 0]);
 
       const setting: SwimlaneSetting = { limit: 5, columns: [] };
@@ -138,6 +138,47 @@ describe('BoardRuntimeModel', () => {
 
       // Assert
       expect(stats.isOverLimit).toBe(false);
+    });
+
+    it('should pass includedIssueTypes in options when specified', () => {
+      // Arrange
+      const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
+      vi.mocked(mockPageObject.getIssueCountForColumns).mockReturnValue(2);
+      vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([1, 1, 0]);
+
+      const setting: SwimlaneSetting = {
+        limit: 5,
+        columns: ['In Progress'],
+        includedIssueTypes: ['Bug', 'Task'],
+      };
+
+      // Act
+      model.calculateStats('swim1', setting);
+
+      // Assert
+      expect(mockPageObject.getIssueCountForColumns).toHaveBeenCalledWith('swim1', ['In Progress'], {
+        excludeDone: true,
+        excludeSubtasks: true,
+        includedIssueTypes: ['Bug', 'Task'],
+      });
+    });
+
+    it('should not pass includedIssueTypes when undefined', () => {
+      // Arrange
+      const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
+      vi.mocked(mockPageObject.getIssueCountInSwimlane).mockReturnValue(3);
+      vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([1, 2, 0]);
+
+      const setting: SwimlaneSetting = { limit: 5, columns: [] };
+
+      // Act
+      model.calculateStats('swim1', setting);
+
+      // Assert
+      expect(mockPageObject.getIssueCountInSwimlane).toHaveBeenCalledWith('swim1', {
+        excludeDone: true,
+        excludeSubtasks: true,
+      });
     });
   });
 
@@ -149,7 +190,7 @@ describe('BoardRuntimeModel', () => {
         { id: 'swim2', element: document.createElement('div'), header: document.createElement('div') },
       ];
       vi.mocked(mockPageObject.getSwimlanes).mockReturnValue(swimlanes);
-      vi.mocked(mockPageObject.getIssueCountForColumns).mockImplementation((id: string) => (id === 'swim1' ? 3 : 7));
+      vi.mocked(mockPageObject.getIssueCountInSwimlane).mockImplementation((id: string) => (id === 'swim1' ? 3 : 7));
       vi.mocked(mockPageObject.getIssueCountByColumn).mockReturnValue([1, 2, 0]);
 
       const model = new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
@@ -191,6 +232,7 @@ describe('BoardRuntimeModel', () => {
 
       // Assert
       expect(model.stats).toEqual({});
+      expect(mockPageObject.getIssueCountInSwimlane).not.toHaveBeenCalled();
       expect(mockPageObject.getIssueCountForColumns).not.toHaveBeenCalled();
     });
   });

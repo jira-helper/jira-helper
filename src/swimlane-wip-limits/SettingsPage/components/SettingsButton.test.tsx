@@ -8,6 +8,7 @@ import { SettingsButton } from './SettingsButton';
 import { settingsUIModelToken } from '../../tokens';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 
 describe('SettingsButton', () => {
@@ -15,6 +16,7 @@ describe('SettingsButton', () => {
 
   beforeEach(() => {
     container = new Container();
+    registerTestDependencies(container);
     container.register({ token: boardPagePageObjectToken, value: BoardPagePageObjectMock });
   });
 

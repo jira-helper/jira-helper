@@ -7,6 +7,7 @@ import { WithDi } from 'src/shared/diContext';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
 import { settingsUIModelToken } from '../../tokens';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 import type { SwimlaneSetting } from '../../types';
 
@@ -42,6 +43,7 @@ describe('SettingsModal', () => {
 
   beforeEach(() => {
     container = new Container();
+    registerTestDependencies(container);
     container.register({ token: boardPagePageObjectToken, value: BoardPagePageObjectMock });
   });
 

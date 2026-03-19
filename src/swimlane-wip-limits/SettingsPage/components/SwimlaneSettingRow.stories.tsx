@@ -51,3 +51,11 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+export const WithIssueTypes: Story = {
+  args: {
+    swimlane: mockSwimlane,
+    setting: { limit: 5, columns: [], includedIssueTypes: ['Bug', 'Task'] },
+    onChange: () => {},
+  },
+};

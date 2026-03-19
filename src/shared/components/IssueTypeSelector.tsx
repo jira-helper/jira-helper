@@ -4,12 +4,47 @@ import { getProjectKeyFromURL } from '../utils/getProjectKeyFromURL';
 import { debounce } from '../utils';
 import type { ProjectIssueType } from '../jiraApi';
 
+export interface IssueTypeSelectorTexts {
+  countAllIssueTypes: string;
+  selectedIssueTypes: string;
+  projectKeyHint: string;
+  projectKeyLabel: string;
+  projectKeyPlaceholder: string;
+  loadingIssueTypes: string;
+  issueTypesFromProject: string;
+  selectTypesHint: string;
+  noIssueTypesFound: string;
+  enterProjectKey: string;
+  noTypesForProject: string;
+  failedToLoadTypes: string;
+  subtask: string;
+  remove: string;
+}
+
+const DEFAULT_TEXTS: IssueTypeSelectorTexts = {
+  countAllIssueTypes: 'Count all issue types',
+  selectedIssueTypes: 'Selected issue types:',
+  projectKeyHint: 'Enter project key to load issue types (auto-loads after typing):',
+  projectKeyLabel: 'Project Key:',
+  projectKeyPlaceholder: 'Enter project key (e.g., PROJ)',
+  loadingIssueTypes: 'Loading issue types...',
+  issueTypesFromProject: 'Issue types from project',
+  selectTypesHint: 'Select types from this project to add to your selection above',
+  noIssueTypesFound: 'No issue types found. Click "Load Types" to fetch types for project',
+  enterProjectKey: 'Please enter a project key',
+  noTypesForProject: 'No issue types found for project',
+  failedToLoadTypes: 'Failed to load issue types',
+  subtask: 'Subtask',
+  remove: 'Remove',
+};
+
 interface IssueTypeSelectorProps {
   groupId: string;
   selectedTypes: string[];
   onSelectionChange: (selectedTypes: string[], countAllTypes: boolean) => void;
   initialCountAllTypes?: boolean;
   initialProjectKey?: string;
+  texts?: IssueTypeSelectorTexts;
 }
 
 export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
@@ -18,7 +53,11 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
   onSelectionChange,
   initialCountAllTypes = true,
   initialProjectKey = '',
+  texts: propTexts,
 }) => {
+  const texts = propTexts ?? DEFAULT_TEXTS;
+  const textsRef = useRef(texts);
+  textsRef.current = texts;
   const [countAllTypes, setCountAllTypes] = useState(initialCountAllTypes);
   const [projectKey, setProjectKey] = useState(initialProjectKey || getProjectKeyFromURL() || '');
   const [currentProjectTypes, setCurrentProjectTypes] = useState<ProjectIssueType[]>([]);
@@ -69,8 +108,9 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
 
   // Load types function with useCallback to maintain stable reference
   const loadTypes = useCallback(async (key: string) => {
+    const t = textsRef.current;
     if (!key.trim()) {
-      setError('Please enter a project key');
+      setError(t.enterProjectKey);
       setCurrentProjectTypes([]);
       return;
     }
@@ -82,10 +122,10 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
       const types = await loadIssueTypesForProject(key.trim());
       setCurrentProjectTypes(types);
       if (types.length === 0) {
-        setError(`No issue types found for project "${key}"`);
+        setError(`${t.noTypesForProject} "${key}"`);
       }
     } catch (err) {
-      setError(`Failed to load issue types: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError(`${t.failedToLoadTypes}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setCurrentProjectTypes([]);
     } finally {
       setIsLoading(false);
@@ -152,16 +192,16 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
   };
 
   return (
-    <div style={{ marginTop: '0', paddingTop: '8px' }}>
+    <div style={{ marginTop: 0, paddingTop: 0 }}>
       <div style={{ marginBottom: '10px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', minHeight: 32 }}>
           <input
             type="checkbox"
             checked={countAllTypes}
             onChange={handleCountAllChange}
             style={{ marginRight: '8px' }}
           />
-          <span style={{ fontWeight: 600 }}>Count all issue types</span>
+          <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{texts.countAllIssueTypes}</span>
         </label>
       </div>
 
@@ -170,7 +210,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
           {/* Selected types chips above input */}
           {selectedTypes.length > 0 && (
             <div style={{ marginBottom: '10px' }}>
-              <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px' }}>Selected issue types:</div>
+              <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px' }}>{texts.selectedIssueTypes}</div>
               <div
                 style={{
                   display: 'flex',
@@ -216,7 +256,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
-                      title="Remove"
+                      title={texts.remove}
                     >
                       ×
                     </button>
@@ -226,16 +266,14 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
             </div>
           )}
 
-          <div style={{ marginBottom: '8px', fontSize: '12px', color: '#5e6c84' }}>
-            Enter project key to load issue types (auto-loads after typing):
-          </div>
+          <div style={{ marginBottom: '8px', fontSize: '12px', color: '#5e6c84' }}>{texts.projectKeyHint}</div>
 
           <div className="field-group" style={{ marginBottom: '8px' }}>
             <label
               htmlFor={`project-input-${groupId}`}
               style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}
             >
-              Project Key:
+              {texts.projectKeyLabel}
             </label>
             <input
               type="text"
@@ -244,7 +282,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
               value={projectKey}
               onChange={handleProjectKeyChange}
               onKeyPress={handleKeyPress}
-              placeholder="Enter project key (e.g., PROJ)"
+              placeholder={texts.projectKeyPlaceholder}
               style={{
                 width: '100%',
                 padding: '6px 8px',
@@ -284,7 +322,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
                   marginRight: '8px',
                 }}
               />
-              Loading issue types...
+              {texts.loadingIssueTypes}
               <style>
                 {`
                   @keyframes spin {
@@ -298,7 +336,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
           {currentProjectTypes.length > 0 && !isLoading && (
             <div>
               <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '13px' }}>
-                Issue types from project "{projectKey}":
+                {texts.issueTypesFromProject} "{projectKey}":
               </div>
               <div
                 style={{
@@ -319,13 +357,12 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
                       onChange={e => handleTypeCheckboxChange(type.name, e.target.checked)}
                       style={{ marginRight: '6px' }}
                     />
-                    {type.name} {type.subtask && <span style={{ color: '#5e6c84', fontSize: '11px' }}>(Subtask)</span>}
+                    {type.name}{' '}
+                    {type.subtask && <span style={{ color: '#5e6c84', fontSize: '11px' }}>({texts.subtask})</span>}
                   </label>
                 ))}
               </div>
-              <div style={{ marginTop: '4px', fontSize: '11px', color: '#5e6c84' }}>
-                Select types from this project to add to your selection above
-              </div>
+              <div style={{ marginTop: '4px', fontSize: '11px', color: '#5e6c84' }}>{texts.selectTypesHint}</div>
             </div>
           )}
 
@@ -333,7 +370,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
             <div
               style={{ padding: '8px', background: '#f4f5f7', borderRadius: '3px', fontSize: '12px', color: '#5e6c84' }}
             >
-              No issue types found. Click "Load Types" to fetch types for project "{projectKey}".
+              {texts.noIssueTypesFound} "{projectKey}".
             </div>
           )}
         </div>

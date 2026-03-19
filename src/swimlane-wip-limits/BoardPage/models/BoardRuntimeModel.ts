@@ -77,7 +77,6 @@ export class BoardRuntimeModel {
       const setting = this.settings[swimlaneId];
       if (!setting?.limit) continue;
 
-      // Подсчёт задач с учётом выбранных колонок
       const stats = this.calculateStats(swimlaneId, setting);
       allStats[swimlaneId] = stats;
     }
@@ -95,11 +94,18 @@ export class BoardRuntimeModel {
    * @returns статистика: количество, распределение по колонкам, превышение
    */
   calculateStats(swimlaneId: string, setting: SwimlaneSetting): SwimlaneIssueStats {
-    // Если columns пустой — считаем все колонки
-    const columnsToCount = setting.columns.length > 0 ? setting.columns : this.pageObject.getColumns();
+    const wipOptions = {
+      excludeDone: true,
+      excludeSubtasks: true,
+      ...(setting.includedIssueTypes?.length ? { includedIssueTypes: setting.includedIssueTypes } : {}),
+    };
 
-    const wipOptions = { excludeDone: true, excludeSubtasks: true };
-    const count = this.pageObject.getIssueCountForColumns(swimlaneId, columnsToCount, wipOptions);
+    const useAllColumns = setting.columns.length === 0;
+
+    const count = useAllColumns
+      ? this.pageObject.getIssueCountInSwimlane(swimlaneId, wipOptions)
+      : this.pageObject.getIssueCountForColumns(swimlaneId, setting.columns, wipOptions);
+
     const columnCounts = this.pageObject.getIssueCountByColumn(swimlaneId, wipOptions);
     const isOverLimit = setting.limit ? count > setting.limit : false;
 
