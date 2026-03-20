@@ -1,4 +1,3 @@
-import { settingsJiraDOM as DOM } from '../../../swimlane/constants';
 import type { IPersonLimitsBoardPageObject } from './IPersonLimitsBoardPageObject';
 
 const NO_VISIBILITY_CLASS = 'no-visibility';
@@ -24,8 +23,8 @@ export const PersonLimitsBoardPageObject: IPersonLimitsBoardPageObject = {
     avatarImg: '.ghx-avatar-img',
     issueType: '.ghx-type',
     column: '.ghx-column',
-    swimlane: DOM.swimlane,
-    swimlaneHeader: DOM.swimlaneHeaderContainer,
+    swimlane: '.ghx-swimlane',
+    swimlaneHeader: '.ghx-swimlane-header',
     parentGroup: '.ghx-parent-group',
   },
 

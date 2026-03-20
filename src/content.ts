@@ -6,12 +6,6 @@ import { isJira } from './shared/utils';
 import AddSlaLine from './charts/AddSlaLine';
 import AddChartGrid from './charts/AddChartGrid';
 import runModifications from './shared/runModifications';
-// Legacy swimlane code - replaced by new implementations
-// import SwimlaneStats from './swimlane/SwimlaneStats';
-// import SwimlaneLimits from './swimlane/SwimlaneLimits';
-// import SwimlaneSettingsPopup from './swimlane/SwimlaneSettingsPopup';
-
-// New swimlane implementations
 import { BoardPageModification as SwimlaneLimitsBoardPage } from './swimlane-wip-limits/BoardPage';
 import { SettingsPageModification as SwimlaneLimitsSettingsPage } from './swimlane-wip-limits/SettingsPage';
 import { HistogramModification as SwimlaneHistogramBoardPage } from './swimlane-histogram';
