@@ -1,12 +1,11 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 import { globalContainer } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
 import { SettingsButtonContainer } from './components/SettingsButton';
+import { SettingsPage } from '../../page-objects/SettingsPage';
 import { normalizeRange } from '../property/actions/loadProperty';
 import type { WipLimitRange } from '../types';
 
@@ -51,13 +50,8 @@ type LegacyRange = {
 
 export default class WipLimitOnCellsSettings extends PageModification<[BoardEditData, LegacyRange[] | null], Element> {
   static jiraSelectors = {
-    /** Jira columns config container */
     columnsConfig: '#ghx-config-columns',
-    /** Last child in columns config - insert button before it */
-    columnsConfigLastChild: '#ghx-config-columns > *:last-child',
   };
-
-  private root: Root | null = null;
 
   getModificationId(): string {
     return `WipLimitOnCells-settings-${this.getBoardId()}`;
@@ -81,33 +75,18 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
 
     if (!boardEditData?.canEdit) return;
 
-    // Normalize ranges for backward compatibility
     const ranges: WipLimitRange[] = (rawRanges ?? []).map(normalizeRange);
-
-    // Extract swimlanes and columns
     const swimlanes = boardEditData.swimlanesConfig?.swimlanes ?? [];
     const columns = (boardEditData.rapidListConfig?.mappedColumns ?? []).filter(col => !col.isKanPlanColumn);
 
-    const buttonContainerId = 'jh-wiplimit-cells-settings-btn';
-
-    // Check if button already exists
-    if (document.getElementById(buttonContainerId)) {
-      return;
-    }
-
-    const sharedContainer = getOrCreateButtonsContainer();
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = buttonContainerId;
-    sharedContainer.appendChild(buttonContainer);
-
-    // Save callback
     const handleSaveToProperty = async (newRanges: WipLimitRange[]) => {
       await this.updateBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS, newRanges);
     };
 
-    // Render React
-    this.root = createRoot(buttonContainer);
-    this.root.render(
+    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+
+    const cleanup = pageObject.registerButton(
+      'wiplimit-on-cells',
       React.createElement(WithDi, {
         container: globalContainer,
         children: React.createElement(SettingsButtonContainer, {
@@ -118,5 +97,7 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
         }),
       })
     );
+
+    this.sideEffects.push(cleanup);
   }
 }

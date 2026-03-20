@@ -1,13 +1,12 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
 import { WithDi } from '../../shared/diContext';
 import { useColumnLimitsPropertyStore } from '../property/store';
 import { SettingsButtonContainer } from './components/SettingsButton';
+import { SettingsPage } from '../../page-objects/SettingsPage';
 
 export default class SettingsWIPLimits extends PageModification<[any, any], Element> {
   static jiraSelectors = {
@@ -15,11 +14,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     allColumns: '.ghx-column-wrapper:not(.ghx-fixed-column).ghx-mapped',
     allColumnsInner: '.ghx-column-wrapper:not(.ghx-fixed-column) > .ghx-mapped',
     allColumnsJira7: '.ghx-mapped.ui-droppable[data-column-id]',
-    columnsConfigLastChild: '#ghx-config-columns > *:last-child',
     columnHeaderName: '.ghx-header-name',
   };
-
-  private settingsButtonRoot: Root | null = null;
 
   async shouldApply(): Promise<boolean> {
     return (await getSettingsTab()) === 'columns';
@@ -55,7 +51,21 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       name: swim.name,
     }));
 
-    this.renderSettingsButton();
+    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+
+    const cleanup = pageObject.registerButton(
+      'column-limits',
+      React.createElement(WithDi, {
+        container: globalContainer,
+        children: React.createElement(SettingsButtonContainer, {
+          getColumns: () => this.getColumns(),
+          getColumnName: (el: HTMLElement) => this.getColumnName(el),
+          swimlanes: this.boardSwimlanes,
+        }),
+      })
+    );
+
+    this.sideEffects.push(cleanup);
   }
 
   getColumns(): NodeListOf<Element> {
@@ -72,31 +82,5 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
 
   private getColumnName(el: HTMLElement): string {
     return el.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName)?.getAttribute('title') ?? '';
-  }
-
-  renderSettingsButton(): void {
-    const buttonContainerId = 'jh-column-limits-settings-btn';
-
-    // Check if button already exists
-    if (document.getElementById(buttonContainerId)) {
-      return;
-    }
-
-    const sharedContainer = getOrCreateButtonsContainer();
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = buttonContainerId;
-    sharedContainer.appendChild(buttonContainer);
-
-    this.settingsButtonRoot = createRoot(buttonContainer);
-    this.settingsButtonRoot.render(
-      React.createElement(WithDi, {
-        container: globalContainer,
-        children: React.createElement(SettingsButtonContainer, {
-          getColumns: () => this.getColumns(),
-          getColumnName: (el: HTMLElement) => this.getColumnName(el),
-          swimlanes: this.boardSwimlanes,
-        }),
-      })
-    );
   }
 }

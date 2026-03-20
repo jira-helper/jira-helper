@@ -1,13 +1,12 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { getSettingsTab } from '../../routing';
-import { getOrCreateButtonsContainer } from '../../shared/settingsPageButtonsContainer';
 import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
 import { searchUsers } from '../../shared/jiraApi';
 import { SettingsButtonContainer } from './components/SettingsButton';
+import { SettingsPage } from '../../page-objects/SettingsPage';
 import type { Column, Swimlane } from './state/types';
 
 type MappedColumn = {
@@ -31,19 +30,12 @@ type BoardData = {
 
 export default class PersonalWIPLimit extends PageModification<[BoardData], Element> {
   static jiraSelectors = {
-    /** Jira columns config container */
     columnsConfig: '#ghx-config-columns',
-    /** Last child in columns config - insert button before it */
-    columnsConfigLastChild: '#ghx-config-columns > *:last-child',
   };
 
   private boardData: BoardData | null = null;
-
   private boardDataColumns: MappedColumn[] | null = null;
-
   private boardDataSwimlanes: Swimlane[] | null = null;
-
-  private settingsButtonRoot: Root | null = null;
 
   async shouldApply(): Promise<boolean> {
     return (await getSettingsTab()) === 'columns';
@@ -72,22 +64,6 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter((i: any) => !i.isKanPlanColumn);
     this.boardDataSwimlanes = this.boardData.swimlanesConfig.swimlanes;
 
-    this.renderEditButton();
-  }
-
-  renderEditButton(): void {
-    const buttonContainerId = 'jh-person-limits-settings-btn';
-
-    // Check if button already exists
-    if (document.getElementById(buttonContainerId)) {
-      return;
-    }
-
-    const sharedContainer = getOrCreateButtonsContainer();
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = buttonContainerId;
-    sharedContainer.appendChild(buttonContainer);
-
     const columns: Column[] = (this.boardDataColumns || []).map(col => ({
       id: col.id,
       name: col.name,
@@ -98,8 +74,10 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
       name: swim.name,
     }));
 
-    this.settingsButtonRoot = createRoot(buttonContainer);
-    this.settingsButtonRoot.render(
+    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+
+    const cleanup = pageObject.registerButton(
+      'person-limits',
       React.createElement(WithDi, {
         container: globalContainer,
         children: React.createElement(SettingsButtonContainer, {
@@ -109,5 +87,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
         }),
       })
     );
+
+    this.sideEffects.push(cleanup);
   }
 }
