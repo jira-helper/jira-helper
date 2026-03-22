@@ -3,7 +3,6 @@
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 import { readFileSync } from 'fs';
-
 import * as path from 'path';
 import manifest from './manifest.json';
 
@@ -44,8 +43,8 @@ export default defineConfig({
       exclude: ['src/**/*.stories.tsx'],
       reporter: ['lcov'],
     },
+    exclude: ['src/**/*.stories.{ts,tsx}', 'node_modules/**'],
   },
-
   resolve: {
     alias: {
       src: path.resolve(__dirname, '/src'),

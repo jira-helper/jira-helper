@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
 import { registerLogger } from '../src/shared/Logger';

@@ -3,9 +3,9 @@ import type { StorybookViteConfig } from '@storybook/react-vite';
 const config: StorybookViteConfig = {
   stories: ['../src/**/*.stories.@(js|ts|tsx|svelte)'],
   addons: [
-    '@storybook/addon-essentials',
     '@chromatic-com/storybook',
-    '@storybook/addon-interactions',
+    '@storybook/addon-vitest',
+    '@storybook/addon-docs'
   ], 
   framework: {
     name: '@storybook/react-vite'

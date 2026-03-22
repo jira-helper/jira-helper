@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IssuesSubTasksProgressPure } from './IssuesSubTasksProgress';
 import { subTasksProgress } from '../SubTasksProgress/testData';
 
@@ -14,6 +14,7 @@ type Story = StoryObj<typeof IssuesSubTasksProgressPure>;
 
 export const Default: Story = {
   args: {
+    progressBarsDisplayMode: 'splitLines',
     subtasksProgressBars: [
       { progress: subTasksProgress.smallMixed, comments: [], groupId: 'group1', groupName: 'Group 1' },
       { progress: subTasksProgress.smallMixed, comments: ['comment'], groupId: 'group2', groupName: 'Group 2' },
@@ -27,6 +28,7 @@ export const Default: Story = {
       { progress: subTasksProgress.largeSameStatus, comments: [], groupId: 'group4', groupName: 'Group 4' },
       { progress: subTasksProgress.smallSameStatus, comments: [], groupId: 'group5', groupName: 'Group 5' },
     ],
+    subtasksProgressCounters: [],
   },
   decorators: [
     S => (
@@ -39,6 +41,7 @@ export const Default: Story = {
 
 export const BigContainer: Story = {
   args: {
+    progressBarsDisplayMode: 'singleLine',
     subtasksProgressBars: [
       { progress: subTasksProgress.smallMixed, comments: [], groupId: 'group1', groupName: 'Group 1' },
       { progress: subTasksProgress.smallMixed, comments: ['comment'], groupId: 'group2', groupName: 'Group 2' },
@@ -51,6 +54,7 @@ export const BigContainer: Story = {
       { progress: subTasksProgress.largeSameStatus, comments: [], groupId: 'group4', groupName: 'Group 4' },
       { progress: subTasksProgress.smallSameStatus, comments: [], groupId: 'group5', groupName: 'Group 5' },
     ],
+    subtasksProgressCounters: [],
   },
   decorators: [
     S => (

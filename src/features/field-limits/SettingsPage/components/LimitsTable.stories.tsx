@@ -1,8 +1,14 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { LimitsTable } from './LimitsTable';
 import type { FieldLimit, BoardColumn, BoardSwimlane, CardLayoutField } from '../../types';
 import { CalcType } from '../../types';
+import { FIELD_LIMITS_TEXTS, type FieldLimitsTextKeys } from '../../texts';
+
+const mockTexts = Object.fromEntries(Object.entries(FIELD_LIMITS_TEXTS).map(([key, val]) => [key, val.en])) as Record<
+  FieldLimitsTextKeys,
+  string
+>;
 
 const mockFields: CardLayoutField[] = [
   { fieldId: 'priority', name: 'Priority' },
@@ -80,6 +86,7 @@ export const Empty: Story = {
     onEdit: noop,
     onDelete: noop,
     onColorChange: noop,
+    texts: mockTexts,
   },
 };
 

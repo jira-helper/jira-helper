@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IssueConditionCheckSettings } from './IssueConditionCheckSettings';
 import { IssueConditionCheckItem } from './IssueConditionCheckItem';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';

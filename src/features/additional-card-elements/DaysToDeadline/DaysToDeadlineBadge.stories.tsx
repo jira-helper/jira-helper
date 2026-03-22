@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-vite';
 import { Badge } from '../Badge';
 import { getDaysToDeadlineColor, formatDaysToDeadline } from './utils';
 import { DaysToDeadlineSettings } from '../types';

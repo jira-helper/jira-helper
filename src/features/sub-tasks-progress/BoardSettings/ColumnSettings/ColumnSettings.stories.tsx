@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { withDi } from 'src/shared/testTools/storyWithDi';
 import { withStore } from 'src/shared/testTools/storyWithStore';

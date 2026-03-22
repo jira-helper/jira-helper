@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
 import type { PersonLimit } from '../state/types';
 import { PERSON_LIMITS_TEXTS } from '../texts';

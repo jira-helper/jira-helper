@@ -27,7 +27,7 @@ Then('I see {string} in {string}', (text: string, container: string) => {
       const hasText = $container.text().includes(text);
       const hasInputValue = $container.find(`input[value*="${text}"]`).length > 0;
       const found = hasText || hasInputValue;
-      assert.isTrue(found, `Expected to find "${text}" in container`);
+      expect(found, `Expected to find "${text}" in container`).to.be.true;
     });
 });
 
@@ -38,7 +38,7 @@ Then('I do not see {string} in {string}', (text: string, container: string) => {
       const hasText = $container.text().includes(text);
       const hasInputValue = $container.find(`input[value*="${text}"]`).length > 0;
       const found = hasText || hasInputValue;
-      assert.isFalse(found, `Expected NOT to find "${text}" in container`);
+      expect(found, `Expected NOT to find "${text}" in container`).to.be.false;
     });
 });
 

@@ -1,11 +1,26 @@
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
+import { Ok } from 'ts-results';
+import { globalContainer } from 'dioma';
 import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { JiraServiceToken } from 'src/shared/jira/jiraService';
 
 import { withStore } from 'src/shared/testTools/storyWithStore';
 import { withDi } from 'src/shared/testTools/storyWithDi';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { useSubTaskProgressBoardPropertyStore } from '../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+
+globalContainer.register({
+  token: JiraServiceToken,
+  value: {
+    fetchJiraIssue: () => Promise.resolve(new Ok({ key: 'MOCK-1', fields: {} } as any)),
+    fetchSubtasks: () => Promise.resolve(new Ok({ subtasks: [], total: 0 } as any)),
+    getExternalIssues: () => Promise.resolve(new Ok([])),
+    getProjectFields: () => Promise.resolve(new Ok([{ id: 'priority', name: 'Priority', schema: { type: 'string' } }])),
+    getIssueLinkTypes: () =>
+      Promise.resolve(new Ok([{ id: '1', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }])),
+  },
+});
 
 const meta: Meta<typeof BoardSettingsTabContent> = {
   title: 'SubTasksProgress/BoardSettings/BoardSettingsTabContent',

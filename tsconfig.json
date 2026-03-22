@@ -11,7 +11,7 @@
 	  "esModuleInterop": true,                 // Поддержка импорта модулей CommonJS
 	  "skipLibCheck": true,                    // Пропустить проверку типов в зависимостях
 	  "forceConsistentCasingInFileNames": true, // Проверка регистра файлов
-	  "moduleResolution": "node",              // Разрешение модулей в стиле Node.js
+	  "moduleResolution": "bundler",           // Разрешение модулей для Vite/bundler (поддержка package.json exports)
 	  "isolatedModules": true,                 // Убедиться, что каждый файл обрабатывается отдельно
 	  "noEmit": true,                          // Отключить генерацию файлов .js
 	  "resolveJsonModule": true,               // Разрешить импорт JSON

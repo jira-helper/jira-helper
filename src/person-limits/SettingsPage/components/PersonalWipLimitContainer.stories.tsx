@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { JiraUser } from 'src/shared/jiraApi';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';

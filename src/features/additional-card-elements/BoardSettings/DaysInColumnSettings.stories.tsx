@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { WithDi } from 'src/shared/diContext';
-import { Container, Token } from 'dioma';
-import { IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
+import { Container } from 'dioma';
+import { IBoardPagePageObject, SwimlaneElement, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
 import React from 'react';
@@ -43,8 +44,12 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
 
 const mockContainer = new Container();
 mockContainer.register({
-  token: new Token<IBoardPagePageObject>('boardPagePageObjectToken'),
+  token: boardPagePageObjectToken,
   value: mockBoardPagePageObject,
+});
+mockContainer.register({
+  token: localeProviderToken,
+  value: new MockLocaleProvider('en'),
 });
 
 const meta: Meta<typeof DaysInColumnSettings> = {

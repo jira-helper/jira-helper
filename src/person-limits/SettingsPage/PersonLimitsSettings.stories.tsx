@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { PersonalWipLimitContainer } from './components/PersonalWipLimitContainer';
 import { useSettingsUIStore } from './stores/settingsUIStore';
 import type { PersonLimit, Column, Swimlane } from './state/types';
