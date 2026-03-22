@@ -21,7 +21,6 @@ import PersonLimitsSettings from './person-limits/SettingsPage';
 import PersonLimits from './person-limits/BoardPage';
 import WiplimitOnCells from './wiplimit-on-cells/BoardPage';
 import WiplimitOnCellsSettings from './wiplimit-on-cells/SettingsPage';
-import { SettingsPage } from './page-objects/SettingsPage';
 import CardColorsSettingsPage from './card-colors/SettingsPage';
 import { CardColorsBoardPage } from './card-colors/BoardPage';
 import { BoardSettingsBoardPage } from './board-settings/BoardPage';
@@ -115,6 +114,3 @@ async function start() {
 }
 
 start();
-
-// @ts-expect-error - legacy
-window.SettingsPage = SettingsPage;
