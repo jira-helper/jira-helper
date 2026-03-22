@@ -3,7 +3,7 @@ import { IssueCard } from './card';
 
 // Дефолтные настройки для компонента
 const meta: Meta<typeof IssueCard> = {
-  title: 'Components/Jira/Card', // Категория и название компонента в Storybook
+  title: 'Shared/Jira/Card', // Категория и название компонента в Storybook
   component: IssueCard,
   tags: ['autodocs'], // Автогенерация документации в Storybook
   args: {

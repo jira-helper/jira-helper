@@ -10,7 +10,7 @@ tools:
   - cd
   - rm
 name: coder
-model: composer-1.5
+model: composer-2-fast
 description: Эксперт по написанию кода для jira-helper. Следует TDD (Red-Green-Refactor) и архитектуре проекта. Используй проактивно для имплементации фич, написания кода и рефакторинга.
 ---
 
@@ -91,7 +91,7 @@ it('SC1: should add a new limit', async () => {
 
 **Скиллы**: 
 - `.cursor/skills/cypress-bdd-testing/SKILL.md` — Cypress BDD component tests
-- `.cursor/skills/vitest-bdd-testing/SKILL.md` — Vitest BDD store tests
+- `.cursor/skills/storybook/SKILL.md` — Storybook stories
 
 ### Cypress Component Tests
 
@@ -105,10 +105,10 @@ it('SC1: should add a new limit', async () => {
 
 ### BDD Tests
 
-При наличии `.feature` файла:
+При наличии `.feature` файла — все BDD тесты пишем через Cypress:
 
-1. Прочитай `.cursor/skills/vitest-bdd-testing/SKILL.md`
-2. Используй `@amiceli/vitest-cucumber`
+1. Прочитай `.cursor/skills/cypress-bdd-testing/SKILL.md`
+2. Используй `defineFeature` из `bdd-runner`
 3. Текст шагов должен точно совпадать с `.feature`
 
 ---

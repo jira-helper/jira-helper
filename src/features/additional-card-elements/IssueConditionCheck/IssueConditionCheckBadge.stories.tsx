@@ -9,7 +9,7 @@ import { ConditionCheckResult, ICON_CONFIG, COLOR_PRESETS, ANIMATION_CONFIG } fr
 import { IssueConditionCheck, IssueConditionCheckIcon, IssueConditionCheckAnimation } from '../types';
 
 const meta: Meta = {
-  title: 'Features/Additional Card Elements/Issue Condition Check',
+  title: 'AdditionalCardElements/IssueConditionCheck/IssueConditionCheckBadge',
 };
 
 export default meta;

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { LimitBadge } from './LimitBadge';
 
 const meta: Meta<typeof LimitBadge> = {
-  title: 'Swimlane WIP Limits/LimitBadge',
+  title: 'SwimlaneWipLimits/BoardPage/LimitBadge',
   component: LimitBadge,
 };
 

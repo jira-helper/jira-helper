@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { RangeForm } from './RangeForm';
 
 const meta: Meta<typeof RangeForm> = {
-  title: 'WIP Limits on Cells/RangeForm',
+  title: 'WiplimitOnCells/SettingsPage/RangeForm',
   component: RangeForm,
   parameters: {
     layout: 'padded',

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { JqlParserInfoTooltip } from './JqlParserInfoTooltip';
 
 const meta: Meta<typeof JqlParserInfoTooltip> = {
-  title: 'JQL/JqlParserInfoTooltip',
+  title: 'Shared/Jql/JqlParserInfoTooltip',
   component: JqlParserInfoTooltip,
 };
 export default meta;

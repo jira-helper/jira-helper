@@ -3,7 +3,7 @@ import { fn } from '@storybook/test';
 import { SettingsButton } from './SettingsButton';
 
 const meta: Meta<typeof SettingsButton> = {
-  title: 'ColumnLimits/SettingsButton',
+  title: 'ColumnLimits/SettingsPage/SettingsButton',
   component: SettingsButton,
   parameters: {
     layout: 'centered',

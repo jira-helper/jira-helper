@@ -10,7 +10,7 @@ const mockTexts = Object.fromEntries(
 ) as Record<keyof typeof PERSON_LIMITS_TEXTS, string>;
 
 const meta: Meta<typeof PersonalWipLimitTable> = {
-  title: 'WIP Limits/PersonalWipLimitTable',
+  title: 'PersonLimits/SettingsPage/PersonalWipLimitTable',
   component: PersonalWipLimitTable,
   parameters: {
     layout: 'padded',

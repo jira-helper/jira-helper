@@ -8,7 +8,7 @@ import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { useSubTaskProgressBoardPropertyStore } from '../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 
 const meta: Meta<typeof BoardSettingsTabContent> = {
-  title: 'Features/Sub-tasks Progress/BoardSettingsTabContent',
+  title: 'SubTasksProgress/BoardSettings/BoardSettingsTabContent',
   component: BoardSettingsTabContent,
   parameters: {
     layout: 'centered',

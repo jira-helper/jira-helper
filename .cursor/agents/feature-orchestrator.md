@@ -109,7 +109,6 @@ description: Координирует полный цикл разработки
 Скиллы:
 - .cursor/skills/tdd/SKILL.md
 - .cursor/skills/testing/SKILL.md
-- .cursor/skills/vitest-bdd-testing/SKILL.md (store BDD тесты)
 - .cursor/skills/cypress-bdd-testing/SKILL.md (Cypress BDD тесты)
 
 Порядок:

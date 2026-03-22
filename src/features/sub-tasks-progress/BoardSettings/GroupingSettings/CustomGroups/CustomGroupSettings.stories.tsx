@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { CustomGroupSettings } from './CustomGroupSettings';
 
 const meta: Meta<typeof CustomGroupSettings> = {
-  title: 'Features/SubTasksProgress/BoardSettings/GroupingSettings/CustomGroupSettings',
+  title: 'SubTasksProgress/BoardSettings/GroupingSettings/CustomGroups/CustomGroupSettings',
   component: CustomGroupSettings,
   parameters: {
     layout: 'centered',

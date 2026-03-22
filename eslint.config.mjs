@@ -9,11 +9,13 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import requireGherkinStepsImport from './eslint-local-rules/require-gherkin-steps-import.js';
 import noChainedStubAs from './eslint-local-rules/no-chained-stub-as.js';
 import noDirectValtioSnapshot from './eslint-local-rules/no-direct-valtio-snapshot.js';
+import requireStorybookTitleHierarchy from './eslint-local-rules/require-storybook-title-hierarchy.js';
 
 const localPlugin = {
   rules: {
     'no-direct-valtio-snapshot': noDirectValtioSnapshot,
     'require-gherkin-steps-import': requireGherkinStepsImport,
+    'require-storybook-title-hierarchy': requireStorybookTitleHierarchy,
   },
 };
 
@@ -126,6 +128,7 @@ export default [
     files: ['**/*.stories.{ts,tsx}'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
+      'local/require-storybook-title-hierarchy': 'error',
     },
   },
 

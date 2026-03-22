@@ -4,7 +4,7 @@ import { fn } from '@storybook/test';
 import { SettingsModal } from './SettingsModal';
 
 const meta: Meta<typeof SettingsModal> = {
-  title: 'ColumnLimits/SettingsModal',
+  title: 'ColumnLimits/SettingsPage/SettingsModal',
   component: SettingsModal,
   parameters: {
     layout: 'fullscreen',

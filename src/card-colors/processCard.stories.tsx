@@ -19,7 +19,7 @@ const ProcessCardDemo = ({ grabberColor }: { grabberColor?: string }) => {
 };
 
 const meta = {
-  title: 'Features/Card Colors/Process Card',
+  title: 'CardColors/ProcessCard',
   component: ProcessCardDemo,
   parameters: {
     layout: 'centered',

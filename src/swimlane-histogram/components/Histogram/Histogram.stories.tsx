@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Histogram } from './Histogram';
 
 const meta: Meta<typeof Histogram> = {
-  title: 'Swimlane Histogram/Histogram',
+  title: 'SwimlaneHistogram/Histogram',
   component: Histogram,
 };
 

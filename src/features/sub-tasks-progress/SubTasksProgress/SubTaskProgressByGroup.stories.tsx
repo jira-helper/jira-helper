@@ -4,7 +4,7 @@ import { SubTaskProgressByGroup } from './SubTaskProgressByGroup';
 import { subTasksProgress } from './testData';
 
 const meta: Meta<typeof SubTaskProgressByGroup> = {
-  title: 'Features/Sub-tasks Progress/SubTaskProgressByGroup',
+  title: 'SubTasksProgress/SubTasksProgress/SubTaskProgressByGroup',
   component: SubTaskProgressByGroup,
   tags: ['autodocs'],
   decorators: [

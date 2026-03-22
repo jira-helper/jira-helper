@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AvatarBadge } from './AvatarBadge';
 
 const meta: Meta<typeof AvatarBadge> = {
-  title: 'PersonLimits/AvatarBadge',
+  title: 'PersonLimits/BoardPage/AvatarBadge',
   component: AvatarBadge,
   parameters: {
     layout: 'centered',

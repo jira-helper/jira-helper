@@ -6,7 +6,7 @@ import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../../property/types';
 
 const meta: Meta<typeof PersonalWipLimitContainer> = {
-  title: 'WIP Limits/PersonalWipLimitContainer',
+  title: 'PersonLimits/SettingsPage/PersonalWipLimitContainer',
   component: PersonalWipLimitContainer,
   parameters: {
     layout: 'padded',

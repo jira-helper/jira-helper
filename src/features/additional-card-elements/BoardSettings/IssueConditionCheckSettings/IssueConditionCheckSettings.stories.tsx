@@ -6,7 +6,7 @@ import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additi
 import { IssueConditionCheck } from '../../types';
 
 const meta: Meta = {
-  title: 'Features/Additional Card Elements/Issue Condition Check Settings',
+  title: 'AdditionalCardElements/BoardSettings/IssueConditionCheckSettings',
 };
 
 export default meta;

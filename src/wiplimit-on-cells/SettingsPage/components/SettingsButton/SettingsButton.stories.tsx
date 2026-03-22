@@ -7,7 +7,7 @@ import { useWipLimitCellsSettingsUIStore } from '../../stores/settingsUIStore';
 import type { WipLimitRange } from '../../../types';
 
 const meta: Meta<typeof SettingsButton> = {
-  title: 'WipLimitOnCells/SettingsButton',
+  title: 'WiplimitOnCells/SettingsPage/SettingsButton',
   component: SettingsButton,
   parameters: {
     layout: 'centered',

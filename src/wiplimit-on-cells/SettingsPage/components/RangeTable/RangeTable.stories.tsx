@@ -4,7 +4,7 @@ import { RangeTable } from './RangeTable';
 import type { WipLimitRange } from '../../../types';
 
 const meta: Meta<typeof RangeTable> = {
-  title: 'WIP Limits on Cells/RangeTable',
+  title: 'WiplimitOnCells/SettingsPage/RangeTable',
   component: RangeTable,
   parameters: {
     layout: 'padded',

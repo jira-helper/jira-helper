@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColumnLimitsForm } from './ColumnLimitsForm';
 
 const meta: Meta = {
-  title: 'ColumnLimits/ColumnLimitsSettings',
+  title: 'ColumnLimits/SettingsPage/ColumnLimitsSettings',
   parameters: {
     layout: 'padded',
   },

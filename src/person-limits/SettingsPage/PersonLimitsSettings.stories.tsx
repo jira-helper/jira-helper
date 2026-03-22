@@ -6,7 +6,7 @@ import { useSettingsUIStore } from './stores/settingsUIStore';
 import type { PersonLimit, Column, Swimlane } from './state/types';
 
 const meta: Meta = {
-  title: 'WIP Limits/Person Limits Settings',
+  title: 'PersonLimits/SettingsPage/PersonLimitsSettings',
   parameters: {
     layout: 'padded',
   },

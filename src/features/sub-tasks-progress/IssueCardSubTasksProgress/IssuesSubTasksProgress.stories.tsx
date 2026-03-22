@@ -4,7 +4,7 @@ import { IssuesSubTasksProgressPure } from './IssuesSubTasksProgress';
 import { subTasksProgress } from '../SubTasksProgress/testData';
 
 const meta: Meta<typeof IssuesSubTasksProgressPure> = {
-  title: 'Features/Sub-tasks Progress/IssuesSubTasksProgressPure',
+  title: 'SubTasksProgress/IssueCardSubTasksProgress/IssuesSubTasksProgress',
   component: IssuesSubTasksProgressPure,
   tags: ['autodocs'],
 };

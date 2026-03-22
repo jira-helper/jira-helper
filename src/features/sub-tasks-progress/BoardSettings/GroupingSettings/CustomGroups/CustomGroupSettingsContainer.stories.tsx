@@ -3,7 +3,7 @@ import { action } from '@storybook/addon-actions';
 import { CustomGroupSettingsContainer } from './CustomGroupSettingsContainer';
 
 const meta = {
-  title: 'Features/SubTasksProgress/GroupingSettings/CustomGroupSettingsContainer',
+  title: 'SubTasksProgress/BoardSettings/GroupingSettings/CustomGroups/CustomGroupSettingsContainer',
   component: CustomGroupSettingsContainer,
   parameters: {
     layout: 'centered',

@@ -8,7 +8,7 @@ import { RangeForm } from '../RangeForm/RangeForm';
 import type { WipLimitRange } from '../../../types';
 
 const meta: Meta<typeof SettingsModal> = {
-  title: 'WipLimitOnCells/SettingsModal',
+  title: 'WiplimitOnCells/SettingsPage/SettingsModal',
   component: SettingsModal,
   parameters: {
     layout: 'fullscreen',

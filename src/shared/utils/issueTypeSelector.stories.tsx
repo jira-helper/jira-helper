@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { generateIssueTypeSelectorHTML, getSelectedIssueTypes, loadIssueTypes } from './issueTypeSelector';
 
 const meta: Meta = {
-  title: 'Shared/Issue Type Selector',
+  title: 'Shared/Utils/IssueTypeSelector',
   parameters: {
     layout: 'padded',
   },

@@ -5,7 +5,7 @@ import { PersonNameSelect } from './PersonNameSelect';
 import type { SelectedPerson } from '../stores/settingsUIStore.types';
 
 const meta: Meta<typeof PersonNameSelect> = {
-  title: 'WIP Limits/PersonNameSelect',
+  title: 'PersonLimits/SettingsPage/PersonNameSelect',
   component: PersonNameSelect,
   parameters: {
     layout: 'padded',

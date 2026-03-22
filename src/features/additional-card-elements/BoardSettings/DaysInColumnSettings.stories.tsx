@@ -48,7 +48,7 @@ mockContainer.register({
 });
 
 const meta: Meta<typeof DaysInColumnSettings> = {
-  title: 'Additional Card Elements/BoardSettings/DaysInColumnSettings',
+  title: 'AdditionalCardElements/BoardSettings/DaysInColumnSettings',
   component: DaysInColumnSettings,
   decorators: [
     Story => (

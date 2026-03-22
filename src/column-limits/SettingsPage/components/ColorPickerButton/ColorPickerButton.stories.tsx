@@ -3,7 +3,7 @@ import { fn } from '@storybook/test';
 import { ColorPickerButton } from './ColorPickerButton';
 
 const meta: Meta<typeof ColorPickerButton> = {
-  title: 'ColumnLimits/ColorPickerButton',
+  title: 'ColumnLimits/SettingsPage/ColorPickerButton',
   component: ColorPickerButton,
   parameters: {
     layout: 'centered',
