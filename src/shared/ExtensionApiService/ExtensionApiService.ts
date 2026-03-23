@@ -1,5 +1,7 @@
 /* global browser chrome */
 
+import type { IExtensionApiService, TabChangeInfo, ContextMenuConfig } from './tokens';
+
 type ExtensionAPI = typeof chrome | typeof browser;
 
 type MessageCallback = (
@@ -11,12 +13,8 @@ type MessageCallback = (
 type TabsActivatedCallback = (activeInfo: chrome.tabs.TabActiveInfo) => void;
 
 type ContextMenuCallback = (info: { checked?: boolean }, tab?: { id?: number }) => void;
-export interface TabChangeInfo {
-  status?: string;
-  url?: string;
-}
 
-class ExtensionApiService {
+export class ExtensionApiService implements IExtensionApiService {
   private extensionAPI: ExtensionAPI;
 
   constructor() {
@@ -77,14 +75,7 @@ class ExtensionApiService {
     this.extensionAPI.contextMenus.onClicked.addListener(cb);
   }
 
-  createContextMenu(config: {
-    title: string;
-    type: 'checkbox';
-    id: string;
-    checked: boolean;
-    contexts: 'page'[];
-    documentUrlPatterns?: string[];
-  }): void {
+  createContextMenu(config: ContextMenuConfig): void {
     this.extensionAPI.contextMenus.create(config);
   }
 

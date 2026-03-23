@@ -1,7 +1,8 @@
 import Draggable from 'gsap/Draggable';
 import { TweenLite, gsap } from 'gsap';
+import { globalContainer } from 'dioma';
 import { PageModification } from '../shared/PageModification';
-import { extensionApiService } from '../shared/ExtensionApiService';
+import { extensionApiServiceToken } from '../shared/ExtensionApiService';
 import { getChartLinePosition, getChartTicks, getChartValueByPosition } from './utils';
 
 interface GridOptions {
@@ -296,7 +297,8 @@ export default class extends PageModification {
   async apply(_: undefined, chartElement: HTMLElement): Promise<void> {
     await this.waitForElement('.tick', chartElement);
 
-    if (extensionApiService.isFirefox()) {
+    const extensionApi = globalContainer.inject(extensionApiServiceToken);
+    if (extensionApi.isFirefox()) {
       // eslint-disable-next-line no-console
       console.warn('jira-helper: AddChartGrid is not supported in Firefox');
       return;

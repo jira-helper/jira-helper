@@ -2,6 +2,7 @@ import React from 'react';
 import type { Preview } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
+import { registerExtensionApiServiceInDI } from '../src/shared/ExtensionApiService';
 import { registerLogger } from '../src/shared/Logger';
 import { WithDi } from '../src/shared/diContext';
 import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
@@ -15,12 +16,16 @@ const preview: Preview = {
     },
     actions: { argTypesRegex: '^on.*' },
   },
-  decorators: (Story) => {
-    return <WithDi container={globalContainer}>
-      <Story />
-    </WithDi>
-  }
+  decorators: Story => {
+    return (
+      <WithDi container={globalContainer}>
+        <Story />
+      </WithDi>
+    );
+  },
 };
+
+registerExtensionApiServiceInDI(globalContainer);
 
 globalContainer.register({
   token: BoardPropertyServiceToken,
@@ -34,6 +39,6 @@ globalContainer.register({
   token: localeProviderToken,
   value: new MockLocaleProvider('en'),
 });
-registerLogger(globalContainer)
+registerLogger(globalContainer);
 
 export default preview;

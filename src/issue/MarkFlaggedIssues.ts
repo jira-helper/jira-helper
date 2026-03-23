@@ -1,9 +1,10 @@
 import each from '@tinkoff/utils/array/each';
+import { globalContainer } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { getCurrentRoute, getIssueId, Routes } from '../routing';
 import { loadFlaggedIssues, loadNewIssueViewEnabled } from '../shared/jiraApi';
 import { issueDOM } from './domSelectors';
-import { extensionApiService } from '../shared/ExtensionApiService';
+import { extensionApiServiceToken } from '../shared/ExtensionApiService';
 import flagNew from '../assets/flagNew.svg';
 import flagUrl from '../assets/flag.png';
 
@@ -14,28 +15,29 @@ enum RelatedIssue {
   LINKED_NEW = 'LINKED_NEW',
 }
 
-const getFlag = (newIssueView: boolean): HTMLImageElement => {
-  const flag = document.createElement('img');
-  flag.src = extensionApiService.getUrl(newIssueView ? flagNew : flagUrl);
-  flag.style.width = '16px';
-  flag.style.height = '16px';
-  return flag;
-};
-
-const getIssueSelector = (): string => {
-  if (getCurrentRoute() === Routes.BOARD) {
-    return `[data-issuekey='${getIssueId()}'] ${issueDOM.detailsBlock}`; // When switching tasks on the board, wait for the desired task to load
-  }
-
-  if (getCurrentRoute() === Routes.SEARCH) {
-    return `[data-issue-key='${getIssueId()}']`;
-  }
-
-  return issueDOM.detailsBlock;
-};
-
 export default class extends PageModification<any, Element> {
   private newIssueView: boolean = false;
+
+  private getFlag(): HTMLImageElement {
+    const extensionApi = globalContainer.inject(extensionApiServiceToken);
+    const flag = document.createElement('img');
+    flag.src = extensionApi.getUrl(this.newIssueView ? flagNew : flagUrl);
+    flag.style.width = '16px';
+    flag.style.height = '16px';
+    return flag;
+  }
+
+  private getIssueSelector(): string {
+    if (getCurrentRoute() === Routes.BOARD) {
+      return `[data-issuekey='${getIssueId()}'] ${issueDOM.detailsBlock}`;
+    }
+
+    if (getCurrentRoute() === Routes.SEARCH) {
+      return `[data-issue-key='${getIssueId()}']`;
+    }
+
+    return issueDOM.detailsBlock;
+  }
 
   shouldApply(): boolean {
     return getIssueId() != null;
@@ -58,7 +60,7 @@ export default class extends PageModification<any, Element> {
       return this.waitForElement(issueDOM.linkButton);
     }
 
-    return this.waitForElement(getIssueSelector());
+    return this.waitForElement(this.getIssueSelector());
   }
 
   async apply(): Promise<void> {
@@ -111,7 +113,7 @@ export default class extends PageModification<any, Element> {
       (issuesElements[issueKey] || []).forEach(({ type, element }) => {
         element.style.backgroundColor = this.newIssueView ? '#fffae6' : '#ffe9a8';
 
-        const flag = getFlag(this.newIssueView);
+        const flag = this.getFlag();
 
         switch (type) {
           case RelatedIssue.LINKED: {
@@ -145,7 +147,7 @@ export default class extends PageModification<any, Element> {
       if (!this.newIssueView && issueKey === issueId) {
         const mainField = document.querySelector('#priority-val') || document.querySelector('#type-val');
         if (mainField) {
-          mainField.insertBefore(getFlag(this.newIssueView), null);
+          mainField.insertBefore(this.getFlag(), null);
         }
       }
     });

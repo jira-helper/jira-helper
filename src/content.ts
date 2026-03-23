@@ -35,7 +35,7 @@ import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
-import { extensionApiService } from './shared/ExtensionApiService';
+import { extensionApiServiceToken, registerExtensionApiServiceInDI } from './shared/ExtensionApiService';
 import { AdditionalCardElementsBoardPage } from './features/additional-card-elements/BoardPage';
 import { AdditionalCardElementsBoardBacklogPage } from './features/additional-card-elements/BoardBacklogPage';
 
@@ -49,6 +49,7 @@ const domLoaded = () =>
 
 function initDiContainer() {
   const container = globalContainer;
+  registerExtensionApiServiceInDI(container);
   registerBoardPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
@@ -64,11 +65,13 @@ function initDiContainer() {
 async function start() {
   if (!isJira) return;
 
+  initDiContainer();
+
   initBlurSensitive();
-  extensionApiService.sendMessage({ message: 'jira-helper-inited' });
+  const extensionApi = globalContainer.inject(extensionApiServiceToken);
+  extensionApi.sendMessage({ message: 'jira-helper-inited' });
 
   await domLoaded();
-  initDiContainer();
 
   // Load local settings (locale, etc.) on all pages
   loadLocalSettings();

@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
+import { globalContainer } from 'dioma';
 import { getBoardProperty, updateBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
+import { WithDi } from '../shared/diContext';
 import { SettingsPage } from '../page-objects/SettingsPage';
 import { CardColorsSettingsContainer } from './CardColorsSettingsContainer';
 import { PropertyValue } from './types';
@@ -47,7 +49,9 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
     };
 
     createRoot(el).render(
-      <CardColorsSettingsContainer updateBoardProperty={updateProperty} getBoardProperty={getProperty} />
+      <WithDi container={globalContainer}>
+        <CardColorsSettingsContainer updateBoardProperty={updateProperty} getBoardProperty={getProperty} />
+      </WithDi>
     );
   }
 }
