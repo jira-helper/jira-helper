@@ -1,4 +1,5 @@
-import { getCurrentRoute, onUrlChange, Routes } from '../routing';
+import { globalContainer } from 'dioma';
+import { Routes, routingServiceToken } from '../routing';
 import type { PageModification } from './PageModification';
 
 export type ModificationsMap = Record<string, (new () => PageModification)[]>;
@@ -41,7 +42,8 @@ const applyModification = async (Modification: new () => PageModification, modif
 };
 
 const applyModifications = (modificationsMap: ModificationsMap) => {
-  const currentRoute = getCurrentRoute();
+  const routingService = globalContainer.inject(routingServiceToken);
+  const currentRoute = routingService.getCurrentRoute();
 
   if (route !== currentRoute) {
     route = currentRoute;
@@ -91,5 +93,6 @@ const applyModifications = (modificationsMap: ModificationsMap) => {
 
 export default (modificationsMap: ModificationsMap) => {
   applyModifications(modificationsMap);
-  onUrlChange(() => applyModifications(modificationsMap));
+  const routingService = globalContainer.inject(routingServiceToken);
+  routingService.onUrlChange(() => applyModifications(modificationsMap));
 };

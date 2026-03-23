@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest';
-import { getCurrentRoute } from '../../src/routing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { globalContainer } from 'dioma';
+import { registerExtensionApiServiceInDI } from '../../src/shared/ExtensionApiService';
+import { registerRoutingServiceInDI, getCurrentRoute } from '../../src/routing';
+import { registerRoutingInDI } from '../../src/shared/di/routingTokens';
 
 describe('Routing should', () => {
+  beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    registerRoutingServiceInDI(globalContainer);
+    registerRoutingInDI(globalContainer);
+  });
+
   it.each([
     ['https://www.example.com/RapidView.jspa', 'SETTINGS'],
     ['https://www.example.com/RapidBoard.jspa', 'BOARD'],

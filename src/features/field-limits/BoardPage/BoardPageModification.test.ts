@@ -1,17 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { globalContainer } from 'dioma';
 import { BoardPageModification } from './BoardPageModification';
-import * as routing from 'src/routing';
+import type { IRoutingService } from 'src/routing';
+import { routingServiceToken } from 'src/routing';
+import { registerRoutingInDI } from 'src/shared/di/routingTokens';
+import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
 import * as jiraApi from 'src/shared/jiraApi';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
-
-vi.mock('src/routing', async importOriginal => {
-  const original = await importOriginal<typeof routing>();
-  return {
-    ...original,
-    getSearchParam: vi.fn(),
-    getBoardIdFromURL: vi.fn(),
-  };
-});
 
 vi.mock('src/shared/jiraApi', () => ({
   getBoardEditData: vi.fn(),
@@ -20,11 +15,27 @@ vi.mock('src/shared/jiraApi', () => ({
 
 describe('BoardPageModification', () => {
   let modification: BoardPageModification;
+  const mockGetSearchParam = vi.fn();
+  const mockGetBoardIdFromURL = vi.fn();
 
   beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    const mockRouting: IRoutingService = {
+      getSearchParam: mockGetSearchParam,
+      getBoardIdFromURL: mockGetBoardIdFromURL,
+      getReportNameFromURL: vi.fn(),
+      getCurrentRoute: vi.fn(),
+      getSettingsTab: vi.fn(),
+      getIssueId: vi.fn(),
+      onUrlChange: vi.fn(),
+    };
+    globalContainer.register({ token: routingServiceToken, value: mockRouting });
+    registerRoutingInDI(globalContainer);
+
     modification = new BoardPageModification();
     document.body.innerHTML = '';
-    vi.mocked(routing.getBoardIdFromURL).mockReturnValue('123');
+    mockGetBoardIdFromURL.mockReturnValue('123');
     vi.mocked(jiraApi.getBoardEditData).mockResolvedValue({
       canEdit: true,
       rapidListConfig: {},
@@ -41,24 +52,24 @@ describe('BoardPageModification', () => {
 
   describe('shouldApply', () => {
     it('should return true when view is null', () => {
-      vi.mocked(routing.getSearchParam).mockReturnValue(null);
+      mockGetSearchParam.mockReturnValue(null);
       expect(modification.shouldApply()).toBe(true);
     });
 
     it('should return true when view is detail', () => {
-      vi.mocked(routing.getSearchParam).mockReturnValue('detail');
+      mockGetSearchParam.mockReturnValue('detail');
       expect(modification.shouldApply()).toBe(true);
     });
 
     it('should return false when view is not detail', () => {
-      vi.mocked(routing.getSearchParam).mockReturnValue('plan');
+      mockGetSearchParam.mockReturnValue('plan');
       expect(modification.shouldApply()).toBe(false);
     });
   });
 
   describe('getModificationId', () => {
     it('should return id with field-limits-board prefix', () => {
-      vi.mocked(routing.getBoardIdFromURL).mockReturnValue('456');
+      mockGetBoardIdFromURL.mockReturnValue('456');
       expect(modification.getModificationId()).toBe('field-limits-board-456');
     });
   });

@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { globalContainer } from 'dioma';
 import { SettingsPageModification } from './SettingsPageModification';
 import * as routing from 'src/routing';
+import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
+import { registerRoutingInDI } from 'src/shared/di/routingTokens';
 
 vi.mock('src/routing', async importOriginal => {
   const original = await importOriginal<typeof routing>();
@@ -14,6 +17,11 @@ describe('SettingsPageModification', () => {
   let modification: SettingsPageModification;
 
   beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    routing.registerRoutingServiceInDI(globalContainer);
+    registerRoutingInDI(globalContainer);
+
     modification = new SettingsPageModification();
     document.body.innerHTML = '';
     vi.mocked(routing.getSettingsTab).mockResolvedValue('cardLayout');

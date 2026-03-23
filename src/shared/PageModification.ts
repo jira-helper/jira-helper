@@ -1,4 +1,5 @@
-import { getBoardIdFromURL, getSearchParam, getReportNameFromURL } from '../routing';
+import { globalContainer } from 'dioma';
+import { routingServiceToken } from '../routing';
 import { waitForElement } from './utils';
 import { deleteBoardProperty, getBoardEditData, getBoardProperty, updateBoardProperty } from './jiraApi';
 
@@ -52,31 +53,35 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   protected getBoardProperty(property: string): Promise<any> {
+    const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
+    return getBoardProperty(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected updateBoardProperty(property: string, value: any): Promise<any> {
+    const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
     // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
-    return updateBoardProperty(getBoardIdFromURL()!, property, value, { abortPromise });
+    return updateBoardProperty(routing.getBoardIdFromURL()!, property, value, { abortPromise });
   }
 
   protected deleteBoardProperty(property: string): Promise<any> {
+    const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
     // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
-    return deleteBoardProperty(getBoardIdFromURL()!, property, { abortPromise });
+    return deleteBoardProperty(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected getBoardEditData(): Promise<any> {
+    const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardEditData(getBoardIdFromURL()!, { abortPromise });
+    return getBoardEditData(routing.getBoardIdFromURL()!, { abortPromise });
   }
 
   protected createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
@@ -173,14 +178,17 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   protected getSearchParam(param: string): string | null {
-    return getSearchParam(param);
+    const routing = globalContainer.inject(routingServiceToken);
+    return routing.getSearchParam(param);
   }
 
   protected getReportNameFromURL(): string | null {
-    return getReportNameFromURL();
+    const routing = globalContainer.inject(routingServiceToken);
+    return routing.getReportNameFromURL();
   }
 
   protected getBoardId(): string | null {
-    return getBoardIdFromURL();
+    const routing = globalContainer.inject(routingServiceToken);
+    return routing.getBoardIdFromURL();
   }
 }

@@ -30,6 +30,7 @@ import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService'
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
 import { registerRoutingInDI } from './shared/di/routingTokens';
+import { registerRoutingServiceInDI } from './routing';
 import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
@@ -55,6 +56,7 @@ function initDiContainer() {
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
   registerLogger(container);
+  registerRoutingServiceInDI(container);
   registerRoutingInDI(container);
   registerJiraApiInDI(container);
   container.register({

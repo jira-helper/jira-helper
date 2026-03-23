@@ -1,8 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getSettingsTab } from '../../src/routing';
+import { globalContainer } from 'dioma';
+import { registerExtensionApiServiceInDI } from '../../src/shared/ExtensionApiService';
+import { registerRoutingServiceInDI, getSettingsTab } from '../../src/routing';
+import { registerRoutingInDI } from '../../src/shared/di/routingTokens';
 
 describe('Routing should', () => {
   beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    registerRoutingServiceInDI(globalContainer);
+    registerRoutingInDI(globalContainer);
     vi.stubGlobal('location', { search: '' });
   });
 

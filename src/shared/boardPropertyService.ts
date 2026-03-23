@@ -1,5 +1,5 @@
-import { getBoardIdFromURL } from 'src/routing';
-import { Container, Token } from 'dioma';
+import { Container, Token, globalContainer } from 'dioma';
+import { routingServiceToken } from 'src/routing';
 import { deleteBoardProperty, getBoardProperty, updateBoardProperty } from './jiraApi';
 
 export interface BoardPropertyServiceI {
@@ -16,7 +16,7 @@ export const BoardPropertyServiceToken = new Token<BoardPropertyServiceI>('Board
 
 export const BoardPropertyService = {
   getBoardProperty<T>(property: string): Promise<T | undefined> {
-    const boardId = getBoardIdFromURL();
+    const boardId = globalContainer.inject(routingServiceToken).getBoardIdFromURL();
     if (!boardId) {
       return Promise.reject(new Error('no board id'));
     }
@@ -24,7 +24,7 @@ export const BoardPropertyService = {
   },
 
   updateBoardProperty<T>(property: string, value: T, params: Record<string, any> = {}): void {
-    const boardId = getBoardIdFromURL();
+    const boardId = globalContainer.inject(routingServiceToken).getBoardIdFromURL();
     if (!boardId) {
       throw new Error('no board id');
     }
@@ -32,7 +32,7 @@ export const BoardPropertyService = {
   },
 
   deleteBoardProperty(property: string, params: Record<string, any> = {}): void {
-    const boardId = getBoardIdFromURL();
+    const boardId = globalContainer.inject(routingServiceToken).getBoardIdFromURL();
     if (!boardId) {
       throw new Error('no board id');
     }
