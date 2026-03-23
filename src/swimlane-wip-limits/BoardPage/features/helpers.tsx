@@ -5,13 +5,13 @@ import type { PropertyModel } from '../../property/PropertyModel';
 import type { Logger } from 'src/shared/Logger';
 import type { SwimlaneSettings } from '../../types';
 
-export const columns = [
+const columns = [
   { id: 'col1', name: 'To Do' },
   { id: 'col2', name: 'In Progress' },
   { id: 'col3', name: 'Done' },
 ];
 
-export const swimlanes = [
+const swimlanes = [
   { id: 'sw1', name: 'Frontend' },
   { id: 'sw2', name: 'Backend' },
 ];
@@ -24,7 +24,7 @@ export const columnNameToId: Record<string, string> = {
 
 let issueCounter = 0;
 
-export const resetIssueCounter = () => {
+const resetIssueCounter = () => {
   issueCounter = 0;
 };
 
@@ -84,7 +84,7 @@ const setupBoardDOM = () => {
  * Real DOM queries (getSwimlanes, getIssueCount*, getColumns) delegate to BoardPagePageObject.
  * Visual methods (insertSwimlaneComponent, highlightSwimlane, removeSwimlaneComponent) are Cypress stubs.
  */
-export const createSpiedPageObject = (): IBoardPagePageObject => ({
+const createSpiedPageObject = (): IBoardPagePageObject => ({
   ...BoardPagePageObject,
   insertSwimlaneComponent: cy.stub().as('insertSwimlaneComponent'),
   removeSwimlaneComponent: cy.stub().as('removeSwimlaneComponent'),

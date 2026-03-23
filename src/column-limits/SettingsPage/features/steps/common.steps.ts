@@ -8,10 +8,6 @@ import { useColumnLimitsPropertyStore } from '../../../property/store';
 import { WITHOUT_GROUP_ID } from '../../../types';
 import { columns, createButtonStubs, mountButton, setBoardSwimlanes } from '../helpers';
 
-// Re-export for convenience
-export { Given, When, Then };
-export type { DataTableRows };
-
 // --- Background steps ---
 
 Given('the board has swimlanes:', (dataTable: DataTableRows) => {

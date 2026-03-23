@@ -9,14 +9,14 @@ import type { WipLimitRange, WipLimitCell } from '../../types';
 
 // --- Fixtures matching feature Background ---
 
-export const columns = [
+const columns = [
   { id: 'col1', name: 'To Do' },
   { id: 'col2', name: 'In Progress' },
   { id: 'col3', name: 'Review' },
   { id: 'col4', name: 'Done' },
 ];
 
-export const swimlanes = [
+const swimlanes = [
   { id: 'sw1', name: 'Frontend' },
   { id: 'sw2', name: 'Backend' },
   { id: 'sw3', name: 'QA' },
@@ -53,7 +53,7 @@ export const createRange = (
 
 // --- DOM helpers ---
 
-export const createMockSwimlane = (id: string, name: string): HTMLElement => {
+const createMockSwimlane = (id: string, name: string): HTMLElement => {
   const swimlane = document.createElement('div');
   swimlane.className = 'ghx-swimlane';
   swimlane.setAttribute('swimlane-id', id);
@@ -61,7 +61,7 @@ export const createMockSwimlane = (id: string, name: string): HTMLElement => {
   return swimlane;
 };
 
-export const createMockColumn = (id: string, name: string): HTMLElement => {
+const createMockColumn = (id: string, name: string): HTMLElement => {
   const column = document.createElement('div');
   column.className = 'ghx-column';
   column.setAttribute('data-column-id', id);
@@ -122,7 +122,7 @@ const createMockPageObject = (cells: Map<string, HTMLElement>): IWipLimitCellsBo
   };
 };
 
-export const createMockBoard = (): BoardContext => {
+const createMockBoard = (): BoardContext => {
   const container = document.createElement('div');
   container.className = 'ghx-board';
   const cells = new Map<string, HTMLElement>();
@@ -200,15 +200,6 @@ export const shouldCountIssue = (issue: Element, includedIssueTypes?: string[]):
 export const cellHasBadge = (cell: HTMLElement, expectedText: string): boolean => {
   const badge = cell.querySelector('.WipLimitCellsBadge');
   return badge?.textContent?.trim() === expectedText;
-};
-
-export const getBadgeBackgroundColor = (cell: HTMLElement): string | null => {
-  const badge = cell.querySelector('.WipLimitCellsBadge');
-  if (!badge) return null;
-  const style = badge.getAttribute('style');
-  if (!style) return null;
-  const match = style.match(/background-color:\s*([^;]+)/);
-  return match ? match[1].trim() : null;
 };
 
 export const cellHasBorder = (cell: HTMLElement, side: 'top' | 'bottom' | 'left' | 'right'): boolean => {

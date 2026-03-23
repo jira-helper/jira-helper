@@ -22,10 +22,6 @@ import {
 import type { BoardContext } from '../helpers';
 import type { WipLimitRange, WipLimitCell } from '../../../types';
 
-// Re-export for convenience
-export { Given, When, Then };
-export type { DataTableRows };
-
 // --- State for building ranges across Given steps ---
 
 let boardContext: BoardContext;
@@ -45,7 +41,7 @@ export const setBoardContext = (ctx: BoardContext) => {
   resetIssueCounter();
 };
 
-export const getRanges = (): WipLimitRange[] => {
+const getRanges = (): WipLimitRange[] => {
   return Array.from(pendingRanges.entries()).map(([name, config]) =>
     createRange(name, config.wipLimit, config.cells, {
       disable: config.disable,

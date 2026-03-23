@@ -16,7 +16,6 @@ import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { Ok } from 'ts-results';
 import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
-import { SettingsModalContainer } from '../components/SettingsModal/SettingsModalContainer';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
 import { useColumnLimitsPropertyStore } from '../../property/store';
@@ -31,7 +30,7 @@ export const columns: Column[] = [
   { id: 'col4', name: 'Done' },
 ];
 
-export const issueTypes = [
+const issueTypes = [
   { id: '1', name: 'Task', subtask: false },
   { id: '2', name: 'Bug', subtask: false },
   { id: '3', name: 'Story', subtask: false },
@@ -44,7 +43,7 @@ export const setBoardSwimlanes = (swimlanes: Array<{ id: string; name: string }>
   boardSwimlanes = swimlanes;
 };
 
-export const getBoardSwimlanes = () => boardSwimlanes;
+const getBoardSwimlanes = () => boardSwimlanes;
 
 // --- Background setup ---
 
@@ -81,27 +80,6 @@ export const setupBackground = () => {
 };
 
 // --- Mount helpers ---
-
-export type ModalStubs = {
-  onClose: sinon.SinonStub;
-  onSave: sinon.SinonStub;
-};
-
-export const createModalStubs = (): ModalStubs => {
-  const onClose = cy.stub();
-  cy.wrap(onClose).as('onClose');
-  const onSave = cy.stub().resolves();
-  cy.wrap(onSave).as('onSave');
-  return { onClose, onSave };
-};
-
-export const mountModal = (stubs: ModalStubs) => {
-  cy.mount(
-    <WithDi container={globalContainer}>
-      <SettingsModalContainer onClose={stubs.onClose} onSave={stubs.onSave} />
-    </WithDi>
-  );
-};
 
 export type ButtonStubs = {
   getColumns: Cypress.Agent<sinon.SinonStub>;

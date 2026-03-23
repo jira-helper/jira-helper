@@ -8,12 +8,9 @@ import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { Ok } from 'ts-results';
 import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
-import { PersonalWipLimitContainer } from '../components/PersonalWipLimitContainer';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import { usePersonWipLimitsPropertyStore } from '../../property/store';
-import { createPersonLimit, updatePersonLimit } from '../actions';
-import type { PersonLimit, FormData } from '../state/types';
 import type { JiraUser } from '../../../shared/jiraApi';
 
 // --- Search mock configuration ---
@@ -25,7 +22,7 @@ export const setSearchMockType = (type: SearchMockType) => {
   searchMockType = type;
 };
 
-export const resetSearchMockType = () => {
+const resetSearchMockType = () => {
   searchMockType = 'default';
 };
 
@@ -42,22 +39,7 @@ export const swimlanes = [
   { id: 'swim2', name: 'Backend' },
 ];
 
-export const createLimit = (
-  id: number,
-  name: string,
-  displayName: string,
-  limit: number,
-  cols: Array<{ id: string; name: string }> = [],
-  swims: Array<{ id: string; name: string }> = []
-): PersonLimit => ({
-  id,
-  person: { name, displayName, self: '' },
-  limit,
-  columns: cols,
-  swimlanes: swims,
-});
-
-export const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
+const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
   if (searchMockType === 'empty') {
     return [];
   }
@@ -136,62 +118,6 @@ export const setupBackground = () => {
 
 // --- Mount helpers ---
 
-export const mountComponent = () => {
-  const handleAddLimit = (formData: FormData) => {
-    const store = useSettingsUIStore.getState();
-    if (store.data.editingId !== null) {
-      const existingLimit = store.data.limits.find(l => l.id === store.data.editingId);
-      if (!existingLimit) return;
-      const updatedLimit = updatePersonLimit({ existingLimit, formData, columns, swimlanes });
-      store.actions.updateLimit(store.data.editingId, updatedLimit);
-    } else {
-      if (!formData.person) return;
-      const personLimit = createPersonLimit({
-        formData,
-        person: {
-          name: formData.person.name,
-          displayName: formData.person.displayName,
-          self: formData.person.self,
-        },
-        columns,
-        swimlanes,
-        id: Date.now(),
-      });
-      store.actions.addLimit(personLimit);
-    }
-  };
-  cy.mount(
-    <WithDi container={globalContainer}>
-      <PersonalWipLimitContainer
-        columns={columns}
-        swimlanes={swimlanes}
-        searchUsers={mockSearchUsers}
-        onAddLimit={handleAddLimit}
-      />
-    </WithDi>
-  );
-};
-
-export const setupIssueTypesMock = () => {
-  cy.intercept('GET', '**/rest/api/2/project/**', {
-    body: {
-      issueTypes: [
-        { id: '1', name: 'Task', subtask: false },
-        { id: '2', name: 'Bug', subtask: false },
-        { id: '3', name: 'Story', subtask: false },
-      ],
-    },
-  }).as('loadIssueTypes');
-};
-
-export const selectIssueTypes = (...types: string[]) => {
-  cy.get('#project-input-person-limit-form').type('TEST');
-  cy.contains('Issue types from project', { timeout: 3000 }).should('be.visible');
-  types.forEach(type => {
-    cy.get(`input[type="checkbox"][value="${type}"]`).check();
-  });
-};
-
 export const mountSettingsButton = () => {
   cy.mount(
     <WithDi container={globalContainer}>
@@ -203,5 +129,3 @@ export const mountSettingsButton = () => {
     </WithDi>
   );
 };
-
-export { PersonLimit, FormData, JiraUser };

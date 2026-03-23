@@ -9,25 +9,6 @@ import { ColumnLimitsBoardPageObject } from '../pageObject/ColumnLimitsBoardPage
 
 // --- Fixtures matching feature Background ---
 
-export const columns = [
-  { id: 'col1', name: 'To Do' },
-  { id: 'col2', name: 'In Progress' },
-  { id: 'col3', name: 'Review' },
-  { id: 'col4', name: 'Done' },
-];
-
-export const swimlanes = [
-  { id: 'sw1', name: 'Frontend' },
-  { id: 'sw2', name: 'Backend' },
-  { id: 'sw3', name: 'Expedite' },
-];
-
-export const issueTypes = [
-  { id: 'type1', name: 'Bug' },
-  { id: 'type2', name: 'Task' },
-  { id: 'type3', name: 'Story' },
-];
-
 // Column name to ID mapping
 export const columnNameToId: Record<string, string> = {
   'To Do': 'col1',
@@ -73,7 +54,7 @@ export const createMockIssue = (
 /**
  * Setup DOM structure for board page.
  */
-export const setupBoardDOM = () => {
+const setupBoardDOM = () => {
   const wrapper = document.createElement('div');
   wrapper.id = 'ghx-pool-wrapper';
   wrapper.innerHTML = `
@@ -150,12 +131,6 @@ export const setupBackground = () => {
   });
 
   useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
-};
-
-export const cleanupAfterScenario = () => {
-  document.querySelectorAll('.ghx-issue').forEach(issue => issue.remove());
-  document.body.innerHTML = '';
-  useColumnLimitsRuntimeStore.setState(getInitialState());
 };
 
 // --- Issue counter for unique IDs ---

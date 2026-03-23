@@ -6,10 +6,6 @@ import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
 import { setupBackground, mountComponent, createRange, columns, swimlanes } from '../helpers';
 import { normalizeRange } from 'src/wiplimit-on-cells/property/actions/loadProperty';
 
-// Re-export for convenience
-export { Given, When, Then };
-export type { DataTableRows };
-
 // --- State for building ranges across Given steps ---
 
 const pendingRanges: Map<

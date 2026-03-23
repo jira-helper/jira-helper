@@ -71,5 +71,3 @@ export const mountComponent = (initialRanges: WipLimitRange[] = []) => {
     </WithDi>
   );
 };
-
-export const getOnSaveToProperty = () => onSaveToProperty;

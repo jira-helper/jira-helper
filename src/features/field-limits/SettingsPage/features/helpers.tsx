@@ -32,7 +32,6 @@ let currentColumns: BoardColumn[] = [];
 let currentSwimlanes: BoardSwimlane[] = [];
 let storedSettings: FieldLimitsSettings = { limits: {} };
 
-export const getFields = () => currentFields;
 export const getColumns = () => currentColumns;
 export const getSwimlanes = () => currentSwimlanes;
 
@@ -82,9 +81,6 @@ const getMockBoardEditData = (): BoardEditData => ({
 
 let propertyModel: PropertyModel;
 let settingsUIModel: SettingsUIModel;
-
-export const getPropertyModel = () => propertyModel;
-export const getSettingsUIModel = () => settingsUIModel;
 
 // --- Background setup ---
 
