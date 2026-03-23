@@ -16,7 +16,7 @@ import MarkFlaggedIssues from './issue/MarkFlaggedIssues';
 import ToggleForRightSidebar from './issue/ToggleForRightSidebar';
 import { SettingsPageModification as FieldLimitsSettingsPage } from './features/field-limits/SettingsPage';
 import { BoardPageModification as FieldLimitsBoardPage } from './features/field-limits/BoardPage';
-import { setUpBlurSensitiveOnPage, initBlurSensitive } from './blur-for-sensitive/blurSensitive';
+import { blurSensitiveFeatureToken, registerBlurSensitiveFeatureInDI } from './blur-for-sensitive';
 import PersonLimitsSettings from './person-limits/SettingsPage';
 import PersonLimits from './person-limits/BoardPage';
 import WiplimitOnCells from './wiplimit-on-cells/BoardPage';
@@ -50,6 +50,7 @@ const domLoaded = () =>
 function initDiContainer() {
   const container = globalContainer;
   registerExtensionApiServiceInDI(container);
+  registerBlurSensitiveFeatureInDI(container);
   registerBoardPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
@@ -67,7 +68,8 @@ async function start() {
 
   initDiContainer();
 
-  initBlurSensitive();
+  const blurFeature = globalContainer.inject(blurSensitiveFeatureToken);
+  blurFeature.init();
   const extensionApi = globalContainer.inject(extensionApiServiceToken);
   extensionApi.sendMessage({ message: 'jira-helper-inited' });
 
@@ -76,7 +78,7 @@ async function start() {
   // Load local settings (locale, etc.) on all pages
   loadLocalSettings();
 
-  setUpBlurSensitiveOnPage();
+  blurFeature.setUpOnPage();
 
   const modificationsMap = {
     [Routes.BOARD]: [

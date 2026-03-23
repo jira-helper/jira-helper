@@ -47,7 +47,7 @@ flowchart TD
 | # | Task | Описание | Status |
 |---|------|----------|--------|
 | 169 | [TASK-169](./TASK-169-extension-api-service-di.md) | ExtensionApiService → DI token | DONE |
-| 177 | [TASK-177](./TASK-177-blur-sensitive-service.md) | BlurSensitive → Service с DI | TODO |
+| 177 | [TASK-177](./TASK-177-blur-sensitive-service.md) | BlurSensitive → Service с DI | DONE |
 | 178 | [TASK-178](./TASK-178-routing-service.md) | Routing → RoutingService с DI | TODO |
 | 170 | [TASK-170](./TASK-170-jira-api-migrate-to-di-tokens.md) | jiraApi — перевод на DI tokens | TODO |
 
