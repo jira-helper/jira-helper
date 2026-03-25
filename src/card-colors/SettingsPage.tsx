@@ -4,29 +4,31 @@ import { globalContainer } from 'dioma';
 import { getBoardProperty, updateBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { WithDi } from '../shared/diContext';
-import { SettingsPage } from '../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
+import { routingServiceToken } from '../routing';
 import { CardColorsSettingsContainer } from './CardColorsSettingsContainer';
 import { PropertyValue } from './types';
 
 export default class CardColorsSettingsPage extends PageModification<undefined, Element> {
+  private get settingsPage() {
+    return globalContainer.inject(settingsPagePageObjectToken);
+  }
+
   getModificationId(): string {
     return `card-colors-settings-${this.getBoardId()}`;
   }
 
   async shouldApply(): Promise<boolean> {
-    const tab = await SettingsPage.getSettingsTab();
-    if (tab === 'cardColors') {
-      return true;
-    }
-    return false;
+    const tab = await globalContainer.inject(routingServiceToken).getSettingsTab();
+    return tab === 'cardColors';
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement(SettingsPage.selectors.settingsContent);
+    return this.waitForElement(this.settingsPage.selectors.settingsContent);
   }
 
   async apply(): Promise<void> {
-    const CardColorsSettings = SettingsPage.getCardColorsSettingsTabPageObject();
+    const CardColorsSettings = this.settingsPage.getCardColorsSettingsTabPageObject();
 
     const el = CardColorsSettings.createSpaceBeforeColorsTable();
     if (!el) {

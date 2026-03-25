@@ -3,7 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from 'src/shared/PageModification';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
-import { getSettingsTab } from 'src/routing';
+import { routingServiceToken } from 'src/routing';
 import { useDi } from 'src/shared/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './components/SettingsButton';
@@ -28,7 +28,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   private wrapper: HTMLDivElement | null = null;
 
   async shouldApply(): Promise<boolean> {
-    return (await getSettingsTab()) === 'cardLayout';
+    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'cardLayout';
   }
 
   getModificationId(): string {

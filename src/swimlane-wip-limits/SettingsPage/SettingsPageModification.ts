@@ -1,10 +1,10 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from 'src/shared/PageModification';
-import { SettingsPage } from 'src/page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from 'src/page-objects/SettingsPage';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
-import { getSettingsTab } from 'src/routing';
+import { routingServiceToken } from 'src/routing';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
 import { registerSwimlaneWipLimitsModule } from '../module';
@@ -15,7 +15,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   private swimlaneSelect: HTMLSelectElement | null = null;
 
   async shouldApply(): Promise<boolean> {
-    return (await getSettingsTab()) === 'swimlanes';
+    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'swimlanes';
   }
 
   getModificationId(): string {
@@ -54,7 +54,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   private renderButton(): void {
     if (this.wrapper) return; // Already rendered
 
-    const pageObject = SettingsPage.getSwimlaneLimitsSettingsTabPageObject();
+    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getSwimlaneLimitsSettingsTabPageObject();
     const configContainer = pageObject.getConfigContainer();
 
     if (!configContainer) return;

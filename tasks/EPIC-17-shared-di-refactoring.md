@@ -56,7 +56,7 @@ flowchart TD
 | # | Task | Описание | Status |
 |---|------|----------|--------|
 | 171 | [TASK-171](./TASK-171-popup-di.md) | Popup — dead code, удалить или вынести в DI | TODO |
-| 172 | [TASK-172](./TASK-172-color-picker-tooltip-di.md) | ColorPickerTooltip — dead code, удалить или вынести в DI | TODO |
+| 172 | [TASK-172](./TASK-172-color-picker-tooltip-di.md) | ColorPickerTooltip — dead code, удалить или вынести в DI | DONE |
 
 ### Phase 3: Средний приоритет — Store actions
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
-import { getSettingsTab } from '../../routing';
+import { routingServiceToken } from '../../routing';
 import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
 import { searchUsers } from '../../shared/jiraApi';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { SettingsPage } from '../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
 import type { Column, Swimlane } from './state/types';
 
 type MappedColumn = {
@@ -38,7 +38,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   private boardDataSwimlanes: Swimlane[] | null = null;
 
   async shouldApply(): Promise<boolean> {
-    return (await getSettingsTab()) === 'columns';
+    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
   }
 
   getModificationId(): string {
@@ -74,7 +74,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
       name: swim.name,
     }));
 
-    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'person-limits',

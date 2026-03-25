@@ -2,10 +2,10 @@ import React from 'react';
 import { globalContainer } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
-import { getSettingsTab } from '../../routing';
+import { routingServiceToken } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { SettingsPage } from '../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
 import { normalizeRange } from '../property/actions/loadProperty';
 import type { WipLimitRange } from '../types';
 
@@ -58,7 +58,7 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
   }
 
   async shouldApply(): Promise<boolean> {
-    return (await getSettingsTab()) === 'columns';
+    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
   }
 
   waitForLoading(): Promise<Element> {
@@ -83,7 +83,7 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
       await this.updateBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS, newRanges);
     };
 
-    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'wiplimit-on-cells',

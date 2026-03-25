@@ -26,6 +26,7 @@ import { CardColorsBoardPage } from './card-colors/BoardPage';
 import { BoardSettingsBoardPage } from './board-settings/BoardPage';
 import { SubTasksProgressBoardPage } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
+import { registerSettingsPagePageObjectInDI } from './page-objects/SettingsPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
 import { registerJiraServiceInDI } from './shared/jira/jiraService';
 import { registerLogger } from './shared/Logger';
@@ -53,6 +54,7 @@ function initDiContainer() {
   registerExtensionApiServiceInDI(container);
   registerBlurSensitiveFeatureInDI(container);
   registerBoardPagePageObjectInDI(container);
+  registerSettingsPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
   registerLogger(container);

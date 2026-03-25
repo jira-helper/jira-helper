@@ -1,5 +1,6 @@
+import { globalContainer } from 'dioma';
 import { PageModification } from '../shared/PageModification';
-import { getIssueId } from '../routing';
+import { routingServiceToken } from '../routing';
 import { issueDOM } from './domSelectors';
 
 // Defining the structure of the toggleMap object
@@ -34,7 +35,7 @@ const getToggle = (sidebarHidden: boolean): HTMLButtonElement => {
 export default class extends PageModification<any, Element> {
   // Method to check if the modification should be applied
   shouldApply(): boolean {
-    return getIssueId() != null;
+    return globalContainer.inject(routingServiceToken).getIssueId() != null;
   }
 
   // Method to get the modification ID

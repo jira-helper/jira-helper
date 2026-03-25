@@ -1,12 +1,12 @@
 import React from 'react';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
-import { getSettingsTab } from '../../routing';
+import { routingServiceToken } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { WithDi } from '../../shared/diContext';
 import { useColumnLimitsPropertyStore } from '../property/store';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { SettingsPage } from '../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
 
 export default class SettingsWIPLimits extends PageModification<[any, any], Element> {
   static jiraSelectors = {
@@ -18,7 +18,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   };
 
   async shouldApply(): Promise<boolean> {
-    return (await getSettingsTab()) === 'columns';
+    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
   }
 
   getModificationId(): string {
@@ -51,7 +51,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       name: swim.name,
     }));
 
-    const pageObject = SettingsPage.getColumnsSettingsTabPageObject();
+    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'column-limits',

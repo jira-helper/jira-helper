@@ -15,7 +15,7 @@ import { FieldLimitsBoardPageObject } from './BoardPage/page-objects/FieldLimits
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { loggerToken } from 'src/shared/Logger';
-import { getBoardIdFromURL } from 'src/routing';
+import { routingServiceToken } from 'src/routing';
 import { getBoardEditData } from 'src/shared/jiraApi';
 
 /**
@@ -42,7 +42,7 @@ export function registerFieldLimitsModule(container: Container = globalContainer
   });
 
   const getBoardData = async () => {
-    const boardId = getBoardIdFromURL();
+    const boardId = container.inject(routingServiceToken).getBoardIdFromURL();
     if (!boardId) throw new Error('No board ID');
     return getBoardEditData(boardId);
   };

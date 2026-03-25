@@ -1,30 +1,31 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { SettingsPageModification } from './SettingsPageModification';
-import * as routing from 'src/routing';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
 import { registerRoutingInDI } from 'src/shared/di/routingTokens';
 
-vi.mock('src/routing', async importOriginal => {
-  const original = await importOriginal<typeof routing>();
-  return {
-    ...original,
-    getSettingsTab: vi.fn(),
-  };
-});
-
 describe('SettingsPageModification', () => {
   let modification: SettingsPageModification;
+  let mockRoutingService: { getSettingsTab: ReturnType<typeof vi.fn>; getBoardIdFromURL: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     globalContainer.reset();
     registerExtensionApiServiceInDI(globalContainer);
-    routing.registerRoutingServiceInDI(globalContainer);
+
+    mockRoutingService = {
+      getSettingsTab: vi.fn().mockResolvedValue('swimlanes'),
+      getBoardIdFromURL: vi.fn().mockReturnValue(null),
+    };
+    globalContainer.register({
+      token: routingServiceToken,
+      value: mockRoutingService as unknown as IRoutingService,
+    });
+
     registerRoutingInDI(globalContainer);
 
     modification = new SettingsPageModification();
     document.body.innerHTML = '';
-    vi.mocked(routing.getSettingsTab).mockResolvedValue('swimlanes');
   });
 
   afterEach(() => {
@@ -34,17 +35,17 @@ describe('SettingsPageModification', () => {
 
   describe('shouldApply', () => {
     it('should return true when settings tab is swimlanes', async () => {
-      vi.mocked(routing.getSettingsTab).mockResolvedValue('swimlanes');
+      mockRoutingService.getSettingsTab.mockResolvedValue('swimlanes');
       expect(await modification.shouldApply()).toBe(true);
     });
 
     it('should return false when settings tab is not swimlanes', async () => {
-      vi.mocked(routing.getSettingsTab).mockResolvedValue('columns');
+      mockRoutingService.getSettingsTab.mockResolvedValue('columns');
       expect(await modification.shouldApply()).toBe(false);
     });
 
     it('should return false when settings tab is null', async () => {
-      vi.mocked(routing.getSettingsTab).mockResolvedValue(null);
+      mockRoutingService.getSettingsTab.mockResolvedValue(null);
       expect(await modification.shouldApply()).toBe(false);
     });
   });

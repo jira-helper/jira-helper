@@ -1,7 +1,7 @@
 import each from '@tinkoff/utils/array/each';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../shared/PageModification';
-import { getCurrentRoute, getIssueId, Routes } from '../routing';
+import { Routes, routingServiceToken } from '../routing';
 import { loadFlaggedIssues, loadNewIssueViewEnabled } from '../shared/jiraApi';
 import { issueDOM } from './domSelectors';
 import { extensionApiServiceToken } from '../shared/ExtensionApiService';
@@ -17,6 +17,9 @@ enum RelatedIssue {
 
 export default class extends PageModification<any, Element> {
   private newIssueView: boolean = false;
+  private get routing() {
+    return globalContainer.inject(routingServiceToken);
+  }
 
   private getFlag(): HTMLImageElement {
     const extensionApi = globalContainer.inject(extensionApiServiceToken);
@@ -28,23 +31,23 @@ export default class extends PageModification<any, Element> {
   }
 
   private getIssueSelector(): string {
-    if (getCurrentRoute() === Routes.BOARD) {
-      return `[data-issuekey='${getIssueId()}'] ${issueDOM.detailsBlock}`;
+    if (this.routing.getCurrentRoute() === Routes.BOARD) {
+      return `[data-issuekey='${this.routing.getIssueId()}'] ${issueDOM.detailsBlock}`;
     }
 
-    if (getCurrentRoute() === Routes.SEARCH) {
-      return `[data-issue-key='${getIssueId()}']`;
+    if (this.routing.getCurrentRoute() === Routes.SEARCH) {
+      return `[data-issue-key='${this.routing.getIssueId()}']`;
     }
 
     return issueDOM.detailsBlock;
   }
 
   shouldApply(): boolean {
-    return getIssueId() != null;
+    return this.routing.getIssueId() != null;
   }
 
   getModificationId(): string {
-    return `mark-flagged-issues-${getIssueId()}`;
+    return `mark-flagged-issues-${this.routing.getIssueId()}`;
   }
 
   preloadData(): Promise<void> {
@@ -106,7 +109,7 @@ export default class extends PageModification<any, Element> {
       );
     }
 
-    const issueId = getIssueId();
+    const issueId = this.routing.getIssueId();
     const flaggedIssues = await loadFlaggedIssues([...Object.keys(issuesElements), issueId!]);
 
     flaggedIssues.forEach((issueKey: string) => {

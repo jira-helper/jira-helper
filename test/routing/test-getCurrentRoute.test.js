@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
 import { registerExtensionApiServiceInDI } from '../../src/shared/ExtensionApiService';
-import { registerRoutingServiceInDI, getCurrentRoute } from '../../src/routing';
+import { registerRoutingServiceInDI, routingServiceToken } from '../../src/routing';
 import { registerRoutingInDI } from '../../src/shared/di/routingTokens';
 
 describe('Routing should', () => {
@@ -24,6 +24,6 @@ describe('Routing should', () => {
   ])('when "%s" is given then return "%s"', (url, route) => {
     delete window.location;
     window.location = new URL(url);
-    expect(getCurrentRoute()).toEqual(route);
+    expect(globalContainer.inject(routingServiceToken).getCurrentRoute()).toEqual(route);
   });
 });
