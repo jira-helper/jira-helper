@@ -6,6 +6,7 @@ import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { Ok } from 'ts-results';
 import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
@@ -113,6 +114,11 @@ export const setupBackground = () => {
         { id: '2', name: 'Bug', subtask: false },
         { id: '3', name: 'Story', subtask: false },
       ]),
+  });
+
+  globalContainer.register({
+    token: routingServiceToken,
+    value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
   });
 };
 

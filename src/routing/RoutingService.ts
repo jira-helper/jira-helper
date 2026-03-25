@@ -109,6 +109,20 @@ https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=ro
     return null;
   }
 
+  /*
+    Old: https://company.atlassian.net/secure/RapidBoard.jspa?projectKey=PN&rapidView=12
+    New: https://company.atlassian.net/jira/software/c/projects/MP/boards/138
+  */
+  getProjectKeyFromURL(): string | null {
+    const projectKeyFromQuery = this.getSearchParam('projectKey');
+    if (projectKeyFromQuery) {
+      return projectKeyFromQuery;
+    }
+
+    const match = window.location.pathname.match(/\/projects\/([A-Z]+)\//i);
+    return match?.[1] ?? null;
+  }
+
   onUrlChange(cb: (url: string) => void): void {
     this.extensionApi.onMessage((request: { type: string; url: string }, sender, sendResponse) => {
       if (!sender.tab && request.type === types.TAB_URL_CHANGE) {

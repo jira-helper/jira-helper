@@ -14,6 +14,7 @@ import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { Ok } from 'ts-results';
 import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
@@ -71,6 +72,11 @@ export const setupBackground = () => {
   globalContainer.register({
     token: getProjectIssueTypesToken,
     value: async () => Ok(issueTypes),
+  });
+
+  globalContainer.register({
+    token: routingServiceToken,
+    value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
   });
 
   useColumnLimitsSettingsUIStore.getState().actions.reset();

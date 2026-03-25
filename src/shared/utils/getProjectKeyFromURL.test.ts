@@ -1,30 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getProjectKeyFromURL } from './getProjectKeyFromURL';
+import { globalContainer } from 'dioma';
+import { registerRoutingServiceInDI, routingServiceToken } from 'src/routing';
+import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
 
-class MockURLSearchParams {
-  private searchStr: string;
-
-  constructor(search: string) {
-    this.searchStr = search;
-  }
-
-  get(key: string) {
-    const params = new Map<string, string>();
-    this.searchStr
-      .substring(1)
-      .split('&')
-      .forEach((param: string) => {
-        const [k, v] = param.split('=');
-        if (k && v) params.set(k, v);
-      });
-    return params.get(key) ?? null;
-  }
-}
-
-describe('getProjectKeyFromURL', () => {
+describe('RoutingService.getProjectKeyFromURL', () => {
   const originalLocation = window.location;
 
   beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    registerRoutingServiceInDI(globalContainer);
     Object.defineProperty(window, 'location', {
       value: { ...originalLocation },
       writable: true,
@@ -38,6 +23,8 @@ describe('getProjectKeyFromURL', () => {
     });
   });
 
+  const getProjectKeyFromURL = () => globalContainer.inject(routingServiceToken).getProjectKeyFromURL();
+
   it('should extract project key from new URL format', () => {
     Object.defineProperty(window, 'location', {
       value: {
@@ -48,9 +35,7 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBe('MP');
+    expect(getProjectKeyFromURL()).toBe('MP');
   });
 
   it('should extract project key from old URL format query parameter', () => {
@@ -63,20 +48,7 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const originalURLSearchParams = window.URLSearchParams;
-    Object.defineProperty(window, 'URLSearchParams', {
-      value: MockURLSearchParams,
-      writable: true,
-    });
-
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBe('PN');
-
-    Object.defineProperty(window, 'URLSearchParams', {
-      value: originalURLSearchParams,
-      writable: true,
-    });
+    expect(getProjectKeyFromURL()).toBe('PN');
   });
 
   it('should handle URL with multiple path segments', () => {
@@ -89,9 +61,7 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBe('DEV');
+    expect(getProjectKeyFromURL()).toBe('DEV');
   });
 
   it('should return null when project key not found in URL', () => {
@@ -104,9 +74,7 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBeNull();
+    expect(getProjectKeyFromURL()).toBeNull();
   });
 
   it('should handle case-insensitive project keys', () => {
@@ -119,9 +87,7 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBe('abc');
+    expect(getProjectKeyFromURL()).toBe('abc');
   });
 
   it('should prefer query parameter over pathname', () => {
@@ -134,19 +100,6 @@ describe('getProjectKeyFromURL', () => {
       writable: true,
     });
 
-    const originalURLSearchParams = window.URLSearchParams;
-    Object.defineProperty(window, 'URLSearchParams', {
-      value: MockURLSearchParams,
-      writable: true,
-    });
-
-    const projectKey = getProjectKeyFromURL();
-
-    expect(projectKey).toBe('PN');
-
-    Object.defineProperty(window, 'URLSearchParams', {
-      value: originalURLSearchParams,
-      writable: true,
-    });
+    expect(getProjectKeyFromURL()).toBe('PN');
   });
 });

@@ -28,6 +28,7 @@ describe('BoardPageModification', () => {
       getCurrentRoute: vi.fn(),
       getSettingsTab: vi.fn(),
       getIssueId: vi.fn(),
+      getProjectKeyFromURL: vi.fn(),
       onUrlChange: vi.fn(),
     };
     globalContainer.register({ token: routingServiceToken, value: mockRouting });

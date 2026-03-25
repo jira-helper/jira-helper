@@ -10,21 +10,26 @@ import {
 import { getProjectIssueTypes } from '../jiraApi';
 import { getProjectIssueTypesToken } from '../di/jiraApiTokens';
 import { getIssueTypesFromDOM } from './getIssueTypesFromDOM';
-import { getProjectKeyFromURL } from './getProjectKeyFromURL';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 
-// Mock dependencies
 vi.mock('../jiraApi');
 vi.mock('./getIssueTypesFromDOM');
-vi.mock('./getProjectKeyFromURL');
 
 describe('issueTypeSelector', () => {
+  const mockRoutingService = {
+    getProjectKeyFromURL: vi.fn().mockReturnValue(null),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     clearIssueTypesCache();
-    // Register mocked getProjectIssueTypes in DI container
     globalContainer.register({
       token: getProjectIssueTypesToken,
       value: getProjectIssueTypes,
+    });
+    globalContainer.register({
+      token: routingServiceToken,
+      value: mockRoutingService as unknown as IRoutingService,
     });
   });
 
@@ -153,7 +158,7 @@ describe('issueTypeSelector', () => {
         { id: '2', name: 'Bug', subtask: false },
       ];
 
-      vi.mocked(getProjectKeyFromURL).mockReturnValue(mockProjectKey);
+      mockRoutingService.getProjectKeyFromURL.mockReturnValue(mockProjectKey);
       vi.mocked(getProjectIssueTypes).mockResolvedValue(Ok(mockTypes));
 
       const types = await loadIssueTypes();
@@ -166,7 +171,7 @@ describe('issueTypeSelector', () => {
       const mockProjectKey = 'TEST';
       const mockDomTypes = ['Task', 'Bug'];
 
-      vi.mocked(getProjectKeyFromURL).mockReturnValue(mockProjectKey);
+      mockRoutingService.getProjectKeyFromURL.mockReturnValue(mockProjectKey);
       vi.mocked(getProjectIssueTypes).mockResolvedValue(Err(new Error('API Error')));
       vi.mocked(getIssueTypesFromDOM).mockReturnValue(mockDomTypes);
 
@@ -179,7 +184,7 @@ describe('issueTypeSelector', () => {
     it('should fallback to DOM parsing when projectKey is not available', async () => {
       const mockDomTypes = ['Task', 'Bug'];
 
-      vi.mocked(getProjectKeyFromURL).mockReturnValue(null);
+      mockRoutingService.getProjectKeyFromURL.mockReturnValue(null);
       vi.mocked(getIssueTypesFromDOM).mockReturnValue(mockDomTypes);
 
       const types = await loadIssueTypes();
@@ -193,7 +198,7 @@ describe('issueTypeSelector', () => {
       const mockProjectKey = 'TEST';
       const mockDomTypes = ['Task'];
 
-      vi.mocked(getProjectKeyFromURL).mockReturnValue(mockProjectKey);
+      mockRoutingService.getProjectKeyFromURL.mockReturnValue(mockProjectKey);
       vi.mocked(getProjectIssueTypes).mockRejectedValue(new Error('Network error'));
       vi.mocked(getIssueTypesFromDOM).mockReturnValue(mockDomTypes);
 

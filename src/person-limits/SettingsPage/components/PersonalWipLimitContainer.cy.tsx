@@ -12,6 +12,7 @@ import type { JiraUser } from 'src/shared/jiraApi';
 import { WithDi } from 'src/shared/diContext';
 import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../state/types';
@@ -50,6 +51,10 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
     globalContainer.register({
       token: localeProviderToken,
       value: new MockLocaleProvider('en'),
+    });
+    globalContainer.register({
+      token: routingServiceToken,
+      value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
     });
     useSettingsUIStore.setState(useSettingsUIStore.getInitialState());
   });

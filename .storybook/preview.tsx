@@ -3,6 +3,7 @@ import type { Preview } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
 import { registerExtensionApiServiceInDI } from '../src/shared/ExtensionApiService';
+import { registerRoutingServiceInDI } from '../src/routing';
 import { registerLogger } from '../src/shared/Logger';
 import { WithDi } from '../src/shared/diContext';
 import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
@@ -26,6 +27,7 @@ const preview: Preview = {
 };
 
 registerExtensionApiServiceInDI(globalContainer);
+registerRoutingServiceInDI(globalContainer);
 
 globalContainer.register({
   token: BoardPropertyServiceToken,

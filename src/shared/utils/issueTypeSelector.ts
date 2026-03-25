@@ -2,7 +2,7 @@ import { globalContainer } from 'dioma';
 import { getProjectIssueTypesToken } from '../di/jiraApiTokens';
 import type { ProjectIssueType } from '../jiraApi';
 import { getIssueTypesFromDOM } from './getIssueTypesFromDOM';
-import { getProjectKeyFromURL } from './getProjectKeyFromURL';
+import { routingServiceToken } from 'src/routing';
 
 // In-memory cache for issue types by project key (scoped to current tab)
 const issueTypesCache: Map<string, ProjectIssueType[]> = new Map();
@@ -49,7 +49,7 @@ export function clearIssueTypesCache(projectKey?: string): void {
  * Load issue types with fallback to DOM
  */
 export async function loadIssueTypes(): Promise<string[]> {
-  const projectKey = getProjectKeyFromURL();
+  const projectKey = globalContainer.inject(routingServiceToken).getProjectKeyFromURL();
   if (projectKey) {
     const types = await loadIssueTypesForProject(projectKey);
     if (types.length > 0) {
@@ -334,7 +334,7 @@ export function initIssueTypeSelector(
   selectorElement.addEventListener('change', handleTypeCheckboxChange);
 
   // Try to load from current URL project key if available
-  const currentProjectKey = getProjectKeyFromURL();
+  const currentProjectKey = globalContainer.inject(routingServiceToken).getProjectKeyFromURL();
   if (currentProjectKey && projectInput) {
     projectInput.value = currentProjectKey;
     updateState({ projectKey: currentProjectKey });

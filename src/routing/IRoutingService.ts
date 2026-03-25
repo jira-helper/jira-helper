@@ -7,5 +7,6 @@ export interface IRoutingService {
   getCurrentRoute(): Route | null;
   getSettingsTab(): Promise<string | null>;
   getIssueId(): string | null;
+  getProjectKeyFromURL(): string | null;
   onUrlChange(cb: (url: string) => void): void;
 }

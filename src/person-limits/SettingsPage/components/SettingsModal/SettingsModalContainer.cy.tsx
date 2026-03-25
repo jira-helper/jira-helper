@@ -7,6 +7,7 @@ import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { SettingsModalContainer } from './SettingsModalContainer';
 import { useSettingsUIStore } from '../../stores/settingsUIStore';
 import type { Column, Swimlane } from '../../state/types';
@@ -31,6 +32,10 @@ describe('SettingsModalContainer', () => {
     globalContainer.register({
       token: localeProviderToken,
       value: new MockLocaleProvider('en'),
+    });
+    globalContainer.register({
+      token: routingServiceToken,
+      value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
     });
     useSettingsUIStore.getState().actions.reset();
   });

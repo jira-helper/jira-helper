@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { loadIssueTypesForProject } from '../utils/issueTypeSelector';
-import { getProjectKeyFromURL } from '../utils/getProjectKeyFromURL';
+import { useDi } from '../diContext';
+import { routingServiceToken } from 'src/routing';
 import { debounce } from '../utils';
 import type { ProjectIssueType } from '../jiraApi';
 
@@ -58,8 +59,11 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
   const texts = propTexts ?? DEFAULT_TEXTS;
   const textsRef = useRef(texts);
   textsRef.current = texts;
+  const container = useDi();
   const [countAllTypes, setCountAllTypes] = useState(initialCountAllTypes);
-  const [projectKey, setProjectKey] = useState(initialProjectKey || getProjectKeyFromURL() || '');
+  const [projectKey, setProjectKey] = useState(
+    initialProjectKey || container.inject(routingServiceToken).getProjectKeyFromURL() || ''
+  );
   const [currentProjectTypes, setCurrentProjectTypes] = useState<ProjectIssueType[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelectedTypes);
   const [isLoading, setIsLoading] = useState(false);
