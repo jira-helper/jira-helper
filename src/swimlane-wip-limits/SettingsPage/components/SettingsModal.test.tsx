@@ -9,6 +9,7 @@ import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
 import { settingsUIModelToken } from '../../tokens';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 import type { SwimlaneSetting } from '../../types';
 
@@ -46,6 +47,10 @@ describe('SettingsModal', () => {
     container = new Container();
     registerTestDependencies(container);
     container.register({ token: boardPagePageObjectToken, value: BoardPagePageObjectMock });
+    container.register({
+      token: issueTypeServiceToken,
+      value: { loadForProject: vi.fn().mockResolvedValue([]), clearCache: vi.fn() } as IIssueTypeService,
+    });
     container.register({
       token: routingServiceToken,
       value: { getProjectKeyFromURL: vi.fn().mockReturnValue('TEST') } as unknown as IRoutingService,

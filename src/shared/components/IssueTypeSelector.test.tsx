@@ -6,14 +6,7 @@ import { Container } from 'dioma';
 import { IssueTypeSelector } from './IssueTypeSelector';
 import { WithDi } from '../diContext';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
-
-vi.mock('../utils/issueTypeSelector', () => ({
-  loadIssueTypesForProject: vi.fn().mockResolvedValue([
-    { id: '1', name: 'Task', subtask: false },
-    { id: '2', name: 'Bug', subtask: false },
-    { id: '3', name: 'Story', subtask: false },
-  ]),
-}));
+import { issueTypeServiceToken, type IIssueTypeService } from '../issueType';
 
 describe('IssueTypeSelector', () => {
   let container: Container;
@@ -31,6 +24,17 @@ describe('IssueTypeSelector', () => {
     container.register({
       token: routingServiceToken,
       value: { getProjectKeyFromURL: vi.fn().mockReturnValue('TEST') } as unknown as IRoutingService,
+    });
+    container.register({
+      token: issueTypeServiceToken,
+      value: {
+        loadForProject: vi.fn().mockResolvedValue([
+          { id: '1', name: 'Task', subtask: false },
+          { id: '2', name: 'Bug', subtask: false },
+          { id: '3', name: 'Story', subtask: false },
+        ]),
+        clearCache: vi.fn(),
+      } as IIssueTypeService,
     });
   });
 

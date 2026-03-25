@@ -15,8 +15,8 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { registerIssueTypeServiceInDI } from 'src/shared/issueType';
 import { Ok } from 'ts-results';
-import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
 import { useColumnLimitsPropertyStore } from '../../property/store';
@@ -79,9 +79,10 @@ export const setupBackground = () => {
     value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
   });
 
+  registerIssueTypeServiceInDI(globalContainer);
+
   useColumnLimitsSettingsUIStore.getState().actions.reset();
   useColumnLimitsPropertyStore.getState().actions.reset();
-  clearIssueTypesCache();
   boardSwimlanes = [];
 };
 

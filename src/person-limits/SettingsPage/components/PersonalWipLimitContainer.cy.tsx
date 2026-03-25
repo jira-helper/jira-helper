@@ -13,6 +13,7 @@ import { WithDi } from 'src/shared/diContext';
 import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../state/types';
@@ -55,6 +56,10 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
     globalContainer.register({
       token: routingServiceToken,
       value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
+    });
+    globalContainer.register({
+      token: issueTypeServiceToken,
+      value: { loadForProject: async () => [], clearCache: () => {} } as IIssueTypeService,
     });
     useSettingsUIStore.setState(useSettingsUIStore.getInitialState());
   });

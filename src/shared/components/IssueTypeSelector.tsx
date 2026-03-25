@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { loadIssueTypesForProject } from '../utils/issueTypeSelector';
 import { useDi } from '../diContext';
 import { routingServiceToken } from 'src/routing';
+import { issueTypeServiceToken } from '../issueType';
 import { debounce } from '../utils';
 import type { ProjectIssueType } from '../jiraApi';
 
@@ -123,7 +123,7 @@ export const IssueTypeSelector: React.FC<IssueTypeSelectorProps> = ({
     setError(null);
 
     try {
-      const types = await loadIssueTypesForProject(key.trim());
+      const types = await container.inject(issueTypeServiceToken).loadForProject(key.trim());
       setCurrentProjectTypes(types);
       if (types.length === 0) {
         setError(`${t.noTypesForProject} "${key}"`);

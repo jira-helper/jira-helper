@@ -7,8 +7,8 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { registerIssueTypeServiceInDI } from 'src/shared/issueType';
 import { Ok } from 'ts-results';
-import { clearIssueTypesCache } from 'src/shared/utils/issueTypeSelector';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { useSettingsUIStore } from '../stores/settingsUIStore';
 import { usePersonWipLimitsPropertyStore } from '../../property/store';
@@ -103,7 +103,6 @@ export const setupBackground = () => {
 
   useSettingsUIStore.getState().actions.reset();
   usePersonWipLimitsPropertyStore.getState().actions.reset();
-  clearIssueTypesCache();
 
   // Mock issue types API via DI
   globalContainer.register({
@@ -120,6 +119,8 @@ export const setupBackground = () => {
     token: routingServiceToken,
     value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
   });
+
+  registerIssueTypeServiceInDI(globalContainer);
 };
 
 // --- Mount helpers ---

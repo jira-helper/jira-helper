@@ -4,6 +4,8 @@ import { globalContainer } from 'dioma';
 import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
 import { registerExtensionApiServiceInDI } from '../src/shared/ExtensionApiService';
 import { registerRoutingServiceInDI } from '../src/routing';
+import { registerJiraApiInDI } from '../src/shared/di/jiraApiTokens';
+import { registerIssueTypeServiceInDI } from '../src/shared/issueType';
 import { registerLogger } from '../src/shared/Logger';
 import { WithDi } from '../src/shared/diContext';
 import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
@@ -28,6 +30,8 @@ const preview: Preview = {
 
 registerExtensionApiServiceInDI(globalContainer);
 registerRoutingServiceInDI(globalContainer);
+registerJiraApiInDI(globalContainer);
+registerIssueTypeServiceInDI(globalContainer);
 
 globalContainer.register({
   token: BoardPropertyServiceToken,
