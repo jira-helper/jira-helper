@@ -1,6 +1,6 @@
 # EPIC-17: Рефакторинг shared/ — вынос сущностей с side effects в DI
 
-**Status**: TODO
+**Status**: IN PROGRESS
 **Created**: 2026-03-22
 
 ---
@@ -55,7 +55,7 @@ flowchart TD
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 171 | [TASK-171](./TASK-171-popup-di.md) | Popup — dead code, удалить или вынести в DI | TODO |
+| 171 | [TASK-171](./TASK-171-popup-di.md) | Popup — dead code, удалить или вынести в DI | DONE |
 | 172 | [TASK-172](./TASK-172-color-picker-tooltip-di.md) | ColorPickerTooltip — dead code, удалить или вынести в DI | DONE |
 
 ### Phase 3: Средний приоритет — Store actions
@@ -68,8 +68,8 @@ flowchart TD
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 174 | [TASK-174](./TASK-174-get-project-key-from-url-di.md) | getProjectKeyFromURL → DI token | TODO |
-| 175 | [TASK-175](./TASK-175-get-issue-types-from-dom-di.md) | getIssueTypesFromDOM → DI (PageObject) | TODO |
+| 174 | [TASK-174](./TASK-174-get-project-key-from-url-di.md) | getProjectKeyFromURL → DI token | DONE |
+| 175 | [TASK-175](./TASK-175-get-issue-types-from-dom-di.md) | getIssueTypesFromDOM → удалено как dead code + IssueTypeService DI | DONE |
 | 176 | [TASK-176](./TASK-176-dom-utils-di.md) | DOM utils (isJira, waitForElement, onDOMChange) → DI | TODO |
 
 ## Dependencies
