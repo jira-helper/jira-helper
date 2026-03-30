@@ -70,7 +70,7 @@ flowchart TD
 |---|------|----------|--------|
 | 174 | [TASK-174](./TASK-174-get-project-key-from-url-di.md) | getProjectKeyFromURL → DI token | DONE |
 | 175 | [TASK-175](./TASK-175-get-issue-types-from-dom-di.md) | getIssueTypesFromDOM → удалено как dead code + IssueTypeService DI | DONE |
-| 176 | [TASK-176](./TASK-176-dom-utils-di.md) | DOM utils (isJira, waitForElement, onDOMChange) → DI | TODO |
+| 176 | [TASK-176](./TASK-176-dom-utils-di.md) | DOM utils — убрать прямые импорты из бизнес-кода | DONE |
 
 ## Dependencies
 

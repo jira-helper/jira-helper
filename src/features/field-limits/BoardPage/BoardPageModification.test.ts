@@ -26,7 +26,6 @@ describe('BoardPageModification', () => {
       getBoardIdFromURL: mockGetBoardIdFromURL,
       getReportNameFromURL: vi.fn(),
       getCurrentRoute: vi.fn(),
-      getSettingsTab: vi.fn(),
       getIssueId: vi.fn(),
       getProjectKeyFromURL: vi.fn(),
       onUrlChange: vi.fn(),

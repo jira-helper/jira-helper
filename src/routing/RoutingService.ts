@@ -2,7 +2,6 @@ import { Container } from 'dioma';
 import { types } from '../background/actions';
 import type { IExtensionApiService } from '../shared/ExtensionApiService';
 import { extensionApiServiceToken } from '../shared/ExtensionApiService';
-import { waitForElement } from '../shared/utils';
 import type { IRoutingService } from './IRoutingService';
 import { Routes, type Route } from './routes';
 import { routingServiceToken } from './tokens';
@@ -80,20 +79,6 @@ https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=ro
     if (pathname.endsWith('/issues/')) return Routes.SEARCH;
 
     return null;
-  }
-
-  getSettingsTab(): Promise<string | null> {
-    const search = new URLSearchParams(window.location.search);
-
-    const tabFromUrl = search.get('tab') || search.get('config');
-
-    return tabFromUrl
-      ? Promise.resolve(tabFromUrl)
-      : waitForElement('.aui-nav-selected').promise.then(
-          selectedNav =>
-            // @ts-expect-error dataset по типам не существует
-            selectedNav?.dataset.tabitem || null
-        );
   }
 
   getIssueId(): string | null {

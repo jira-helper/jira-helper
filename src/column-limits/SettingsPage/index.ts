@@ -1,7 +1,6 @@
 import React from 'react';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
-import { routingServiceToken } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { WithDi } from '../../shared/diContext';
 import { useColumnLimitsPropertyStore } from '../property/store';
@@ -18,7 +17,7 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   };
 
   async shouldApply(): Promise<boolean> {
-    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
+    return (await this.getSettingsTab()) === 'columns';
   }
 
   getModificationId(): string {

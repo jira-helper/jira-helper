@@ -4,7 +4,6 @@ import { PageModification } from 'src/shared/PageModification';
 import { settingsPagePageObjectToken } from 'src/page-objects/SettingsPage';
 import { WithDi } from 'src/shared/diContext';
 import { globalContainer } from 'dioma';
-import { routingServiceToken } from 'src/routing';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
 import { registerSwimlaneWipLimitsModule } from '../module';
@@ -15,7 +14,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   private swimlaneSelect: HTMLSelectElement | null = null;
 
   async shouldApply(): Promise<boolean> {
-    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'swimlanes';
+    return (await this.getSettingsTab()) === 'swimlanes';
   }
 
   getModificationId(): string {

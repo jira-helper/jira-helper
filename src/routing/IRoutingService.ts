@@ -5,7 +5,6 @@ export interface IRoutingService {
   getReportNameFromURL(): string | null;
   getBoardIdFromURL(): string | null;
   getCurrentRoute(): Route | null;
-  getSettingsTab(): Promise<string | null>;
   getIssueId(): string | null;
   getProjectKeyFromURL(): string | null;
   onUrlChange(cb: (url: string) => void): void;

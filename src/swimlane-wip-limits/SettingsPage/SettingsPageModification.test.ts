@@ -2,24 +2,33 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { SettingsPageModification } from './SettingsPageModification';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { settingsPagePageObjectToken, type ISettingsPagePageObject } from 'src/page-objects/SettingsPage';
 import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
 import { registerRoutingInDI } from 'src/shared/di/routingTokens';
 
 describe('SettingsPageModification', () => {
   let modification: SettingsPageModification;
-  let mockRoutingService: { getSettingsTab: ReturnType<typeof vi.fn>; getBoardIdFromURL: ReturnType<typeof vi.fn> };
+  let mockRoutingService: { getSearchParam: ReturnType<typeof vi.fn>; getBoardIdFromURL: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     globalContainer.reset();
     registerExtensionApiServiceInDI(globalContainer);
 
     mockRoutingService = {
-      getSettingsTab: vi.fn().mockResolvedValue('swimlanes'),
+      getSearchParam: vi.fn().mockReturnValue(null),
       getBoardIdFromURL: vi.fn().mockReturnValue(null),
     };
     globalContainer.register({
       token: routingServiceToken,
       value: mockRoutingService as unknown as IRoutingService,
+    });
+
+    globalContainer.register({
+      token: settingsPagePageObjectToken,
+      value: {
+        selectors: { settingsContent: '#main', selectedNav: '.aui-nav-selected' },
+        getSelectedTab: vi.fn().mockReturnValue(null),
+      } as unknown as ISettingsPagePageObject,
     });
 
     registerRoutingInDI(globalContainer);
@@ -35,17 +44,23 @@ describe('SettingsPageModification', () => {
 
   describe('shouldApply', () => {
     it('should return true when settings tab is swimlanes', async () => {
-      mockRoutingService.getSettingsTab.mockResolvedValue('swimlanes');
+      mockRoutingService.getSearchParam.mockImplementation((param: string) =>
+        param === 'config' ? 'swimlanes' : null
+      );
       expect(await modification.shouldApply()).toBe(true);
     });
 
     it('should return false when settings tab is not swimlanes', async () => {
-      mockRoutingService.getSettingsTab.mockResolvedValue('columns');
+      mockRoutingService.getSearchParam.mockImplementation((param: string) => (param === 'config' ? 'columns' : null));
       expect(await modification.shouldApply()).toBe(false);
     });
 
-    it('should return false when settings tab is null', async () => {
-      mockRoutingService.getSettingsTab.mockResolvedValue(null);
+    it('should return false when settings tab is null and DOM has no selected nav', async () => {
+      mockRoutingService.getSearchParam.mockReturnValue(null);
+      document.body.innerHTML = '<nav class="aui-nav-selected" data-tabitem="other"></nav>';
+      (globalContainer.inject(settingsPagePageObjectToken).getSelectedTab as ReturnType<typeof vi.fn>).mockReturnValue(
+        'other'
+      );
       expect(await modification.shouldApply()).toBe(false);
     });
   });

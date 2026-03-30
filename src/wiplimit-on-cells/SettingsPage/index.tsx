@@ -2,7 +2,6 @@ import React from 'react';
 import { globalContainer } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
-import { routingServiceToken } from '../../routing';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
@@ -58,7 +57,7 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
   }
 
   async shouldApply(): Promise<boolean> {
-    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
+    return (await this.getSettingsTab()) === 'columns';
   }
 
   waitForLoading(): Promise<Element> {

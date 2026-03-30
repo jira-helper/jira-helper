@@ -5,7 +5,6 @@ import { getBoardProperty, updateBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { WithDi } from '../shared/diContext';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
-import { routingServiceToken } from '../routing';
 import { CardColorsSettingsContainer } from './CardColorsSettingsContainer';
 import { PropertyValue } from './types';
 
@@ -19,8 +18,7 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
   }
 
   async shouldApply(): Promise<boolean> {
-    const tab = await globalContainer.inject(routingServiceToken).getSettingsTab();
-    return tab === 'cardColors';
+    return (await this.getSettingsTab()) === 'cardColors';
   }
 
   waitForLoading(): Promise<Element> {

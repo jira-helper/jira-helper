@@ -1,5 +1,6 @@
 import { globalContainer } from 'dioma';
 import { routingServiceToken } from '../routing';
+import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
 import { waitForElement } from './utils';
 import { deleteBoardProperty, getBoardEditData, getBoardProperty, updateBoardProperty } from './jiraApi';
 
@@ -175,6 +176,16 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
 
     const issueType = this.getIssueTypeFromCard(card);
     return issueType ? includedIssueTypes.includes(issueType) : false;
+  }
+
+  protected async getSettingsTab(): Promise<string | null> {
+    const routing = globalContainer.inject(routingServiceToken);
+    const tabFromUrl = routing.getSearchParam('tab') || routing.getSearchParam('config');
+    if (tabFromUrl) return tabFromUrl;
+
+    const settingsPage = globalContainer.inject(settingsPagePageObjectToken);
+    await this.waitForElement(settingsPage.selectors.selectedNav);
+    return settingsPage.getSelectedTab();
   }
 
   protected getSearchParam(param: string): string | null {

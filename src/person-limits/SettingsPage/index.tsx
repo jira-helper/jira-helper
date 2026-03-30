@@ -1,7 +1,6 @@
 import React from 'react';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
-import { routingServiceToken } from '../../routing';
 import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
 import { searchUsers } from '../../shared/jiraApi';
@@ -38,7 +37,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   private boardDataSwimlanes: Swimlane[] | null = null;
 
   async shouldApply(): Promise<boolean> {
-    return (await globalContainer.inject(routingServiceToken).getSettingsTab()) === 'columns';
+    return (await this.getSettingsTab()) === 'columns';
   }
 
   getModificationId(): string {

@@ -1,5 +1,4 @@
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { onDOMChange } from 'src/shared/domUtils';
 import { getBoardProperty } from 'src/shared/jiraApi';
 import { PageModification } from '../shared/PageModification';
 import { processCard } from './processCard';
@@ -33,17 +32,9 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     }, 200);
     this.sideEffects.push(() => clearInterval(interval));
 
-    const pool = document.querySelector(BoardPagePageObject.selectors.pool);
-    if (!pool) {
-      // eslint-disable-next-line no-console
-      console.error('Pool not found');
-      return;
-    }
-
-    const clear = onDOMChange(pool, () => {
+    this.onDOMChange(BoardPagePageObject.selectors.pool, () => {
       this.fillCardWithColor();
     });
-    this.sideEffects.push(clear);
   }
 
   private fillCardWithColor() {
