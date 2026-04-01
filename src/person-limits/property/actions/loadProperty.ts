@@ -1,5 +1,5 @@
 import { routingServiceToken } from 'src/routing';
-import { getBoardProperty } from 'src/shared/jiraApi';
+import { getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { createAction } from 'src/shared/action';
 import { usePersonWipLimitsPropertyStore } from '../store';
@@ -20,6 +20,7 @@ export const loadPersonWipLimitsProperty = createAction({
       return;
     }
 
+    const getBoardProperty = this.di.inject(getBoardPropertyToken);
     const data = await getBoardProperty<PersonWipLimitsProperty>(boardId, BOARD_PROPERTIES.PERSON_LIMITS);
     store.actions.setData(data ?? { limits: [] });
     store.actions.setState('loaded');

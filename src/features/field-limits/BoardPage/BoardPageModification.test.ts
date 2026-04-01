@@ -5,18 +5,15 @@ import type { IRoutingService } from 'src/routing';
 import { routingServiceToken } from 'src/routing';
 import { registerRoutingInDI } from 'src/shared/di/routingTokens';
 import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
-import * as jiraApi from 'src/shared/jiraApi';
+import { getBoardEditDataToken, getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
-
-vi.mock('src/shared/jiraApi', () => ({
-  getBoardEditData: vi.fn(),
-  getBoardProperty: vi.fn(),
-}));
 
 describe('BoardPageModification', () => {
   let modification: BoardPageModification;
   const mockGetSearchParam = vi.fn();
   const mockGetBoardIdFromURL = vi.fn();
+  const mockGetBoardEditData = vi.fn();
+  const mockGetBoardProperty = vi.fn();
 
   beforeEach(() => {
     globalContainer.reset();
@@ -33,16 +30,19 @@ describe('BoardPageModification', () => {
     globalContainer.register({ token: routingServiceToken, value: mockRouting });
     registerRoutingInDI(globalContainer);
 
+    globalContainer.register({ token: getBoardEditDataToken, value: mockGetBoardEditData });
+    globalContainer.register({ token: getBoardPropertyToken, value: mockGetBoardProperty });
+
     modification = new BoardPageModification();
     document.body.innerHTML = '';
     mockGetBoardIdFromURL.mockReturnValue('123');
-    vi.mocked(jiraApi.getBoardEditData).mockResolvedValue({
+    mockGetBoardEditData.mockResolvedValue({
       canEdit: true,
       rapidListConfig: {},
       swimlanesConfig: {},
       cardLayoutConfig: {},
     });
-    vi.mocked(jiraApi.getBoardProperty).mockResolvedValue({ limits: {} });
+    mockGetBoardProperty.mockResolvedValue({ limits: {} });
   });
 
   afterEach(() => {
@@ -95,19 +95,19 @@ describe('BoardPageModification', () => {
       };
       const fieldLimits = { limits: { key1: {} as any } };
 
-      vi.mocked(jiraApi.getBoardEditData).mockResolvedValue(boardEditData);
-      vi.mocked(jiraApi.getBoardProperty).mockResolvedValue(fieldLimits);
+      mockGetBoardEditData.mockResolvedValue(boardEditData);
+      mockGetBoardProperty.mockResolvedValue(fieldLimits);
 
       const result = await modification.loadData();
 
       expect(result).toEqual([boardEditData, fieldLimits]);
-      expect(jiraApi.getBoardProperty).toHaveBeenCalledWith('123', BOARD_PROPERTIES.FIELD_LIMITS, expect.any(Object));
+      expect(mockGetBoardProperty).toHaveBeenCalledWith('123', BOARD_PROPERTIES.FIELD_LIMITS, expect.any(Object));
     });
 
     it('should return empty limits when getBoardProperty returns null', async () => {
       const boardEditData = { canEdit: true, rapidListConfig: {}, swimlanesConfig: {}, cardLayoutConfig: {} };
-      vi.mocked(jiraApi.getBoardEditData).mockResolvedValue(boardEditData);
-      vi.mocked(jiraApi.getBoardProperty).mockResolvedValue(null);
+      mockGetBoardEditData.mockResolvedValue(boardEditData);
+      mockGetBoardProperty.mockResolvedValue(null);
 
       const result = await modification.loadData();
 

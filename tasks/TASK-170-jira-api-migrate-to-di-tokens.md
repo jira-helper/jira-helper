@@ -1,6 +1,6 @@
 # TASK-170: jiraApi — перевод на DI tokens
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-17](./EPIC-17-shared-di-refactoring.md)
 
@@ -163,12 +163,42 @@ src/issue/
 
 ## Критерии приёмки
 
-- [ ] 3 новых токена созданы и зарегистрированы в `registerJiraApiInDI`
-- [ ] Нет прямых импортов `getBoardProperty`, `updateBoardProperty`, `searchUsers` из `jiraApi.ts` (кроме `jiraApiTokens.ts`)
-- [ ] Нет прямых импортов `getBoardEditData`, `loadFlaggedIssues`, `loadNewIssueViewEnabled` из `jiraApi.ts`
-- [ ] Допускается импорт типов (`type { JiraUser }`) из `jiraApi.ts`
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] 3 новых токена созданы и зарегистрированы в `registerJiraApiInDI` (фактически 4: +`deleteBoardPropertyToken`)
+- [x] Нет прямых импортов `getBoardProperty`, `updateBoardProperty`, `searchUsers` из `jiraApi.ts` (кроме `jiraApiTokens.ts`)
+- [x] Нет прямых импортов `getBoardEditData`, `loadFlaggedIssues`, `loadNewIssueViewEnabled` из `jiraApi.ts`
+- [x] Допускается импорт типов (`type { JiraUser }`) из `jiraApi.ts`
+- [x] Тесты проходят: `npm test` (86 файлов, 784 теста)
+- [x] Нет ошибок линтера
+
+## Результат
+
+### Новые DI-токены (4 шт.):
+- `deleteBoardPropertyToken` — удаление board property
+- `getBoardEditDataToken` — получение edit data доски
+- `loadFlaggedIssuesToken` — загрузка flagged issues
+- `loadNewIssueViewEnabledToken` — проверка включения new issue view
+
+### Миграция потребителей:
+| Файл | Было | Стало |
+|------|------|-------|
+| `person-limits/property/actions/loadProperty.ts` | `import { getBoardProperty }` | `this.di.inject(getBoardPropertyToken)` |
+| `column-limits/property/actions/loadProperty.ts` | `import { getBoardProperty }` | `this.di.inject(getBoardPropertyToken)` |
+| `card-colors/BoardPage.tsx` | `import { getBoardProperty }` | `this.getBoardProperty()` (через `PageModification`) |
+| `card-colors/SettingsPage.tsx` | `import { getBoardProperty, updateBoardProperty }` | `globalContainer.inject(getBoardPropertyToken/updateBoardPropertyToken)` |
+| `person-limits/SettingsPage/index.tsx` | `import { searchUsers }` | `globalContainer.inject(searchUsersToken)` |
+| `features/field-limits/module.ts` | `import { getBoardEditData }` | `container.inject(getBoardEditDataToken)` |
+| `swimlane-wip-limits/module.ts` | `import { getBoardEditData }` | `container.inject(getBoardEditDataToken)` |
+| `issue/MarkFlaggedIssues.ts` | `import { loadFlaggedIssues, loadNewIssueViewEnabled }` | `globalContainer.inject(loadFlaggedIssuesToken/loadNewIssueViewEnabledToken)` |
+| `shared/PageModification.ts` | `import { deleteBoardProperty, getBoardEditData, getBoardProperty, updateBoardProperty }` | `globalContainer.inject(…Token)` |
+| `shared/boardPropertyService.ts` | `import { deleteBoardProperty, getBoardProperty, updateBoardProperty }` | `globalContainer.inject(…Token)` |
+
+### Тесты:
+- `BoardPageModification.test.ts` — переписан с `vi.mock(jiraApi)` на DI-регистрацию токенов
+
+### Остаток прямых импортов из `jiraApi.ts`:
+- `jiraApiTokens.ts` — DI-инфраструктура (value-импорты для регистрации)
+- `jira/jiraService.ts` — `JiraService` (сам является DI-сервисом, использует низкоуровневые API: `getJiraIssue`, `searchIssues`, `getExternalIssues` и т.д. — вне скоупа)
+- Type-only импорты `JiraUser`, `ProjectIssueType` — без побочных эффектов
 
 ## Зависимости
 

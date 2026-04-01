@@ -2,7 +2,7 @@ import each from '@tinkoff/utils/array/each';
 import { globalContainer } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { Routes, routingServiceToken } from '../routing';
-import { loadFlaggedIssues, loadNewIssueViewEnabled } from '../shared/jiraApi';
+import { loadFlaggedIssuesToken, loadNewIssueViewEnabledToken } from '../shared/di/jiraApiTokens';
 import { issueDOM } from './domSelectors';
 import { extensionApiServiceToken } from '../shared/ExtensionApiService';
 import flagNew from '../assets/flagNew.svg';
@@ -51,6 +51,7 @@ export default class extends PageModification<any, Element> {
   }
 
   preloadData(): Promise<void> {
+    const loadNewIssueViewEnabled = globalContainer.inject(loadNewIssueViewEnabledToken);
     return (this.getSearchParam('oldIssueView') ? Promise.resolve(false) : loadNewIssueViewEnabled()).then(
       (newIssueView: boolean) => {
         this.newIssueView = newIssueView;
@@ -110,6 +111,7 @@ export default class extends PageModification<any, Element> {
     }
 
     const issueId = this.routing.getIssueId();
+    const loadFlaggedIssues = globalContainer.inject(loadFlaggedIssuesToken);
     const flaggedIssues = await loadFlaggedIssues([...Object.keys(issuesElements), issueId!]);
 
     flaggedIssues.forEach((issueKey: string) => {

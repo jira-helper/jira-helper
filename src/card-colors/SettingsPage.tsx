@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { globalContainer } from 'dioma';
-import { getBoardProperty, updateBoardProperty } from 'src/shared/jiraApi';
+import { getBoardPropertyToken, updateBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { PageModification } from '../shared/PageModification';
 import { WithDi } from '../shared/diContext';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
@@ -41,11 +41,11 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
     }
 
     const updateProperty = (property: string, value: PropertyValue) => {
-      updateBoardProperty(boardId, property, value);
+      globalContainer.inject(updateBoardPropertyToken)(boardId, property, value);
     };
 
     const getProperty = (property: string): Promise<PropertyValue> => {
-      return getBoardProperty(boardId, property);
+      return globalContainer.inject(getBoardPropertyToken)(boardId, property);
     };
 
     createRoot(el).render(

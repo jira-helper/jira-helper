@@ -10,7 +10,7 @@ import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { loggerToken } from 'src/shared/Logger';
 import { routingServiceToken } from 'src/routing';
-import { getBoardEditData } from 'src/shared/jiraApi';
+import { getBoardEditDataToken } from 'src/shared/di/jiraApiTokens';
 
 /**
  * Регистрирует все модели фичи swimlane-wip-limits.
@@ -34,7 +34,7 @@ export function registerSwimlaneWipLimitsModule(container: Container = globalCon
   const getBoardData = async () => {
     const boardId = container.inject(routingServiceToken).getBoardIdFromURL();
     if (!boardId) throw new Error('No board ID');
-    return getBoardEditData(boardId);
+    return container.inject(getBoardEditDataToken)(boardId);
   };
 
   const settingsUIModel = proxy(new SettingsUIModel(propertyModel, getBoardData, logger));

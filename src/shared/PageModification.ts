@@ -2,7 +2,12 @@ import { globalContainer } from 'dioma';
 import { routingServiceToken } from '../routing';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
 import { waitForElement } from './utils';
-import { deleteBoardProperty, getBoardEditData, getBoardProperty, updateBoardProperty } from './jiraApi';
+import {
+  deleteBoardPropertyToken,
+  getBoardEditDataToken,
+  getBoardPropertyToken,
+  updateBoardPropertyToken,
+} from './di/jiraApiTokens';
 
 type SideEffect = () => void;
 
@@ -53,11 +58,11 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     return promise;
   }
 
-  protected getBoardProperty(property: string): Promise<any> {
+  protected getBoardProperty<T = any>(property: string): Promise<T | undefined> {
     const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardProperty(routing.getBoardIdFromURL()!, property, { abortPromise });
+    return globalContainer.inject(getBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected updateBoardProperty(property: string, value: any): Promise<any> {
@@ -66,7 +71,9 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
     // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
-    return updateBoardProperty(routing.getBoardIdFromURL()!, property, value, { abortPromise });
+    return globalContainer.inject(updateBoardPropertyToken)(routing.getBoardIdFromURL()!, property, value, {
+      abortPromise,
+    });
   }
 
   protected deleteBoardProperty(property: string): Promise<any> {
@@ -74,15 +81,15 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
-    // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
-    return deleteBoardProperty(routing.getBoardIdFromURL()!, property, { abortPromise });
+    // @ts-expect-error is it OK that deleteBoardProperty returns void instead of Promise? is it bug or feature?
+    return globalContainer.inject(deleteBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected getBoardEditData(): Promise<any> {
     const routing = globalContainer.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return getBoardEditData(routing.getBoardIdFromURL()!, { abortPromise });
+    return globalContainer.inject(getBoardEditDataToken)(routing.getBoardIdFromURL()!, { abortPromise });
   }
 
   protected createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {

@@ -3,7 +3,7 @@ import { globalContainer } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
-import { searchUsers } from '../../shared/jiraApi';
+import { searchUsersToken } from '../../shared/di/jiraApiTokens';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
 import type { Column, Swimlane } from './state/types';
@@ -82,7 +82,7 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
         children: React.createElement(SettingsButtonContainer, {
           boardDataColumns: columns,
           boardDataSwimlanes: swimlanes,
-          searchUsers,
+          searchUsers: globalContainer.inject(searchUsersToken),
         }),
       })
     );
