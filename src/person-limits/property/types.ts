@@ -1,12 +1,12 @@
 /**
- * PersonLimit - один лимит для конкретного человека.
- * Хранится в Jira Board Property.
+ * PersonLimit v2.29 — формат без showAllPersonIssues.
+ * Использовался до добавления опции показа всех задач пользователя при клике на аватар.
  *
  * Special convention for "all" columns/swimlanes:
  * - columns: empty array [] means "all columns"
  * - swimlanes: empty array [] means "all swimlanes"
  */
-export type PersonLimit = {
+export type PersonLimit_2_29 = {
   id: number;
   person: {
     name: string;
@@ -26,8 +26,30 @@ export type PersonLimit = {
 };
 
 /**
- * Структура, хранимая в Jira Board Property
+ * Property v2.29 — массив лимитов без showAllPersonIssues.
+ */
+export type PersonWipLimitsProperty_2_29 = {
+  limits: PersonLimit_2_29[];
+};
+
+/**
+ * PersonLimit v2.30 — добавлено поле showAllPersonIssues.
+ *
+ * When true (default): clicking avatar shows ALL person's issues on the board.
+ * When false: clicking avatar shows only issues matching the limit criteria
+ * (specific columns, swimlanes, issue types).
+ */
+export type PersonLimit = PersonLimit_2_29 & {
+  showAllPersonIssues: boolean;
+};
+
+export type PersonLimit_2_30 = PersonLimit;
+
+/**
+ * Структура, хранимая в Jira Board Property (текущая версия)
  */
 export type PersonWipLimitsProperty = {
   limits: PersonLimit[];
 };
+
+export type PersonWipLimitsProperty_2_30 = PersonWipLimitsProperty;

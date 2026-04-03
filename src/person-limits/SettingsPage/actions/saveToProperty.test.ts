@@ -38,6 +38,7 @@ describe('saveToProperty', () => {
       limit: 5,
       columns: [],
       swimlanes: [],
+      showAllPersonIssues: true,
     };
 
     useSettingsUIStore.getState().actions.setLimits([limit]);

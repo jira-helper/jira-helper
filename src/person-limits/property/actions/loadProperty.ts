@@ -3,7 +3,8 @@ import { getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { createAction } from 'src/shared/action';
 import { usePersonWipLimitsPropertyStore } from '../store';
-import type { PersonWipLimitsProperty } from '../types';
+import { migrateProperty } from '../migrateProperty';
+import type { PersonWipLimitsProperty_2_29 } from '../types';
 
 export const loadPersonWipLimitsProperty = createAction({
   name: 'loadPersonWipLimitsProperty',
@@ -21,8 +22,8 @@ export const loadPersonWipLimitsProperty = createAction({
     }
 
     const getBoardProperty = this.di.inject(getBoardPropertyToken);
-    const data = await getBoardProperty<PersonWipLimitsProperty>(boardId, BOARD_PROPERTIES.PERSON_LIMITS);
-    store.actions.setData(data ?? { limits: [] });
+    const data = await getBoardProperty<PersonWipLimitsProperty_2_29>(boardId, BOARD_PROPERTIES.PERSON_LIMITS);
+    store.actions.setData(migrateProperty(data ?? { limits: [] }));
     store.actions.setState('loaded');
   },
 });

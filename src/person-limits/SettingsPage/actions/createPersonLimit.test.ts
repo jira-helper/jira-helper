@@ -48,6 +48,7 @@ describe('createPersonLimit', () => {
       columns: mockColumns,
       swimlanes: mockSwimlanes,
       includedIssueTypes: ['bug', 'task'],
+      showAllPersonIssues: true,
     });
   });
 
@@ -73,6 +74,7 @@ describe('createPersonLimit', () => {
       limit: 5,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
+      showAllPersonIssues: true,
     });
   });
 
@@ -169,6 +171,42 @@ describe('createPersonLimit', () => {
     });
 
     expect(result.columns).toEqual([]);
+  });
+
+  it('should create PersonLimit with showAllPersonIssues=false when explicitly set', () => {
+    const formData: FormData = {
+      ...mockFormData,
+      showAllPersonIssues: false,
+    };
+
+    const id = 1234567897;
+    const result = createPersonLimit({
+      formData,
+      person: mockPerson,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id,
+    });
+
+    expect(result.showAllPersonIssues).toBe(false);
+  });
+
+  it('should default showAllPersonIssues to true when not provided in formData', () => {
+    const formData: FormData = {
+      ...mockFormData,
+    };
+    delete formData.showAllPersonIssues;
+
+    const id = 1234567898;
+    const result = createPersonLimit({
+      formData,
+      person: mockPerson,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id,
+    });
+
+    expect(result.showAllPersonIssues).toBe(true);
   });
 
   it('should handle empty swimlanes', () => {

@@ -32,6 +32,7 @@ const mockLimits: PersonLimit[] = [
     limit: 3,
     columns: [{ id: 'col1', name: 'To Do' }],
     swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+    showAllPersonIssues: true,
   },
   {
     id: 2,
@@ -44,6 +45,7 @@ const mockLimits: PersonLimit[] = [
     limit: 5,
     columns: [], // empty = all columns (should display "All")
     swimlanes: [], // empty = all swimlanes (should display "All")
+    showAllPersonIssues: true,
   },
   {
     id: 3,
@@ -59,6 +61,7 @@ const mockLimits: PersonLimit[] = [
       { id: 'col2', name: 'In Progress' },
     ],
     swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+    showAllPersonIssues: true,
   },
 ];
 
@@ -68,6 +71,41 @@ export const EmptyState: Story = {
 
 export const WithLimits: Story = {
   render: () => <PersonalWipLimitTable texts={mockTexts} limits={mockLimits} onDelete={() => {}} onEdit={() => {}} />,
+};
+
+export const WithMixedShowAllPersonIssues: Story = {
+  render: () => {
+    const limits: PersonLimit[] = [
+      {
+        id: 1,
+        person: {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: 'https://jira.example.com/user',
+          avatar: 'https://via.placeholder.com/32',
+        },
+        limit: 3,
+        columns: [{ id: 'col1', name: 'To Do' }],
+        swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+        showAllPersonIssues: true,
+      },
+      {
+        id: 2,
+        person: {
+          name: 'jane.smith',
+          displayName: 'Jane Smith',
+          self: 'https://jira.example.com/user',
+          avatar: 'https://via.placeholder.com/32',
+        },
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+        showAllPersonIssues: false,
+      },
+    ];
+
+    return <PersonalWipLimitTable texts={mockTexts} limits={limits} onDelete={() => {}} onEdit={() => {}} />;
+  },
 };
 
 export const WithAllColumnsAndSwimlanes: Story = {
@@ -83,6 +121,7 @@ export const WithAllColumnsAndSwimlanes: Story = {
       limit: 5,
       columns: [], // should display "All"
       swimlanes: [], // should display "All"
+      showAllPersonIssues: true,
     };
 
     return <PersonalWipLimitTable texts={mockTexts} limits={[limitWithAll]} onDelete={() => {}} onEdit={() => {}} />;

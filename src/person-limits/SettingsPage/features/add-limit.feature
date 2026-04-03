@@ -129,6 +129,29 @@ Feature: Personal WIP Limit Settings - Add Limit
     Then I should see validation error for duplicate limit
     And I should see 1 limit in the table
 
+  # === SHOW ALL PERSON ISSUES ===
+
+  @SC-ADD-11
+  Scenario: Add limit with showAllPersonIssues disabled
+    When I open the settings modal
+    And I search for "john" in person name field
+    And I select "John Doe (john.doe)" from search results
+    And I set the limit to 5
+    And I uncheck "Show all person issues on avatar click"
+    And I click "Add limit"
+    Then I should see limit: name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
+    And the showAllPersonIssues column for "John Doe" should show "—"
+
+  @SC-ADD-12
+  Scenario: Add limit with showAllPersonIssues enabled (default)
+    When I open the settings modal
+    And I search for "john" in person name field
+    And I select "John Doe (john.doe)" from search results
+    And I set the limit to 3
+    And I click "Add limit"
+    Then I should see limit: name "John Doe" value 3 columns "all" swimlanes "all" issueTypes "all"
+    And the showAllPersonIssues column for "John Doe" should show "✓"
+
   @SC-ADD-10
   Scenario: Validation error clears when switching to edit mode
     Given a limit: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"

@@ -89,6 +89,10 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'Manage per-person WIP-limits',
     ru: 'WIP-лимиты на человека',
   },
+  showAllPersonIssues: {
+    en: 'Show all person issues on avatar click',
+    ru: 'Показывать все задачи пользователя при клике на аватар',
+  },
 } as const satisfies Texts;
 
 export type PersonLimitsTextKeys = keyof typeof PERSON_LIMITS_TEXTS;

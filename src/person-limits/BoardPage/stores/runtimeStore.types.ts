@@ -18,6 +18,8 @@ export type PersonLimitStats = {
   swimlanes: Array<{ id: string; name: string }>;
   /** Issue types to count (undefined/empty = all types) */
   includedIssueTypes?: string[];
+  /** When true, clicking avatar shows all person's issues; when false, only limit-matching */
+  showAllPersonIssues: boolean;
 };
 
 /**

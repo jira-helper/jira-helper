@@ -31,6 +31,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.setData([limit]);
@@ -55,6 +56,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -84,6 +86,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -106,6 +109,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -135,6 +139,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -166,6 +171,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       const limit2: PersonLimit = {
@@ -179,6 +185,7 @@ describe('settingsUIStore', () => {
         limit: 10,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit1);
@@ -203,6 +210,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -230,6 +238,7 @@ describe('settingsUIStore', () => {
         columns: [{ id: 'col1', name: 'Column 1' }],
         swimlanes: [{ id: 'swim1', name: 'Swimlane 1' }],
         includedIssueTypes: ['bug', 'task'],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -247,6 +256,7 @@ describe('settingsUIStore', () => {
         selectedColumns: ['col1'],
         swimlanes: ['swim1'],
         includedIssueTypes: ['bug', 'task'],
+        showAllPersonIssues: true,
       });
     });
 
@@ -295,6 +305,7 @@ describe('settingsUIStore', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -328,6 +339,7 @@ describe('settingsUIStore', () => {
             { id: 'col2', name: 'Column 2' },
           ],
           swimlanes: [{ id: 'swim1', name: 'Swimlane 1' }],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -352,6 +364,7 @@ describe('settingsUIStore', () => {
           columns: [],
           swimlanes: [],
           includedIssueTypes: ['Task', 'Bug', 'Story'],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -375,6 +388,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -399,6 +413,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -431,6 +446,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -453,6 +469,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -484,6 +501,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -514,6 +532,7 @@ describe('settingsUIStore', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);

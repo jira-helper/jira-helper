@@ -22,6 +22,7 @@ describe('initFromProperty', () => {
       limit: 5,
       columns: [],
       swimlanes: [],
+      showAllPersonIssues: true,
     };
 
     usePersonWipLimitsPropertyStore.getState().actions.setData({ limits: [limit] });
@@ -70,6 +71,7 @@ describe('initFromProperty', () => {
       limit: 3,
       columns: [{ id: 'col-1', name: 'In Progress' }],
       swimlanes: [],
+      showAllPersonIssues: true,
     };
 
     usePersonWipLimitsPropertyStore.getState().actions.setData({ limits: [legacyLimit] });

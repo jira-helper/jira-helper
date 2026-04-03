@@ -64,7 +64,7 @@ describe('SettingsModalContainer', () => {
     );
 
     cy.contains('Personal WIP Limit').should('be.visible');
-    cy.get('[role="dialog"]').should('be.visible');
+    cy.get('[role="dialog"]').scrollIntoView().should('be.visible');
   });
 
   it('should call onClose when Cancel is clicked', () => {

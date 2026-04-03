@@ -3,7 +3,7 @@
  *
  * These steps are reusable across multiple scenarios.
  */
-import { Given, When, Then } from '../../../../../cypress/support/bdd-runner';
+import { Given, When, Then, type DataTableRows } from '../../../../../cypress/support/bdd-runner';
 import { useSettingsUIStore } from '../../stores/settingsUIStore';
 import { usePersonWipLimitsPropertyStore } from '../../../property/store';
 import { columns, swimlanes, mountSettingsButton, setSearchMockType } from '../helpers';
@@ -24,6 +24,30 @@ function findSwimlanesByNames(names: string[]): Array<{ id: string; name: string
   return swimlanes.filter(s => names.includes(s.name)).map(s => ({ id: s.id, name: s.name }));
 }
 
+function createPersonLimit(
+  login: string,
+  displayName: string,
+  value: number,
+  columnsStr: string,
+  swimlanesStr: string,
+  issueTypesStr: string,
+  showAllPersonIssues: boolean = true
+): PersonLimit {
+  const colNames = parseList(columnsStr);
+  const swimNames = parseList(swimlanesStr);
+  const issueTypes = parseList(issueTypesStr);
+
+  return {
+    id: getNextLimitId(),
+    person: { name: login, displayName, self: '' },
+    limit: value,
+    columns: findColumnsByNames(colNames),
+    swimlanes: findSwimlanesByNames(swimNames),
+    includedIssueTypes: issueTypes.length > 0 ? issueTypes : undefined,
+    showAllPersonIssues,
+  };
+}
+
 // --- Given steps ---
 
 Given(
@@ -34,21 +58,46 @@ Given(
     value: string,
     columnsStr: string,
     swimlanesStr: string,
+    issueTypesStr: string,
+    dataTable?: DataTableRows
+  ) => {
+    const row = dataTable?.[0];
+    const showAllPersonIssues = row?.showAllPersonIssues != null ? row.showAllPersonIssues !== 'false' : true;
+
+    const limit = createPersonLimit(
+      login,
+      displayName,
+      parseInt(value, 10),
+      columnsStr,
+      swimlanesStr,
+      issueTypesStr,
+      showAllPersonIssues
+    );
+
+    const propertyStore = usePersonWipLimitsPropertyStore.getState();
+    propertyStore.actions.setLimits([...propertyStore.data.limits, limit]);
+  }
+);
+
+Given(
+  /^a limit with showAllPersonIssues disabled: login "([^"]*)" name "([^"]*)" value (\d+) columns "([^"]*)" swimlanes "([^"]*)" issueTypes "([^"]*)"$/,
+  (
+    login: string,
+    displayName: string,
+    value: string,
+    columnsStr: string,
+    swimlanesStr: string,
     issueTypesStr: string
   ) => {
-    const colNames = parseList(columnsStr);
-    const swimNames = parseList(swimlanesStr);
-    const issueTypes = parseList(issueTypesStr);
-
-    const limit: PersonLimit = {
-      id: getNextLimitId(),
-      person: { name: login, displayName, self: '' },
-      limit: parseInt(value, 10),
-      columns: findColumnsByNames(colNames),
-      swimlanes: findSwimlanesByNames(swimNames),
-      includedIssueTypes: issueTypes.length > 0 ? issueTypes : undefined,
-    };
-
+    const limit = createPersonLimit(
+      login,
+      displayName,
+      parseInt(value, 10),
+      columnsStr,
+      swimlanesStr,
+      issueTypesStr,
+      false
+    );
     const propertyStore = usePersonWipLimitsPropertyStore.getState();
     propertyStore.actions.setLimits([...propertyStore.data.limits, limit]);
   }
@@ -155,17 +204,30 @@ Then(/^I should see (\d+) limits? in the table$/, (count: string) => {
 Then(
   /^I should see limit: name "([^"]*)" value (\d+) columns "([^"]*)" swimlanes "([^"]*)" issueTypes "([^"]*)"$/,
   (displayName: string, value: string, columnsStr: string, swimlanesStr: string, issueTypesStr: string) => {
-    cy.contains('tr', displayName).within(() => {
-      cy.contains(value).should('be.visible');
+    cy.contains('tr', displayName)
+      .scrollIntoView()
+      .within(() => {
+        cy.contains(value).should('be.visible');
 
-      const colDisplay = columnsStr === 'all' ? 'All columns' : columnsStr;
-      const swimDisplay = swimlanesStr === 'all' ? 'All swimlanes' : swimlanesStr;
-      const issueDisplay = issueTypesStr === 'all' ? 'All types' : issueTypesStr;
+        const colDisplay = columnsStr === 'all' ? 'All columns' : columnsStr;
+        const swimDisplay = swimlanesStr === 'all' ? 'All swimlanes' : swimlanesStr;
+        const issueDisplay = issueTypesStr === 'all' ? 'All types' : issueTypesStr;
 
-      cy.get('td').eq(2).should('contain.text', colDisplay);
-      cy.get('td').eq(3).should('contain.text', swimDisplay);
-      cy.get('td').eq(4).should('contain.text', issueDisplay);
-    });
+        cy.get('td').eq(2).should('contain.text', colDisplay);
+        cy.get('td').eq(3).should('contain.text', swimDisplay);
+        cy.get('td').eq(4).should('contain.text', issueDisplay);
+      });
+  }
+);
+
+Then(
+  /^the showAllPersonIssues column for "([^"]*)" should show "([^"]*)"$/,
+  (displayName: string, expectedValue: string) => {
+    cy.contains('tr', displayName)
+      .scrollIntoView()
+      .within(() => {
+        cy.get('td').eq(5).should('contain.text', expectedValue);
+      });
   }
 );
 

@@ -165,6 +165,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }], // Only one column
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -207,6 +208,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [], // empty = all columns
         swimlanes: [], // empty = all swimlanes
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -253,6 +255,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [], // empty = all columns
         swimlanes: [], // empty = all swimlanes
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -304,6 +307,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }],
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -371,7 +375,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       cy.contains('label', 'To Do').click();
 
       // Now all should be checked - list should hide
-      cy.get('input[type="checkbox"]').should('have.length.at.most', 3);
+      // 4 checkboxes: All columns, All swimlanes, Count all issue types, Show all person issues
+      cy.get('input[type="checkbox"]').should('have.length.at.most', 4);
 
       // "All columns" should be checked when list is hidden
       cy.contains('label', 'All columns').find('input[type="checkbox"]').should('be.checked');
@@ -427,6 +432,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             limit: formData.limit,
             columns: [],
             swimlanes: [],
+            showAllPersonIssues: true,
             ...(formData.includedIssueTypes && formData.includedIssueTypes.length > 0
               ? { includedIssueTypes: formData.includedIssueTypes }
               : {}),
@@ -491,6 +497,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
           includedIssueTypes: ['Task', 'Bug'],
         };
 
@@ -535,6 +542,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           limit: 5,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
           includedIssueTypes: ['Task', 'Bug'],
         };
 
@@ -583,6 +591,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             { id: 'col2', name: 'In Progress' },
           ], // Only 2 out of 3 columns
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -644,6 +653,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
             { id: '789', name: 'Done' },
           ], // Only 2 out of 3 columns
           swimlanes: [],
+          showAllPersonIssues: true,
         };
 
         useSettingsUIStore.getState().actions.addLimit(limit);
@@ -775,6 +785,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -821,6 +832,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       };
 
       useSettingsUIStore.getState().actions.addLimit(limit);
@@ -895,6 +907,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
         includedIssueTypes: ['Task', 'Bug'],
       };
 

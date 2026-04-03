@@ -15,6 +15,7 @@ describe('updatePersonLimit', () => {
     columns: [{ id: 'col1', name: 'To Do' }],
     swimlanes: [{ id: 'swim1', name: 'Frontend' }],
     includedIssueTypes: ['bug'],
+    showAllPersonIssues: true,
   };
 
   const mockFormData: FormData = {
@@ -58,6 +59,7 @@ describe('updatePersonLimit', () => {
       columns: mockColumns,
       swimlanes: mockSwimlanes,
       includedIssueTypes: ['bug', 'task'],
+      showAllPersonIssues: true,
     });
   });
 
@@ -197,6 +199,62 @@ describe('updatePersonLimit', () => {
       { id: 'Frontend', name: 'Frontend' },
       { id: 'Backend', name: 'Backend' },
     ]);
+  });
+
+  it('should update showAllPersonIssues from true to false', () => {
+    const formData: FormData = {
+      ...mockFormData,
+      showAllPersonIssues: false,
+    };
+
+    const result = updatePersonLimit({
+      existingLimit,
+      formData,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.showAllPersonIssues).toBe(false);
+  });
+
+  it('should preserve existing showAllPersonIssues when formData does not specify it', () => {
+    const limitWithFalse: PersonLimit = {
+      ...existingLimit,
+      showAllPersonIssues: false,
+    };
+    const formData: FormData = {
+      ...mockFormData,
+    };
+    delete formData.showAllPersonIssues;
+
+    const result = updatePersonLimit({
+      existingLimit: limitWithFalse,
+      formData,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.showAllPersonIssues).toBe(false);
+  });
+
+  it('should update showAllPersonIssues from false to true', () => {
+    const limitWithFalse: PersonLimit = {
+      ...existingLimit,
+      showAllPersonIssues: false,
+    };
+    const formData: FormData = {
+      ...mockFormData,
+      showAllPersonIssues: true,
+    };
+
+    const result = updatePersonLimit({
+      existingLimit: limitWithFalse,
+      formData,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.showAllPersonIssues).toBe(true);
   });
 
   it('should return a new object (immutability)', () => {

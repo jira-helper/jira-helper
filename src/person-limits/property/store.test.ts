@@ -25,6 +25,7 @@ describe('personWipLimitsPropertyStore', () => {
       limit: 5,
       columns: [],
       swimlanes: [],
+      showAllPersonIssues: true,
     };
 
     usePersonWipLimitsPropertyStore.getState().actions.setData({ limits: [limit] });
@@ -44,6 +45,7 @@ describe('personWipLimitsPropertyStore', () => {
           limit: 1,
           columns: [],
           swimlanes: [],
+          showAllPersonIssues: true,
         },
       ],
     });

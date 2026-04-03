@@ -34,6 +34,7 @@ export function createPersonLimit({
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,
+    showAllPersonIssues: formData.showAllPersonIssues ?? true,
   };
 
   if (formData.includedIssueTypes && formData.includedIssueTypes.length > 0) {

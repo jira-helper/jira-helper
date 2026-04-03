@@ -12,6 +12,7 @@ export type FormData = {
   selectedColumns: string[];
   swimlanes: string[];
   includedIssueTypes?: string[];
+  showAllPersonIssues?: boolean;
 };
 
 export type SettingsUIData = {

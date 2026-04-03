@@ -45,6 +45,12 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ te
         !includedIssueTypes || includedIssueTypes.length === 0 ? texts.allTypes : includedIssueTypes.join(', '),
     },
     {
+      title: texts.showAllPersonIssues,
+      dataIndex: 'showAllPersonIssues',
+      key: 'showAllPersonIssues',
+      render: (value: boolean) => (value ? '✓' : '—'),
+    },
+    {
       title: texts.actions,
       key: 'actions',
       render: (_: any, record: PersonLimit) => (

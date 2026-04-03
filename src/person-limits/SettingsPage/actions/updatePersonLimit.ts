@@ -28,6 +28,7 @@ export function updatePersonLimit({
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,
+    showAllPersonIssues: formData.showAllPersonIssues ?? existingLimit.showAllPersonIssues,
     person: formData.person
       ? {
           name: formData.person.name,

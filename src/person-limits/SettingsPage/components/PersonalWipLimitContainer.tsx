@@ -53,6 +53,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       limit: 1,
       selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: [], // [] = all swimlanes (convention)
+      showAllPersonIssues: true,
     }),
     [availableColumns]
   );
@@ -214,6 +215,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       limit: values.limit || 0,
       selectedColumns: columnsToSave,
       swimlanes: swimlanesToSave,
+      showAllPersonIssues: currentFormData.showAllPersonIssues ?? true,
       ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
     };
 
@@ -338,6 +340,15 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                 label={null}
                 allLabel={texts.allSwimlanes}
               />
+            </Form.Item>
+
+            <Form.Item>
+              <Checkbox
+                checked={currentFormData.showAllPersonIssues ?? true}
+                onChange={e => handleFormChange('showAllPersonIssues', e.target.checked)}
+              >
+                {texts.showAllPersonIssues}
+              </Checkbox>
             </Form.Item>
           </Col>
         </Row>

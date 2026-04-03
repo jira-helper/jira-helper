@@ -107,6 +107,7 @@ export const EditMode: Story = {
       limit: 5,
       columns: [{ id: 'col1', name: 'To Do' }],
       swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+      showAllPersonIssues: true,
     };
 
     return (
@@ -141,6 +142,42 @@ export const EditModeWithAllColumns: Story = {
       limit: 5,
       columns: [],
       swimlanes: [],
+      showAllPersonIssues: true,
+    };
+
+    return (
+      <ContainerWrapper initialLimits={[limit]}>
+        <PersonalWipLimitContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={async () => {}}
+        />
+      </ContainerWrapper>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
+    if (editButton) {
+      editButton.click();
+    }
+  },
+};
+
+export const EditModeShowAllDisabled: Story = {
+  render: () => {
+    const limit: PersonLimit = {
+      id: 1,
+      person: {
+        name: 'john.doe',
+        displayName: 'John Doe',
+        self: 'https://jira.example.com/user',
+        avatar: 'https://via.placeholder.com/32',
+      },
+      limit: 5,
+      columns: [{ id: 'col1', name: 'To Do' }],
+      swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+      showAllPersonIssues: false,
     };
 
     return (
@@ -176,6 +213,7 @@ export const WithMultipleLimits: Story = {
         limit: 3,
         columns: [{ id: 'col1', name: 'To Do' }],
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+        showAllPersonIssues: true,
       },
       {
         id: 2,
@@ -188,6 +226,7 @@ export const WithMultipleLimits: Story = {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       },
     ];
 

@@ -72,6 +72,7 @@ export const SingleLimit: StoryObj = {
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+          showAllPersonIssues: true,
         },
       ]}
     />
@@ -93,6 +94,7 @@ export const MultipleLimits: StoryObj = {
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+          showAllPersonIssues: true,
         },
         {
           id: 2,
@@ -108,6 +110,45 @@ export const MultipleLimits: StoryObj = {
             { id: 'col3', name: 'Code Review' },
           ],
           swimlanes: [{ id: 'swim2', name: 'Backend' }],
+          showAllPersonIssues: true,
+        },
+      ]}
+    />
+  ),
+};
+
+export const WithShowAllDisabled: StoryObj = {
+  render: () => (
+    <PersonLimitsDemo
+      limits={[
+        {
+          id: 1,
+          person: {
+            name: 'john.doe',
+            displayName: 'John Doe',
+            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+            avatar: 'https://via.placeholder.com/32',
+          },
+          limit: 3,
+          columns: [{ id: 'col2', name: 'In Progress' }],
+          swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+          showAllPersonIssues: false,
+        },
+        {
+          id: 2,
+          person: {
+            name: 'jane.smith',
+            displayName: 'Jane Smith',
+            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+            avatar: 'https://via.placeholder.com/32',
+          },
+          limit: 5,
+          columns: [
+            { id: 'col2', name: 'In Progress' },
+            { id: 'col3', name: 'Code Review' },
+          ],
+          swimlanes: [{ id: 'swim2', name: 'Backend' }],
+          showAllPersonIssues: true,
         },
       ]}
     />
@@ -130,6 +171,7 @@ export const WithIssueTypeFilter: StoryObj = {
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
           includedIssueTypes: ['Task', 'Bug'],
+          showAllPersonIssues: true,
         },
         {
           id: 2,
@@ -143,6 +185,7 @@ export const WithIssueTypeFilter: StoryObj = {
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim2', name: 'Backend' }],
           includedIssueTypes: ['Story', 'Epic'],
+          showAllPersonIssues: true,
         },
       ]}
     />

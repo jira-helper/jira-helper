@@ -118,6 +118,28 @@ Feature: Personal WIP Limit Settings - Edit Limit
     Then issue types "Task, Bug" should be selected
     And I see checkbox "Count all issue types" is unchecked
 
+  # === SHOW ALL PERSON ISSUES ===
+
+  @SC-EDIT-13
+  Scenario: Disable showAllPersonIssues on existing limit
+    Given a limit: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
+    When I open the settings modal
+    And the showAllPersonIssues column for "John Doe" should show "✓"
+    And I click "Edit" on the limit for "John Doe"
+    And I uncheck "Show all person issues on avatar click"
+    And I click "Update limit"
+    Then the showAllPersonIssues column for "John Doe" should show "—"
+
+  @SC-EDIT-14
+  Scenario: Enable showAllPersonIssues on existing limit
+    Given a limit with showAllPersonIssues disabled: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
+    When I open the settings modal
+    And the showAllPersonIssues column for "John Doe" should show "—"
+    And I click "Edit" on the limit for "John Doe"
+    And I check "Show all person issues on avatar click"
+    And I click "Update limit"
+    Then the showAllPersonIssues column for "John Doe" should show "✓"
+
   # === CANCEL ===
 
   @SC-EDIT-11

@@ -6,25 +6,12 @@ import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { registerPersonLimitsBoardPageObjectInDI, personLimitsBoardPageObjectToken } from './pageObject';
 import { useRuntimeStore } from './stores';
-import { usePersonWipLimitsPropertyStore } from '../property';
+import { usePersonWipLimitsPropertyStore, migrateProperty } from '../property';
 import { applyLimits, showOnlyChosen } from './actions';
 import { AvatarsContainer } from './components';
+import type { PersonWipLimitsProperty_2_29 } from '../property';
 
-type PersonLimitData = {
-  limits: Array<{
-    id: number;
-    person: {
-      name: string;
-      displayName?: string;
-      self: string;
-      avatar?: string;
-    };
-    columns: Array<{ id: string; name: string }>;
-    swimlanes: Array<{ id: string; name: string }>;
-    limit: number;
-    includedIssueTypes?: string[];
-  }>;
-};
+type PersonLimitData = PersonWipLimitsProperty_2_29;
 
 /**
  * BoardPage modification for PersonLimits feature.
@@ -80,9 +67,9 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       registerPersonLimitsBoardPageObjectInDI(this.container);
     }
 
-    // Initialize property store with loaded data
+    // Initialize property store with loaded data (migrate from v2.29 if needed)
     const propertyStore = usePersonWipLimitsPropertyStore.getState();
-    propertyStore.actions.setData(personLimits);
+    propertyStore.actions.setData(migrateProperty(personLimits));
 
     // Initialize runtime store
     const { actions } = useRuntimeStore.getState();

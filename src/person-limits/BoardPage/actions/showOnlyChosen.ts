@@ -1,7 +1,7 @@
 import { createAction } from 'src/shared/action';
 import { IPersonLimitsBoardPageObject, personLimitsBoardPageObjectToken } from '../pageObject';
 import { useRuntimeStore } from '../stores';
-import { isPersonLimitAppliedToIssue } from '../utils';
+import { isPersonLimitAppliedToIssue, isPersonsIssue } from '../utils';
 
 /**
  * Hide empty swimlanes and parent groups after filtering.
@@ -52,14 +52,19 @@ export const showOnlyChosen = createAction({
     const personLimit = stats.find(s => s.id === activeLimitId);
     if (!personLimit) return;
 
-    // Show/hide issues based on whether they match the person's limit
+    // Show/hide issues based on the limit's showAllPersonIssues setting
     issues.forEach(issue => {
       const assignee = pageObject.getAssigneeFromIssue(issue);
-      const columnId = pageObject.getColumnId(issue);
-      const swimlaneId = pageObject.getSwimlaneId(issue);
-      const issueType = pageObject.getIssueType(issue);
 
-      const shouldShow = isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId, issueType);
+      let shouldShow: boolean;
+      if (personLimit.showAllPersonIssues) {
+        shouldShow = isPersonsIssue(personLimit, assignee);
+      } else {
+        const columnId = pageObject.getColumnId(issue);
+        const swimlaneId = pageObject.getSwimlaneId(issue);
+        const issueType = pageObject.getIssueType(issue);
+        shouldShow = isPersonLimitAppliedToIssue(personLimit, assignee, columnId!, swimlaneId, issueType);
+      }
 
       pageObject.setIssueVisibility(issue, shouldShow);
     });

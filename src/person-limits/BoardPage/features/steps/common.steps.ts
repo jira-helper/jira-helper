@@ -50,7 +50,8 @@ function createPersonLimit(
   limit: number,
   limitColumns: Array<{ id: string; name: string }>,
   limitSwimlanes: Array<{ id: string; name: string }>,
-  includedIssueTypes?: string[]
+  includedIssueTypes?: string[],
+  showAllPersonIssues: boolean = true
 ) {
   return {
     id: 0,
@@ -64,6 +65,7 @@ function createPersonLimit(
     columns: limitColumns,
     swimlanes: limitSwimlanes,
     includedIssueTypes,
+    showAllPersonIssues,
   };
 }
 
@@ -113,7 +115,16 @@ Given('there are WIP limits:', (dataTable: DataTableRows) => {
       const limitColumns = parseColumnIds(row.columns ?? '');
       const limitSwimlanes = parseSwimlaneIds(row.swimlanes ?? '');
       const includedIssueTypes = parseIssueTypes(row.issueTypes ?? '');
-      return createPersonLimit(person, personDisplayName, limit, limitColumns, limitSwimlanes, includedIssueTypes);
+      const showAllPersonIssues = row.showAllPersonIssues != null ? row.showAllPersonIssues !== 'false' : true;
+      return createPersonLimit(
+        person,
+        personDisplayName,
+        limit,
+        limitColumns,
+        limitSwimlanes,
+        includedIssueTypes,
+        showAllPersonIssues
+      );
     });
     usePersonWipLimitsPropertyStore.getState().actions.setLimits([...limits, ...newLimits]);
   });

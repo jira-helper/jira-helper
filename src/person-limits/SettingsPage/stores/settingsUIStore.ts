@@ -83,6 +83,7 @@ export const useSettingsUIStore = create<SettingsUIStoreState>()(set => ({
                 selectedColumns,
                 swimlanes,
                 includedIssueTypes: limit.includedIssueTypes,
+                showAllPersonIssues: limit.showAllPersonIssues,
               };
             }
           } else {

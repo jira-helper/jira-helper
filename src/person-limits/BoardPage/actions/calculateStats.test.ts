@@ -59,6 +59,7 @@ describe('calculateStats', () => {
         limit: 5,
         columns: [],
         swimlanes: [],
+        showAllPersonIssues: true,
       },
     ]);
 
@@ -105,6 +106,7 @@ describe('calculateStats', () => {
         limit: 2,
         columns: [{ id: 'col2', name: 'In Progress' }],
         swimlanes: [],
+        showAllPersonIssues: true,
       },
     ]);
 

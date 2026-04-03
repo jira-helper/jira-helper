@@ -4,11 +4,14 @@ Feature: Personal WIP Limits on Board - Interaction
   доску, показывая только задачи, которые учитываются в этом лимите.
   Повторный клик снимает фильтр.
 
+  Сценарии с showAllPersonIssues=false тестируют режим фильтрации
+  по критериям лимита (колонки, свимлейны, типы задач).
+
   @SC-INTERACT-1
   Scenario: Click avatar filters board to show only matching issues
     Given there are WIP limits:
-      | person   | personDisplayName | limit | columns | swimlanes | issueTypes |
-      | john.doe | John Doe          | 2     | col2    |           |            |
+      | person   | personDisplayName | limit | columns | swimlanes | issueTypes | showAllPersonIssues |
+      | john.doe | John Doe          | 2     | col2    |           |            | false               |
     Given the board has issues:
       | id | person   | personDisplayName | column | swimlane | issueType |
       | 1  | john.doe | John Doe          | col1   |          | Task      |
@@ -23,8 +26,8 @@ Feature: Personal WIP Limits on Board - Interaction
   @SC-INTERACT-2
   Scenario: Click avatar again removes filter
     Given there are WIP limits:
-      | person   | personDisplayName | limit | columns | swimlanes | issueTypes |
-      | john.doe | John Doe          | 2     |         |           |            |
+      | person   | personDisplayName | limit | columns | swimlanes | issueTypes | showAllPersonIssues |
+      | john.doe | John Doe          | 2     |         |           |            | false               |
     Given the board has issues:
       | id | person   | personDisplayName | column | swimlane | issueType |
       | 1  | john.doe | John Doe          | col1   |          | Task      |
@@ -39,9 +42,9 @@ Feature: Personal WIP Limits on Board - Interaction
   @SC-INTERACT-3
   Scenario: Click second limit of same person
     Given there are WIP limits:
-      | person   | personDisplayName | limit | columns | swimlanes | issueTypes |
-      | john.doe | John Doe          | 2     | col1    |           |            |
-      | john.doe | John Doe          | 1     | col2    |           |            |
+      | person   | personDisplayName | limit | columns | swimlanes | issueTypes | showAllPersonIssues |
+      | john.doe | John Doe          | 2     | col1    |           |            | false               |
+      | john.doe | John Doe          | 1     | col2    |           |            | false               |
     Given the board has issues:
       | id | person   | personDisplayName | column | swimlane | issueType |
       | 1  | john.doe | John Doe          | col1   |          | Task      |
