@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
@@ -32,7 +32,7 @@ type PersonLimitData = {
  * Displays WIP limit counters for each person and highlights
  * issues when limits are exceeded.
  */
-export default class extends PageModification<[any, PersonLimitData | null], Element> {
+export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {
   shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -75,9 +75,9 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
 
     // Register PageObject in DI (if not already registered)
     try {
-      globalContainer.inject(personLimitsBoardPageObjectToken);
+      this.container.inject(personLimitsBoardPageObjectToken);
     } catch {
-      registerPersonLimitsBoardPageObjectInDI(globalContainer);
+      registerPersonLimitsBoardPageObjectInDI(this.container);
     }
 
     // Initialize property store with loaded data
@@ -122,7 +122,7 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
     const root = createRoot(container);
     root.render(
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(AvatarsContainer),
       })
     );
@@ -134,3 +134,5 @@ export default class extends PageModification<[any, PersonLimitData | null], Ele
     });
   }
 }
+
+export const personLimitsBoardPageToken = new Token<PersonLimitsBoardPage>('PersonLimitsBoardPage');

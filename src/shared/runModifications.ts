@@ -1,48 +1,45 @@
-import { globalContainer } from 'dioma';
-import { Routes, routingServiceToken } from '../routing';
+import { Routes } from '../routing';
+import type { IRoutingService } from '../routing/IRoutingService';
 import type { PageModification } from './PageModification';
 
-export type ModificationsMap = Record<string, (new () => PageModification)[]>;
+export type ModificationsMap = Record<string, PageModification<any, any>[]>;
 
-const currentModifications: Map<new () => PageModification, { id: string; instance: PageModification }> = new Map();
-let route: string | null;
+const currentModifications = new Map<PageModification, string>();
+let route: string | null = null;
 
-const applyModification = async (Modification: new () => PageModification, modificationInstance: PageModification) => {
-  const id = modificationInstance.getModificationId();
-  currentModifications.set(Modification, { id, instance: modificationInstance });
+const applyModification = async (instance: PageModification) => {
+  const id = instance.getModificationId();
+  currentModifications.set(instance, id);
 
   try {
-    await modificationInstance.preloadData();
+    await instance.preloadData();
   } catch (err) {
     window.console.error('jira-helper: Preload Data Failed:', err);
   }
 
-  const styles = modificationInstance.appendStyles();
+  const styles = instance.appendStyles();
   if (styles) document.body.insertAdjacentHTML('beforeend', styles);
 
   // it's hard to retrieve correct type for this
-  const loadingPromise: Promise<any> = modificationInstance.waitForLoading();
+  const loadingPromise: Promise<any> = instance.waitForLoading();
 
   try {
-    const dataPromise = modificationInstance.loadData();
+    const dataPromise = instance.loadData();
 
     const [loadingElement, data] = await Promise.all([loadingPromise, dataPromise]);
 
-    // Apply the modification once loading and data are ready
-    modificationInstance.apply(data, loadingElement);
+    instance.apply(data, loadingElement);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('jira-helper: Load Data Failed:', err);
 
-    // Run function apply after page load, without loading data from server
     loadingPromise.then(() => {
-      modificationInstance.apply();
+      instance.apply();
     });
   }
 };
 
-const applyModifications = (modificationsMap: ModificationsMap) => {
-  const routingService = globalContainer.inject(routingServiceToken);
+const applyModifications = (modificationsMap: ModificationsMap, routingService: IRoutingService) => {
   const currentRoute = routingService.getCurrentRoute();
 
   if (route !== currentRoute) {
@@ -52,47 +49,44 @@ const applyModifications = (modificationsMap: ModificationsMap) => {
     return;
   }
 
-  const modificationsForRoute = new Set(modificationsMap[Routes.ALL].concat(modificationsMap[route] || []));
+  const modificationsForRoute = new Set((modificationsMap[Routes.ALL] || []).concat(modificationsMap[route] || []));
 
   // Clear modifications that are no longer needed
-  for (const Modification of currentModifications.keys()) {
-    if (!modificationsForRoute.has(Modification)) {
-      currentModifications.get(Modification)?.instance.clear();
-      currentModifications.delete(Modification);
+  for (const instance of currentModifications.keys()) {
+    if (!modificationsForRoute.has(instance)) {
+      instance.clear();
+      currentModifications.delete(instance);
     }
   }
 
   // Apply modifications for the current route
-  for (const Modification of modificationsForRoute) {
-    const modificationInstance = new Modification();
+  for (const instance of modificationsForRoute) {
+    Promise.resolve(instance.shouldApply()).then(shouldApply => {
+      const currentId = currentModifications.get(instance);
 
-    Promise.resolve(modificationInstance.shouldApply()).then(shouldApply => {
-      if (currentModifications.has(Modification)) {
-        const { id: currentModificationId, instance: currentInstance } = currentModifications.get(Modification)!;
-
+      if (currentId !== undefined) {
         if (!shouldApply) {
-          currentInstance.clear();
-          currentModifications.delete(Modification);
+          instance.clear();
+          currentModifications.delete(instance);
           return;
         }
 
-        if (currentModificationId !== modificationInstance.getModificationId()) {
-          currentInstance.clear();
-          currentModifications.delete(Modification);
+        if (currentId !== instance.getModificationId()) {
+          instance.clear();
+          currentModifications.delete(instance);
         } else {
           return;
         }
       }
 
       if (shouldApply) {
-        applyModification(Modification, modificationInstance);
+        applyModification(instance);
       }
     });
   }
 };
 
-export default (modificationsMap: ModificationsMap) => {
-  applyModifications(modificationsMap);
-  const routingService = globalContainer.inject(routingServiceToken);
-  routingService.onUrlChange(() => applyModifications(modificationsMap));
+export default (modificationsMap: ModificationsMap, routingService: IRoutingService) => {
+  applyModifications(modificationsMap, routingService);
+  routingService.onUrlChange(() => applyModifications(modificationsMap, routingService));
 };

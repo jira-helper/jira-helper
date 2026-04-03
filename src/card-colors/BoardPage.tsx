@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { PageModification } from '../shared/PageModification';
 import { processCard } from './processCard';
@@ -58,3 +59,5 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     return cardColorsSettings?.value === true;
   }
 }
+
+export const cardColorsBoardPageToken = new Token<CardColorsBoardPage>('CardColorsBoardPage');

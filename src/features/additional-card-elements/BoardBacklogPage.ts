@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { BoardBacklogPagePageObject } from 'src/page-objects/BoardBacklogPage';
 import { PageModification } from 'src/shared/PageModification';
 
@@ -35,3 +36,7 @@ export class AdditionalCardElementsBoardBacklogPage extends PageModification<voi
     });
   }
 }
+
+export const additionalCardElementsBoardBacklogPageToken = new Token<AdditionalCardElementsBoardBacklogPage>(
+  'AdditionalCardElementsBoardBacklogPage'
+);

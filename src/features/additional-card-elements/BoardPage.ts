@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { PageModification } from 'src/shared/PageModification';
 
@@ -59,3 +60,7 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
     });
   }
 }
+
+export const additionalCardElementsBoardPageToken = new Token<AdditionalCardElementsBoardPage>(
+  'AdditionalCardElementsBoardPage'
+);

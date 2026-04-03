@@ -1,6 +1,6 @@
 # TASK-173: Zustand store actions — убрать globalContainer.inject
 
-**Status**: TODO
+**Status**: DONE
 
 **Parent**: [EPIC-17](./EPIC-17-shared-di-refactoring.md)
 

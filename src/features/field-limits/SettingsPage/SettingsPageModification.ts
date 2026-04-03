@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from 'src/shared/PageModification';
 import { WithDi } from 'src/shared/diContext';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { useDi } from 'src/shared/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './components/SettingsButton';
@@ -39,7 +39,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerFieldLimitsModule(globalContainer);
+    registerFieldLimitsModule(this.container);
 
     const container = document.querySelector('#ghx-config-cardLayout');
     if (!container) return;
@@ -59,7 +59,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
     this.root = createRoot(this.wrapper);
     this.root.render(
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(
           React.Fragment,
           null,
@@ -85,3 +85,5 @@ export class SettingsPageModification extends PageModification<void, Element> {
     }
   }
 }
+
+export const fieldLimitsSettingsPageToken = new Token<SettingsPageModification>('SettingsPageModification');

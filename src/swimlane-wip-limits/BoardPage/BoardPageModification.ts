@@ -1,4 +1,4 @@
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from 'src/shared/PageModification';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { boardRuntimeModelToken } from '../tokens';
@@ -33,9 +33,9 @@ export class BoardPageModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerSwimlaneWipLimitsModule(globalContainer);
+    registerSwimlaneWipLimitsModule(this.container);
 
-    const { model } = globalContainer.inject(boardRuntimeModelToken);
+    const { model } = this.container.inject(boardRuntimeModelToken);
     this.runtimeModel = model as BoardRuntimeModel;
 
     const initResult = await this.runtimeModel.initialize();
@@ -44,7 +44,7 @@ export class BoardPageModification extends PageModification<void, Element> {
       return;
     }
 
-    const pageObject = globalContainer.inject(boardPagePageObjectToken);
+    const pageObject = this.container.inject(boardPagePageObjectToken);
     renderSwimlaneVisuals(this.runtimeModel, pageObject);
 
     this.onDOMChange('#ghx-pool', () => {
@@ -59,3 +59,5 @@ export class BoardPageModification extends PageModification<void, Element> {
     });
   }
 }
+
+export const swimlaneWipLimitsBoardPageToken = new Token<BoardPageModification>('BoardPageModification');

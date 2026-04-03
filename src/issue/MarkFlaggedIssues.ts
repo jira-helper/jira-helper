@@ -1,5 +1,5 @@
 import each from '@tinkoff/utils/array/each';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { Routes, routingServiceToken } from '../routing';
 import { loadFlaggedIssuesToken, loadNewIssueViewEnabledToken } from '../shared/di/jiraApiTokens';
@@ -15,14 +15,14 @@ enum RelatedIssue {
   LINKED_NEW = 'LINKED_NEW',
 }
 
-export default class extends PageModification<any, Element> {
+export default class MarkFlaggedIssues extends PageModification<any, Element> {
   private newIssueView: boolean = false;
   private get routing() {
-    return globalContainer.inject(routingServiceToken);
+    return this.container.inject(routingServiceToken);
   }
 
   private getFlag(): HTMLImageElement {
-    const extensionApi = globalContainer.inject(extensionApiServiceToken);
+    const extensionApi = this.container.inject(extensionApiServiceToken);
     const flag = document.createElement('img');
     flag.src = extensionApi.getUrl(this.newIssueView ? flagNew : flagUrl);
     flag.style.width = '16px';
@@ -51,7 +51,7 @@ export default class extends PageModification<any, Element> {
   }
 
   preloadData(): Promise<void> {
-    const loadNewIssueViewEnabled = globalContainer.inject(loadNewIssueViewEnabledToken);
+    const loadNewIssueViewEnabled = this.container.inject(loadNewIssueViewEnabledToken);
     return (this.getSearchParam('oldIssueView') ? Promise.resolve(false) : loadNewIssueViewEnabled()).then(
       (newIssueView: boolean) => {
         this.newIssueView = newIssueView;
@@ -111,7 +111,7 @@ export default class extends PageModification<any, Element> {
     }
 
     const issueId = this.routing.getIssueId();
-    const loadFlaggedIssues = globalContainer.inject(loadFlaggedIssuesToken);
+    const loadFlaggedIssues = this.container.inject(loadFlaggedIssuesToken);
     const flaggedIssues = await loadFlaggedIssues([...Object.keys(issuesElements), issueId!]);
 
     flaggedIssues.forEach((issueKey: string) => {
@@ -158,3 +158,5 @@ export default class extends PageModification<any, Element> {
     });
   }
 }
+
+export const markFlaggedIssuesToken = new Token<MarkFlaggedIssues>('MarkFlaggedIssues');

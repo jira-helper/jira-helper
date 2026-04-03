@@ -1,1 +1,1 @@
-export { BoardPageModification } from './BoardPageModification';
+export { BoardPageModification, fieldLimitsBoardPageToken } from './BoardPageModification';

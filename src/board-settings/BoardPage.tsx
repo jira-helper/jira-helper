@@ -1,4 +1,5 @@
 import React from 'react';
+import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { createRoot } from 'react-dom/client';
 import { PageModification } from '../shared/PageModification';
@@ -35,3 +36,5 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
     createRoot(div).render(<BoardSettingsComponent />);
   }
 }
+
+export const boardSettingsBoardPageToken = new Token<BoardSettingsBoardPage>('BoardSettingsBoardPage');

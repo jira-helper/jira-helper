@@ -1,3 +1,4 @@
+import type { Container } from 'dioma';
 import { globalContainer } from 'dioma';
 import { routingServiceToken } from '../routing';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
@@ -13,6 +14,8 @@ type SideEffect = () => void;
 
 export class PageModification<InitData = undefined, TargetElement extends Element | undefined = undefined> {
   sideEffects: SideEffect[] = [];
+
+  constructor(protected container: Container = globalContainer) {}
 
   // life-cycle methods
 
@@ -48,48 +51,49 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
 
   clear(): void {
     this.sideEffects.forEach(se => se());
+    this.sideEffects = [];
   }
 
   // methods with side-effects
 
-  waitForElement(selector: string, container?: Document | HTMLElement | Element): Promise<Element> {
-    const { promise, cancel } = waitForElement(selector, container);
+  waitForElement(selector: string, containerEl?: Document | HTMLElement | Element): Promise<Element> {
+    const { promise, cancel } = waitForElement(selector, containerEl);
     this.sideEffects.push(cancel);
     return promise;
   }
 
   protected getBoardProperty<T = any>(property: string): Promise<T | undefined> {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return globalContainer.inject(getBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
+    return this.container.inject(getBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected updateBoardProperty(property: string, value: any): Promise<any> {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
     // @ts-expect-error is it OK that updateBoardProperty returns void instead of Promise? is it bug or feature?
-    return globalContainer.inject(updateBoardPropertyToken)(routing.getBoardIdFromURL()!, property, value, {
+    return this.container.inject(updateBoardPropertyToken)(routing.getBoardIdFromURL()!, property, value, {
       abortPromise,
     });
   }
 
   protected deleteBoardProperty(property: string): Promise<any> {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
     // TODO: solve before merge
     // @ts-expect-error is it OK that deleteBoardProperty returns void instead of Promise? is it bug or feature?
-    return globalContainer.inject(deleteBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
+    return this.container.inject(deleteBoardPropertyToken)(routing.getBoardIdFromURL()!, property, { abortPromise });
   }
 
   protected getBoardEditData(): Promise<any> {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     const { cancelRequest, abortPromise } = this.createAbortPromise();
     this.sideEffects.push(cancelRequest);
-    return globalContainer.inject(getBoardEditDataToken)(routing.getBoardIdFromURL()!, { abortPromise });
+    return this.container.inject(getBoardEditDataToken)(routing.getBoardIdFromURL()!, { abortPromise });
   }
 
   protected createAbortPromise(): { cancelRequest: () => void; abortPromise: Promise<void> } {
@@ -124,22 +128,22 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     this.sideEffects.push(() => observer.disconnect());
   }
 
-  protected insertHTML(container: Element, position: InsertPosition, html: string): Element | null {
-    container.insertAdjacentHTML(position, html.trim());
+  protected insertHTML(containerEl: Element, position: InsertPosition, html: string): Element | null {
+    containerEl.insertAdjacentHTML(position, html.trim());
 
     let insertedElement: Element | null = null;
     switch (position) {
       case 'beforebegin':
-        insertedElement = container.previousElementSibling;
+        insertedElement = containerEl.previousElementSibling;
         break;
       case 'afterbegin':
-        insertedElement = container.firstElementChild;
+        insertedElement = containerEl.firstElementChild;
         break;
       case 'beforeend':
-        insertedElement = container.lastElementChild;
+        insertedElement = containerEl.lastElementChild;
         break;
       case 'afterend':
-        insertedElement = container.nextElementSibling;
+        insertedElement = containerEl.nextElementSibling;
         break;
       default:
         throw new Error('Wrong position');
@@ -170,15 +174,13 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
     const title = typeElement.getAttribute('title');
     if (!title) return null;
 
-    // Extract type name from title attribute
-    // Title format can be: "Idea", "Тип запроса: Idea", etc.
     const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
     return typeName || null;
   }
 
   protected shouldCountIssue(card: Element, includedIssueTypes?: string[]): boolean {
     if (!includedIssueTypes || includedIssueTypes.length === 0) {
-      return true; // Если фильтр не настроен, считать все задачи
+      return true;
     }
 
     const issueType = this.getIssueTypeFromCard(card);
@@ -186,27 +188,27 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   protected async getSettingsTab(): Promise<string | null> {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     const tabFromUrl = routing.getSearchParam('tab') || routing.getSearchParam('config');
     if (tabFromUrl) return tabFromUrl;
 
-    const settingsPage = globalContainer.inject(settingsPagePageObjectToken);
+    const settingsPage = this.container.inject(settingsPagePageObjectToken);
     await this.waitForElement(settingsPage.selectors.selectedNav);
     return settingsPage.getSelectedTab();
   }
 
   protected getSearchParam(param: string): string | null {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     return routing.getSearchParam(param);
   }
 
   protected getReportNameFromURL(): string | null {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     return routing.getReportNameFromURL();
   }
 
   protected getBoardId(): string | null {
-    const routing = globalContainer.inject(routingServiceToken);
+    const routing = this.container.inject(routingServiceToken);
     return routing.getBoardIdFromURL();
   }
 }

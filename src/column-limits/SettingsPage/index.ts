@@ -1,5 +1,5 @@
 import React from 'react';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { WithDi } from '../../shared/diContext';
@@ -50,12 +50,12 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
       name: swim.name,
     }));
 
-    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
+    const pageObject = this.container.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'column-limits',
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(SettingsButtonContainer, {
           getColumns: () => this.getColumns(),
           getColumnName: (el: HTMLElement) => this.getColumnName(el),
@@ -83,3 +83,5 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     return el.querySelector(SettingsWIPLimits.jiraSelectors.columnHeaderName)?.getAttribute('title') ?? '';
   }
 }
+
+export const columnLimitsSettingsPageToken = new Token<SettingsWIPLimits>('SettingsWIPLimits');

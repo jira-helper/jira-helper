@@ -62,7 +62,7 @@ flowchart TD
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 173 | [TASK-173](./TASK-173-store-actions-eliminate-global-container.md) | Zustand store actions — убрать globalContainer.inject | TODO |
+| 173 | [TASK-173](./TASK-173-store-actions-eliminate-global-container.md) | Zustand store actions — убрать globalContainer.inject | DONE |
 
 ### Phase 4: Низкий приоритет — DOM-утилиты
 

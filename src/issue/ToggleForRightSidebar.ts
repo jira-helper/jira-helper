@@ -1,4 +1,4 @@
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { routingServiceToken } from '../routing';
 import { issueDOM } from './domSelectors';
@@ -32,10 +32,10 @@ const getToggle = (sidebarHidden: boolean): HTMLButtonElement => {
 };
 
 // Extending the PageModification class
-export default class extends PageModification<any, Element> {
+export default class ToggleForRightSidebar extends PageModification<any, Element> {
   // Method to check if the modification should be applied
   shouldApply(): boolean {
-    return globalContainer.inject(routingServiceToken).getIssueId() != null;
+    return this.container.inject(routingServiceToken).getIssueId() != null;
   }
 
   // Method to get the modification ID
@@ -60,3 +60,5 @@ export default class extends PageModification<any, Element> {
     }
   }
 }
+
+export const toggleForRightSidebarToken = new Token<ToggleForRightSidebar>('ToggleForRightSidebar');

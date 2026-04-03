@@ -1,5 +1,5 @@
 import React from 'react';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { WithDi } from '../../shared/diContext';
 import { loadPersonWipLimitsProperty } from '../property';
@@ -73,16 +73,16 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
       name: swim.name,
     }));
 
-    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
+    const pageObject = this.container.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'person-limits',
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(SettingsButtonContainer, {
           boardDataColumns: columns,
           boardDataSwimlanes: swimlanes,
-          searchUsers: globalContainer.inject(searchUsersToken),
+          searchUsers: this.container.inject(searchUsersToken),
         }),
       })
     );
@@ -90,3 +90,5 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
     this.sideEffects.push(cleanup);
   }
 }
+
+export const personLimitsSettingsPageToken = new Token<PersonalWIPLimit>('PersonalWIPLimit');

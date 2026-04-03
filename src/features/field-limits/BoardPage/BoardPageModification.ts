@@ -1,5 +1,5 @@
 import React from 'react';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from 'src/shared/PageModification';
 import { WithDi } from 'src/shared/diContext';
 import { boardRuntimeModelToken, fieldLimitsBoardPageObjectToken } from '../tokens';
@@ -39,9 +39,9 @@ export class BoardPageModification extends PageModification<[BoardEditData, Fiel
 
     if (!fieldLimits?.limits || Object.keys(fieldLimits.limits).length === 0) return;
 
-    registerFieldLimitsModule(globalContainer);
+    registerFieldLimitsModule(this.container);
 
-    const { model } = globalContainer.inject(boardRuntimeModelToken);
+    const { model } = this.container.inject(boardRuntimeModelToken);
     this.runtimeModel = model as BoardRuntimeModel;
 
     const initResult = await this.runtimeModel.initialize(boardEditData);
@@ -50,10 +50,10 @@ export class BoardPageModification extends PageModification<[BoardEditData, Fiel
       return;
     }
 
-    const pageObject = globalContainer.inject(fieldLimitsBoardPageObjectToken);
+    const pageObject = this.container.inject(fieldLimitsBoardPageObjectToken);
     pageObject.insertSubnavComponent(
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(FieldLimitsList),
       }),
       'field-limits-list'
@@ -74,7 +74,7 @@ export class BoardPageModification extends PageModification<[BoardEditData, Fiel
         if (!existing) {
           pageObject.insertSubnavComponent(
             React.createElement(WithDi, {
-              container: globalContainer,
+              container: this.container,
               children: React.createElement(FieldLimitsList),
             }),
             'field-limits-list'
@@ -91,3 +91,5 @@ export class BoardPageModification extends PageModification<[BoardEditData, Fiel
     });
   }
 }
+
+export const fieldLimitsBoardPageToken = new Token<BoardPageModification>('BoardPageModification');

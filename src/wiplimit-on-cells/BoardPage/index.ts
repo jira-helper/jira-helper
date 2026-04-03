@@ -1,4 +1,4 @@
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import type { WipLimitRange } from '../types';
@@ -39,9 +39,9 @@ export default class WipLimitOnCellsBoard extends PageModification<[any, WipLimi
 
     // Register PageObject in DI
     try {
-      globalContainer.inject(wipLimitCellsBoardPageObjectToken);
+      this.container.inject(wipLimitCellsBoardPageObjectToken);
     } catch {
-      registerWipLimitCellsBoardPageObjectInDI(globalContainer);
+      registerWipLimitCellsBoardPageObjectInDI(this.container);
     }
 
     // Set CSS selector in runtime store
@@ -108,3 +108,5 @@ export default class WipLimitOnCellsBoard extends PageModification<[any, WipLimi
     </style>`;
   }
 }
+
+export const wipLimitOnCellsBoardPageToken = new Token<WipLimitOnCellsBoard>('WipLimitOnCellsBoard');

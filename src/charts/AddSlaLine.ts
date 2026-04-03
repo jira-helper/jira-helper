@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { BOARD_PROPERTIES } from '../shared/constants';
 import { getChartLinePosition, getChartTicks } from './utils';
@@ -336,7 +337,7 @@ const renderSlaInput = (
 };
 
 // TODO: any[]
-export default class extends PageModification<any[], Element> {
+export default class AddSlaLine extends PageModification<any[], Element> {
   shouldApply(): boolean {
     return this.getSearchParam('chart') === 'controlChart' || this.getReportNameFromURL() === 'control-chart';
   }
@@ -389,3 +390,5 @@ export default class extends PageModification<any[], Element> {
     });
   }
 }
+
+export const addSlaLineToken = new Token<AddSlaLine>('AddSlaLine');

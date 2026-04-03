@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { getBoardPropertyToken, updateBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
 import { PageModification } from '../shared/PageModification';
 import { WithDi } from '../shared/diContext';
@@ -10,7 +10,7 @@ import { PropertyValue } from './types';
 
 export default class CardColorsSettingsPage extends PageModification<undefined, Element> {
   private get settingsPage() {
-    return globalContainer.inject(settingsPagePageObjectToken);
+    return this.container.inject(settingsPagePageObjectToken);
   }
 
   getModificationId(): string {
@@ -41,17 +41,19 @@ export default class CardColorsSettingsPage extends PageModification<undefined, 
     }
 
     const updateProperty = (property: string, value: PropertyValue) => {
-      globalContainer.inject(updateBoardPropertyToken)(boardId, property, value);
+      this.container.inject(updateBoardPropertyToken)(boardId, property, value);
     };
 
     const getProperty = (property: string): Promise<PropertyValue> => {
-      return globalContainer.inject(getBoardPropertyToken)(boardId, property);
+      return this.container.inject(getBoardPropertyToken)(boardId, property);
     };
 
     createRoot(el).render(
-      <WithDi container={globalContainer}>
+      <WithDi container={this.container}>
         <CardColorsSettingsContainer updateBoardProperty={updateProperty} getBoardProperty={getProperty} />
       </WithDi>
     );
   }
 }
+
+export const cardColorsSettingsPageToken = new Token<CardColorsSettingsPage>('CardColorsSettingsPage');

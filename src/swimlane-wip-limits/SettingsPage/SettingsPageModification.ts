@@ -3,7 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { PageModification } from 'src/shared/PageModification';
 import { settingsPagePageObjectToken } from 'src/page-objects/SettingsPage';
 import { WithDi } from 'src/shared/diContext';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
 import { registerSwimlaneWipLimitsModule } from '../module';
@@ -29,7 +29,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerSwimlaneWipLimitsModule(globalContainer);
+    registerSwimlaneWipLimitsModule(this.container);
 
     this.swimlaneSelect = document.querySelector('#ghx-swimlanestrategy-select');
 
@@ -53,7 +53,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
   private renderButton(): void {
     if (this.wrapper) return; // Already rendered
 
-    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getSwimlaneLimitsSettingsTabPageObject();
+    const pageObject = this.container.inject(settingsPagePageObjectToken).getSwimlaneLimitsSettingsTabPageObject();
     const configContainer = pageObject.getConfigContainer();
 
     if (!configContainer) return;
@@ -66,7 +66,7 @@ export class SettingsPageModification extends PageModification<void, Element> {
     this.root = createRoot(this.wrapper);
     this.root.render(
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(
           React.Fragment,
           null,
@@ -92,3 +92,5 @@ export class SettingsPageModification extends PageModification<void, Element> {
     }
   }
 }
+
+export const swimlaneWipLimitsSettingsPageToken = new Token<SettingsPageModification>('SettingsPageModification');

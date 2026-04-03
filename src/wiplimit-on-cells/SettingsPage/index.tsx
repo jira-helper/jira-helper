@@ -1,5 +1,5 @@
 import React from 'react';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
@@ -82,12 +82,12 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
       await this.updateBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_CELLS, newRanges);
     };
 
-    const pageObject = globalContainer.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
+    const pageObject = this.container.inject(settingsPagePageObjectToken).getColumnsSettingsTabPageObject();
 
     const cleanup = pageObject.registerButton(
       'wiplimit-on-cells',
       React.createElement(WithDi, {
-        container: globalContainer,
+        container: this.container,
         children: React.createElement(SettingsButtonContainer, {
           swimlanes,
           columns,
@@ -100,3 +100,5 @@ export default class WipLimitOnCellsSettings extends PageModification<[BoardEdit
     this.sideEffects.push(cleanup);
   }
 }
+
+export const wipLimitOnCellsSettingsPageToken = new Token<WipLimitOnCellsSettings>('WipLimitOnCellsSettings');

@@ -1,30 +1,42 @@
 import './firefoxFixes';
 import { globalContainer } from 'dioma';
 import { setAutoFreeze } from 'immer';
-import { Routes } from './routing';
+import { Routes, routingServiceToken } from './routing';
 import { isJira } from './shared/utils';
-import AddSlaLine from './charts/AddSlaLine';
-import AddChartGrid from './charts/AddChartGrid';
+import AddSlaLine, { addSlaLineToken } from './charts/AddSlaLine';
+import AddChartGrid, { addChartGridToken } from './charts/AddChartGrid';
 import runModifications from './shared/runModifications';
-import { BoardPageModification as SwimlaneLimitsBoardPage } from './swimlane-wip-limits/BoardPage';
-import { SettingsPageModification as SwimlaneLimitsSettingsPage } from './swimlane-wip-limits/SettingsPage';
-import { HistogramModification as SwimlaneHistogramBoardPage } from './swimlane-histogram';
-import WIPLimitsSettingsPage from './column-limits/SettingsPage';
-import WIPLimitsBoardPage from './column-limits/BoardPage';
-import BugTemplate from './bug-template/BugTemplate';
-import MarkFlaggedIssues from './issue/MarkFlaggedIssues';
-import ToggleForRightSidebar from './issue/ToggleForRightSidebar';
-import { SettingsPageModification as FieldLimitsSettingsPage } from './features/field-limits/SettingsPage';
-import { BoardPageModification as FieldLimitsBoardPage } from './features/field-limits/BoardPage';
+import {
+  BoardPageModification as SwimlaneLimitsBoardPage,
+  swimlaneWipLimitsBoardPageToken,
+} from './swimlane-wip-limits/BoardPage';
+import {
+  SettingsPageModification as SwimlaneLimitsSettingsPage,
+  swimlaneWipLimitsSettingsPageToken,
+} from './swimlane-wip-limits/SettingsPage';
+import { HistogramModification as SwimlaneHistogramBoardPage, histogramModificationToken } from './swimlane-histogram';
+import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './column-limits/SettingsPage';
+import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './column-limits/BoardPage';
+import BugTemplate, { bugTemplateToken } from './bug-template/BugTemplate';
+import MarkFlaggedIssues, { markFlaggedIssuesToken } from './issue/MarkFlaggedIssues';
+import ToggleForRightSidebar, { toggleForRightSidebarToken } from './issue/ToggleForRightSidebar';
+import {
+  SettingsPageModification as FieldLimitsSettingsPage,
+  fieldLimitsSettingsPageToken,
+} from './features/field-limits/SettingsPage';
+import {
+  BoardPageModification as FieldLimitsBoardPage,
+  fieldLimitsBoardPageToken,
+} from './features/field-limits/BoardPage';
 import { blurSensitiveFeatureToken, registerBlurSensitiveFeatureInDI } from './blur-for-sensitive';
-import PersonLimitsSettings from './person-limits/SettingsPage';
-import PersonLimits from './person-limits/BoardPage';
-import WiplimitOnCells from './wiplimit-on-cells/BoardPage';
-import WiplimitOnCellsSettings from './wiplimit-on-cells/SettingsPage';
-import CardColorsSettingsPage from './card-colors/SettingsPage';
-import { CardColorsBoardPage } from './card-colors/BoardPage';
-import { BoardSettingsBoardPage } from './board-settings/BoardPage';
-import { SubTasksProgressBoardPage } from './features/sub-tasks-progress/BoardPage';
+import PersonLimitsSettings, { personLimitsSettingsPageToken } from './person-limits/SettingsPage';
+import PersonLimits, { personLimitsBoardPageToken } from './person-limits/BoardPage';
+import WiplimitOnCells, { wipLimitOnCellsBoardPageToken } from './wiplimit-on-cells/BoardPage';
+import WiplimitOnCellsSettings, { wipLimitOnCellsSettingsPageToken } from './wiplimit-on-cells/SettingsPage';
+import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './card-colors/SettingsPage';
+import { CardColorsBoardPage, cardColorsBoardPageToken } from './card-colors/BoardPage';
+import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './board-settings/BoardPage';
+import { SubTasksProgressBoardPage, subTasksProgressBoardPageToken } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerSettingsPagePageObjectInDI } from './page-objects/SettingsPage';
 import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
@@ -35,12 +47,18 @@ import { registerRoutingServiceInDI } from './routing';
 import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
-import { DiagnosticBoardPage } from './features/diagnostic/BoardPage';
-import { LocalSettingsBoardPage } from './features/local-settings/BoardPage';
+import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
+import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
 import { extensionApiServiceToken, registerExtensionApiServiceInDI } from './shared/ExtensionApiService';
-import { AdditionalCardElementsBoardPage } from './features/additional-card-elements/BoardPage';
-import { AdditionalCardElementsBoardBacklogPage } from './features/additional-card-elements/BoardBacklogPage';
+import {
+  AdditionalCardElementsBoardPage,
+  additionalCardElementsBoardPageToken,
+} from './features/additional-card-elements/BoardPage';
+import {
+  AdditionalCardElementsBoardBacklogPage,
+  additionalCardElementsBoardBacklogPageToken,
+} from './features/additional-card-elements/BoardBacklogPage';
 
 setAutoFreeze(false);
 
@@ -67,6 +85,43 @@ function initDiContainer() {
     token: localeProviderToken,
     value: new JiraLocaleProvider(),
   });
+
+  // Register PageModification instances as value tokens
+  container.register({ token: cardColorsBoardPageToken, value: new CardColorsBoardPage(container) });
+  container.register({ token: columnLimitsBoardPageToken, value: new WIPLimitsBoardPage(container) });
+  container.register({ token: personLimitsBoardPageToken, value: new PersonLimits(container) });
+  container.register({ token: wipLimitOnCellsBoardPageToken, value: new WiplimitOnCells(container) });
+  container.register({ token: swimlaneWipLimitsBoardPageToken, value: new SwimlaneLimitsBoardPage(container) });
+  container.register({ token: histogramModificationToken, value: new SwimlaneHistogramBoardPage(container) });
+  container.register({ token: fieldLimitsBoardPageToken, value: new FieldLimitsBoardPage(container) });
+  container.register({ token: subTasksProgressBoardPageToken, value: new SubTasksProgressBoardPage(container) });
+  container.register({
+    token: additionalCardElementsBoardPageToken,
+    value: new AdditionalCardElementsBoardPage(container),
+  });
+  container.register({
+    token: additionalCardElementsBoardBacklogPageToken,
+    value: new AdditionalCardElementsBoardBacklogPage(container),
+  });
+  container.register({ token: diagnosticBoardPageToken, value: new DiagnosticBoardPage(container) });
+  container.register({ token: localSettingsBoardPageToken, value: new LocalSettingsBoardPage(container) });
+  container.register({ token: boardSettingsBoardPageToken, value: new BoardSettingsBoardPage(container) });
+
+  container.register({ token: cardColorsSettingsPageToken, value: new CardColorsSettingsPage(container) });
+  container.register({ token: columnLimitsSettingsPageToken, value: new WIPLimitsSettingsPage(container) });
+  container.register({ token: personLimitsSettingsPageToken, value: new PersonLimitsSettings(container) });
+  container.register({ token: wipLimitOnCellsSettingsPageToken, value: new WiplimitOnCellsSettings(container) });
+  container.register({
+    token: swimlaneWipLimitsSettingsPageToken,
+    value: new SwimlaneLimitsSettingsPage(container),
+  });
+  container.register({ token: fieldLimitsSettingsPageToken, value: new FieldLimitsSettingsPage(container) });
+
+  container.register({ token: markFlaggedIssuesToken, value: new MarkFlaggedIssues(container) });
+  container.register({ token: toggleForRightSidebarToken, value: new ToggleForRightSidebar(container) });
+  container.register({ token: addSlaLineToken, value: new AddSlaLine(container) });
+  container.register({ token: addChartGridToken, value: new AddChartGrid(container) });
+  container.register({ token: bugTemplateToken, value: new BugTemplate(container) });
 }
 
 async function start() {
@@ -74,54 +129,52 @@ async function start() {
 
   initDiContainer();
 
-  const blurFeature = globalContainer.inject(blurSensitiveFeatureToken);
+  const container = globalContainer;
+
+  const blurFeature = container.inject(blurSensitiveFeatureToken);
   blurFeature.init();
-  const extensionApi = globalContainer.inject(extensionApiServiceToken);
+  const extensionApi = container.inject(extensionApiServiceToken);
   extensionApi.sendMessage({ message: 'jira-helper-inited' });
 
   await domLoaded();
 
-  // Load local settings (locale, etc.) on all pages
   loadLocalSettings();
 
   blurFeature.setUpOnPage();
 
   const modificationsMap = {
     [Routes.BOARD]: [
-      // SwimlaneStats, // Legacy - replaced by SwimlaneHistogramBoardPage
-      SwimlaneHistogramBoardPage,
-      PersonLimits,
-      WIPLimitsBoardPage,
-      // SwimlaneLimits, // Legacy - replaced by SwimlaneLimitsBoardPage
-      SwimlaneLimitsBoardPage,
-      MarkFlaggedIssues,
-      FieldLimitsBoardPage,
-      WiplimitOnCells,
-      CardColorsBoardPage,
-      BoardSettingsBoardPage,
-      SubTasksProgressBoardPage,
-      LocalSettingsBoardPage,
-      DiagnosticBoardPage,
-      AdditionalCardElementsBoardPage,
+      container.inject(histogramModificationToken),
+      container.inject(personLimitsBoardPageToken),
+      container.inject(columnLimitsBoardPageToken),
+      container.inject(swimlaneWipLimitsBoardPageToken),
+      container.inject(markFlaggedIssuesToken),
+      container.inject(fieldLimitsBoardPageToken),
+      container.inject(wipLimitOnCellsBoardPageToken),
+      container.inject(cardColorsBoardPageToken),
+      container.inject(boardSettingsBoardPageToken),
+      container.inject(subTasksProgressBoardPageToken),
+      container.inject(localSettingsBoardPageToken),
+      container.inject(diagnosticBoardPageToken),
+      container.inject(additionalCardElementsBoardPageToken),
     ],
-    [Routes.BOARD_BACKLOG]: [AdditionalCardElementsBoardBacklogPage],
+    [Routes.BOARD_BACKLOG]: [container.inject(additionalCardElementsBoardBacklogPageToken)],
     [Routes.SETTINGS]: [
-      // SwimlaneSettingsPopup, // Legacy - replaced by SwimlaneLimitsSettingsPage
-      SwimlaneLimitsSettingsPage,
-      WIPLimitsSettingsPage,
-      PersonLimitsSettings,
-      FieldLimitsSettingsPage,
-      WiplimitOnCellsSettings,
-      CardColorsSettingsPage,
+      container.inject(swimlaneWipLimitsSettingsPageToken),
+      container.inject(columnLimitsSettingsPageToken),
+      container.inject(personLimitsSettingsPageToken),
+      container.inject(fieldLimitsSettingsPageToken),
+      container.inject(wipLimitOnCellsSettingsPageToken),
+      container.inject(cardColorsSettingsPageToken),
     ],
-    [Routes.ISSUE]: [MarkFlaggedIssues, ToggleForRightSidebar],
-    [Routes.SEARCH]: [MarkFlaggedIssues, ToggleForRightSidebar],
-    [Routes.REPORTS]: [AddSlaLine, AddChartGrid],
-    [Routes.ALL]: [BugTemplate],
+    [Routes.ISSUE]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],
+    [Routes.SEARCH]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],
+    [Routes.REPORTS]: [container.inject(addSlaLineToken), container.inject(addChartGridToken)],
+    [Routes.ALL]: [container.inject(bugTemplateToken)],
   };
 
-  // @ts-expect-error - legacy
-  runModifications(modificationsMap);
+  const routingService = container.inject(routingServiceToken);
+  runModifications(modificationsMap, routingService);
 }
 
 start();

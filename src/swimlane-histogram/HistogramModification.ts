@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageModification } from 'src/shared/PageModification';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { histogramModelToken } from './tokens';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { Histogram } from './components/Histogram';
@@ -24,9 +24,9 @@ export class HistogramModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerSwimlaneHistogramModule(globalContainer);
+    registerSwimlaneHistogramModule(this.container);
 
-    const { model } = globalContainer.inject(histogramModelToken);
+    const { model } = this.container.inject(histogramModelToken);
     this.histogramModel = model as HistogramModel;
 
     this.histogramModel.initialize();
@@ -45,7 +45,7 @@ export class HistogramModification extends PageModification<void, Element> {
   private renderHistograms(): void {
     if (!this.histogramModel) return;
 
-    const pageObject = globalContainer.inject(boardPagePageObjectToken);
+    const pageObject = this.container.inject(boardPagePageObjectToken);
     const swimlanes = pageObject.getSwimlanes();
 
     for (const swimlane of swimlanes) {
@@ -63,7 +63,7 @@ export class HistogramModification extends PageModification<void, Element> {
   }
 
   private cleanup(): void {
-    const pageObject = globalContainer.inject(boardPagePageObjectToken);
+    const pageObject = this.container.inject(boardPagePageObjectToken);
     const swimlanes = pageObject.getSwimlanes();
 
     for (const swimlane of swimlanes) {
@@ -74,3 +74,5 @@ export class HistogramModification extends PageModification<void, Element> {
     this.histogramModel = null;
   }
 }
+
+export const histogramModificationToken = new Token<HistogramModification>('HistogramModification');

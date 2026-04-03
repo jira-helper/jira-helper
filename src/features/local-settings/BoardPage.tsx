@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 
 import { registerSettings } from 'src/board-settings/actions/registerSettings';
@@ -25,3 +26,5 @@ export class LocalSettingsBoardPage extends PageModification<void, Element> {
     });
   }
 }
+
+export const localSettingsBoardPageToken = new Token<LocalSettingsBoardPage>('LocalSettingsBoardPage');

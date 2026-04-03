@@ -1,6 +1,6 @@
 import Draggable from 'gsap/Draggable';
 import { TweenLite, gsap } from 'gsap';
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import { extensionApiServiceToken } from '../shared/ExtensionApiService';
 import { getChartLinePosition, getChartTicks, getChartValueByPosition } from './utils';
@@ -277,7 +277,7 @@ class ResizableDraggableGrid {
   }
 }
 
-export default class extends PageModification {
+export default class AddChartGrid extends PageModification {
   shouldApply(): boolean {
     return this.getSearchParam('chart') === 'controlChart' || this.getReportNameFromURL() === 'control-chart';
   }
@@ -297,7 +297,7 @@ export default class extends PageModification {
   async apply(_: undefined, chartElement: HTMLElement): Promise<void> {
     await this.waitForElement('.tick', chartElement);
 
-    const extensionApi = globalContainer.inject(extensionApiServiceToken);
+    const extensionApi = this.container.inject(extensionApiServiceToken);
     if (extensionApi.isFirefox()) {
       // eslint-disable-next-line no-console
       console.warn('jira-helper: AddChartGrid is not supported in Firefox');
@@ -309,3 +309,5 @@ export default class extends PageModification {
     grid.init();
   }
 }
+
+export const addChartGridToken = new Token<AddChartGrid>('AddChartGrid');

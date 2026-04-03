@@ -1,4 +1,4 @@
-import { globalContainer } from 'dioma';
+import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { useColumnLimitsPropertyStore } from '../property';
@@ -27,7 +27,7 @@ interface BoardGroup {
   };
 }
 
-export default class extends PageModification<[EditData?, BoardGroup?], Element> {
+export default class ColumnLimitsBoardPage extends PageModification<[EditData?, BoardGroup?], Element> {
   shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -53,9 +53,9 @@ export default class extends PageModification<[EditData?, BoardGroup?], Element>
 
     // Register PageObject in DI
     try {
-      globalContainer.inject(columnLimitsBoardPageObjectToken);
+      this.container.inject(columnLimitsBoardPageObjectToken);
     } catch {
-      registerColumnLimitsBoardPageObjectInDI(globalContainer);
+      registerColumnLimitsBoardPageObjectInDI(this.container);
     }
 
     // Initialize property store with loaded data
@@ -82,3 +82,5 @@ export default class extends PageModification<[EditData?, BoardGroup?], Element>
     });
   }
 }
+
+export const columnLimitsBoardPageToken = new Token<ColumnLimitsBoardPage>('ColumnLimitsBoardPage');

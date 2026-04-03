@@ -1,3 +1,4 @@
+import { Token } from 'dioma';
 import { PageModification } from '../shared/PageModification';
 import style from './styles.module.css';
 
@@ -18,7 +19,7 @@ const buttonSaveCls = style.buttonJiraSaveTemplateForBug;
 const localStorageTemplateTextarea = 'jira_helper_textarea_bug_template';
 const textToHtml = (text: string) => text.replace(/\n/g, '<br />');
 
-export default class extends PageModification {
+export default class BugTemplate extends PageModification {
   getModificationId() {
     return 'bug-template';
   }
@@ -137,3 +138,5 @@ export default class extends PageModification {
 
   onCloseDialog() {}
 }
+
+export const bugTemplateToken = new Token<BugTemplate>('BugTemplate');
