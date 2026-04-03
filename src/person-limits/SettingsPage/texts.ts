@@ -91,7 +91,11 @@ export const PERSON_LIMITS_TEXTS = {
   },
   showAllPersonIssues: {
     en: 'Show all person issues on avatar click',
-    ru: 'Показывать все задачи пользователя при клике на аватар',
+    ru: 'При клике на аватар показывать все задачи пользователя',
+  },
+  showAllPersonIssuesTooltip: {
+    en: 'Clicking on the avatar hides issues of other people on the board. If enabled, all issues of this person will remain. If disabled, only issues matching the limit settings (columns, swimlanes, issue types) will remain.',
+    ru: 'Клик на аватар скрывает чужие задачи на доске. Если опция включена — останутся все задачи этого человека. Если выключена — только задачи, подходящие под настройки лимита (колонки, свимлейны, типы задач).',
   },
 } as const satisfies Texts;
 

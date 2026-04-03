@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox } from 'antd';
+import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox, Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { SearchUsers } from 'src/shared/di/jiraApiTokens';
 import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector';
@@ -347,7 +348,10 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                 checked={currentFormData.showAllPersonIssues ?? true}
                 onChange={e => handleFormChange('showAllPersonIssues', e.target.checked)}
               >
-                {texts.showAllPersonIssues}
+                {texts.showAllPersonIssues}{' '}
+                <Tooltip title={texts.showAllPersonIssuesTooltip}>
+                  <QuestionCircleOutlined style={{ color: 'rgba(0, 0, 0, 0.45)' }} />
+                </Tooltip>
               </Checkbox>
             </Form.Item>
           </Col>
