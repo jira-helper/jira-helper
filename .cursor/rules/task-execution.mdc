@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Выполнение задач
 
-При запросе пользователя выполнить задачу (task file из `.agents/tasks/`) следуй этому workflow.
+При запросе пользователя выполнить задачу (task file из `.agents/tasks/<FEATURE-SLUG>/` или legacy из корня `.agents/tasks/`) следуй этому workflow.
 
 ## 1. Прочитай задачу
 
@@ -74,7 +74,7 @@ Task(subagent_type: "coder", prompt: "...")
 
 Пользователь: "Выполни TASK-20"
 
-1. Читаю `.agents/tasks/TASK-20-add-tests-coverage.md`
+1. Читаю путь к задаче, например `.agents/tasks/wiplimit-cells/TASK-20-add-tests-coverage.md` (или legacy `.agents/tasks/TASK-20-*.md`)
 2. Тип: testing (cypress)
 3. Скиллы: `cypress-bdd-testing/SKILL.md`, `testing/SKILL.md`
 4. Запускаю coder с полным контекстом

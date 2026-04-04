@@ -141,11 +141,15 @@ npm test && npm run lint:eslint -- --fix
 
 ## Выходной артефакт
 
-План ВСЕГДА сохраняется в файл в `.agents/tasks/`, а не только выводится в чат:
+Если фича начата **из чата** и папки ещё нет — сначала создай `.agents/tasks/<FEATURE-SLUG>/` и `request.md` (как в агенте `feature-orchestrator`, этап 0).
 
-1. **EPIC файл**: `.agents/tasks/EPIC-{N}-{short-name}.md` — с таблицей задач и общим описанием
-2. **Target Design** (если рефакторинг): `.agents/tasks/target-design-{name}.md` — по шаблону из `.cursor/skills/solution-design/SKILL.md`
-3. **Task файлы**: `.agents/tasks/TASK-{N}-{name}.md` — по шаблону из `.cursor/skills/task-template/SKILL.md`
+План ВСЕГДА сохраняется в файлы в **папке фичи** `.agents/tasks/<FEATURE-SLUG>/`, а не только выводится в чат (см. `.cursor/skills/task-template/SKILL.md` — `request.md`, `requirements.md`, единый bundle на фичу).
+
+1. **EPIC файл**: `.agents/tasks/<FEATURE-SLUG>/EPIC-{N}-{short-name}.md` — с таблицей задач и общим описанием
+2. **Target Design** (если нужен): `.agents/tasks/<FEATURE-SLUG>/target-design-{name}.md` — по шаблону из `.cursor/skills/solution-design/SKILL.md`
+3. **Task файлы**: `.agents/tasks/<FEATURE-SLUG>/TASK-{N}-{name}.md` — по шаблону из `.cursor/skills/task-template/SKILL.md`
+
+`<FEATURE-SLUG>` — kebab-case, латиница; одна папка = один запрос/эпик (удаление папки удаляет все связанные артефакты).
 
 После создания файлов — покажи пользователю summary со ссылками на созданные файлы.
 
