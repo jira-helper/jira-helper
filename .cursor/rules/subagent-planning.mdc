@@ -141,11 +141,11 @@ npm test && npm run lint:eslint -- --fix
 
 ## Выходной артефакт
 
-План ВСЕГДА сохраняется в файл в `tasks/`, а не только выводится в чат:
+План ВСЕГДА сохраняется в файл в `.agents/tasks/`, а не только выводится в чат:
 
-1. **EPIC файл**: `tasks/EPIC-{N}-{short-name}.md` — с таблицей задач и общим описанием
-2. **Target Design** (если рефакторинг): `tasks/target-design-{name}.md` — по шаблону из `.cursor/skills/solution-design/SKILL.md`
-3. **Task файлы**: `tasks/TASK-{N}-{name}.md` — по шаблону из `.cursor/skills/task-template/SKILL.md`
+1. **EPIC файл**: `.agents/tasks/EPIC-{N}-{short-name}.md` — с таблицей задач и общим описанием
+2. **Target Design** (если рефакторинг): `.agents/tasks/target-design-{name}.md` — по шаблону из `.cursor/skills/solution-design/SKILL.md`
+3. **Task файлы**: `.agents/tasks/TASK-{N}-{name}.md` — по шаблону из `.cursor/skills/task-template/SKILL.md`
 
 После создания файлов — покажи пользователю summary со ссылками на созданные файлы.
 

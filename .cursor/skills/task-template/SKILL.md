@@ -1,6 +1,6 @@
 ---
 name: task-template
-description: Стандартный шаблон задачи и EPIC для jira-helper. Используй при создании новых задач и эпиков в tasks/ директории.
+description: Стандартный шаблон задачи и EPIC для jira-helper. Используй при создании новых задач и эпиков в .agents/tasks/ директории.
 ---
 
 # Шаблон задачи jira-helper
@@ -31,7 +31,7 @@ description: Стандартный шаблон задачи и EPIC для jir
 **Перед созданием задачи** определи следующий номер:
 
 ```bash
-ls tasks/TASK-*.md | sed 's/.*TASK-\([0-9]*\).*/\1/' | sort -n | tail -1
+ls .agents/tasks/TASK-*.md | sed 's/.*TASK-\([0-9]*\).*/\1/' | sort -n | tail -1
 ```
 
 Используй `max + 1`. Текущий диапазон: TASK-1..TASK-172.

@@ -1,7 +1,7 @@
 ---
 description: Синхронизация статусов задач между EPIC и task файлами. Применяется при создании, обновлении или завершении задач.
 globs:
-  - tasks/*.md
+  - .agents/tasks/*.md
 alwaysApply: false
 ---
 
