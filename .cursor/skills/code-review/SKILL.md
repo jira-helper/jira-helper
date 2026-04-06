@@ -38,6 +38,9 @@ description: Код-ревью реализации задачи jira-helper. И
 - State в правильном слое (Model / Store, не в компоненте)?
 - Зависимости через DI (constructor injection для Valtio, inject для Zustand)?
 - DOM-работа через PageObject + DI (не прямые селекторы в логике)?
+- Фича собрана в Module (`class extends Module`)? Токены через `createModelToken()`?
+- Модуль зарегистрирован в `content.ts` (`module.ensure(container)`), а не в PageModification?
+- Используются `lazy()` + `modelEntry()`, а не прямой `proxy()` / `useSnapshot()` в module.ts?
 
 ### 3. Типы
 

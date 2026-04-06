@@ -120,6 +120,60 @@ flowchart LR
 
 ---
 
+## Модули (Module)
+
+Каждая фича собирается в **Module** — класс, наследующий `Module` из `src/shared/di/Module.ts`. Модуль группирует DI-регистрации фичи и регистрируется централизованно в `content.ts`.
+
+```mermaid
+flowchart LR
+    content["content.ts"] -->|ensure| ModA["columnLimitsModule"]
+    content -->|ensure| ModB["swimlaneWipLimitsModule"]
+    content -->|ensure| ModC["fieldLimitsModule"]
+    ModA -->|lazy| TokenA["propertyModelToken"]
+    ModA -->|lazy| TokenB["boardRuntimeModelToken"]
+    ModA -->|lazy| TokenC["settingsUIModelToken"]
+```
+
+### Структура модуля
+
+```typescript
+// tokens.ts — токены фичи
+import { createModelToken } from 'src/shared/di/Module';
+export const myModelToken = createModelToken<MyModel>('feature/myModel');
+
+// module.ts — класс Module
+import { Module, modelEntry } from 'src/shared/di/Module';
+
+class MyFeatureModule extends Module {
+  register(container: Container): void {
+    this.lazy(container, myModelToken, c =>
+      modelEntry(new MyModel(c.inject(loggerToken))),
+    );
+  }
+}
+export const myFeatureModule = new MyFeatureModule();
+
+// content.ts — централизованная регистрация
+myFeatureModule.ensure(container);
+```
+
+### Ключевые свойства
+
+| Свойство | Описание |
+|---|---|
+| **Ленивость** | `lazy()` — factory вызывается при первом `inject()`, не при регистрации |
+| **Идемпотентность** | `ensure()` — безопасно вызывать повторно, повторные вызовы игнорируются |
+| **Централизация** | Модули регистрируются в `content.ts`, PageModification просто делают `inject()` |
+| **Универсальность** | `lazy()` работает для любого `Token<T>`, не только для моделей |
+
+### Хелперы
+
+- `modelEntry(instance)` — оборачивает в `proxy()` + создаёт `{ model, useModel: () => useSnapshot(model) }`
+- `createModelToken<T>(name)` — создаёт `Token<ModelEntry<T>>`
+- `Module.lazy(container, token, factory)` — ленивая singleton-регистрация для любого токена
+
+---
+
 ## State Management: Valtio vs Zustand
 
 | | **Valtio (новые фичи)** | **Zustand (legacy, на холде)** |
@@ -523,12 +577,14 @@ export const WithWarning: Story = {
 ```
 src/features/my-feature/
 ├── index.ts                    # Экспорты
-├── module.ts                   # Регистрация Models в DI
-├── tokens.ts                   # DI Tokens
+├── module.ts                   # class MyFeatureModule extends Module
+├── module.test.ts              # Тесты регистрации модуля
+├── tokens.ts                   # DI Tokens (createModelToken)
 ├── types.ts                    # Доменные типы с JSDoc
 │
 ├── property/                   # Property Model
-│   └── PropertyModel.ts
+│   ├── PropertyModel.ts
+│   └── PropertyModel.test.ts
 │
 ├── SettingsPage/
 │   ├── models/
@@ -565,9 +621,11 @@ src/features/my-feature/
 - [ ] Создать `types.ts` с JSDoc для всех типов
 - [ ] Определить, нужны ли отдельные models (property / UI / runtime)
 - [ ] Создать Models (см. `docs/state-valtio.md`)
-- [ ] Создать `tokens.ts` с DI токенами
-- [ ] Создать `module.ts` с регистрацией в DI
+- [ ] Создать `tokens.ts` с DI токенами (`createModelToken`)
+- [ ] Создать `module.ts` — `class extends Module` с `lazy()` + `modelEntry()`
+- [ ] Зарегистрировать модуль в `content.ts` — `myModule.ensure(container)`
 - [ ] Написать тесты на Models (`*.test.ts`)
+- [ ] Написать тесты на модуль (`module.test.ts`)
 - [ ] Вынести логику в чистые функции (`utils/`)
 - [ ] Написать тесты на чистые функции
 - [ ] Создать ComponentContainer + ComponentView
@@ -589,4 +647,7 @@ src/features/my-feature/
 - ❌ Работа с Jira API не через JiraClient
 - ❌ Создание нового Action (на холде)
 - ❌ Создание нового Zustand store для **новой фичи** (используй Valtio)
+- ❌ `registerXxxModule()` функция — используй `class extends Module`
+- ❌ Регистрация модуля в PageModification — регистрируй в `content.ts`
+- ❌ Прямой `useSnapshot()` / `proxy()` в `module.ts` — используй `modelEntry()`
 - ✅ Расширение существующего Zustand store — OK (legacy)

@@ -26,11 +26,9 @@ description: Проектирование и ревью архитектуры U
 
 ```
 feature/
-  pageObject/
+  page-objects/
     IFeaturePageObject.ts    # Интерфейс с Query и Command методами
     FeaturePageObject.ts     # Реализация с DOM-селекторами
-    featurePageObjectToken.ts  # DI Token
-    index.ts                 # Экспорт + registerInDI()
 ```
 
 **Паттерн PageObject:**
@@ -47,28 +45,38 @@ export interface IFeaturePageObject {
 }
 
 export const featurePageObjectToken = new Token<IFeaturePageObject>('featurePageObject');
-
-export const registerFeaturePageObjectInDI = (container: Container) => {
-  container.register({
-    token: featurePageObjectToken,
-    value: FeaturePageObject,
-  });
-};
 ```
 
-**Использование в Actions:**
+**Регистрация PageObject — через Module:**
 
 ```typescript
-export const applyChanges = createAction({
-  name: 'applyChanges',
-  handler() {
-    const pageObject = this.di.inject(featurePageObjectToken);
-    const issues = pageObject.getIssues('.ghx-issue');
+// module.ts
+class MyFeatureModule extends Module {
+  register(container: Container): void {
+    this.lazy(container, featurePageObjectToken, () =>
+      new FeaturePageObject(),
+    );
+    // ...модели
+  }
+}
+```
+
+**Использование в Model:**
+
+```typescript
+export class RuntimeModel {
+  constructor(
+    private pageObject: IFeaturePageObject,  // DI
+    private logger: Logger
+  ) {}
+
+  apply(): void {
+    const issues = this.pageObject.getIssues('.ghx-issue');
     issues.forEach(issue => {
-      pageObject.setIssueBackgroundColor(issue, '#ff5630');
+      this.pageObject.setIssueBackgroundColor(issue, '#ff5630');
     });
-  },
-});
+  }
+}
 ```
 
 **В тестах — мок PageObject:**
@@ -82,7 +90,7 @@ const mockPageObject: IFeaturePageObject = {
   setIssueVisibility: vi.fn(),
 };
 
-globalContainer.register({
+container.register({
   token: featurePageObjectToken,
   value: mockPageObject,
 });
@@ -90,8 +98,8 @@ globalContainer.register({
 
 **Правила:**
 - React-компоненты НЕ обращаются к DOM напрямую (кроме своих refs)
-- Actions работают с DOM ТОЛЬКО через PageObject
-- PageObject регистрируется в DI в `PageModification.apply()`
+- Models работают с DOM ТОЛЬКО через PageObject (через constructor DI)
+- PageObject регистрируется в Module через `lazy()`, модуль — в `content.ts`
 - В тестах всегда используется мок PageObject
 
 ---

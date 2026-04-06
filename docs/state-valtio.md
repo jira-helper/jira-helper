@@ -95,40 +95,59 @@ export class MyFeatureModel {
 
 ---
 
-## Регистрация в DI (module.ts)
+## Регистрация в DI
+
+### tokens.ts — токены
 
 ```typescript
-import { proxy } from 'valtio';
-import { useSnapshot } from 'valtio';
-import { Token, Container } from 'dioma';
+import { createModelToken } from 'src/shared/di/Module';
+import type { MyFeatureModel } from './models/MyFeatureModel';
 
-export const myFeatureModelToken = new Token<{
-  model: MyFeatureModel;
-  useModel: () => MyFeatureModel;
-}>('myFeatureModel');
+export const myFeatureModelToken = createModelToken<MyFeatureModel>('my-feature/myFeatureModel');
+```
 
-export function registerMyFeatureModule(container: Container): void {
-  const propertyModel = container.inject(propertyModelToken).model;
-  const logger = container.inject(loggerToken);
+`createModelToken<T>` создаёт `Token<ModelEntry<T>>`, где `ModelEntry<T> = { model: T; useModel: () => Readonly<T> }`.
 
-  const model = proxy(new MyFeatureModel(propertyModel, logger));
+### module.ts — класс Module
 
-  container.register({
-    token: myFeatureModelToken,
-    value: {
-      model,
-      useModel: () => useSnapshot(model) as MyFeatureModel,
-    },
-  });
+```typescript
+import type { Container } from 'dioma';
+import { Module, modelEntry } from 'src/shared/di/Module';
+import { myFeatureModelToken } from './tokens';
+import { MyFeatureModel } from './models/MyFeatureModel';
+import { loggerToken } from 'src/shared/Logger';
+
+class MyFeatureModule extends Module {
+  register(container: Container): void {
+    this.lazy(container, myFeatureModelToken, c =>
+      modelEntry(new MyFeatureModel(
+        c.inject(loggerToken),
+      )),
+    );
+  }
+}
+
+export const myFeatureModule = new MyFeatureModule();
+```
+
+### content.ts — централизованная регистрация
+
+```typescript
+import { myFeatureModule } from './my-feature/module';
+
+function initDiContainer() {
+  // ...shared services...
+  myFeatureModule.ensure(container);
 }
 ```
 
-### Паттерн регистрации
+### Как это работает
 
-1. `registerMyFeatureModule()` вызывается один раз при инициализации
-2. Модель создаётся сразу: `proxy(new Model(deps))`
-3. Регистрируется как **value** — dioma возвращает один и тот же объект при каждом `inject()`
-4. Token экспортирует `{ model, useModel }` — для прямого доступа и для React
+1. `Module.ensure(container)` — идемпотентная регистрация (безопасно вызывать повторно)
+2. `this.lazy()` — регистрирует factory-токен. Экземпляр создаётся **лениво** при первом `inject()`, затем кешируется
+3. `modelEntry(instance)` — оборачивает экземпляр в `proxy()` и создаёт `{ model, useModel: () => useSnapshot(model) }`
+4. `createModelToken<T>()` — создаёт типизированный токен `Token<ModelEntry<T>>`
+5. Все модули регистрируются централизованно в `content.ts`, а не в отдельных PageModification
 
 ---
 
@@ -285,11 +304,12 @@ src/features/my-feature/
 2. **Commands** — методы класса (async для API)
 3. **Queries** — getters (`get isEmpty()`) — без side effects
 4. **DI** — через constructor, не через `this.di`
-5. **`proxy()`** — оборачивает экземпляр один раз при создании
-6. **`useSnapshot()`** — для реактивной подписки в React
-7. **`reset()`** — обязательный метод для сброса в тестах
-8. **Result** — async методы возвращают `Result<T, Error>`
-9. **Logger** — `this.logger.getPrefixedLog('ClassName.method')`
+5. **Module** — фича собирается в класс `extends Module`, регистрируется в `content.ts`
+6. **`modelEntry()`** — оборачивает экземпляр в `proxy()` и создаёт `{ model, useModel }`
+7. **`lazy()`** — ленивая регистрация: экземпляр создаётся при первом `inject()`
+8. **`reset()`** — обязательный метод для сброса в тестах
+9. **Result** — async методы возвращают `Result<T, Error>`
+10. **Logger** — `this.logger.getPrefixedLog('ClassName.method')`
 
 ---
 
@@ -298,6 +318,8 @@ src/features/my-feature/
 - ❌ Бизнес-логика в React-компонентах
 - ❌ `useState` для данных модели
 - ❌ `this.di.inject()` вместо constructor DI
-- ❌ Прямой `useSnapshot(model)` без регистрации в DI
+- ❌ Прямой `useSnapshot(model)` — используй `modelEntry()` в `module.ts`
+- ❌ `registerXxxModule()` функция — используй `class extends Module`
+- ❌ Вызов `module.ensure()` в PageModification — регистрируй в `content.ts`
 - ❌ State без `reset()`
 - ❌ Getters с side effects
