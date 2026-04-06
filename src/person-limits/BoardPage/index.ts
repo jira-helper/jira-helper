@@ -1,14 +1,48 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import type { Container } from 'dioma';
 import { Token } from 'dioma';
+import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
+import { localeProviderToken } from 'src/shared/locale';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { propertyModelToken, boardRuntimeModelToken } from '../tokens';
 import { AvatarsContainer } from './components';
 import type { PersonWipLimitsProperty_2_29 } from '../property';
+import { PersonLimitsSettingsTab } from '../SettingsTab';
+import { PERSON_LIMITS_TEXTS } from '../SettingsPage/texts';
+import type { Column, Swimlane } from '../SettingsPage/state/types';
 
 type PersonLimitData = PersonWipLimitsProperty_2_29;
+
+type MappedColumn = {
+  id: string;
+  name: string;
+  isKanPlanColumn?: boolean;
+};
+
+interface EditData {
+  canEdit?: boolean;
+  rapidListConfig?: {
+    mappedColumns?: MappedColumn[];
+  };
+  swimlanesConfig?: {
+    swimlanes?: Array<{ id?: string; name: string }>;
+  };
+}
+
+function getPersonLimitsSettingsTabTitle(container: Container): string {
+  const settingsLocale = useLocalSettingsStore.getState().settings.locale;
+  const locale: 'en' | 'ru' =
+    settingsLocale !== 'auto'
+      ? settingsLocale
+      : container.inject(localeProviderToken).getJiraLocale() === 'ru'
+        ? 'ru'
+        : 'en';
+  return PERSON_LIMITS_TEXTS.tabTitle[locale];
+}
 
 /**
  * BoardPage modification for PersonLimits feature.
@@ -55,10 +89,34 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   apply(data: [any, PersonLimitData | null]): void {
     if (!data) return;
     const [editData = {}, personLimits] = data;
-    if (!personLimits?.limits?.length) return;
 
     const { model: propertyModel } = this.container.inject(propertyModelToken);
-    propertyModel.setData(personLimits);
+    const effectivePersonLimits = personLimits ?? { limits: [] };
+    propertyModel.setData(effectivePersonLimits);
+
+    const boardEditData = editData as EditData;
+    const canEdit = boardEditData?.canEdit;
+    if (canEdit) {
+      const rawColumns = boardEditData.rapidListConfig?.mappedColumns ?? [];
+      const columns: Column[] = rawColumns
+        .filter((col: MappedColumn) => !col.isKanPlanColumn)
+        .map((col: MappedColumn) => ({ id: col.id, name: col.name }));
+
+      const rawSwimlanes = boardEditData.swimlanesConfig?.swimlanes ?? [];
+      const swimlanes: Swimlane[] = rawSwimlanes.map((swim, index) => ({
+        id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
+        name: swim.name,
+      }));
+
+      const TabComponent = () => React.createElement(PersonLimitsSettingsTab, { columns, swimlanes });
+
+      registerSettings({
+        title: getPersonLimitsSettingsTabTitle(this.container),
+        component: TabComponent,
+      });
+    }
+
+    if (!effectivePersonLimits.limits.length) return;
 
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
     const runtime = boardRuntimeModel;

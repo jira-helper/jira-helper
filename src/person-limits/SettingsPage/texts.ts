@@ -89,6 +89,18 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'Manage per-person WIP-limits',
     ru: 'WIP-лимиты на человека',
   },
+  tabTitle: {
+    en: 'Person WIP Limits',
+    ru: 'WIP-лимиты на человека',
+  },
+  saveConfig: {
+    en: 'Save configuration',
+    ru: 'Сохранить конфигурацию',
+  },
+  discardChanges: {
+    en: 'Discard changes',
+    ru: 'Отменить изменения',
+  },
   showAllPersonIssues: {
     en: 'Show all person issues on avatar click',
     ru: 'При клике на аватар показывать все задачи пользователя',
