@@ -4,12 +4,16 @@ import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { registerJiraApiInDI } from 'src/shared/di/jiraApiTokens';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { boardPagePageObjectToken, type IBoardPagePageObject, type SwimlaneElement } from 'src/page-objects/BoardPage';
+import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { WithDi } from 'src/shared/diContext';
 import { AvatarsContainer } from '../components/AvatarsContainer';
-import { useRuntimeStore, getInitialState } from '../stores';
-import { usePersonWipLimitsPropertyStore } from '../../property';
-import { personLimitsBoardPageObjectToken } from '../pageObject';
-import type { IPersonLimitsBoardPageObject } from '../pageObject';
+import { personLimitsModule } from '../../module';
+import { boardRuntimeModelToken, propertyModelToken } from '../../tokens';
+import type { PropertyModel } from '../../property/PropertyModel';
+import type { BoardRuntimeModel } from '../models/BoardRuntimeModel';
 
 // --- Fixtures matching feature Background ---
 
@@ -49,10 +53,18 @@ function getIssueId(issue: Element): string | null {
 
 // --- Mock PageObject for tests ---
 
-export type MockPageObject = IPersonLimitsBoardPageObject & {
+export type MockPageObject = IBoardPagePageObject & {
   addIssue: (id: string, assignee: string, columnId: string, type?: string, swimlaneId?: string | null) => Element;
   getHighlightedIssues: () => Element[];
   appendIssuesToBoard: (container: HTMLElement) => void;
+};
+
+const mockBoardPropertyService: BoardPropertyServiceI = {
+  async getBoardProperty() {
+    return undefined;
+  },
+  updateBoardProperty() {},
+  deleteBoardProperty() {},
 };
 
 function createMockPageObject(): MockPageObject {
@@ -62,18 +74,8 @@ function createMockPageObject(): MockPageObject {
   >();
   const highlightedIssues: Element[] = [];
 
-  const mockPageObject: MockPageObject = {
-    selectors: {
-      issue: '.ghx-issue',
-      avatarImg: '.ghx-avatar-img',
-      issueType: '.ghx-type',
-      column: '.ghx-column',
-      swimlane: '.ghx-swimlane',
-      swimlaneHeader: '.ghx-swimlane-header-container',
-      parentGroup: '.ghx-parent-group',
-    },
-
-    addIssue(id, assignee, columnId, type = 'Task', swimlaneId = null) {
+  const custom = {
+    addIssue(id: string, assignee: string, columnId: string, type = 'Task', swimlaneId: string | null = null) {
       const element = createMockIssueElement(id, assignee, columnId, type, swimlaneId);
       mockIssues.set(id, { element, assignee, columnId, swimlaneId, type });
       return element;
@@ -85,8 +87,11 @@ function createMockPageObject(): MockPageObject {
       });
     },
 
-    getIssues() {
-      return Array.from(mockIssues.values()).map(i => i.element);
+    getIssueElements(cssSelector: string) {
+      if (cssSelector === '.ghx-issue') {
+        return Array.from(mockIssues.values()).map(i => i.element);
+      }
+      return [];
     },
 
     getAssigneeFromIssue(issue: Element) {
@@ -94,12 +99,12 @@ function createMockPageObject(): MockPageObject {
       return mockIssues.get(id ?? '')?.assignee ?? null;
     },
 
-    getIssueType(issue: Element) {
+    getIssueTypeFromIssue(issue: Element) {
       const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.type ?? null;
     },
 
-    getColumnId(issue: Element) {
+    getColumnIdOfIssue(issue: Element) {
       const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.columnId ?? null;
     },
@@ -108,7 +113,7 @@ function createMockPageObject(): MockPageObject {
       return (column as { columnId?: string }).columnId ?? null;
     },
 
-    getSwimlaneId(issue: Element) {
+    getSwimlaneIdOfIssue(issue: Element) {
       const id = getIssueId(issue);
       return mockIssues.get(id ?? '')?.swimlaneId ?? null;
     },
@@ -117,17 +122,21 @@ function createMockPageObject(): MockPageObject {
       return Array.from(mockIssues.values()).some(i => i.swimlaneId != null);
     },
 
-    getSwimlanes() {
+    getSwimlanes(): SwimlaneElement[] {
       const swimlaneIds = new Set<string>();
       mockIssues.forEach(issue => {
         if (issue.swimlaneId != null) swimlaneIds.add(issue.swimlaneId);
       });
-      return Array.from(swimlaneIds).map(
-        swId =>
-          ({
-            getAttribute: (name: string) => (name === 'swimlane-id' ? swId : null),
-          }) as unknown as Element
-      );
+      return Array.from(swimlaneIds).map(swId => {
+        const element = {
+          getAttribute: (name: string) => (name === 'swimlane-id' ? swId : null),
+        } as unknown as Element;
+        return {
+          id: swId,
+          element,
+          header: document.createElement('div'),
+        };
+      });
     },
 
     getColumnsInSwimlane(swimlane: Element) {
@@ -152,7 +161,7 @@ function createMockPageObject(): MockPageObject {
       );
     },
 
-    getColumns() {
+    getColumnElements() {
       const columnIds = new Set<string>();
       mockIssues.forEach(issue => columnIds.add(issue.columnId));
       return Array.from(columnIds).map(
@@ -193,11 +202,22 @@ function createMockPageObject(): MockPageObject {
     setParentGroupVisibility: cy.stub(),
   };
 
-  return mockPageObject;
+  return {
+    ...BoardPagePageObject,
+    ...custom,
+  } as MockPageObject;
 }
 
 /** Shared mock PageObject reference, set in setupBackground before each scenario. */
 export const mockPageObjectRef: { current: MockPageObject | null } = { current: null };
+
+function getPropertyModel(): PropertyModel {
+  return globalContainer.inject(propertyModelToken).model;
+}
+
+function getBoardRuntimeModel(): BoardRuntimeModel {
+  return globalContainer.inject(boardRuntimeModelToken).model;
+}
 
 // --- Background setup ---
 
@@ -205,6 +225,11 @@ export const setupBackground = () => {
   mockPageObjectRef.current = null;
   globalContainer.reset();
   registerLogger(globalContainer);
+
+  globalContainer.register({
+    token: BoardPropertyServiceToken,
+    value: mockBoardPropertyService,
+  });
 
   const mockPageObject = createMockPageObject();
   mockPageObjectRef.current = mockPageObject;
@@ -214,13 +239,15 @@ export const setupBackground = () => {
     value: new MockLocaleProvider('en'),
   });
   globalContainer.register({
-    token: personLimitsBoardPageObjectToken,
+    token: boardPagePageObjectToken,
     value: mockPageObject,
   });
   registerJiraApiInDI(globalContainer);
 
-  usePersonWipLimitsPropertyStore.getState().actions.reset();
-  useRuntimeStore.setState(getInitialState());
+  personLimitsModule.ensure(globalContainer);
+
+  getPropertyModel().reset();
+  getBoardRuntimeModel().reset();
 };
 
 // --- Mount helpers ---

@@ -797,3 +797,136 @@ describe('CardPageObject', () => {
     cleanup();
   });
 });
+
+describe('BoardPagePageObject person-limits DOM helpers', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('getIssueElements returns all elements for selector', () => {
+    const a = document.createElement('div');
+    a.className = 'custom-issue';
+    document.body.appendChild(a);
+    expect(BoardPagePageObject.getIssueElements('.custom-issue')).toEqual([a]);
+  });
+
+  it('getIssueElementsInColumn returns issues scoped to the column element', () => {
+    const col = document.createElement('div');
+    col.className = 'ghx-column';
+    const inCol = document.createElement('div');
+    inCol.className = 'ghx-issue';
+    const other = document.createElement('div');
+    other.className = 'ghx-issue';
+    col.appendChild(inCol);
+    document.body.appendChild(col);
+    document.body.appendChild(other);
+    expect(BoardPagePageObject.getIssueElementsInColumn(col, '.ghx-issue')).toEqual([inCol]);
+  });
+
+  it('getAssigneeFromIssue parses avatar alt via getNameFromTooltip', () => {
+    const issue = document.createElement('div');
+    const img = document.createElement('img');
+    img.className = 'ghx-avatar-img';
+    img.setAttribute('alt', 'Assignee: Jane [x]');
+    issue.appendChild(img);
+    expect(BoardPagePageObject.getAssigneeFromIssue(issue)).toBe('Jane');
+  });
+
+  it('getIssueTypeFromIssue returns title or text (full string, not split)', () => {
+    const issue = document.createElement('div');
+    const typeEl = document.createElement('span');
+    typeEl.className = 'ghx-type';
+    typeEl.setAttribute('title', 'Type: Story');
+    issue.appendChild(typeEl);
+    expect(BoardPagePageObject.getIssueTypeFromIssue(issue)).toBe('Type: Story');
+    typeEl.removeAttribute('title');
+    typeEl.textContent = 'Bug';
+    expect(BoardPagePageObject.getIssueTypeFromIssue(issue)).toBe('Bug');
+  });
+
+  it('getColumnIdOfIssue, getColumnIdFromColumn, getSwimlaneIdOfIssue read from ancestors', () => {
+    const swimlane = document.createElement('div');
+    swimlane.className = 'ghx-swimlane';
+    swimlane.setAttribute('swimlane-id', 'sw-a');
+    const col = document.createElement('div');
+    col.className = 'ghx-column';
+    col.setAttribute('data-column-id', 'col-x');
+    const issue = document.createElement('div');
+    col.appendChild(issue);
+    swimlane.appendChild(col);
+    document.body.appendChild(swimlane);
+
+    expect(BoardPagePageObject.getColumnIdOfIssue(issue)).toBe('col-x');
+    expect(BoardPagePageObject.getColumnIdFromColumn(col)).toBe('col-x');
+    expect(BoardPagePageObject.getSwimlaneIdOfIssue(issue)).toBe('sw-a');
+  });
+
+  it('hasCustomSwimlanes is true when swimlane header aria-label mentions custom', () => {
+    const h = document.createElement('div');
+    h.className = 'ghx-swimlane-header';
+    h.setAttribute('aria-label', 'custom swimlane');
+    document.body.appendChild(h);
+    expect(BoardPagePageObject.hasCustomSwimlanes()).toBe(true);
+  });
+
+  it('hasCustomSwimlanes is false when no header', () => {
+    expect(BoardPagePageObject.hasCustomSwimlanes()).toBe(false);
+  });
+
+  it('getColumnElements and getColumnsInSwimlane return column elements', () => {
+    document.body.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s">
+        <div class="ghx-column" data-column-id="c1"></div>
+        <div class="ghx-column" data-column-id="c2"></div>
+      </div>
+      <div class="ghx-column" data-column-id="orphan"></div>
+    `;
+    const swimlane = document.querySelector('.ghx-swimlane')!;
+    const colsInSwim = BoardPagePageObject.getColumnsInSwimlane(swimlane);
+    expect(colsInSwim).toHaveLength(2);
+    const allCols = BoardPagePageObject.getColumnElements();
+    expect(allCols).toHaveLength(3);
+  });
+
+  it('getParentGroups queries parent group selector', () => {
+    const g = document.createElement('div');
+    g.className = 'ghx-parent-group';
+    document.body.appendChild(g);
+    expect(BoardPagePageObject.getParentGroups()).toEqual([g]);
+  });
+
+  it('countIssueVisibility counts hidden with no-visibility class', () => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div class="ghx-issue"></div><div class="ghx-issue no-visibility"></div><div class="ghx-issue no-visibility"></div>';
+    document.body.appendChild(wrap);
+    expect(BoardPagePageObject.countIssueVisibility(wrap, '.ghx-issue')).toEqual({ total: 3, hidden: 2 });
+  });
+
+  it('setIssueVisibility and background color helpers mutate issue element', () => {
+    const issue = document.createElement('div');
+    BoardPagePageObject.setIssueBackgroundColor(issue, 'red');
+    expect((issue as HTMLElement).style.backgroundColor).toBe('red');
+    BoardPagePageObject.resetIssueBackgroundColor(issue);
+    expect((issue as HTMLElement).style.backgroundColor).toBe('');
+
+    BoardPagePageObject.setIssueVisibility(issue, false);
+    expect(issue.classList.contains('no-visibility')).toBe(true);
+    BoardPagePageObject.setIssueVisibility(issue, true);
+    expect(issue.classList.contains('no-visibility')).toBe(false);
+  });
+
+  it('setSwimlaneVisibility and setParentGroupVisibility toggle no-visibility', () => {
+    const swimlane = document.createElement('div');
+    const group = document.createElement('div');
+    BoardPagePageObject.setSwimlaneVisibility(swimlane, false);
+    expect(swimlane.classList.contains('no-visibility')).toBe(true);
+    BoardPagePageObject.setSwimlaneVisibility(swimlane, true);
+    expect(swimlane.classList.contains('no-visibility')).toBe(false);
+
+    BoardPagePageObject.setParentGroupVisibility(group, false);
+    expect(group.classList.contains('no-visibility')).toBe(true);
+    BoardPagePageObject.setParentGroupVisibility(group, true);
+    expect(group.classList.contains('no-visibility')).toBe(false);
+  });
+});

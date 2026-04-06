@@ -4,10 +4,7 @@ import { Token } from 'dioma';
 import { WithDi } from '../../shared/diContext';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { registerPersonLimitsBoardPageObjectInDI, personLimitsBoardPageObjectToken } from './pageObject';
-import { useRuntimeStore } from './stores';
-import { usePersonWipLimitsPropertyStore, migrateProperty } from '../property';
-import { applyLimits, showOnlyChosen } from './actions';
+import { propertyModelToken, boardRuntimeModelToken } from '../tokens';
 import { AvatarsContainer } from './components';
 import type { PersonWipLimitsProperty_2_29 } from '../property';
 
@@ -60,36 +57,24 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const [editData = {}, personLimits] = data;
     if (!personLimits?.limits?.length) return;
 
-    // Register PageObject in DI (if not already registered)
-    try {
-      this.container.inject(personLimitsBoardPageObjectToken);
-    } catch {
-      registerPersonLimitsBoardPageObjectInDI(this.container);
-    }
+    const { model: propertyModel } = this.container.inject(propertyModelToken);
+    propertyModel.setData(personLimits);
 
-    // Initialize property store with loaded data (migrate from v2.29 if needed)
-    const propertyStore = usePersonWipLimitsPropertyStore.getState();
-    propertyStore.actions.setData(migrateProperty(personLimits));
-
-    // Initialize runtime store
-    const { actions } = useRuntimeStore.getState();
+    const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
+    const runtime = boardRuntimeModel;
     const cssSelector = this.getCssSelectorOfIssues(editData);
-    actions.setCssSelectorOfIssues(cssSelector);
+    runtime.setCssSelectorOfIssues(cssSelector);
+    runtime.apply();
 
-    // Apply limits (reads from property store)
-    applyLimits();
-
-    // Render React component
     this.renderAvatarsContainer();
 
-    // Watch for DOM changes
     const pool = document.getElementById('ghx-pool');
     if (pool) {
       this.onDOMChange(
         '#ghx-pool',
         () => {
-          applyLimits();
-          showOnlyChosen();
+          runtime.apply();
+          runtime.showOnlyChosen();
         },
         { childList: true, subtree: true }
       );
@@ -114,7 +99,6 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       })
     );
 
-    // Cleanup on unmount
     this.sideEffects.push(() => {
       root.unmount();
       container.remove();

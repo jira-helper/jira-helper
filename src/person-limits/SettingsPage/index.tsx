@@ -2,7 +2,7 @@ import React from 'react';
 import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { WithDi } from '../../shared/diContext';
-import { loadPersonWipLimitsProperty } from '../property';
+import { propertyModelToken } from '../tokens';
 import { searchUsersToken } from '../../shared/di/jiraApiTokens';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
@@ -49,7 +49,8 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   }
 
   async loadData(): Promise<[BoardData]> {
-    await loadPersonWipLimitsProperty();
+    const { model: propertyModel } = this.container.inject(propertyModelToken);
+    await propertyModel.load();
     const boardData = await this.getBoardEditData();
     return [boardData];
   }

@@ -9,9 +9,11 @@ import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
+import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/shared/boardPropertyService';
 import { SettingsModalContainer } from './SettingsModalContainer';
-import { useSettingsUIStore } from '../../stores/settingsUIStore';
 import type { Column, Swimlane } from '../../state/types';
+import { personLimitsModule } from '../../../module';
+import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
 
 const mockSearchUsers = async () => [];
 
@@ -42,7 +44,17 @@ describe('SettingsModalContainer', () => {
       token: issueTypeServiceToken,
       value: { loadForProject: async () => [], clearCache: () => {} } as IIssueTypeService,
     });
-    useSettingsUIStore.getState().actions.reset();
+    globalContainer.register({
+      token: BoardPropertyServiceToken,
+      value: {
+        getBoardProperty: async () => ({ limits: [] }),
+        updateBoardProperty: () => {},
+        deleteBoardProperty: () => {},
+      } as unknown as BoardPropertyServiceI,
+    });
+    personLimitsModule.ensure(globalContainer);
+    globalContainer.inject(propertyModelToken).model.setData({ limits: [] });
+    globalContainer.inject(settingsUIModelToken).model.reset();
   });
 
   it('should render modal with PersonalWipLimitContainer inside', () => {

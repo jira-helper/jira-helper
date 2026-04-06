@@ -1,6 +1,9 @@
 import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { getNameFromTooltip } from './utils/getNameFromTooltip';
+
+const NO_VISIBILITY_CLASS = 'no-visibility';
 
 /**
  * Swimlane DOM element with id, row element and header container.
@@ -164,6 +167,9 @@ export interface IBoardPagePageObject {
     daysInColumn: string;
     swimlaneHeader: string;
     swimlaneRow: string;
+    avatarImg: string;
+    issueType: string;
+    parentGroup: string;
   };
 
   classlist: {
@@ -233,6 +239,62 @@ export interface IBoardPagePageObject {
 
   /** Clear inline background on all column cells for this column id across swimlanes. */
   resetColumnCellStyles(columnId: string): void;
+
+  // === Person-limits: Queries ===
+
+  /** Get all issue card elements matching CSS selector. */
+  getIssueElements(cssSelector: string): Element[];
+
+  /** Issue cards inside a column element (scoped `querySelectorAll`). */
+  getIssueElementsInColumn(column: Element, cssSelector: string): Element[];
+
+  /** Parse assignee name from issue card's avatar tooltip / alt. */
+  getAssigneeFromIssue(issue: Element): string | null;
+
+  /** Issue type from `.ghx-type` title or textContent (person-limits semantics). */
+  getIssueTypeFromIssue(issue: Element): string | null;
+
+  /** Column ID for an issue (closest `.ghx-column` `data-column-id`). */
+  getColumnIdOfIssue(issue: Element): string | null;
+
+  /** Column ID from a column element (`data-column-id`). */
+  getColumnIdFromColumn(column: Element): string | null;
+
+  /** Swimlane ID for an issue (closest `.ghx-swimlane` `swimlane-id`). */
+  getSwimlaneIdOfIssue(issue: Element): string | null;
+
+  /** Whether the board uses custom swimlanes (`aria-label` contains `custom`). */
+  hasCustomSwimlanes(): boolean;
+
+  /** All `.ghx-column` elements on the board (distinct from `getColumns()` string titles). */
+  getColumnElements(): Element[];
+
+  /** Column elements inside a swimlane row. */
+  getColumnsInSwimlane(swimlane: Element): Element[];
+
+  /** Parent group elements (subtask grouping). */
+  getParentGroups(): Element[];
+
+  /** Count issues matching selector; hidden = has `no-visibility` class. */
+  countIssueVisibility(
+    element: Element,
+    cssSelector: string
+  ): {
+    total: number;
+    hidden: number;
+  };
+
+  // === Person-limits: Commands ===
+
+  setIssueBackgroundColor(issue: Element, color: string): void;
+
+  resetIssueBackgroundColor(issue: Element): void;
+
+  setIssueVisibility(issue: Element, visible: boolean): void;
+
+  setSwimlaneVisibility(swimlane: Element, visible: boolean): void;
+
+  setParentGroupVisibility(group: Element, visible: boolean): void;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
@@ -249,6 +311,9 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     daysInColumn: '.ghx-days',
     swimlaneHeader: '.ghx-swimlane-header',
     swimlaneRow: '.ghx-swimlane',
+    avatarImg: '.ghx-avatar-img',
+    issueType: '.ghx-type',
+    parentGroup: '.ghx-parent-group',
   },
 
   classlist: {
@@ -601,6 +666,100 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     document.querySelectorAll<HTMLElement>(selector).forEach(el => {
       el.style.backgroundColor = '';
     });
+  },
+
+  getIssueElements(cssSelector: string): Element[] {
+    return Array.from(document.querySelectorAll(cssSelector));
+  },
+
+  getIssueElementsInColumn(column: Element, cssSelector: string): Element[] {
+    return Array.from(column.querySelectorAll(cssSelector));
+  },
+
+  getAssigneeFromIssue(issue: Element): string | null {
+    const avatar = issue.querySelector(this.selectors.avatarImg) as HTMLElement | null;
+    if (!avatar) return null;
+
+    const label = avatar.getAttribute('alt') ?? avatar.getAttribute('data-tooltip');
+    if (!label) return null;
+
+    return getNameFromTooltip(label);
+  },
+
+  getIssueTypeFromIssue(issue: Element): string | null {
+    const typeEl = issue.querySelector(this.selectors.issueType) as HTMLElement | null;
+    if (!typeEl) return null;
+    return typeEl.getAttribute('title') ?? typeEl.textContent ?? null;
+  },
+
+  getColumnIdOfIssue(issue: Element): string | null {
+    const column = issue.closest(this.selectors.column) as HTMLElement | null;
+    return column?.dataset.columnId ?? null;
+  },
+
+  getColumnIdFromColumn(column: Element): string | null {
+    return (column as HTMLElement).dataset.columnId ?? null;
+  },
+
+  getSwimlaneIdOfIssue(issue: Element): string | null {
+    const swimlane = issue.closest(this.selectors.swimlaneRow) as HTMLElement | null;
+    return swimlane?.getAttribute('swimlane-id') ?? null;
+  },
+
+  hasCustomSwimlanes(): boolean {
+    const swimlaneHeader = document.querySelector(this.selectors.swimlaneHeader);
+    if (!swimlaneHeader) return false;
+    return swimlaneHeader.getAttribute('aria-label')?.includes('custom') ?? false;
+  },
+
+  getColumnElements(): Element[] {
+    return Array.from(document.querySelectorAll(this.selectors.column));
+  },
+
+  getColumnsInSwimlane(swimlane: Element): Element[] {
+    return Array.from(swimlane.querySelectorAll(this.selectors.column));
+  },
+
+  getParentGroups(): Element[] {
+    return Array.from(document.querySelectorAll(this.selectors.parentGroup));
+  },
+
+  countIssueVisibility(element: Element, cssSelector: string) {
+    const total = element.querySelectorAll(cssSelector).length;
+    const hidden = element.querySelectorAll(`${cssSelector}.${NO_VISIBILITY_CLASS}`).length;
+    return { total, hidden };
+  },
+
+  setIssueBackgroundColor(issue: Element, color: string): void {
+    (issue as HTMLElement).style.backgroundColor = color;
+  },
+
+  resetIssueBackgroundColor(issue: Element): void {
+    (issue as HTMLElement).style.backgroundColor = '';
+  },
+
+  setIssueVisibility(issue: Element, visible: boolean): void {
+    if (visible) {
+      issue.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      issue.classList.add(NO_VISIBILITY_CLASS);
+    }
+  },
+
+  setSwimlaneVisibility(swimlane: Element, visible: boolean): void {
+    if (visible) {
+      swimlane.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      swimlane.classList.add(NO_VISIBILITY_CLASS);
+    }
+  },
+
+  setParentGroupVisibility(group: Element, visible: boolean): void {
+    if (visible) {
+      group.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      group.classList.add(NO_VISIBILITY_CLASS);
+    }
   },
 };
 

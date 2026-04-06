@@ -3,13 +3,13 @@ import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox, Tooltip } 
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { SearchUsers } from 'src/shared/di/jiraApiTokens';
+import { useDi } from 'src/shared/diContext';
 import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector';
 import { SwimlaneSelector } from 'src/shared/components/SwimlaneSelector';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
 import { PersonNameSelect } from './PersonNameSelect';
-import { useSettingsUIStore } from '../stores/settingsUIStore';
-import type { FormData, Column, Swimlane } from '../state/types';
-import type { SelectedPerson } from '../stores/settingsUIStore.types';
+import { settingsUIModelToken } from '../../tokens';
+import type { FormData, Column, Swimlane, SelectedPerson } from '../state/types';
 import { settingsJiraDOM } from '../constants';
 import { PERSON_LIMITS_TEXTS } from '../texts';
 
@@ -26,9 +26,9 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   searchUsers,
   onAddLimit,
 }) => {
-  // Zustand automatically subscribes component to changes
-  const { data, actions } = useSettingsUIStore();
-  const { limits, editingId, formData } = data;
+  const { model: settingsUi, useModel } = useDi().inject(settingsUIModelToken);
+  const snap = useModel();
+  const { limits, editingId, formData } = snap;
   const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
   const [form] = Form.useForm();
 
@@ -179,7 +179,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // cross-contamination (e.g., swimlane change overwriting columns representation)
   const handleFormChange = (field: string, value: any) => {
     const formDataForUpdate = formData || defaultFormData;
-    actions.setFormData({
+    settingsUi.setFormData({
       ...formDataForUpdate,
       [field]: value,
     } as FormData);
@@ -206,7 +206,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       return;
     }
 
-    if (!isEditMode && actions.isDuplicate(currentPerson.name, columnsToSave, swimlanesToSave, issueTypesToCheck)) {
+    if (!isEditMode && settingsUi.isDuplicate(currentPerson.name, columnsToSave, swimlanesToSave, issueTypesToCheck)) {
       form.setFields([{ name: 'person', errors: ['A limit with the same filters already exists for this person'] }]);
       return;
     }
@@ -366,7 +366,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               >
                 {isEditMode ? texts.updateLimit : texts.addLimit}
               </Button>
-              {isEditMode && <Button onClick={() => actions.setEditingId(null)}>{texts.cancel}</Button>}
+              {isEditMode && <Button onClick={() => settingsUi.setEditingId(null)}>{texts.cancel}</Button>}
             </Space>
           </Col>
         </Row>
@@ -375,8 +375,8 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
         <PersonalWipLimitTable
           texts={texts}
           limits={limits}
-          onDelete={(id: number) => actions.deleteLimit(id)}
-          onEdit={(id: number) => actions.setEditingId(id)}
+          onDelete={(id: number) => settingsUi.deleteLimit(id)}
+          onEdit={(id: number) => settingsUi.setEditingId(id)}
         />
       </div>
     </>

@@ -2,9 +2,19 @@
  * Common step definitions for Person Limits BoardPage display tests.
  */
 import { Given, When, Then, And, type DataTableRows } from '../../../../../cypress/support/bdd-runner';
+import { globalContainer } from 'dioma';
 import { columns, swimlanes, mockPageObjectRef, mountComponent } from '../helpers';
-import { usePersonWipLimitsPropertyStore } from '../../../property';
-import { applyLimits } from '../../actions';
+import { propertyModelToken, boardRuntimeModelToken } from '../../../tokens';
+import type { PropertyModel } from '../../../property/PropertyModel';
+import type { BoardRuntimeModel } from '../../models/BoardRuntimeModel';
+
+function propertyModel(): PropertyModel {
+  return globalContainer.inject(propertyModelToken).model;
+}
+
+function boardRuntime(): BoardRuntimeModel {
+  return globalContainer.inject(boardRuntimeModelToken).model;
+}
 
 function toDisplayName(login: string): string {
   return login
@@ -91,7 +101,7 @@ function parseOrdinalToIndex(ordinal: string): number {
 
 Given('there are no WIP limits configured', () => {
   cy.then(() => {
-    usePersonWipLimitsPropertyStore.getState().actions.setLimits([]);
+    propertyModel().setLimits([]);
   });
 });
 
@@ -107,26 +117,26 @@ Given('there are issues on the board', () => {
 
 Given('there are WIP limits:', (dataTable: DataTableRows) => {
   cy.then(() => {
-    const { limits } = usePersonWipLimitsPropertyStore.getState().data;
+    const { limits } = propertyModel().data;
     const newLimits = dataTable.map(row => {
-      const person = row.person ?? '';
-      const personDisplayName = row.personDisplayName ?? toDisplayName(person);
-      const limit = parseInt(row.limit ?? '0', 10);
+      const personRow = row.person ?? '';
+      const personDisplayName = row.personDisplayName ?? toDisplayName(personRow);
+      const limitVal = parseInt(row.limit ?? '0', 10);
       const limitColumns = parseColumnIds(row.columns ?? '');
       const limitSwimlanes = parseSwimlaneIds(row.swimlanes ?? '');
       const includedIssueTypes = parseIssueTypes(row.issueTypes ?? '');
       const showAllPersonIssues = row.showAllPersonIssues != null ? row.showAllPersonIssues !== 'false' : true;
       return createPersonLimit(
-        person,
+        personRow,
         personDisplayName,
-        limit,
+        limitVal,
         limitColumns,
         limitSwimlanes,
         includedIssueTypes,
         showAllPersonIssues
       );
     });
-    usePersonWipLimitsPropertyStore.getState().actions.setLimits([...limits, ...newLimits]);
+    propertyModel().setLimits([...limits, ...newLimits]);
   });
 });
 
@@ -151,20 +161,18 @@ Given('the board has issues:', (dataTable: DataTableRows) => {
 
 When('the board is displayed', () => {
   cy.then(() => {
-    applyLimits();
+    boardRuntime().apply();
   });
   mountComponent();
 });
 
 When(/^I click on "([^"]*)" avatar$/, (person: string) => {
   cy.get(`[data-person-name="${person}"]`).first().click();
-  cy.wait(100); // Wait for showOnlyChosen (setTimeout)
 });
 
 When(/^I click on the (first|second|1st|2nd) "([^"]*)" avatar$/, (ordinal: string, person: string) => {
   const index = parseOrdinalToIndex(ordinal);
   cy.get(`[data-person-name="${person}"]`).eq(index).click();
-  cy.wait(100);
 });
 
 // --- Then steps ---
@@ -194,11 +202,11 @@ Then(/^all (\d+) issues for "([^"]*)" should be highlighted red$/, (countStr: st
     if (!mock || !('getHighlightedIssues' in mock)) {
       throw new Error('Mock PageObject has no getHighlightedIssues');
     }
-    const { limits } = usePersonWipLimitsPropertyStore.getState().data;
+    const { limits } = propertyModel().data;
     const limit = limits.find(l => l.person.name === person);
     const expectedDisplayName = limit?.person.displayName;
     const highlighted = mock.getHighlightedIssues();
-    expect(highlighted).to.have.length(expectedCount);
+    expect(highlighted.length).to.eq(expectedCount);
     highlighted.forEach(issue => {
       const assignee = mock.getAssigneeFromIssue(issue);
       const matches = assignee === person || (expectedDisplayName != null && assignee === expectedDisplayName);
@@ -257,7 +265,7 @@ Then('all issues should be visible', () => {
   cy.then(() => {
     const mock = mockPageObjectRef.current;
     if (!mock) throw new Error('No mock PageObject');
-    const issues = mock.getIssues('.ghx-issue');
+    const issues = mock.getIssueElements('.ghx-issue');
     issues.forEach(issue => {
       const id = (issue as HTMLElement).getAttribute('data-issue-id');
       if (id) cy.get(`[data-issue-id="${id}"]`).should('be.visible');
@@ -269,10 +277,10 @@ Then(/^only "([^"]*)" issues should be visible$/, (person: string) => {
   cy.then(() => {
     const mock = mockPageObjectRef.current;
     if (!mock) throw new Error('No mock PageObject');
-    const { limits } = usePersonWipLimitsPropertyStore.getState().data;
+    const { limits } = propertyModel().data;
     const limit = limits.find(l => l.person.name === person);
     const personDisplayName = limit?.person.displayName ?? toDisplayName(person);
-    const issues = mock.getIssues('.ghx-issue');
+    const issues = mock.getIssueElements('.ghx-issue');
     issues.forEach(issue => {
       const id = (issue as HTMLElement).getAttribute('data-issue-id');
       const assignee = mock.getAssigneeFromIssue(issue);

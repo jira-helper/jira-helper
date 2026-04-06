@@ -9,9 +9,10 @@ import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken }
 import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { registerIssueTypeServiceInDI } from 'src/shared/issueType';
 import { Ok } from 'ts-results';
+import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
-import { useSettingsUIStore } from '../stores/settingsUIStore';
-import { usePersonWipLimitsPropertyStore } from '../../property/store';
+import { personLimitsModule } from '../../module';
+import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 import type { JiraUser } from '../../../shared/jiraApi';
 
 // --- Search mock configuration ---
@@ -101,8 +102,19 @@ export const setupBackground = () => {
     value: mockSearchUsers,
   });
 
-  useSettingsUIStore.getState().actions.reset();
-  usePersonWipLimitsPropertyStore.getState().actions.reset();
+  globalContainer.register({
+    token: BoardPropertyServiceToken,
+    value: {
+      getBoardProperty: cy.stub().as('getBoardProperty').resolves({ limits: [] }),
+      updateBoardProperty: cy.stub().as('updateBoardPropertyService'),
+      deleteBoardProperty: cy.stub(),
+    },
+  });
+
+  personLimitsModule.ensure(globalContainer);
+
+  globalContainer.inject(propertyModelToken).model.setData({ limits: [] });
+  globalContainer.inject(settingsUIModelToken).model.reset();
 
   // Mock issue types API via DI
   globalContainer.register({

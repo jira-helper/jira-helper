@@ -11,6 +11,9 @@ export default defineConfig({
       src: path.resolve(dirname, 'src'),
     },
   },
+  optimizeDeps: {
+    include: ['valtio'],
+  },
   plugins: [
     storybookTest({
       configDir: path.join(dirname, '.storybook'),

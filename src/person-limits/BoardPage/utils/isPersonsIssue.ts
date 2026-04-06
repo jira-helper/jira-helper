@@ -1,4 +1,4 @@
-import type { PersonLimitStats } from '../stores';
+import type { PersonLimitStats } from '../models/types';
 
 /**
  * Checks if an issue belongs to a person by assignee match only.

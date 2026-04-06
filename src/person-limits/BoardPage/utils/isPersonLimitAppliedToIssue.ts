@@ -1,4 +1,4 @@
-import type { PersonLimitStats } from '../stores';
+import type { PersonLimitStats } from '../models/types';
 
 /**
  * Checks if a person's WIP limit applies to a given issue.

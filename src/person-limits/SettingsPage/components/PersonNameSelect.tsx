@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Select, Spin } from 'antd';
 import type { JiraUser } from 'src/shared/jiraApi';
-import type { SelectedPerson } from '../stores/settingsUIStore.types';
+import type { SelectedPerson } from '../state/types';
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;

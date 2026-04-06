@@ -3,9 +3,9 @@
  *
  * These steps are reusable across multiple scenarios.
  */
+import { globalContainer } from 'dioma';
 import { Given, When, Then, type DataTableRows } from '../../../../../cypress/support/bdd-runner';
-import { useSettingsUIStore } from '../../stores/settingsUIStore';
-import { usePersonWipLimitsPropertyStore } from '../../../property/store';
+import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
 import { columns, swimlanes, mountSettingsButton, setSearchMockType } from '../helpers';
 import type { PersonLimit } from '../../state/types';
 
@@ -74,8 +74,8 @@ Given(
       showAllPersonIssues
     );
 
-    const propertyStore = usePersonWipLimitsPropertyStore.getState();
-    propertyStore.actions.setLimits([...propertyStore.data.limits, limit]);
+    const propertyModel = globalContainer.inject(propertyModelToken).model;
+    propertyModel.setLimits([...propertyModel.data.limits, limit]);
   }
 );
 
@@ -98,13 +98,14 @@ Given(
       issueTypesStr,
       false
     );
-    const propertyStore = usePersonWipLimitsPropertyStore.getState();
-    propertyStore.actions.setLimits([...propertyStore.data.limits, limit]);
+    const propertyModel = globalContainer.inject(propertyModelToken).model;
+    propertyModel.setLimits([...propertyModel.data.limits, limit]);
   }
 );
 
 Given('there are no limits configured', () => {
-  useSettingsUIStore.getState().actions.reset();
+  globalContainer.inject(propertyModelToken).model.setData({ limits: [] });
+  globalContainer.inject(settingsUIModelToken).model.reset();
 });
 
 Given('search returns no users', () => {

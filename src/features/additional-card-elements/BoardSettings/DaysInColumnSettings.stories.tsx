@@ -22,6 +22,9 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
     daysInColumn: '.ghx-days',
     swimlaneHeader: '.ghx-swimlane-header',
     swimlaneRow: '.ghx-swimlane',
+    avatarImg: '.ghx-avatar-img',
+    issueType: '.ghx-type',
+    parentGroup: '.ghx-parent-group',
   },
   classlist: {
     flagged: 'ghx-flagged',
@@ -51,6 +54,23 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
   getOrderedColumns: () => [],
   highlightColumnCells: () => {},
   resetColumnCellStyles: () => {},
+  getIssueElements: () => [],
+  getIssueElementsInColumn: () => [],
+  getAssigneeFromIssue: () => null,
+  getIssueTypeFromIssue: () => null,
+  getColumnIdOfIssue: () => null,
+  getColumnIdFromColumn: () => null,
+  getSwimlaneIdOfIssue: () => null,
+  hasCustomSwimlanes: () => false,
+  getColumnElements: () => [],
+  getColumnsInSwimlane: () => [],
+  getParentGroups: () => [],
+  countIssueVisibility: () => ({ total: 0, hidden: 0 }),
+  setIssueBackgroundColor: () => {},
+  resetIssueBackgroundColor: () => {},
+  setIssueVisibility: () => {},
+  setSwimlaneVisibility: () => {},
+  setParentGroupVisibility: () => {},
 };
 
 const mockContainer = new Container();

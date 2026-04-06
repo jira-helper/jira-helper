@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
+import { useDi } from 'src/shared/diContext';
 import { SettingsModal } from './SettingsModal';
 import { PersonalWipLimitContainer } from '../PersonalWipLimitContainer';
-import { useSettingsUIStore } from '../../stores/settingsUIStore';
-import { createPersonLimit, updatePersonLimit } from '../../actions';
+import { createPersonLimit, updatePersonLimit } from '../../utils';
 import { PERSON_LIMITS_TEXTS } from '../../texts';
+import { settingsUIModelToken } from '../../../tokens';
 import type { SearchUsers } from '../../../../shared/di/jiraApiTokens';
 import type { FormData, Column, Swimlane } from '../../state/types';
 
@@ -25,6 +26,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
 }) => {
   const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
+  const { model: settingsUi } = useDi().inject(settingsUIModelToken);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -36,13 +38,11 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
   };
 
   const handleAddLimit = (formData: FormData): void => {
-    const store = useSettingsUIStore.getState();
-
-    if (store.data.editingId !== null) {
-      const existingLimit = store.data.limits.find(l => l.id === store.data.editingId);
+    if (settingsUi.editingId !== null) {
+      const existingLimit = settingsUi.limits.find(l => l.id === settingsUi.editingId);
       if (!existingLimit) return;
       const updatedLimit = updatePersonLimit({ existingLimit, formData, columns, swimlanes });
-      store.actions.updateLimit(store.data.editingId, updatedLimit);
+      settingsUi.updateLimit(settingsUi.editingId, updatedLimit);
     } else {
       if (!formData.person) return;
       const personLimit = createPersonLimit({
@@ -56,7 +56,7 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
         swimlanes,
         id: Date.now(),
       });
-      store.actions.addLimit(personLimit);
+      settingsUi.addLimit(personLimit);
     }
   };
 

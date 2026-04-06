@@ -1,20 +1,17 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { JiraUser } from 'src/shared/jiraApi';
+import { globalContainer } from 'dioma';
+import { WithDi } from 'src/shared/diContext';
+import { registerLogger } from 'src/shared/Logger';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
+import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/shared/boardPropertyService';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
-import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../../property/types';
-
-const meta: Meta<typeof PersonalWipLimitContainer> = {
-  title: 'PersonLimits/SettingsPage/PersonalWipLimitContainer',
-  component: PersonalWipLimitContainer,
-  parameters: {
-    layout: 'padded',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof PersonalWipLimitContainer>;
+import { personLimitsModule } from '../../module';
+import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 
 const mockColumns = [
   { id: 'col1', name: 'To Do', isKanPlanColumn: false },
@@ -55,72 +52,100 @@ const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
   );
 };
 
-const ContainerWrapper: React.FC<{
-  children: React.ReactNode;
-  initialLimits?: PersonLimit[];
-}> = ({ children, initialLimits = [] }) => {
-  React.useEffect(() => {
-    useSettingsUIStore.getState().actions.reset();
-    if (initialLimits.length > 0) {
-      useSettingsUIStore.getState().actions.setData(initialLimits);
-    }
-  }, [initialLimits]);
-  return children;
+function initContainerStoryDi(initialLimits: PersonLimit[]) {
+  globalContainer.reset();
+  registerLogger(globalContainer);
+  globalContainer.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
+  globalContainer.register({
+    token: routingServiceToken,
+    value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
+  });
+  globalContainer.register({
+    token: issueTypeServiceToken,
+    value: { loadForProject: async () => [], clearCache: () => {} } as IIssueTypeService,
+  });
+  globalContainer.register({
+    token: BoardPropertyServiceToken,
+    value: {
+      getBoardProperty: async () => ({ limits: [] }),
+      updateBoardProperty: () => {},
+      deleteBoardProperty: () => {},
+    } as unknown as BoardPropertyServiceI,
+  });
+  personLimitsModule.ensure(globalContainer);
+  globalContainer.inject(propertyModelToken).model.setData({ limits: structuredClone(initialLimits) });
+  globalContainer.inject(settingsUIModelToken).model.initFromProperty();
+}
+
+const ContainerView: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <WithDi container={globalContainer}>{children}</WithDi>
+);
+
+const meta: Meta<typeof PersonalWipLimitContainer> = {
+  title: 'PersonLimits/SettingsPage/PersonalWipLimitContainer',
+  component: PersonalWipLimitContainer,
+  parameters: {
+    layout: 'padded',
+  },
 };
 
+export default meta;
+type Story = StoryObj<typeof PersonalWipLimitContainer>;
+
 export const EmptyState: Story = {
+  loaders: [() => initContainerStoryDi([])],
   render: () => (
-    <ContainerWrapper>
+    <ContainerView>
       <PersonalWipLimitContainer
         columns={mockColumns}
         swimlanes={mockSwimlanes}
         searchUsers={mockSearchUsers}
         onAddLimit={async () => {}}
       />
-    </ContainerWrapper>
+    </ContainerView>
   ),
 };
 
 export const AddMode: Story = {
+  loaders: [() => initContainerStoryDi([])],
   render: () => (
-    <ContainerWrapper>
+    <ContainerView>
       <PersonalWipLimitContainer
         columns={mockColumns}
         swimlanes={mockSwimlanes}
         searchUsers={mockSearchUsers}
         onAddLimit={async () => {}}
       />
-    </ContainerWrapper>
+    </ContainerView>
   ),
 };
 
-export const EditMode: Story = {
-  render: () => {
-    const limit: PersonLimit = {
-      id: 1,
-      person: {
-        name: 'john.doe',
-        displayName: 'John Doe',
-        self: 'https://jira.example.com/user',
-        avatar: 'https://via.placeholder.com/32',
-      },
-      limit: 5,
-      columns: [{ id: 'col1', name: 'To Do' }],
-      swimlanes: [{ id: 'swim1', name: 'Frontend' }],
-      showAllPersonIssues: true,
-    };
-
-    return (
-      <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          searchUsers={mockSearchUsers}
-          onAddLimit={async () => {}}
-        />
-      </ContainerWrapper>
-    );
+const singleLimit: PersonLimit = {
+  id: 1,
+  person: {
+    name: 'john.doe',
+    displayName: 'John Doe',
+    self: 'https://jira.example.com/user',
+    avatar: 'https://via.placeholder.com/32',
   },
+  limit: 5,
+  columns: [{ id: 'col1', name: 'To Do' }],
+  swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+  showAllPersonIssues: true,
+};
+
+export const EditMode: Story = {
+  loaders: [() => initContainerStoryDi([singleLimit])],
+  render: () => (
+    <ContainerView>
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
+    </ContainerView>
+  ),
   play: async ({ canvasElement }) => {
     const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
     if (editButton) {
@@ -130,32 +155,17 @@ export const EditMode: Story = {
 };
 
 export const EditModeWithAllColumns: Story = {
-  render: () => {
-    const limit: PersonLimit = {
-      id: 1,
-      person: {
-        name: 'john.doe',
-        displayName: 'John Doe',
-        self: 'https://jira.example.com/user',
-        avatar: 'https://via.placeholder.com/32',
-      },
-      limit: 5,
-      columns: [],
-      swimlanes: [],
-      showAllPersonIssues: true,
-    };
-
-    return (
-      <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          searchUsers={mockSearchUsers}
-          onAddLimit={async () => {}}
-        />
-      </ContainerWrapper>
-    );
-  },
+  loaders: [() => initContainerStoryDi([{ ...singleLimit, columns: [], swimlanes: [] }])],
+  render: () => (
+    <ContainerView>
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
+    </ContainerView>
+  ),
   play: async ({ canvasElement }) => {
     const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
     if (editButton) {
@@ -165,32 +175,17 @@ export const EditModeWithAllColumns: Story = {
 };
 
 export const EditModeShowAllDisabled: Story = {
-  render: () => {
-    const limit: PersonLimit = {
-      id: 1,
-      person: {
-        name: 'john.doe',
-        displayName: 'John Doe',
-        self: 'https://jira.example.com/user',
-        avatar: 'https://via.placeholder.com/32',
-      },
-      limit: 5,
-      columns: [{ id: 'col1', name: 'To Do' }],
-      swimlanes: [{ id: 'swim1', name: 'Frontend' }],
-      showAllPersonIssues: false,
-    };
-
-    return (
-      <ContainerWrapper initialLimits={[limit]}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          searchUsers={mockSearchUsers}
-          onAddLimit={async () => {}}
-        />
-      </ContainerWrapper>
-    );
-  },
+  loaders: [() => initContainerStoryDi([{ ...singleLimit, showAllPersonIssues: false }])],
+  render: () => (
+    <ContainerView>
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
+    </ContainerView>
+  ),
   play: async ({ canvasElement }) => {
     const editButton = canvasElement.querySelector('[data-testid="edit-button-1"]') as HTMLElement;
     if (editButton) {
@@ -200,45 +195,45 @@ export const EditModeShowAllDisabled: Story = {
 };
 
 export const WithMultipleLimits: Story = {
-  render: () => {
-    const limits: PersonLimit[] = [
-      {
-        id: 1,
-        person: {
-          name: 'john.doe',
-          displayName: 'John Doe',
-          self: 'https://jira.example.com/user',
-          avatar: 'https://via.placeholder.com/32',
+  loaders: [
+    () =>
+      initContainerStoryDi([
+        {
+          id: 1,
+          person: {
+            name: 'john.doe',
+            displayName: 'John Doe',
+            self: 'https://jira.example.com/user',
+            avatar: 'https://via.placeholder.com/32',
+          },
+          limit: 3,
+          columns: [{ id: 'col1', name: 'To Do' }],
+          swimlanes: [{ id: 'swim1', name: 'Frontend' }],
+          showAllPersonIssues: true,
         },
-        limit: 3,
-        columns: [{ id: 'col1', name: 'To Do' }],
-        swimlanes: [{ id: 'swim1', name: 'Frontend' }],
-        showAllPersonIssues: true,
-      },
-      {
-        id: 2,
-        person: {
-          name: 'jane.smith',
-          displayName: 'Jane Smith',
-          self: 'https://jira.example.com/user',
-          avatar: 'https://via.placeholder.com/32',
+        {
+          id: 2,
+          person: {
+            name: 'jane.smith',
+            displayName: 'Jane Smith',
+            self: 'https://jira.example.com/user',
+            avatar: 'https://via.placeholder.com/32',
+          },
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
         },
-        limit: 5,
-        columns: [],
-        swimlanes: [],
-        showAllPersonIssues: true,
-      },
-    ];
-
-    return (
-      <ContainerWrapper initialLimits={limits}>
-        <PersonalWipLimitContainer
-          columns={mockColumns}
-          swimlanes={mockSwimlanes}
-          searchUsers={mockSearchUsers}
-          onAddLimit={async () => {}}
-        />
-      </ContainerWrapper>
-    );
-  },
+      ]),
+  ],
+  render: () => (
+    <ContainerView>
+      <PersonalWipLimitContainer
+        columns={mockColumns}
+        swimlanes={mockSwimlanes}
+        searchUsers={mockSearchUsers}
+        onAddLimit={async () => {}}
+      />
+    </ContainerView>
+  ),
 };

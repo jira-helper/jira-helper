@@ -14,10 +14,14 @@ import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
+import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/shared/boardPropertyService';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
-import { useSettingsUIStore } from '../stores/settingsUIStore';
 import type { PersonLimit } from '../state/types';
 import type { PersonalWipLimitContainerProps } from './PersonalWipLimitContainer';
+import { personLimitsModule } from '../../module';
+import { propertyModelToken, settingsUIModelToken } from '../../tokens';
+
+const settingsUi = () => globalContainer.inject(settingsUIModelToken).model;
 
 const WrappedContainer = (props: PersonalWipLimitContainerProps) => (
   <WithDi container={globalContainer}>
@@ -61,7 +65,17 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       token: issueTypeServiceToken,
       value: { loadForProject: async () => [], clearCache: () => {} } as IIssueTypeService,
     });
-    useSettingsUIStore.setState(useSettingsUIStore.getInitialState());
+    globalContainer.register({
+      token: BoardPropertyServiceToken,
+      value: {
+        getBoardProperty: async () => ({ limits: [] }),
+        updateBoardProperty: () => {},
+        deleteBoardProperty: () => {},
+      } as unknown as BoardPropertyServiceI,
+    });
+    personLimitsModule.ensure(globalContainer);
+    globalContainer.inject(propertyModelToken).model.setData({ limits: [] });
+    globalContainer.inject(settingsUIModelToken).model.reset();
   });
 
   describe('C1: Ввод в поле personName не переключает в режим Edit', () => {
@@ -85,7 +99,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Verify editingId is still null
 
       cy.then(() => {
-        expect(useSettingsUIStore.getState().data.editingId).to.be.null;
+        expect(settingsUi().editingId).to.be.null;
       });
     });
   });
@@ -168,7 +182,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -211,7 +225,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -258,7 +272,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -310,7 +324,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -334,8 +348,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       cy.then(() => {
         // Verify editingId is cleared in store first
-        expect(useSettingsUIStore.getState().data.editingId).to.be.null;
-        expect(useSettingsUIStore.getState().data.formData).to.be.null;
+        expect(settingsUi().editingId).to.be.null;
+        expect(settingsUi().formData).to.be.null;
       });
 
       // Then check button - single button should show "Add limit"
@@ -438,7 +452,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
               : {}),
           };
 
-          useSettingsUIStore.getState().actions.addLimit(personLimit);
+          settingsUi().addLimit(personLimit);
         });
         cy.wrap(onAddLimitMock).as('onAddLimit');
 
@@ -469,9 +483,8 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('@onAddLimit').should('have.been.called');
 
         cy.then(() => {
-          const store = useSettingsUIStore.getState();
-          expect(store.data.formData).to.be.null;
-          expect(store.data.editingId).to.be.null;
+          expect(settingsUi().formData).to.be.null;
+          expect(settingsUi().editingId).to.be.null;
         });
 
         // All form fields should reset to defaults
@@ -501,7 +514,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           includedIssueTypes: ['Task', 'Bug'],
         };
 
-        useSettingsUIStore.getState().actions.addLimit(limit);
+        settingsUi().addLimit(limit);
 
         cy.mount(
           <WrappedContainer
@@ -546,7 +559,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           includedIssueTypes: ['Task', 'Bug'],
         };
 
-        useSettingsUIStore.getState().actions.addLimit(limit);
+        settingsUi().addLimit(limit);
 
         cy.mount(
           <WrappedContainer
@@ -594,7 +607,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           showAllPersonIssues: true,
         };
 
-        useSettingsUIStore.getState().actions.addLimit(limit);
+        settingsUi().addLimit(limit);
 
         cy.mount(
           <WrappedContainer
@@ -656,7 +669,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
           showAllPersonIssues: true,
         };
 
-        useSettingsUIStore.getState().actions.addLimit(limit);
+        settingsUi().addLimit(limit);
 
         cy.mount(
           <WrappedContainer
@@ -788,7 +801,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -814,7 +827,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       // Store's selectedColumns must stay [] (empty = all), not get replaced with explicit IDs
       cy.then(() => {
-        const { formData: fd } = useSettingsUIStore.getState().data;
+        const fd = settingsUi().formData;
         expect(fd!.selectedColumns).to.deep.equal([]);
       });
     });
@@ -835,7 +848,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         showAllPersonIssues: true,
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer
@@ -860,7 +873,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       // Store's swimlanes must stay [] (empty = all), not get replaced with explicit IDs
       cy.then(() => {
-        const { formData: fd } = useSettingsUIStore.getState().data;
+        const fd = settingsUi().formData;
         expect(fd!.swimlanes).to.deep.equal([]);
       });
     });
@@ -911,7 +924,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         includedIssueTypes: ['Task', 'Bug'],
       };
 
-      useSettingsUIStore.getState().actions.addLimit(limit);
+      settingsUi().addLimit(limit);
 
       cy.mount(
         <WrappedContainer

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
+import { useDi } from 'src/shared/diContext';
 import { SettingsButton } from './SettingsButton';
 import { SettingsModalContainer } from '../SettingsModal';
-import { initFromProperty, saveToProperty } from '../../actions';
 import { PERSON_LIMITS_TEXTS } from '../../texts';
+import { settingsUIModelToken } from '../../../tokens';
 import type { SearchUsers } from '../../../../shared/di/jiraApiTokens';
 import type { Column, Swimlane } from '../../state/types';
 
@@ -20,19 +21,20 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
 }) => {
   const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { model: settingsUi } = useDi().inject(settingsUIModelToken);
 
   const handleOpen = () => {
-    initFromProperty();
+    settingsUi.initFromProperty();
     setIsModalOpen(true);
   };
 
   const handleClose = () => {
-    initFromProperty();
+    settingsUi.initFromProperty();
     setIsModalOpen(false);
   };
 
   const handleSave = async () => {
-    await saveToProperty();
+    await settingsUi.save();
     setIsModalOpen(false);
   };
 

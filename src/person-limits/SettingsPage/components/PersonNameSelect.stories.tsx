@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { JiraUser } from 'src/shared/jiraApi';
 import { PersonNameSelect } from './PersonNameSelect';
-import type { SelectedPerson } from '../stores/settingsUIStore.types';
+import type { SelectedPerson } from '../state/types';
 
 const meta: Meta<typeof PersonNameSelect> = {
   title: 'PersonLimits/SettingsPage/PersonNameSelect',

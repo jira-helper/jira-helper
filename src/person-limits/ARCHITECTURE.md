@@ -1,125 +1,137 @@
 # Module Analysis
 
-Analyzed: `src/person-limits`
+Analyzed: `src/person-limits/`
 
 ## Summary
 
-| Module | Stores | Actions | DI Tokens | Containers |
-|--------|--------|---------|-----------|------------|
-| BoardPage | 1 | 3 | 1 | 1 |
-| SettingsPage | 1 | 2 | 0 | 3 |
-| property | 1 | 2 | 0 | 0 |
+| Area         | Model            | DI registration           |
+| ------------ | ---------------- | ------------------------- |
+| property     | `PropertyModel`  | `propertyModelToken`      |
+| BoardPage    | `BoardRuntimeModel` | `boardRuntimeModelToken` |
+| SettingsPage | `SettingsUIModel`   | `settingsUIModelToken`   |
 
-## Dependencies
+`personLimitsModule` (`module.ts`) registers all three models via the shared `Module` base class (`lazy()` + `modelEntry()`). `BoardPagePageObject` is injected into `BoardRuntimeModel` for DOM work. `PropertyModel` is injected into both runtime and settings models.
 
-**applyLimits** (action) uses:
-  - `personLimitsBoardPageObjectToken` (token)
-  - `useRuntimeStore` (store)
-  - `calculateStats` (action)
+**Tokens** (`tokens.ts`): `propertyModelToken`, `boardRuntimeModelToken`, `settingsUIModelToken` — created with `createModelToken()`.
 
-**calculateStats** (action) uses:
-  - `personLimitsBoardPageObjectToken` (token)
-  - `useRuntimeStore` (store)
-  - `usePersonWipLimitsPropertyStore` (store)
+**Registration**: `personLimitsModule.ensure(container)` in `content.ts`.
 
-**showOnlyChosen** (action) uses:
-  - `personLimitsBoardPageObjectToken` (token)
-  - `useRuntimeStore` (store)
+**Property layer** (`property/`): `types.ts`, `migrateProperty.ts`, `PropertyModel.ts` — no zustand store; load/persist/setData live on `PropertyModel` with `Result` for I/O.
 
-**AvatarsContainer** (container) uses:
-  - `useRuntimeStore` (store)
-  - `showOnlyChosen` (action)
+## Dependencies (high level)
 
-**initFromProperty** (action) uses:
-  - `usePersonWipLimitsPropertyStore` (store)
-  - `useSettingsUIStore` (store)
+- **Board page** (`BoardPage/index.ts`): loads board property into `PropertyModel`, mounts `AvatarsContainer` with `BoardRuntimeModel` for stats, highlight, and avatar click filtering.
+- **Settings page** (`SettingsPage/index.tsx`): settings UI containers use `SettingsUIModel` (`useModel`) for form state, CRUD, and `initFromProperty` / `save` (delegates persist to `PropertyModel`).
+- **Pure helpers** remain direct imports: `createPersonLimit`, `updatePersonLimit`, `transformFormData` in `SettingsPage/utils/`, and board helpers in `BoardPage/utils/` (`isPersonLimitAppliedToIssue`, `isPersonsIssue`, `computeLimitId`).
 
-**saveToProperty** (action) uses:
-  - `savePersonWipLimitsProperty` (action)
-  - `usePersonWipLimitsPropertyStore` (store)
-  - `useSettingsUIStore` (store)
-
-**PersonalWipLimitContainer** (container) uses:
-  - `useSettingsUIStore` (store)
-
-**SettingsButtonContainer** (container) uses:
-  - `SettingsModalContainer` (container)
-  - `initFromProperty` (action)
-  - `saveToProperty` (action)
-
-**SettingsModalContainer** (container) uses:
-  - `PersonalWipLimitContainer` (container)
-  - `useSettingsUIStore` (store)
-
-**loadPersonWipLimitsProperty** (action) uses:
-  - `usePersonWipLimitsPropertyStore` (store)
-
-**savePersonWipLimitsProperty** (action) uses:
-  - `usePersonWipLimitsPropertyStore` (store)
-
-## Mermaid Diagram
+## Architecture diagram (target state)
 
 ```mermaid
 flowchart TB
-    classDef store fill:#4CAF50,stroke:#2E7D32,color:#fff
-    classDef action fill:#2196F3,stroke:#1565C0,color:#fff
-    classDef token fill:#FF9800,stroke:#EF6C00,color:#fff
-    classDef container fill:#9C27B0,stroke:#6A1B9A,color:#fff
-
-    subgraph BoardPage["BoardPage"]
-        useRuntimeStore[("useRuntimeStore")]
-        applyLimits["applyLimits()"]
-        calculateStats["calculateStats()"]
-        showOnlyChosen["showOnlyChosen()"]
-        personLimitsBoardPageObjectToken{{"personLimitsBoardPageObjectToken"}}
-        AvatarsContainer["AvatarsContainer"]
-    end
-    subgraph SettingsPage["SettingsPage"]
-        useSettingsUIStore[("useSettingsUIStore")]
-        initFromProperty["initFromProperty()"]
-        saveToProperty["saveToProperty()"]
-        PersonalWipLimitContainer["PersonalWipLimitContainer"]
-        SettingsButtonContainer["SettingsButtonContainer"]
-        SettingsModalContainer["SettingsModalContainer"]
-    end
-    subgraph property["property"]
-        usePersonWipLimitsPropertyStore[("usePersonWipLimitsPropertyStore")]
-        loadPersonWipLimitsProperty["loadPersonWipLimitsProperty()"]
-        savePersonWipLimitsProperty["savePersonWipLimitsProperty()"]
+    subgraph pageObjects ["page-objects/"]
+        BoardPagePO["BoardPagePageObject<br/><small>DOM: issues, columns, swimlanes, visibility</small>"]
+        style BoardPagePO fill:#FFA500,color:black
     end
 
-    applyLimits --> personLimitsBoardPageObjectToken
-    applyLimits --> useRuntimeStore
-    applyLimits --> calculateStats
-    calculateStats --> personLimitsBoardPageObjectToken
-    calculateStats --> useRuntimeStore
-    calculateStats --> usePersonWipLimitsPropertyStore
-    showOnlyChosen --> personLimitsBoardPageObjectToken
-    showOnlyChosen --> useRuntimeStore
-    AvatarsContainer --> useRuntimeStore
-    AvatarsContainer --> showOnlyChosen
-    initFromProperty --> usePersonWipLimitsPropertyStore
-    initFromProperty --> useSettingsUIStore
-    saveToProperty --> savePersonWipLimitsProperty
-    saveToProperty --> usePersonWipLimitsPropertyStore
-    saveToProperty --> useSettingsUIStore
-    PersonalWipLimitContainer --> useSettingsUIStore
-    SettingsButtonContainer --> SettingsModalContainer
-    SettingsButtonContainer --> initFromProperty
-    SettingsButtonContainer --> saveToProperty
-    SettingsModalContainer --> PersonalWipLimitContainer
-    SettingsModalContainer --> useSettingsUIStore
-    loadPersonWipLimitsProperty --> usePersonWipLimitsPropertyStore
-    savePersonWipLimitsProperty --> usePersonWipLimitsPropertyStore
+    subgraph personLimits ["person-limits/"]
+        Types["property/types.ts"]
 
-    class useRuntimeStore,useSettingsUIStore,usePersonWipLimitsPropertyStore store
-    class applyLimits,calculateStats,showOnlyChosen,initFromProperty,saveToProperty,loadPersonWipLimitsProperty,savePersonWipLimitsProperty action
-    class personLimitsBoardPageObjectToken token
-    class AvatarsContainer,PersonalWipLimitContainer,SettingsButtonContainer,SettingsModalContainer container
+        subgraph plTokens ["DI"]
+            Tokens["tokens.ts"]
+            PLModule["module.ts"]
+        end
+
+        subgraph property ["property/"]
+            PropModel["PropertyModel"]
+            style PropModel fill:#9370DB,color:white
+        end
+
+        subgraph boardPage ["BoardPage/"]
+            BoardEntry["index.ts<br/>(PageModification)"]
+            style BoardEntry fill:#FFA500,color:black
+            RuntimeModel["BoardRuntimeModel"]
+            style RuntimeModel fill:#9370DB,color:white
+            AvatarsC["AvatarsContainer"]
+            style AvatarsC fill:#4169E1,color:white
+            AvatarBadge["AvatarBadge"]
+            style AvatarBadge fill:#20B2AA,color:white
+        end
+
+        subgraph settingsPage ["SettingsPage/"]
+            SettingsEntry["index.tsx<br/>(PageModification)"]
+            style SettingsEntry fill:#FFA500,color:black
+            UIModel["SettingsUIModel"]
+            style UIModel fill:#9370DB,color:white
+            BtnContainer["SettingsButtonContainer"]
+            style BtnContainer fill:#4169E1,color:white
+            ModalContainer["SettingsModalContainer"]
+            style ModalContainer fill:#4169E1,color:white
+            FormContainer["PersonalWipLimitContainer"]
+            style FormContainer fill:#4169E1,color:white
+        end
+
+        subgraph utils ["SettingsPage/utils/"]
+            CreateLimit["createPersonLimit"]
+            UpdateLimit["updatePersonLimit"]
+            TransformForm["transformFormData"]
+        end
+
+        subgraph boardUtils ["BoardPage/utils/"]
+            IsApplied["isPersonLimitAppliedToIssue"]
+            IsPersons["isPersonsIssue"]
+            ComputeId["computeLimitId"]
+        end
+    end
+
+    PLModule -->|lazy + modelEntry| PropModel
+    PLModule -->|lazy + modelEntry| RuntimeModel
+    PLModule -->|lazy + modelEntry| UIModel
+
+    RuntimeModel -->|constructor DI| PropModel
+    RuntimeModel -->|constructor DI| BoardPagePO
+    UIModel -->|constructor DI| PropModel
+
+    BoardEntry -->|inject| RuntimeModel
+    BoardEntry -->|inject| PropModel
+    AvatarsC -->|useModel| RuntimeModel
+
+    BtnContainer -->|useModel| UIModel
+    ModalContainer -->|useModel| UIModel
+    FormContainer -->|useModel| UIModel
+
+    RuntimeModel -->|direct import| IsApplied
+    RuntimeModel -->|direct import| IsPersons
+    RuntimeModel -->|direct import| ComputeId
 ```
 
-**Legend:**
-- 🟢 Store (green)
-- 🔵 Action (blue)
-- 🟠 DI Token (orange)
-- 🟣 Container (purple)
+## Component hierarchy
+
+```mermaid
+graph TD
+    BP["PersonLimitsBoardPage<br/>(PageModification)"]:::entry
+    SP["PersonalWIPLimit<br/>(PageModification)"]:::entry
+
+    BP --> RM["BoardRuntimeModel"]:::model
+    BP --> AvatarsC["AvatarsContainer"]:::container
+    AvatarsC --> AB["AvatarBadge"]:::view
+    AvatarsC -.->|useModel| RM
+
+    SP --> SBC["SettingsButtonContainer"]:::container
+    SBC --> SMC["SettingsModalContainer"]:::container
+    SMC --> PLC["PersonalWipLimitContainer"]:::container
+    SBC --> SB["SettingsButton"]:::view
+    SMC --> SM["SettingsModal"]:::view
+    PLC --> PLT["PersonalWipLimitTable"]:::view
+    PLC --> PNS["PersonNameSelect"]:::view
+
+    SBC -.->|useModel| UIModel["SettingsUIModel"]:::model
+    SMC -.->|useModel| UIModel
+    PLC -.->|useModel| UIModel
+
+    classDef entry fill:#e1f5fe,stroke:#0288d1,color:black
+    classDef container fill:#fff3e0,stroke:#f57c00,color:black
+    classDef view fill:#e8f5e9,stroke:#388e3c,color:black
+    classDef model fill:#f3e5f5,stroke:#7b1fa2,color:black
+```
+
+**Legend:** light blue — `PageModification` (non-React entry); orange — container; green — view; purple — valtio model.

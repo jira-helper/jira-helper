@@ -48,6 +48,7 @@ import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { columnLimitsModule } from './column-limits/module';
+import { personLimitsModule } from './person-limits/module';
 import { swimlaneWipLimitsModule } from './swimlane-wip-limits/module';
 import { fieldLimitsModule } from './features/field-limits/module';
 import { swimlaneHistogramModule } from './swimlane-histogram/module';
@@ -91,6 +92,7 @@ function initDiContainer() {
   });
 
   columnLimitsModule.ensure(container);
+  personLimitsModule.ensure(container);
   swimlaneWipLimitsModule.ensure(container);
   fieldLimitsModule.ensure(container);
   swimlaneHistogramModule.ensure(container);
