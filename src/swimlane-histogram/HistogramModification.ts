@@ -4,7 +4,6 @@ import { Token } from 'dioma';
 import { histogramModelToken } from './tokens';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { Histogram } from './components/Histogram';
-import { registerSwimlaneHistogramModule } from './module';
 import type { HistogramModel } from './models/HistogramModel';
 
 export class HistogramModification extends PageModification<void, Element> {
@@ -24,8 +23,6 @@ export class HistogramModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerSwimlaneHistogramModule(this.container);
-
     const { model } = this.container.inject(histogramModelToken);
     this.histogramModel = model as HistogramModel;
 

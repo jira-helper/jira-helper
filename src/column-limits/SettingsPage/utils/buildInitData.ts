@@ -1,6 +1,6 @@
 import type { GroupMap } from '../../shared/utils';
 import type { WipLimitsProperty, Column, UIGroup, IssueTypeState } from '../../types';
-import type { InitFromPropertyData } from '../actions/initFromProperty';
+import type { InitFromPropertyData } from '../models/SettingsUIModel';
 import { WITHOUT_GROUP_ID } from '../../types';
 
 /**

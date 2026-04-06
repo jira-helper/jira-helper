@@ -40,6 +40,15 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
   insertSwimlaneComponent: () => {},
   removeSwimlaneComponent: () => {},
   highlightSwimlane: () => {},
+  getOrderedColumnIds: () => [],
+  getColumnHeaderElement: () => null,
+  getSwimlaneIds: () => [],
+  getIssueCountInColumn: () => 0,
+  styleColumnHeader: () => {},
+  insertColumnHeaderHtml: () => {},
+  removeColumnHeaderElements: () => {},
+  highlightColumnCells: () => {},
+  resetColumnCellStyles: () => {},
 };
 
 const mockContainer = new Container();

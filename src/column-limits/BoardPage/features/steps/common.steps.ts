@@ -3,10 +3,10 @@
  *
  * Step definitions are added in subsequent tasks as features are implemented.
  */
+import { globalContainer } from 'dioma';
 import { Given, When, Then } from '../../../../../cypress/support/bdd-runner';
 import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
-import { useColumnLimitsPropertyStore } from '../../../property';
-import { applyLimits } from '../../actions';
+import { boardRuntimeModelToken, propertyModelToken } from '../../../tokens';
 import {
   createMockIssue,
   addIssueToDOM,
@@ -15,6 +15,10 @@ import {
   resetIssueCounter,
   getNextIssueId,
 } from '../helpers';
+
+const applyColumnLimits = () => {
+  globalContainer.inject(boardRuntimeModelToken).model.apply();
+};
 
 // --- Utility functions ---
 
@@ -90,7 +94,7 @@ Given('there are column groups:', (table: DataTableRows) => {
     };
   });
 
-  useColumnLimitsPropertyStore.getState().actions.setData(data);
+  globalContainer.inject(propertyModelToken).model.setData(data);
 });
 
 /**
@@ -119,7 +123,7 @@ Given('the board has issues:', (table: DataTableRows) => {
  * When the board is displayed
  */
 When('the board is displayed', () => {
-  applyLimits();
+  applyColumnLimits();
 });
 
 /**
@@ -133,7 +137,7 @@ When('a new issue appears in {string}', (columnName: string) => {
   const issueId = getNextIssueId();
   const issue = createMockIssue(issueId, columnId, swimlaneId, 'Task');
   addIssueToDOM(issue, columnId, swimlaneId);
-  applyLimits();
+  applyColumnLimits();
 });
 
 // --- Then steps ---
@@ -215,7 +219,7 @@ Then('{string} should have a badge', (columnName: string) => {
 Then('{string} columns should have {string} border', (groupName: string, hexColor: string) => {
   const expectedColor = hexToRgb(hexColor);
 
-  const groupData = useColumnLimitsPropertyStore.getState().data[groupName];
+  const groupData = globalContainer.inject(propertyModelToken).model.data[groupName];
   if (groupData?.columns) {
     groupData.columns.forEach(colId => {
       cy.get(`.ghx-column[data-id="${colId}"]`).should('have.css', 'border-top-color', expectedColor);

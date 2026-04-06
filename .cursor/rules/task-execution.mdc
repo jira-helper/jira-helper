@@ -57,16 +57,47 @@ alwaysApply: false
 - ESLint: `npm run lint:eslint -- --fix`
 ```
 
-## 4. Запусти coder саб-агента
+## 4. Запусти coder саб-агента (5a)
+
+Обнови статус: `TODO` → `IN_PROGRESS` (в файле задачи и EPIC).
 
 ```
 Task(subagent_type: "coder", prompt: "...")
 ```
 
-## 5. После завершения
+## 5. Код-ревью (5b) — ОБЯЗАТЕЛЬНО после каждой реализации
 
-1. Обнови статус в файле задачи: `TODO` → `DONE`
-2. Обнови статус в EPIC таблице
+```
+Task(subagent_type: "generalPurpose", readonly: true, prompt: "
+Прочитай skill .cursor/skills/code-review/SKILL.md.
+Проведи ревью задачи: .agents/tasks/<FEATURE-SLUG>/TASK-{N}-*.md
+Также прочитай requirements.md, target-design.md, docs/architecture_guideline.md.
+Сохрани отчёт в .agents/tasks/<FEATURE-SLUG>/REVIEW-TASK-{N}.md
+")
+```
+
+## 6. QA проверка (5c) — ОБЯЗАТЕЛЬНО после ревью
+
+```
+Task(subagent_type: "shell", model: "fast", prompt: "
+Прочитай skill .cursor/skills/qa-check/SKILL.md.
+Запусти: npm run lint:eslint -- --fix, npm test, npm run build:dev.
+Сохрани отчёт в .agents/tasks/<FEATURE-SLUG>/QA-TASK-{N}.md
+")
+```
+
+## 7. Цикл фиксов (5d) — если ревью CHANGES_REQUESTED или QA FAIL
+
+1. Собери findings из REVIEW и QA.
+2. Запусти `Task(subagent_type: "coder")` с описанием проблем.
+3. Повтори 5b → 5c после исправлений.
+4. Максимум 3 итерации. Если после 3 остаются critical — эскалируй пользователю.
+
+## 8. Завершение
+
+Когда ревью `APPROVED` + QA `PASS`:
+1. Обнови статус: `IN_PROGRESS` → `VERIFICATION`
+2. Обнови EPIC таблицу
 3. Заполни раздел "Результаты" в файле задачи
 4. Сообщи пользователю результат
 
@@ -74,8 +105,11 @@ Task(subagent_type: "coder", prompt: "...")
 
 Пользователь: "Выполни TASK-20"
 
-1. Читаю путь к задаче, например `.agents/tasks/wiplimit-cells/TASK-20-add-tests-coverage.md` (или legacy `.agents/tasks/TASK-20-*.md`)
+1. Читаю путь к задаче, например `.agents/tasks/wiplimit-cells/TASK-20-add-tests-coverage.md`
 2. Тип: testing (cypress)
 3. Скиллы: `cypress-bdd-testing/SKILL.md`, `testing/SKILL.md`
-4. Запускаю coder с полным контекстом
-5. Обновляю статус в TASK-20 и EPIC-1
+4. Запускаю coder → обновляю статус `IN_PROGRESS`
+5. Запускаю код-ревью → сохраняю REVIEW-TASK-20.md
+6. Запускаю QA → сохраняю QA-TASK-20.md
+7. Если CHANGES_REQUESTED / FAIL → фикс → повторное ревью/QA
+8. Когда APPROVED + PASS → статус `VERIFICATION`, обновляю EPIC

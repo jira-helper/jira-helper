@@ -3,7 +3,7 @@ import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
 import { WithDi } from '../../shared/diContext';
-import { useColumnLimitsPropertyStore } from '../property/store';
+import { propertyModelToken } from '../tokens';
 import { SettingsButtonContainer } from './components/SettingsButton';
 import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
 
@@ -39,8 +39,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
     const [boardData = {}, wipLimits = {}] = data;
     if (!boardData.canEdit) return;
 
-    useColumnLimitsPropertyStore.getState().actions.setData(wipLimits);
-    useColumnLimitsPropertyStore.getState().actions.setState('loaded');
+    const { model: propertyModel } = this.container.inject(propertyModelToken);
+    propertyModel.setData(wipLimits);
 
     const rawSwimlanes =
       (boardData as { swimlanesConfig?: { swimlanes?: Array<{ id?: string; name: string }> } }).swimlanesConfig

@@ -1,4 +1,4 @@
-export { registerSwimlaneHistogramModule } from './module';
+export { swimlaneHistogramModule } from './module';
 export { HistogramModification, histogramModificationToken } from './HistogramModification';
 export { histogramModelToken } from './tokens';
 export { Histogram } from './components/Histogram';

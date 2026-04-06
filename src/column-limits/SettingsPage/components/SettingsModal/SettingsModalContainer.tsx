@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
+import { useDi } from 'src/shared/diContext';
 import { SettingsModal } from './SettingsModal';
-import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
+import { settingsUIModelToken } from '../../../tokens';
+import type { SettingsUIModel } from '../../models/SettingsUIModel';
 import { ColumnLimitsForm } from '../../ColumnLimitsForm';
-import { moveColumn } from '../../actions';
 import { WITHOUT_GROUP_ID } from '../../../types';
 import { COLUMN_LIMITS_TEXTS } from '../../texts';
 import type { Column } from '../../../types';
@@ -19,11 +20,13 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ 
   const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
   const draggingRef = useRef<{ column: Column; groupId: string } | null>(null);
+  const { model, useModel } = useDi().inject(settingsUIModelToken);
+  const snap = useModel();
+  const actions = model as SettingsUIModel;
 
-  const withoutGroupColumns = useColumnLimitsSettingsUIStore(state => state.data.withoutGroupColumns);
-  const groups = useColumnLimitsSettingsUIStore(state => state.data.groups);
-  const issueTypeSelectorStates = useColumnLimitsSettingsUIStore(state => state.data.issueTypeSelectorStates);
-  const actions = useColumnLimitsSettingsUIStore(state => state.actions);
+  const { withoutGroupColumns } = snap;
+  const { groups } = snap;
+  const { issueTypeSelectorStates } = snap;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -78,20 +81,23 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({ 
     draggingRef.current = null;
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent, targetGroupId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const dragged = draggingRef.current;
-    if (!dragged) return;
-    const { column, groupId: fromGroupId } = dragged;
-    if (fromGroupId !== targetGroupId) {
-      moveColumn(column, fromGroupId, targetGroupId);
-    }
-    draggingRef.current = null;
-    // Remove highlight
-    const target = e.currentTarget as HTMLElement;
-    target.classList.remove(styles.addGroupDropzoneActiveJH);
-  }, []);
+  const handleDrop = useCallback(
+    (e: React.DragEvent, targetGroupId: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const dragged = draggingRef.current;
+      if (!dragged) return;
+      const { column, groupId: fromGroupId } = dragged;
+      if (fromGroupId !== targetGroupId) {
+        actions.moveColumn(column, fromGroupId, targetGroupId);
+      }
+      draggingRef.current = null;
+      // Remove highlight
+      const target = e.currentTarget as HTMLElement;
+      target.classList.remove(styles.addGroupDropzoneActiveJH);
+    },
+    [actions]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

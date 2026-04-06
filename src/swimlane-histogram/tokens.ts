@@ -1,7 +1,4 @@
-import { Token } from 'dioma';
+import { createModelToken } from 'src/shared/di/Module';
 import type { HistogramModel } from './models/HistogramModel';
 
-export const histogramModelToken = new Token<{
-  model: Readonly<HistogramModel>;
-  useModel: () => Readonly<HistogramModel>;
-}>('swimlane-histogram/histogramModel');
+export const histogramModelToken = createModelToken<HistogramModel>('swimlane-histogram/histogramModel');

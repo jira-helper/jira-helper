@@ -16,10 +16,12 @@ import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
 import { updateBoardPropertyToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
 import { routingServiceToken, type IRoutingService } from 'src/routing';
 import { registerIssueTypeServiceInDI } from 'src/shared/issueType';
+import { registerBoardPropertyServiceInDI } from 'src/shared/boardPropertyService';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
 import { Ok } from 'ts-results';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
-import { useColumnLimitsSettingsUIStore } from '../stores/settingsUIStore';
-import { useColumnLimitsPropertyStore } from '../../property/store';
+import { columnLimitsModule } from '../../module';
+import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 import type { Column } from '../../types';
 
 // --- Test fixtures matching feature Background ---
@@ -76,13 +78,23 @@ export const setupBackground = () => {
 
   globalContainer.register({
     token: routingServiceToken,
-    value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
+    value: {
+      getProjectKeyFromURL: () => 'TEST',
+      getBoardIdFromURL: () => 'test-board-123',
+    } as unknown as IRoutingService,
   });
 
   registerIssueTypeServiceInDI(globalContainer);
 
-  useColumnLimitsSettingsUIStore.getState().actions.reset();
-  useColumnLimitsPropertyStore.getState().actions.reset();
+  globalContainer.register({
+    token: boardPagePageObjectToken,
+    value: BoardPagePageObject,
+  });
+  registerBoardPropertyServiceInDI(globalContainer);
+  columnLimitsModule.ensure(globalContainer);
+
+  globalContainer.inject(propertyModelToken).model.reset();
+  globalContainer.inject(settingsUIModelToken).model.reset();
   boardSwimlanes = [];
 };
 

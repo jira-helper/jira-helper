@@ -3,45 +3,31 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
-import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
+import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { loggerToken, Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { columnLimitsModule } from '../../../module';
+import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsModalContainer } from './SettingsModalContainer';
 
-// Mock store
-vi.mock('../../stores/settingsUIStore', () => {
-  const mockActions = {
-    setGroupLimit: vi.fn(),
-    setIssueTypeState: vi.fn(),
-    reset: vi.fn(),
-  };
+const mockBoardPropertyService = {
+  getBoardProperty: vi.fn().mockResolvedValue({}),
+  updateBoardProperty: vi.fn(),
+  deleteBoardProperty: vi.fn(),
+};
 
-  const useStore = (selector: any) =>
-    selector({
-      data: {
-        withoutGroupColumns: [],
-        groups: [],
-        issueTypeSelectorStates: {},
-      },
-      actions: mockActions,
-    });
-
-  (useStore as any).getState = () => ({
-    data: {
-      withoutGroupColumns: [],
-      groups: [],
-      issueTypeSelectorStates: {},
-    },
-    actions: mockActions,
-  });
-
-  return {
-    useColumnLimitsSettingsUIStore: useStore,
-  };
-});
-
-// Mock actions
-vi.mock('../../actions', () => ({
-  moveColumn: vi.fn(),
-}));
+const mockBoardPagePageObject: IBoardPagePageObject = {
+  getOrderedColumnIds: vi.fn(() => []),
+  getColumnHeaderElement: vi.fn(() => null),
+  getSwimlaneIds: vi.fn(() => []),
+  getIssueCountInColumn: vi.fn(() => 0),
+  styleColumnHeader: vi.fn(),
+  insertColumnHeaderHtml: vi.fn(),
+  removeColumnHeaderElements: vi.fn(),
+  highlightColumnCells: vi.fn(),
+  resetColumnCellStyles: vi.fn(),
+} as unknown as IBoardPagePageObject;
 
 // Mock SettingsModal to avoid rendering its complex logic
 vi.mock('./SettingsModal', () => ({
@@ -64,6 +50,17 @@ vi.mock('../../ColumnLimitsForm', () => ({
   ColumnLimitsForm: () => <div data-testid="mock-form">Form</div>,
 }));
 
+const registerColumnLimitsTestDi = () => {
+  globalContainer.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
+  globalContainer.register({ token: loggerToken, value: new Logger() });
+  globalContainer.register({ token: boardPagePageObjectToken, value: mockBoardPagePageObject });
+  columnLimitsModule.ensure(globalContainer);
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
+};
+
 describe('SettingsModalContainer', () => {
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
@@ -71,7 +68,7 @@ describe('SettingsModalContainer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     globalContainer.reset();
-    registerTestDependencies(globalContainer);
+    registerColumnLimitsTestDi();
   });
 
   it('should render SettingsModal and ColumnLimitsForm', () => {

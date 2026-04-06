@@ -35,7 +35,7 @@ const rule = {
     const filename = context.filename || context.getFilename();
     const basename = path.basename(filename);
 
-    if (basename === 'module.ts') {
+    if (basename === 'module.ts' || basename === 'Module.ts') {
       return {};
     }
 

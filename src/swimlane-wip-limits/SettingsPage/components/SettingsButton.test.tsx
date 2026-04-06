@@ -27,7 +27,7 @@ describe('SettingsButton', () => {
     };
     container.register({
       token: settingsUIModelToken,
-      value: mock as { model: Readonly<SettingsUIModel>; useModel: () => Readonly<SettingsUIModel> },
+      value: mock as { model: SettingsUIModel; useModel: () => Readonly<SettingsUIModel> },
     });
 
     return render(

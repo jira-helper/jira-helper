@@ -1,26 +1,16 @@
 import type { Container } from 'dioma';
-import { globalContainer } from 'dioma';
-import { proxy } from 'valtio';
-import { useSnapshot } from 'valtio';
+import { Module, modelEntry } from 'src/shared/di/Module';
 import { histogramModelToken } from './tokens';
 import { HistogramModel } from './models/HistogramModel';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { loggerToken } from 'src/shared/Logger';
 
-/**
- * Регистрирует HistogramModel в DI-контейнере.
- */
-export function registerSwimlaneHistogramModule(container: Container = globalContainer): void {
-  const pageObject = container.inject(boardPagePageObjectToken);
-  const logger = container.inject(loggerToken);
-
-  const model = proxy(new HistogramModel(pageObject, logger));
-
-  container.register({
-    token: histogramModelToken,
-    value: {
-      model,
-      useModel: () => useSnapshot(model) as HistogramModel,
-    },
-  });
+class SwimlaneHistogramModule extends Module {
+  register(container: Container): void {
+    this.lazy(container, histogramModelToken, c =>
+      modelEntry(new HistogramModel(c.inject(boardPagePageObjectToken), c.inject(loggerToken)))
+    );
+  }
 }
+
+export const swimlaneHistogramModule = new SwimlaneHistogramModule();

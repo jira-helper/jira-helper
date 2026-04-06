@@ -17,6 +17,16 @@ export interface IssueCountOptions {
   includedIssueTypes?: string[];
 }
 
+/** Опции подсчёта issues в колонке (across swimlanes). */
+export type ColumnIssueCountOptions = {
+  /** Swimlane IDs to exclude from counting */
+  ignoredSwimlanes?: string[];
+  /** Only count issues of these types (empty/undefined = all) */
+  includedIssueTypes?: string[];
+  /** Additional CSS fragment appended after `.ghx-issue:not(.ghx-done)`, e.g. `:not(.ghx-issue-subtask)` */
+  cssFilter?: string;
+};
+
 const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
 
 type BoardSelectors = Pick<
@@ -174,6 +184,43 @@ export interface IBoardPagePageObject {
   insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void;
   removeSwimlaneComponent(header: Element, key: string): void;
   highlightSwimlane(header: Element, exceeded: boolean): void;
+
+  /**
+   * Ordered column IDs from the board header row.
+   * Reads from `.ghx-first ul.ghx-columns > li.ghx-column` (and test variant `ul.ghx-columns.ghx-first`).
+   */
+  getOrderedColumnIds(): string[];
+
+  /**
+   * Column header element by column ID (header row, not swimlane cell).
+   */
+  getColumnHeaderElement(columnId: string): HTMLElement | null;
+
+  /** All swimlane IDs (`getSwimlanes().map(s => s.id)`). */
+  getSwimlaneIds(): string[];
+
+  /**
+   * Count issues in a column across swimlanes (excludes `.ghx-done` by default, like legacy column-limits).
+   */
+  getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number;
+
+  /** Apply inline styles to the column header element. */
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void;
+
+  /** Insert HTML at the end of the column header (`insertAdjacentHTML` `beforeend`). */
+  insertColumnHeaderHtml(columnId: string, html: string): void;
+
+  /** Remove descendants of the column header matching `selector`. */
+  removeColumnHeaderElements(columnId: string, selector: string): void;
+
+  /**
+   * Set background color on column cells across swimlanes.
+   * @param excludedSwimlaneIds — swimlanes to skip (not highlighted).
+   */
+  highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void;
+
+  /** Clear inline background on all column cells for this column id across swimlanes. */
+  resetColumnCellStyles(columnId: string): void;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
@@ -432,6 +479,90 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     if (swimlane) swimlane.style.backgroundColor = bgColor;
     if (swimlaneDescription) swimlaneDescription.style.color = textColor;
     if (innerHeader) innerHeader.style.backgroundColor = bgColor;
+  },
+
+  getOrderedColumnIds(): string[] {
+    const columns = document.querySelectorAll<HTMLElement>(
+      'ul.ghx-columns.ghx-first > li.ghx-column, .ghx-first ul.ghx-columns > li.ghx-column'
+    );
+    return Array.from(columns)
+      .map(column => (column.dataset.columnId || column.getAttribute('data-column-id') || '') as string)
+      .filter(Boolean);
+  },
+
+  getColumnHeaderElement(columnId: string): HTMLElement | null {
+    const headerColumn = document.querySelector<HTMLElement>(
+      `.ghx-column-header-group .ghx-column[data-id="${columnId}"], ul.ghx-columns .ghx-column[data-id="${columnId}"]`
+    );
+    if (headerColumn) {
+      return headerColumn;
+    }
+    return document.querySelector<HTMLElement>(`.ghx-column[data-id="${columnId}"]`);
+  },
+
+  getSwimlaneIds(): string[] {
+    return this.getSwimlanes().map(s => s.id);
+  },
+
+  getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
+    const ignoredSwimlanes = options?.ignoredSwimlanes ?? [];
+    const includedIssueTypes = options?.includedIssueTypes;
+    const cssFilter = options?.cssFilter ?? '';
+
+    const swimlanesFilter =
+      ignoredSwimlanes.length > 0
+        ? ignoredSwimlanes.map(swimlaneId => `:not([swimlane-id="${swimlaneId}"])`).join('')
+        : '';
+
+    const selector = swimlanesFilter
+      ? `.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"] .ghx-issue:not(.ghx-done)${cssFilter}`
+      : `.ghx-swimlane .ghx-column[data-column-id="${columnId}"] .ghx-issue:not(.ghx-done)${cssFilter}`;
+
+    const issues = document.querySelectorAll(selector);
+
+    if (!includedIssueTypes || includedIssueTypes.length === 0) {
+      return issues.length;
+    }
+
+    return Array.from(issues).filter(issue => {
+      const issueType = getIssueTypeFromCard(issue);
+      return issueType ? includedIssueTypes.includes(issueType) : false;
+    }).length;
+  },
+
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    Object.assign(columnElement.style, styles);
+  },
+
+  insertColumnHeaderHtml(columnId: string, html: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    columnElement.insertAdjacentHTML('beforeend', html);
+  },
+
+  removeColumnHeaderElements(columnId: string, selector: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    columnElement.querySelectorAll(selector).forEach(el => el.remove());
+  },
+
+  highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void {
+    const excluded = excludedSwimlaneIds ?? [];
+    const swimlanesFilter = excluded.length > 0 ? excluded.map(id => `:not([swimlane-id="${id}"])`).join('') : '';
+    document
+      .querySelectorAll<HTMLElement>(`.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"]`)
+      .forEach(el => {
+        el.style.backgroundColor = color;
+      });
+  },
+
+  resetColumnCellStyles(columnId: string): void {
+    const selector = `.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`;
+    document.querySelectorAll<HTMLElement>(selector).forEach(el => {
+      el.style.backgroundColor = '';
+    });
   },
 };
 

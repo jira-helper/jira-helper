@@ -6,7 +6,6 @@ import { WithDi } from 'src/shared/diContext';
 import { Token } from 'dioma';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
-import { registerSwimlaneWipLimitsModule } from '../module';
 
 export class SettingsPageModification extends PageModification<void, Element> {
   private root: Root | null = null;
@@ -29,8 +28,6 @@ export class SettingsPageModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerSwimlaneWipLimitsModule(this.container);
-
     this.swimlaneSelect = document.querySelector('#ghx-swimlanestrategy-select');
 
     if (this.swimlaneSelect?.value === 'custom') {

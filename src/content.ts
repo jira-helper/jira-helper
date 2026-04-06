@@ -47,6 +47,10 @@ import { registerRoutingServiceInDI } from './routing';
 import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
+import { columnLimitsModule } from './column-limits/module';
+import { swimlaneWipLimitsModule } from './swimlane-wip-limits/module';
+import { fieldLimitsModule } from './features/field-limits/module';
+import { swimlaneHistogramModule } from './swimlane-histogram/module';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
@@ -85,6 +89,11 @@ function initDiContainer() {
     token: localeProviderToken,
     value: new JiraLocaleProvider(),
   });
+
+  columnLimitsModule.ensure(container);
+  swimlaneWipLimitsModule.ensure(container);
+  fieldLimitsModule.ensure(container);
+  swimlaneHistogramModule.ensure(container);
 
   // Register PageModification instances as value tokens
   container.register({ token: cardColorsBoardPageToken, value: new CardColorsBoardPage(container) });

@@ -7,7 +7,6 @@ import { useDi } from 'src/shared/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
-import { registerFieldLimitsModule } from '../module';
 import { settingsUIModelToken } from '../tokens';
 import { FIELD_LIMITS_TEXTS } from '../texts';
 import type { SettingsUIModel } from './models/SettingsUIModel';
@@ -39,8 +38,6 @@ export class SettingsPageModification extends PageModification<void, Element> {
   }
 
   async apply(): Promise<void> {
-    registerFieldLimitsModule(this.container);
-
     const container = document.querySelector('#ghx-config-cardLayout');
     if (!container) return;
 

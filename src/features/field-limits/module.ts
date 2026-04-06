@@ -1,7 +1,5 @@
 import type { Container } from 'dioma';
-import { globalContainer } from 'dioma';
-import { proxy } from 'valtio';
-import { useSnapshot } from 'valtio';
+import { Module, modelEntry } from 'src/shared/di/Module';
 import {
   propertyModelToken,
   settingsUIModelToken,
@@ -18,50 +16,36 @@ import { loggerToken } from 'src/shared/Logger';
 import { routingServiceToken } from 'src/routing';
 import { getBoardEditDataToken } from 'src/shared/di/jiraApiTokens';
 
-/**
- * Регистрирует все модели фичи field-limits в DI-контейнере.
- */
-export function registerFieldLimitsModule(container: Container = globalContainer): void {
-  const boardPropertyService = container.inject(BoardPropertyServiceToken);
-  const boardPageObject = container.inject(boardPagePageObjectToken);
-  const logger = container.inject(loggerToken);
+class FieldLimitsModule extends Module {
+  register(container: Container): void {
+    this.lazy(container, fieldLimitsBoardPageObjectToken, () => new FieldLimitsBoardPageObject());
 
-  const fieldLimitsPageObject = new FieldLimitsBoardPageObject();
-  container.register({
-    token: fieldLimitsBoardPageObjectToken,
-    value: fieldLimitsPageObject,
-  });
+    this.lazy(container, propertyModelToken, c =>
+      modelEntry(new PropertyModel(c.inject(BoardPropertyServiceToken), c.inject(loggerToken)))
+    );
 
-  const propertyModel = proxy(new PropertyModel(boardPropertyService, logger));
-  container.register({
-    token: propertyModelToken,
-    value: {
-      model: propertyModel,
-      useModel: () => useSnapshot(propertyModel) as PropertyModel,
-    },
-  });
+    this.lazy(container, settingsUIModelToken, c => {
+      const { model: propertyModel } = c.inject(propertyModelToken);
+      const getBoardData = async () => {
+        const boardId = c.inject(routingServiceToken).getBoardIdFromURL();
+        if (!boardId) throw new Error('No board ID');
+        return c.inject(getBoardEditDataToken)(boardId);
+      };
+      return modelEntry(new SettingsUIModel(propertyModel, getBoardData, c.inject(loggerToken)));
+    });
 
-  const getBoardData = async () => {
-    const boardId = container.inject(routingServiceToken).getBoardIdFromURL();
-    if (!boardId) throw new Error('No board ID');
-    return container.inject(getBoardEditDataToken)(boardId);
-  };
-
-  const settingsUIModel = proxy(new SettingsUIModel(propertyModel, getBoardData, logger));
-  container.register({
-    token: settingsUIModelToken,
-    value: {
-      model: settingsUIModel,
-      useModel: () => useSnapshot(settingsUIModel) as SettingsUIModel,
-    },
-  });
-
-  const boardRuntimeModel = proxy(new BoardRuntimeModel(propertyModel, fieldLimitsPageObject, boardPageObject, logger));
-  container.register({
-    token: boardRuntimeModelToken,
-    value: {
-      model: boardRuntimeModel,
-      useModel: () => useSnapshot(boardRuntimeModel) as BoardRuntimeModel,
-    },
-  });
+    this.lazy(container, boardRuntimeModelToken, c => {
+      const { model: propertyModel } = c.inject(propertyModelToken);
+      return modelEntry(
+        new BoardRuntimeModel(
+          propertyModel,
+          c.inject(fieldLimitsBoardPageObjectToken),
+          c.inject(boardPagePageObjectToken),
+          c.inject(loggerToken)
+        )
+      );
+    });
+  }
 }
+
+export const fieldLimitsModule = new FieldLimitsModule();

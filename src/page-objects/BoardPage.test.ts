@@ -476,6 +476,227 @@ describe('BoardPagePageObject swimlane methods', () => {
   });
 });
 
+describe('BoardPagePageObject column header & column-limits DOM helpers', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const mountOrderedColumnsStructure = (variant: 'wrapper-first' | 'ul-first-class') => {
+    if (variant === 'wrapper-first') {
+      document.body.innerHTML = `
+        <div class="ghx-first">
+          <ul class="ghx-columns">
+            <li class="ghx-column" data-column-id="c1" data-id="c1"></li>
+            <li class="ghx-column" data-column-id="c2" data-id="c2"></li>
+          </ul>
+        </div>
+      `;
+    } else {
+      document.body.innerHTML = `
+        <ul class="ghx-columns ghx-first">
+          <li class="ghx-column" data-column-id="c1" data-id="c1"></li>
+          <li class="ghx-column" data-column-id="c2" data-id="c2"></li>
+        </ul>
+      `;
+    }
+  };
+
+  it('getOrderedColumnIds reads column ids from .ghx-first ul.ghx-columns layout', () => {
+    mountOrderedColumnsStructure('wrapper-first');
+    expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['c1', 'c2']);
+  });
+
+  it('getOrderedColumnIds reads column ids from ul.ghx-columns.ghx-first layout', () => {
+    mountOrderedColumnsStructure('ul-first-class');
+    expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['c1', 'c2']);
+  });
+
+  it('getColumnHeaderElement returns header li from ul.ghx-columns', () => {
+    document.body.innerHTML = `
+      <div id="ghx-column-headers">
+        <ul class="ghx-columns">
+          <li class="ghx-column" data-id="col-x" data-column-id="col-x"><span class="ghx-column-title">X</span></li>
+        </ul>
+      </div>
+    `;
+    const el = BoardPagePageObject.getColumnHeaderElement('col-x');
+    expect(el).not.toBeNull();
+    expect(el?.classList.contains('ghx-column')).toBe(true);
+    expect(el?.querySelector('.ghx-column-title')?.textContent).toBe('X');
+  });
+
+  it('getColumnHeaderElement prefers ghx-column-header-group when present', () => {
+    document.body.innerHTML = `
+      <div class="ghx-column-header-group">
+        <div class="ghx-column" data-id="col-h" data-column-id="col-h">Header group</div>
+      </div>
+      <ul class="ghx-columns">
+        <li class="ghx-column" data-id="col-h" data-column-id="col-h">Other</li>
+      </ul>
+    `;
+    const el = BoardPagePageObject.getColumnHeaderElement('col-h');
+    expect(el?.textContent?.trim()).toBe('Header group');
+  });
+
+  it('getSwimlaneIds matches getSwimlanes ids', () => {
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="a"><div class="ghx-swimlane-header"></div><div class="ghx-columns"></div></div>
+      <div class="ghx-swimlane" swimlane-id="b"><div class="ghx-swimlane-header"></div><div class="ghx-columns"></div></div>
+    `;
+    document.body.appendChild(pool);
+
+    expect(BoardPagePageObject.getSwimlaneIds()).toEqual(['a', 'b']);
+    expect(BoardPagePageObject.getSwimlaneIds()).toEqual(BoardPagePageObject.getSwimlanes().map(s => s.id));
+  });
+
+  it('getIssueCountInColumn counts non-done issues across swimlanes', () => {
+    document.body.innerHTML = '';
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s1">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue"></div>
+            <div class="ghx-issue ghx-done"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ghx-swimlane" swimlane-id="s2">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+
+    expect(BoardPagePageObject.getIssueCountInColumn('col1')).toBe(2);
+  });
+
+  it('getIssueCountInColumn ignores listed swimlanes', () => {
+    document.body.innerHTML = '';
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s1">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1"><div class="ghx-issue"></div></div>
+        </div>
+      </div>
+      <div class="ghx-swimlane" swimlane-id="s2">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1"><div class="ghx-issue"></div></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+
+    expect(BoardPagePageObject.getIssueCountInColumn('col1', { ignoredSwimlanes: ['s1'] })).toBe(1);
+  });
+
+  it('getIssueCountInColumn applies cssFilter', () => {
+    document.body.innerHTML = '';
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s1">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue"></div>
+            <div class="ghx-issue ghx-issue-subtask"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+
+    expect(BoardPagePageObject.getIssueCountInColumn('col1', { cssFilter: ':not(.ghx-issue-subtask)' })).toBe(1);
+  });
+
+  it('getIssueCountInColumn filters by issue type from .ghx-type title', () => {
+    document.body.innerHTML = '';
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s1">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue"><span class="ghx-type" title="Story"></span></div>
+            <div class="ghx-issue"><span class="ghx-type" title="Simple Bug"></span></div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+
+    expect(BoardPagePageObject.getIssueCountInColumn('col1', { includedIssueTypes: ['Story'] })).toBe(1);
+  });
+
+  it('styleColumnHeader applies inline styles to header element', () => {
+    document.body.innerHTML = `
+      <ul class="ghx-columns">
+        <li class="ghx-column" data-id="z1" data-column-id="z1"></li>
+      </ul>
+    `;
+    BoardPagePageObject.styleColumnHeader('z1', { color: 'red' });
+    const el = BoardPagePageObject.getColumnHeaderElement('z1');
+    expect(el?.style.color).toBe('red');
+  });
+
+  it('insertColumnHeaderHtml and removeColumnHeaderElements mutate header', () => {
+    document.body.innerHTML = `
+      <ul class="ghx-columns">
+        <li class="ghx-column" data-id="z2" data-column-id="z2"></li>
+      </ul>
+    `;
+    BoardPagePageObject.insertColumnHeaderHtml('z2', '<span class="badge-test" data-x="1">Hi</span>');
+    const header = BoardPagePageObject.getColumnHeaderElement('z2');
+    expect(header?.querySelector('.badge-test')?.textContent).toBe('Hi');
+
+    BoardPagePageObject.removeColumnHeaderElements('z2', '.badge-test');
+    expect(header?.querySelector('.badge-test')).toBeNull();
+  });
+
+  it('highlightColumnCells and resetColumnCellStyles update swimlane column cells', () => {
+    document.body.innerHTML = '';
+    const pool = document.createElement('div');
+    pool.id = 'ghx-pool';
+    pool.innerHTML = `
+      <div class="ghx-swimlane" swimlane-id="s1">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1"></div>
+        </div>
+      </div>
+      <div class="ghx-swimlane" swimlane-id="s2">
+        <div class="ghx-swimlane-header"></div>
+        <div class="ghx-columns">
+          <div class="ghx-column" data-column-id="col1"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pool);
+
+    BoardPagePageObject.highlightColumnCells('col1', '#ff5630', ['s2']);
+    const cells = document.querySelectorAll('.ghx-column[data-column-id="col1"]');
+    expect((cells[0] as HTMLElement).style.backgroundColor).toBe('#ff5630');
+    expect((cells[1] as HTMLElement).style.backgroundColor).toBe('');
+
+    BoardPagePageObject.resetColumnCellStyles('col1');
+    expect((cells[0] as HTMLElement).style.backgroundColor).toBe('');
+  });
+});
+
 describe('CardPageObject', () => {
   beforeEach(() => {
     document.body.innerHTML = '';

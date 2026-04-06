@@ -4,46 +4,60 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/shared/diContext';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { loggerToken, Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { columnLimitsModule } from '../../../module';
+import { settingsUIModelToken } from '../../../tokens';
+import type { SettingsUIModel } from '../../models/SettingsUIModel';
 import { SettingsButtonContainer } from './SettingsButtonContainer';
-import { useColumnLimitsPropertyStore } from '../../../property/store';
-import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
-import * as actions from '../../actions';
-
-// Mock stores
-vi.mock('../../../property/store', () => ({
-  useColumnLimitsPropertyStore: {
-    getState: vi.fn(),
-  },
-}));
-
-vi.mock('../../stores/settingsUIStore', () => ({
-  useColumnLimitsSettingsUIStore: {
-    getState: vi.fn(),
-  },
-}));
-
-// Mock actions
-vi.mock('../../actions', () => ({
-  initFromProperty: vi.fn(),
-  saveToProperty: vi.fn(),
-}));
 
 // Mock SettingsModalContainer
 vi.mock('../SettingsModal', () => ({
-  SettingsModalContainer: ({ onClose, onSave }: any) => (
+  SettingsModalContainer: ({ onClose, onSave }: { onClose: () => void; onSave: () => Promise<void> }) => (
     <div data-testid="mock-modal">
       <button type="button" onClick={onClose}>
         Close
       </button>
-      <button type="button" onClick={onSave}>
+      <button type="button" onClick={() => void onSave()}>
         Save
       </button>
     </div>
   ),
 }));
 
+const mockBoardPropertyService = {
+  getBoardProperty: vi.fn().mockResolvedValue({}),
+  updateBoardProperty: vi.fn(),
+  deleteBoardProperty: vi.fn(),
+};
+
+const mockBoardPagePageObject: IBoardPagePageObject = {
+  getOrderedColumnIds: vi.fn(() => []),
+  getColumnHeaderElement: vi.fn(() => null),
+  getSwimlaneIds: vi.fn(() => []),
+  getIssueCountInColumn: vi.fn(() => 0),
+  styleColumnHeader: vi.fn(),
+  insertColumnHeaderHtml: vi.fn(),
+  removeColumnHeaderElements: vi.fn(),
+  highlightColumnCells: vi.fn(),
+  resetColumnCellStyles: vi.fn(),
+} as unknown as IBoardPagePageObject;
+
 const renderWithDi = (ui: React.ReactElement) => {
   return render(<WithDi container={globalContainer}>{ui}</WithDi>);
+};
+
+const registerColumnLimitsTestDi = () => {
+  globalContainer.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
+  globalContainer.register({ token: loggerToken, value: new Logger() });
+  globalContainer.register({ token: boardPagePageObjectToken, value: mockBoardPagePageObject });
+  columnLimitsModule.ensure(globalContainer);
+  globalContainer.register({
+    token: localeProviderToken,
+    value: new MockLocaleProvider('en'),
+  });
 };
 
 describe('SettingsButtonContainer', () => {
@@ -54,23 +68,7 @@ describe('SettingsButtonContainer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     globalContainer.reset();
-
-    // Register locale provider for i18n
-    globalContainer.register({
-      token: localeProviderToken,
-      value: new MockLocaleProvider('en'),
-    });
-
-    // Default mock implementation for stores
-    (useColumnLimitsPropertyStore.getState as any).mockReturnValue({
-      data: {},
-    });
-
-    (useColumnLimitsSettingsUIStore.getState as any).mockReturnValue({
-      actions: {
-        reset: vi.fn(),
-      },
-    });
+    registerColumnLimitsTestDi();
   });
 
   it('should render SettingsButton', () => {
@@ -88,23 +86,25 @@ describe('SettingsButtonContainer', () => {
     mockGetColumns.mockReturnValue(mockColumns);
     mockGetColumnName.mockReturnValue('Column 1');
 
+    const settingsModel = globalContainer.inject(settingsUIModelToken).model as SettingsUIModel;
+    const resetSpy = vi.spyOn(settingsModel, 'reset');
+    const initSpy = vi.spyOn(settingsModel, 'initFromProperty');
+
     renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
     fireEvent.click(screen.getByText(buttonLabel));
 
-    expect(useColumnLimitsSettingsUIStore.getState().actions.reset).toHaveBeenCalled();
-    expect(actions.initFromProperty).toHaveBeenCalled();
+    expect(resetSpy).toHaveBeenCalled();
+    expect(initSpy).toHaveBeenCalled();
     expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
   });
 
   it('should close modal when handleClose is called', async () => {
     renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
-    // Open modal
     fireEvent.click(screen.getByText(buttonLabel));
     expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
 
-    // Close modal
     fireEvent.click(screen.getByText('Close'));
     expect(screen.queryByTestId('mock-modal')).not.toBeInTheDocument();
   });
@@ -117,15 +117,16 @@ describe('SettingsButtonContainer', () => {
       },
     ]);
 
+    const settingsModel = globalContainer.inject(settingsUIModelToken).model as SettingsUIModel;
+    const saveSpy = vi.spyOn(settingsModel, 'save').mockResolvedValue(undefined);
+
     renderWithDi(<SettingsButtonContainer getColumns={mockGetColumns} getColumnName={mockGetColumnName} />);
 
-    // Open modal
     fireEvent.click(screen.getByText(buttonLabel));
 
-    // Click save in mock modal
     fireEvent.click(screen.getByText('Save'));
 
-    expect(actions.saveToProperty).toHaveBeenCalledWith(['col1']);
+    expect(saveSpy).toHaveBeenCalledWith(['col1']);
     await waitFor(() => {
       expect(screen.queryByTestId('mock-modal')).not.toBeInTheDocument();
     });

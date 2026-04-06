@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
-import { registerSwimlaneWipLimitsModule } from './module';
+import { swimlaneWipLimitsModule } from './module';
 import { propertyModelToken, settingsUIModelToken, boardRuntimeModelToken } from './tokens';
 import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
@@ -13,7 +13,7 @@ const mockBoardPropertyService = {
   deleteBoardProperty: vi.fn(),
 };
 
-describe('registerSwimlaneWipLimitsModule', () => {
+describe('swimlaneWipLimitsModule', () => {
   let container: Container;
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('registerSwimlaneWipLimitsModule', () => {
   });
 
   it('should register PropertyModel token', () => {
-    registerSwimlaneWipLimitsModule(container);
+    swimlaneWipLimitsModule.ensure(container);
 
     const { model } = container.inject(propertyModelToken);
     expect(model).toBeDefined();
@@ -33,7 +33,7 @@ describe('registerSwimlaneWipLimitsModule', () => {
   });
 
   it('should register SettingsUIModel token', () => {
-    registerSwimlaneWipLimitsModule(container);
+    swimlaneWipLimitsModule.ensure(container);
 
     const { model } = container.inject(settingsUIModelToken);
     expect(model).toBeDefined();
@@ -41,7 +41,7 @@ describe('registerSwimlaneWipLimitsModule', () => {
   });
 
   it('should register BoardRuntimeModel token', () => {
-    registerSwimlaneWipLimitsModule(container);
+    swimlaneWipLimitsModule.ensure(container);
 
     const { model } = container.inject(boardRuntimeModelToken);
     expect(model).toBeDefined();
@@ -49,7 +49,7 @@ describe('registerSwimlaneWipLimitsModule', () => {
   });
 
   it('should create singletons (same instance on multiple injects)', () => {
-    registerSwimlaneWipLimitsModule(container);
+    swimlaneWipLimitsModule.ensure(container);
 
     const first = container.inject(propertyModelToken);
     const second = container.inject(propertyModelToken);

@@ -35,7 +35,7 @@ const createMockBoardRuntimeModel = (overrides: {
   };
 
   return {
-    model: model as unknown as Readonly<BoardRuntimeModel>,
+    model: model as unknown as BoardRuntimeModel,
     useModel: () => snap as unknown as Readonly<BoardRuntimeModel>,
   };
 };

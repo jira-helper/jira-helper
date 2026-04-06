@@ -1,13 +1,15 @@
 ---
 name: solution-design
-description: Создание Target Design документа для фичи jira-helper. Описывает целевую архитектуру, компоненты с кодом, файловую структуру и план миграции. Используй после проектирования архитектуры и перед разбиением на задачи.
+description: Создание Target Design документа для фичи jira-helper. Описывает целевую архитектуру, интерфейсы компонентов, файловую структуру и план миграции. Используй после проектирования архитектуры и перед разбиением на задачи.
 ---
 
 # Solution Design (Target Design)
 
 ## Назначение
 
-Target Design — это **имплементационный blueprint**: документ, который показывает как именно будет выглядеть код после реализации. Содержит Mermaid-диаграммы, TypeScript-интерфейсы, code snippets для каждого компонента, файловую структуру и план миграции.
+Target Design — это **архитектурный blueprint**: документ, который показывает **структуру и контракты** будущего кода. Содержит Mermaid-диаграммы, TypeScript-интерфейсы (props, store state, public API), файловую структуру и план миграции.
+
+**НЕ содержит реализацию**: тела функций, хуки, обработчики событий, JSX — всё это пишет coder на этапе реализации. Target Design описывает **что** и **какие контракты**, но не **как** реализовано.
 
 ## Обязательный контекст
 
@@ -48,7 +50,7 @@ Target Design клади **в ту же папку фичи**, что и EPIC и
 
 ## Architecture Diagram
 
-[Mermaid flowchart — полная архитектура: DOM → React → State → Actions]
+[Mermaid flowchart — по сущностям (папкам/модулям), не по слоям. Каждый subgraph = папка/модуль фичи.]
 
 ## Component Hierarchy
 
@@ -60,7 +62,7 @@ Target Design клади **в ту же папку фичи**, что и EPIC и
 
 ## Component Specifications
 
-[Для каждого компонента: Responsibility + TypeScript код (props)]
+[Для каждого компонента: Responsibility (одно предложение) + TypeScript интерфейс (props / public API). БЕЗ реализации.]
 
 ## State Changes
 
@@ -85,18 +87,34 @@ Target Design клади **в ту же папку фичи**, что и EPIC и
 
 ### 2. Architecture Diagram
 
-Mermaid `flowchart TB` с subgraph-ами по слоям:
+Mermaid `flowchart TB` с subgraph-ами **по сущностям (папкам / модулям)**, а не по слоям.
 
-- **Jira DOM** — точка входа (если есть)
-- **PageModification** — index.ts (если есть)
-- **React Application** — компоненты (Container → View)
-- **State Layer** — Valtio Models или Zustand Stores
+Каждый subgraph = **папка или логический модуль** фичи. Например:
 
-Color coding:
+```mermaid
+flowchart TB
+    subgraph feature/SettingsTab ["SettingsTab/ (★ NEW)"]
+        Mod["index.ts (PageModification)"]
+        Container["ColumnLimitsTabContainer"]
+        BuildInit["buildInitDataFromColumns"]
+    end
+    subgraph feature/SettingsPage ["SettingsPage/ (✦ reused)"]
+        Form["ColumnLimitsForm"]
+        UIStore["SettingsUIStore"]
+        Actions["initFromProperty / saveToProperty"]
+    end
+    subgraph feature/property ["property/ (✦ reused)"]
+        PropStore["PropertyStore"]
+    end
+```
+
+Так человек видит **какие папки затрагиваются и как связаны**, а не абстрактные слои.
+
+Color coding (внутри subgraph-ов по роли элемента):
 - Контейнеры — синие (#4169E1)
-- Компоненты — бирюзовые (#20B2AA)
-- Models — фиолетовые (#9370DB)
-- PageObject / Services — оранжевые (#FFA500)
+- View-компоненты — бирюзовые (#20B2AA)
+- Models / Stores — фиолетовые (#9370DB)
+- PageObject / Services / PageModification — оранжевые (#FFA500)
 
 ### 3. Component Hierarchy
 
@@ -118,7 +136,33 @@ Mermaid `graph TD` с цветовой легендой:
 
 Для **каждого** компонента:
 1. **Responsibility** — одно предложение
-2. **Props type** — полный TypeScript интерфейс
+2. **TypeScript интерфейс** — props, public API, типы аргументов/возврата
+
+**Только интерфейсы и типы. НЕ пиши**:
+- Тела функций / методов
+- React hooks, useEffect, useState
+- Обработчики событий
+- JSX / рендер
+- Стили
+
+Пример — правильно:
+
+```typescript
+export type ColumnLimitsTabContainerProps = {
+  getColumns: () => Column[];
+  swimlanes?: Array<{ id: string; name: string }>;
+};
+```
+
+Пример — **неправильно** (реализация):
+
+```typescript
+export const ColumnLimitsTabContainer: React.FC<Props> = ({ getColumns }) => {
+  const [isSaving, setIsSaving] = useState(false);
+  useEffect(() => { ... }, []);
+  return <div>...</div>;
+};
+```
 
 ### 6. State Changes
 
@@ -135,11 +179,12 @@ Mermaid `graph TD` с цветовой легендой:
 
 ## Правила написания
 
-1. **Код конкретен, не абстрактен** — показывай TypeScript код с конкретными props
+1. **Только интерфейсы, не реализация** — TypeScript types/interfaces с конкретными полями; тела функций, JSX, хуки — НЕ включай
 2. **Каждый компонент — с Responsibility** — одно предложение
 3. **Mermaid обязателен** — минимум Architecture Diagram + Component Hierarchy
-4. **Файловая структура — полная** — каждый файл с комментарием
-5. **Migration Plan реалистичен** — самодостаточные фазы
+4. **Диаграмма по сущностям (папкам)** — subgraph = папка/модуль, не слой
+5. **Файловая структура — полная** — каждый файл с комментарием
+6. **Migration Plan реалистичен** — самодостаточные фазы
 
 ---
 

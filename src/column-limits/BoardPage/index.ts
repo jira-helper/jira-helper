@@ -1,10 +1,10 @@
 import { Token } from 'dioma';
 import { PageModification } from '../../shared/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
-import { useColumnLimitsPropertyStore } from '../property';
-import { useColumnLimitsRuntimeStore } from './stores';
-import { applyLimits } from './actions';
-import { columnLimitsBoardPageObjectToken, registerColumnLimitsBoardPageObjectInDI } from './pageObject';
+import type { WipLimitsProperty } from '../types';
+import { boardRuntimeModelToken, propertyModelToken } from '../tokens';
+import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
+import type { PropertyModel } from '../property/PropertyModel';
 
 interface EditData {
   rapidListConfig: {
@@ -16,18 +16,7 @@ interface EditData {
   };
 }
 
-interface BoardGroup {
-  [key: string]: {
-    columns: string[];
-    max?: number;
-    customHexColor?: string;
-    name: string;
-    value: string;
-    includedIssueTypes?: string[];
-  };
-}
-
-export default class ColumnLimitsBoardPage extends PageModification<[EditData?, BoardGroup?], Element> {
+export default class ColumnLimitsBoardPage extends PageModification<[EditData?, WipLimitsProperty?], Element> {
   shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -41,44 +30,35 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     return this.waitForElement('.ghx-column-header-group');
   }
 
-  loadData(): Promise<[EditData, BoardGroup]> {
-    return Promise.all([this.getBoardEditData(), this.getBoardProperty(BOARD_PROPERTIES.WIP_LIMITS_SETTINGS)]);
+  async loadData(): Promise<[EditData, WipLimitsProperty]> {
+    const editData = await this.getBoardEditData();
+    const boardProperty = await this.getBoardProperty<WipLimitsProperty>(BOARD_PROPERTIES.WIP_LIMITS_SETTINGS);
+    return [editData, boardProperty ?? {}];
   }
 
-  apply(data: [EditData?, BoardGroup?]): void {
+  apply(data: [EditData?, WipLimitsProperty?]): void {
     if (!data) return;
     const [editData = { rapidListConfig: { mappedColumns: [] } }, boardGroups = {}] = data;
 
     if (Object.keys(boardGroups).length === 0) return;
 
-    // Register PageObject in DI
-    try {
-      this.container.inject(columnLimitsBoardPageObjectToken);
-    } catch {
-      registerColumnLimitsBoardPageObjectInDI(this.container);
-    }
+    const { model: propertyModel } = this.container.inject(propertyModelToken);
+    const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
 
-    // Initialize property store with loaded data
-    const propertyStore = useColumnLimitsPropertyStore.getState();
-    propertyStore.actions.setData(boardGroups);
+    (propertyModel as PropertyModel).setData(boardGroups);
 
-    // Initialize runtime store
-    const { actions } = useColumnLimitsRuntimeStore.getState();
     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
-    actions.setCssNotIssueSubTask(cssNotIssueSubTask);
+    (boardRuntimeModel as BoardRuntimeModel).setCssNotIssueSubTask(cssNotIssueSubTask);
 
-    // Adjust header padding for Jira v8
     const headerGroup = document.querySelector<HTMLElement>('#ghx-pool-wrapper');
     if (headerGroup) {
       headerGroup.style.paddingTop = '10px';
     }
 
-    // Apply limits
-    applyLimits();
+    (boardRuntimeModel as BoardRuntimeModel).apply();
 
-    // Watch for DOM changes
     this.onDOMChange('#ghx-pool', () => {
-      applyLimits();
+      (boardRuntimeModel as BoardRuntimeModel).apply();
     });
   }
 }

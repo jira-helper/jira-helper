@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
+import { useDi } from 'src/shared/diContext';
 import { SettingsButton } from './SettingsButton';
-import { useColumnLimitsPropertyStore } from '../../../property/store';
-import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
+import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
+import type { SettingsUIModel } from '../../models/SettingsUIModel';
 import { mapColumnsToGroups } from '../../../shared/utils';
 import { buildInitDataFromGroupMap } from '../../utils/buildInitData';
-import { initFromProperty, saveToProperty } from '../../actions';
 import { WITHOUT_GROUP_ID } from '../../../types';
 import { SettingsModalContainer } from '../SettingsModal';
 import { COLUMN_LIMITS_TEXTS } from '../../texts';
@@ -23,9 +23,12 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
 }) => {
   const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { model: propertyModel } = useDi().inject(propertyModelToken);
+  const { model: settingsModel } = useDi().inject(settingsUIModelToken);
+  const settingsUi = settingsModel as SettingsUIModel;
 
   const handleOpen = () => {
-    const wipLimits = useColumnLimitsPropertyStore.getState().data;
+    const wipLimits = propertyModel.data;
     const columns = Array.from(getColumns()) as HTMLElement[];
 
     const groupMap = mapColumnsToGroups({
@@ -36,8 +39,8 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
 
     const initData = buildInitDataFromGroupMap(groupMap, wipLimits, getColumnName);
 
-    useColumnLimitsSettingsUIStore.getState().actions.reset();
-    initFromProperty(initData);
+    settingsUi.reset();
+    settingsUi.initFromProperty(initData);
 
     setIsModalOpen(true);
   };
@@ -51,7 +54,7 @@ export const SettingsButtonContainer: React.FC<SettingsButtonContainerProps> = (
       .map(el => el.getAttribute('data-column-id'))
       .filter((id): id is string => id != null);
 
-    await saveToProperty(columnIds);
+    await settingsUi.save(columnIds);
     setIsModalOpen(false);
   };
 

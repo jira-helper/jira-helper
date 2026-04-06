@@ -3,7 +3,6 @@ import { Token } from 'dioma';
 import { PageModification } from 'src/shared/PageModification';
 import { WithDi } from 'src/shared/diContext';
 import { boardRuntimeModelToken, fieldLimitsBoardPageObjectToken } from '../tokens';
-import { registerFieldLimitsModule } from '../module';
 import { FieldLimitsList } from './components/FieldLimitsList';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 import type { BoardEditData, FieldLimitsSettings } from '../types';
@@ -38,8 +37,6 @@ export class BoardPageModification extends PageModification<[BoardEditData, Fiel
     const [boardEditData, fieldLimits] = data;
 
     if (!fieldLimits?.limits || Object.keys(fieldLimits.limits).length === 0) return;
-
-    registerFieldLimitsModule(this.container);
 
     const { model } = this.container.inject(boardRuntimeModelToken);
     this.runtimeModel = model as BoardRuntimeModel;

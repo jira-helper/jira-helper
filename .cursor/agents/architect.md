@@ -48,16 +48,18 @@ description: Проектирование архитектуры фич jira-hel
 
 #### Диаграмма компонентов
 
+Subgraph-ы — **по папкам/модулям фичи** (не по слоям «State Layer», «React App» и т.д.):
+
 ```mermaid
 flowchart TD
-    subgraph SettingsPage
+    subgraph feature/SettingsPage ["SettingsPage/"]
         Container[FeatureContainer]
         style Container fill:#4169E1,color:white
         Form[FeatureForm]
         style Form fill:#20B2AA,color:white
     end
     
-    subgraph Models
+    subgraph feature/models ["models/"]
         UIModel[UIModel]
         style UIModel fill:#9370DB,color:white
     end
@@ -66,10 +68,10 @@ flowchart TD
     Container --> Form
 ```
 
-Color coding:
+Color coding (внутри subgraph по роли элемента):
 - Контейнеры — синие (#4169E1)
-- Компоненты — бирюзовые (#20B2AA)
-- Models — фиолетовые (#9370DB)
+- View-компоненты — бирюзовые (#20B2AA)
+- Models / Stores — фиолетовые (#9370DB)
 - PageObject / Services — оранжевые (#FFA500)
 
 #### Диаграмма Data Flow
@@ -104,14 +106,16 @@ sequenceDiagram
 [Дерево — см. примеры в docs/architecture_guideline.md]
 
 ### Типы (`types.ts`)
-[Типы с JSDoc]
+[TypeScript интерфейсы и типы с JSDoc — без реализации]
 
 ### Models / Stores
-[State + Methods для каждого, жизненный цикл]
+[Интерфейсы state + сигнатуры публичных методов — без тел функций]
 
 ### Компоненты
-| Компонент | Тип | Ответственность |
-|-----------|-----|-----------------|
+| Компонент | Тип | Ответственность | Props интерфейс |
+|-----------|-----|-----------------|-----------------|
+
+**Только интерфейсы**: props types, public API. Не пиши тела функций, JSX, хуки.
 
 ### Шаги реализации
 [Чек-лист задач]

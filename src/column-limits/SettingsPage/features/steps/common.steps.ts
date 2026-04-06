@@ -1,10 +1,11 @@
 /**
  * Common step definitions for Column Limits SettingsPage tests.
  */
+import { globalContainer } from 'dioma';
 import { Given, When, Then } from '../../../../../cypress/support/bdd-runner';
 import type { DataTableRows } from '../../../../../cypress/support/bdd-runner';
-import { useColumnLimitsSettingsUIStore } from '../../stores/settingsUIStore';
-import { useColumnLimitsPropertyStore } from '../../../property/store';
+import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
+import type { SettingsUIModel } from '../../models/SettingsUIModel';
 import { WITHOUT_GROUP_ID } from '../../../types';
 import { columns, createButtonStubs, mountButton, setBoardSwimlanes } from '../helpers';
 
@@ -29,8 +30,8 @@ Given(/^there are columns "([^"]*)" on the board$/, () => {
 // --- Given steps ---
 
 Given('no column groups are configured', () => {
-  useColumnLimitsPropertyStore.getState().actions.reset();
-  useColumnLimitsSettingsUIStore.getState().actions.reset();
+  globalContainer.inject(propertyModelToken).model.reset();
+  globalContainer.inject(settingsUIModelToken).model.reset();
 });
 
 Given('there are configured column groups:', (table: DataTableRows) => {
@@ -63,7 +64,7 @@ Given('there are configured column groups:', (table: DataTableRows) => {
     groups[row.name] = groupData;
   });
 
-  useColumnLimitsPropertyStore.getState().actions.setData(groups);
+  globalContainer.inject(propertyModelToken).model.setData(groups);
 });
 
 // --- When steps ---
@@ -138,10 +139,10 @@ When(/^I select color "([^"]*)"$/, (color: string) => {
 When(/^I select issue types "([^"]*)"$/, (typesStr: string) => {
   const typeNames = typesStr.split(',').map(s => s.trim());
   cy.then(() => {
-    const { groups } = useColumnLimitsSettingsUIStore.getState().data;
-    const groupId = groups[0]?.id;
+    const ui = globalContainer.inject(settingsUIModelToken).model as SettingsUIModel;
+    const groupId = ui.groups[0]?.id;
     if (!groupId) throw new Error('No group found to set issue types');
-    useColumnLimitsSettingsUIStore.getState().actions.setIssueTypeState(groupId, {
+    ui.setIssueTypeState(groupId, {
       countAllTypes: false,
       projectKey: '',
       selectedTypes: typeNames,
@@ -166,7 +167,8 @@ When(/^I click color picker for group "([^"]*)"$/, (groupId: string) => {
 When(/^I set issue types "([^"]*)" for group "([^"]*)"$/, (typesStr: string, groupId: string) => {
   const typeNames = typesStr.split(',').map(s => s.trim());
   cy.then(() => {
-    useColumnLimitsSettingsUIStore.getState().actions.setIssueTypeState(groupId, {
+    const ui = globalContainer.inject(settingsUIModelToken).model as SettingsUIModel;
+    ui.setIssueTypeState(groupId, {
       countAllTypes: false,
       projectKey: '',
       selectedTypes: typeNames,
@@ -323,10 +325,10 @@ Then(/^the group should have color "([^"]*)"$/, (expectedColor: string) => {
 Then(/^the group should filter by "([^"]*)"$/, (expectedTypes: string) => {
   const typeNames = expectedTypes.split(',').map(s => s.trim());
   cy.then(() => {
-    const { groups } = useColumnLimitsSettingsUIStore.getState().data;
-    const groupId = groups[0]?.id;
+    const ui = globalContainer.inject(settingsUIModelToken).model as SettingsUIModel;
+    const groupId = ui.groups[0]?.id;
     if (!groupId) throw new Error('No group found');
-    const state = useColumnLimitsSettingsUIStore.getState().data.issueTypeSelectorStates[groupId];
+    const state = ui.issueTypeSelectorStates[groupId];
 
     expect(state?.countAllTypes).to.be.false;
     expect(state?.selectedTypes).to.deep.equal(typeNames);
@@ -362,20 +364,20 @@ Then(/^group "([^"]*)" should have limit (\d+) in property$/, (groupId: string, 
   const limit = parseInt(limitStr, 10);
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
-    const { data } = useColumnLimitsPropertyStore.getState();
+    const { model } = globalContainer.inject(propertyModelToken);
 
-    expect(data[groupId]).to.exist;
-    expect(data[groupId]?.max).to.equal(limit);
+    expect(model.data[groupId]).to.exist;
+    expect(model.data[groupId]?.max).to.equal(limit);
   });
 });
 
 Then(/^group "([^"]*)" should have color "([^"]*)" in property$/, (groupId: string, expectedColor: string) => {
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
-    const { data } = useColumnLimitsPropertyStore.getState();
+    const { model } = globalContainer.inject(propertyModelToken);
 
-    expect(data[groupId]).to.exist;
-    expect((data[groupId]?.customHexColor ?? '').toLowerCase()).to.equal(expectedColor.toLowerCase());
+    expect(model.data[groupId]).to.exist;
+    expect((model.data[groupId]?.customHexColor ?? '').toLowerCase()).to.equal(expectedColor.toLowerCase());
   });
 });
 
@@ -383,20 +385,20 @@ Then(/^group "([^"]*)" should filter by "([^"]*)" in property$/, (groupId: strin
   const typeNames = expectedTypes.split(',').map(s => s.trim());
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
-    const { data } = useColumnLimitsPropertyStore.getState();
+    const { model } = globalContainer.inject(propertyModelToken);
 
-    expect(data[groupId]).to.exist;
-    expect(data[groupId]?.includedIssueTypes).to.deep.equal(typeNames);
+    expect(model.data[groupId]).to.exist;
+    expect(model.data[groupId]?.includedIssueTypes).to.deep.equal(typeNames);
   });
 });
 
 Then(/^group "([^"]*)" should count all issue types in property$/, (groupId: string) => {
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
-    const { data } = useColumnLimitsPropertyStore.getState();
+    const { model } = globalContainer.inject(propertyModelToken);
 
-    expect(data[groupId]).to.exist;
-    const included = data[groupId]?.includedIssueTypes;
+    expect(model.data[groupId]).to.exist;
+    const included = model.data[groupId]?.includedIssueTypes;
 
     expect(!included || included.length === 0).to.be.true;
   });
@@ -406,10 +408,10 @@ Then(/^group "([^"]*)" should have swimlanes "([^"]*)" in property$/, (groupId: 
   const expectedNames = swimlanesStr.split(',').map(s => s.trim());
   cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
-    const { data } = useColumnLimitsPropertyStore.getState();
+    const { model } = globalContainer.inject(propertyModelToken);
 
-    expect(data[groupId]).to.exist;
-    const savedSwimlanes = data[groupId]?.swimlanes ?? [];
+    expect(model.data[groupId]).to.exist;
+    const savedSwimlanes = model.data[groupId]?.swimlanes ?? [];
     const savedNames = savedSwimlanes.map(s => s.name);
 
     expect(savedNames).to.deep.equal(expectedNames);

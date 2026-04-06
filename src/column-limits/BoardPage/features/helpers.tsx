@@ -2,10 +2,11 @@
 import { globalContainer } from 'dioma';
 import { registerLogger } from 'src/shared/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
-import { useColumnLimitsPropertyStore } from '../../property';
-import { useColumnLimitsRuntimeStore, getInitialState } from '../stores';
-import { columnLimitsBoardPageObjectToken } from '../pageObject';
-import { ColumnLimitsBoardPageObject } from '../pageObject/ColumnLimitsBoardPageObject';
+import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
+import { columnLimitsModule } from '../../module';
+import { propertyModelToken, boardRuntimeModelToken } from '../../tokens';
 
 // --- Fixtures matching feature Background ---
 
@@ -22,6 +23,14 @@ export const swimlaneNameToId: Record<string, string> = {
   Frontend: 'sw1',
   Backend: 'sw2',
   Expedite: 'sw3',
+};
+
+const mockBoardPropertyService: BoardPropertyServiceI = {
+  async getBoardProperty() {
+    return undefined;
+  },
+  updateBoardProperty() {},
+  deleteBoardProperty() {},
 };
 
 // --- DOM helpers ---
@@ -70,25 +79,16 @@ const setupBoardDOM = () => {
 
   const pool = document.createElement('div');
   pool.id = 'ghx-pool';
+  const swimlaneBody = `
+      <div class="ghx-swimlane-header"></div>
+      <div class="ghx-column" data-id="col1" data-column-id="col1"></div>
+      <div class="ghx-column" data-id="col2" data-column-id="col2"></div>
+      <div class="ghx-column" data-id="col3" data-column-id="col3"></div>
+      <div class="ghx-column" data-id="col4" data-column-id="col4"></div>`;
   pool.innerHTML = `
-    <div class="ghx-swimlane" swimlane-id="sw1">
-      <div class="ghx-column" data-id="col1" data-column-id="col1"></div>
-      <div class="ghx-column" data-id="col2" data-column-id="col2"></div>
-      <div class="ghx-column" data-id="col3" data-column-id="col3"></div>
-      <div class="ghx-column" data-id="col4" data-column-id="col4"></div>
-    </div>
-    <div class="ghx-swimlane" swimlane-id="sw2">
-      <div class="ghx-column" data-id="col1" data-column-id="col1"></div>
-      <div class="ghx-column" data-id="col2" data-column-id="col2"></div>
-      <div class="ghx-column" data-id="col3" data-column-id="col3"></div>
-      <div class="ghx-column" data-id="col4" data-column-id="col4"></div>
-    </div>
-    <div class="ghx-swimlane" swimlane-id="sw3">
-      <div class="ghx-column" data-id="col1" data-column-id="col1"></div>
-      <div class="ghx-column" data-id="col2" data-column-id="col2"></div>
-      <div class="ghx-column" data-id="col3" data-column-id="col3"></div>
-      <div class="ghx-column" data-id="col4" data-column-id="col4"></div>
-    </div>
+    <div class="ghx-swimlane" swimlane-id="sw1">${swimlaneBody}</div>
+    <div class="ghx-swimlane" swimlane-id="sw2">${swimlaneBody}</div>
+    <div class="ghx-swimlane" swimlane-id="sw3">${swimlaneBody}</div>
   `;
 
   document.body.appendChild(wrapper);
@@ -114,23 +114,29 @@ export const setupBackground = () => {
   globalContainer.reset();
   registerLogger(globalContainer);
 
-  useColumnLimitsPropertyStore.getState().actions.reset();
-  useColumnLimitsRuntimeStore.setState(getInitialState());
+  globalContainer.register({
+    token: BoardPropertyServiceToken,
+    value: mockBoardPropertyService,
+  });
+  globalContainer.register({
+    token: boardPagePageObjectToken,
+    value: BoardPagePageObject,
+  });
 
-  document.body.innerHTML = '';
-
-  setupBoardDOM();
+  columnLimitsModule.ensure(globalContainer);
 
   globalContainer.register({
     token: localeProviderToken,
     value: new MockLocaleProvider('en'),
   });
-  globalContainer.register({
-    token: columnLimitsBoardPageObjectToken,
-    value: new ColumnLimitsBoardPageObject(),
-  });
 
-  useColumnLimitsRuntimeStore.getState().actions.setCssNotIssueSubTask('');
+  document.body.innerHTML = '';
+
+  setupBoardDOM();
+
+  globalContainer.inject(propertyModelToken).model.reset();
+  globalContainer.inject(boardRuntimeModelToken).model.reset();
+  globalContainer.inject(boardRuntimeModelToken).model.setCssNotIssueSubTask('');
 };
 
 // --- Issue counter for unique IDs ---

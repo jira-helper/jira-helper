@@ -61,7 +61,7 @@ describe('SettingsModal', () => {
     const mock = createMockSettingsUIModel(modelOverrides);
     container.register({
       token: settingsUIModelToken,
-      value: mock as { model: Readonly<SettingsUIModel>; useModel: () => Readonly<SettingsUIModel> },
+      value: mock as unknown as { model: SettingsUIModel; useModel: () => Readonly<SettingsUIModel> },
     });
 
     return render(

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Container } from 'dioma';
-import { registerSwimlaneHistogramModule } from './module';
+import { swimlaneHistogramModule } from './module';
 import { histogramModelToken } from './tokens';
 import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
 import { loggerToken, Logger } from 'src/shared/Logger';
 
-describe('registerSwimlaneHistogramModule', () => {
+describe('swimlaneHistogramModule', () => {
   let container: Container;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('registerSwimlaneHistogramModule', () => {
   });
 
   it('should register HistogramModel token', () => {
-    registerSwimlaneHistogramModule(container);
+    swimlaneHistogramModule.ensure(container);
 
     const { model } = container.inject(histogramModelToken);
     expect(model).toBeDefined();
@@ -25,7 +25,7 @@ describe('registerSwimlaneHistogramModule', () => {
   });
 
   it('should return same instance on multiple injects (singleton)', () => {
-    registerSwimlaneHistogramModule(container);
+    swimlaneHistogramModule.ensure(container);
 
     const first = container.inject(histogramModelToken);
     const second = container.inject(histogramModelToken);
@@ -34,7 +34,7 @@ describe('registerSwimlaneHistogramModule', () => {
   });
 
   it('should provide useModel function', () => {
-    registerSwimlaneHistogramModule(container);
+    swimlaneHistogramModule.ensure(container);
 
     const { useModel } = container.inject(histogramModelToken);
     expect(typeof useModel).toBe('function');
