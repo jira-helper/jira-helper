@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { IBoardPagePageObject, SwimlaneElement } from './BoardPage';
 
 export const BoardPagePageObjectMock: IBoardPagePageObject = {
@@ -33,10 +34,12 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   removeSwimlaneComponent: () => {},
   highlightSwimlane: () => {},
   getOrderedColumnIds: () => [],
+  getOrderedColumns: vi.fn(() => []),
   getColumnHeaderElement: () => null,
   getSwimlaneIds: () => [],
   getIssueCountInColumn: () => 0,
   styleColumnHeader: () => {},
+  resetColumnHeaderStyles: () => {},
   insertColumnHeaderHtml: () => {},
   removeColumnHeaderElements: () => {},
   highlightColumnCells: () => {},

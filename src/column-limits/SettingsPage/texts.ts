@@ -37,9 +37,21 @@ export const COLUMN_LIMITS_TEXTS = {
     en: 'Cancel',
     ru: 'Отмена',
   },
+  saveConfig: {
+    en: 'Save configuration',
+    ru: 'Сохранить конфигурацию',
+  },
+  discardChanges: {
+    en: 'Discard changes',
+    ru: 'Отменить изменения',
+  },
   settingsButton: {
     en: 'Column group WIP limits',
     ru: 'WIP-лимиты на группы колонок',
+  },
+  tabTitle: {
+    en: 'Column WIP Limits',
+    ru: 'WIP-лимиты по колонкам',
   },
 } as const satisfies Texts;
 

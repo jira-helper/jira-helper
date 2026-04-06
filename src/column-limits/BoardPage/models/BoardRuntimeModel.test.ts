@@ -26,6 +26,7 @@ describe('BoardRuntimeModel', () => {
         return 0;
       }),
       styleColumnHeader: vi.fn(),
+      resetColumnHeaderStyles: vi.fn(),
       insertColumnHeaderHtml: vi.fn(),
       removeColumnHeaderElements: vi.fn(),
       highlightColumnCells: vi.fn(),
@@ -296,8 +297,42 @@ describe('BoardRuntimeModel', () => {
 
       model.applyColumnHeaderStyles();
 
+      expect(mockPageObject.resetColumnHeaderStyles).toHaveBeenCalledWith('col1');
+      expect(mockPageObject.resetColumnHeaderStyles).toHaveBeenCalledWith('col2');
+      expect(mockPageObject.resetColumnHeaderStyles).toHaveBeenCalledWith('col3');
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalled();
       expect(mockPageObject.getOrderedColumnIds).toHaveBeenCalled();
+    });
+
+    it('resets every board column header before styling so removed group columns lose decoration', () => {
+      const model = modelWithData({
+        G1: {
+          columns: ['col1'],
+          max: 5,
+          customHexColor: '#abc',
+        },
+      });
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 1,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      const resetCalls = vi.mocked(mockPageObject.resetColumnHeaderStyles).mock.calls.map(([id]) => id);
+      expect(resetCalls).toEqual(['col1', 'col2', 'col3']);
+
+      const firstResetOrder = vi.mocked(mockPageObject.resetColumnHeaderStyles).mock.invocationCallOrder[0];
+      const firstStyleOrder = vi.mocked(mockPageObject.styleColumnHeader).mock.invocationCallOrder[0];
+      expect(firstResetOrder).toBeLessThan(firstStyleOrder);
     });
   });
 

@@ -362,7 +362,6 @@ Then('changes should be saved', () => {
 
 Then(/^group "([^"]*)" should have limit (\d+) in property$/, (groupId: string, limitStr: string) => {
   const limit = parseInt(limitStr, 10);
-  cy.get('@updateBoardProperty').should('have.been.called');
   cy.then(() => {
     const { model } = globalContainer.inject(propertyModelToken);
 
@@ -370,6 +369,22 @@ Then(/^group "([^"]*)" should have limit (\d+) in property$/, (groupId: string, 
     expect(model.data[groupId]?.max).to.equal(limit);
   });
 });
+
+Then(
+  /^group containing column "([^"]*)" should have limit (\d+) in property$/,
+  (columnName: string, limitStr: string) => {
+    const limit = parseInt(limitStr, 10);
+    cy.get('@updateBoardProperty').should('have.been.called');
+    cy.then(() => {
+      const { model } = globalContainer.inject(propertyModelToken);
+      const col = columns.find(c => c.name === columnName);
+      expect(col, `Column "${columnName}" not found in fixtures`).to.exist;
+      const entry = Object.entries(model.data).find(([, g]) => col && g.columns.includes(col.id));
+      expect(entry, `No property group contains column "${columnName}"`).to.exist;
+      expect(entry![1].max).to.equal(limit);
+    });
+  }
+);
 
 Then(/^group "([^"]*)" should have color "([^"]*)" in property$/, (groupId: string, expectedColor: string) => {
   cy.get('@updateBoardProperty').should('have.been.called');

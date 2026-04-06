@@ -84,6 +84,10 @@ export class BoardRuntimeModel {
 
     const columnsInOrder = this.pageObject.getOrderedColumnIds();
 
+    columnsInOrder.forEach(columnId => {
+      this.pageObject.resetColumnHeaderStyles(columnId);
+    });
+
     columnsInOrder.forEach((columnId, index) => {
       const { name, value } = findGroupByColumnId(columnId, boardGroups);
       if (!name || !value?.length) return;

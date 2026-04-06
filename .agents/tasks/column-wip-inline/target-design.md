@@ -1,84 +1,79 @@
 # Target Design: Column WIP Limits — Settings Tab on Board Page
 
-Этот документ описывает целевую архитектуру для переноса UI настроек CONWIP (column-limits) из Board Settings в новый таб панели Jira Helper на board page.
-
-**Тип**: перенос UI существующей фичи в новое место (альтернативная точка входа).
+Этот документ описывает целевую архитектуру для переноса UI настроек CONWIP из Board Settings в новый таб панели Jira Helper на board page. Код переиспользуется максимально — создаётся минимум новых файлов.
 
 ## Ключевые принципы
 
-1. **Максимальное переиспользование** — `ColumnLimitsForm`, `settingsUIStore`, все actions (`initFromProperty`, `saveToProperty`, `moveColumn`), `propertyStore` — используются as-is, без изменений
-2. **Минимальное расширение** — добавляется новый контейнер (`SettingsTabContainer`), чистая функция (`buildInitDataFromColumns`), метод на PageObject (`getColumnsWithNames`) и несколько полей в runtime store
-3. **Колонки из DOM board page** — вместо DOM settings page; новый метод PageObject читает `Column[]` (id + name) из заголовков колонок доски
-4. **После Save — refresh доски** — вызов `applyLimits()` обновляет badges и highlighting без перезагрузки
+1. **Максимальное переиспользование** — `SettingsUIModel`, `PropertyModel`, `ColumnLimitsForm`, `ColorPickerButton` — все существующие сущности используются as-is. Новая логика — только для инициализации данных из board page DOM и для обёртки tab.
+2. **Паттерн registerSettings** — таб регистрируется через `registerSettings()` в `ColumnLimitsBoardPage.apply()`, как делают `DiagnosticBoardPage`, `LocalSettingsBoardPage`, `SubTasksProgressBoardPage`.
+3. **Колонки из BoardPagePageObject** — на settings page колонки читаются из DOM settings UI, на board page — из DOM доски через `IBoardPagePageObject`. Нужен новый метод `getOrderedColumns()`.
+4. **Нет новых моделей** — `PropertyModel`, `SettingsUIModel`, `BoardRuntimeModel` уже зарегистрированы в `columnLimitsModule`. Tab-компонент получает их из DI.
 
-> Общие архитектурные принципы — см. `docs/architecture_guideline.md`
+> Общие архитектурные принципы — см. docs/architecture_guideline.md
 
 ## Architecture Diagram
 
 ```mermaid
 flowchart TB
-    subgraph settingsTab ["SettingsTab/ (★ NEW)"]
-        TabContainer["ColumnLimitsSettingsTabContainer"]
+    subgraph boardSettings ["board-settings/ (✦ reused)"]
+        BSStore["BoardSettingsStore (zustand)"]
+        style BSStore fill:#9370DB,color:white
+        BSComponent["BoardSettingsComponent"]
+        style BSComponent fill:#4169E1,color:white
+        RegSettings["registerSettings()"]
+        style RegSettings fill:#FFA500,color:white
+    end
+
+    subgraph columnLimitsTab ["column-limits/SettingsTab/ (★ NEW)"]
+        TabContainer["ColumnLimitsSettingsTab"]
         style TabContainer fill:#4169E1,color:white
         BuildInit["buildInitDataFromColumns()"]
         style BuildInit fill:#20B2AA,color:white
     end
 
-    subgraph settingsPage ["SettingsPage/ (✦ reused as-is)"]
+    subgraph columnLimitsSettings ["column-limits/SettingsPage/ (✦ reused)"]
         Form["ColumnLimitsForm"]
         style Form fill:#20B2AA,color:white
-        UIStore[("settingsUIStore")]
-        style UIStore fill:#9370DB,color:white
-        InitAction["initFromProperty()"]
-        SaveAction["saveToProperty()"]
-        MoveAction["moveColumn()"]
+        ModalContainer["SettingsModalContainer"]
+        style ModalContainer fill:#4169E1,color:white
     end
 
-    subgraph boardPage ["BoardPage/ (✦ modified)"]
-        BPIndex["ColumnLimitsBoardPage.apply()"]
-        style BPIndex fill:#FFA500,color:white
-        PageObj["ColumnLimitsBoardPageObject"]
-        style PageObj fill:#FFA500,color:white
-        RuntimeStore[("runtimeStore")]
-        style RuntimeStore fill:#9370DB,color:white
-        ApplyLimits["applyLimits()"]
+    subgraph columnLimitsModels ["column-limits/ models (✦ reused)"]
+        UIModel["SettingsUIModel"]
+        style UIModel fill:#9370DB,color:white
+        PropModel["PropertyModel"]
+        style PropModel fill:#9370DB,color:white
+        RuntimeModel["BoardRuntimeModel"]
+        style RuntimeModel fill:#9370DB,color:white
     end
 
-    subgraph property ["property/ (✦ reused as-is)"]
-        PropStore[("propertyStore")]
-        style PropStore fill:#9370DB,color:white
-        SaveProp["saveColumnLimitsProperty()"]
+    subgraph pageObjects ["page-objects/ (✦ extended)"]
+        BoardPO["BoardPagePageObject"]
+        style BoardPO fill:#FFA500,color:white
     end
 
-    subgraph boardSettings ["board-settings/ (✦ reused as-is)"]
-        RegisterSettings["registerSettings()"]
-        style RegisterSettings fill:#FFA500,color:white
-        BSComponent["BoardSettingsComponent"]
-        style BSComponent fill:#4169E1,color:white
+    subgraph boardPage ["column-limits/BoardPage/ (✦ modified)"]
+        BoardEntry["ColumnLimitsBoardPage"]
+        style BoardEntry fill:#FFA500,color:white
     end
 
-    BPIndex -->|"canEdit? →"| RegisterSettings
-    BPIndex -->|"swimlanes →"| RuntimeStore
-    RegisterSettings -->|"{ title, component }"| BSComponent
-    BSComponent -->|"renders"| TabContainer
+    BoardEntry -->|"registerSettings()"| RegSettings
+    RegSettings --> BSStore
+    BSComponent -->|"renders tab"| TabContainer
 
-    TabContainer -->|"useSnapshot"| UIStore
-    TabContainer -->|"reads columns"| PageObj
-    TabContainer -->|"reads swimlanes"| RuntimeStore
-    TabContainer -->|"init"| BuildInit
-    BuildInit -->|"→ initFromProperty()"| InitAction
-    InitAction --> UIStore
-    TabContainer --> Form
+    TabContainer -->|"useDi().inject"| UIModel
+    TabContainer -->|"useDi().inject"| PropModel
+    TabContainer -->|"useDi().inject"| RuntimeModel
+    TabContainer -->|"useDi().inject"| BoardPO
+    TabContainer -->|"renders"| Form
+    TabContainer -->|"calls"| BuildInit
 
-    TabContainer -->|"onSave"| SaveAction
-    SaveAction --> UIStore
-    SaveAction --> PropStore
-    SaveAction --> SaveProp
+    UIModel --> PropModel
+    RuntimeModel --> PropModel
+    RuntimeModel --> BoardPO
 
-    TabContainer -->|"after save"| ApplyLimits
-    ApplyLimits --> PropStore
-    ApplyLimits --> RuntimeStore
-    ApplyLimits --> PageObj
+    ModalContainer -->|"renders"| Form
+    ModalContainer -->|"useDi().inject"| UIModel
 ```
 
 ## Data Flow
@@ -86,267 +81,159 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     participant User
-    participant BSModal as BoardSettingsComponent<br/>(Modal + Tabs)
-    participant TabContainer as ColumnLimitsSettings<br/>TabContainer
-    participant PageObj as ColumnLimits<br/>BoardPageObject
-    participant UIStore as settingsUIStore
-    participant PropStore as propertyStore
-    participant JiraAPI as Jira API
-    participant Board as Board DOM
+    participant BoardSettingsComponent
+    participant ColumnLimitsSettingsTab
+    participant BoardPagePageObject
+    participant SettingsUIModel
+    participant PropertyModel
+    participant BoardRuntimeModel
+    participant JiraAPI
 
-    Note over User,Board: --- Открытие таба ---
-    User->>BSModal: Click Jira Helper icon
-    BSModal->>TabContainer: Mount component
-    TabContainer->>PageObj: getColumnsWithNames()
-    PageObj-->>TabContainer: Column[]
-    TabContainer->>PropStore: getState().data
-    PropStore-->>TabContainer: WipLimitsProperty
-    TabContainer->>TabContainer: buildInitDataFromColumns(columns, wipLimits)
-    TabContainer->>UIStore: initFromProperty(initData)
-    Note over TabContainer: renders ColumnLimitsForm
+    User->>BoardSettingsComponent: Click JH icon → open panel
+    BoardSettingsComponent->>ColumnLimitsSettingsTab: Render tab (mount)
 
-    Note over User,Board: --- Редактирование ---
-    User->>TabContainer: Drag column to group
-    TabContainer->>UIStore: moveColumn(column, from, to)
-    Note over TabContainer: auto re-render via useStore
+    ColumnLimitsSettingsTab->>BoardPagePageObject: getOrderedColumns()
+    BoardPagePageObject-->>ColumnLimitsSettingsTab: Column[] (id + name)
 
-    Note over User,Board: --- Save ---
-    User->>TabContainer: Click Save
-    TabContainer->>UIStore: saveToProperty(columnIds)
-    UIStore->>PropStore: setData(wipLimits)
-    PropStore->>JiraAPI: setBoardProperty()
-    TabContainer->>Board: applyLimits()
-    Note over Board: Badges + highlighting updated
+    ColumnLimitsSettingsTab->>PropertyModel: read .data (WipLimitsProperty)
+    ColumnLimitsSettingsTab->>ColumnLimitsSettingsTab: buildInitDataFromColumns(columns, wipLimits)
+    ColumnLimitsSettingsTab->>SettingsUIModel: .initFromProperty(initData)
 
-    Note over User,Board: --- Cancel ---
-    User->>TabContainer: Click Cancel
-    TabContainer->>TabContainer: re-init from property
-    Note over TabContainer: form reset to saved state
+    Note over ColumnLimitsSettingsTab: ColumnLimitsForm renders with useModel()
+
+    User->>ColumnLimitsSettingsTab: Edit groups (drag-drop, set limit, etc.)
+    ColumnLimitsSettingsTab->>SettingsUIModel: .moveColumn() / .setGroupLimit() / ...
+
+    User->>ColumnLimitsSettingsTab: Click Save
+    ColumnLimitsSettingsTab->>SettingsUIModel: .save(columnIds)
+    SettingsUIModel->>PropertyModel: .setData(wipLimits)
+    SettingsUIModel->>PropertyModel: .persist()
+    PropertyModel->>JiraAPI: setBoardProperty(WIP_LIMITS_SETTINGS)
+    ColumnLimitsSettingsTab->>BoardRuntimeModel: .apply()
+    Note over BoardRuntimeModel: Re-renders indicators on board
+
+    User->>ColumnLimitsSettingsTab: Click Cancel
+    ColumnLimitsSettingsTab->>SettingsUIModel: .reset()
 ```
 
 ## Component Hierarchy
 
 ```mermaid
 graph TD
-    A["BoardSettingsComponent (Modal)"]
-    style A fill:#e1f5fe
+    A["BoardSettingsComponent (modal + tabs)"]
+    style A fill:#fff3e0
 
-    B["Tabs (antd)"]
-    style B fill:#e1f5fe
+    B["ColumnLimitsSettingsTab ★ NEW"]
+    style B fill:#fff3e0
 
-    C["ColumnLimitsSettingsTabContainer ★ NEW"]
-    style C fill:#fff3e0
+    C["ColumnLimitsForm (✦ reused)"]
+    style C fill:#e8f5e9
 
-    D["ColumnLimitsForm ✦ REUSED"]
+    D["DraggableColumn"]
     style D fill:#e8f5e9
 
-    E["SaveCancelButtons ★ NEW"]
+    E["ColumnGroup"]
     style E fill:#e8f5e9
+
+    F["CreateGroupDropzone"]
+    style F fill:#e8f5e9
+
+    G["ColorPickerButton (✦ reused)"]
+    style G fill:#e8f5e9
+
+    H["IssueTypeSelector (✦ reused)"]
+    style H fill:#e8f5e9
+
+    I["SwimlaneSelector (✦ reused)"]
+    style I fill:#e8f5e9
 
     A --> B
     B --> C
     C --> D
     C --> E
+    C --> F
+    E --> G
+    E --> H
+    E --> I
 ```
 
-Легенда:
-- 🔵 Голубой (`#e1f5fe`) — PageModification / внешний каркас (не React)
-- 🟠 Оранжевый (`#fff3e0`) — Container (useStore, логика)
-- 🟢 Зелёный (`#e8f5e9`) — View (чистое отображение)
+**Легенда**: оранжевый — Container (state + logic), зелёный — View (pure presentation).
 
 ## Target File Structure
 
 ```
 src/column-limits/
-├── types.ts                                          # ✦ Reused as-is
-├── shared/
-│   └── utils.ts                                      # ✦ Reused as-is
+├── types.ts                                    # ✦ reused, без изменений
+├── tokens.ts                                   # ✦ reused, без изменений
+├── module.ts                                   # ✦ reused, без изменений
 │
 ├── property/
-│   ├── store.ts                                      # ✦ Reused as-is
-│   ├── interface.ts                                  # ✦ Reused as-is
-│   ├── index.ts                                      # ✦ Reused as-is
-│   └── actions/
-│       ├── loadProperty.ts                           # ✦ Reused as-is
-│       └── saveProperty.ts                           # ✦ Reused as-is
+│   └── PropertyModel.ts                        # ✦ reused, без изменений
+│
+├── shared/
+│   └── utils.ts                                # ✦ reused (findGroupByColumnId, mapColumnsToGroups, generateColorByFirstChars)
 │
 ├── SettingsPage/
-│   ├── ColumnLimitsForm.tsx                          # ✦ Reused as-is (View)
-│   ├── styles.module.css                             # ✦ Reused as-is
-│   ├── texts.ts                                      # ✦ Modified: add tabTitle
-│   ├── stores/
-│   │   ├── settingsUIStore.ts                        # ✦ Reused as-is
-│   │   └── settingsUIStore.types.ts                  # ✦ Reused as-is
-│   ├── actions/
-│   │   ├── initFromProperty.ts                       # ✦ Reused as-is
-│   │   ├── saveToProperty.ts                         # ✦ Reused as-is
-│   │   ├── moveColumn.ts                             # ✦ Reused as-is
-│   │   └── index.ts                                  # ✦ Reused as-is
+│   ├── index.ts                                # ✦ reused (Settings page PageModification)
+│   ├── ColumnLimitsForm.tsx                    # ✦ reused, без изменений
+│   ├── texts.ts                                # ✦ modified: добавлен tabTitle
+│   ├── styles.module.css                       # ✦ reused, без изменений
 │   ├── utils/
-│   │   └── buildInitData.ts                          # ✦ Reused as-is (for SettingsPage)
-│   └── components/                                   # ✦ Reused as-is
-│       └── ...
+│   │   └── buildInitData.ts                    # ✦ modified: добавлена buildInitDataFromColumns()
+│   ├── models/
+│   │   └── SettingsUIModel.ts                  # ✦ reused, без изменений
+│   └── components/
+│       ├── SettingsButton/                     # ✦ reused, без изменений
+│       ├── SettingsModal/                      # ✦ reused, без изменений
+│       └── ColorPickerButton/                  # ✦ reused, без изменений
 │
-├── SettingsTab/                                      # ★ NEW directory
-│   ├── ColumnLimitsSettingsTabContainer.tsx           # ★ NEW: Container for board page tab
-│   └── utils/
-│       ├── buildInitDataFromColumns.ts               # ★ NEW: Pure function — Column[] + WipLimits → InitData
-│       └── buildInitDataFromColumns.test.ts          # ★ NEW: Unit tests
+├── SettingsTab/                                # ★ NEW folder
+│   ├── index.ts                                # ★ NEW: exports
+│   └── ColumnLimitsSettingsTab.tsx              # ★ NEW: Container для tab в панели JH
 │
-└── BoardPage/
-    ├── index.ts                                      # ✦ Modified: register settings tab, store swimlanes
-    ├── pageObject/
-    │   ├── IColumnLimitsBoardPageObject.ts            # ✦ Modified: add getColumnsWithNames()
-    │   ├── ColumnLimitsBoardPageObject.ts             # ✦ Modified: implement getColumnsWithNames()
-    │   ├── columnLimitsBoardPageObjectToken.ts        # ✦ Reused as-is
-    │   └── index.ts                                  # ✦ Reused as-is
-    ├── stores/
-    │   ├── runtimeStore.types.ts                     # ✦ Modified: add boardSwimlanes
-    │   └── runtimeStore.ts                           # ✦ Modified: add setBoardSwimlanes action
-    └── actions/                                      # ✦ Reused as-is
-        └── ...
+├── BoardPage/
+│   ├── index.ts                                # ✦ modified: добавлен registerSettings() + EditData расширен
+│   ├── models/
+│   │   ├── BoardRuntimeModel.ts                # ✦ reused, без изменений
+│   │   └── types.ts                            # ✦ reused, без изменений
+│   └── styles.module.css                       # ✦ reused, без изменений
+
+src/page-objects/
+│   └── BoardPage.tsx                           # ✦ modified: добавлен getOrderedColumns()
 ```
 
 ## Component Specifications
 
-### 1. `ColumnLimitsSettingsTabContainer` (★ NEW)
+### 1. `ColumnLimitsSettingsTab` (Container, ★ NEW)
 
-**Responsibility**: Container для вкладки настроек column WIP limits в панели Jira Helper на board page. Инициализирует settingsUIStore из текущего состояния доски, рендерит ColumnLimitsForm с кнопками Save/Cancel, вызывает applyLimits() после сохранения.
-
-```typescript
-/**
- * Registered via registerSettings({ title, component }).
- * Renders inside BoardSettingsComponent modal → Tabs.TabPane.
- * No props — all data from stores and DI.
- */
-export const ColumnLimitsSettingsTabContainer: React.FC = () => { /* ... */ };
-```
-
-Внутренняя логика (НЕ интерфейс, а описание ответственности):
-- На mount: читает колонки через `pageObject.getColumnsWithNames()`, wipLimits из `propertyStore`, swimlanes из `runtimeStore` → `buildInitDataFromColumns()` → `initFromProperty()`
-- Подписывается на `settingsUIStore` (withoutGroupColumns, groups, issueTypeSelectorStates)
-- Обрабатывает drag-and-drop через `draggingRef` + `moveColumn()`
-- Вызывает `settingsUIStore.actions` для setGroupLimit, setGroupColor, setGroupSwimlanes, setIssueTypeState
-- Save: `saveToProperty(columnIds)` → `applyLimits()`
-- Cancel: re-init from property (reset + buildInitDataFromColumns + initFromProperty)
-
-### 2. `buildInitDataFromColumns()` (★ NEW)
-
-**Responsibility**: Чистая функция — строит `InitFromPropertyData` из массива `Column[]` и `WipLimitsProperty`, без обращения к DOM.
+**Responsibility**: Board page tab container — инициализирует `SettingsUIModel` из данных board page, рендерит `ColumnLimitsForm` с Save/Cancel кнопками, после Save обновляет runtime-индикаторы на доске.
 
 ```typescript
-import type { Column, WipLimitsProperty, UIGroup, IssueTypeState } from '../../types';
-import type { InitFromPropertyData } from '../../SettingsPage/actions/initFromProperty';
+// src/column-limits/SettingsTab/ColumnLimitsSettingsTab.tsx
 
-/**
- * Builds init data for settingsUIStore from board columns and wipLimits property.
- *
- * Unlike buildInitDataFromGroupMap (which works with DOM elements from settings page),
- * this function takes already resolved Column[] from board page DOM.
- *
- * @param columns - All board columns with id and name (from BoardPageObject)
- * @param wipLimits - Current WipLimitsProperty from property store
- * @returns Data ready for initFromProperty()
- *
- * @example
- * ```ts
- * const columns = pageObject.getColumnsWithNames();
- * const wipLimits = useColumnLimitsPropertyStore.getState().data;
- * const initData = buildInitDataFromColumns(columns, wipLimits);
- * initFromProperty(initData);
- * ```
- */
-export function buildInitDataFromColumns(
-  columns: Column[],
-  wipLimits: WipLimitsProperty
-): InitFromPropertyData;
-```
-
-### 3. `IColumnLimitsBoardPageObject.getColumnsWithNames()` (★ NEW method)
-
-**Responsibility**: Читает id и name колонок из заголовков board page DOM. Возвращает `Column[]`.
-
-```typescript
-export interface IColumnLimitsBoardPageObject {
-  // ... existing methods ...
-
-  /**
-   * Get columns with their display names from the board page header.
-   * Reads from column header DOM elements.
-   *
-   * @returns Array of Column objects with id and name
-   */
-  getColumnsWithNames(): Column[];
-}
-```
-
-### 4. `RuntimeData` extensions (★ NEW fields)
-
-**Responsibility**: Расширение runtime store для хранения swimlanes и canEdit, загруженных BoardPage modification.
-
-```typescript
-export type RuntimeData = {
-  groupStats: GroupStats[];
-  cssNotIssueSubTask: string;
-  /** Board swimlanes from getBoardEditData(), stored for settings tab */
-  boardSwimlanes: Array<{ id: string; name: string }>;
-};
-
-export type RuntimeActions = {
-  setGroupStats: (stats: GroupStats[]) => void;
-  setCssNotIssueSubTask: (css: string) => void;
-  /** Store swimlanes extracted from board edit data */
-  setBoardSwimlanes: (swimlanes: Array<{ id: string; name: string }>) => void;
-  reset: () => void;
+export type ColumnLimitsSettingsTabProps = {
+  swimlanes: Array<{ id: string; name: string }>;
 };
 ```
 
-### 5. `COLUMN_LIMITS_TEXTS` extension (★ NEW entry)
+DI-зависимости (через `useDi().inject()`):
+- `settingsUIModelToken` — состояние формы
+- `propertyModelToken` — данные property
+- `boardRuntimeModelToken` — обновление доски после Save
+- `boardPagePageObjectToken` — чтение колонок с доски
+
+Логика:
+- `useEffect` при mount → `boardPagePO.getOrderedColumns()` + `propertyModel.data` → `buildInitDataFromColumns()` → `settingsUIModel.initFromProperty()`
+- Save → `settingsUIModel.save(columnIds)` → `boardRuntimeModel.apply()`
+- Cancel → `settingsUIModel.reset()`
+- Рендер: `ColumnLimitsForm` + `Button Save` + `Button Cancel`
+
+### 2. `ColumnLimitsForm` (View, ✦ reused)
+
+Без изменений. Уже принимает всё через props, не зависит от контекста страницы.
 
 ```typescript
-export const COLUMN_LIMITS_TEXTS = {
-  // ... existing entries ...
-
-  /** Tab title in Jira Helper panel on board page */
-  tabTitle: {
-    en: 'Column WIP Limits',
-    ru: 'WIP-лимиты колонок',
-  },
-} as const satisfies Texts;
-```
-
-### 6. `ColumnLimitsBoardPage` changes (✦ MODIFIED)
-
-**Responsibility**: Расширение `apply()` — условная регистрация settings tab и сохранение swimlanes в runtime store.
-
-```typescript
-interface EditData {
-  canEdit?: boolean;
-  rapidListConfig: {
-    mappedColumns: Array<{
-      id: string;
-      isKanPlanColumn: boolean;
-      max?: number;
-    }>;
-  };
-  swimlanesConfig?: {
-    swimlanes?: Array<{ id?: string; name: string }>;
-  };
-}
-```
-
-Изменения в `apply()`:
-1. Извлечь `canEdit` из editData
-2. Извлечь swimlanes из editData → `actions.setBoardSwimlanes()`
-3. Если `canEdit` → `registerSettings({ title, component: ColumnLimitsSettingsTabContainer })`
-
-### 7. `ColumnLimitsForm` (✦ REUSED as-is)
-
-**Responsibility**: View-компонент формы настройки групп колонок. Drag-and-drop колонок, ввод лимитов, выбор swimlanes/issue types/цвета.
-
-Props interface — без изменений:
-
-```typescript
+// Существующий интерфейс — src/column-limits/SettingsPage/ColumnLimitsForm.tsx
 export interface ColumnLimitsFormProps {
   withoutGroupColumns: Column[];
   groups: UIGroup[];
@@ -368,206 +255,218 @@ export interface ColumnLimitsFormProps {
 }
 ```
 
-## State Changes
+### 3. `buildInitDataFromColumns()` (Pure Function, ★ NEW)
 
-### settingsUIStore (✦ Reused as-is)
-
-Zustand store. Без изменений.
+**Responsibility**: Builds `InitFromPropertyData` from an array of board page columns and existing WipLimitsProperty. Аналог `buildInitDataFromGroupMap()`, но работает с `Column[]` вместо `GroupMap` (без HTML-элементов).
 
 ```typescript
-export interface SettingsUIStoreState {
-  data: SettingsUIData;
-  state: 'initial' | 'loaded';
-  actions: { /* see settingsUIStore.types.ts */ };
-}
-```
+// src/column-limits/SettingsPage/utils/buildInitData.ts — дополнение к существующему файлу
 
-### propertyStore (✦ Reused as-is)
-
-Zustand store. Без изменений.
-
-```typescript
-export interface ColumnLimitsPropertyStoreState {
-  data: WipLimitsProperty;
-  state: 'initial' | 'loading' | 'loaded';
-  actions: { setData, setState, reset };
-}
-```
-
-### runtimeStore (✦ Modified)
-
-Zustand store. Добавлено поле `boardSwimlanes` и action `setBoardSwimlanes`.
-
-```typescript
-// runtimeStore.types.ts — ПОСЛЕ изменений
-export type RuntimeData = {
-  groupStats: GroupStats[];
-  cssNotIssueSubTask: string;
-  boardSwimlanes: Array<{ id: string; name: string }>;   // ★ NEW
-};
-
-export type RuntimeActions = {
-  setGroupStats: (stats: GroupStats[]) => void;
-  setCssNotIssueSubTask: (css: string) => void;
-  setBoardSwimlanes: (swimlanes: Array<{ id: string; name: string }>) => void;  // ★ NEW
-  reset: () => void;
-};
-
-export const getInitialData = (): RuntimeData => ({
-  groupStats: [],
-  cssNotIssueSubTask: '',
-  boardSwimlanes: [],  // ★ NEW
-});
-```
-
-## Полный код новых файлов
-
-### `src/column-limits/SettingsTab/utils/buildInitDataFromColumns.ts`
-
-```typescript
-import type { Column, WipLimitsProperty, UIGroup, IssueTypeState } from '../../types';
-import type { InitFromPropertyData } from '../../SettingsPage/actions/initFromProperty';
+import type { Column, WipLimitsProperty } from '../../types';
+import type { InitFromPropertyData } from '../models/SettingsUIModel';
 
 /**
- * Builds init data for settingsUIStore from board columns and wipLimits property.
- *
- * Unlike buildInitDataFromGroupMap (SettingsPage), this works with resolved
- * Column[] from board page DOM — no HTMLElement dependency.
- *
- * @param columns - Board columns with id and name
- * @param wipLimits - WipLimitsProperty from property store
+ * Builds InitFromPropertyData from a plain Column[] array (no HTML elements needed).
+ * Used by SettingsTab on the board page, where columns come from BoardPagePageObject.
  */
 export function buildInitDataFromColumns(
   columns: Column[],
   wipLimits: WipLimitsProperty
-): InitFromPropertyData {
-  const assignedColumnIds = new Set<string>();
-  Object.values(wipLimits).forEach(group => {
-    group.columns?.forEach(id => assignedColumnIds.add(id));
-  });
+): InitFromPropertyData;
+```
 
-  const withoutGroupColumns: Column[] = columns.filter(c => !assignedColumnIds.has(c.id));
+### 4. `IBoardPagePageObject.getOrderedColumns()` (Extension, ✦ modified)
 
-  const groups: UIGroup[] = Object.entries(wipLimits).map(([groupId, groupData]) => ({
-    id: groupId,
-    columns: (groupData.columns ?? [])
-      .map(id => columns.find(c => c.id === id))
-      .filter((c): c is Column => c != null),
-    max: groupData.max,
-    customHexColor: groupData.customHexColor,
-    includedIssueTypes: groupData.includedIssueTypes,
-    swimlanes: groupData.swimlanes,
-  }));
+**Responsibility**: Returns ordered column data (id + name) from the board page header row.
 
-  const issueTypeSelectorStates: Record<string, IssueTypeState> = {};
-  Object.entries(wipLimits).forEach(([groupId, group]) => {
-    const includedIssueTypes = group.includedIssueTypes ?? [];
-    issueTypeSelectorStates[groupId] = {
-      countAllTypes: !includedIssueTypes || includedIssueTypes.length === 0,
-      projectKey: '',
-      selectedTypes: includedIssueTypes,
-    };
-  });
+```typescript
+// src/page-objects/BoardPage.tsx — дополнение интерфейса
 
-  return { withoutGroupColumns, groups, issueTypeSelectorStates };
+export interface IBoardPagePageObject {
+  // ... existing methods ...
+
+  /**
+   * Ordered columns (id + display name) from the board header row.
+   * Reads from column header elements: id from data-id, name from .ghx-column-title.
+   */
+  getOrderedColumns(): Array<{ id: string; name: string }>;
 }
 ```
 
-### `src/column-limits/SettingsTab/ColumnLimitsSettingsTabContainer.tsx`
+### 5. `ColumnLimitsBoardPage` (PageModification, ✦ modified)
+
+**Responsibility**: Existing board page modification — дополняется вызовом `registerSettings()` для регистрации tab при наличии `canEdit`.
 
 ```typescript
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Button, Space, message } from 'antd';
-import { useGetTextsByLocale } from 'src/shared/texts';
+// src/column-limits/BoardPage/index.ts — расширение EditData
+
+interface EditData {
+  canEdit?: boolean;
+  rapidListConfig: {
+    mappedColumns: Array<{
+      id: string;
+      isKanPlanColumn: boolean;
+      max?: number;
+    }>;
+  };
+  swimlanesConfig?: {
+    swimlanes?: Array<{ id?: string; name: string }>;
+  };
+}
+```
+
+Добавляемая логика в `apply()`:
+- Извлечь `canEdit` и `swimlanes` из `editData`
+- Если `canEdit` — вызвать `registerSettings({ title, component })` с closure-компонентом, передающим `swimlanes` в `ColumnLimitsSettingsTab`
+
+## State Changes
+
+Новых моделей НЕТ. Все три уже зарегистрированы в `columnLimitsModule`:
+
+| Model | Token | Изменения |
+|-------|-------|-----------|
+| `PropertyModel` | `propertyModelToken` | Без изменений |
+| `SettingsUIModel` | `settingsUIModelToken` | Без изменений |
+| `BoardRuntimeModel` | `boardRuntimeModelToken` | Без изменений |
+
+Модуль `columnLimitsModule` (`module.ts`) и токены (`tokens.ts`) — без изменений.
+
+## Migration Plan
+
+### Phase 1: Расширение IBoardPagePageObject (TASK-A)
+
+**Файлы**: `src/page-objects/BoardPage.tsx`, `src/page-objects/BoardPage.test.ts`
+
+Добавить метод `getOrderedColumns()` в `IBoardPagePageObject` и реализацию в `BoardPagePageObject`.
+
+Метод комбинирует `getOrderedColumnIds()` (уже есть) с чтением текста из `.ghx-column-title` для каждого column header element.
+
+### Phase 2: Утилита buildInitDataFromColumns (TASK-B)
+
+**Файлы**: `src/column-limits/SettingsPage/utils/buildInitData.ts`, `buildInitData.test.ts` (новый)
+
+Добавить чистую функцию `buildInitDataFromColumns(columns, wipLimits)` рядом с существующей `buildInitDataFromGroupMap`.
+
+Unit-тесты: маппинг колонок в группы, without-group колонки, issueTypeSelectorStates.
+
+### Phase 3: Tab Container + регистрация (TASK-C)
+
+**Новые файлы**:
+- `src/column-limits/SettingsTab/ColumnLimitsSettingsTab.tsx`
+- `src/column-limits/SettingsTab/index.ts`
+
+**Модифицируемые файлы**:
+- `src/column-limits/BoardPage/index.ts` — расширение `EditData`, добавление `registerSettings()` в `apply()`
+- `src/column-limits/SettingsPage/texts.ts` — добавление `tabTitle`
+
+### Phase 4: Тесты и stories (TASK-D)
+
+- Unit-тесты на `ColumnLimitsSettingsTab` (`.test.tsx` или `.cy.tsx`)
+- Storybook story для tab-варианта формы
+
+---
+
+## Полный код новых файлов
+
+### `src/column-limits/SettingsTab/index.ts`
+
+```typescript
+export { ColumnLimitsSettingsTab } from './ColumnLimitsSettingsTab';
+```
+
+### `src/column-limits/SettingsTab/ColumnLimitsSettingsTab.tsx`
+
+```typescript
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { Button, Space } from 'antd';
 import { useDi } from 'src/shared/diContext';
+import { useGetTextsByLocale } from 'src/shared/texts';
+import { settingsUIModelToken, propertyModelToken, boardRuntimeModelToken } from '../tokens';
+import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
 import { ColumnLimitsForm } from '../SettingsPage/ColumnLimitsForm';
-import { useColumnLimitsSettingsUIStore } from '../SettingsPage/stores/settingsUIStore';
-import { initFromProperty, saveToProperty, moveColumn } from '../SettingsPage/actions';
-import { useColumnLimitsPropertyStore } from '../property/store';
-import { useColumnLimitsRuntimeStore } from '../BoardPage/stores';
-import { columnLimitsBoardPageObjectToken } from '../BoardPage/pageObject';
-import { applyLimits } from '../BoardPage/actions';
-import { buildInitDataFromColumns } from './utils/buildInitDataFromColumns';
+import { buildInitDataFromColumns } from '../SettingsPage/utils/buildInitData';
 import { WITHOUT_GROUP_ID } from '../types';
+import type { Column } from '../types';
+import type { SettingsUIModel } from '../SettingsPage/models/SettingsUIModel';
+import type { BoardRuntimeModel } from '../BoardPage/models/BoardRuntimeModel';
 import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
 import styles from '../SettingsPage/styles.module.css';
-import type { Column } from '../types';
 
-function useInitSettingsTab() {
-  const di = useDi();
+export type ColumnLimitsSettingsTabProps = {
+  swimlanes: Array<{ id: string; name: string }>;
+};
 
-  return useCallback(() => {
-    const pageObject = di.inject(columnLimitsBoardPageObjectToken);
-    const columns = pageObject.getColumnsWithNames();
-    const wipLimits = useColumnLimitsPropertyStore.getState().data;
-
-    const initData = buildInitDataFromColumns(columns, wipLimits);
-    useColumnLimitsSettingsUIStore.getState().actions.reset();
-    initFromProperty(initData);
-
-    return columns;
-  }, [di]);
-}
-
-export const ColumnLimitsSettingsTabContainer: React.FC = () => {
+export const ColumnLimitsSettingsTab: React.FC<ColumnLimitsSettingsTabProps> = ({ swimlanes }) => {
   const texts = useGetTextsByLocale(COLUMN_LIMITS_TEXTS);
   const [isSaving, setIsSaving] = useState(false);
-  const columnsRef = useRef<Column[]>([]);
   const draggingRef = useRef<{ column: Column; groupId: string } | null>(null);
-  const initTab = useInitSettingsTab();
 
-  const withoutGroupColumns = useColumnLimitsSettingsUIStore(s => s.data.withoutGroupColumns);
-  const groups = useColumnLimitsSettingsUIStore(s => s.data.groups);
-  const issueTypeSelectorStates = useColumnLimitsSettingsUIStore(s => s.data.issueTypeSelectorStates);
-  const actions = useColumnLimitsSettingsUIStore(s => s.actions);
-  const boardSwimlanes = useColumnLimitsRuntimeStore(s => s.data.boardSwimlanes);
+  const container = useDi();
+  const { model: propertyModel } = container.inject(propertyModelToken);
+  const { model, useModel } = container.inject(settingsUIModelToken);
+  const { model: runtimeModel } = container.inject(boardRuntimeModelToken);
+  const boardPagePO = container.inject(boardPagePageObjectToken);
+
+  const settingsUi = model as SettingsUIModel;
+  const snap = useModel();
 
   useEffect(() => {
-    columnsRef.current = initTab();
-  }, [initTab]);
+    const columns = boardPagePO.getOrderedColumns();
+    const wipLimits = propertyModel.data;
+    const initData = buildInitDataFromColumns(columns, wipLimits);
+    settingsUi.reset();
+    settingsUi.initFromProperty(initData);
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const columnIds = columnsRef.current.map(c => c.id);
-      await saveToProperty(columnIds);
-      applyLimits();
-      message.success(texts.save);
+      const columnIds = boardPagePO.getOrderedColumnIds();
+      await settingsUi.save(columnIds);
+      (runtimeModel as BoardRuntimeModel).apply();
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    columnsRef.current = initTab();
+    settingsUi.reset();
+    const columns = boardPagePO.getOrderedColumns();
+    const wipLimits = propertyModel.data;
+    const initData = buildInitDataFromColumns(columns, wipLimits);
+    settingsUi.initFromProperty(initData);
   };
 
   const handleLimitChange = useCallback(
-    (groupId: string, limit: number) => actions.setGroupLimit(groupId, limit),
-    [actions]
+    (groupId: string, limit: number) => {
+      settingsUi.setGroupLimit(groupId, limit);
+    },
+    [settingsUi]
   );
 
   const handleColorChange = useCallback(
-    (groupId: string, color: string) => actions.setGroupColor(groupId, color),
-    [actions]
+    (groupId: string, color: string) => {
+      settingsUi.setGroupColor(groupId, color);
+    },
+    [settingsUi]
   );
 
   const handleIssueTypesChange = useCallback(
     (groupId: string, selectedTypes: string[], countAllTypes: boolean) => {
-      actions.setIssueTypeState(groupId, {
+      settingsUi.setIssueTypeState(groupId, {
         countAllTypes,
-        projectKey: issueTypeSelectorStates[groupId]?.projectKey ?? '',
+        projectKey: snap.issueTypeSelectorStates[groupId]?.projectKey ?? '',
         selectedTypes,
       });
     },
-    [actions, issueTypeSelectorStates]
+    [settingsUi, snap.issueTypeSelectorStates]
   );
 
   const handleSwimlanesChange = useCallback(
     (groupId: string, selectedSwimlanes: Array<{ id: string; name: string }>) => {
-      actions.setGroupSwimlanes(groupId, selectedSwimlanes);
+      settingsUi.setGroupSwimlanes(groupId, selectedSwimlanes);
     },
-    [actions]
+    [settingsUi]
   );
 
   const handleColumnDragStart = useCallback(
@@ -575,32 +474,35 @@ export const ColumnLimitsSettingsTabContainer: React.FC = () => {
       e.dataTransfer.effectAllowed = 'move';
       const column =
         groupId === WITHOUT_GROUP_ID
-          ? withoutGroupColumns.find(c => c.id === columnId)
-          : groups.find(g => g.id === groupId)?.columns.find(c => c.id === columnId);
+          ? snap.withoutGroupColumns.find(c => c.id === columnId)
+          : snap.groups.find(g => g.id === groupId)?.columns.find(c => c.id === columnId);
       if (column) {
         draggingRef.current = { column, groupId };
       }
     },
-    [withoutGroupColumns, groups]
+    [snap.withoutGroupColumns, snap.groups]
   );
 
   const handleColumnDragEnd = useCallback(() => {
     draggingRef.current = null;
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent, targetGroupId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const dragged = draggingRef.current;
-    if (!dragged) return;
-    const { column, groupId: fromGroupId } = dragged;
-    if (fromGroupId !== targetGroupId) {
-      moveColumn(column, fromGroupId, targetGroupId);
-    }
-    draggingRef.current = null;
-    const target = e.currentTarget as HTMLElement;
-    target.classList.remove(styles.addGroupDropzoneActiveJH);
-  }, []);
+  const handleDrop = useCallback(
+    (e: React.DragEvent, targetGroupId: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const dragged = draggingRef.current;
+      if (!dragged) return;
+      const { column, groupId: fromGroupId } = dragged;
+      if (fromGroupId !== targetGroupId) {
+        settingsUi.moveColumn(column, fromGroupId, targetGroupId);
+      }
+      draggingRef.current = null;
+      const target = e.currentTarget as HTMLElement;
+      target.classList.remove(styles.addGroupDropzoneActiveJH);
+    },
+    [settingsUi]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -617,12 +519,12 @@ export const ColumnLimitsSettingsTabContainer: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ padding: '16px' }}>
+    <div>
       <ColumnLimitsForm
-        withoutGroupColumns={withoutGroupColumns}
-        groups={groups}
-        issueTypeSelectorStates={issueTypeSelectorStates}
-        swimlanes={boardSwimlanes}
+        withoutGroupColumns={snap.withoutGroupColumns}
+        groups={snap.groups}
+        issueTypeSelectorStates={snap.issueTypeSelectorStates}
+        swimlanes={swimlanes}
         onLimitChange={handleLimitChange}
         onColorChange={handleColorChange}
         onSwimlanesChange={handleSwimlanesChange}
@@ -649,221 +551,180 @@ export const ColumnLimitsSettingsTabContainer: React.FC = () => {
 };
 ```
 
-## Модификации существующих файлов
+### `src/column-limits/SettingsPage/utils/buildInitData.ts` — добавление `buildInitDataFromColumns`
 
-### `src/column-limits/BoardPage/index.ts` — diff
+Новая функция добавляется в существующий файл рядом с `buildInitDataFromGroupMap`:
 
-```diff
- import { Token } from 'dioma';
- import { PageModification } from '../../shared/PageModification';
- import { BOARD_PROPERTIES } from '../../shared/constants';
- import { useColumnLimitsPropertyStore } from '../property';
- import { useColumnLimitsRuntimeStore } from './stores';
- import { applyLimits } from './actions';
- import { columnLimitsBoardPageObjectToken, registerColumnLimitsBoardPageObjectInDI } from './pageObject';
-+import { registerSettings } from 'src/board-settings/actions/registerSettings';
-+import { ColumnLimitsSettingsTabContainer } from '../SettingsTab/ColumnLimitsSettingsTabContainer';
-+import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
-+import { useGetTextByLocale } from 'src/shared/texts';
- 
- interface EditData {
-+  canEdit?: boolean;
-   rapidListConfig: {
-     mappedColumns: Array<{
-       id: string;
-       isKanPlanColumn: boolean;
-       max?: number;
-     }>;
-   };
-+  swimlanesConfig?: {
-+    swimlanes?: Array<{ id?: string; name: string }>;
-+  };
- }
+```typescript
+import { findGroupByColumnId } from '../../shared/utils';
 
- // ... (class definition unchanged until apply())
+/**
+ * Builds InitFromPropertyData from a plain Column[] array (no HTML elements needed).
+ * Used by SettingsTab on the board page, where columns come from BoardPagePageObject.
+ */
+export function buildInitDataFromColumns(
+  columns: Column[],
+  wipLimits: WipLimitsProperty
+): InitFromPropertyData {
+  const withoutGroupColumns: Column[] = [];
+  const groupColumnsMap: Record<string, Column[]> = {};
 
-   apply(data: [EditData?, BoardGroup?]): void {
-     if (!data) return;
-     const [editData = { rapidListConfig: { mappedColumns: [] } }, boardGroups = {}] = data;
--    if (Object.keys(boardGroups).length === 0) return;
- 
-     // Register PageObject in DI
-     try {
-       this.container.inject(columnLimitsBoardPageObjectToken);
-     } catch {
-       registerColumnLimitsBoardPageObjectInDI(this.container);
-     }
- 
-+    // Extract and store swimlanes for settings tab
-+    const rawSwimlanes = editData.swimlanesConfig?.swimlanes ?? [];
-+    const boardSwimlanes = rawSwimlanes.map((swim, index) => ({
-+      id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
-+      name: swim.name,
-+    }));
-+
-     // Initialize property store with loaded data
-     const propertyStore = useColumnLimitsPropertyStore.getState();
-     propertyStore.actions.setData(boardGroups);
- 
-     // Initialize runtime store
-     const { actions } = useColumnLimitsRuntimeStore.getState();
-     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
-     actions.setCssNotIssueSubTask(cssNotIssueSubTask);
-+    actions.setBoardSwimlanes(boardSwimlanes);
- 
-+    // Register settings tab (only if user can edit board)
-+    if (editData.canEdit) {
-+      registerSettings({
-+        title: COLUMN_LIMITS_TEXTS.tabTitle.en,
-+        component: ColumnLimitsSettingsTabContainer,
-+      });
-+    }
-+
-+    if (Object.keys(boardGroups).length === 0) return;
-+
-     // Adjust header padding for Jira v8
-     // ... (rest unchanged)
+  columns.forEach(col => {
+    const group = findGroupByColumnId(col.id, wipLimits);
+    if (group.name) {
+      if (!groupColumnsMap[group.name]) groupColumnsMap[group.name] = [];
+      groupColumnsMap[group.name].push(col);
+    } else {
+      withoutGroupColumns.push(col);
+    }
+  });
+
+  const groups: UIGroup[] = Object.entries(groupColumnsMap).map(([groupId, cols]) => {
+    const wipLimit = wipLimits[groupId] ?? {};
+    return {
+      id: groupId,
+      columns: cols,
+      max: wipLimit.max,
+      customHexColor: wipLimit.customHexColor,
+      includedIssueTypes: wipLimit.includedIssueTypes,
+      swimlanes: wipLimit.swimlanes,
+    };
+  });
+
+  const issueTypeSelectorStates: Record<string, IssueTypeState> = {};
+  groups.forEach(group => {
+    const wipGroup = wipLimits[group.id];
+    const includedIssueTypes = wipGroup?.includedIssueTypes ?? [];
+    issueTypeSelectorStates[group.id] = {
+      countAllTypes: !includedIssueTypes || includedIssueTypes.length === 0,
+      projectKey: '',
+      selectedTypes: includedIssueTypes,
+    };
+  });
+
+  return { withoutGroupColumns, groups, issueTypeSelectorStates };
+}
 ```
 
-### `src/column-limits/BoardPage/pageObject/IColumnLimitsBoardPageObject.ts` — diff
+## Diff для модифицируемых файлов
+
+### `src/page-objects/BoardPage.tsx`
+
+Добавить метод `getOrderedColumns()` в интерфейс `IBoardPagePageObject` и реализацию:
 
 ```diff
-+import type { Column } from '../../types';
+  /** All swimlane IDs (`getSwimlanes().map(s => s.id)`). */
+  getSwimlaneIds(): string[];
+
++ /**
++  * Ordered columns (id + display name) from the board header row.
++  * Combines getOrderedColumnIds() with column title text extraction.
++  */
++ getOrderedColumns(): Array<{ id: string; name: string }>;
 +
- export interface IColumnLimitsBoardPageObject {
-   // ... existing methods ...
- 
-+  /**
-+   * Get columns with their display names from board page header.
-+   * @returns Array of Column objects (id + name) in display order
-+   */
-+  getColumnsWithNames(): Column[];
- }
+  /**
+   * Count issues in a column across swimlanes (excludes `.ghx-done` by default, like legacy column-limits).
+   */
 ```
 
-### `src/column-limits/BoardPage/pageObject/ColumnLimitsBoardPageObject.ts` — diff
+Реализация в объекте `BoardPagePageObject`:
 
 ```diff
-+import type { Column } from '../../types';
+  getSwimlaneIds(): string[] {
+    return this.getSwimlanes().map(s => s.id);
+  },
+
++ getOrderedColumns(): Array<{ id: string; name: string }> {
++   const ids = this.getOrderedColumnIds();
++   return ids.map(id => {
++     const headerEl = this.getColumnHeaderElement(id);
++     const titleEl = headerEl?.querySelector(this.selectors.columnTitle);
++     const name = titleEl?.textContent?.trim() ?? '';
++     return { id, name };
++   });
++ },
 +
- export class ColumnLimitsBoardPageObject implements IColumnLimitsBoardPageObject {
-   // ... existing methods ...
- 
-+  getColumnsWithNames(): Column[] {
-+    const columnIds = this.getOrderedColumnIds();
-+    return columnIds
-+      .map(id => {
-+        const el =
-+          document.querySelector<HTMLElement>(
-+            `.ghx-column-header-group .ghx-column[data-id="${id}"]`
-+          ) ??
-+          document.querySelector<HTMLElement>(
-+            `ul.ghx-columns .ghx-column[data-id="${id}"]`
-+          );
+  getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
+```
+
+### `src/column-limits/BoardPage/index.ts`
+
+Расширить `EditData` и добавить `registerSettings()`:
+
+```diff
++ import React from 'react';
++ import { registerSettings } from 'src/board-settings/actions/registerSettings';
++ import { ColumnLimitsSettingsTab } from '../SettingsTab';
++ import { useGetTextsByLocale } from 'src/shared/texts';
++ import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
+
+  interface EditData {
++   canEdit?: boolean;
+    rapidListConfig: {
+      mappedColumns: Array<{
+        id: string;
+        isKanPlanColumn: boolean;
+        max?: number;
+      }>;
+    };
++   swimlanesConfig?: {
++     swimlanes?: Array<{ id?: string; name: string }>;
++   };
+  }
+```
+
+В методе `apply()` после существующей логики:
+
+```diff
+    this.onDOMChange('#ghx-pool', () => {
+      (boardRuntimeModel as BoardRuntimeModel).apply();
+    });
 +
-+        const name = el?.querySelector('.ghx-column-title, h2')?.textContent?.trim() ?? '';
-+        return { id, name };
-+      })
-+      .filter(c => c.id);
-+  }
- }
-```
-
-### `src/column-limits/BoardPage/stores/runtimeStore.types.ts` — diff
-
-```diff
- export type RuntimeData = {
-   groupStats: GroupStats[];
-   cssNotIssueSubTask: string;
-+  boardSwimlanes: Array<{ id: string; name: string }>;
- };
-
- export type RuntimeActions = {
-   setGroupStats: (stats: GroupStats[]) => void;
-   setCssNotIssueSubTask: (css: string) => void;
-+  setBoardSwimlanes: (swimlanes: Array<{ id: string; name: string }>) => void;
-   reset: () => void;
- };
-
- export const getInitialData = (): RuntimeData => ({
-   groupStats: [],
-   cssNotIssueSubTask: '',
-+  boardSwimlanes: [],
- });
-```
-
-### `src/column-limits/BoardPage/stores/runtimeStore.ts` — diff
-
-```diff
- export const useColumnLimitsRuntimeStore = create<RuntimeStoreState>()(set => ({
-   data: getInitialData(),
-   actions: {
-     setGroupStats: stats => set(produce(state => { state.data.groupStats = stats; })),
-     setCssNotIssueSubTask: css => set(produce(state => { state.data.cssNotIssueSubTask = css; })),
-+    setBoardSwimlanes: swimlanes => set(produce(state => { state.data.boardSwimlanes = swimlanes; })),
-     reset: () => set({ data: getInitialData() }),
-   },
- }));
-```
-
-### `src/column-limits/SettingsPage/texts.ts` — diff
-
-```diff
- export const COLUMN_LIMITS_TEXTS = {
-   // ... existing entries ...
++   const canEdit = (editData as EditData).canEdit;
++   if (canEdit) {
++     const rawSwimlanes = (editData as EditData).swimlanesConfig?.swimlanes ?? [];
++     const swimlanes = rawSwimlanes.map((swim, index) => ({
++       id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
++       name: swim.name,
++     }));
 +
-+  tabTitle: {
-+    en: 'Column WIP Limits',
-+    ru: 'WIP-лимиты колонок',
-+  },
- } as const satisfies Texts;
++     const TabComponent = () => <ColumnLimitsSettingsTab swimlanes={swimlanes} />;
++
++     registerSettings({
++       title: 'Column WIP Limits',
++       component: TabComponent,
++     });
++   }
+  }
 ```
 
-## Migration Plan
+### `src/column-limits/SettingsPage/texts.ts`
 
-### Phase 1: Infrastructure (TASK-1)
+```diff
+  settingsButton: {
+    en: 'Column group WIP limits',
+    ru: 'WIP-лимиты на группы колонок',
+  },
++ tabTitle: {
++   en: 'Column WIP Limits',
++   ru: 'WIP-лимиты по колонкам',
++ },
+  } as const satisfies Texts;
+```
 
-**Цель**: подготовить stores и page object для settings tab.
+### `src/page-objects/BoardPage.mock.ts`
 
-1. Добавить `boardSwimlanes` в `runtimeStore.types.ts`
-2. Добавить `setBoardSwimlanes` в `runtimeStore.ts`
-3. Добавить `getColumnsWithNames()` в `IColumnLimitsBoardPageObject` и `ColumnLimitsBoardPageObject`
-4. Написать unit-тесты на `getColumnsWithNames()` и новые runtime store fields
-5. Добавить `tabTitle` в `COLUMN_LIMITS_TEXTS`
+Добавить мок для нового метода:
 
-**Результат**: существующая функциональность не затронута, новые методы/поля доступны.
-
-### Phase 2: Core logic (TASK-2)
-
-**Цель**: реализовать чистую функцию и контейнер.
-
-1. Создать `buildInitDataFromColumns.ts` с unit-тестами
-2. Создать `ColumnLimitsSettingsTabContainer.tsx`
-
-**Результат**: компонент готов, но ещё не зарегистрирован.
-
-### Phase 3: Integration (TASK-3)
-
-**Цель**: подключить settings tab к board page.
-
-1. Модифицировать `ColumnLimitsBoardPage.apply()`:
-   - Извлечь swimlanes → `setBoardSwimlanes()`
-   - Проверить `canEdit` → `registerSettings()`
-2. Перенести `if (Object.keys(boardGroups).length === 0) return;` ПОСЛЕ регистрации таба
-
-**Результат**: таб доступен на board page. Полная функциональность: создание/редактирование/удаление групп, Save/Cancel, applyLimits после сохранения.
-
-### Phase 4: Tests (TASK-4)
-
-**Цель**: BDD-тесты и Storybook.
-
-1. Cypress component test: открытие таба, создание группы, Save/Cancel
-2. Storybook story для ColumnLimitsSettingsTabContainer (если нужно)
+```diff
++ getOrderedColumns: vi.fn(() => []),
+```
 
 ## Benefits
 
-1. **Удобство пользователя** — настройка лимитов без ухода с доски
-2. **Минимум нового кода** — переиспользуются ColumnLimitsForm, settingsUIStore, все actions, propertyStore
-3. **Консистентность** — тот же паттерн, что у других фич с settings tab (sub-tasks-progress, diagnostic, local-settings)
-4. **Обратная совместимость** — старая модалка в Board Settings продолжает работать параллельно
-5. **Тестируемость** — `buildInitDataFromColumns` — чистая функция; контейнер использует DI
+1. **Минимум нового кода** — 2 новых файла (`ColumnLimitsSettingsTab.tsx`, `index.ts`), 1 новая функция (`buildInitDataFromColumns`), 3 модифицируемых файла.
+2. **Полное переиспользование моделей** — `PropertyModel`, `SettingsUIModel`, `BoardRuntimeModel` — без изменений. DI-регистрация (`module.ts`, `tokens.ts`) — без изменений.
+3. **Полное переиспользование UI** — `ColumnLimitsForm`, `ColorPickerButton`, `SwimlaneSelector`, `IssueTypeSelector` — все View-компоненты используются as-is.
+4. **Совместимость** — tab и старая модалка работают параллельно, обе читают/пишут один и тот же board property.
+5. **Следование паттерну registerSettings** — таб регистрируется точно так же, как другие фичи (Diagnostic, Local Settings, Sub-tasks Progress).
+6. **Обновление доски после Save** — вызов `BoardRuntimeModel.apply()` обеспечивает мгновенное обновление индикаторов на доске без перезагрузки.

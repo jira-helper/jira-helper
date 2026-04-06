@@ -196,6 +196,12 @@ export interface IBoardPagePageObject {
    */
   getColumnHeaderElement(columnId: string): HTMLElement | null;
 
+  /**
+   * Ordered columns (id + display name) from the board header row.
+   * Combines getOrderedColumnIds() with column title text from `.ghx-column-title` or `h2`.
+   */
+  getOrderedColumns(): Array<{ id: string; name: string }>;
+
   /** All swimlane IDs (`getSwimlanes().map(s => s.id)`). */
   getSwimlaneIds(): string[];
 
@@ -206,6 +212,12 @@ export interface IBoardPagePageObject {
 
   /** Apply inline styles to the column header element. */
   styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void;
+
+  /**
+   * Clear group-limit inline styles on the column header (background, top border, radii).
+   * Used before re-applying so columns removed from a group lose previous decoration.
+   */
+  resetColumnHeaderStyles(columnId: string): void;
 
   /** Insert HTML at the end of the column header (`insertAdjacentHTML` `beforeend`). */
   insertColumnHeaderHtml(columnId: string, html: string): void;
@@ -500,6 +512,22 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     return document.querySelector<HTMLElement>(`.ghx-column[data-id="${columnId}"]`);
   },
 
+  getOrderedColumns(): Array<{ id: string; name: string }> {
+    const ids = this.getOrderedColumnIds();
+    return ids.map(id => {
+      const headerEl = this.getColumnHeaderElement(id);
+      let name = '';
+      if (headerEl) {
+        const titleEl = headerEl.querySelector(this.selectors.columnTitle);
+        name = titleEl?.textContent?.trim() ?? '';
+        if (!name) {
+          name = headerEl.querySelector('h2')?.textContent?.trim() ?? '';
+        }
+      }
+      return { id, name };
+    });
+  },
+
   getSwimlaneIds(): string[] {
     return this.getSwimlanes().map(s => s.id);
   },
@@ -534,6 +562,16 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     const columnElement = this.getColumnHeaderElement(columnId);
     if (!columnElement) return;
     Object.assign(columnElement.style, styles);
+  },
+
+  resetColumnHeaderStyles(columnId: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    const { style } = columnElement;
+    style.removeProperty('background-color');
+    style.removeProperty('border-top');
+    style.removeProperty('border-top-left-radius');
+    style.removeProperty('border-top-right-radius');
   },
 
   insertColumnHeaderHtml(columnId: string, html: string): void {

@@ -19,6 +19,7 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
   getSwimlaneIds: vi.fn(() => []),
   getIssueCountInColumn: vi.fn(() => 0),
   styleColumnHeader: vi.fn(),
+  resetColumnHeaderStyles: vi.fn(),
   insertColumnHeaderHtml: vi.fn(),
   removeColumnHeaderElements: vi.fn(),
   highlightColumnCells: vi.fn(),

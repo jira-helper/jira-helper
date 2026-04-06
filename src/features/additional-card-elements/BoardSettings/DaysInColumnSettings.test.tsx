@@ -86,8 +86,10 @@ describe('DaysInColumnSettings', () => {
       getSwimlaneIds: () => [],
       getIssueCountInColumn: () => 0,
       styleColumnHeader: () => {},
+      resetColumnHeaderStyles: () => {},
       insertColumnHeaderHtml: () => {},
       removeColumnHeaderElements: () => {},
+      getOrderedColumns: () => [],
       highlightColumnCells: () => {},
       resetColumnCellStyles: () => {},
     };

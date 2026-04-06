@@ -45,8 +45,10 @@ const mockBoardPagePageObject: IBoardPagePageObject = {
   getSwimlaneIds: () => [],
   getIssueCountInColumn: () => 0,
   styleColumnHeader: () => {},
+  resetColumnHeaderStyles: () => {},
   insertColumnHeaderHtml: () => {},
   removeColumnHeaderElements: () => {},
+  getOrderedColumns: () => [],
   highlightColumnCells: () => {},
   resetColumnCellStyles: () => {},
 };

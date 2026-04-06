@@ -26,10 +26,18 @@ const BoardSettingsModalInner = () => {
         onCancel={() => setIsModalOpen(false)}
         onClose={() => setIsModalOpen(false)}
         onOk={() => setIsModalOpen(false)}
+        destroyOnClose
         width="auto"
         getContainer={false}
         okText={texts.ok}
         cancelText={texts.cancel}
+        styles={{
+          footer: {
+            borderTop: '1px solid var(--ant-color-split, rgba(0, 0, 0, 0.06))',
+            marginTop: 0,
+            paddingTop: 16,
+          },
+        }}
       >
         <Tabs defaultActiveKey="1">
           {settings.map(setting => (

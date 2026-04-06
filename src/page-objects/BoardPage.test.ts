@@ -511,6 +511,50 @@ describe('BoardPagePageObject column header & column-limits DOM helpers', () => 
     expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['c1', 'c2']);
   });
 
+  it('getOrderedColumns returns empty list when no ordered columns', () => {
+    document.body.innerHTML = '';
+    expect(BoardPagePageObject.getOrderedColumns()).toEqual([]);
+  });
+
+  it('getOrderedColumns returns id and name from .ghx-column-title in getOrderedColumnIds order', () => {
+    document.body.innerHTML = `
+      <div class="ghx-first">
+        <ul class="ghx-columns">
+          <li class="ghx-column" data-column-id="c1" data-id="c1"><span class="ghx-column-title">Alpha</span></li>
+          <li class="ghx-column" data-column-id="c2" data-id="c2"><span class="ghx-column-title">Beta</span></li>
+        </ul>
+      </div>
+    `;
+    const columns = BoardPagePageObject.getOrderedColumns();
+    expect(columns.map(c => c.id)).toEqual(BoardPagePageObject.getOrderedColumnIds());
+    expect(columns).toEqual([
+      { id: 'c1', name: 'Alpha' },
+      { id: 'c2', name: 'Beta' },
+    ]);
+  });
+
+  it('getOrderedColumns falls back to h2 when .ghx-column-title is absent', () => {
+    document.body.innerHTML = `
+      <div class="ghx-first">
+        <ul class="ghx-columns">
+          <li class="ghx-column" data-column-id="c1" data-id="c1"><h2>From H2</h2></li>
+        </ul>
+      </div>
+    `;
+    expect(BoardPagePageObject.getOrderedColumns()).toEqual([{ id: 'c1', name: 'From H2' }]);
+  });
+
+  it('getOrderedColumns uses empty name when header has no title', () => {
+    document.body.innerHTML = `
+      <div class="ghx-first">
+        <ul class="ghx-columns">
+          <li class="ghx-column" data-column-id="cx" data-id="cx"></li>
+        </ul>
+      </div>
+    `;
+    expect(BoardPagePageObject.getOrderedColumns()).toEqual([{ id: 'cx', name: '' }]);
+  });
+
   it('getColumnHeaderElement returns header li from ul.ghx-columns', () => {
     document.body.innerHTML = `
       <div id="ghx-column-headers">
@@ -651,6 +695,26 @@ describe('BoardPagePageObject column header & column-limits DOM helpers', () => 
     BoardPagePageObject.styleColumnHeader('z1', { color: 'red' });
     const el = BoardPagePageObject.getColumnHeaderElement('z1');
     expect(el?.style.color).toBe('red');
+  });
+
+  it('resetColumnHeaderStyles clears group header decoration set by styleColumnHeader', () => {
+    document.body.innerHTML = `
+      <ul class="ghx-columns">
+        <li class="ghx-column" data-id="z1" data-column-id="z1"></li>
+      </ul>
+    `;
+    BoardPagePageObject.styleColumnHeader('z1', {
+      backgroundColor: '#deebff',
+      borderTop: '4px solid #abc',
+      borderTopLeftRadius: '10px',
+      borderTopRightRadius: '10px',
+    });
+    BoardPagePageObject.resetColumnHeaderStyles('z1');
+    const el = BoardPagePageObject.getColumnHeaderElement('z1');
+    expect(el?.style.backgroundColor).toBe('');
+    expect(el?.style.borderTop).toBe('');
+    expect(el?.style.borderTopLeftRadius).toBe('');
+    expect(el?.style.borderTopRightRadius).toBe('');
   });
 
   it('insertColumnHeaderHtml and removeColumnHeaderElements mutate header', () => {
