@@ -10,7 +10,7 @@ tools:
   - cd
   - rm
 name: coder
-model: composer-2
+model: composer-2-fast
 description: Эксперт по написанию кода для jira-helper. Следует TDD (Red-Green-Refactor) и архитектуре проекта. Используй проактивно для имплементации фич, написания кода и рефакторинга.
 ---
 
