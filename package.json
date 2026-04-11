@@ -91,7 +91,7 @@
     "analyze": "node scripts/analyze-modules.mjs",
     "docs:features": "node scripts/generate-features-doc.mjs",
     "docs:changelog": "node scripts/generate-changelog.mjs",
-    "precommit": "npm run lint:typescript && npm run lint:eslint && npm run test && npm run test:storybook",
+    "precommit": "node tools/precommit.mjs",
     "precommit:full": "npm run lint:typescript && npm run lint:eslint && npm run test && npm run test:storybook && npm run cy:run"
   },
   "husky": {
