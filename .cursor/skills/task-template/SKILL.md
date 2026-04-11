@@ -96,6 +96,7 @@ find .agents/tasks -name 'EPIC-*.md' -type f 2>/dev/null | sed 's/.*EPIC-\([0-9]
 # TASK-{N}: {Краткое название}
 
 **Status**: TODO
+**Type**: {тип сущности или характер работы, например: types, model, view, container, stories, page-object, api, di-wiring, bdd-tests, config, refactoring, other}
 
 **Parent**: [EPIC-{N}](./EPIC-{N}-{name}.md)
 
@@ -181,7 +182,80 @@ Standalone задача:
 
 ---
 
-## Типы задач
+## Атомарная декомпозиция задач
+
+Каждая TASK имеет поле **Type** — краткое описание сущности или характера работы. Помогает coder-агенту понять scope и какой skill читать.
+
+**Типичные значения Type** (не строгий enum — используй что подходит):
+
+- `types` — интерфейсы, типы, DI-токены
+- `model` — Model/Store класс + unit test
+- `view` — View-компонент (presentation) + unit test
+- `container` — Container-компонент + unit test
+- `stories` — Storybook stories для компонента
+- `page-object` — PageObject (работа с DOM) + unit test
+- `page-modification` — PageModification (entry point фичи на странице) + unit test
+- `api` — API-функция, адаптер, HTTP-клиент + unit test
+- `di-wiring` — регистрация токенов в DI-контейнере, entry point
+- `bdd-tests` — Cypress BDD тесты
+- `config` — конфигурация (manifest, webpack, package.json)
+- `refactoring` — рефакторинг без изменения поведения
+- `other` — всё, что не попадает в категории выше
+
+### Главное правило
+
+**Одна задача = один слой + один модуль.** Если задача затрагивает и Model, и View — разбей на две.
+
+### Правила гранулярности
+
+1. **1 TASK = 1-3 файла** (реализация + тест). Если больше — задача слишком крупная.
+2. **Stories — всегда отдельная TASK.** Не совмещай создание компонента и его stories.
+3. **BDD-тесты — отдельная TASK.** Cypress тесты отделены от unit tests.
+4. **DI-wiring — отдельная TASK.** Регистрация в контейнере отдельно от реализации.
+5. **Unit test идёт вместе с реализацией** в одной TASK (это TDD — тест пишется первым).
+6. **Конфигурация — отдельная TASK.** Изменения manifest/webpack не смешивай с кодом фичи.
+
+### Anti-patterns (как НЕ надо разбивать)
+
+**Слишком крупная задача:**
+
+```
+TASK: Создать Cloud PageObject
+- Исследовать DOM Cloud-доски
+- Написать CloudBoardPagePageObject (15 методов)
+- Написать unit tests
+- Зарегистрировать в DI
+```
+
+**Правильная декомпозиция той же работы:**
+
+```
+TASK-1 [types]:           Определить интерфейс IBoardPagePageObject и DI-токен
+TASK-2 [page-object]:     CloudBoardPagePageObject — selectors и методы для колонок/issues
+TASK-3 [page-object]:     CloudBoardPagePageObject — методы для свимлейнов и фильтрации
+TASK-4 [di-wiring]:       Зарегистрировать CloudBoardPagePageObject в content-cloud.ts
+```
+
+**Ещё пример — слишком крупная:**
+
+```
+TASK: Реализовать PersonLimitsForm с моделью и stories
+```
+
+**Правильная декомпозиция:**
+
+```
+TASK-1 [types]:       Типы и интерфейсы для PersonLimitsForm
+TASK-2 [model]:       SettingsUIModel — state управления формой
+TASK-3 [view]:        PersonLimitsForm — presentation компонент
+TASK-4 [container]:   PersonLimitsFormContainer — подключение к store
+TASK-5 [stories]:     Stories для PersonLimitsForm
+TASK-6 [bdd-tests]:   Cypress тесты для сценария "добавление лимита"
+```
+
+---
+
+## Типы задач по характеру работы
 
 ### Bug Fix
 
@@ -286,8 +360,10 @@ Standalone задача:
 - [ ] Номер TASK определён (`find` по `.agents/tasks`, max + 1)
 - [ ] Файл создан по шаблону **внутри** этой папки
 - [ ] Status = TODO
+- [ ] **Type указан** (тип сущности или характер работы)
 - [ ] Parent указан (EPIC или Standalone)
 - [ ] Критерии приёмки с чекбоксами
+- [ ] **Задача атомарна**: 1-3 файла, один слой, один модуль
 - [ ] Задача добавлена в EPIC таблицу (если не Standalone)
 - [ ] Зависимости указаны (если есть)
 
