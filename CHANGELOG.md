@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Generating changelog
+
+Run `node scripts/generate-changelog.mjs [from-tag] [to-tag]` to generate entries from git commits.
+
+
+## [2.30.0] - 2025-01-15
+
+### Added
+
+- **Issue Condition Checks**: Show small icons on cards when issues match defined conditions (sub-tasks, epic children, linked issues)
+- **person-limits**: Person WIP Limits settings tab in board page Jira Helper panel
+- **person-limits**: showAllPersonIssues per-limit option
+- **column-limits**: CONWIP settings tab in board page Jira Helper panel
+
+### Changed
+
+- **Architecture**: Migrated feature modules to Valtio + Module DI abstraction
+- **person-limits**: Migrated from Zustand to Valtio Model + DI
+- Centralized settings page button registration via ColumnsSettingsTabPageObject
+
+
+## [2.29.0] - 2024-10-15
+
+### Added
+
+- **Additional Card Elements**: Issue link display in backlog and board
+- **Additional Card Elements**: showInBacklog option for backlog issue elements
+- **Additional Card Elements**: Board Backlog page integration
+- **Additional Card Elements**: Multiline summary option for issue links
+- Debounce utility for IssueSelectorByAttributes
+
+### Fixed
+
+- Fill card with grabber color
+- Duplicated requests to Jira API
+- Progress bars for external issues in epics
+- External links progress tracking
+- Sub-tasks progress only for chosen columns
+- Detecting backlog screen
+
+
+## [2.28.0] - 2024-06-01
+
+### Added
+
+- Days to Deadline badge on cards
+- Days in Column warning levels per column
+- Issue Links Display with configurable rules and colors
+
+### Fixed
+
+- Various UI fixes and improvements
+
 
 ## [2.10.1] - 2021-02-25
 ### Fixed 

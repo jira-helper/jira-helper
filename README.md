@@ -12,8 +12,8 @@ A browser extension that enhances Jira with advanced visualization, WIP-limits, 
 - [WIP-limit for several columns (CONWIP)](./docs/index.md#wip-limits-for-several-columns-conwip)
 - [WIP-limit for Swimlanes](./docs/index.md#wip-limits-for-swimlanes)
 - [Personal WIP-limit](./docs/index.md#wip-limits-for-individual-team-members)
-- [WIP-limit by Field Value](./docs/index.ru.md#wip-limit-for-field-value)
-- [WIP-limit on Cells](./docs/index.ru.md#wip-limit-on-cell)
+- [WIP-limit by Field Value](./docs/index.md#wip-limit-for-field-value)
+- [WIP-limit on Cells](./docs/index.md#wip-limit-on-cell)
 
 ### Board Visualization
 - [Card Colors - full card highlighting](./docs/index.md#card-colors)
