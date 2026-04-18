@@ -2,6 +2,7 @@ import type { Container } from 'dioma';
 import { globalContainer } from 'dioma';
 import { routingServiceToken } from '../routing';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
+import { getIssueTypeFromCard } from '../page-objects/utils/getIssueTypeFromCard';
 import { waitForElement } from './utils';
 import {
   deleteBoardPropertyToken,
@@ -168,14 +169,7 @@ export class PageModification<InitData = undefined, TargetElement extends Elemen
   }
 
   protected getIssueTypeFromCard(card: Element): string | null {
-    const typeElement = card.querySelector('.ghx-type');
-    if (!typeElement) return null;
-
-    const title = typeElement.getAttribute('title');
-    if (!title) return null;
-
-    const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
-    return typeName || null;
+    return getIssueTypeFromCard(card);
   }
 
   protected shouldCountIssue(card: Element, includedIssueTypes?: string[]): boolean {

@@ -1,5 +1,5 @@
 import { Err, Ok, Result } from 'ts-results';
-import { Container, Token } from 'dioma';
+import { Container, Scopes, Token } from 'dioma';
 import {
   getExternalIssues,
   getIssueLinkTypes,
@@ -228,6 +228,19 @@ export interface IJiraService {
   getIssueLinkTypes: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
 }
 
+/**
+ * Wraps an unknown thrown value into an `Error` and prepends a context message.
+ * Mutates the original error message if the value is already an `Error`,
+ * preserving the original stack trace.
+ */
+const wrapUnknownError = (error: unknown, contextMessage: string): Error => {
+  if (error instanceof Error) {
+    error.message = `${contextMessage}: ${error.message}`;
+    return error;
+  }
+  return new Error(`${contextMessage}: ${String(error)}`);
+};
+
 export class JiraService implements IJiraService {
   private queue = new TaskQueue();
 
@@ -243,6 +256,12 @@ export class JiraService implements IJiraService {
 
   private epicNameFieldId: string | null = null;
 
+  /**
+   * Standalone instance, used by `testData.ts` and other places, where DI
+   * is not configured (e.g. some unit tests, storybook).
+   *
+   * In application code use DI: `inject(JiraServiceToken)` instead.
+   */
   static getInstance() {
     if (!JiraService.instance) {
       JiraService.instance = new JiraService();
@@ -359,12 +378,7 @@ export class JiraService implements IJiraService {
 
       return mappedJiraIssue;
     } catch (error) {
-      if (error instanceof Error) {
-        const message = `Failed to fetch Jira issue ${issueId}: ${error.message}`;
-        error.message = message;
-        return Err(error);
-      }
-      return Err(new Error(`Unknown error: ${error}`));
+      return Err(wrapUnknownError(error, `Failed to fetch Jira issue ${issueId}`));
     }
   }
 
@@ -573,12 +587,7 @@ export class JiraService implements IJiraService {
 
       return fields;
     } catch (error) {
-      if (error instanceof Error) {
-        const message = `Failed to fetch project fields: ${error.message}`;
-        error.message = message;
-        return Err(error);
-      }
-      return Err(new Error(`Unknown error: ${error}`));
+      return Err(wrapUnknownError(error, 'Failed to fetch project fields'));
     }
   }
 
@@ -608,5 +617,5 @@ export class JiraService implements IJiraService {
 
 export const JiraServiceToken = new Token<IJiraService>('JiraService');
 export const registerJiraServiceInDI = (container: Container) => {
-  container.register({ token: JiraServiceToken, factory: () => JiraService.getInstance() });
+  container.register({ token: JiraServiceToken, class: JiraService, scope: Scopes.Singleton() });
 };

@@ -40,11 +40,8 @@ const applyModification = async (instance: PageModification) => {
 };
 
 const applyModifications = (modificationsMap: ModificationsMap, routingService: IRoutingService) => {
-  const currentRoute = routingService.getCurrentRoute();
+  route = routingService.getCurrentRoute();
 
-  if (route !== currentRoute) {
-    route = currentRoute;
-  }
   if (!route) {
     return;
   }

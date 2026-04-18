@@ -94,6 +94,27 @@ const requestJiraViaFetch = async (
   return Ok(response);
 };
 
+const requestJsonViaFetch = async <T>(
+  url: string,
+  options: RequestInit = {},
+  retries = 5
+): Promise<Result<T, Error>> => {
+  const responseResult = await requestJiraViaFetch(url, options, retries);
+  if (responseResult.err) {
+    return Err(responseResult.val);
+  }
+
+  const jsonResult = await responseResult.val.json().then(
+    r => Ok(r as T),
+    e => Err(e)
+  );
+
+  if (jsonResult.err) {
+    return Err(jsonResult.val);
+  }
+  return Ok(jsonResult.val);
+};
+
 // Fetch all properties of a board
 const getBoardProperties = (boardId: string): Promise<any> => {
   const cacheKey = `${boardId}_propertiesList`;
@@ -301,41 +322,11 @@ export const getUser = (query: string): Promise<any> =>
     return substringMatch || users[0];
   });
 
-export const getJiraIssue = async (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> => {
-  const result = await requestJiraViaFetch(`api/2/issue/${issueId}`, options, 5);
-  if (result.err) {
-    return Err(result.val);
-  }
+export const getJiraIssue = (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> =>
+  requestJsonViaFetch<JiraIssue>(`api/2/issue/${issueId}`, options);
 
-  const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
-    e => Err(e)
-  );
-
-  if (jsonDataResult.err) {
-    return Err(jsonDataResult.val);
-  }
-  const jsonData = jsonDataResult.val;
-
-  return Ok(jsonData);
-};
-
-export const getExternalIssues = async (issueKey: string, options: RequestInit = {}): Promise<Result<any, Error>> => {
-  const result = await requestJiraViaFetch(`api/2/issue/${issueKey}/remotelink`, options, 5);
-  if (result.err) {
-    return Err(result.val);
-  }
-
-  const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
-    e => Err(e)
-  );
-
-  if (jsonDataResult.err) {
-    return Err(jsonDataResult.val);
-  }
-  return Ok(jsonDataResult.val);
-};
+export const getExternalIssues = (issueKey: string, options: RequestInit = {}): Promise<Result<any, Error>> =>
+  requestJsonViaFetch<any>(`api/2/issue/${issueKey}/remotelink`, options);
 
 export const renderRemoteLink = async (
   remoteLinkId: number,
@@ -349,38 +340,15 @@ export const renderRemoteLink = async (
   return Ok(await result.val.text());
 };
 
-export const getProjectFields = async (options: RequestInit = {}): Promise<Result<JiraField[], Error>> => {
-  const result = await requestJiraViaFetch('api/2/field', options, 5);
-  if (result.err) {
-    return Err(result.val);
-  }
-
-  const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
-    e => Err(e)
-  );
-
-  if (jsonDataResult.err) {
-    return Err(jsonDataResult.val);
-  }
-  return Ok(jsonDataResult.val);
-};
+export const getProjectFields = (options: RequestInit = {}): Promise<Result<JiraField[], Error>> =>
+  requestJsonViaFetch<JiraField[]>('api/2/field', options);
 
 export const getIssueLinkTypes = async (options: RequestInit = {}): Promise<Result<JiraIssueLinkType[], Error>> => {
-  const result = await requestJiraViaFetch('api/2/issueLinkType', options, 5);
+  const result = await requestJsonViaFetch<{ issueLinkTypes: JiraIssueLinkType[] }>('api/2/issueLinkType', options);
   if (result.err) {
     return Err(result.val);
   }
-
-  const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
-    e => Err(e)
-  );
-
-  if (jsonDataResult.err) {
-    return Err(jsonDataResult.val);
-  }
-  return Ok(jsonDataResult.val.issueLinkTypes);
+  return Ok(result.val.issueLinkTypes);
 };
 
 export interface ProjectIssueType {
@@ -393,22 +361,12 @@ export const getProjectIssueTypes = async (
   projectKey: string,
   options: RequestInit = {}
 ): Promise<Result<ProjectIssueType[], Error>> => {
-  const result = await requestJiraViaFetch(`api/2/project/${projectKey}`, options, 5);
+  const result = await requestJsonViaFetch<{ issueTypes?: any[] }>(`api/2/project/${projectKey}`, options);
   if (result.err) {
     return Err(result.val);
   }
 
-  const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
-    e => Err(e)
-  );
-
-  if (jsonDataResult.err) {
-    return Err(jsonDataResult.val);
-  }
-
-  const project = jsonDataResult.val;
-  const issueTypes = project.issueTypes || [];
+  const issueTypes = result.val.issueTypes || [];
   return Ok(
     issueTypes.map((type: any) => ({
       id: type.id,

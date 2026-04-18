@@ -67,12 +67,9 @@ export function filterSubtasksBySources(
     return [];
   }
 
-  // If all main sources are enabled, return all
+  // If direct subtasks AND any non-subtask source are enabled — return all
   if (config.includeDirectSubtasks && (config.includeEpicChildren || config.includeLinkedIssues)) {
-    // Need to check if we're including all non-subtask items
-    if (config.includeEpicChildren || config.includeLinkedIssues) {
-      return subtasks;
-    }
+    return subtasks;
   }
 
   return subtasks.filter(subtask => {

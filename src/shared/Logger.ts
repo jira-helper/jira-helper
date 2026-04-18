@@ -9,6 +9,14 @@ type Message = {
 export type LoggerLevel = 'info' | 'error' | 'warn';
 const levels: LoggerLevel[] = ['info', 'error', 'warn'];
 
+/* eslint-disable no-console */
+const consoleByLevel: Record<LoggerLevel, (...args: unknown[]) => void> = {
+  info: console.log,
+  error: console.error,
+  warn: console.warn,
+};
+/* eslint-enable no-console */
+
 export class Logger {
   private messagesSize: number = 2000;
 
@@ -32,24 +40,8 @@ export class Logger {
       return;
     }
 
-    switch (level) {
-      case 'info':
-        // eslint-disable-next-line no-console
-        console.log(message);
-        break;
-      case 'error':
-        // eslint-disable-next-line no-console
-        console.error(message);
-        break;
-      case 'warn':
-        // eslint-disable-next-line no-console
-        console.warn(message);
-        break;
-      default:
-        // eslint-disable-next-line no-console
-        console.log(message);
-        break;
-    }
+    const logFn = consoleByLevel[level] ?? consoleByLevel.info;
+    logFn(message);
   }
 
   getMessages() {

@@ -2,6 +2,7 @@ import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { getNameFromTooltip } from './utils/getNameFromTooltip';
+import { getIssueTypeFromCard } from './utils/getIssueTypeFromCard';
 
 const NO_VISIBILITY_CLASS = 'no-visibility';
 
@@ -57,15 +58,6 @@ function getColumnTitleToIdMap(selectors: BoardSelectors): Map<string, string> {
     if (id && title) map.set(title, id);
   });
   return map;
-}
-
-function getIssueTypeFromCard(card: Element): string | null {
-  const typeElement = card.querySelector('.ghx-type');
-  if (!typeElement) return null;
-  const title = typeElement.getAttribute('title');
-  if (!title) return null;
-  const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
-  return typeName || null;
 }
 
 function countIssuesInColumn(column: Element, issueSelector: string, options?: IssueCountOptions): number {
