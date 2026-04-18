@@ -83,19 +83,16 @@ When(/^I drag "([^"]*)" column to create a new group$/, (columnName: string) => 
 });
 
 When(/^I set limit to (\d+)$/, (limitValue: string) => {
-  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${limitValue}`);
-  cy.get('body').click();
+  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${limitValue}`).blur();
   cy.wait(300);
 });
 
 When(/^I try to set limit to (-?\d+)$/, (limitValue: string) => {
-  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${limitValue}`);
-  cy.get('body').click();
+  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${limitValue}`).blur();
 });
 
 When(/^I type "([^"]*)" into limit input$/, (text: string) => {
-  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${text}`);
-  cy.get('body').click();
+  cy.get('.group-limits-input-jh').first().find('input').click().type(`{selectall}${text}`).blur();
 });
 
 Then(/^the limit input should show value (\d+)$/, (expectedValue: string) => {
@@ -155,8 +152,8 @@ When(/^I change group "([^"]*)" limit to (\d+)$/, (groupId: string, limitValue: 
     .closest('.ant-card')
     .find('.group-limits-input-jh input')
     .click()
-    .type(`{selectall}${limitValue}`);
-  cy.get('body').click();
+    .type(`{selectall}${limitValue}`)
+    .blur();
   cy.wait(300);
 });
 

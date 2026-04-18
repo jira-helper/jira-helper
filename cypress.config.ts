@@ -27,6 +27,8 @@ export default defineConfig({
     },
   },
   component: {
+    viewportWidth: 1440,
+    viewportHeight: 900,
     devServer: {
       framework: 'react',
       bundler: 'vite',
@@ -46,7 +48,7 @@ export default defineConfig({
     supportFile: 'cypress/support/component.ts',
     indexHtmlFile: 'cypress/support/component-index.html',
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports, global-require
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('cypress-mochawesome-reporter/plugin')(on);
       return config;
     },
