@@ -26,3 +26,6 @@ tools/local
 
 storybook-static
 cypress-coverage
+cypress/reports
+cypress/screenshots
+cypress/videos

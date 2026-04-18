@@ -1,5 +1,6 @@
 // Cypress Component Testing support file
 import { mount } from 'cypress/react';
+import 'cypress-mochawesome-reporter/register';
 import './commands';
 
 // Augment the Cypress namespace to include type definitions for
