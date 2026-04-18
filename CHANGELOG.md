@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Run `node scripts/generate-changelog.mjs [from-tag] [to-tag]` to generate entries from git commits.
 
 
-## [2.30.0] - 2025-01-15
+## [2.30.0] - 2026-04-18
 
 ### Added
 
