@@ -3,23 +3,26 @@ import { globalContainer } from 'dioma';
 import { setAutoFreeze } from 'immer';
 import { Routes, routingServiceToken } from './routing';
 import { isJira } from './shared/utils';
-import AddSlaLine, { addSlaLineToken } from './charts/AddSlaLine';
-import AddChartGrid, { addChartGridToken } from './charts/AddChartGrid';
+import AddSlaLine, { addSlaLineToken } from './features/charts/AddSlaLine';
+import AddChartGrid, { addChartGridToken } from './features/charts/AddChartGrid';
 import runModifications from './shared/runModifications';
 import {
   BoardPageModification as SwimlaneLimitsBoardPage,
   swimlaneWipLimitsBoardPageToken,
-} from './swimlane-wip-limits/BoardPage';
+} from './features/swimlane-wip-limits/BoardPage';
 import {
   SettingsPageModification as SwimlaneLimitsSettingsPage,
   swimlaneWipLimitsSettingsPageToken,
-} from './swimlane-wip-limits/SettingsPage';
-import { HistogramModification as SwimlaneHistogramBoardPage, histogramModificationToken } from './swimlane-histogram';
-import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './column-limits/SettingsPage';
-import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './column-limits/BoardPage';
-import BugTemplate, { bugTemplateToken } from './bug-template/BugTemplate';
-import MarkFlaggedIssues, { markFlaggedIssuesToken } from './issue/MarkFlaggedIssues';
-import ToggleForRightSidebar, { toggleForRightSidebarToken } from './issue/ToggleForRightSidebar';
+} from './features/swimlane-wip-limits/SettingsPage';
+import {
+  HistogramModification as SwimlaneHistogramBoardPage,
+  histogramModificationToken,
+} from './features/swimlane-histogram';
+import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './features/column-limits/SettingsPage';
+import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './features/column-limits/BoardPage';
+import BugTemplate, { bugTemplateToken } from './features/bug-template/BugTemplate';
+import MarkFlaggedIssues, { markFlaggedIssuesToken } from './features/issue/MarkFlaggedIssues';
+import ToggleForRightSidebar, { toggleForRightSidebarToken } from './features/issue/ToggleForRightSidebar';
 import {
   SettingsPageModification as FieldLimitsSettingsPage,
   fieldLimitsSettingsPageToken,
@@ -28,14 +31,14 @@ import {
   BoardPageModification as FieldLimitsBoardPage,
   fieldLimitsBoardPageToken,
 } from './features/field-limits/BoardPage';
-import { blurSensitiveFeatureToken, registerBlurSensitiveFeatureInDI } from './blur-for-sensitive';
-import PersonLimitsSettings, { personLimitsSettingsPageToken } from './person-limits/SettingsPage';
-import PersonLimits, { personLimitsBoardPageToken } from './person-limits/BoardPage';
-import WiplimitOnCells, { wipLimitOnCellsBoardPageToken } from './wiplimit-on-cells/BoardPage';
-import WiplimitOnCellsSettings, { wipLimitOnCellsSettingsPageToken } from './wiplimit-on-cells/SettingsPage';
-import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './card-colors/SettingsPage';
-import { CardColorsBoardPage, cardColorsBoardPageToken } from './card-colors/BoardPage';
-import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './board-settings/BoardPage';
+import { blurSensitiveFeatureToken, registerBlurSensitiveFeatureInDI } from './features/blur-for-sensitive';
+import PersonLimitsSettings, { personLimitsSettingsPageToken } from './features/person-limits/SettingsPage';
+import PersonLimits, { personLimitsBoardPageToken } from './features/person-limits/BoardPage';
+import WiplimitOnCells, { wipLimitOnCellsBoardPageToken } from './features/wiplimit-on-cells/BoardPage';
+import WiplimitOnCellsSettings, { wipLimitOnCellsSettingsPageToken } from './features/wiplimit-on-cells/SettingsPage';
+import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors/SettingsPage';
+import { CardColorsBoardPage, cardColorsBoardPageToken } from './features/card-colors/BoardPage';
+import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './features/board-settings/BoardPage';
 import { SubTasksProgressBoardPage, subTasksProgressBoardPageToken } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
 import { registerSettingsPagePageObjectInDI } from './page-objects/SettingsPage';
@@ -47,11 +50,11 @@ import { registerRoutingServiceInDI } from './routing';
 import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
-import { columnLimitsModule } from './column-limits/module';
-import { personLimitsModule } from './person-limits/module';
-import { swimlaneWipLimitsModule } from './swimlane-wip-limits/module';
+import { columnLimitsModule } from './features/column-limits/module';
+import { personLimitsModule } from './features/person-limits/module';
+import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits/module';
 import { fieldLimitsModule } from './features/field-limits/module';
-import { swimlaneHistogramModule } from './swimlane-histogram/module';
+import { swimlaneHistogramModule } from './features/swimlane-histogram/module';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';

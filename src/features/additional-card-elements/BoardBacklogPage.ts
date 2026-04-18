@@ -2,7 +2,7 @@ import { Token } from 'dioma';
 import { BoardBacklogPagePageObject } from 'src/page-objects/BoardBacklogPage';
 import { PageModification } from 'src/shared/PageModification';
 
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
 import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions/loadAdditionalCardElementsBoardProperty';
 

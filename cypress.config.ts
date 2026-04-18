@@ -38,8 +38,8 @@ export default defineConfig({
         },
         resolve: {
           alias: {
-            src: '/src',
-            'cypress/support/gherkin-steps/common': path.resolve(__dirname, 'cypress/support/gherkin-steps/common.ts'),
+            src: path.resolve(__dirname, 'src'),
+            cypress: path.resolve(__dirname, 'cypress'),
           },
         },
       },

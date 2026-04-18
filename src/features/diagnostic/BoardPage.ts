@@ -1,7 +1,7 @@
 import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/page-objects/BoardPage';
 
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { PageModification } from '../../shared/PageModification';
 
 import { DiagnosticSettingsTabContent } from './SettingsTab';

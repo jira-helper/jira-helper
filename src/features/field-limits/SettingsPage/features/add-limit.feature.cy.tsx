@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { defineFeature } from '../../../../../cypress/support/bdd-runner';
+import { defineFeature } from 'cypress/support/bdd-runner';
 import { setupBackground } from './helpers';
 import featureText from './add-limit.feature?raw';
 import './steps/common.steps';

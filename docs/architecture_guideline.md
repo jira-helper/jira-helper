@@ -120,6 +120,54 @@ flowchart LR
 
 ---
 
+## Структура проекта
+
+```
+src/
+├── features/              # Все фичи (модули и legacy)
+│   ├── column-limits/    # Модуль (module.ts + tokens.ts)
+│   ├── person-limits/   # Модуль
+│   ├── field-limits/    # Модуль
+│   ├── swimlane-wip-limits/
+│   ├── swimlane-histogram/
+│   ├── card-colors/      # Legacy (PageModification, без module.ts)
+│   ├── board-settings/
+│   └── ...
+│
+├── shared/               # Общий код без DI — прямой import
+│   ├── di/              # DI tokens, Module base
+│   ├── jira/            # JiraClient
+│   ├── components/      # Общие React-компоненты
+│   ├── utils/           # Чистые функции
+│   └── types/           # Общие типы
+│
+├── page-objects/         # Общие PageObjects (DI)
+├── routing/             # Роутинг
+├── background/           # Service worker
+├── content.ts           # Entry point, DI bootstrap
+└── docs/
+```
+
+### Правила расположения
+
+| Папка | Тип | Правило |
+|-------|-----|---------|
+| `features/*` | Модули и legacy | Всё что относится к фиче |
+| `shared/*` | Немодули | Чистые функции, типы, общие компоненты — без DI, import напрямую |
+| `page-objects/*` | Модули | PageObjects используются несколькими фичами |
+
+### Модуль vs Не модуль
+
+**Модуль** — фича с `module.ts` + `tokens.ts`, регистрируется через `Module.ensure(container)`:
+- column-limits, person-limits, field-limits, swimlane-wip-limits, swimlane-histogram
+
+**Не модуль** — legacy фичи, регистрируются напрямую через `container.register()`:
+- card-colors, board-settings, wiplimit-on-cells, charts, bug-template, issue, blur-for-sensitive, related-tasks
+
+**Правило:** новые фичи = модули. Legacy могут жить как есть.
+
+---
+
 ## Модули (Module)
 
 Каждая фича собирается в **Module** — класс, наследующий `Module` из `src/shared/di/Module.ts`. Модуль группирует DI-регистрации фичи и регистрируется централизованно в `content.ts`.

@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       src: path.resolve(dirname, 'src'),
+      cypress: path.resolve(dirname, 'cypress'),
     },
   },
   optimizeDeps: {

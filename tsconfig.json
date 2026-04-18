@@ -15,12 +15,16 @@
 	  "isolatedModules": true,                 // Убедиться, что каждый файл обрабатывается отдельно
 	  "noEmit": true,                          // Отключить генерацию файлов .js
 	  "resolveJsonModule": true,               // Разрешить импорт JSON
-	  "baseUrl": "./"                         // Базовый путь
+	  "baseUrl": "./",                        // Базовый путь
+	  "paths": {
+	    "src/*": ["src/*"],
+	    "cypress/*": ["cypress/*"]
+	  }
 	},
 	"include": [
 	  "src/**/*",                               // Включить все файлы из папки src
 	  "./test/setup.ts",
-	  "./cypress/support/cypress-augmentation.d.ts"
+	  "./cypress/support/**/*"
 	],
 	"exclude": [
 	  "node_modules",                          // Исключить node_modules
