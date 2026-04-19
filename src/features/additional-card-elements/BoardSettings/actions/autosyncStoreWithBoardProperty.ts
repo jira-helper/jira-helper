@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { throttle } from 'src/shared/utils';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
 

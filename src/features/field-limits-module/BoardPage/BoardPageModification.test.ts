@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { BoardPageModification } from './BoardPageModification';
-import type { IRoutingService } from 'src/routing';
-import { routingServiceToken } from 'src/routing';
-import { registerRoutingInDI } from 'src/shared/di/routingTokens';
-import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
-import { getBoardEditDataToken, getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
+import type { IRoutingService } from 'src/infrastructure/routing';
+import { routingServiceToken } from 'src/infrastructure/routing';
+import { registerRoutingInDI } from 'src/infrastructure/di/routingTokens';
+import { registerExtensionApiServiceInDI } from 'src/infrastructure/extension-api/ExtensionApiService';
+import { getBoardEditDataToken, getBoardPropertyToken } from 'src/infrastructure/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 
 describe('BoardPageModification', () => {

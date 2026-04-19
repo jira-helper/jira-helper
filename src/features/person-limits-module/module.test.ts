@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Container } from 'dioma';
 import { personLimitsModule } from './module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
-import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { loggerToken, Logger } from 'src/shared/Logger';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 
 const mockBoardPropertyService = {
   getBoardProperty: vi.fn().mockResolvedValue({ limits: [] }),

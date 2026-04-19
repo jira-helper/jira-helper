@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
-import { routingServiceToken } from '../../src/routing';
-import { settingsPagePageObjectToken } from '../../src/page-objects/SettingsPage';
-import { registerExtensionApiServiceInDI } from '../../src/shared/ExtensionApiService';
-import { PageModification } from '../../src/shared/PageModification';
+import { routingServiceToken } from '../../src/infrastructure/routing';
+import { settingsPagePageObjectToken } from '../../src/infrastructure/page-objects/SettingsPage';
+import { registerExtensionApiServiceInDI } from '../../src/infrastructure/extension-api/ExtensionApiService';
+import { PageModification } from '../../src/infrastructure/page-modification/PageModification';
 
 class TestModification extends PageModification {
   async getTab() {

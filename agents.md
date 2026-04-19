@@ -9,11 +9,11 @@ TypeScript 5 (strict), React 18, Vite 5 + @crxjs/vite-plugin, Ant Design 5, Valt
 ## Key Directories
 
 - `src/content.ts` — extension entry point, DI bootstrap, feature registration
-- `src/background/` — service worker
-- `src/shared/PageModification.ts` — base class for all Jira page modifications
-- `src/shared/di/` — DI tokens and Module base class
-- `src/shared/jira/` — Jira API client
-- `src/page-objects/` — BoardPage, SettingsPage
+- `src/background/` — service worker entrypoint that delegates to infrastructure
+- `src/infrastructure/page-modification/` — base class for all Jira page modifications
+- `src/infrastructure/di/` — DI tokens and Module base class
+- `src/infrastructure/jira/` — Jira API client
+- `src/infrastructure/page-objects/` — BoardPage, SettingsPage
 - `src/features/` — feature modules (column-limits, card-colors, swimlane-wip-limits, etc.)
 - `cypress/` — Cypress component tests with Gherkin BDD
 

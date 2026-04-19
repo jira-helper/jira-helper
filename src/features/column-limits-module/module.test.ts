@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
 import { columnLimitsModule } from './module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { loggerToken, Logger } from 'src/shared/Logger';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 
 const mockBoardPropertyService = {
   getBoardProperty: vi.fn().mockResolvedValue({}),

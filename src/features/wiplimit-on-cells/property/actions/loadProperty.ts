@@ -1,6 +1,6 @@
 import { createAction } from 'src/shared/action';
-import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
-import { getBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
+import { getBoardIdFromURLToken } from 'src/infrastructure/di/routingTokens';
+import { getBoardPropertyToken } from 'src/infrastructure/di/jiraApiTokens';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { useWipLimitCellsPropertyStore } from '../store';
 import type { WipLimitRange, WipLimitCell } from '../../types';

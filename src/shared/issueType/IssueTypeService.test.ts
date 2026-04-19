@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Ok, Err } from 'ts-results';
 import { IssueTypeService } from './IssueTypeService';
-import type { GetProjectIssueTypes } from '../di/jiraApiTokens';
+import type { GetProjectIssueTypes } from 'src/infrastructure/di/jiraApiTokens';
 
 describe('IssueTypeService', () => {
   let getProjectIssueTypes: GetProjectIssueTypes;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { WithDi } from '../../../shared/diContext';
-import { PageModification } from '../../../shared/PageModification';
+import { WithDi } from '../../../infrastructure/di/diContext';
+import { PageModification } from '../../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { settingsPagePageObjectToken } from '../../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from 'src/infrastructure/page-objects/SettingsPage';
 import { normalizeRange } from '../property/actions/loadProperty';
 import type { WipLimitRange } from '../types';
 

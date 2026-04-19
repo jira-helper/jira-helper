@@ -1,7 +1,7 @@
 import { Result, Ok, Err } from 'ts-results';
 import type { SwimlaneSettings, LoadingState, SwimlaneSetting } from '../types';
-import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
-import type { Logger } from 'src/shared/Logger';
+import type { BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { mergeSwimlaneSettings } from '../utils/mergeSwimlaneSettings';
 

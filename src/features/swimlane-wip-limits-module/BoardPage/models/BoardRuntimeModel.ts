@@ -10,8 +10,8 @@
 import { Result, Ok, Err } from 'ts-results';
 import type { SwimlaneSettings, SwimlaneSetting, SwimlaneIssueStats } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 
 export class BoardRuntimeModel {
   // === State ===

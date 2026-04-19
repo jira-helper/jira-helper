@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Container } from 'dioma';
 import { swimlaneHistogramModule } from './module';
 import { histogramModelToken } from './tokens';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
-import { loggerToken, Logger } from 'src/shared/Logger';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObjectMock } from 'src/infrastructure/page-objects/BoardPage.mock';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 
 describe('swimlaneHistogramModule', () => {
   let container: Container;

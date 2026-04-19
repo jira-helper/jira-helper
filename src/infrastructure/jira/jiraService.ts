@@ -7,7 +7,7 @@ import {
   getProjectFields,
   renderRemoteLink,
   searchIssues,
-} from '../jiraApi';
+} from './jiraApi';
 import { ExternalIssueMapped, JiraField, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
 
 class CacheWithTTL<T> {

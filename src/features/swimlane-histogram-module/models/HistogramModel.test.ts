@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HistogramModel } from './HistogramModel';
-import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
-import type { IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
-import { Logger } from 'src/shared/Logger';
+import { BoardPagePageObjectMock } from 'src/infrastructure/page-objects/BoardPage.mock';
+import type { IBoardPagePageObject, SwimlaneElement } from 'src/infrastructure/page-objects/BoardPage';
+import { Logger } from 'src/infrastructure/logging/Logger';
 
 describe('HistogramModel', () => {
   let model: HistogramModel;

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { SettingsButton } from './SettingsButton';
 import { SettingsModalContainer } from '../SettingsModal';
 import { PERSON_LIMITS_TEXTS } from '../../texts';
 import { settingsUIModelToken } from '../../../tokens';
-import type { SearchUsers } from 'src/shared/di/jiraApiTokens';
+import type { SearchUsers } from 'src/infrastructure/di/jiraApiTokens';
 import type { Column, Swimlane } from '../../state/types';
 
 export type SettingsButtonContainerProps = {

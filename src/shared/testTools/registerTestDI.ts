@@ -1,5 +1,5 @@
 import type { Container } from 'dioma';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 
 /**

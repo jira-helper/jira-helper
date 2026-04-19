@@ -1,10 +1,10 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { Token } from 'dioma';
-import { getBoardPropertyToken, updateBoardPropertyToken } from 'src/shared/di/jiraApiTokens';
-import { PageModification } from '../../shared/PageModification';
-import { WithDi } from '../../shared/diContext';
-import { settingsPagePageObjectToken } from '../../page-objects/SettingsPage';
+import { getBoardPropertyToken, updateBoardPropertyToken } from 'src/infrastructure/di/jiraApiTokens';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
+import { WithDi } from '../../infrastructure/di/diContext';
+import { settingsPagePageObjectToken } from '../../infrastructure/page-objects/SettingsPage';
 import { CardColorsSettingsContainer } from './CardColorsSettingsContainer';
 import { PropertyValue } from './types';
 

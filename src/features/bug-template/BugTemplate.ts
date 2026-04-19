@@ -1,5 +1,5 @@
 import { Token } from 'dioma';
-import { PageModification } from '../../shared/PageModification';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
 import style from './styles.module.css';
 
 const defaultIframeTemplate = `Device: <br />

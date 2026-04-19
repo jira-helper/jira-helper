@@ -2,8 +2,8 @@ import { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { Ok } from 'ts-results';
 import { globalContainer } from 'dioma';
-import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { BoardPagePageObject, boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 
 import { withStore } from 'src/shared/testTools/storyWithStore';
 import { withDi } from 'src/shared/testTools/storyWithDi';

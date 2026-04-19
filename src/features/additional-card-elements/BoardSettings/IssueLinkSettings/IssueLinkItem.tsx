@@ -3,7 +3,7 @@ import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Checkbox } fr
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { IssueSelectorByAttributes } from 'src/shared/components/IssueSelectorByAttributes';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { IssueLink } from '../../types';
 
 export const TEXTS = {

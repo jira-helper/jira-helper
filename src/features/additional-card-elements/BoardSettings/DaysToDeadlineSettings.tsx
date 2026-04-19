@@ -1,8 +1,8 @@
 import React from 'react';
 import { Checkbox, InputNumber, Radio, Select, Space, Typography, Spin } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
-import { JiraField } from 'src/shared/jira/types';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
+import { JiraField } from 'src/infrastructure/jira/types';
 import { DaysToDeadlineDisplayMode } from '../types';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 

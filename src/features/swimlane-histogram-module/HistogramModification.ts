@@ -1,8 +1,8 @@
 import React from 'react';
-import { PageModification } from 'src/shared/PageModification';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
 import { Token } from 'dioma';
 import { histogramModelToken } from './tokens';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { Histogram } from './components/Histogram';
 import type { HistogramModel } from './models/HistogramModel';
 

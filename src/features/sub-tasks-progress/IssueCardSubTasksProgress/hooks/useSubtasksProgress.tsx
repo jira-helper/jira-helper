@@ -1,14 +1,14 @@
-import { JiraField, JiraIssueMapped } from 'src/shared/jira/types';
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
+import { JiraField, JiraIssueMapped } from 'src/infrastructure/jira/types';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
+import { useJiraExternalIssuesStore } from 'src/infrastructure/jira/stores/jiraExternalIssues';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
-import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
-import { getEpicLinkFieldId } from 'src/shared/jira/fields/loadJiraFields';
+import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
+import { getEpicLinkFieldId } from 'src/infrastructure/jira/fields/loadJiraFields';
 import { ActiveStatuses, IssueLinkTypeSelection, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';

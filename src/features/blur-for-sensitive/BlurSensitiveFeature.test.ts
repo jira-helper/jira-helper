@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtensionApiService } from '../../shared/ExtensionApiService';
+import type { IExtensionApiService } from '../../infrastructure/extension-api/ExtensionApiService';
 import { BlurSensitiveFeature } from './BlurSensitiveFeature';
 
 describe('BlurSensitiveFeature', () => {

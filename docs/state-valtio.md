@@ -19,7 +19,7 @@ flowchart LR
 
 ```typescript
 import { Result, Ok, Err } from 'ts-results';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 
 /**
  * @module MyFeatureModel
@@ -100,7 +100,7 @@ export class MyFeatureModel {
 ### tokens.ts — токены
 
 ```typescript
-import { createModelToken } from 'src/shared/di/Module';
+import { createModelToken } from 'src/infrastructure/di/Module';
 import type { MyFeatureModel } from './models/MyFeatureModel';
 
 export const myFeatureModelToken = createModelToken<MyFeatureModel>('my-feature/myFeatureModel');
@@ -112,10 +112,10 @@ export const myFeatureModelToken = createModelToken<MyFeatureModel>('my-feature/
 
 ```typescript
 import type { Container } from 'dioma';
-import { Module, modelEntry } from 'src/shared/di/Module';
+import { Module, modelEntry } from 'src/infrastructure/di/Module';
 import { myFeatureModelToken } from './tokens';
 import { MyFeatureModel } from './models/MyFeatureModel';
-import { loggerToken } from 'src/shared/Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 
 class MyFeatureModule extends Module {
   register(container: Container): void {
@@ -154,7 +154,7 @@ function initDiContainer() {
 ## Использование в React
 
 ```typescript
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { myFeatureModelToken } from '../tokens';
 
 export const MyFeatureContainer: React.FC = () => {

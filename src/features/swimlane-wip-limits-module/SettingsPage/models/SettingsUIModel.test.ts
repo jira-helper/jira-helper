@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SettingsUIModel } from './SettingsUIModel';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { SwimlaneSettings, Swimlane, BoardData } from '../../types';
 import { Ok, Err } from 'ts-results';
 

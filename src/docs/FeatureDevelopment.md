@@ -76,11 +76,11 @@ Every feature that needs to modify the board view should have a `BoardPage.ts` f
 
 ```typescript
 // src/features/YourFeature/BoardPage.ts
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { PageModification } from 'src/shared/pageModification';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
 import { YourFeatureComponent } from './components/YourFeatureComponent';
 import { loadFeatureData } from './actions/loadFeatureData';
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { BoardSettingsTabContent } from './BoardSettingsTab';
 
 export class YourFeatureBoardPage extends PageModification<void, Element> {
@@ -171,7 +171,7 @@ If your feature needs settings, create a `BoardSettingsTab.tsx` file:
 ```typescript
 // src/features/YourFeature/BoardSettingsTab.tsx
 import React from 'react';
-import { BoardSettingsTab } from 'src/shared/components/BoardSettingsTab';
+import { BoardSettingsTab } from './BoardSettingsTab';
 import { useYourFeatureStore } from './stores';
 
 export const YourFeatureSettings: React.FC = () => {
@@ -203,11 +203,11 @@ Register your settings tab in the feature's initialization:
 
 ```typescript
 // src/features/YourFeature/index.ts
-import { registerBoardSettingsTab } from 'src/shared/boardSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { YourFeatureSettings } from './BoardSettingsTab';
 
 export const init = () => {
-  registerBoardSettingsTab({
+  registerSettings({
     id: 'your-feature-settings',
     title: 'Your Feature',
     component: YourFeatureSettings,

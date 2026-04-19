@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
-import { useDi } from './diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { localeProviderToken } from './locale';
 
 export type Texts<textsKeys extends string = string> = {

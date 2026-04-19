@@ -1,4 +1,4 @@
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { hslFromRGB } from 'src/shared/utils';
 
 const excludeColors = {

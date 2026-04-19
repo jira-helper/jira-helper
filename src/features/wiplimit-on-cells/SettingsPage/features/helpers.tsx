@@ -9,8 +9,8 @@
  */
 import React from 'react';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
-import { registerLogger } from 'src/shared/Logger';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsButtonContainer } from '../components/SettingsButton';
 import { useWipLimitCellsSettingsUIStore } from '../stores/settingsUIStore';

@@ -1,5 +1,5 @@
 import { Token } from 'dioma';
-import { PageModification } from '../../../shared/PageModification';
+import { PageModification } from '../../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import type { WipLimitRange } from '../types';
 import { useWipLimitCellsRuntimeStore } from './stores';

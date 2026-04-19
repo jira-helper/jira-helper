@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Button, Space } from 'antd';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { settingsUIModelToken, propertyModelToken, boardRuntimeModelToken } from '../tokens';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { ColumnLimitsForm } from '../SettingsPage/ColumnLimitsForm';
 import { buildInitDataFromColumns } from '../SettingsPage/utils/buildInitData';
 import { WITHOUT_GROUP_ID } from '../types';

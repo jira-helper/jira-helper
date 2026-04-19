@@ -1,12 +1,12 @@
 import type { Container } from 'dioma';
-import { Module, modelEntry } from 'src/shared/di/Module';
+import { Module, modelEntry } from 'src/infrastructure/di/Module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
 import { PropertyModel } from './property/PropertyModel';
 import { BoardRuntimeModel } from './BoardPage/models/BoardRuntimeModel';
 import { SettingsUIModel } from './SettingsPage/models/SettingsUIModel';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { loggerToken } from 'src/shared/Logger';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 
 class ColumnLimitsModule extends Module {
   register(container: Container): void {

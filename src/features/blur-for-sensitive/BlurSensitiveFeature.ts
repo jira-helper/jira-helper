@@ -1,7 +1,7 @@
 import { Container } from 'dioma';
-import type { IExtensionApiService } from '../../shared/ExtensionApiService';
+import type { IExtensionApiService } from '../../infrastructure/extension-api/ExtensionApiService';
 import type { IBlurSensitiveFeature } from './IBlurSensitiveFeature';
-import { extensionApiServiceToken } from '../../shared/ExtensionApiService';
+import { extensionApiServiceToken } from '../../infrastructure/extension-api/ExtensionApiService';
 import { blurSensitiveFeatureToken } from './tokens';
 import './blurSensitive.css';
 

@@ -1,6 +1,6 @@
 import { Token } from 'dioma';
-import { BoardBacklogPagePageObject } from 'src/page-objects/BoardBacklogPage';
-import { PageModification } from 'src/shared/PageModification';
+import { BoardBacklogPagePageObject } from 'src/infrastructure/page-objects/BoardBacklogPage';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
 
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';

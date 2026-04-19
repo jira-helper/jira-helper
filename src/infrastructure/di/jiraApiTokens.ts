@@ -8,8 +8,8 @@ import {
   getProjectIssueTypes,
   loadFlaggedIssues,
   loadNewIssueViewEnabled,
-} from 'src/shared/jiraApi';
-import type { JiraUser, ProjectIssueType } from 'src/shared/jiraApi';
+} from 'src/infrastructure/jira/jiraApi';
+import type { JiraUser, ProjectIssueType } from 'src/infrastructure/jira/jiraApi';
 import type { Result } from 'ts-results';
 import { buildAvatarUrl } from 'src/shared/utils/avatarUrl';
 

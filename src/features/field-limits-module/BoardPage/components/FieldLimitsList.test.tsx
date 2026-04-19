@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Container } from 'dioma';
 import { FieldLimitsList } from './FieldLimitsList';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { boardRuntimeModelToken } from '../../tokens';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import type { FieldLimitsSettings, FieldLimitStats, CardLayoutField } from '../../types';

@@ -1,10 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { SettingsPageModification } from './SettingsPageModification';
-import { routingServiceToken, type IRoutingService } from 'src/routing';
-import { settingsPagePageObjectToken, type ISettingsPagePageObject } from 'src/page-objects/SettingsPage';
-import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
-import { registerRoutingInDI } from 'src/shared/di/routingTokens';
+import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
+import {
+  settingsPagePageObjectToken,
+  type ISettingsPagePageObject,
+} from 'src/infrastructure/page-objects/SettingsPage';
+import { registerExtensionApiServiceInDI } from 'src/infrastructure/extension-api/ExtensionApiService';
+import { registerRoutingInDI } from 'src/infrastructure/di/routingTokens';
 
 describe('SettingsPageModification', () => {
   let modification: SettingsPageModification;

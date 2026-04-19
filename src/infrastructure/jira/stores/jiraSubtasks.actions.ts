@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { useJiraSubtasksStore } from './jiraSubtasks';
 import { JiraServiceToken } from '../jiraService';
 import { loadIssue } from '../jiraIssues/actions/loadIssue';

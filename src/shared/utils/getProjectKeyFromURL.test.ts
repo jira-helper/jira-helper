@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { globalContainer } from 'dioma';
-import { registerRoutingServiceInDI, routingServiceToken } from 'src/routing';
-import { registerExtensionApiServiceInDI } from 'src/shared/ExtensionApiService';
+import { registerRoutingServiceInDI, routingServiceToken } from 'src/infrastructure/routing';
+import { registerExtensionApiServiceInDI } from 'src/infrastructure/extension-api/ExtensionApiService';
 
 describe('RoutingService.getProjectKeyFromURL', () => {
   const originalLocation = window.location;

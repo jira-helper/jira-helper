@@ -7,7 +7,7 @@
 import type { Column, UIGroup, IssueTypeState, WipLimitsProperty, ColumnLimitGroup } from '../../types';
 import { WITHOUT_GROUP_ID } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 
 export type InitFromPropertyData = {
   withoutGroupColumns: Column[];

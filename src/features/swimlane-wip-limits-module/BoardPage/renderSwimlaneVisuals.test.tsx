@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
+import type { IBoardPagePageObject, SwimlaneElement } from 'src/infrastructure/page-objects/BoardPage';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 import { renderSwimlaneVisuals } from './renderSwimlaneVisuals';
 

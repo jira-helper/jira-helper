@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useDi } from '../diContext';
-import { routingServiceToken } from 'src/routing';
+import { useDi } from 'src/infrastructure/di/diContext';
+import { routingServiceToken } from 'src/infrastructure/routing';
 import { issueTypeServiceToken } from '../issueType';
 import { debounce } from '../utils';
-import type { ProjectIssueType } from '../jiraApi';
+import type { ProjectIssueType } from 'src/infrastructure/jira/jiraApi';
 
 export interface IssueTypeSelectorTexts {
   countAllIssueTypes: string;

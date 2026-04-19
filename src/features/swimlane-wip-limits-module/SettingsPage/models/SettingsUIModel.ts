@@ -9,7 +9,7 @@
 import { Result, Ok, Err } from 'ts-results';
 import type { SwimlaneSettings, Swimlane, SwimlaneSetting, BoardData } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 
 export class SettingsUIModel {
   // === State ===

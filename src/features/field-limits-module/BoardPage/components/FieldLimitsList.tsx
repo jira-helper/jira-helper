@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { FieldLimitBadge } from './FieldLimitBadge';
 import { boardRuntimeModelToken } from '../../tokens';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { FIELD_LIMITS_TEXTS } from '../../texts';
 import type { BoardRuntimeModel } from '../models/BoardRuntimeModel';

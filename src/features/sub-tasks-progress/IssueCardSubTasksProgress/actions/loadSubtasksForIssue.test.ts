@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { globalContainer } from 'dioma';
 import { Ok } from 'ts-results';
-import { IJiraService, JiraServiceToken } from 'src/shared/jira/jiraService';
-import { ExternalIssueMapped, JiraIssueMapped } from 'src/shared/jira/types';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
+import { IJiraService, JiraServiceToken } from 'src/infrastructure/jira/jiraService';
+import { ExternalIssueMapped, JiraIssueMapped } from 'src/infrastructure/jira/types';
+import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
+import { useJiraExternalIssuesStore } from 'src/infrastructure/jira/stores/jiraExternalIssues';
 import { useSubTaskProgressBoardPropertyStore } from '../../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { loadSubtasksForIssue } from './loadSubtasksForIssue';
 

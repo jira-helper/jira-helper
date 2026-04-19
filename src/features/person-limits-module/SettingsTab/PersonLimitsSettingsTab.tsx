@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Space } from 'antd';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { settingsUIModelToken, boardRuntimeModelToken } from '../tokens';
-import { searchUsersToken } from 'src/shared/di/jiraApiTokens';
+import { searchUsersToken } from 'src/infrastructure/di/jiraApiTokens';
 import { PersonalWipLimitContainer } from '../SettingsPage/components/PersonalWipLimitContainer';
 import { createPersonLimit } from '../SettingsPage/utils/createPersonLimit';
 import { updatePersonLimit } from '../SettingsPage/utils/updatePersonLimit';

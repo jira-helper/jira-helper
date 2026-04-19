@@ -3,7 +3,7 @@ import { Modal, Alert, Spin } from 'antd';
 import { LimitForm } from './LimitForm';
 import { LimitsTable } from './LimitsTable';
 import { settingsUIModelToken } from '../../tokens';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { FIELD_LIMITS_TEXTS } from '../../texts';
 import type { SettingsUIModel } from '../models/SettingsUIModel';

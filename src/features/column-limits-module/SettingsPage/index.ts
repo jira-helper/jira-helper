@@ -1,11 +1,11 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { PageModification } from '../../../shared/PageModification';
+import { PageModification } from '../../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
-import { WithDi } from '../../../shared/diContext';
+import { WithDi } from '../../../infrastructure/di/diContext';
 import { propertyModelToken } from '../tokens';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { settingsPagePageObjectToken } from '../../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from 'src/infrastructure/page-objects/SettingsPage';
 
 export default class SettingsWIPLimits extends PageModification<[any, any], Element> {
   static jiraSelectors = {

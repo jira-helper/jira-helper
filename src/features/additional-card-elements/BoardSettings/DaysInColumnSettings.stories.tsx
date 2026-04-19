@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { Container } from 'dioma';
-import { IBoardPagePageObject, SwimlaneElement, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import {
+  IBoardPagePageObject,
+  SwimlaneElement,
+  boardPagePageObjectToken,
+} from 'src/infrastructure/page-objects/BoardPage';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { DaysInColumnSettings } from './DaysInColumnSettings';

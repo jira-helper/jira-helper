@@ -1,5 +1,5 @@
 import { Container, globalContainer } from 'dioma';
-import { loggerToken } from './Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 
 type ActionHandler<Payload extends any[], Result> = (
   this: {

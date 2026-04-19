@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { globalContainer } from 'dioma';
 import { IssueLink } from '../types';
 import { useAdditionalCardElementsBoardPropertyStore } from './additionalCardElementsBoardProperty';

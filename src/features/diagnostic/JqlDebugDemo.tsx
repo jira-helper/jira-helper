@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Input, Button, Alert, Spin, List, Typography } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import { parseJqlAst, tokenize, evaluateJqlAst, JqlAstNode, JqlAstResult } from 'src/shared/jql/simpleJqlParser';
-import { useDi } from 'src/shared/diContext';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { useDi } from 'src/infrastructure/di/diContext';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { getFieldValueForJqlStandalone } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { JqlParserInfoTooltip } from 'src/shared/jql/JqlParserInfoTooltip';
 import { useGetTextsByLocale } from 'src/shared/texts';
 

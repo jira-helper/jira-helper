@@ -1,19 +1,23 @@
 /// <reference types="cypress" />
 import React from 'react';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
-import { registerLogger } from 'src/shared/Logger';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
-import { getBoardIdFromURLToken } from 'src/shared/di/routingTokens';
-import { updateBoardPropertyToken, searchUsersToken, getProjectIssueTypesToken } from 'src/shared/di/jiraApiTokens';
-import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { getBoardIdFromURLToken } from 'src/infrastructure/di/routingTokens';
+import {
+  updateBoardPropertyToken,
+  searchUsersToken,
+  getProjectIssueTypesToken,
+} from 'src/infrastructure/di/jiraApiTokens';
+import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
 import { registerIssueTypeServiceInDI } from 'src/shared/issueType';
 import { Ok } from 'ts-results';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { personLimitsModule } from '../../module';
 import { propertyModelToken, settingsUIModelToken } from '../../tokens';
-import type { JiraUser } from 'src/shared/jiraApi';
+import type { JiraUser } from 'src/infrastructure/jira/jiraApi';
 
 // --- Search mock configuration ---
 

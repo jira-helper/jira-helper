@@ -1,6 +1,6 @@
 import { Token } from 'dioma';
-import { PageModification } from '../../shared/PageModification';
-import { routingServiceToken } from '../../routing';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
+import { routingServiceToken } from '../../infrastructure/routing';
 import { issueDOM } from './domSelectors';
 
 // Defining the structure of the toggleMap object

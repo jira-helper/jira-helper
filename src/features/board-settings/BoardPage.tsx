@@ -1,8 +1,8 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { createRoot } from 'react-dom/client';
-import { PageModification } from '../../shared/PageModification';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
 import { BoardSettingsComponent } from './BoardSettingsComponent';
 
 export class BoardSettingsBoardPage extends PageModification<undefined, Element> {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { PageModification } from 'src/shared/PageModification';
-import { WithDi } from 'src/shared/diContext';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { boardRuntimeModelToken, fieldLimitsBoardPageObjectToken } from '../tokens';
 import { FieldLimitsList } from './components/FieldLimitsList';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';

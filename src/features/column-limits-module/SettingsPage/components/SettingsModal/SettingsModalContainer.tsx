@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { SettingsModal } from './SettingsModal';
 import { settingsUIModelToken } from '../../../tokens';
 import type { SettingsUIModel } from '../../models/SettingsUIModel';

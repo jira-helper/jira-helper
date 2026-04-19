@@ -1,6 +1,6 @@
 import { globalContainer } from 'dioma';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
 import { createAction } from 'src/shared/action';
 
 export const loadIssue = createAction({

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
-import { JiraIssueMapped, JiraField } from 'src/shared/jira/types';
+import { JiraIssueMapped, JiraField } from 'src/infrastructure/jira/types';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
 import { getFieldValueForJqlStandalone } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
 import { useGetSettings } from '../hooks/useGetSettings';
 import { IssueLinkBadge } from '../IssueLinkBadge/IssueLinkBadge';

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, Checkbox, ColorPicker, Select, Tag, Tooltip } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { InfoCircleFilled } from '@ant-design/icons';

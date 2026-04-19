@@ -4,7 +4,7 @@ import React from 'react';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
-import { PageModification } from '../../../shared/PageModification';
+import { PageModification } from '../../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import type { WipLimitsProperty } from '../types';
 import { boardRuntimeModelToken, propertyModelToken } from '../tokens';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { PageModification } from 'src/shared/PageModification';
-import { WithDi } from 'src/shared/diContext';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { Token } from 'dioma';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';

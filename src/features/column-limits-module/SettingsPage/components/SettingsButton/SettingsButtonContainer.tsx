@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { SettingsButton } from './SettingsButton';
 import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
 import type { SettingsUIModel } from '../../models/SettingsUIModel';

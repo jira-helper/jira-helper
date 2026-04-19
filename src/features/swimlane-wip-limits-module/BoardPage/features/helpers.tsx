@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 import { BoardRuntimeModel } from '../models/BoardRuntimeModel';
-import { BoardPagePageObject, type IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import { BoardPagePageObject, type IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { SwimlaneSettings } from '../../types';
 
 const columns = [

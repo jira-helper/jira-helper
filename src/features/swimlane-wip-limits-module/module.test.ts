@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
 import { swimlaneWipLimitsModule } from './module';
 import { propertyModelToken, settingsUIModelToken, boardRuntimeModelToken } from './tokens';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
-import { loggerToken, Logger } from 'src/shared/Logger';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObjectMock } from 'src/infrastructure/page-objects/BoardPage.mock';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 
 const mockBoardPropertyService = {
   getBoardProperty: vi.fn().mockResolvedValue({}),

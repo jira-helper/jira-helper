@@ -1,4 +1,4 @@
-import { ExternalIssueMapped } from 'src/shared/jira/types';
+import { ExternalIssueMapped } from 'src/infrastructure/jira/types';
 import { ActiveStatuses, ColorScheme } from './types';
 
 export const availableStatuses: ActiveStatuses[] = ['blocked', 'todo', 'inProgress', 'done'];

@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { PageModification } from 'src/shared/PageModification';
-import { settingsPagePageObjectToken } from 'src/page-objects/SettingsPage';
-import { WithDi } from 'src/shared/diContext';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
+import { settingsPagePageObjectToken } from 'src/infrastructure/page-objects/SettingsPage';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { Token } from 'dioma';
 import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';

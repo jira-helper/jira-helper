@@ -2,8 +2,12 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Container } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
-import { boardPagePageObjectToken, IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import {
+  boardPagePageObjectToken,
+  IBoardPagePageObject,
+  SwimlaneElement,
+} from 'src/infrastructure/page-objects/BoardPage';
 import { DaysInColumnSettings } from './DaysInColumnSettings';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import * as useDaysInColumnSettingsModule from './hooks/useDaysInColumnSettings';

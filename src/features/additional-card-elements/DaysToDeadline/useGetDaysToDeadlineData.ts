@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { globalContainer } from 'dioma';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { calculateDaysRemaining, getDaysToDeadlineColor, formatDaysToDeadline } from './utils';
 import { BadgeColor } from '../Badge';

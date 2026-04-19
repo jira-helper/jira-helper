@@ -9,8 +9,8 @@ import { Result, Ok, Err } from 'ts-results';
 import type { FieldLimitsSettings, FieldLimitStats, CardLayoutField, BoardEditData, CalcType } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
 import type { IFieldLimitsBoardPageObject } from '../page-objects/FieldLimitsBoardPageObject';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import { COLORS } from 'src/shared/constants';
 import { calculateFieldValue } from '../../utils/calculateFieldValue';
 

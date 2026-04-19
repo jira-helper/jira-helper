@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Alert, Spin } from 'antd';
 import { SwimlaneLimitsTable } from './SwimlaneLimitsTable';
 import { settingsUIModelToken } from '../../tokens';
-import { useDi } from 'src/shared/diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { SWIMLANE_WIP_LIMITS_TEXTS } from '../../texts';
 import type { SwimlaneSetting } from '../../types';

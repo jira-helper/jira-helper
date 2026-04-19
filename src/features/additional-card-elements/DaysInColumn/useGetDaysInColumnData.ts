@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { getDaysInColumnColor, formatDaysInColumn } from './utils';
 import { BadgeColor } from '../Badge';

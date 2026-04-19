@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Select, Spin } from 'antd';
-import type { JiraUser } from 'src/shared/jiraApi';
+import type { JiraUser } from 'src/infrastructure/jira/jiraApi';
 import type { SelectedPerson } from '../state/types';
 
 const DEBOUNCE_MS = 300;

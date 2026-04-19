@@ -1,7 +1,7 @@
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 
-import { BoardPropertyServiceToken } from '../../../../shared/boardPropertyService';
+import { BoardPropertyServiceToken } from '../../../../infrastructure/jira/boardPropertyService';
 
 import { BoardProperty } from '../../types';
 import { useSubTaskProgressBoardPropertyStore } from '../stores/subTaskProgressBoardProperty';

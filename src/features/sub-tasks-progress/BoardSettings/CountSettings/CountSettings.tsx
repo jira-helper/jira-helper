@@ -4,7 +4,7 @@ import { Card, Tooltip } from 'antd';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { InfoCircleFilled } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
+import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
 import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
 import { changeCount, setIssueLinkTypesToCount, clearIssueLinkTypesToCount } from './actions/changeCount';
 

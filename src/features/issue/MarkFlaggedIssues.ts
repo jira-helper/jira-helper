@@ -1,10 +1,10 @@
 import each from '@tinkoff/utils/array/each';
 import { Token } from 'dioma';
-import { PageModification } from '../../shared/PageModification';
-import { Routes, routingServiceToken } from '../../routing';
-import { loadFlaggedIssuesToken, loadNewIssueViewEnabledToken } from '../../shared/di/jiraApiTokens';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
+import { Routes, routingServiceToken } from '../../infrastructure/routing';
+import { loadFlaggedIssuesToken, loadNewIssueViewEnabledToken } from '../../infrastructure/di/jiraApiTokens';
 import { issueDOM } from './domSelectors';
-import { extensionApiServiceToken } from '../../shared/ExtensionApiService';
+import { extensionApiServiceToken } from '../../infrastructure/extension-api/ExtensionApiService';
 import flagNew from '../../assets/flagNew.svg';
 import flagUrl from '../../assets/flag.png';
 

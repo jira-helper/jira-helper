@@ -3,11 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Container } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { SettingsButton } from './SettingsButton';
 import { settingsUIModelToken } from '../../tokens';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
-import { BoardPagePageObjectMock } from 'src/page-objects/BoardPage.mock';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObjectMock } from 'src/infrastructure/page-objects/BoardPage.mock';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import type { SettingsUIModel } from '../models/SettingsUIModel';
 

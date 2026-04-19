@@ -1,7 +1,7 @@
 import { Container } from 'dioma';
-import { types } from '../background/actions';
-import type { IExtensionApiService } from '../shared/ExtensionApiService';
-import { extensionApiServiceToken } from '../shared/ExtensionApiService';
+import { types } from '../messages/actions';
+import type { IExtensionApiService } from '../extension-api/ExtensionApiService';
+import { extensionApiServiceToken } from '../extension-api/ExtensionApiService';
 import type { IRoutingService } from './IRoutingService';
 import { Routes, type Route } from './routes';
 import { routingServiceToken } from './tokens';

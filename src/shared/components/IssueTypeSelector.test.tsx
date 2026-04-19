@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Container } from 'dioma';
 import { IssueTypeSelector } from './IssueTypeSelector';
-import { WithDi } from '../diContext';
-import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from '../issueType';
 
 describe('IssueTypeSelector', () => {

@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
 import { getFieldValueForJqlStandalone } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
-import { getEpicLinkFieldId } from 'src/shared/jira/fields/loadJiraFields';
-import { JiraIssueMapped, JiraField } from 'src/shared/jira/types';
+import { getEpicLinkFieldId } from 'src/infrastructure/jira/fields/loadJiraFields';
+import { JiraIssueMapped, JiraField } from 'src/infrastructure/jira/types';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 import { IssueConditionCheck, IssueConditionCheckSubtaskSources } from '../types';
 import { ConditionCheckResult, MatchedSubtaskInfo, safeParseJql, DEFAULT_SUBTASK_SOURCES } from './utils';

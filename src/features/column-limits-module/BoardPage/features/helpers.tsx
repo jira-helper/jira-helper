@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
 import { globalContainer } from 'dioma';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
-import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { boardPagePageObjectToken, BoardPagePageObject } from 'src/page-objects/BoardPage';
+import type { BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { columnLimitsModule } from '../../module';
 import { propertyModelToken, boardRuntimeModelToken } from '../../tokens';
 

@@ -6,7 +6,7 @@
 import { Ok, Err, type Result } from 'ts-results';
 import type { PersonLimit } from '../../property/types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { FormData } from '../state/types';
 
 function cloneLimits(limits: PersonLimit[]): PersonLimit[] {

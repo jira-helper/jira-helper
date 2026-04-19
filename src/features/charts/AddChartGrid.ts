@@ -1,8 +1,8 @@
 import Draggable from 'gsap/Draggable';
 import { TweenLite, gsap } from 'gsap';
 import { Token } from 'dioma';
-import { PageModification } from '../../shared/PageModification';
-import { extensionApiServiceToken } from '../../shared/ExtensionApiService';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
+import { extensionApiServiceToken } from '../../infrastructure/extension-api/ExtensionApiService';
 import { getChartLinePosition, getChartTicks, getChartValueByPosition } from './utils';
 
 interface GridOptions {

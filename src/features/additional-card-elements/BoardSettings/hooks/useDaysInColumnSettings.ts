@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useDi } from 'src/shared/diContext';
-import { BoardPagePageObject, boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { useDi } from 'src/infrastructure/di/diContext';
+import { BoardPagePageObject, boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
 import { DaysInColumnSettings } from '../../types';
 

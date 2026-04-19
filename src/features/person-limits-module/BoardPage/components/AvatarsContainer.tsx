@@ -1,6 +1,6 @@
 import React from 'react';
-import { useDi } from 'src/shared/diContext';
-import { buildAvatarUrlToken } from 'src/shared/di/jiraApiTokens';
+import { useDi } from 'src/infrastructure/di/diContext';
+import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
 import { boardRuntimeModelToken } from '../../tokens';
 import { AvatarBadge } from './AvatarBadge';
 

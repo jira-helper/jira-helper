@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 import React from 'react';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
-import { registerLogger, loggerToken } from 'src/shared/Logger';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { registerLogger, loggerToken } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { proxy } from 'valtio';
 import { useSnapshot } from 'valtio'; // eslint-disable-line local/no-direct-valtio-snapshot -- test DI setup mirrors module.ts
@@ -20,8 +20,8 @@ import type {
   BoardColumn,
   BoardSwimlane,
 } from '../../types';
-import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import type { BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { BOARD_PROPERTIES } from 'src/shared/constants';
 import { createLimitKey } from '../../utils/createLimitKey';
 

@@ -1,5 +1,5 @@
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { SwimlaneHistogram, LoadingState } from '../types';
 
 export class HistogramModel {

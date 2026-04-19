@@ -1,5 +1,5 @@
 import React from 'react';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { globalContainer } from 'dioma';
 import { IssueConditionCheckBadgesConnected } from './IssueConditionCheckBadgesConnected';
 import { useGetSettings } from '../hooks/useGetSettings';

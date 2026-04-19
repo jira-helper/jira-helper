@@ -12,9 +12,9 @@ import isNil from '@tinkoff/utils/is/nil';
 import path from '@tinkoff/utils/object/path';
 import pathOr from '@tinkoff/utils/object/pathOr';
 import { Ok, Err, Result } from 'ts-results';
-import { defaultHeaders } from './defaultHeaders';
-import manifest from '../../manifest.json';
-import { JiraField, JiraIssue, JiraIssueLinkType } from './jira/types';
+import { defaultHeaders } from 'src/shared/defaultHeaders';
+import manifest from '../../../manifest.json';
+import { JiraField, JiraIssue, JiraIssueLinkType } from './types';
 
 const PACKAGE_VERSION = manifest.version;
 

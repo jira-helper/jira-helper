@@ -1,11 +1,11 @@
 import './firefoxFixes';
 import { globalContainer } from 'dioma';
 import { setAutoFreeze } from 'immer';
-import { Routes, routingServiceToken } from './routing';
+import { Routes, routingServiceToken } from './infrastructure/routing';
 import { isJira } from './shared/utils';
 import AddSlaLine, { addSlaLineToken } from './features/charts/AddSlaLine';
 import AddChartGrid, { addChartGridToken } from './features/charts/AddChartGrid';
-import runModifications from './shared/runModifications';
+import runModifications from './infrastructure/page-modification/runModifications';
 import {
   BoardPageModification as SwimlaneLimitsBoardPage,
   swimlaneWipLimitsBoardPageToken,
@@ -40,14 +40,14 @@ import { CardColorsBoardPage, cardColorsBoardPageToken } from './features/card-c
 import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors/SettingsPage';
 import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './features/board-settings/BoardPage';
 import { SubTasksProgressBoardPage, subTasksProgressBoardPageToken } from './features/sub-tasks-progress/BoardPage';
-import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
-import { registerSettingsPagePageObjectInDI } from './page-objects/SettingsPage';
-import { registerBoardPropertyServiceInDI } from './shared/boardPropertyService';
-import { registerJiraServiceInDI } from './shared/jira/jiraService';
-import { registerLogger } from './shared/Logger';
-import { registerRoutingInDI } from './shared/di/routingTokens';
-import { registerRoutingServiceInDI } from './routing';
-import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
+import { registerBoardPagePageObjectInDI } from './infrastructure/page-objects/BoardPage';
+import { registerSettingsPagePageObjectInDI } from './infrastructure/page-objects/SettingsPage';
+import { registerBoardPropertyServiceInDI } from './infrastructure/jira/boardPropertyService';
+import { registerJiraServiceInDI } from './infrastructure/jira/jiraService';
+import { registerLogger } from './infrastructure/logging/Logger';
+import { registerRoutingInDI } from './infrastructure/di/routingTokens';
+import { registerRoutingServiceInDI } from './infrastructure/routing';
+import { registerJiraApiInDI } from './infrastructure/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { columnLimitsModule } from './features/column-limits-module/module';
@@ -58,7 +58,10 @@ import { swimlaneHistogramModule } from './features/swimlane-histogram-module/mo
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
-import { extensionApiServiceToken, registerExtensionApiServiceInDI } from './shared/ExtensionApiService';
+import {
+  extensionApiServiceToken,
+  registerExtensionApiServiceInDI,
+} from './infrastructure/extension-api/ExtensionApiService';
 import {
   AdditionalCardElementsBoardPage,
   additionalCardElementsBoardPageToken,

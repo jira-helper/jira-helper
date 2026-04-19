@@ -1,14 +1,18 @@
 /// <reference types="cypress" />
 import React, { useRef, useEffect } from 'react';
 import { globalContainer } from 'dioma';
-import { registerLogger } from 'src/shared/Logger';
-import { registerJiraApiInDI } from 'src/shared/di/jiraApiTokens';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
+import { registerJiraApiInDI } from 'src/infrastructure/di/jiraApiTokens';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
-import type { BoardPropertyServiceI } from 'src/shared/boardPropertyService';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
-import { boardPagePageObjectToken, type IBoardPagePageObject, type SwimlaneElement } from 'src/page-objects/BoardPage';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { WithDi } from 'src/shared/diContext';
+import type { BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
+import {
+  boardPagePageObjectToken,
+  type IBoardPagePageObject,
+  type SwimlaneElement,
+} from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { AvatarsContainer } from '../components/AvatarsContainer';
 import { personLimitsModule } from '../../module';
 import { boardRuntimeModelToken, propertyModelToken } from '../../tokens';

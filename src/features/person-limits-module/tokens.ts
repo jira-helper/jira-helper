@@ -1,4 +1,4 @@
-import { createModelToken } from 'src/shared/di/Module';
+import { createModelToken } from 'src/infrastructure/di/Module';
 import type { PropertyModel } from './property/PropertyModel';
 import type { BoardRuntimeModel } from './BoardPage/models/BoardRuntimeModel';
 import type { SettingsUIModel } from './SettingsPage/models/SettingsUIModel';

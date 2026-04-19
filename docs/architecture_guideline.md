@@ -124,7 +124,7 @@ flowchart LR
 
 ```
 src/
-├── features/              # Все фичи (модули и legacy)
+├── features/              # Бизнес-фичи (legacy + новые module-* фичи)
 │   ├── column-limits-module/    # Модуль (module.ts + tokens.ts)
 │   ├── person-limits-module/    # Модуль
 │   ├── field-limits-module/     # Модуль
@@ -134,16 +134,22 @@ src/
 │   ├── board-settings/
 │   └── ...
 │
-├── shared/               # Общий код без DI — прямой import
-│   ├── di/              # DI tokens, Module base
-│   ├── jira/            # JiraClient
+├── shared/               # Чистые утилиты и компоненты без DI
 │   ├── components/      # Общие React-компоненты
 │   ├── utils/           # Чистые функции
 │   └── types/           # Общие типы
 │
-├── page-objects/         # Общие PageObjects (DI)
-├── routing/             # Роутинг
-├── background/           # Service worker
+├── infrastructure/       # Runtime/integration слой
+│   ├── background/       # Service worker
+│   ├── di/              # DI ядро, токены, helpers
+│   ├── extension-api/    # Абстракции браузерного API
+│   ├── jira/            # Jira API integration + stores
+│   ├── logging/         # Логирование
+│   ├── page-modification # Базовый PageModification
+│   ├── page-objects/    # Общие PageObjects
+│   ├── routing/         # Роутинг + типы
+│   └── messages/        # Сообщения между service worker и content script
+├── background/           # Entry point для манифеста, делегирует в infrastructure/background
 ├── content.ts           # Entry point, DI bootstrap
 └── docs/
 ```
@@ -154,7 +160,7 @@ src/
 |-------|-----|---------|
 | `features/*` | Модули и legacy | Всё что относится к фиче |
 | `shared/*` | Немодули | Чистые функции, типы, общие компоненты — без DI, import напрямую |
-| `page-objects/*` | Модули | PageObjects используются несколькими фичами |
+| `infrastructure/*` | Runtime/integration | DI bootstrap, page-objects, routing, jira/integration, extension API, background |
 
 ### Модуль vs Не модуль
 
@@ -176,7 +182,7 @@ src/
 
 ## Модули (Module)
 
-Каждая фича собирается в **Module** — класс, наследующий `Module` из `src/shared/di/Module.ts`. Модуль группирует DI-регистрации фичи и регистрируется централизованно в `content.ts`.
+Каждая фича собирается в **Module** — класс, наследующий `Module` из `src/infrastructure/di/Module.ts`. Модуль группирует DI-регистрации фичи и регистрируется централизованно в `content.ts`.
 
 ```mermaid
 flowchart LR
@@ -192,11 +198,11 @@ flowchart LR
 
 ```typescript
 // tokens.ts — токены фичи
-import { createModelToken } from 'src/shared/di/Module';
+import { createModelToken } from 'src/infrastructure/di/Module';
 export const myModelToken = createModelToken<MyModel>('feature/myModel');
 
 // module.ts — класс Module
-import { Module, modelEntry } from 'src/shared/di/Module';
+import { Module, modelEntry } from 'src/infrastructure/di/Module';
 
 class MyFeatureModule extends Module {
   register(container: Container): void {

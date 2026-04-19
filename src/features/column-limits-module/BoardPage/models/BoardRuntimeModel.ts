@@ -6,8 +6,8 @@
  */
 import type { GroupStats } from './types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import { findGroupByColumnId, generateColorByFirstChars } from '../../shared/utils';
 import styles from '../styles.module.css';
 

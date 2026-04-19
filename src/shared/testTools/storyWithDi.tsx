@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Container } from 'dioma';
 import { StoryFn } from '@storybook/react';
-import { useDi } from '../diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 
 export function withDi(cb: (container: Container) => void) {
   return (Story: StoryFn) => {

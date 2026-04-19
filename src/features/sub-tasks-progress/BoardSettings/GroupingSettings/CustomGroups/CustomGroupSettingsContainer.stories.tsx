@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
 import { Ok } from 'ts-results';
 import { globalContainer } from 'dioma';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { CustomGroupSettingsContainer } from './CustomGroupSettingsContainer';
 
 globalContainer.register({

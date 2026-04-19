@@ -1,5 +1,5 @@
 import { Token, Container } from 'dioma';
-import { routingServiceToken } from 'src/routing/tokens';
+import { routingServiceToken } from '../routing/tokens';
 
 export type GetBoardIdFromURL = () => string | null;
 export const getBoardIdFromURLToken = new Token<GetBoardIdFromURL>('getBoardIdFromURL');

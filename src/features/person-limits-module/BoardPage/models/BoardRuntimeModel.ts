@@ -6,8 +6,8 @@
  */
 import { ref } from 'valtio';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { PersonLimitStats } from './types';
 import { isPersonLimitAppliedToIssue, isPersonsIssue, computeLimitId } from '../utils';
 

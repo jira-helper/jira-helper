@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { globalContainer } from 'dioma';
-import { loadSubtasksForIssue } from 'src/shared/jira/stores/jiraSubtasks.actions';
+import { loadSubtasksForIssue } from 'src/infrastructure/jira/stores/jiraSubtasks.actions';
 import { useGetSettings } from '../hooks/useGetSettings';
 import { IssueLinkBadges } from '../IssueLinkBadges/IssueLinkBadges';
 

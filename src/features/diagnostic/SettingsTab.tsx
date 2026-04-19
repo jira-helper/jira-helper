@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useDi } from 'src/shared/diContext';
-import { loggerToken } from 'src/shared/Logger';
+import { useDi } from 'src/infrastructure/di/diContext';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { Button } from 'antd';
 import { saveDiagnosticData } from './actions/saveDiagnosticData';
 import { JqlDebugDemo } from './JqlDebugDemo';

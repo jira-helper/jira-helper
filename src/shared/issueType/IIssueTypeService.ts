@@ -1,4 +1,4 @@
-import type { ProjectIssueType } from '../jiraApi';
+import type { ProjectIssueType } from 'src/infrastructure/jira/jiraApi';
 
 export interface IIssueTypeService {
   loadForProject(projectKey: string): Promise<ProjectIssueType[]>;

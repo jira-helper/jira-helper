@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import ColumnLimitsBoardPage from './index';
 
 // Mock PageModification dependencies
-vi.mock('../../shared/PageModification', async () => {
-  const actual = await vi.importActual('../../shared/PageModification');
+vi.mock('../../infrastructure/page-modification/PageModification', async () => {
+  const actual = await vi.importActual('../../infrastructure/page-modification/PageModification');
   return {
     ...actual,
     PageModification: class {

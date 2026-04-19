@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button, Space, Divider, Alert, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
+import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
 import { IssueLinkItem } from './IssueLinkItem';
 import { IssueLink } from '../../types';

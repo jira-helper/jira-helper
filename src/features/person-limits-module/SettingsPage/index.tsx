@@ -1,11 +1,11 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { PageModification } from '../../../shared/PageModification';
-import { WithDi } from '../../../shared/diContext';
+import { PageModification } from '../../../infrastructure/page-modification/PageModification';
+import { WithDi } from '../../../infrastructure/di/diContext';
 import { propertyModelToken } from '../tokens';
-import { searchUsersToken } from '../../../shared/di/jiraApiTokens';
+import { searchUsersToken } from '../../../infrastructure/di/jiraApiTokens';
 import { SettingsButtonContainer } from './components/SettingsButton';
-import { settingsPagePageObjectToken } from '../../../page-objects/SettingsPage';
+import { settingsPagePageObjectToken } from 'src/infrastructure/page-objects/SettingsPage';
 import type { Column, Swimlane } from './state/types';
 
 type MappedColumn = {

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { PersonLimit } from '../../property/types';
 
 const OVER_LIMIT_BG = '#ff5630';

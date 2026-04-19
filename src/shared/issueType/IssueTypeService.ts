@@ -1,7 +1,7 @@
 import { Container } from 'dioma';
-import type { ProjectIssueType } from '../jiraApi';
-import type { GetProjectIssueTypes } from '../di/jiraApiTokens';
-import { getProjectIssueTypesToken } from '../di/jiraApiTokens';
+import type { ProjectIssueType } from 'src/infrastructure/jira/jiraApi';
+import type { GetProjectIssueTypes } from 'src/infrastructure/di/jiraApiTokens';
+import { getProjectIssueTypesToken } from 'src/infrastructure/di/jiraApiTokens';
 import type { IIssueTypeService } from './IIssueTypeService';
 import { issueTypeServiceToken } from './tokens';
 

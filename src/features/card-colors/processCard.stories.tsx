@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useEffect, useRef } from 'react';
-import { IssueCard } from 'src/shared/jira/card';
+import { IssueCard } from 'src/infrastructure/jira/card';
 import { processCard } from './processCard';
 
 const ProcessCardDemo = ({ grabberColor }: { grabberColor?: string }) => {

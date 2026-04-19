@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { JiraUser } from 'src/shared/jiraApi';
+import type { JiraUser } from 'src/infrastructure/jira/jiraApi';
 import { PersonNameSelect } from './PersonNameSelect';
 import type { SelectedPerson } from '../state/types';
 

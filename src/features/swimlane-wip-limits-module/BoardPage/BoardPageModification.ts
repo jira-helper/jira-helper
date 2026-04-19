@@ -1,6 +1,6 @@
 import { Token } from 'dioma';
-import { PageModification } from 'src/shared/PageModification';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { boardRuntimeModelToken } from '../tokens';
 import { renderSwimlaneVisuals } from './renderSwimlaneVisuals';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';

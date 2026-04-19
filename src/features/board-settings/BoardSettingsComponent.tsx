@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'antd/es/modal';
 import { Tabs } from 'antd';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
 import { useGetTextsByLocale } from 'src/shared/texts';

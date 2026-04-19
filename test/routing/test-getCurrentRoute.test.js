@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
-import { registerExtensionApiServiceInDI } from '../../src/shared/ExtensionApiService';
-import { registerRoutingServiceInDI, routingServiceToken } from '../../src/routing';
-import { registerRoutingInDI } from '../../src/shared/di/routingTokens';
+import { registerExtensionApiServiceInDI } from '../../src/infrastructure/extension-api/ExtensionApiService';
+import { registerRoutingServiceInDI, routingServiceToken } from '../../src/infrastructure/routing';
+import { registerRoutingInDI } from '../../src/infrastructure/di/routingTokens';
 
 describe('Routing should', () => {
   beforeEach(() => {

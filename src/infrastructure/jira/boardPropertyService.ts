@@ -1,6 +1,6 @@
 import { Container, Token, globalContainer } from 'dioma';
-import { routingServiceToken } from 'src/routing';
-import { deleteBoardPropertyToken, getBoardPropertyToken, updateBoardPropertyToken } from './di/jiraApiTokens';
+import { routingServiceToken } from 'src/infrastructure/routing';
+import { deleteBoardPropertyToken, getBoardPropertyToken, updateBoardPropertyToken } from '../di/jiraApiTokens';
 
 export interface BoardPropertyServiceI {
   getBoardProperty<T>(property: string): Promise<T | undefined>;

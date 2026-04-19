@@ -1,5 +1,5 @@
 import React from 'react';
-import type { IBoardPagePageObject } from 'src/page-objects/BoardPage';
+import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 import { LimitBadge } from './components/LimitBadge';
 

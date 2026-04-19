@@ -49,7 +49,7 @@ const mockUseGetIssueLinkTypes = vi.fn(() => ({
   error: null,
 }));
 
-vi.mock('src/shared/jira/stores/useGetIssueLinkTypes', () => ({
+vi.mock('src/infrastructure/jira/stores/useGetIssueLinkTypes', () => ({
   useGetIssueLinkTypes: () => mockUseGetIssueLinkTypes(),
 }));
 

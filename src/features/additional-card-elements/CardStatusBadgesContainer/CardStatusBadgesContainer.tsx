@@ -1,6 +1,6 @@
 import React from 'react';
-import { useDi, WithDi } from 'src/shared/diContext';
-import { boardPagePageObjectToken } from 'src/page-objects/BoardPage';
+import { useDi, WithDi } from 'src/infrastructure/di/diContext';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { globalContainer } from 'dioma';
 import { useGetSettings } from '../hooks/useGetSettings';
 import { DaysInColumnBadge } from '../DaysInColumn/DaysInColumnBadge';

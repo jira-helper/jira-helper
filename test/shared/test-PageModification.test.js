@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PageModification } from '../../src/shared/PageModification';
+import { PageModification } from '../../src/infrastructure/page-modification/PageModification';
 
 describe('MarkFlaggedIssues', () => {
   const pageModification = new PageModification();

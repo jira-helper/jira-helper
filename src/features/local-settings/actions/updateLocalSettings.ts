@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { useLocalSettingsStore } from '../stores/localSettingsStore';
 import { LocalSettings } from '../types/local-settings';
 import { STORAGE_KEY } from './loadLocalSettings';

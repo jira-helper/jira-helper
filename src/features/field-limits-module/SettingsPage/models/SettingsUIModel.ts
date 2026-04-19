@@ -16,7 +16,7 @@ import type {
   BoardEditData,
 } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import { createLimitKey } from '../../utils/createLimitKey';
 
 export class SettingsUIModel {

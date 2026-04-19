@@ -3,13 +3,13 @@ import { globalContainer } from 'dioma';
 import { routingServiceToken } from '../routing';
 import { settingsPagePageObjectToken } from '../page-objects/SettingsPage';
 import { getIssueTypeFromCard } from '../page-objects/utils/getIssueTypeFromCard';
-import { waitForElement } from './utils';
+import { waitForElement } from '../../shared/utils';
 import {
   deleteBoardPropertyToken,
   getBoardEditDataToken,
   getBoardPropertyToken,
   updateBoardPropertyToken,
-} from './di/jiraApiTokens';
+} from '../di/jiraApiTokens';
 
 type SideEffect = () => void;
 

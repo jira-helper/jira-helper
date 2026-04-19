@@ -1,6 +1,6 @@
 import React from 'react';
-import { extensionApiServiceToken } from '../ExtensionApiService';
-import { useDi } from '../diContext';
+import { extensionApiServiceToken } from 'src/infrastructure/extension-api/ExtensionApiService';
+import { useDi } from 'src/infrastructure/di/diContext';
 
 interface ImageProps {
   src: string;

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
-import type { IBoardPagePageObject, SwimlaneElement } from 'src/page-objects/BoardPage';
-import type { Logger } from 'src/shared/Logger';
+import type { IBoardPagePageObject, SwimlaneElement } from 'src/infrastructure/page-objects/BoardPage';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { SwimlaneSettings, SwimlaneSetting, SwimlaneIssueStats } from '../../types';
 import { Ok, Err } from 'ts-results';
 

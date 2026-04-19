@@ -4,12 +4,12 @@
  */
 import React from 'react';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
-import { registerLogger } from 'src/shared/Logger';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
-import { routingServiceToken, type IRoutingService } from 'src/routing';
+import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
-import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/shared/boardPropertyService';
+import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
 import { SettingsModalContainer } from './SettingsModalContainer';
 import type { Column, Swimlane } from '../../state/types';
 import { personLimitsModule } from '../../../module';

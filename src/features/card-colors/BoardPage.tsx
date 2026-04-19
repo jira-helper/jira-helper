@@ -1,6 +1,6 @@
 import { Token } from 'dioma';
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
-import { PageModification } from '../../shared/PageModification';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
 import { processCard } from './processCard';
 import { PropertyValue } from './types';
 

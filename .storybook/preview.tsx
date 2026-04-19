@@ -1,13 +1,13 @@
 import React from 'react';
 import type { Preview } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
-import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
-import { registerExtensionApiServiceInDI } from '../src/shared/ExtensionApiService';
-import { registerRoutingServiceInDI } from '../src/routing';
-import { registerJiraApiInDI } from '../src/shared/di/jiraApiTokens';
+import { BoardPropertyServiceToken } from '../src/infrastructure/jira/boardPropertyService';
+import { registerExtensionApiServiceInDI } from '../src/infrastructure/extension-api/ExtensionApiService';
+import { registerRoutingServiceInDI } from '../src/infrastructure/routing';
+import { registerJiraApiInDI } from '../src/infrastructure/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from '../src/shared/issueType';
-import { registerLogger } from '../src/shared/Logger';
-import { WithDi } from '../src/shared/diContext';
+import { registerLogger } from '../src/infrastructure/logging/Logger';
+import { WithDi } from '../src/infrastructure/di/diContext';
 import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
 const preview: Preview = {
   parameters: {

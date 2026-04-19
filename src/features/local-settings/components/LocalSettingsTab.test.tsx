@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { step } from 'src/shared/testTools/step';
