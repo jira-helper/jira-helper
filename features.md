@@ -4,7 +4,7 @@
 > Run `npm run docs:features` to regenerate.
 
 ---
-<!-- source: src/column-limits/feature.md -->
+<!-- source: src/column-limits-module/feature.md -->
 # Column group WIP limits (CONWIP)
 
 Set one shared work-in-progress limit across several columns so cards in those columns count together, with optional rules by swimlane and issue type.
@@ -36,7 +36,7 @@ Only board administrators (or whoever can change board configuration in your Jir
 
 ---
 
-<!-- source: src/person-limits/feature.md -->
+<!-- source: src/person-limits-module/feature.md -->
 # Per-person WIP limits
 
 Cap how many issues each teammate may have in progress on the board, with a quick visual status and an optional way to focus only on issues that count toward someone’s limit.
@@ -100,7 +100,7 @@ Issue counting respects your board’s settings (for example sub-task handling),
 
 ---
 
-<!-- source: src/swimlane-wip-limits/feature.md -->
+<!-- source: src/swimlane-wip-limits-module/feature.md -->
 # Swimlane WIP limits
 
 Give each swimlane row its own work-in-progress cap and optional issue-type rules, shown on the lane header—useful lanes like “Expedite” can follow different WIP rules from the rest of the board.
@@ -130,7 +130,7 @@ Board administrators (or anyone with board configuration access) can save.
 
 ---
 
-<!-- source: src/features/field-limits/feature.md -->
+<!-- source: src/features/field-limits-module/feature.md -->
 # WIP limits by field values
 
 Turn a field shown on your board cards into a capacity-style limit: count or sum how issues contribute by field value (or by whether the field is present), scoped to columns and swimlanes, with badges beside the board and a tint on cards that tip the limit over.
@@ -187,7 +187,7 @@ When **Fill whole card** is enabled, each issue card on the board can show a gen
 
 ---
 
-<!-- source: src/swimlane-histogram/feature.md -->
+<!-- source: src/swimlane-histogram-module/feature.md -->
 # Swimlane Histogram
 
 Shows a small **bar chart** beside each swimlane name so you can see at a glance how work in that swimlane is **spread across columns** on the board.

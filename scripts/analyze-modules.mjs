@@ -13,8 +13,8 @@
  * 
  * Usage: node scripts/analyze-modules.mjs [directory] [--output file.md]
  * Example: 
- *   node scripts/analyze-modules.mjs src/person-limits
- *   node scripts/analyze-modules.mjs src/person-limits --output src/person-limits/ARCHITECTURE.md
+ *   node scripts/analyze-modules.mjs src/person-limits-module
+ *   node scripts/analyze-modules.mjs src/person-limits-module --output src/person-limits-module/ARCHITECTURE.md
  */
 
 import fs from 'fs';

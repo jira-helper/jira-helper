@@ -72,4 +72,4 @@ If the feature has multiple sub-features (like Additional Card Elements), use H3
 See existing feature documentation:
 - Simple feature: `src/card-colors/feature.md`
 - Complex feature: `src/features/additional-card-elements/feature.md`
-- Feature with full docs: `src/person-limits/` (feature.md, ARCHITECTURE.md, USER-GUIDE.md, REQUIREMENTS.md)
+- Feature with full docs: `src/person-limits-module/` (feature.md, ARCHITECTURE.md, USER-GUIDE.md, REQUIREMENTS.md)

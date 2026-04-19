@@ -42,7 +42,7 @@ cypress/support/
 npx cypress run --component --spec "src/**/features/*.feature.cy.tsx"
 
 # Конкретный файл
-npx cypress run --component --spec "src/person-limits/SettingsPage/features/add-limit.feature.cy.tsx"
+npx cypress run --component --spec "src/person-limits-module/SettingsPage/features/add-limit.feature.cy.tsx"
 
 # Интерактивный режим
 npx cypress open --component
@@ -289,5 +289,5 @@ Given('search API fails', () => {
 ## Референсы
 
 - `cypress/support/bdd-runner.ts` — BDD runner
-- `src/person-limits/SettingsPage/features/` — эталонный пример (36 сценариев в 5 файлах)
-- `src/person-limits/SettingsPage/features/steps/common.steps.ts` — общие step definitions
+- `src/person-limits-module/SettingsPage/features/` — эталонный пример (36 сценариев в 5 файлах)
+- `src/person-limits-module/SettingsPage/features/steps/common.steps.ts` — общие step definitions

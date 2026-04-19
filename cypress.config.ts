@@ -39,7 +39,7 @@ export default defineConfig({
         resolve: {
           alias: {
             src: path.resolve(__dirname, 'src'),
-            cypress: path.resolve(__dirname, 'cypress'),
+            'cypress/support': path.resolve(__dirname, 'cypress/support'),
           },
         },
       },

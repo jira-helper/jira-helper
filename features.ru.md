@@ -4,7 +4,7 @@
 > Run `npm run docs:features` to regenerate.
 
 ---
-<!-- source: src/column-limits/feature.ru.md -->
+<!-- source: src/column-limits-module/feature.ru.md -->
 # Групповые лимиты WIP по колонкам (CONWIP)
 
 Задаёт один общий лимит work-in-progress сразу на несколько колонок: карточки в этих колонках суммируются, при необходимости с учётом swimlane и типа задачи.
@@ -36,7 +36,7 @@
 
 ---
 
-<!-- source: src/person-limits/feature.ru.md -->
+<!-- source: src/person-limits-module/feature.ru.md -->
 # Персональные лимиты WIP
 
 Ограничивает, сколько задач у каждого участника может быть «в работе» на доске, с наглядным статусом и возможностью сфокусироваться только на задачах, входящих в его лимит.
@@ -100,7 +100,7 @@
 
 ---
 
-<!-- source: src/swimlane-wip-limits/feature.ru.md -->
+<!-- source: src/swimlane-wip-limits-module/feature.ru.md -->
 # Лимиты WIP по swimlane
 
 Задаёт отдельный лимит work-in-progress для каждой строки swimlane и при необходимости правила по типам задач; индикатор на заголовке дорожки — удобно для полос вроде «Expedite» с особыми правилами WIP.
@@ -130,7 +130,7 @@
 
 ---
 
-<!-- source: src/features/field-limits/feature.ru.md -->
+<!-- source: src/features/field-limits-module/feature.ru.md -->
 # Лимиты WIP по значениям полей
 
 Превращает поле на карточке доски в лимит в духе «ёмкости»: можно считать или суммировать вклад задач по значению поля (или по факту заполнения поля), ограничить область колонками и swimlane, показать бейджи рядом с доской и подсветить карточки при перегрузе.
@@ -187,7 +187,7 @@
 
 ---
 
-<!-- source: src/swimlane-histogram/feature.ru.md -->
+<!-- source: src/swimlane-histogram-module/feature.ru.md -->
 # Гистограмма по swimlane
 
 Показывает небольшую **столбчатую диаграмму** рядом с названием каждого swimlane, чтобы сразу видеть, как задачи в этом swimlane **распределены по колонкам** доски.

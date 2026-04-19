@@ -125,11 +125,11 @@ flowchart LR
 ```
 src/
 ├── features/              # Все фичи (модули и legacy)
-│   ├── column-limits/    # Модуль (module.ts + tokens.ts)
-│   ├── person-limits/   # Модуль
-│   ├── field-limits/    # Модуль
-│   ├── swimlane-wip-limits/
-│   ├── swimlane-histogram/
+│   ├── column-limits-module/    # Модуль (module.ts + tokens.ts)
+│   ├── person-limits-module/    # Модуль
+│   ├── field-limits-module/     # Модуль
+│   ├── swimlane-wip-limits-module/
+│   ├── swimlane-histogram-module/
 │   ├── card-colors/      # Legacy (PageModification, без module.ts)
 │   ├── board-settings/
 │   └── ...
@@ -159,10 +159,16 @@ src/
 ### Модуль vs Не модуль
 
 **Модуль** — фича с `module.ts` + `tokens.ts`, регистрируется через `Module.ensure(container)`:
-- column-limits, person-limits, field-limits, swimlane-wip-limits, swimlane-histogram
+- в новой структуре: `src/features/*-module/` с `module.ts` и `tokens.ts` внутри;
+- временно часть модулей может ещё находиться в `src/features/<feature>/` до завершения миграции.
+- мигрированные модули сейчас: column-limits-module, person-limits-module, field-limits-module, swimlane-wip-limits-module, swimlane-histogram-module
 
 **Не модуль** — legacy фичи, регистрируются напрямую через `container.register()`:
 - card-colors, board-settings, wiplimit-on-cells, charts, bug-template, issue, blur-for-sensitive, related-tasks
+
+### Подробные правила для модулей
+
+Дополнительные соглашения по новым/рефакторимым модульным фичам зафиксированы в `docs/module-boundaries.md`.
 
 **Правило:** новые фичи = модули. Legacy могут жить как есть.
 
@@ -348,7 +354,7 @@ const data = useSettingsStore(s => s.data);  // реактивная подпи�
 ### Пример декомпозиции: Person Limits
 
 ```
-person-limits/
+person-limits-module/
 ├── property/
 │   └── PropertyModel.ts         # Данные из Jira Board Property
 │

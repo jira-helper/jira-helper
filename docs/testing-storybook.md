@@ -55,10 +55,10 @@ export const Default: Story = {
 Title должен отражать путь файла от `src/`. Директории `features/` и `components/` пропускаются, kebab-case конвертируется в PascalCase.
 
 ```typescript
-// src/features/field-limits/SettingsPage/components/LimitForm.stories.tsx
+// src/features/field-limits-module/SettingsPage/components/LimitForm.stories.tsx
 title: 'FieldLimits/SettingsPage/LimitForm',
 
-// src/person-limits/BoardPage/components/AvatarBadge.stories.tsx
+// src/person-limits-module/BoardPage/components/AvatarBadge.stories.tsx
 title: 'PersonLimits/BoardPage/AvatarBadge',
 
 // src/shared/components/ColumnSelector/ColumnSelector.stories.tsx
@@ -166,6 +166,6 @@ export const Default: Story = {
 
 ## Референсы
 
-- `src/features/field-limits/SettingsPage/components/LimitForm.stories.tsx`
-- `src/features/field-limits/BoardPage/components/FieldLimitBadge.stories.tsx`
-- `src/person-limits/SettingsPage/components/SettingsModal/SettingsModal.stories.tsx`
+- `src/features/field-limits-module/SettingsPage/components/LimitForm.stories.tsx`
+- `src/features/field-limits-module/BoardPage/components/FieldLimitBadge.stories.tsx`
+- `src/person-limits-module/SettingsPage/components/SettingsModal/SettingsModal.stories.tsx`

@@ -9,35 +9,35 @@ import runModifications from './shared/runModifications';
 import {
   BoardPageModification as SwimlaneLimitsBoardPage,
   swimlaneWipLimitsBoardPageToken,
-} from './features/swimlane-wip-limits/BoardPage';
+} from './features/swimlane-wip-limits-module/BoardPage';
 import {
   SettingsPageModification as SwimlaneLimitsSettingsPage,
   swimlaneWipLimitsSettingsPageToken,
-} from './features/swimlane-wip-limits/SettingsPage';
+} from './features/swimlane-wip-limits-module/SettingsPage';
 import {
   HistogramModification as SwimlaneHistogramBoardPage,
   histogramModificationToken,
-} from './features/swimlane-histogram';
-import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './features/column-limits/SettingsPage';
-import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './features/column-limits/BoardPage';
+} from './features/swimlane-histogram-module';
+import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './features/column-limits-module/SettingsPage';
+import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './features/column-limits-module/BoardPage';
 import BugTemplate, { bugTemplateToken } from './features/bug-template/BugTemplate';
 import MarkFlaggedIssues, { markFlaggedIssuesToken } from './features/issue/MarkFlaggedIssues';
 import ToggleForRightSidebar, { toggleForRightSidebarToken } from './features/issue/ToggleForRightSidebar';
 import {
   SettingsPageModification as FieldLimitsSettingsPage,
   fieldLimitsSettingsPageToken,
-} from './features/field-limits/SettingsPage';
+} from './features/field-limits-module/SettingsPage';
 import {
   BoardPageModification as FieldLimitsBoardPage,
   fieldLimitsBoardPageToken,
-} from './features/field-limits/BoardPage';
+} from './features/field-limits-module/BoardPage';
 import { blurSensitiveFeatureToken, registerBlurSensitiveFeatureInDI } from './features/blur-for-sensitive';
-import PersonLimitsSettings, { personLimitsSettingsPageToken } from './features/person-limits/SettingsPage';
-import PersonLimits, { personLimitsBoardPageToken } from './features/person-limits/BoardPage';
+import PersonLimitsSettings, { personLimitsSettingsPageToken } from './features/person-limits-module/SettingsPage';
+import PersonLimits, { personLimitsBoardPageToken } from './features/person-limits-module/BoardPage';
 import WiplimitOnCells, { wipLimitOnCellsBoardPageToken } from './features/wiplimit-on-cells/BoardPage';
 import WiplimitOnCellsSettings, { wipLimitOnCellsSettingsPageToken } from './features/wiplimit-on-cells/SettingsPage';
-import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors/SettingsPage';
 import { CardColorsBoardPage, cardColorsBoardPageToken } from './features/card-colors/BoardPage';
+import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors/SettingsPage';
 import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './features/board-settings/BoardPage';
 import { SubTasksProgressBoardPage, subTasksProgressBoardPageToken } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './page-objects/BoardPage';
@@ -50,11 +50,11 @@ import { registerRoutingServiceInDI } from './routing';
 import { registerJiraApiInDI } from './shared/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
-import { columnLimitsModule } from './features/column-limits/module';
-import { personLimitsModule } from './features/person-limits/module';
-import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits/module';
-import { fieldLimitsModule } from './features/field-limits/module';
-import { swimlaneHistogramModule } from './features/swimlane-histogram/module';
+import { columnLimitsModule } from './features/column-limits-module/module';
+import { personLimitsModule } from './features/person-limits-module/module';
+import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/module';
+import { fieldLimitsModule } from './features/field-limits-module/module';
+import { swimlaneHistogramModule } from './features/swimlane-histogram-module/module';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';

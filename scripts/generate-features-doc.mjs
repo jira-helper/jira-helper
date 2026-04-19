@@ -11,13 +11,13 @@ const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
 
 const CATEGORY_ORDER = [
-  'column-limits',
-  'person-limits',
+  'column-limits-module',
+  'person-limits-module',
   'wiplimit-on-cells',
-  'swimlane-wip-limits',
-  'features/field-limits',
+  'swimlane-wip-limits-module',
+  'features/field-limits-module',
   'card-colors',
-  'swimlane-histogram',
+  'swimlane-histogram-module',
   'blur-for-sensitive',
   'features/additional-card-elements',
   'features/sub-tasks-progress',
