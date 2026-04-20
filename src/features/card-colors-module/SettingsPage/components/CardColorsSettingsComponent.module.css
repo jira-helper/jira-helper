@@ -1,0 +1,32 @@
+.exampleWithImages {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.controlRow {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 8px;
+}
+
+.error {
+  color: #ff4d4f;
+  font-size: 12px;
+  padding: 4px 8px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+}

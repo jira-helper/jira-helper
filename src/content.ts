@@ -36,8 +36,8 @@ import PersonLimitsSettings, { personLimitsSettingsPageToken } from './features/
 import PersonLimits, { personLimitsBoardPageToken } from './features/person-limits-module/BoardPage';
 import WiplimitOnCells, { wipLimitOnCellsBoardPageToken } from './features/wiplimit-on-cells/BoardPage';
 import WiplimitOnCellsSettings, { wipLimitOnCellsSettingsPageToken } from './features/wiplimit-on-cells/SettingsPage';
-import { CardColorsBoardPage, cardColorsBoardPageToken } from './features/card-colors/BoardPage';
-import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors/SettingsPage';
+import { CardColorsBoardPage, cardColorsBoardPageToken } from './features/card-colors-module/BoardPage';
+import CardColorsSettingsPage, { cardColorsSettingsPageToken } from './features/card-colors-module/SettingsPage';
 import { BoardSettingsBoardPage, boardSettingsBoardPageToken } from './features/board-settings/BoardPage';
 import { SubTasksProgressBoardPage, subTasksProgressBoardPageToken } from './features/sub-tasks-progress/BoardPage';
 import { registerBoardPagePageObjectInDI } from './infrastructure/page-objects/BoardPage';
@@ -55,6 +55,7 @@ import { personLimitsModule } from './features/person-limits-module/module';
 import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/module';
 import { fieldLimitsModule } from './features/field-limits-module/module';
 import { swimlaneHistogramModule } from './features/swimlane-histogram-module/module';
+import { cardColorsModule } from './features/card-colors-module/module';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
@@ -102,6 +103,7 @@ function initDiContainer() {
   swimlaneWipLimitsModule.ensure(container);
   fieldLimitsModule.ensure(container);
   swimlaneHistogramModule.ensure(container);
+  cardColorsModule.ensure(container);
 
   // Register PageModification instances as value tokens
   container.register({ token: cardColorsBoardPageToken, value: new CardColorsBoardPage(container) });
