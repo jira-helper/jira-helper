@@ -56,6 +56,8 @@ import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/m
 import { fieldLimitsModule } from './features/field-limits-module/module';
 import { swimlaneHistogramModule } from './features/swimlane-histogram-module/module';
 import { cardColorsModule } from './features/card-colors-module/module';
+import { ganttChartModule } from './features/gantt-chart/module';
+import { GanttChartIssuePage, ganttChartIssuePageToken } from './features/gantt-chart/IssuePage/GanttChartIssuePage';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
@@ -104,6 +106,7 @@ function initDiContainer() {
   fieldLimitsModule.ensure(container);
   swimlaneHistogramModule.ensure(container);
   cardColorsModule.ensure(container);
+  ganttChartModule.ensure(container);
 
   // Register PageModification instances as value tokens
   container.register({ token: cardColorsBoardPageToken, value: new CardColorsBoardPage(container) });
@@ -137,6 +140,7 @@ function initDiContainer() {
   container.register({ token: fieldLimitsSettingsPageToken, value: new FieldLimitsSettingsPage(container) });
 
   container.register({ token: markFlaggedIssuesToken, value: new MarkFlaggedIssues(container) });
+  container.register({ token: ganttChartIssuePageToken, value: new GanttChartIssuePage(container) });
   container.register({ token: toggleForRightSidebarToken, value: new ToggleForRightSidebar(container) });
   container.register({ token: addSlaLineToken, value: new AddSlaLine(container) });
   container.register({ token: addChartGridToken, value: new AddChartGrid(container) });
@@ -186,7 +190,11 @@ async function start() {
       container.inject(wipLimitOnCellsSettingsPageToken),
       container.inject(cardColorsSettingsPageToken),
     ],
-    [Routes.ISSUE]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],
+    [Routes.ISSUE]: [
+      container.inject(markFlaggedIssuesToken),
+      container.inject(ganttChartIssuePageToken),
+      container.inject(toggleForRightSidebarToken),
+    ],
     [Routes.SEARCH]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],
     [Routes.REPORTS]: [container.inject(addSlaLineToken), container.inject(addChartGridToken)],
     [Routes.ALL]: [container.inject(bugTemplateToken)],

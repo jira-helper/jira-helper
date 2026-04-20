@@ -1,0 +1,626 @@
+import { Container, Token } from 'dioma';
+import React from 'react';
+import { createRoot, Root } from 'react-dom/client';
+import { getNameFromTooltip } from '../utils/getNameFromTooltip';
+
+const NO_VISIBILITY_CLASS = 'no-visibility';
+
+/**
+ * Swimlane DOM element with id, row element and header container.
+ */
+export interface SwimlaneElement {
+  id: string;
+  element: Element;
+  header: Element;
+}
+
+export interface IssueCountOptions {
+  excludeDone?: boolean;
+  excludeSubtasks?: boolean;
+  includedIssueTypes?: string[];
+}
+
+/** Опции подсчёта issues в колонке (across swimlanes). */
+export type ColumnIssueCountOptions = {
+  /** Swimlane IDs to exclude from counting */
+  ignoredSwimlanes?: string[];
+  /** Only count issues of these types (empty/undefined = all) */
+  includedIssueTypes?: string[];
+  /** Additional CSS fragment appended after `.ghx-issue:not(.ghx-done)`, e.g. `:not(.ghx-issue-subtask)` */
+  cssFilter?: string;
+};
+
+const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
+
+type BoardSelectors = Pick<
+  IBoardPagePageObject['selectors'],
+  'pool' | 'swimlaneRow' | 'swimlaneHeader' | 'issue' | 'column' | 'columnHeader' | 'columnTitle'
+>;
+
+function getSwimlaneColumns(swimlane: Element): Element[] {
+  const columnsContainer = swimlane.querySelector('.ghx-columns');
+  if (columnsContainer) {
+    return Array.from(columnsContainer.children).filter(el => el.classList.contains('ghx-column'));
+  }
+  return Array.from(swimlane.querySelectorAll(':scope > .ghx-column'));
+}
+
+function getColumnTitleToIdMap(selectors: BoardSelectors): Map<string, string> {
+  const header = document.querySelector(selectors.columnHeader);
+  const titleElements = header?.querySelectorAll(selectors.columnTitle);
+  if (!titleElements) return new Map();
+  const map = new Map<string, string>();
+  titleElements.forEach(titleEl => {
+    const column = titleEl.closest(selectors.column);
+    const id = column?.getAttribute('data-id') || column?.getAttribute('data-column-id');
+    const title = titleEl.textContent?.trim();
+    if (id && title) map.set(title, id);
+  });
+  return map;
+}
+
+function getIssueTypeFromCard(card: Element): string | null {
+  const typeElement = card.querySelector('.ghx-type');
+  if (!typeElement) return null;
+  const title = typeElement.getAttribute('title');
+  if (!title) return null;
+  const typeName = title.includes(':') ? title.split(':')[1].trim() : title.trim();
+  return typeName || null;
+}
+
+function countIssuesInColumn(column: Element, issueSelector: string, options?: IssueCountOptions): number {
+  const issues = column.querySelectorAll(issueSelector);
+  if (!options?.excludeDone && !options?.excludeSubtasks && !options?.includedIssueTypes?.length) {
+    return issues.length;
+  }
+  return Array.from(issues).filter(issue => {
+    if (options?.excludeDone && issue.classList.contains('ghx-done')) return false;
+    if (options?.excludeSubtasks && issue.classList.contains('ghx-issue-subtask')) return false;
+    if (options?.includedIssueTypes?.length) {
+      const issueType = getIssueTypeFromCard(issue);
+      if (!issueType || !options.includedIssueTypes.includes(issueType)) return false;
+    }
+    return true;
+  }).length;
+}
+
+class CardPageObject {
+  selectors = {
+    issueKey: '.ghx-key',
+  };
+
+  constructor(private readonly card: Element) {}
+
+  getIssueId() {
+    return this.card.querySelector(this.selectors.issueKey)?.textContent?.trim() as string;
+  }
+
+  getCardElement() {
+    return this.card;
+  }
+
+  attach(
+    ComponentToAttach: React.ComponentType<{ issueId: string }>,
+    key: string,
+    options?: { position: 'aftersummary' | 'beforeend' | 'inFooterBeforeDays' }
+  ) {
+    let div = this.card.querySelector(`[data-jh-attached-key="${key}"]`);
+
+    if (div) {
+      return;
+    }
+
+    div = document.createElement('span');
+    div.setAttribute('data-jh-attached-key', key);
+    if (options?.position === 'aftersummary') {
+      // ghx-summary is inside ghx-issue-fields and ghx-issue-fields width is not 100%
+      this.card.querySelector('.ghx-issue-fields')?.after(div);
+    } else if (options?.position === 'inFooterBeforeDays') {
+      // Insert in .ghx-card-footer before .ghx-days if exists
+      const footer = this.card.querySelector('.ghx-card-footer');
+      const daysElement = footer?.querySelector('.ghx-days');
+      if (footer && daysElement) {
+        daysElement.before(div);
+      } else if (footer) {
+        footer.appendChild(div);
+      } else {
+        // Fallback: insert at the end of card content
+        this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+      }
+    } else if (options?.position === 'beforeend') {
+      // Insert at the very end of card content
+      this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+    } else {
+      this.card.querySelector('.ghx-issue-content')?.appendChild(div);
+    }
+
+    const root = createRoot(div);
+    root.render(<ComponentToAttach issueId={this.getIssueId()} />);
+
+    this.unmountReactRootWhenCardIsRemoved(root);
+  }
+
+  /**
+   * Jira can remove card from DOM by different ways, so we need to unmount React root when card is removed
+   */
+  private unmountReactRootWhenCardIsRemoved(root: Root) {
+    const interval = setInterval(() => {
+      if (!document.body.contains(this.card)) {
+        root.unmount();
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+}
+
+export const BoardPagePageObject: IBoardPagePageObject = {
+  selectors: {
+    pool: '#ghx-pool',
+    issue: '.ghx-issue',
+    flagged: '.ghx-flagged',
+    grabber: '.ghx-grabber',
+    grabberTransparent: '.ghx-grabber-transparent',
+    sidebar: '.aui-sidebar.projects-sidebar .aui-navgroup.aui-navgroup-vertical',
+    column: '.ghx-column',
+    columnHeader: '#ghx-column-headers',
+    columnTitle: '.ghx-column-title',
+    daysInColumn: '.ghx-days',
+    swimlaneHeader: '.ghx-swimlane-header',
+    swimlaneRow: '.ghx-swimlane',
+    avatarImg: '.ghx-avatar-img',
+    issueType: '.ghx-type',
+    parentGroup: '.ghx-parent-group',
+  },
+
+  classlist: {
+    flagged: 'ghx-flagged',
+  },
+
+  getColumns(): string[] {
+    return Array.from(document.querySelectorAll('.ghx-column-title, #ghx-column-headers .ghx-column h2')).map(
+      el => el.textContent?.trim() || ''
+    );
+  },
+
+  listenCards(callback: (cards: CardPageObject[]) => void) {
+    // Map to track the last known DOM element for each issueId
+    // This allows us to detect when a card DOM element is recreated even if the issueId stays the same
+    const cardElementsMap = new Map<string, Element>();
+    let currentCards = '';
+    const getCards = () => {
+      const cards = Array.from(document.querySelectorAll(this.selectors.issue)).map(card => new CardPageObject(card));
+      return cards;
+    };
+    const getCurrentCardsState = (cards: CardPageObject[]) => {
+      const state: string[] = [];
+      const currentIssueIds = new Set<string>();
+
+      for (const card of cards) {
+        const issueId = card.getIssueId();
+        currentIssueIds.add(issueId);
+        const cardElement = card.getCardElement();
+        const lastKnownElement = cardElementsMap.get(issueId);
+
+        // If the DOM element changed (but issueId is the same), the card was recreated
+        if (lastKnownElement && lastKnownElement !== cardElement) {
+          // Card was recreated - update the map and mark as changed
+          cardElementsMap.set(issueId, cardElement);
+          state.push(`${issueId}:recreated`);
+        } else if (!lastKnownElement) {
+          // New card - add to map
+          cardElementsMap.set(issueId, cardElement);
+          state.push(`${issueId}:new`);
+        } else {
+          // Same card, same element
+          state.push(`${issueId}:same`);
+        }
+      }
+
+      // Clean up removed cards from the map
+      for (const [issueId] of cardElementsMap) {
+        if (!currentIssueIds.has(issueId)) {
+          cardElementsMap.delete(issueId);
+        }
+      }
+
+      return state.join(',');
+    };
+
+    const notifyIfNewCards = () => {
+      const cards = getCards();
+      const currentCardsState = getCurrentCardsState(cards);
+      if (currentCardsState !== currentCards) {
+        currentCards = currentCardsState;
+        callback(cards);
+      }
+    };
+
+    notifyIfNewCards();
+
+    const interval = setInterval(() => {
+      notifyIfNewCards();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  },
+
+  getColumnOfIssue(issueId: string) {
+    const issue = document.querySelector(`[data-issue-key="${issueId}"]`);
+    const columnId = issue?.closest(this.selectors.column)?.getAttribute('data-column-id');
+    if (!columnId) return '';
+
+    const column = document.querySelector(this.selectors.columnHeader)?.querySelector(`[data-id="${columnId}"]`);
+    return column?.querySelector(this.selectors.columnTitle)?.textContent?.trim() || '';
+  },
+
+  getDaysInColumn(issueId: string): number | null {
+    const issue = document.querySelector(`[data-issue-key="${issueId}"]`);
+    if (!issue) return null;
+
+    const daysElement = issue.querySelector(this.selectors.daysInColumn);
+    if (!daysElement) return null;
+
+    // Try to get from data-tooltip attribute first
+    const tooltip = daysElement.getAttribute('data-tooltip') || daysElement.getAttribute('title') || '';
+    // Format: "X day(s) in this column"
+    const match = tooltip.match(/(\d+)\s*day/i);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+
+    // Fallback: count the number of dot elements (each dot = 1 day)
+    const dots = daysElement.querySelectorAll('.ghx-days-icon');
+    if (dots.length > 0) {
+      return dots.length;
+    }
+
+    // Last resort: try to parse text content
+    const text = daysElement.textContent?.trim() || '';
+    const textMatch = text.match(/(\d+)/);
+    if (textMatch) {
+      return parseInt(textMatch[1], 10);
+    }
+
+    return null;
+  },
+
+  hideDaysInColumn(): void {
+    // Add CSS rule to hide default Jira days counter
+    const styleId = 'jira-helper-hide-days-in-column';
+    if (document.getElementById(styleId)) {
+      return; // Already added
+    }
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .ghx-issue .ghx-days {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  },
+
+  getHtml(): string {
+    return document.body.innerHTML;
+  },
+
+  getSwimlanes(): SwimlaneElement[] {
+    const pool = document.querySelector(this.selectors.pool);
+    const swimlanes = pool
+      ? pool.querySelectorAll(this.selectors.swimlaneRow)
+      : document.querySelectorAll(this.selectors.swimlaneRow);
+    return Array.from(swimlanes)
+      .map(swimlane => {
+        const id = swimlane.getAttribute('swimlane-id');
+        const header = swimlane.querySelector(this.selectors.swimlaneHeader);
+        if (!id || !header) return null;
+        return { id, element: swimlane, header };
+      })
+      .filter((s): s is SwimlaneElement => s !== null);
+  },
+
+  getSwimlaneHeader(swimlaneId: string): Element | null {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    return swimlane?.querySelector(this.selectors.swimlaneHeader) ?? null;
+  },
+
+  getIssueCountInSwimlane(swimlaneId: string, options?: IssueCountOptions): number {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return 0;
+    const columns = getSwimlaneColumns(swimlane);
+    return columns.reduce(
+      (acc: number, column: Element) => acc + countIssuesInColumn(column, this.selectors.issue, options),
+      0
+    );
+  },
+
+  getIssueCountByColumn(swimlaneId: string, options?: IssueCountOptions): number[] {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return [];
+    const columnsContainer = swimlane.querySelector('.ghx-columns');
+    if (!columnsContainer) return [];
+    const counts: number[] = [];
+    columnsContainer.childNodes.forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const column = node as HTMLElement;
+        counts.push(countIssuesInColumn(column, this.selectors.issue, options));
+      }
+    });
+    return counts;
+  },
+
+  getIssueCountForColumns(swimlaneId: string, columns: string[], options?: IssueCountOptions): number {
+    const swimlane = document.querySelector(`${this.selectors.swimlaneRow}[swimlane-id="${swimlaneId}"]`);
+    if (!swimlane) return 0;
+    const columnTitleToId = getColumnTitleToIdMap(this.selectors);
+    const swimlaneColumns = getSwimlaneColumns(swimlane);
+    return columns.reduce((acc: number, columnTitle: string) => {
+      const columnId = columnTitleToId.get(columnTitle);
+      if (!columnId) return acc;
+      const column = swimlaneColumns.find((col: Element) => col.getAttribute('data-column-id') === columnId);
+      if (!column) return acc;
+      return acc + countIssuesInColumn(column, this.selectors.issue, options);
+    }, 0);
+  },
+
+  insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void {
+    let container = header.querySelector(`[data-jh-attached-key="${key}"]`);
+    if (container) return;
+
+    // Make header a flex container so histogram appears inline with title
+    (header as HTMLElement).style.display = 'flex';
+
+    container = document.createElement('span');
+    container.setAttribute('data-jh-attached-key', key);
+    header.insertAdjacentElement('afterbegin', container);
+
+    const root = createRoot(container);
+    root.render(component);
+
+    let rootsByKey = swimlaneRootsStore.get(header);
+    if (!rootsByKey) {
+      rootsByKey = new Map<string, Root>();
+      swimlaneRootsStore.set(header, rootsByKey);
+    }
+    rootsByKey.set(key, root);
+  },
+
+  removeSwimlaneComponent(header: Element, key: string): void {
+    const container = header.querySelector(`[data-jh-attached-key="${key}"]`);
+    if (!container) return;
+
+    const rootsByKey = swimlaneRootsStore.get(header);
+    if (rootsByKey) {
+      const root = rootsByKey.get(key);
+      if (root) {
+        root.unmount();
+        rootsByKey.delete(key);
+      }
+    }
+    container.remove();
+  },
+
+  highlightSwimlane(header: Element, exceeded: boolean): void {
+    const swimlane = header.closest(this.selectors.swimlaneRow) as HTMLElement;
+    const swimlaneDescription = swimlane?.querySelector('.ghx-description') as HTMLElement | null;
+    const innerHeader = header as HTMLElement;
+
+    const bgColor = exceeded ? 'rgb(255, 86, 48)' : '';
+    const textColor = exceeded ? 'rgb(255, 215, 0)' : '';
+
+    if (swimlane) swimlane.style.backgroundColor = bgColor;
+    if (swimlaneDescription) swimlaneDescription.style.color = textColor;
+    if (innerHeader) innerHeader.style.backgroundColor = bgColor;
+  },
+
+  getOrderedColumnIds(): string[] {
+    const columns = document.querySelectorAll<HTMLElement>(
+      'ul.ghx-columns.ghx-first > li.ghx-column, .ghx-first ul.ghx-columns > li.ghx-column'
+    );
+    return Array.from(columns)
+      .map(column => (column.dataset.columnId || column.getAttribute('data-column-id') || '') as string)
+      .filter(Boolean);
+  },
+
+  getColumnHeaderElement(columnId: string): HTMLElement | null {
+    const headerColumn = document.querySelector<HTMLElement>(
+      `.ghx-column-header-group .ghx-column[data-id="${columnId}"], ul.ghx-columns .ghx-column[data-id="${columnId}"]`
+    );
+    if (headerColumn) {
+      return headerColumn;
+    }
+    return document.querySelector<HTMLElement>(`.ghx-column[data-id="${columnId}"]`);
+  },
+
+  getOrderedColumns(): Array<{ id: string; name: string }> {
+    const ids = this.getOrderedColumnIds();
+    return ids.map(id => {
+      const headerEl = this.getColumnHeaderElement(id);
+      let name = '';
+      if (headerEl) {
+        const titleEl = headerEl.querySelector(this.selectors.columnTitle);
+        name = titleEl?.textContent?.trim() ?? '';
+        if (!name) {
+          name = headerEl.querySelector('h2')?.textContent?.trim() ?? '';
+        }
+      }
+      return { id, name };
+    });
+  },
+
+  getSwimlaneIds(): string[] {
+    return this.getSwimlanes().map(s => s.id);
+  },
+
+  getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
+    const ignoredSwimlanes = options?.ignoredSwimlanes ?? [];
+    const includedIssueTypes = options?.includedIssueTypes;
+    const cssFilter = options?.cssFilter ?? '';
+
+    const swimlanesFilter =
+      ignoredSwimlanes.length > 0
+        ? ignoredSwimlanes.map(swimlaneId => `:not([swimlane-id="${swimlaneId}"])`).join('')
+        : '';
+
+    const selector = swimlanesFilter
+      ? `.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"] .ghx-issue:not(.ghx-done)${cssFilter}`
+      : `.ghx-swimlane .ghx-column[data-column-id="${columnId}"] .ghx-issue:not(.ghx-done)${cssFilter}`;
+
+    const issues = document.querySelectorAll(selector);
+
+    if (!includedIssueTypes || includedIssueTypes.length === 0) {
+      return issues.length;
+    }
+
+    return Array.from(issues).filter(issue => {
+      const issueType = getIssueTypeFromCard(issue);
+      return issueType ? includedIssueTypes.includes(issueType) : false;
+    }).length;
+  },
+
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    Object.assign(columnElement.style, styles);
+  },
+
+  resetColumnHeaderStyles(columnId: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    const { style } = columnElement;
+    style.removeProperty('background-color');
+    style.removeProperty('border-top');
+    style.removeProperty('border-top-left-radius');
+    style.removeProperty('border-top-right-radius');
+  },
+
+  insertColumnHeaderHtml(columnId: string, html: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    columnElement.insertAdjacentHTML('beforeend', html);
+  },
+
+  removeColumnHeaderElements(columnId: string, selector: string): void {
+    const columnElement = this.getColumnHeaderElement(columnId);
+    if (!columnElement) return;
+    columnElement.querySelectorAll(selector).forEach(el => el.remove());
+  },
+
+  highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void {
+    const excluded = excludedSwimlaneIds ?? [];
+    const swimlanesFilter = excluded.length > 0 ? excluded.map(id => `:not([swimlane-id="${id}"])`).join('') : '';
+    document
+      .querySelectorAll<HTMLElement>(`.ghx-swimlane${swimlanesFilter} .ghx-column[data-column-id="${columnId}"]`)
+      .forEach(el => {
+        el.style.backgroundColor = color;
+      });
+  },
+
+  resetColumnCellStyles(columnId: string): void {
+    const selector = `.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`;
+    document.querySelectorAll<HTMLElement>(selector).forEach(el => {
+      el.style.backgroundColor = '';
+    });
+  },
+
+  getIssueElements(cssSelector: string): Element[] {
+    return Array.from(document.querySelectorAll(cssSelector));
+  },
+
+  getIssueElementsInColumn(column: Element, cssSelector: string): Element[] {
+    return Array.from(column.querySelectorAll(cssSelector));
+  },
+
+  getAssigneeFromIssue(issue: Element): string | null {
+    const avatar = issue.querySelector(this.selectors.avatarImg) as HTMLElement | null;
+    if (!avatar) return null;
+
+    const label = avatar.getAttribute('alt') ?? avatar.getAttribute('data-tooltip');
+    if (!label) return null;
+
+    return getNameFromTooltip(label);
+  },
+
+  getIssueTypeFromIssue(issue: Element): string | null {
+    const typeEl = issue.querySelector(this.selectors.issueType) as HTMLElement | null;
+    if (!typeEl) return null;
+    return typeEl.getAttribute('title') ?? typeEl.textContent ?? null;
+  },
+
+  getColumnIdOfIssue(issue: Element): string | null {
+    const column = issue.closest(this.selectors.column) as HTMLElement | null;
+    return column?.dataset.columnId ?? null;
+  },
+
+  getColumnIdFromColumn(column: Element): string | null {
+    return (column as HTMLElement).dataset.columnId ?? null;
+  },
+
+  getSwimlaneIdOfIssue(issue: Element): string | null {
+    const swimlane = issue.closest(this.selectors.swimlaneRow) as HTMLElement | null;
+    return swimlane?.getAttribute('swimlane-id') ?? null;
+  },
+
+  hasCustomSwimlanes(): boolean {
+    const swimlaneHeader = document.querySelector(this.selectors.swimlaneHeader);
+    if (!swimlaneHeader) return false;
+    return swimlaneHeader.getAttribute('aria-label')?.includes('custom') ?? false;
+  },
+
+  getColumnElements(): Element[] {
+    return Array.from(document.querySelectorAll(this.selectors.column));
+  },
+
+  getColumnsInSwimlane(swimlane: Element): Element[] {
+    return Array.from(swimlane.querySelectorAll(this.selectors.column));
+  },
+
+  getParentGroups(): Element[] {
+    return Array.from(document.querySelectorAll(this.selectors.parentGroup));
+  },
+
+  countIssueVisibility(element: Element, cssSelector: string) {
+    const total = element.querySelectorAll(cssSelector).length;
+    const hidden = element.querySelectorAll(`${cssSelector}.${NO_VISIBILITY_CLASS}`).length;
+    return { total, hidden };
+  },
+
+  setIssueBackgroundColor(issue: Element, color: string): void {
+    (issue as HTMLElement).style.backgroundColor = color;
+  },
+
+  resetIssueBackgroundColor(issue: Element): void {
+    (issue as HTMLElement).style.backgroundColor = '';
+  },
+
+  setIssueVisibility(issue: Element, visible: boolean): void {
+    if (visible) {
+      issue.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      issue.classList.add(NO_VISIBILITY_CLASS);
+    }
+  },
+
+  setSwimlaneVisibility(swimlane: Element, visible: boolean): void {
+    if (visible) {
+      swimlane.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      swimlane.classList.add(NO_VISIBILITY_CLASS);
+    }
+  },
+
+  setParentGroupVisibility(group: Element, visible: boolean): void {
+    if (visible) {
+      group.classList.remove(NO_VISIBILITY_CLASS);
+    } else {
+      group.classList.add(NO_VISIBILITY_CLASS);
+    }
+  },
+};
+
+export const boardPagePageObjectToken = new Token<IBoardPagePageObject>('boardPagePageObjectToken');
+
+export const registerBoardPagePageObjectInDI = (container: Container) => {
+  container.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
+};

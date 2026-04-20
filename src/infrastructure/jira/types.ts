@@ -323,3 +323,14 @@ export type JiraIssueLinkType = {
   outward: string;
   self: string;
 };
+
+export type JiraStatus = {
+  id: string;
+  name: string;
+  statusCategory: {
+    id: number;
+    key: 'new' | 'indeterminate' | 'done';
+    colorName: string;
+    name: string;
+  };
+};

@@ -14,7 +14,7 @@ import pathOr from '@tinkoff/utils/object/pathOr';
 import { Ok, Err, Result } from 'ts-results';
 import { defaultHeaders } from 'src/shared/defaultHeaders';
 import manifest from '../../../manifest.json';
-import { JiraField, JiraIssue, JiraIssueLinkType } from './types';
+import { JiraField, JiraIssue, JiraIssueLinkType, JiraStatus } from './types';
 
 const PACKAGE_VERSION = manifest.version;
 
@@ -349,6 +349,23 @@ export const getIssueLinkTypes = async (options: RequestInit = {}): Promise<Resu
     return Err(result.val);
   }
   return Ok(result.val.issueLinkTypes);
+};
+
+export const getStatuses = async (options: RequestInit = {}): Promise<Result<JiraStatus[], Error>> => {
+  const result = await requestJiraViaFetch('api/2/status', options, 5);
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  const jsonDataResult = await result.val.json().then(
+    r => Ok(r),
+    e => Err(e)
+  );
+
+  if (jsonDataResult.err) {
+    return Err(jsonDataResult.val);
+  }
+  return Ok(jsonDataResult.val);
 };
 
 export interface ProjectIssueType {

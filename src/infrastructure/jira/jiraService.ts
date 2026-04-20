@@ -5,10 +5,11 @@ import {
   getIssueLinkTypes,
   getJiraIssue,
   getProjectFields,
+  getStatuses,
   renderRemoteLink,
   searchIssues,
 } from './jiraApi';
-import { ExternalIssueMapped, JiraField, JiraIssue, JiraIssueMapped, RemoteLink } from './types';
+import { ExternalIssueMapped, JiraField, JiraIssue, JiraIssueMapped, JiraStatus, RemoteLink } from './types';
 
 class CacheWithTTL<T> {
   private cache: { [key: string]: { value: T; timestamp: number } } = {};
@@ -226,6 +227,7 @@ export interface IJiraService {
   getExternalIssues: (issueKey: string, signal: AbortSignal) => Promise<Result<ExternalIssueMapped[], Error>>;
   getProjectFields: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
   getIssueLinkTypes: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
+  getStatuses: (abortSignal: AbortSignal) => Promise<Result<JiraStatus[], Error>>;
 }
 
 /**
@@ -253,6 +255,8 @@ export class JiraService implements IJiraService {
   private projectFieldsCache = new LocalStorageCache<JiraField[]>('jira-helper-fields', 7 * 24 * 60 * 60 * 1000); // 1 week
 
   private issueLinkTypesCache = new LocalStorageCache<any[]>('jira-helper-issue-link-types', 7 * 24 * 60 * 60 * 1000); // 1 week
+
+  private statusesCache = new LocalStorageCache<JiraStatus[]>('jira-helper-statuses', 7 * 24 * 60 * 60 * 1000); // 1 week
 
   private epicNameFieldId: string | null = null;
 
@@ -612,6 +616,29 @@ export class JiraService implements IJiraService {
     });
 
     return issueLinkTypes;
+  }
+
+  async getStatuses(abortSignal: AbortSignal): Promise<Result<JiraStatus[], Error>> {
+    const cached = this.statusesCache.get();
+    if (cached) {
+      return Ok(cached);
+    }
+
+    const statuses = await this.queue.register({
+      key: 'getStatuses',
+      cb: async () => {
+        const result = await getStatuses({ signal: abortSignal });
+        if (result.err) {
+          return Err(result.val);
+        }
+        this.statusesCache.set(result.val);
+        return Ok(result.val);
+      },
+      abortSignal,
+      priority: 'high',
+    });
+
+    return statuses;
   }
 }
 
