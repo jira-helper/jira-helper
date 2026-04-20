@@ -21,7 +21,7 @@ Analyzed: `src/person-limits-module/`
 ## Dependencies (high level)
 
 - **Board page** (`BoardPage/index.ts`): loads board property into `PropertyModel`, mounts `AvatarsContainer` with `BoardRuntimeModel` for stats, highlight, and avatar click filtering.
-- **Settings page** (`SettingsPage/index.tsx`): settings UI containers use `SettingsUIModel` (`useModel`) for form state, CRUD, and `initFromProperty` / `save` (delegates persist to `PropertyModel`).
+- **Settings page** (`SettingsPage/index.tsx`): settings UI containers use `SettingsUIModel` from `ModelEntry` — **`useModel()`** for reactive **read** of form state, **`model`** for **`initFromProperty` / `save`** and other commands (delegates persist to `PropertyModel`; see `docs/state-valtio.md`).
 - **Pure helpers** remain direct imports: `createPersonLimit`, `updatePersonLimit`, `transformFormData` in `SettingsPage/utils/`, and board helpers in `BoardPage/utils/` (`isPersonLimitAppliedToIssue`, `isPersonsIssue`, `computeLimitId`).
 
 ## Architecture diagram (target state)

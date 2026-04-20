@@ -34,6 +34,7 @@ npm run precommit   # Full lint + test (husky hook)
 
 - **PageModification<T>** — base class for DOM modifications; each feature implements `shouldApply → preloadData → loadData → apply → clear`
 - **Module + DI** — new features: `tokens.ts` (createModelToken) + `module.ts` (extend Module, use `this.lazy()` + `modelEntry()`), registered in `content.ts` via `module.ensure(container)`
+- **Valtio `ModelEntry`** — в React читай state через **`useModel()`**, вызывай методы модели только у **`model`** из того же entry (`docs/state-valtio.md`)
 - **Settings vs Runtime** — settings persisted to Jira board properties; runtime state calculated per board view
 - **ts-results** — Ok/Err for error handling, not throw/catch
 

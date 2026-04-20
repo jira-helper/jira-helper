@@ -3,6 +3,10 @@ import { Token, TokenNotRegisteredError } from 'dioma';
 import { proxy } from 'valtio';
 import { useSnapshot } from 'valtio';
 
+/**
+ * Valtio model in DI. `useModel` is a snapshot (read-only in React); call mutating methods on `model`.
+ * @see docs/state-valtio.md
+ */
 export type ModelEntry<T> = {
   model: T;
   useModel: () => Readonly<T>;

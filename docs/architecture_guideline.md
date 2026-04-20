@@ -24,7 +24,8 @@ flowchart TB
     PureFunctions[Pure Functions]
 
     DOM -->|React.render| Container
-    Container -->|useModel| Model
+    Container -->|useModel read| Model
+    Container -->|model commands| Model
     Container --> View
     Container -.->|calls| Action
     Action -.->|model.method| Model
@@ -241,7 +242,7 @@ myFeatureModule.ensure(container);
 | **Статус** | Рекомендуется | На холде |
 | **Паттерн** | Model-классы | Stores с actions |
 | **Мутации** | Прямые (`this.field = x`) | Через `set()` + `produce()` |
-| **React** | `useSnapshot(model)` | `useStore(selector)` |
+| **React** | чтение: `useModel()` из `modelEntry`; команды: методы на **`model`** (не на снапшоте) | `useStore(selector)` |
 | **DI** | Constructor injection | `this.di.inject()` в actions |
 
 **Правило**: Все новые Models делать через **Valtio**. Существующий Zustand код работает, но не расширяется.
@@ -265,7 +266,7 @@ myFeatureModule.ensure(container);
 - Получает Models из DI через `useDi().inject(token)`
 - Подписывается на state через `useModel()` (Valtio) или `useStore()` (Zustand)
 - Передаёт данные в ComponentView
-- Вызывает Actions или методы Models
+- Вызывает Actions или **методы модели только у `model` из `ModelEntry`**, а не у значения `useModel()` (см. `docs/state-valtio.md`)
 - НЕ содержит бизнес-логики
 
 ### Локальный стейт — только для UI
@@ -289,12 +290,12 @@ const MyComponent = () => {
   return <button onClick={handleSave}>Save</button>;
 };
 
-// ✅ ХОРОШО: логика в model
+// ✅ ХОРОШО: логика в model; save — на proxy (`model`), не на снапшоте
 const MyContainer = () => {
-  const { useModel } = useDi().inject(myModelToken);
-  const model = useModel();
-  
-  return <button onClick={() => model.save()}>Save</button>;
+  const { model, useModel } = useDi().inject(myModelToken);
+  const state = useModel();
+
+  return <button onClick={() => void model.save()}>Save ({state.data.length})</button>;
 };
 ```
 
@@ -349,9 +350,9 @@ PropertyModel ←─constructor─→ SettingsUIModel ←─constructor─→ Ru
 Container-компоненты достают модели из DI через хуки. Модели обеспечивают реактивность данных:
 
 ```typescript
-// Valtio — useModel() внутри оборачивает useSnapshot()
-const { useModel } = useDi().inject(settingsModelToken);
-const model = useModel();  // реактивная подписка
+// Valtio — useModel() = useSnapshot для полей; методы — у `model`
+const { model, useModel } = useDi().inject(settingsModelToken);
+const settingsState = useModel(); // реактивное чтение для UI
 
 // Zustand — useStore()
 const data = useSettingsStore(s => s.data);  // реактивная подписка
@@ -421,9 +422,10 @@ export type PersonLimit = {
  * ## Использование
  *
  * ```ts
- * const { useModel } = useDi().inject(settingsUIModelToken);
- * const model = useModel();
- * model.setEditingId(123);
+ * const { model, useModel } = useDi().inject(settingsUIModelToken);
+ * const state = useModel();
+ * // чтение: state.editingId
+ * model.setEditingId(123); // запись — только через `model`
  * ```
  */
 ```

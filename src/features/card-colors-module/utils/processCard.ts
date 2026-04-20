@@ -88,8 +88,11 @@ export function paintCard(
 
   const finalColor = `hsl(${h}, ${s * 100}%, ${finalL * 100}%)`;
 
-  const currentColor = card.style.backgroundColor;
-  card.setAttribute('current-color', currentColor);
+  // Сохраняем оригинальный цвет только при первой покраске. При перепокраске после
+  // Jira-перезатирания `style` `backgroundColor` уже пустой, и сохранять его не нужно.
+  if (!card.hasAttribute('current-color')) {
+    card.setAttribute('current-color', card.style.backgroundColor);
+  }
   card.style.backgroundColor = finalColor;
 }
 

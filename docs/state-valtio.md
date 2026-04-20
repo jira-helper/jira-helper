@@ -153,29 +153,36 @@ function initDiContainer() {
 
 ## Использование в React
 
+`ModelEntry` из `modelEntry()` содержит два поля:
+
+- **`model`** — живой **Valtio proxy** (тот же инстанс класса): через него вызывай **методы-команды** (`open`, `save`, `setEnabled`, `reset`, …), которые меняют `this.*`.
+- **`useModel()`** — **`useSnapshot(proxy)`**: только для **чтения полей в рендере**; возвращаемый объект **глубоко read-only**. Если вызвать на нём метод, который пишет в state, в рантайме будет ошибка вида *Cannot assign to read only property* (у методов `this` указывает на снапшот, а не на proxy).
+
+**Правило:** подписка на данные → `useModel()`; любые **вызовы методов модели** → **`model`**, а не результат `useModel()`.
+
 ```typescript
 import { useDi } from 'src/infrastructure/di/diContext';
 import { myFeatureModelToken } from '../tokens';
 
 export const MyFeatureContainer: React.FC = () => {
-  const { useModel } = useDi().inject(myFeatureModelToken);
-  const model = useModel();
-  
+  const { model, useModel } = useDi().inject(myFeatureModelToken);
+  const state = useModel();
+
   const handleClick = () => {
-    model.load();
+    void model.load();
   };
-  
+
   return (
-    <MyFeatureComponent 
-      data={model.data}
-      isLoading={model.state === 'loading'}
+    <MyFeatureComponent
+      data={state.data}
+      isLoading={state.state === 'loading'}
       onClick={handleClick}
     />
   );
 };
 ```
 
-Container получает модель из DI через хук → `useModel()` обеспечивает реактивность.
+Container: из DI берётся `ModelEntry` → в JSX читается **`state` из `useModel()`** (реактивность), в обработчиках и эффектах вызывается **`model.*`** (корректные мутации).
 
 ---
 
@@ -310,6 +317,7 @@ src/features/my-feature/
 8. **`reset()`** — обязательный метод для сброса в тестах
 9. **Result** — async методы возвращают `Result<T, Error>`
 10. **Logger** — `this.logger.getPrefixedLog('ClassName.method')`
+11. **Команды только через `model`** — методы модели (всё, что мутирует state) вызывай у **`entry.model`**, а не у значения **`entry.useModel()`**; последнее — только чтение полей для UI
 
 ---
 
@@ -318,6 +326,7 @@ src/features/my-feature/
 - ❌ Бизнес-логика в React-компонентах
 - ❌ `useState` для данных модели
 - ❌ `this.di.inject()` вместо constructor DI
+- ❌ Вызывать методы модели (`save`, `open`, `setEnabled`, …) на объекте из **`useModel()`** — только на **`model`** из того же `ModelEntry`
 - ❌ Прямой `useSnapshot(model)` — используй `modelEntry()` в `module.ts`
 - ❌ `registerXxxModule()` функция — используй `class extends Module`
 - ❌ Вызов `module.ensure()` в PageModification — регистрируй в `content.ts`

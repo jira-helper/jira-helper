@@ -16,6 +16,7 @@
 - Экспортировать один инстанс модуля (`export const ...Module = new ...Module();`).
 - Регистрировать все DI токены фичи через `this.lazy(...)`.
 - Для `Valtio` моделей использовать `modelEntry(...)`, чтобы получить `model` + `useModel`.
+- В React: **`useModel()`** — только чтение state для рендера; **методы модели** — у **`model`** из того же entry (иначе снапшот read-only и команды падают в рантайме).
 - Не создавать singleton вручную через `container.register({ token, value: ... })` для тех же сущностей, если есть `lazy + modelEntry`.
 
 ## 3) `tokens.ts`

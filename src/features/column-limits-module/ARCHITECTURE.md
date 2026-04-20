@@ -15,7 +15,7 @@ Analyzed: `src/column-limits-module/`
 ## Dependencies (high level)
 
 - **Board page** (`BoardPage/index.ts`): `propertyModelToken`, `boardRuntimeModelToken` — `PropertyModel.setData`, `BoardRuntimeModel.setCssNotIssueSubTask` / `apply`, subscription on `#ghx-pool`.
-- **Settings page** (`SettingsPage/index.ts`): `propertyModelToken` — `PropertyModel.setData`; settings UI uses `SettingsUIModel` via `settingsUIModelToken` inside containers.
+- **Settings page** (`SettingsPage/index.ts`): `propertyModelToken` — `PropertyModel.setData`; settings UI uses `SettingsUIModel` via `settingsUIModelToken` inside containers (`useModel()` for read, `model` for commands — `docs/state-valtio.md`).
 - **Registration**: `columnLimitsModule.ensure()` is called centrally in `content.ts`.
 
 ## Mermaid Diagram

@@ -33,14 +33,15 @@ export const CardColorsSettingsContainer: React.FC<CardColorsSettingsContainerPr
   settingsUIModel: settingsUIModelEntry,
   forceTooltipOpen,
 }) => {
-  const settingsUIModel = settingsUIModelEntry.useModel();
+  const { model: settingsActions, useModel: useSettingsSnapshot } = settingsUIModelEntry;
+  const settingsState = useSettingsSnapshot();
 
   /**
    * Загрузить настройки при монтировании компонента.
    */
   useEffect(() => {
     const loadSettings = async () => {
-      const result = await settingsUIModel.open();
+      const result = await settingsActions.open();
 
       if (result.err) {
         // eslint-disable-next-line no-console
@@ -52,18 +53,18 @@ export const CardColorsSettingsContainer: React.FC<CardColorsSettingsContainerPr
 
     // При размонтировании сбрасываем состояние модели
     return () => {
-      settingsUIModel.reset();
+      settingsActions.reset();
     };
-  }, [settingsUIModel]);
+  }, [settingsActions]);
 
   /**
    * Обработчик изменения состояния checkbox.
    */
   const handleCheckboxChange = async (newValue: boolean) => {
-    settingsUIModel.setEnabled(newValue);
+    settingsActions.setEnabled(newValue);
 
     // Сохраняем изменения
-    const result = await settingsUIModel.save();
+    const result = await settingsActions.save();
 
     if (result.err) {
       // eslint-disable-next-line no-console
@@ -73,12 +74,12 @@ export const CardColorsSettingsContainer: React.FC<CardColorsSettingsContainerPr
 
   return (
     <CardColorsSettingsComponent
-      cardColorsEnabled={settingsUIModel.draft.enabled}
+      cardColorsEnabled={settingsState.draft.enabled}
       onCardColorsEnabledChange={handleCheckboxChange}
       forceTooltipOpen={forceTooltipOpen}
-      isLoading={settingsUIModel.isLoading}
-      isSaving={settingsUIModel.isSaving}
-      error={settingsUIModel.error}
+      isLoading={settingsState.isLoading}
+      isSaving={settingsState.isSaving}
+      error={settingsState.error}
     />
   );
 };

@@ -127,8 +127,17 @@ export class RuntimeModel {
       return;
     }
 
+    // Берём карточки в двух случаях:
+    //   1) ещё не обработаны — `:not([processedAttribute])`;
+    //   2) уже обработаны, но Jira перезатёрла `style` (например, при ленивой гидратации карточки,
+    //      попадающей во viewport) — `[processedAttribute]:not([style])` или `[style=""]`.
+    // Без второй части цвет на видимых карточках сбрасывается «навсегда»: маркер обработки остаётся,
+    // селектор без проверки `style` карточку больше не подхватит.
+    const baseSelector = `${this.boardPage.selectors.issue}:not(${this.boardPage.selectors.flagged})`;
     const cards = document.querySelectorAll(
-      `${this.boardPage.selectors.issue}:not(${this.boardPage.selectors.flagged}):not([${this.processedAttribute}])`
+      `${baseSelector}:not([${this.processedAttribute}]),` +
+        `${baseSelector}[${this.processedAttribute}]:not([style]),` +
+        `${baseSelector}[${this.processedAttribute}][style=""]`
     );
 
     // Импортируем функцию преобразования цвета

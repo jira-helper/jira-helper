@@ -93,8 +93,8 @@ export class SettingsUIModel {
       return Err(result.val);
     }
 
-    this.close();
-    log('Saved and closed');
+    this.isSaving = false;
+    log(`Saved, enabled=${this.draft.enabled}`);
     return Ok(undefined);
   }
 

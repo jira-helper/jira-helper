@@ -41,6 +41,7 @@ description: Код-ревью реализации задачи jira-helper. И
 - Фича собрана в Module (`class extends Module`)? Токены через `createModelToken()`?
 - Модуль зарегистрирован в `content.ts` (`module.ensure(container)`), а не в PageModification?
 - Используются `lazy()` + `modelEntry()`, а не прямой `proxy()` / `useSnapshot()` в module.ts?
+- В контейнерах: методы модели вызываются у **`entry.model`**, а не у результата **`entry.useModel()`** (снапшот read-only)?
 
 ### 3. Типы
 
