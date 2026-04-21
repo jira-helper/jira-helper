@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import type { Container } from 'dioma';
 import { Token } from 'dioma';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
@@ -50,7 +50,17 @@ function getPersonLimitsSettingsTabTitle(container: Container): string {
  * Displays WIP limit counters for each person and highlights
  * issues when limits are exceeded.
  */
+const AVATARS_WRAPPER_ATTR = 'data-jh-person-limits';
+const AVATARS_WRAPPER_KEY = 'avatars';
+
 export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {
+  private avatarsRoot: Root | null = null;
+
+  private avatarsWrapper: HTMLDivElement | null = null;
+
+  /** Set during clear() so re-entrant MutationObserver callbacks don't resurrect the wrapper. */
+  private destroyed = false;
+
   shouldApply(): boolean {
     const view = this.getSearchParam('view');
     return !view || view === 'detail';
@@ -124,7 +134,13 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     runtime.setCssSelectorOfIssues(cssSelector);
     runtime.apply();
 
+    this.destroyed = false;
     this.renderAvatarsContainer();
+
+    this.sideEffects.push(() => {
+      this.destroyed = true;
+      this.unmountAvatarsContainer();
+    });
 
     const pool = document.getElementById('ghx-pool');
     if (pool) {
@@ -133,6 +149,22 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
         () => {
           runtime.apply();
           runtime.showOnlyChosen();
+          // Jira sometimes wipes #subnav-title together with the toolbar
+          // when cards/columns mutate; re-mount avatars if our wrapper is gone.
+          this.renderAvatarsContainer();
+        },
+        { childList: true, subtree: true }
+      );
+    }
+
+    // Quick filters / view changes re-render the toolbar around #subnav-title.
+    // Watch the toolbar wrapper so avatars survive those re-renders.
+    const viewSelector = document.getElementById('ghx-view-selector');
+    if (viewSelector) {
+      this.onDOMChange(
+        '#ghx-view-selector',
+        () => {
+          this.renderAvatarsContainer();
         },
         { childList: true, subtree: true }
       );
@@ -140,16 +172,24 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   }
 
   private renderAvatarsContainer(): void {
-    const existingContainer = document.getElementById('avatars-limits');
-    if (existingContainer) {
-      return;
-    }
+    if (this.destroyed) return;
 
-    const container = document.createElement('div');
-    container.style.display = 'contents';
-    document.querySelector('#subnav-title')?.appendChild(container);
+    const subnav = document.querySelector('#subnav-title');
+    if (!subnav) return;
 
-    const root = createRoot(container);
+    // Idempotent: skip if our wrapper is still attached to the live DOM.
+    if (this.avatarsWrapper && this.avatarsWrapper.isConnected) return;
+
+    // Wrapper is gone (Jira wiped subnav) — drop the stale React root before
+    // creating a new one to avoid leaking the renderer.
+    this.unmountAvatarsContainer();
+
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute(AVATARS_WRAPPER_ATTR, AVATARS_WRAPPER_KEY);
+    wrapper.style.display = 'contents';
+    subnav.appendChild(wrapper);
+
+    const root = createRoot(wrapper);
     root.render(
       React.createElement(WithDi, {
         container: this.container,
@@ -157,10 +197,19 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       })
     );
 
-    this.sideEffects.push(() => {
-      root.unmount();
-      container.remove();
-    });
+    this.avatarsRoot = root;
+    this.avatarsWrapper = wrapper;
+  }
+
+  private unmountAvatarsContainer(): void {
+    if (this.avatarsRoot) {
+      this.avatarsRoot.unmount();
+      this.avatarsRoot = null;
+    }
+    if (this.avatarsWrapper) {
+      this.avatarsWrapper.remove();
+      this.avatarsWrapper = null;
+    }
   }
 }
 
