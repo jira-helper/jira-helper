@@ -12,6 +12,15 @@ Run `node scripts/generate-changelog.mjs [from-tag] [to-tag]` to generate entrie
 
 ## [2.30.0] - 2026-04-18
 
+## [2.30.1] - 2026-04-21
+
+### Fixed
+
+- Fixed person-limits badge disappearing from boards after board updates
+
+
+## [2.30.0] - 2026-04-18
+
 ### Added
 
 - **Issue Condition Checks**: Show small icons on cards when issues match defined conditions (sub-tasks, epic children, linked issues)
