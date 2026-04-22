@@ -1,6 +1,6 @@
 # TASK-32: Cypress BDD — display scenarios
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: bdd-tests
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

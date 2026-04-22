@@ -1,6 +1,6 @@
 # TASK-3: resolveSettings и buildScopeKey
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: utils
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

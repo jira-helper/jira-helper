@@ -1,6 +1,6 @@
 # TASK-25: Storybook — Toolbar, Tooltip, MissingDates
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: stories
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

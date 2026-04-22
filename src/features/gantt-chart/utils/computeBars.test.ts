@@ -4,12 +4,12 @@ import { computeBars, matchColorRule, type GanttIssueInput } from './computeBars
 
 function scopeSettings(overrides: Partial<GanttScopeSettings> = {}): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'customfield_start' },
-    endMapping: { source: 'dateField', fieldId: 'customfield_end' },
+    startMappings: [{ source: 'dateField', fieldId: 'customfield_start' }],
+    endMappings: [{ source: 'dateField', fieldId: 'customfield_end' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],
-    hideCompletedTasks: false,
+    quickFilters: [],
     includeSubtasks: true,
     includeEpicChildren: false,
     includeIssueLinks: false,
@@ -184,31 +184,14 @@ describe('computeBars', () => {
     expect(result.missingDateIssues).toHaveLength(2);
   });
 
-  it('hideCompletedTasks excludes issues with statusCategory key=done', () => {
-    const settings = scopeSettings({ hideCompletedTasks: true });
-    const doneIssue = baseIssue({
-      fields: {
-        ...baseIssue().fields,
-        status: { name: 'Done', statusCategory: { key: 'done', colorName: 'green' } },
-      },
-    });
-    const openIssue = baseIssue({
-      key: 'TEST-2',
-      id: '2',
-      fields: {
-        ...baseIssue().fields,
-        status: { name: 'To Do', statusCategory: { key: 'new', colorName: 'blue-gray' } },
-      },
-    });
-    const result = computeBars([doneIssue, openIssue], settings, now);
-    expect(result.bars).toHaveLength(1);
-    expect(result.bars[0]!.issueKey).toBe('TEST-2');
-  });
+  // `hideCompletedTasks` was migrated to a built-in quick filter (`builtin:hideCompleted`).
+  // computeBars no longer reads that field — quick filters are applied at the presentation layer
+  // (see `applyQuickFiltersToBars`).
 
   it('resolves dates from first changelog transition to configured status', () => {
     const settings = scopeSettings({
-      startMapping: { source: 'statusTransition', statusName: 'In Progress' },
-      endMapping: { source: 'statusTransition', statusName: 'Done' },
+      startMappings: [{ source: 'statusTransition', statusName: 'In Progress' }],
+      endMappings: [{ source: 'statusTransition', statusName: 'Done' }],
     });
     const issue = baseIssue({
       fields: {
@@ -329,6 +312,80 @@ describe('computeBars', () => {
     expect(bars[0].barColor).toBe('#FF5630');
   });
 
+  // A1: composite Jira values (project, assignee, status, priority...) must be matchable
+  // by any of their tokens (key/name/id/value/displayName/emailAddress) in BOTH JQL and field mode.
+  it('JQL color rule matches project by key (e.g. project = TRPA)', () => {
+    const settings = scopeSettings({
+      colorRules: [{ selector: { mode: 'jql', jql: 'project = TRPA' }, color: '#FF5630' }],
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        project: { key: 'TRPA', name: 'TR Project A', id: '10001' },
+      },
+    });
+    const { bars } = computeBars([issue], settings, now);
+    expect(bars[0].barColor).toBe('#FF5630');
+  });
+
+  it('JQL color rule matches project by name and by id as well', () => {
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        project: { key: 'TRPA', name: 'TR Project A', id: '10001' },
+      },
+    });
+    expect(matchColorRule(issue, [{ selector: { mode: 'jql', jql: 'project = "TR Project A"' }, color: '#1' }])).toBe(
+      '#1'
+    );
+    expect(matchColorRule(issue, [{ selector: { mode: 'jql', jql: 'project = 10001' }, color: '#2' }])).toBe('#2');
+  });
+
+  it('JQL color rule matches assignee by name OR displayName OR emailAddress', () => {
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        assignee: { name: 'jdoe', displayName: 'John Doe', emailAddress: 'jdoe@example.com', key: 'jdoe' },
+      },
+    });
+    expect(matchColorRule(issue, [{ selector: { mode: 'jql', jql: 'assignee = jdoe' }, color: '#1' }])).toBe('#1');
+    expect(matchColorRule(issue, [{ selector: { mode: 'jql', jql: 'assignee = "John Doe"' }, color: '#2' }])).toBe(
+      '#2'
+    );
+    expect(
+      matchColorRule(issue, [{ selector: { mode: 'jql', jql: 'assignee = jdoe@example.com' }, color: '#3' }])
+    ).toBe('#3');
+  });
+
+  it('field-mode color rule matches project by key (e.g. fieldId=project, value=TRPA)', () => {
+    const settings = scopeSettings({
+      colorRules: [{ selector: { mode: 'field', fieldId: 'project', value: 'TRPA' }, color: '#36B37E' }],
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        project: { key: 'TRPA', name: 'TR Project A', id: '10001' },
+      },
+    });
+    const { bars } = computeBars([issue], settings, now);
+    expect(bars[0].barColor).toBe('#36B37E');
+  });
+
+  it('field-mode exclusion filter matches assignee by displayName', () => {
+    const settings = scopeSettings({
+      exclusionFilters: [{ mode: 'field', fieldId: 'assignee', value: 'John Doe' }],
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        assignee: { name: 'jdoe', displayName: 'John Doe' },
+      },
+    });
+    const { bars, missingDateIssues } = computeBars([issue], settings, now);
+    expect(bars).toEqual([]);
+    expect(missingDateIssues).toEqual([{ issueKey: 'PROJ-1', summary: 'Test issue', reason: 'excluded' }]);
+  });
+
   it('with rootIssueKey: omits subtasks when includeSubtasks is false', () => {
     const settings = scopeSettings({
       includeSubtasks: false,
@@ -379,6 +436,61 @@ describe('computeBars', () => {
     delete (issue.fields as Record<string, unknown>).parent;
     const { bars } = computeBars([issue], settings, now, 'ROOT-1');
     expect(bars).toHaveLength(0);
+  });
+
+  it('with rootIssueKey: when issueLinkTypesToInclude is set, keeps only issues whose link matches type+direction', () => {
+    const settings = scopeSettings({
+      includeSubtasks: false,
+      includeEpicChildren: false,
+      includeIssueLinks: true,
+      issueLinkTypesToInclude: [{ id: '10000', direction: 'inward' }],
+    });
+    const matchingInward = baseIssue({
+      key: 'L-MATCH-IN',
+      fields: {
+        ...baseIssue().fields,
+        issuelinks: [{ type: { id: '10000' }, inwardIssue: { key: 'ROOT-1' } }],
+      },
+    });
+    delete (matchingInward.fields as Record<string, unknown>).parent;
+    const wrongDirection = baseIssue({
+      key: 'L-OUT',
+      fields: {
+        ...baseIssue().fields,
+        issuelinks: [{ type: { id: '10000' }, outwardIssue: { key: 'ROOT-1' } }],
+      },
+    });
+    delete (wrongDirection.fields as Record<string, unknown>).parent;
+    const wrongType = baseIssue({
+      key: 'L-OTHER-TYPE',
+      fields: {
+        ...baseIssue().fields,
+        issuelinks: [{ type: { id: '10999' }, inwardIssue: { key: 'ROOT-1' } }],
+      },
+    });
+    delete (wrongType.fields as Record<string, unknown>).parent;
+
+    const { bars } = computeBars([matchingInward, wrongDirection, wrongType], settings, now, 'ROOT-1');
+    expect(bars.map(b => b.issueKey)).toEqual(['L-MATCH-IN']);
+  });
+
+  it('with rootIssueKey: empty issueLinkTypesToInclude means no restriction', () => {
+    const settings = scopeSettings({
+      includeSubtasks: false,
+      includeEpicChildren: false,
+      includeIssueLinks: true,
+      issueLinkTypesToInclude: [],
+    });
+    const link = baseIssue({
+      key: 'L-1',
+      fields: {
+        ...baseIssue().fields,
+        issuelinks: [{ type: { id: '10000' }, inwardIssue: { key: 'ROOT-1' } }],
+      },
+    });
+    delete (link.fields as Record<string, unknown>).parent;
+    const { bars } = computeBars([link], settings, now, 'ROOT-1');
+    expect(bars.map(b => b.issueKey)).toEqual(['L-1']);
   });
 
   it('with rootIssueKey: includes subtask, epic child, and plain linked issue when all flags are true', () => {

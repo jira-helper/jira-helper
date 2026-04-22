@@ -1,6 +1,6 @@
 # TASK-16: GanttChartView (SVG, time axis)
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: view
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

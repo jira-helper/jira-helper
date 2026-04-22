@@ -1,9 +1,12 @@
 import { ref } from 'valtio';
-import type { Logger } from 'src/shared/Logger';
-import type { IJiraService } from 'src/shared/jira/jiraService';
-import type { JiraIssueMapped } from 'src/shared/jira/types';
+import type { Logger } from 'src/infrastructure/logging/Logger';
+import type { IJiraService } from 'src/infrastructure/jira/jiraService';
+import type { JiraField, JiraIssueMapped } from 'src/infrastructure/jira/types';
 import type { GanttBar, GanttScopeSettings, LoadingState, MissingDateIssue } from '../types';
 import { computeBars, type GanttIssueInput } from '../utils/computeBars';
+
+/** Empty constant returned by {@link GanttDataModel.getIssuesByKey} when nothing is loaded. */
+const EMPTY_ISSUE_MAP: ReadonlyMap<string, GanttIssueInput> = new Map();
 
 /**
  * @module GanttDataModel
@@ -20,6 +23,23 @@ export class GanttDataModel {
   error: string | null = null;
 
   private cachedIssues: JiraIssueMapped[] | null = null;
+
+  /**
+   * Lookup map populated alongside {@link bars}. Stored as a plain JS Map (not part of valtio state)
+   * because consumers — notably the toolbar quick-filter pipeline — only ever read it imperatively.
+   * Keeping it off the proxy avoids unnecessary re-renders when the underlying issues mutate in place.
+   */
+  private issueInputByKey: Map<string, GanttIssueInput> = new Map();
+
+  /**
+   * Jira field metadata used by JQL-mode color rules / exclusion filters to resolve display names
+   * (e.g. `Platform`) to actual storage keys (`customfield_178101`) and apply schema-aware extraction.
+   *
+   * Set imperatively from the container via {@link setFields} once the JiraFields store finishes loading;
+   * defaults to an empty array, in which case {@link computeBars} uses its raw-tokens fallback.
+   * Stored off the valtio proxy because field metadata is large and never participates in renders.
+   */
+  private fields: ReadonlyArray<JiraField> = [];
 
   /** Issue key from the last successful {@link loadSubtasks} (for relation filtering in {@link computeBars}). */
   private lastIssueKey = '';
@@ -58,6 +78,7 @@ export class GanttDataModel {
       this.lastIssueKey = '';
       this.bars = [];
       this.missingDateIssues = [];
+      this.issueInputByKey = new Map();
       return;
     }
 
@@ -67,8 +88,32 @@ export class GanttDataModel {
     this.loadingState = 'loaded';
   }
 
+  /**
+   * Returns the input issues used by the most recent {@link applyCompute}, indexed by issue key.
+   *
+   * Used by the toolbar quick filters which need access to the raw Jira fields (resolution, status,
+   * arbitrary custom fields) that {@link GanttBar} intentionally does not carry.
+   */
+  getIssuesByKey(): ReadonlyMap<string, GanttIssueInput> {
+    if (this.issueInputByKey.size === 0) return EMPTY_ISSUE_MAP;
+    return this.issueInputByKey;
+  }
+
   recompute(settings: GanttScopeSettings): void {
     this.applyCompute(settings);
+  }
+
+  /**
+   * Replace the Jira field metadata used by JQL/field selectors and trigger a recompute when the
+   * dataset is already loaded. Identity-compared with {@link ref} semantics so a no-op call does not
+   * trigger an extra `applyCompute`.
+   */
+  setFields(fields: ReadonlyArray<JiraField>, settings: GanttScopeSettings | null): void {
+    if (this.fields === fields) return;
+    this.fields = fields;
+    if (settings && this.cachedIssues?.length) {
+      this.applyCompute(settings);
+    }
   }
 
   reset(): void {
@@ -81,6 +126,7 @@ export class GanttDataModel {
     this.error = null;
     this.cachedIssues = null;
     this.lastIssueKey = '';
+    this.issueInputByKey = new Map();
   }
 
   private applyCompute(settings: GanttScopeSettings): void {
@@ -88,6 +134,7 @@ export class GanttDataModel {
     if (!issues?.length) {
       this.bars = [];
       this.missingDateIssues = [];
+      this.issueInputByKey = new Map();
       return;
     }
     const input: GanttIssueInput[] = issues.map(issue => ({
@@ -96,7 +143,16 @@ export class GanttDataModel {
       fields: issue.fields,
       changelog: issue.changelog,
     }));
-    const { bars, missingDateIssues } = computeBars(input, settings, this.getNow(), this.lastIssueKey || undefined);
+    const map = new Map<string, GanttIssueInput>();
+    for (const i of input) map.set(i.key, i);
+    this.issueInputByKey = map;
+    const { bars, missingDateIssues } = computeBars(
+      input,
+      settings,
+      this.getNow(),
+      this.lastIssueKey || undefined,
+      this.fields
+    );
     this.bars = bars;
     this.missingDateIssues = missingDateIssues;
   }

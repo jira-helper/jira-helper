@@ -4,7 +4,8 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
 import type { MissingDateIssue, MissingDateReason } from '../../types';
 
-const MISSING_DATES_TEXTS = {
+/** Shared with the toolbar tag/tooltip that mirrors this section in compact form. */
+export const MISSING_DATES_TEXTS = {
   headerOne: {
     en: '1 issue not shown',
     ru: '1 задача не отображена на диаграмме',
@@ -53,7 +54,7 @@ const MISSING_DATES_TEXTS = {
   | 'reasonExcluded'
 >;
 
-const REASON_TO_TEXT_KEY: Record<MissingDateReason, keyof typeof MISSING_DATES_TEXTS> = {
+export const MISSING_DATES_REASON_TO_TEXT_KEY: Record<MissingDateReason, keyof typeof MISSING_DATES_TEXTS> = {
   noStartDate: 'reasonNoStartDate',
   noEndDate: 'reasonNoEndDate',
   noStartAndEndDate: 'reasonNoStartAndEndDate',
@@ -74,7 +75,7 @@ export const MissingDatesSection: React.FC<MissingDatesSectionProps> = ({ issues
 
   const header = issues.length === 1 ? texts.headerOne : texts.headerMany.replace('{{count}}', String(issues.length));
 
-  const reasonLabel = (reason: MissingDateReason) => texts[REASON_TO_TEXT_KEY[reason]];
+  const reasonLabel = (reason: MissingDateReason) => texts[MISSING_DATES_REASON_TO_TEXT_KEY[reason]];
 
   const table = (
     <table

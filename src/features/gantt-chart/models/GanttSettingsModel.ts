@@ -1,6 +1,6 @@
-import type { GanttScopeSettings, GanttSettingsStorage, SettingsScope, ScopeKey } from '../types';
+import type { GanttScopeSettings, GanttSettingsStorage, QuickFilter, SettingsScope, ScopeKey } from '../types';
 import { buildScopeKey, resolveSettings } from '../utils/resolveSettings';
-import type { Logger } from 'src/shared/Logger';
+import type { Logger } from 'src/infrastructure/logging/Logger';
 
 export const GANTT_SETTINGS_STORAGE_KEY = 'jh-gantt-settings';
 
@@ -21,8 +21,10 @@ type ParsedPayload = {
 };
 
 /**
- * Migrate legacy `exclusionFilter` (single) to `exclusionFilters` (array).
- * Also ensures `hideCompletedTasks` defaults to `false` for old data.
+ * Migrates legacy persisted scope settings to the current shape:
+ * - `exclusionFilter` (single) → `exclusionFilters` (array)
+ * - `startMapping` / `endMapping` (single) → `startMappings` / `endMappings` (priority list of one)
+ * - Ensures `hideCompletedTasks` defaults to `false`.
  */
 function migrateScope(settings: Record<string, unknown>): void {
   if (settings.exclusionFilter && !settings.exclusionFilters) {
@@ -31,10 +33,24 @@ function migrateScope(settings: Record<string, unknown>): void {
   if (!Array.isArray(settings.exclusionFilters)) {
     settings.exclusionFilters = [];
   }
-  if (typeof settings.hideCompletedTasks !== 'boolean') {
-    settings.hideCompletedTasks = false;
+  if (!Array.isArray(settings.quickFilters)) {
+    settings.quickFilters = [];
   }
+  // `hideCompletedTasks` was replaced by the built-in quick filter `builtin:hideCompleted`.
+  // We drop it silently — there is effectively no installed user base yet.
+  delete settings.hideCompletedTasks;
   delete settings.exclusionFilter;
+
+  if (!Array.isArray(settings.startMappings)) {
+    settings.startMappings = settings.startMapping
+      ? [settings.startMapping]
+      : [{ source: 'dateField', fieldId: 'created' }];
+  }
+  if (!Array.isArray(settings.endMappings)) {
+    settings.endMappings = settings.endMapping ? [settings.endMapping] : [{ source: 'dateField', fieldId: 'duedate' }];
+  }
+  delete settings.startMapping;
+  delete settings.endMapping;
 }
 
 function parseStoredPayload(raw: string | null): ParsedPayload {
@@ -59,7 +75,13 @@ function parseStoredPayload(raw: string | null): ParsedPayload {
       preferredScopeLevel: p.preferredScopeLevel ?? null,
     };
   }
-  return { storage: parsed as GanttSettingsStorage, statusBreakdownEnabled: false, preferredScopeLevel: null };
+  const legacyStorage = parsed as GanttSettingsStorage;
+  for (const settings of Object.values(legacyStorage)) {
+    if (settings && typeof settings === 'object') {
+      migrateScope(settings as unknown as Record<string, unknown>);
+    }
+  }
+  return { storage: legacyStorage, statusBreakdownEnabled: false, preferredScopeLevel: null };
 }
 
 function resolveArgsForScope(scope: SettingsScope): { projectKey: string; issueType?: string } {
@@ -89,21 +111,17 @@ function cloneScopeSettings(settings: GanttScopeSettings): GanttScopeSettings {
 /** Defaults when no cascading settings exist yet for the current scope. */
 function createDefaultScopeSettings(): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'created' },
-    endMapping: { source: 'dateField', fieldId: 'duedate' },
+    startMappings: [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],
-    hideCompletedTasks: false,
+    quickFilters: [],
     includeSubtasks: true,
     includeEpicChildren: false,
     includeIssueLinks: false,
     issueLinkTypesToInclude: [],
   };
-}
-
-function draftFromResolved(resolved: GanttScopeSettings | null): GanttScopeSettings {
-  return resolved !== null ? cloneScopeSettings(resolved) : createDefaultScopeSettings();
 }
 
 /**
@@ -133,6 +151,33 @@ export class GanttSettingsModel {
   /** True when at least one scope has saved settings. */
   get isConfigured(): boolean {
     return Object.values(this.storage).some(s => s !== undefined && s !== null);
+  }
+
+  /**
+   * Most-specific scope level (across context project / issue type) that has direct settings
+   * in storage. Used at page init to seed `currentScope` from the level that already has data.
+   */
+  get effectiveScopeLevel(): SettingsScope['level'] | null {
+    const pk = this.contextProjectKey.trim();
+    const it = this.contextIssueType.trim();
+    if (pk && it && this.storage[buildScopeKey(pk, it)] != null) return 'projectIssueType';
+    if (pk && this.storage[buildScopeKey(pk)] != null) return 'project';
+    if (this.storage[buildScopeKey()] != null) return 'global';
+    return null;
+  }
+
+  /**
+   * Variant of {@link effectiveScopeLevel} that resolves against the project/issue type
+   * embedded in {@link currentScope}, not the page context. Used by the settings UI to
+   * snap the modal scope to the tier that actually feeds {@link resolvedSettings}.
+   */
+  get effectiveScopeLevelForCurrentScope(): SettingsScope['level'] | null {
+    const pk = (this.currentScope.projectKey ?? '').trim();
+    const it = (this.currentScope.issueType ?? '').trim();
+    if (pk && it && this.storage[buildScopeKey(pk, it)] != null) return 'projectIssueType';
+    if (pk && this.storage[buildScopeKey(pk)] != null) return 'project';
+    if (this.storage[buildScopeKey()] != null) return 'global';
+    return null;
   }
 
   load(): void {
@@ -194,12 +239,45 @@ export class GanttSettingsModel {
     this.draftSettings = direct !== null ? cloneScopeSettings(direct) : createDefaultScopeSettings();
   }
 
+  /**
+   * Snaps {@link currentScope} to the level whose direct settings are actually feeding
+   * {@link resolvedSettings} (cascade source), then refreshes the draft from there.
+   *
+   * Used when opening the settings UI so the user edits the same tier they see applied
+   * to the chart, not whichever tier they happened to leave the segmented control on.
+   */
+  syncScopeToEffectiveAndOpenDraft(): void {
+    const effective = this.effectiveScopeLevelForCurrentScope;
+    if (effective !== null && effective !== this.currentScope.level && this.directSettings === null) {
+      this.setScopeLevel(effective);
+    }
+    this.openDraft();
+  }
+
   saveDraft(): void {
     if (this.draftSettings === null) {
       return;
     }
     const key = scopeKeyFromScope(this.currentScope);
     this.storage[key] = cloneScopeSettings(this.draftSettings);
+    this.save();
+  }
+
+  /**
+   * Appends a custom quick filter to the current scope's direct settings, creating a storage row
+   * from cascaded {@link resolvedSettings} or defaults when none exist yet (FR-17 Save as chip).
+   */
+  appendQuickFilterToCurrentScope(qf: QuickFilter): void {
+    const direct = this.directSettings;
+    const base: GanttScopeSettings =
+      direct !== null
+        ? cloneScopeSettings(direct)
+        : this.resolvedSettings !== null
+          ? cloneScopeSettings(this.resolvedSettings)
+          : createDefaultScopeSettings();
+    base.quickFilters = [...(base.quickFilters ?? []), qf];
+    const key = scopeKeyFromScope(this.currentScope);
+    this.storage[key] = base;
     this.save();
   }
 

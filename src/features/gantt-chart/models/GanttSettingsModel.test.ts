@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { proxy } from 'valtio';
-import { Logger } from 'src/shared/Logger';
+import { Logger } from 'src/infrastructure/logging/Logger';
 import type { GanttScopeSettings, GanttSettingsStorage, SettingsScope } from '../types';
 import { GANTT_SETTINGS_STORAGE_KEY, GanttSettingsModel } from './GanttSettingsModel';
 
 function scopeSettings(overrides: Partial<GanttScopeSettings> = {}): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'created' },
-    endMapping: { source: 'dateField', fieldId: 'duedate' },
+    startMappings: [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],
-    hideCompletedTasks: false,
+    quickFilters: [],
     includeSubtasks: true,
     includeEpicChildren: false,
     includeIssueLinks: false,
@@ -157,7 +157,7 @@ describe('GanttSettingsModel', () => {
     model.currentScope = { level: 'project', projectKey: 'PROJA' };
     model.openDraft();
     expect(model.draftSettings?.colorRules).toEqual([]);
-    expect(model.draftSettings?.startMapping).toEqual({ source: 'dateField', fieldId: 'created' });
+    expect(model.draftSettings?.startMappings).toEqual([{ source: 'dateField', fieldId: 'created' }]);
   });
 
   it('copyFromScope: copies storage entry into draft', () => {
@@ -267,7 +267,7 @@ describe('GanttSettingsModel', () => {
       model.setScope({ level: 'project', projectKey: 'PROJ' });
 
       expect(model.draftSettings?.tooltipFieldIds).toEqual([]);
-      expect(model.draftSettings?.startMapping).toEqual({ source: 'dateField', fieldId: 'created' });
+      expect(model.draftSettings?.startMappings).toEqual([{ source: 'dateField', fieldId: 'created' }]);
     });
 
     it('setScope loads direct settings when scope has stored settings', () => {
@@ -423,6 +423,261 @@ describe('GanttSettingsModel', () => {
     });
   });
 
+  describe('effectiveScopeLevel (page-context resolution)', () => {
+    it('returns null when storage is empty', () => {
+      const model = createModel();
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      expect(model.effectiveScopeLevel).toBeNull();
+    });
+
+    it('returns "global" when only _global has settings', () => {
+      const model = createModel();
+      model.storage = { _global: scopeSettings() };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      expect(model.effectiveScopeLevel).toBe('global');
+    });
+
+    it('returns "project" when project has settings (preferred over global)', () => {
+      const model = createModel();
+      model.storage = {
+        _global: scopeSettings(),
+        PROJ: scopeSettings(),
+      };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      expect(model.effectiveScopeLevel).toBe('project');
+    });
+
+    it('returns "projectIssueType" when the most specific scope has settings', () => {
+      const model = createModel();
+      model.storage = {
+        _global: scopeSettings(),
+        PROJ: scopeSettings(),
+        'PROJ:Story': scopeSettings(),
+      };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      expect(model.effectiveScopeLevel).toBe('projectIssueType');
+    });
+
+    it('falls back to project when projectIssueType row exists for a different issue type', () => {
+      const model = createModel();
+      model.storage = {
+        PROJ: scopeSettings(),
+        'PROJ:Bug': scopeSettings(),
+      };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      expect(model.effectiveScopeLevel).toBe('project');
+    });
+  });
+
+  describe('effectiveScopeLevelForCurrentScope (UI snap target)', () => {
+    it('uses currentScope project/issueType, not page context', () => {
+      const model = createModel();
+      model.storage = { 'PROJB:Bug': scopeSettings() };
+      model.contextProjectKey = 'PROJA';
+      model.contextIssueType = 'Story';
+      model.currentScope = { level: 'projectIssueType', projectKey: 'PROJB', issueType: 'Bug' };
+      expect(model.effectiveScopeLevelForCurrentScope).toBe('projectIssueType');
+    });
+  });
+
+  describe('syncScopeToEffectiveAndOpenDraft (settings modal entry)', () => {
+    it('snaps Project+IssueType down to Project when current scope has no direct settings', () => {
+      const model = createModel();
+      model.storage = {
+        _global: scopeSettings({ tooltipFieldIds: ['g'] }),
+        PROJ: scopeSettings({ tooltipFieldIds: ['proj-applied'] }),
+      };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      // Simulate stale preferred level after a previous session.
+      model.currentScope = { level: 'projectIssueType', projectKey: 'PROJ', issueType: 'Story' };
+
+      model.syncScopeToEffectiveAndOpenDraft();
+
+      expect(model.currentScope).toEqual({ level: 'project', projectKey: 'PROJ' });
+      expect(model.draftSettings?.tooltipFieldIds).toEqual(['proj-applied']);
+    });
+
+    it('keeps current scope when it already has direct settings', () => {
+      const model = createModel();
+      model.storage = {
+        PROJ: scopeSettings(),
+        'PROJ:Story': scopeSettings({ tooltipFieldIds: ['pit-applied'] }),
+      };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      model.currentScope = { level: 'projectIssueType', projectKey: 'PROJ', issueType: 'Story' };
+
+      model.syncScopeToEffectiveAndOpenDraft();
+
+      expect(model.currentScope).toEqual({ level: 'projectIssueType', projectKey: 'PROJ', issueType: 'Story' });
+      expect(model.draftSettings?.tooltipFieldIds).toEqual(['pit-applied']);
+    });
+
+    it('does not snap when no scope has settings (first-run); opens defaults instead', () => {
+      const model = createModel();
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      model.currentScope = { level: 'project', projectKey: 'PROJ' };
+
+      model.syncScopeToEffectiveAndOpenDraft();
+
+      expect(model.currentScope).toEqual({ level: 'project', projectKey: 'PROJ' });
+      expect(model.draftSettings?.startMappings).toEqual([{ source: 'dateField', fieldId: 'created' }]);
+    });
+
+    it('snaps from Project down to Global when only _global has settings', () => {
+      const model = createModel();
+      model.storage = { _global: scopeSettings({ tooltipFieldIds: ['g-applied'] }) };
+      model.contextProjectKey = 'PROJ';
+      model.contextIssueType = 'Story';
+      model.currentScope = { level: 'project', projectKey: 'PROJ' };
+
+      model.syncScopeToEffectiveAndOpenDraft();
+
+      expect(model.currentScope).toEqual({ level: 'global' });
+      expect(model.draftSettings?.tooltipFieldIds).toEqual(['g-applied']);
+    });
+  });
+
+  describe('multi-mapping migration', () => {
+    it('migrates legacy single startMapping/endMapping to startMappings/endMappings arrays', () => {
+      localStorage.setItem(
+        GANTT_SETTINGS_STORAGE_KEY,
+        JSON.stringify({
+          storage: {
+            _global: {
+              startMapping: { source: 'dateField', fieldId: 'created' },
+              endMapping: { source: 'statusTransition', statusName: 'Done' },
+              colorRules: [],
+              tooltipFieldIds: [],
+              exclusionFilters: [],
+              hideCompletedTasks: false,
+              includeSubtasks: true,
+              includeEpicChildren: false,
+              includeIssueLinks: false,
+              issueLinkTypesToInclude: [],
+            },
+          },
+        })
+      );
+      const model = createModel();
+      model.load();
+      const resolved = model.resolvedSettings;
+      expect(resolved?.startMappings).toEqual([{ source: 'dateField', fieldId: 'created' }]);
+      expect(resolved?.endMappings).toEqual([{ source: 'statusTransition', statusName: 'Done' }]);
+      expect((resolved as unknown as { startMapping?: unknown; endMapping?: unknown }).startMapping).toBeUndefined();
+      expect((resolved as unknown as { startMapping?: unknown; endMapping?: unknown }).endMapping).toBeUndefined();
+    });
+
+    it('seeds default arrays when neither legacy nor new mappings are present', () => {
+      localStorage.setItem(
+        GANTT_SETTINGS_STORAGE_KEY,
+        JSON.stringify({
+          storage: {
+            _global: {
+              colorRules: [],
+              tooltipFieldIds: [],
+              exclusionFilters: [],
+              hideCompletedTasks: false,
+              includeSubtasks: true,
+              includeEpicChildren: false,
+              includeIssueLinks: false,
+              issueLinkTypesToInclude: [],
+            },
+          },
+        })
+      );
+      const model = createModel();
+      model.load();
+      const resolved = model.resolvedSettings;
+      expect(resolved?.startMappings).toEqual([{ source: 'dateField', fieldId: 'created' }]);
+      expect(resolved?.endMappings).toEqual([{ source: 'dateField', fieldId: 'duedate' }]);
+    });
+
+    it('preserves multi-mapping arrays already in current shape', () => {
+      const persisted = {
+        storage: {
+          _global: {
+            startMappings: [{ source: 'dateField', fieldId: 'startDate' }],
+            endMappings: [
+              { source: 'dateField', fieldId: 'duedate' },
+              { source: 'statusTransition', statusName: 'Done' },
+            ],
+            colorRules: [],
+            tooltipFieldIds: [],
+            exclusionFilters: [],
+            hideCompletedTasks: false,
+            includeSubtasks: true,
+            includeEpicChildren: false,
+            includeIssueLinks: false,
+            issueLinkTypesToInclude: [],
+          },
+        },
+      };
+      localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(persisted));
+
+      const model = createModel();
+      model.load();
+      const resolved = model.resolvedSettings;
+      expect(resolved?.startMappings).toEqual(persisted.storage._global.startMappings);
+      expect(resolved?.endMappings).toEqual(persisted.storage._global.endMappings);
+    });
+  });
+
+  describe('appendQuickFilterToCurrentScope', () => {
+    it('creates direct row from resolved cascade when current scope has no direct entry', () => {
+      const model = createModel();
+      model.storage = {
+        _global: scopeSettings({
+          quickFilters: [{ id: 'old', name: 'Old', selector: { mode: 'jql', jql: 'x' } }],
+        }),
+      };
+      model.currentScope = { level: 'project', projectKey: 'PROJA' };
+      const qf = { id: 'new', name: 'New', selector: { mode: 'jql' as const, jql: 'y' } };
+      model.appendQuickFilterToCurrentScope(qf);
+      expect(model.storage.PROJA).toBeDefined();
+      expect(model.storage.PROJA?.quickFilters).toEqual([
+        { id: 'old', name: 'Old', selector: { mode: 'jql', jql: 'x' } },
+        qf,
+      ]);
+    });
+
+    it('appends to existing direct quickFilters for the current scope', () => {
+      const model = createModel();
+      const existing = { id: 'a', name: 'A', selector: { mode: 'jql' as const, jql: 'a' } };
+      model.storage = { PROJA: scopeSettings({ quickFilters: [existing] }) };
+      model.currentScope = { level: 'project', projectKey: 'PROJA' };
+      const qf = { id: 'b', name: 'B', selector: { mode: 'jql' as const, jql: 'b' } };
+      model.appendQuickFilterToCurrentScope(qf);
+      expect(model.storage.PROJA?.quickFilters).toEqual([existing, qf]);
+    });
+
+    it('writes through to localStorage via save()', () => {
+      const model = createModel();
+      model.storage = { _global: scopeSettings() };
+      model.currentScope = { level: 'global' };
+      const qf = { id: 'x', name: 'X', selector: { mode: 'jql' as const, jql: 'project = X' } };
+      model.appendQuickFilterToCurrentScope(qf);
+      const fromDisk = JSON.parse(localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY) ?? '{}');
+      expect(fromDisk.storage._global.quickFilters).toContainEqual(qf);
+    });
+
+    it('uses project+issueType storage key when scope level is projectIssueType', () => {
+      const model = createModel();
+      model.storage = { _global: scopeSettings() };
+      model.currentScope = { level: 'projectIssueType', projectKey: 'PROJ', issueType: 'Story' };
+      const qf = { id: 'pit', name: 'PIT', selector: { mode: 'jql' as const, jql: 'z' } };
+      model.appendQuickFilterToCurrentScope(qf);
+      expect(model.storage['PROJ:Story']?.quickFilters).toEqual([qf]);
+    });
+  });
+
   it('load: migrates legacy exclusionFilter to exclusionFilters', () => {
     localStorage.setItem(
       GANTT_SETTINGS_STORAGE_KEY,
@@ -446,6 +701,7 @@ describe('GanttSettingsModel', () => {
     model.load();
     const resolved = model.resolvedSettings;
     expect(resolved?.exclusionFilters).toEqual([{ mode: 'field', fieldId: 'status', value: 'Done' }]);
-    expect(resolved?.hideCompletedTasks).toBe(false);
+    expect(resolved?.hideCompletedTasks).toBeUndefined();
+    expect(resolved?.quickFilters).toEqual([]);
   });
 });

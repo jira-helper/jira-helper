@@ -25,6 +25,51 @@ function fillForCategory(category: GanttBar['statusCategory']): string {
   return ganttBarColors[category as ActiveStatuses] ?? ganttBarColors.todo;
 }
 
+/** WCAG relative luminance for an sRGB component in [0..1]. */
+function srgbToLin(channel0to1: number): number {
+  return channel0to1 <= 0.03928 ? channel0to1 / 12.92 : Math.pow((channel0to1 + 0.055) / 1.055, 2.4);
+}
+
+function relativeLuminance(r: number, g: number, b: number): number {
+  return 0.2126 * srgbToLin(r / 255) + 0.7152 * srgbToLin(g / 255) + 0.0722 * srgbToLin(b / 255);
+}
+
+function contrastRatio(l1: number, l2: number): number {
+  const [hi, lo] = l1 >= l2 ? [l1, l2] : [l2, l1];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * Returns '#FFFFFF' or '#172B4D' (Jira N800) for the given bg, picking whichever
+ * meets WCAG AA (>= 4.5:1) for normal text. If both fail, returns the higher-contrast one.
+ */
+function readableTextColorFor(bg: string): string {
+  const dark = '#172B4D';
+  const light = '#FFFFFF';
+  const hex = bg.replace('#', '');
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split('')
+          .map(c => c + c)
+          .join('')
+      : hex;
+  if (normalized.length !== 6) return dark;
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  if ([r, g, b].some(v => Number.isNaN(v))) return dark;
+  const bgLum = relativeLuminance(r, g, b);
+  const darkLum = relativeLuminance(0x17, 0x2b, 0x4d);
+  const lightLum = 1;
+  const darkRatio = contrastRatio(darkLum, bgLum);
+  const lightRatio = contrastRatio(lightLum, bgLum);
+  return darkRatio >= lightRatio ? dark : light;
+}
+
+/** Slightly darker border to increase contrast around the bar regardless of fill. */
+const BAR_BORDER_COLOR = 'rgba(9,30,66,0.25)';
+
 function computeDrawableRects(
   bar: GanttBar,
   x: number,
@@ -32,12 +77,14 @@ function computeDrawableRects(
   showStatusSections: boolean
 ): Array<{ x: number; width: number; fill: string }> {
   const fallbackFill = fillForCategory(bar.statusCategory);
+  const hasCustomColor = bar.barColor !== undefined && bar.barColor !== '';
+  const useStatusSections = showStatusSections && bar.statusSections.length > 0;
 
-  if (bar.barColor !== undefined && bar.barColor !== '') {
-    return [{ x, width, fill: bar.barColor }];
-  }
-
-  if (!showStatusSections || bar.statusSections.length === 0) {
+  // Status breakdown wins over custom color rules — see GanttTooltip for the user-visible hint.
+  if (!useStatusSections) {
+    if (hasCustomColor) {
+      return [{ x, width, fill: bar.barColor as string }];
+    }
     return [{ x, width, fill: fallbackFill }];
   }
 
@@ -84,8 +131,20 @@ export function GanttBarView({
   const [hovered, setHovered] = useState(false);
 
   const rects = computeDrawableRects(bar, x, width, showStatusSections);
-  const fontSize = Math.min(height * 0.55, 12);
-  const cornerR = rects.length === 1 ? 2 : 0;
+  const fontSize = Math.min(height * 0.5, 13);
+  const cornerR = rects.length === 1 ? 3 : 0;
+  const dominantFill = rects[0]?.fill ?? '#DFE1E6';
+  const textColor = readableTextColorFor(dominantFill);
+
+  const charPx = fontSize * 0.55;
+  const innerPaddingPx = 16;
+  const reservedForOpenEndedFadePx = bar.isOpenEnded ? 12 : 4;
+  const availableTextPx = Math.max(0, width - innerPaddingPx - reservedForOpenEndedFadePx);
+  const maxChars = Math.max(0, Math.floor(availableTextPx / charPx));
+  let displayLabel: string | null = null;
+  if (maxChars >= 3) {
+    displayLabel = bar.label.length <= maxChars ? bar.label : `${bar.label.slice(0, Math.max(0, maxChars - 1))}…`;
+  }
 
   const endIso = bar.endDate.toISOString();
 
@@ -122,34 +181,65 @@ export function GanttBarView({
           fill={r.fill}
           rx={cornerR}
           ry={cornerR}
-          stroke={hovered ? '#172B4D' : 'none'}
-          strokeWidth={hovered ? 1.5 : 0}
+          stroke={hovered ? '#172B4D' : BAR_BORDER_COLOR}
+          strokeWidth={hovered ? 1.5 : 1}
           vectorEffect="non-scaling-stroke"
         />
       ))}
-      <text
-        x={x + 4}
-        y={y + height / 2}
-        dominantBaseline="middle"
-        textAnchor="start"
-        clipPath={`url(#${clipId})`}
-        style={{
-          fontSize,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          fill: '#172B4D',
-        }}
-      >
-        {bar.label}
-      </text>
+      {rects.length > 1
+        ? rects
+            .slice(1)
+            .map((r, i) => (
+              <line
+                key={`${bar.issueKey}-divider-${i}`}
+                x1={r.x}
+                y1={y + 1}
+                x2={r.x}
+                y2={y + height - 1}
+                stroke="rgba(9,30,66,0.35)"
+                strokeWidth={0.75}
+                vectorEffect="non-scaling-stroke"
+                clipPath={`url(#${clipId})`}
+                pointerEvents="none"
+              />
+            ))
+        : null}
+      {displayLabel !== null ? (
+        <text
+          x={x + 8}
+          y={y + height / 2}
+          dominantBaseline="middle"
+          textAnchor="start"
+          clipPath={`url(#${clipId})`}
+          style={{
+            fontSize,
+            fontWeight: 500,
+            pointerEvents: 'none',
+            userSelect: 'none',
+            fill: textColor,
+          }}
+        >
+          {displayLabel}
+        </text>
+      ) : null}
       {bar.isOpenEnded ? (
         <g
-          data-testid="gantt-bar-open-ended-warning"
-          transform={`translate(${x + width - 12}, ${y + height / 2})`}
+          data-testid="gantt-bar-open-ended"
           style={{ pointerEvents: 'none' }}
+          aria-label="Open-ended bar — no end date"
+          clipPath={`url(#${clipId})`}
         >
-          <title>Open-ended bar</title>
-          <path d="M0,-7 L6,5 L-6,5 Z" fill="#FFAB00" stroke="#172B4D" strokeWidth={0.35} />
+          <title>Open-ended bar — no end date</title>
+          <line
+            x1={x + width}
+            y1={y + 1}
+            x2={x + width}
+            y2={y + height - 1}
+            stroke="#172B4D"
+            strokeWidth={1.5}
+            strokeDasharray="2 2"
+            opacity={0.55}
+          />
         </g>
       ) : null}
     </g>

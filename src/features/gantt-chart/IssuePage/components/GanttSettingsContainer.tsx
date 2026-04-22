@@ -42,7 +42,7 @@ export const GanttSettingsContainer: React.FC<GanttSettingsContainerProps> = ({ 
 
   useEffect(() => {
     if (visible) {
-      model.openDraft();
+      model.syncScopeToEffectiveAndOpenDraft();
     } else {
       setCopyFromVisible(false);
     }

@@ -3,15 +3,14 @@ import { Ok } from 'ts-results';
 import { globalContainer } from 'dioma';
 import { screen, waitFor } from '@testing-library/react';
 import { GanttChartIssuePage } from './GanttChartIssuePage';
-import type { IRoutingService } from 'src/routing';
-import { routingServiceToken } from 'src/routing';
-import { registerRoutingInDI } from 'src/shared/di/routingTokens';
+import type { IRoutingService } from 'src/infrastructure/routing';
+import { routingServiceToken } from 'src/infrastructure/routing';
+import { registerRoutingInDI } from 'src/infrastructure/di/routingTokens';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { GANTT_SETTINGS_STORAGE_KEY } from '../models/GanttSettingsModel';
-import { ganttChartModule } from '../module';
 import type { GanttScopeSettings } from '../types';
 import { buildScopeKey } from '../utils/resolveSettings';
-import { JiraServiceToken, type IJiraService } from 'src/shared/jira/jiraService';
+import { JiraServiceToken, type IJiraService } from 'src/infrastructure/jira/jiraService';
 import { resetIssueSettings } from 'src/issue-settings/issueSettingsModel';
 
 const EN_FIRST_RUN = 'Gantt chart is not configured yet. Please configure start and end date mappings.';
@@ -108,8 +107,8 @@ describe('GanttChartIssuePage', () => {
 
       const scopeKey = buildScopeKey('PROJ');
       const scopeSettings: GanttScopeSettings = {
-        startMapping: { source: 'dateField', fieldId: 'created' },
-        endMapping: { source: 'dateField', fieldId: 'duedate' },
+        startMappings: [{ source: 'dateField', fieldId: 'created' }],
+        endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
         colorRules: [],
         tooltipFieldIds: [],
         exclusionFilters: [],
@@ -145,8 +144,8 @@ describe('GanttChartIssuePage', () => {
 
       const scopeKey = buildScopeKey('PROJ', 'Story');
       const storySettings: GanttScopeSettings = {
-        startMapping: { source: 'dateField', fieldId: 'created' },
-        endMapping: { source: 'dateField', fieldId: 'duedate' },
+        startMappings: [{ source: 'dateField', fieldId: 'created' }],
+        endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
         colorRules: [],
         tooltipFieldIds: ['custom-field'],
         exclusionFilters: [],

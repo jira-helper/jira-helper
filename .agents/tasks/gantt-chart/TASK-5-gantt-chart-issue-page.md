@@ -1,6 +1,6 @@
 # TASK-5: GanttChartIssuePage (PageModification)
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: page-modification
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

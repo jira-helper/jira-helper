@@ -1,6 +1,6 @@
 # TASK-29: GanttSettingsContainer
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: container
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

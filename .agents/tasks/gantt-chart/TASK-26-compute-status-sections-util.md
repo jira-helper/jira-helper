@@ -1,6 +1,6 @@
 # TASK-26: computeStatusSections
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: utils
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

@@ -1,5 +1,5 @@
 import { mapStatusCategoryColorToProgressStatus } from 'src/features/sub-tasks-progress/colorSchemas';
-import type { ExternalIssueMapped } from 'src/shared/jira/types';
+import type { ExternalIssueMapped } from 'src/infrastructure/jira/types';
 import type { BarStatusCategory, BarStatusSection, StatusTransition } from '../types';
 
 /**
@@ -40,9 +40,25 @@ function compareTransitionTime(a: StatusTransition, b: StatusTransition): number
   return a.timestamp.getTime() - b.timestamp.getTime();
 }
 
+function resolveCategoryWithFallback(
+  rawCategory: string,
+  statusName: string,
+  categoryByStatusName?: ReadonlyMap<string, BarStatusCategory>
+): BarStatusCategory {
+  if (rawCategory.trim() !== '') {
+    return mapCategoryStringToBarStatusCategory(rawCategory);
+  }
+  if (categoryByStatusName) {
+    const fromMap = categoryByStatusName.get(statusName);
+    if (fromMap) return fromMap;
+  }
+  return 'todo';
+}
+
 function resolveStateAtOrAfterTransition(
   sorted: StatusTransition[],
-  timeMs: number
+  timeMs: number,
+  categoryByStatusName?: ReadonlyMap<string, BarStatusCategory>
 ): {
   statusName: string;
   category: BarStatusCategory;
@@ -51,7 +67,7 @@ function resolveStateAtOrAfterTransition(
   if (timeMs < first.timestamp.getTime()) {
     return {
       statusName: first.fromStatus,
-      category: mapCategoryStringToBarStatusCategory(first.fromCategory),
+      category: resolveCategoryWithFallback(first.fromCategory, first.fromStatus, categoryByStatusName),
     };
   }
 
@@ -72,7 +88,7 @@ function resolveStateAtOrAfterTransition(
   const tr = sorted[ans];
   return {
     statusName: tr.toStatus,
-    category: mapCategoryStringToBarStatusCategory(tr.toCategory),
+    category: resolveCategoryWithFallback(tr.toCategory, tr.toStatus, categoryByStatusName),
   };
 }
 
@@ -108,11 +124,16 @@ function mergeAdjacentSections(sections: BarStatusSection[]): BarStatusSection[]
  * - State before the first transition uses `transitions[0].fromStatus` / `fromCategory` (category defaults to `todo` when unresolved).
  * - Each transition applies from its `timestamp` onward (`toStatus` / `toCategory`).
  * - Transitions strictly before `barStart` are applied so the first visible segment reflects issue state at `barStart`.
+ *
+ * `categoryByStatusName` is used as a fallback when the changelog does not carry category metadata
+ * (typical for Jira Server): if a transition has empty `fromCategory`/`toCategory`, the resolver
+ * looks up the status name in this map to recover the proper {@link BarStatusCategory}.
  */
 export function computeStatusSections(
   transitions: StatusTransition[],
   barStart: Date,
-  barEnd: Date
+  barEnd: Date,
+  categoryByStatusName?: ReadonlyMap<string, BarStatusCategory>
 ): BarStatusSection[] {
   const barStartMs = barStart.getTime();
   const barEndMs = barEnd.getTime();
@@ -148,7 +169,7 @@ export function computeStatusSections(
     const endMs = points[i + 1];
     if (startMs === endMs) continue;
 
-    const { statusName, category } = resolveStateAtOrAfterTransition(sorted, startMs);
+    const { statusName, category } = resolveStateAtOrAfterTransition(sorted, startMs, categoryByStatusName);
     raw.push({
       statusName,
       category,

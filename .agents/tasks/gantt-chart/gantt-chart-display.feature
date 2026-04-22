@@ -424,6 +424,126 @@ Feature: Gantt Chart - Display
       | PROJ-1803 |
     And I should not see a bar for "PROJ-1801" on the chart
 
+  @SC-GANTT-DISP-22
+  Scenario: FR-3 — Multi-source end mapping with priority fallback
+    Given the issue "PROJ-2200" of type "Epic" in project "PROJ" has these linked issues:
+      | key       | type  | relation | created    | status      | statusCategory | dueDate    |
+      | PROJ-2201 | Story | subtask  | 2026-04-01 | Done        | done           | 2026-04-05 |
+      | PROJ-2202 | Story | subtask  | 2026-04-02 | Done        | done           | -          |
+      | PROJ-2203 | Bug   | subtask  | 2026-04-03 | In Progress | indeterminate  | -          |
+    And the changelog for "PROJ-2202" contains these status transitions:
+      | timestamp           | fromStatus  | toStatus | fromCategory  | toCategory |
+      | 2026-04-04T10:00:00 | In Progress | Done     | indeterminate | done       |
+    And the changelog for "PROJ-2203" contains these status transitions:
+      | timestamp           | fromStatus  | toStatus    | fromCategory | toCategory    |
+      | 2026-04-03T09:00:00 | To Do       | In Progress | new          | indeterminate |
+    And Gantt settings are configured with:
+      | setting             | value                                       |
+      | startMapping        | dateField: created                          |
+      | endMapping          | dateField: dueDate, statusTransition: Done  |
+      | includeSubtasks     | true                                        |
+      | includeEpicChildren | false                                       |
+      | includeIssueLinks   | false                                       |
+      | scope               | _global                                     |
+    When the Gantt chart is rendered
+    Then I should see a bar for "PROJ-2201" from "2026-04-01" to "2026-04-05"
+    And I should see a bar for "PROJ-2202" from "2026-04-02" to "2026-04-04T10:00:00"
+    And I should not see a bar for "PROJ-2203" on the chart
+    And I should see collapsible section "1 issue not shown"
+
+  @SC-GANTT-DISP-23
+  Scenario: FR-4 — Status section colors fallback to current statuses when changelog lacks category metadata
+    Given the issue "PROJ-2300" of type "Epic" in project "PROJ" has these linked issues:
+      | key       | type  | relation | created    | status      | statusCategory | dueDate    |
+      | PROJ-2301 | Story | subtask  | 2026-04-01 | Done        | done           | 2026-04-08 |
+      | PROJ-2302 | Story | subtask  | 2026-04-02 | In Progress | indeterminate  | 2026-04-09 |
+      | PROJ-2303 | Bug   | subtask  | 2026-04-03 | To Do       | new            | 2026-04-10 |
+    And the changelog for "PROJ-2301" contains these status transitions without category metadata:
+      | timestamp           | fromStatus  | toStatus    |
+      | 2026-04-03T10:00:00 | To Do       | In Progress |
+      | 2026-04-06T14:00:00 | In Progress | Done        |
+    And Gantt settings are configured with:
+      | setting             | value              |
+      | startMapping        | dateField: created |
+      | endMapping          | dateField: dueDate |
+      | includeSubtasks     | true               |
+      | includeEpicChildren | false              |
+      | includeIssueLinks   | false              |
+      | scope               | _global            |
+    When the Gantt chart is rendered
+    And I turn on the "Status breakdown" toggle in the Gantt toolbar
+    Then the bar for "PROJ-2301" should show these status sections:
+      | statusName  | category   | color | from                | to                  |
+      | To Do       | todo       | gray  | 2026-04-01T00:00:00 | 2026-04-03T10:00:00 |
+      | In Progress | inProgress | blue  | 2026-04-03T10:00:00 | 2026-04-06T14:00:00 |
+      | Done        | done       | green | 2026-04-06T14:00:00 | 2026-04-08T00:00:00 |
+
+  @SC-GANTT-DISP-24
+  Scenario: P4 — Yellow "No history for X of Y tasks" tag flags bars without changelog history when status breakdown is on
+    Given the issue "PROJ-2400" of type "Epic" in project "PROJ" has these linked issues:
+      | key       | type  | relation | created    | status      | statusCategory | dueDate    | summary        |
+      | PROJ-2401 | Story | subtask  | 2026-04-01 | Done        | done           | 2026-04-07 | Auth service   |
+      | PROJ-2402 | Story | subtask  | 2026-04-02 | In Progress | indeterminate  | 2026-04-08 | Payment module |
+      | PROJ-2403 | Bug   | subtask  | 2026-04-03 | To Do       | new            | 2026-04-09 | Fix login bug  |
+    And the changelog for "PROJ-2401" contains these status transitions:
+      | timestamp           | fromStatus  | toStatus    | fromCategory  | toCategory    |
+      | 2026-04-02T10:00:00 | To Do       | In Progress | new           | indeterminate |
+      | 2026-04-05T14:00:00 | In Progress | Done        | indeterminate | done          |
+    And the changelog for "PROJ-2402" has no status transitions inside its bar window
+    And the changelog for "PROJ-2403" has no status transitions inside its bar window
+    And Gantt settings are configured with:
+      | setting             | value              |
+      | startMapping        | dateField: created |
+      | endMapping          | dateField: dueDate |
+      | includeSubtasks     | true               |
+      | includeEpicChildren | false              |
+      | includeIssueLinks   | false              |
+      | scope               | _global            |
+    When the Gantt chart is rendered
+    And I turn on the "Status breakdown" toggle in the Gantt toolbar
+    Then I should see a yellow warning tag "No history for 2 of 3 tasks" in the Gantt toolbar
+    And the tag is keyboard-focusable and uses a help cursor
+    When I hover or focus the "No history for 2 of 3 tasks" tag
+    Then a tooltip with the heading "Tasks without status history" appears
+    And the tooltip lists these tasks in an Issue / Summary table:
+      | key       | summary        |
+      | PROJ-2402 | Payment module |
+      | PROJ-2403 | Fix login bug  |
+    When the changelog for "PROJ-2402" gains status transitions covering its bar window
+    Then I should see a yellow warning tag "No history for 1 task" in the Gantt toolbar
+    When the changelog for "PROJ-2403" also gains status transitions covering its bar window
+    Then I should not see any "No history" tag in the Gantt toolbar
+
+  @SC-GANTT-DISP-25
+  Scenario: P4 — Yellow "X tasks not on chart" tag mirrors the missing-dates section as a compact toolbar warning
+    Given the issue "PROJ-2500" of type "Epic" in project "PROJ" has these linked issues:
+      | key       | type  | relation | created    | status      | statusCategory | dueDate    | summary         |
+      | PROJ-2501 | Story | subtask  | 2026-04-01 | Done        | done           | 2026-04-05 | Normal task     |
+      | PROJ-2502 | Story | subtask  | -          | In Progress | indeterminate  | -          | No dates at all |
+      | PROJ-2503 | Bug   | subtask  | -          | To Do       | new            | 2026-04-10 | No start date   |
+    And Gantt settings are configured with:
+      | setting             | value              |
+      | startMapping        | dateField: created |
+      | endMapping          | dateField: dueDate |
+      | includeSubtasks     | true               |
+      | includeEpicChildren | false              |
+      | includeIssueLinks   | false              |
+      | scope               | _global            |
+    When the Gantt chart is rendered
+    Then I should see a yellow warning tag "2 tasks not on chart" in the Gantt toolbar
+    And the tag is keyboard-focusable and uses a help cursor
+    When I hover or focus the "2 tasks not on chart" tag
+    Then a tooltip lists these issues in an Issue / Summary / Reason table:
+      | key       | summary         | reason                |
+      | PROJ-2502 | No dates at all | No start and end date |
+      | PROJ-2503 | No start date   | No start date         |
+    When "PROJ-2503" gains a resolvable start date so that only "PROJ-2502" remains without dates
+    And the Gantt chart is rendered again
+    Then I should see a yellow warning tag "1 task not on chart" in the Gantt toolbar
+    When every linked issue has resolvable start and end dates
+    And the Gantt chart is rendered again
+    Then I should not see any "not on chart" tag in the Gantt toolbar
+
   @SC-GANTT-DISP-19
   Scenario: Gantt section is collapsible, collapsed by default
     Given the issue "PROJ-1900" of type "Story" in project "PROJ" is open on the issue view page

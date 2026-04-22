@@ -2,12 +2,12 @@
 import React from 'react';
 import { globalContainer } from 'dioma';
 import { Err, Ok } from 'ts-results';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
-import { JiraServiceToken, type IJiraService } from 'src/shared/jira/jiraService';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
-import type { JiraIssueMapped } from 'src/shared/jira/types';
+import { JiraServiceToken, type IJiraService } from 'src/infrastructure/jira/jiraService';
+import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
+import type { JiraIssueMapped } from 'src/infrastructure/jira/types';
 import { GANTT_SETTINGS_STORAGE_KEY } from '../../models/GanttSettingsModel';
 import { ganttChartModule } from '../../module';
 import { ganttSettingsModelToken } from '../../tokens';
@@ -43,14 +43,30 @@ export function parseDateMapping(raw: string): DateMapping {
   throw new Error(`Unsupported date mapping: ${raw}`);
 }
 
+/**
+ * Parse a comma-separated list of date mappings (priority order).
+ * Single mapping (no comma) yields a one-element list — keeping legacy feature tables working.
+ *
+ * @example "dateField: dueDate, statusTransition: Done" → [{...dueDate}, {...Done}]
+ */
+export function parseDateMappings(raw: string): DateMapping[] {
+  return raw
+    .split(',')
+    .map(part => part.trim())
+    .filter(part => part.length > 0)
+    .map(parseDateMapping);
+}
+
 function ganttScopeSettingsFromFlatRow(map: Record<string, string>): GanttScopeSettings {
+  const startRaw = map.startMappings ?? map.startMapping;
+  const endRaw = map.endMappings ?? map.endMapping;
   return {
-    startMapping: parseDateMapping(map.startMapping),
-    endMapping: parseDateMapping(map.endMapping),
+    startMappings: parseDateMappings(startRaw ?? ''),
+    endMappings: parseDateMappings(endRaw ?? ''),
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],
-    hideCompletedTasks: false,
+    hideCompletedTasks: map.hideCompletedTasks === 'true',
     includeSubtasks: map.includeSubtasks === 'true',
     includeEpicChildren: map.includeEpicChildren === 'true',
     includeIssueLinks: map.includeIssueLinks === 'true',
@@ -81,6 +97,20 @@ export function applyGanttScopesTable(rows: DataTableRows): void {
     statusBreakdownEnabled: false,
   };
   localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+}
+
+/** Mutate the stored payload to set `preferredScopeLevel` (used by FR-10 effective-scope tests). */
+export function setPersistedPreferredScopeLevel(level: 'global' | 'project' | 'projectIssueType'): void {
+  const raw = localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY);
+  const parsed = raw
+    ? (JSON.parse(raw) as { storage?: GanttSettingsStorage; statusBreakdownEnabled?: boolean })
+    : { storage: {} as GanttSettingsStorage, statusBreakdownEnabled: false };
+  const next = {
+    storage: parsed.storage ?? {},
+    statusBreakdownEnabled: Boolean(parsed.statusBreakdownEnabled),
+    preferredScopeLevel: level,
+  };
+  localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(next));
 }
 
 export function applyGanttSettingsTable(rows: DataTableRows): void {
@@ -234,7 +264,20 @@ export const mountIssueViewWithGantt = (options: { withIssueDetails?: boolean } 
   ganttChartModule.ensure(globalContainer);
   const { model } = globalContainer.inject(ganttSettingsModelToken);
   model.load();
-  if (ganttDisplayBddCtx.scenarioIssueType) {
+  model.contextProjectKey = ganttDisplayBddCtx.scenarioProjectKey;
+  model.contextIssueType = ganttDisplayBddCtx.scenarioIssueType ?? '';
+  // Mirror GanttChartIssuePage.loadData: prefer the effective scope (where settings actually
+  // live) over a stale preferred level. Falls back to scenario-derived level when storage
+  // does not constrain it (e.g. fresh first-run scenarios).
+  const fallbackLevel: 'global' | 'project' | 'projectIssueType' = ganttDisplayBddCtx.scenarioIssueType
+    ? 'projectIssueType'
+    : 'project';
+  const initialLevel: 'global' | 'project' | 'projectIssueType' =
+    model.effectiveScopeLevel ?? model.preferredScopeLevel ?? fallbackLevel;
+
+  if (initialLevel === 'global') {
+    model.setScope({ level: 'global' });
+  } else if (initialLevel === 'projectIssueType' && ganttDisplayBddCtx.scenarioIssueType) {
     model.setScope({
       level: 'projectIssueType',
       projectKey: ganttDisplayBddCtx.scenarioProjectKey,

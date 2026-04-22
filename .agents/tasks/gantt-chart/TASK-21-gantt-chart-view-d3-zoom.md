@@ -1,6 +1,6 @@
 # TASK-21: d3-zoom / pan / scrollbars в GanttChartView
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: view
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

@@ -3,16 +3,16 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Ok, Err } from 'ts-results';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
-import { JiraServiceToken, type IJiraService } from 'src/shared/jira/jiraService';
+import { JiraServiceToken, type IJiraService } from 'src/infrastructure/jira/jiraService';
 import { GANTT_SETTINGS_STORAGE_KEY } from '../../models/GanttSettingsModel';
 import { ganttChartModule } from '../../module';
 import { ganttSettingsModelToken } from '../../tokens';
 import type { GanttScopeSettings } from '../../types';
 import { buildScopeKey } from '../../utils/resolveSettings';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
+import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
 import { GanttChartContainer } from './GanttChartContainer';
 
 const EN_FIRST_RUN = 'Gantt chart is not configured yet. Please configure start and end date mappings.';
@@ -22,8 +22,8 @@ const EN_ERROR = 'Failed to load Gantt chart data. Please try refreshing the pag
 
 function scopeSettings(overrides: Partial<GanttScopeSettings> = {}): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'created' },
-    endMapping: { source: 'dateField', fieldId: 'duedate' },
+    startMappings: [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],

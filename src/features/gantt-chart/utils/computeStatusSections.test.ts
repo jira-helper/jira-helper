@@ -236,6 +236,75 @@ describe('computeStatusSections', () => {
     expect(computeStatusSections([], barEnd, barStart)).toEqual([]);
   });
 
+  describe('categoryByStatusName fallback (Jira Server changelog without category metadata)', () => {
+    it('uses fallback map when transition fromCategory/toCategory are empty', () => {
+      const transitions: StatusTransition[] = [
+        transition({
+          timestamp: '2024-06-04T00:00:00.000Z',
+          fromStatus: 'Open',
+          toStatus: 'In Progress',
+          fromCategory: '',
+          toCategory: '',
+        }),
+        transition({
+          timestamp: '2024-06-07T00:00:00.000Z',
+          fromStatus: 'In Progress',
+          toStatus: 'Done',
+          fromCategory: '',
+          toCategory: '',
+        }),
+      ];
+
+      const map = new Map<string, 'todo' | 'inProgress' | 'done' | 'blocked'>([
+        ['Open', 'todo'],
+        ['In Progress', 'inProgress'],
+        ['Done', 'done'],
+      ]);
+
+      const sections = computeStatusSections(transitions, barStart, barEnd, map);
+      expect(sections.map(s => [s.statusName, s.category])).toEqual([
+        ['Open', 'todo'],
+        ['In Progress', 'inProgress'],
+        ['Done', 'done'],
+      ]);
+    });
+
+    it('falls back to todo when status name is missing in the map', () => {
+      const transitions: StatusTransition[] = [
+        transition({
+          timestamp: '2024-06-05T00:00:00.000Z',
+          fromStatus: 'Open',
+          toStatus: 'Mystery',
+          fromCategory: '',
+          toCategory: '',
+        }),
+      ];
+
+      const map = new Map<string, 'todo' | 'inProgress' | 'done' | 'blocked'>([['Open', 'todo']]);
+
+      const sections = computeStatusSections(transitions, barStart, barEnd, map);
+      expect(sections[1].statusName).toBe('Mystery');
+      expect(sections[1].category).toBe('todo');
+    });
+
+    it('does not override category when transition already provides it', () => {
+      const transitions: StatusTransition[] = [
+        transition({
+          timestamp: '2024-06-05T00:00:00.000Z',
+          fromStatus: 'Open',
+          toStatus: 'In Progress',
+          fromCategory: 'todo',
+          toCategory: 'inProgress',
+        }),
+      ];
+
+      const map = new Map<string, 'todo' | 'inProgress' | 'done' | 'blocked'>([['In Progress', 'done']]);
+
+      const sections = computeStatusSections(transitions, barStart, barEnd, map);
+      expect(sections[1].category).toBe('inProgress');
+    });
+  });
+
   it('merges adjacent sections with the same status and category', () => {
     const transitions: StatusTransition[] = [
       transition({

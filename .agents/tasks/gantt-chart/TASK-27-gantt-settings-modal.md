@@ -1,6 +1,6 @@
 # TASK-27: GanttSettingsModal view
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: view
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

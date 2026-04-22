@@ -1,7 +1,14 @@
 import { And, Given, type DataTableRows, Then, When } from '../../../../../../cypress/support/bdd-runner';
 import type { DateMapping, GanttScopeSettings } from '../../../types';
 import { GANTT_SETTINGS_STORAGE_KEY } from '../../../models/GanttSettingsModel';
-import { applyGanttScopesTable, ganttDisplayBddCtx, mountIssueViewWithGantt, parseDateMapping } from '../helpers';
+import {
+  applyGanttScopesTable,
+  ganttDisplayBddCtx,
+  mountIssueViewWithGantt,
+  parseDateMapping,
+  parseDateMappings,
+  setPersistedPreferredScopeLevel,
+} from '../helpers';
 
 const { expect } = chai;
 
@@ -23,7 +30,7 @@ Given(
   }
 );
 
-Given(/^the changelog for "([^"]*)" contains these status transitions:$/, (issueKey: string, table: DataTableRows) => {
+function applyChangelog(issueKey: string, table: DataTableRows, opts: { withCategory: boolean }): void {
   const issue = ganttDisplayBddCtx.mockSubtasks.find(i => i.key === issueKey);
   if (!issue) {
     throw new Error(`Unknown linked issue ${issueKey}; define linked issues before changelog.`);
@@ -42,12 +49,34 @@ Given(/^the changelog for "([^"]*)" contains these status transitions:$/, (issue
           to: null,
           fromString: row.fromStatus,
           toString: row.toStatus,
-          fromStatusCategory: { key: row.fromCategory },
-          toStatusCategory: { key: row.toCategory },
+          ...(opts.withCategory
+            ? {
+                fromStatusCategory: { key: row.fromCategory },
+                toStatusCategory: { key: row.toCategory },
+              }
+            : {}),
         },
       ],
     })),
   };
+}
+
+Given(/^the changelog for "([^"]*)" contains these status transitions:$/, (issueKey: string, table: DataTableRows) => {
+  applyChangelog(issueKey, table, { withCategory: true });
+});
+
+Given(
+  /^the changelog for "([^"]*)" contains these status transitions without category metadata:$/,
+  (issueKey: string, table: DataTableRows) => {
+    applyChangelog(issueKey, table, { withCategory: false });
+  }
+);
+
+Given(/^the persisted preferredScopeLevel is "([^"]*)"$/, (level: string) => {
+  if (level !== 'global' && level !== 'project' && level !== 'projectIssueType') {
+    throw new Error(`Unsupported preferredScopeLevel: ${level}`);
+  }
+  setPersistedPreferredScopeLevel(level);
 });
 
 When('I open Gantt settings from the gear button', () => {
@@ -116,6 +145,10 @@ function expectMapping(actual: DateMapping, cell: string): void {
   expect(actual).to.deep.equal(parseDateMapping(cell));
 }
 
+function expectMappings(actual: DateMapping[], cell: string): void {
+  expect(actual).to.deep.equal(parseDateMappings(cell));
+}
+
 function readScopeFromStorage(raw: string | null, scopeKey: string): GanttScopeSettings {
   expect(raw, 'localStorage value').to.be.a('string');
   const parsed = JSON.parse(raw!) as { storage: Record<string, GanttScopeSettings> };
@@ -130,9 +163,13 @@ function assertScopeTable(storageKey: string, scopeKey: string, table: DataTable
     const settings = readScopeFromStorage(raw, scopeKey);
     for (const row of table) {
       if (row.setting === 'startMapping') {
-        expectMapping(settings.startMapping, row.value);
+        expectMapping(settings.startMappings[0], row.value);
       } else if (row.setting === 'endMapping') {
-        expectMapping(settings.endMapping, row.value);
+        expectMapping(settings.endMappings[0], row.value);
+      } else if (row.setting === 'startMappings') {
+        expectMappings(settings.startMappings, row.value);
+      } else if (row.setting === 'endMappings') {
+        expectMappings(settings.endMappings, row.value);
       } else {
         throw new Error(`Unsupported setting assertion: ${row.setting}`);
       }
@@ -207,3 +244,50 @@ When(/^I change start mapping to "([^"]*)" with field "([^"]*)"$/, (sourceLabel:
       cy.get('input.ant-input').eq(0).type(fieldValue);
     });
 });
+
+const SCOPE_VALUE_TO_LABEL: Record<string, string> = {
+  Global: 'Global',
+  Project: 'This project',
+  'Project + issue type': 'This project + issue type',
+};
+
+Then(/^the scope picker should show "([^"]*)" selected$/, (label: string) => {
+  const labelText = SCOPE_VALUE_TO_LABEL[label] ?? label;
+  cy.get('[role="dialog"]')
+    .filter(':visible')
+    .first()
+    .within(() => {
+      cy.contains('.ant-segmented-item-selected', labelText).should('exist');
+    });
+});
+
+When(
+  /^I add a fallback row to "([^"]*)" with "([^"]*)" and value "([^"]*)"$/,
+  (sectionLabel: string, sourceLabel: string, fieldValue: string) => {
+    cy.get('[role="dialog"]')
+      .filter(':visible')
+      .first()
+      .within(() => {
+        cy.contains('h4, .ant-typography', sectionLabel)
+          .parents('.ant-form-item, section, div')
+          .first()
+          .within(() => {
+            cy.contains('button', /Add fallback|Добавить/i).click();
+            cy.get('.ant-select').last().click();
+          });
+      });
+    cy.contains('.ant-select-item-option', sourceLabel).should('be.visible').click();
+    cy.get('[role="dialog"]')
+      .filter(':visible')
+      .first()
+      .within(() => {
+        cy.contains('h4, .ant-typography', sectionLabel)
+          .parents('.ant-form-item, section, div')
+          .first()
+          .within(() => {
+            cy.get('input.ant-input').last().clear();
+            cy.get('input.ant-input').last().type(fieldValue);
+          });
+      });
+  }
+);

@@ -1,6 +1,6 @@
 # TASK-7: Конфигурация расширения (content.ts, сборка)
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: config
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

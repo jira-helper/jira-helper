@@ -2,9 +2,9 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { Token } from 'dioma';
-import { PageModification } from 'src/shared/PageModification';
-import { WithDi } from 'src/shared/diContext';
-import { routingServiceToken } from 'src/routing';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
+import { WithDi } from 'src/infrastructure/di/diContext';
+import { routingServiceToken } from 'src/infrastructure/routing';
 import { registerIssueSettings } from 'src/issue-settings/actions/registerIssueSettings';
 import { IssueSettingsComponent } from 'src/issue-settings/IssueSettingsComponent';
 import { ganttChartModule } from '../module';
@@ -53,7 +53,8 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
     model.contextProjectKey = projectKey;
     model.contextIssueType = pageObject.getIssueType() ?? '';
 
-    const scope = this.buildScopeFromPreferred(model.preferredScopeLevel, projectKey);
+    const initialLevel = model.effectiveScopeLevel ?? model.preferredScopeLevel;
+    const scope = this.buildScopeFromPreferred(initialLevel, projectKey);
     model.setScope(scope);
 
     return Promise.resolve({ issueKey });

@@ -3,6 +3,9 @@ import type { GanttBar } from '../types';
 import { computeTimeScale } from './computeTimeScale';
 
 const DAY_MS = 86_400_000;
+const LEFT_PAD_RATIO = 0.05;
+const RIGHT_PAD_RATIO = 0.1;
+const MIN_RIGHT_PAD_MS = 3 * DAY_MS;
 
 function bar(overrides: Partial<GanttBar> & Pick<GanttBar, 'startDate' | 'endDate'>): GanttBar {
   return {
@@ -22,16 +25,17 @@ describe('computeTimeScale', () => {
     vi.useRealTimers();
   });
 
-  it('maps domain endpoints to range for a single bar with padding', () => {
+  it('maps domain endpoints to range for a single bar with asymmetric padding', () => {
     const start = new Date('2024-06-01T00:00:00.000Z');
     const end = new Date('2024-06-11T00:00:00.000Z');
     const chartWidth = 1000;
     const { scale } = computeTimeScale([bar({ startDate: start, endDate: end })], chartWidth, 'days');
 
     const span = end.getTime() - start.getTime();
-    const pad = span * 0.05;
-    const d0 = start.getTime() - pad;
-    const d1 = end.getTime() + pad;
+    const leftPad = span * LEFT_PAD_RATIO;
+    const rightPad = Math.max(span * RIGHT_PAD_RATIO, MIN_RIGHT_PAD_MS);
+    const d0 = start.getTime() - leftPad;
+    const d1 = end.getTime() + rightPad;
 
     expect(scale.domain()[0].getTime()).toBe(d0);
     expect(scale.domain()[1].getTime()).toBe(d1);
@@ -58,9 +62,10 @@ describe('computeTimeScale', () => {
     const chartWidth = 200;
     const { scale } = computeTimeScale([bar({ startDate: t, endDate: t })], chartWidth, 'hours');
 
-    const pad = DAY_MS * 0.05;
-    const d0 = t.getTime() - pad;
-    const d1 = t.getTime() + pad;
+    const leftPad = DAY_MS * LEFT_PAD_RATIO;
+    const rightPad = Math.max(DAY_MS * RIGHT_PAD_RATIO, MIN_RIGHT_PAD_MS);
+    const d0 = t.getTime() - leftPad;
+    const d1 = t.getTime() + rightPad;
     expect(scale.domain()[0].getTime()).toBe(d0);
     expect(scale.domain()[1].getTime()).toBe(d1);
   });
@@ -120,8 +125,9 @@ describe('computeTimeScale', () => {
     const min = new Date('2024-01-01T00:00:00.000Z').getTime();
     const max = new Date('2024-02-10T00:00:00.000Z').getTime();
     const span = max - min;
-    const pad = span * 0.05;
-    expect(scale.domain()[0].getTime()).toBe(min - pad);
-    expect(scale.domain()[1].getTime()).toBe(max + pad);
+    const leftPad = span * LEFT_PAD_RATIO;
+    const rightPad = Math.max(span * RIGHT_PAD_RATIO, MIN_RIGHT_PAD_MS);
+    expect(scale.domain()[0].getTime()).toBe(min - leftPad);
+    expect(scale.domain()[1].getTime()).toBe(max + rightPad);
   });
 });

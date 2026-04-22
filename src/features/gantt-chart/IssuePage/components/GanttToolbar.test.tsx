@@ -1,16 +1,18 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
-import { GanttToolbar } from './GanttToolbar';
+import type { TimeInterval } from 'src/features/gantt-chart/types';
+import type { QuickFilterSearchMode } from 'src/features/gantt-chart/models/GanttQuickFiltersModel';
+import { GanttToolbar, type GanttToolbarProps } from './GanttToolbar';
 
 const defaultProps = {
   zoomLevel: 1,
-  interval: 'days' as const,
+  interval: 'days' as TimeInterval,
   statusBreakdownEnabled: false,
   onZoomIn: vi.fn(),
   onZoomOut: vi.fn(),
@@ -19,10 +21,20 @@ const defaultProps = {
   onToggleStatusBreakdown: vi.fn(),
   onOpenSettings: vi.fn(),
   onOpenFullscreen: vi.fn(),
+  quickFilters: [] as Array<{ id: string; name: string; selector: { mode: 'jql'; jql: string } }>,
+  activeQuickFilterIds: [] as string[],
+  quickFilterSearch: '',
+  quickFilterSearchMode: 'text' as QuickFilterSearchMode,
+  onQuickFilterSearchModeChange: vi.fn(),
+  onSaveJqlAsQuickFilter: vi.fn(),
+  quickFilterHiddenCount: 0,
+  onToggleQuickFilter: vi.fn(),
+  onQuickFilterSearchChange: vi.fn(),
+  onClearQuickFilters: vi.fn(),
 };
 
-function renderToolbar(overrides: Partial<typeof defaultProps> = {}) {
-  const props = { ...defaultProps, ...overrides };
+function renderToolbar(overrides: Partial<GanttToolbarProps> = {}) {
+  const props: GanttToolbarProps = { ...defaultProps, ...overrides };
   render(
     <WithDi container={globalContainer}>
       <GanttToolbar {...props} />
@@ -67,37 +79,36 @@ describe('GanttToolbar', () => {
     expect(props.onZoomReset).toHaveBeenCalledTimes(1);
   });
 
-  it('renders interval options as radio group and reflects selection', () => {
+  it('renders interval options as a Segmented control and reflects selection', () => {
     renderToolbar({ interval: 'weeks' });
 
-    const group = screen.getByRole('radiogroup', { name: 'Time interval' });
-    expect(group).toBeInTheDocument();
+    const options = screen.getAllByRole('option');
+    const labelToSelected = Object.fromEntries(
+      options.map(o => [o.getAttribute('title') ?? o.textContent ?? '', o.getAttribute('aria-selected') === 'true'])
+    );
 
-    const hours = screen.getByRole('radio', { name: 'Hours' });
-    const days = screen.getByRole('radio', { name: 'Days' });
-    const weeks = screen.getByRole('radio', { name: 'Weeks' });
-    const months = screen.getByRole('radio', { name: 'Months' });
-
-    expect(hours).not.toBeChecked();
-    expect(days).not.toBeChecked();
-    expect(weeks).toBeChecked();
-    expect(months).not.toBeChecked();
+    expect(labelToSelected.Hours).toBe(false);
+    expect(labelToSelected.Days).toBe(false);
+    expect(labelToSelected.Weeks).toBe(true);
+    expect(labelToSelected.Months).toBe(false);
   });
 
   it('calls onIntervalChange when a different interval is selected', async () => {
     const user = userEvent.setup();
     const props = renderToolbar({ interval: 'days' });
 
-    await user.click(screen.getByRole('radio', { name: 'Months' }));
+    const monthsOption = screen.getAllByRole('option').find(o => o.getAttribute('title') === 'Months');
+    expect(monthsOption).toBeTruthy();
+    await user.click(monthsOption!);
 
     expect(props.onIntervalChange).toHaveBeenCalledWith('months');
   });
 
-  it('renders status breakdown switch and calls onToggleStatusBreakdown', async () => {
+  it('renders status sections switch and calls onToggleStatusBreakdown', async () => {
     const user = userEvent.setup();
     const props = renderToolbar({ statusBreakdownEnabled: false });
 
-    const toggle = screen.getByRole('switch', { name: 'Status breakdown' });
+    const toggle = screen.getByRole('switch', { name: 'Status sections' });
     expect(toggle).toHaveAttribute('aria-checked', 'false');
 
     await user.click(toggle);
@@ -105,10 +116,141 @@ describe('GanttToolbar', () => {
     expect(props.onToggleStatusBreakdown).toHaveBeenCalledTimes(1);
   });
 
-  it('shows status breakdown switch as on when enabled', () => {
+  it('shows status sections switch as on when enabled', () => {
     renderToolbar({ statusBreakdownEnabled: true });
 
-    expect(screen.getByRole('switch', { name: 'Status breakdown' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('switch', { name: 'Status sections' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('shows "No history for X of Y tasks" tag with task count when coverage is partial', () => {
+    renderToolbar({
+      statusBreakdownEnabled: true,
+      statusBreakdownAvailability: {
+        total: 12,
+        tasksWithoutHistory: [
+          { key: 'TTP-1', summary: 'Task one' },
+          { key: 'TTP-2', summary: 'Task two' },
+          { key: 'TTP-3', summary: 'Task three' },
+          { key: 'TTP-4', summary: 'Task four' },
+          { key: 'TTP-5', summary: 'Task five' },
+          { key: 'TTP-6', summary: 'Task six' },
+          { key: 'TTP-7', summary: 'Task seven' },
+          { key: 'TTP-8', summary: 'Task eight' },
+          { key: 'TTP-9', summary: 'Task nine' },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId('gantt-no-history-tag')).toHaveTextContent('No history for 9 of 12 tasks');
+  });
+
+  it('hides availability tag when every loaded task has status history', () => {
+    renderToolbar({
+      statusBreakdownEnabled: true,
+      statusBreakdownAvailability: { total: 12, tasksWithoutHistory: [] },
+    });
+
+    expect(screen.queryByTestId('gantt-no-history-tag')).not.toBeInTheDocument();
+  });
+
+  it('renders the no-history tag as a focusable warning with cursor:help', () => {
+    renderToolbar({
+      statusBreakdownEnabled: true,
+      statusBreakdownAvailability: {
+        total: 4,
+        tasksWithoutHistory: [{ key: 'TTP-1', summary: 'Only one' }],
+      },
+    });
+
+    const tag = screen.getByTestId('gantt-no-history-tag');
+    expect(tag).toHaveAttribute('tabindex', '0');
+    expect(tag).toHaveStyle({ cursor: 'help' });
+    // The accessible name spells out which tasks are affected.
+    expect(tag.getAttribute('aria-label')).toMatch(/1.*4/);
+  });
+
+  it('renders a tooltip table listing the affected issues on hover/focus', async () => {
+    const user = userEvent.setup();
+    renderToolbar({
+      statusBreakdownEnabled: true,
+      statusBreakdownAvailability: {
+        total: 5,
+        tasksWithoutHistory: [
+          { key: 'TTP-101', summary: 'Refactor signup' },
+          { key: 'TTP-202', summary: 'Add OTP flow' },
+        ],
+      },
+    });
+
+    await user.hover(screen.getByTestId('gantt-no-history-tag'));
+
+    const tooltip = await screen.findByTestId('gantt-no-history-tooltip');
+    expect(within(tooltip).getByText('Tasks without status history')).toBeInTheDocument();
+    expect(within(tooltip).getByText('TTP-101')).toBeInTheDocument();
+    expect(within(tooltip).getByText('Refactor signup')).toBeInTheDocument();
+    expect(within(tooltip).getByText('TTP-202')).toBeInTheDocument();
+    expect(within(tooltip).getByText('Add OTP flow')).toBeInTheDocument();
+  });
+
+  it('does not render availability tag when status sections disabled', () => {
+    renderToolbar({
+      statusBreakdownEnabled: false,
+      statusBreakdownAvailability: {
+        total: 12,
+        tasksWithoutHistory: [{ key: 'TTP-1', summary: 'Task' }],
+      },
+    });
+
+    expect(screen.queryByTestId('gantt-no-history-tag')).not.toBeInTheDocument();
+  });
+
+  describe('missing dates tag', () => {
+    it('does not render the tag when there are no missing-date issues', () => {
+      renderToolbar({ missingDateIssues: [] });
+      expect(screen.queryByTestId('gantt-missing-dates-tag')).not.toBeInTheDocument();
+    });
+
+    it('renders a focusable warning tag with task count', () => {
+      renderToolbar({
+        missingDateIssues: [
+          { issueKey: 'TTP-1', summary: 'No start date task', reason: 'noStartDate' },
+          { issueKey: 'TTP-2', summary: 'No end date task', reason: 'noEndDate' },
+          { issueKey: 'TTP-3', summary: 'Excluded by config', reason: 'excluded' },
+        ],
+      });
+
+      const tag = screen.getByTestId('gantt-missing-dates-tag');
+      expect(tag).toHaveTextContent('3 tasks not on chart');
+      expect(tag).toHaveAttribute('tabindex', '0');
+      expect(tag).toHaveStyle({ cursor: 'help' });
+      expect(tag.getAttribute('aria-label')).toMatch(/3.*not on chart/);
+    });
+
+    it('uses singular form for a single missing-date issue', () => {
+      renderToolbar({
+        missingDateIssues: [{ issueKey: 'TTP-7', summary: 'Lonely', reason: 'noStartAndEndDate' }],
+      });
+      expect(screen.getByTestId('gantt-missing-dates-tag')).toHaveTextContent('1 task not on chart');
+    });
+
+    it('renders a tooltip table with issue key, summary and reason on hover', async () => {
+      const user = userEvent.setup();
+      renderToolbar({
+        missingDateIssues: [
+          { issueKey: 'TTP-101', summary: 'Backfill release notes', reason: 'noStartDate' },
+          { issueKey: 'TTP-202', summary: 'Excluded by config', reason: 'excluded' },
+        ],
+      });
+
+      await user.hover(screen.getByTestId('gantt-missing-dates-tag'));
+
+      const tooltip = await screen.findByTestId('gantt-missing-dates-tooltip');
+      expect(within(tooltip).getByText('TTP-101')).toBeInTheDocument();
+      expect(within(tooltip).getByText('Backfill release notes')).toBeInTheDocument();
+      expect(within(tooltip).getByText('No start date')).toBeInTheDocument();
+      expect(within(tooltip).getByText('TTP-202')).toBeInTheDocument();
+      expect(within(tooltip).getByText('Excluded by filter')).toBeInTheDocument();
+    });
   });
 
   it('calls onOpenSettings when settings is clicked', async () => {
@@ -120,12 +262,214 @@ describe('GanttToolbar', () => {
     expect(props.onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onOpenFullscreen when Open in modal is clicked', async () => {
+  it('calls onOpenFullscreen when Open fullscreen is clicked', async () => {
     const user = userEvent.setup();
     const props = renderToolbar();
 
-    await user.click(screen.getByRole('button', { name: 'Open in modal' }));
+    await user.click(screen.getByRole('button', { name: 'Open fullscreen' }));
 
     expect(props.onOpenFullscreen).toHaveBeenCalledTimes(1);
+  });
+
+  describe('quick filters row', () => {
+    const filters = [
+      { id: 'builtin:unresolved', name: 'Unresolved', selector: { mode: 'jql' as const, jql: 'resolution is EMPTY' } },
+      { id: 'custom-1', name: 'My team', selector: { mode: 'jql' as const, jql: 'team = "X"' } },
+    ];
+
+    it('renders the search input and chip per quick filter', () => {
+      renderToolbar({ quickFilters: filters });
+
+      expect(screen.getByTestId('gantt-quick-filters-search')).toBeInTheDocument();
+      expect(screen.getByTestId('gantt-quick-filter-builtin:unresolved')).toHaveTextContent('Unresolved');
+      expect(screen.getByTestId('gantt-quick-filter-custom-1')).toHaveTextContent('My team');
+    });
+
+    it('marks active filter chips and toggles via onToggleQuickFilter', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({
+        quickFilters: filters,
+        activeQuickFilterIds: ['custom-1'],
+      });
+
+      const activeChip = screen.getByTestId('gantt-quick-filter-custom-1');
+      const inactiveChip = screen.getByTestId('gantt-quick-filter-builtin:unresolved');
+      expect(activeChip.getAttribute('data-active')).toBe('true');
+      expect(inactiveChip.getAttribute('data-active')).toBe('false');
+
+      await user.click(inactiveChip);
+      expect(props.onToggleQuickFilter).toHaveBeenCalledWith('builtin:unresolved');
+    });
+
+    it('shows empty hint when there are no quick filters configured', () => {
+      renderToolbar({ quickFilters: [] });
+      expect(screen.getByTestId('gantt-quick-filters-empty')).toBeInTheDocument();
+    });
+
+    it('renders hidden-count hint and clear button only when filters/search are active', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({
+        quickFilters: filters,
+        activeQuickFilterIds: ['custom-1'],
+        quickFilterHiddenCount: 4,
+      });
+
+      expect(screen.getByTestId('gantt-quick-filters-hidden-count')).toHaveTextContent('4 hidden by quick filters');
+
+      const clearBtn = screen.getByTestId('gantt-quick-filters-clear');
+      await user.click(clearBtn);
+      expect(props.onClearQuickFilters).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT render clear button when no filters and no search are active', () => {
+      renderToolbar({ quickFilters: filters, activeQuickFilterIds: [], quickFilterSearch: '' });
+      expect(screen.queryByTestId('gantt-quick-filters-clear')).not.toBeInTheDocument();
+    });
+
+    it('forwards search input changes', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({ quickFilters: filters, quickFilterSearch: 'KE' });
+
+      const search = screen.getByTestId('gantt-quick-filters-search') as HTMLInputElement;
+      // Controlled input keeps the parent value 'KE'; typing one extra char fires onChange with 'KEY'.
+      await user.type(search, 'Y');
+
+      expect(props.onQuickFilterSearchChange).toHaveBeenCalled();
+      const lastCall = (props.onQuickFilterSearchChange as ReturnType<typeof vi.fn>).mock.calls.at(-1);
+      expect(lastCall?.[0]).toBe('KEY');
+    });
+
+    it('calls onQuickFilterSearchModeChange when switching Text → JQL on the segmented control', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({ quickFilters: filters });
+      const modeSeg = screen.getByTestId('gantt-quick-filters-search-mode');
+      await user.click(within(modeSeg).getByText('JQL'));
+      expect(props.onQuickFilterSearchModeChange).toHaveBeenCalledWith('jql');
+    });
+
+    it('marks JQL search input as error when JQL is invalid', () => {
+      renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: '((( broken',
+      });
+      const search = screen.getByTestId('gantt-quick-filters-search');
+      expect(search).toHaveAttribute('aria-invalid', 'true');
+      const affix = search.closest('.ant-input-affix-wrapper');
+      expect(affix?.className ?? '').toMatch(/ant-input-status-error/);
+    });
+
+    it('does not show Save as quick filter in text mode', () => {
+      renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'text',
+        quickFilterSearch: 'project = X',
+      });
+      expect(screen.queryByTestId('gantt-quick-filters-save-as-chip')).not.toBeInTheDocument();
+    });
+
+    it('does not show Save as quick filter when JQL is invalid', () => {
+      renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: '((( broken',
+      });
+      expect(screen.queryByTestId('gantt-quick-filters-save-as-chip')).not.toBeInTheDocument();
+    });
+
+    it('shows Save as quick filter when JQL mode and query is valid', () => {
+      renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: 'project = TRPA',
+      });
+      expect(screen.getByTestId('gantt-quick-filters-save-as-chip')).toBeInTheDocument();
+    });
+
+    it('opens save popover and calls onSaveJqlAsQuickFilter with name and jql', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: 'team = "Alpha"',
+      });
+
+      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+
+      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Alpha team');
+      await user.click(screen.getByTestId('gantt-quick-filters-save-confirm'));
+
+      expect(props.onSaveJqlAsQuickFilter).toHaveBeenCalledWith({
+        name: 'Alpha team',
+        jql: 'team = "Alpha"',
+      });
+    });
+
+    it('cancel button closes popover and does not call onSaveJqlAsQuickFilter (SC-GANTT-QF-18)', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: 'team = "Alpha"',
+      });
+
+      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Alpha team');
+
+      const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+      await user.click(cancelButton);
+
+      // Primary contract for SC-GANTT-QF-18: cancellation must not persist anything.
+      // The visual closing of the antd Popover is not asserted here (animation/portal
+      // cleanup in JSDOM is unreliable); covered visually by Storybook.
+      expect(props.onSaveJqlAsQuickFilter).not.toHaveBeenCalled();
+    });
+
+    it('stops keyboard events from reaching Jira global hotkey handlers (P1)', () => {
+      renderToolbar({ quickFilters: filters });
+      const search = screen.getByTestId('gantt-quick-filters-search');
+
+      let bubbledToWindow = false;
+      const windowListener = () => {
+        bubbledToWindow = true;
+      };
+      window.addEventListener('keydown', windowListener);
+      try {
+        const event = new KeyboardEvent('keydown', { key: 'a', bubbles: true, cancelable: true });
+        search.dispatchEvent(event);
+      } finally {
+        window.removeEventListener('keydown', windowListener);
+      }
+
+      // The toolbar's input must short-circuit propagation so Jira's window-level
+      // hotkey listeners (e.g. for "a", "c", "/") never see the keystroke.
+      expect(bubbledToWindow).toBe(false);
+    });
+
+    it('save button is disabled when name input is empty/whitespace', async () => {
+      const user = userEvent.setup();
+      const props = renderToolbar({
+        quickFilters: filters,
+        quickFilterSearchMode: 'jql',
+        quickFilterSearch: 'team = "Alpha"',
+      });
+
+      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
+      await user.clear(nameInput);
+
+      const saveButton = screen.getByTestId('gantt-quick-filters-save-confirm');
+      expect(saveButton).toBeDisabled();
+
+      await user.type(nameInput, '   ');
+      expect(saveButton).toBeDisabled();
+
+      await user.click(saveButton);
+      expect(props.onSaveJqlAsQuickFilter).not.toHaveBeenCalled();
+    });
   });
 });

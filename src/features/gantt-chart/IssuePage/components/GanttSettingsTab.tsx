@@ -34,7 +34,7 @@ export const GanttSettingsTab: React.FC = () => {
   const [copyFromVisible, setCopyFromVisible] = useState(false);
 
   useEffect(() => {
-    model.openDraft();
+    model.syncScopeToEffectiveAndOpenDraft();
   }, [model]);
 
   const currentScopeKey = useMemo(

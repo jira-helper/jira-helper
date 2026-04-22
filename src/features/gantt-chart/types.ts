@@ -43,11 +43,34 @@ export type ColorRule = {
 };
 
 /**
+ * User-defined quick filter preset displayed as a toggleable chip on the Gantt toolbar.
+ * Active state is session-only (kept in `GanttQuickFiltersModel`); the preset itself cascades like other scope settings.
+ *
+ * `id` is a stable identifier (UUID for custom filters, `builtin:<key>` for built-ins).
+ * Multiple active quick filters combine via AND, matching how Jira boards combine quick filters.
+ */
+export type QuickFilter = {
+  id: string;
+  name: string;
+  selector: { mode: 'field' | 'jql'; fieldId?: string; value?: string; jql?: string };
+};
+
+/**
  * Resolved settings for one Gantt scope (global, project, or project+issue type), including inclusion of related issues (FR-5).
  */
 export type GanttScopeSettings = {
-  startMapping: DateMapping;
-  endMapping: DateMapping;
+  /**
+   * Ordered fallback list for resolving a bar's start date.
+   * The first mapping that yields a valid Date for an issue wins.
+   * Must always contain at least one entry (UI/migration enforce this).
+   */
+  startMappings: DateMapping[];
+  /**
+   * Ordered fallback list for resolving a bar's end date.
+   * The first mapping that yields a valid Date for an issue wins.
+   * Must always contain at least one entry.
+   */
+  endMappings: DateMapping[];
   /** Rules for custom bar colors (first match wins). */
   colorRules: ColorRule[];
   /** Jira field IDs to show in hover tooltip. */
@@ -56,8 +79,16 @@ export type GanttScopeSettings = {
   exclusionFilter?: ExclusionFilter | null;
   /** Filters to exclude issues from the chart (OR logic — any match excludes). */
   exclusionFilters: ExclusionFilter[];
-  /** Hide issues with statusCategory = done. */
-  hideCompletedTasks: boolean;
+  /**
+   * User-defined quick filter presets surfaced as chips on the toolbar.
+   * Active toggle state is session-only (see `GanttQuickFiltersModel`).
+   *
+   * Optional in the type to avoid breaking existing test/storage payloads;
+   * resolved settings always normalize to an array via the migration in `GanttSettingsModel`.
+   */
+  quickFilters?: QuickFilter[];
+  /** @deprecated Replaced by built-in quick filter `builtin:hideCompleted`. Kept on type for migration only. */
+  hideCompletedTasks?: boolean;
   /** Include subtasks of the root issue in the chart. */
   includeSubtasks: boolean;
   /** Include epic children when applicable. */

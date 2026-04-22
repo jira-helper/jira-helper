@@ -9,6 +9,7 @@ import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
 import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
 import { getEpicLinkFieldId } from 'src/infrastructure/jira/fields/loadJiraFields';
+import { extractFieldValueBySchema, getFieldValueForJql } from 'src/infrastructure/jira/fields/getFieldValueForJql';
 import { ActiveStatuses, IssueLinkTypeSelection, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
@@ -143,66 +144,18 @@ const TEXTS = {
   },
 };
 
-const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]): any[] => {
+const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]): string[] => {
   const field = fields.find(f => f.id === cg.fieldId);
   if (!field) return [];
-  const val = issue.fields[field.id];
-  switch (field.schema?.type) {
-    // by value
-    case 'string':
-    case 'option':
-      return val && val.value !== undefined ? [val.value] : [];
-    // by key
-    case 'project':
-      return val && val.key !== undefined ? [val.key] : [];
-    // by name
-    case 'priority':
-    case 'status':
-    case 'issuetype':
-      return val && val.name !== undefined ? [val.name] : [];
-    case 'user': {
-      const arr = [];
-      if (val?.displayName) arr.push(val.displayName);
-      if (val?.emailAddress) arr.push(val.emailAddress);
-      if (val?.name) arr.push(val.name);
-      return arr;
-    }
-    case 'array': {
-      switch (field.schema.items) {
-        case 'component':
-          if (!val) return [];
-          return val.map((v: { name: string }) => v.name);
-        case 'string':
-        case 'option':
-          if (!val) return [];
-          return val.map((v: { value: string }) => v.value);
-        default:
-          return [];
-      }
-    }
-    default:
-      return [];
-  }
+  return extractFieldValueBySchema(issue, field);
 };
 
-// Utility: getFieldValueForJqlStandalone for use in JQL debug/demo
+/**
+ * @deprecated Use {@link getFieldValueForJql} from `infrastructure/jira/fields` directly.
+ * Kept as a thin re-export so existing tests/callers in this module keep working.
+ */
 export function getFieldValueForJqlStandalone(issue: JiraIssueMapped, fields: JiraField[]) {
-  return (fieldName: string) => {
-    const lowerFieldName = fieldName.toLowerCase();
-
-    // jira may have multiple fields with the same name, so we need to filter them
-    // for example: system field Project (type project) and custom field Project (type option)
-    const filteredFields = fields.filter(
-      f =>
-        f.id.toLowerCase() === lowerFieldName ||
-        f.name.toLowerCase() === lowerFieldName ||
-        (f.clauseNames && f.clauseNames.some(cn => cn.toLowerCase() === lowerFieldName))
-    );
-
-    if (!filteredFields.length) return [];
-
-    return filteredFields.flatMap(f => getFieldValue(issue, { fieldId: f.id } as any, fields));
-  };
+  return getFieldValueForJql(issue, fields);
 }
 
 const matchToCustomGroupByField = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]) => {

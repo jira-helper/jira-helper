@@ -88,7 +88,12 @@ export type JqlAstResult =
       actualValue?: unknown; // Actual field value from the issue for debugging
     };
 
-// Tokenizer that respects quoted strings and tracks if token was quoted
+// Tokenizer that respects quoted strings and tracks if token was quoted.
+// Recognises comparison operators (!=, =, !~, ~) as separate tokens even when not
+// separated by whitespace, so user input like `project=TRPA AND status=Done`
+// (no spaces around `=`) still parses correctly. Real Jira tolerates this; the
+// previous implementation required spaces and would treat `project=TRPA` as a
+// single field token, then choke on the next word as an "Unknown operator".
 function tokenize(jql: string): string[] {
   const tokens: string[] = [];
   let i = 0;
@@ -105,14 +110,31 @@ function tokenize(jql: string): string[] {
       i = j + 1;
       continue;
     }
-    if (jql[i] === '(' || jql[i] === ')') {
+    if (jql[i] === '(' || jql[i] === ')' || jql[i] === ',') {
       tokens.push(jql[i]);
       i++;
       continue;
     }
-    // word
+    // Two-char operators take priority over one-char prefixes.
+    if (jql[i] === '!' && (jql[i + 1] === '=' || jql[i + 1] === '~')) {
+      tokens.push(jql.slice(i, i + 2));
+      i += 2;
+      continue;
+    }
+    if (jql[i] === '=' || jql[i] === '~') {
+      tokens.push(jql[i]);
+      i++;
+      continue;
+    }
+    // word — terminate on whitespace, parentheses, comma, or any operator char
     let j = i;
-    while (j < jql.length && !jql[j].match(/[\s()]/)) j++;
+    while (
+      j < jql.length &&
+      !jql[j].match(/[\s(),=~]/) &&
+      !(jql[j] === '!' && (jql[j + 1] === '=' || jql[j + 1] === '~'))
+    ) {
+      j++;
+    }
     tokens.push(jql.slice(i, j));
     i = j;
   }

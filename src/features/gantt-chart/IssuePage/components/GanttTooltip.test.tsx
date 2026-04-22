@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import type { GanttBar } from '../../types';
@@ -25,10 +25,10 @@ function makeBar(overrides: Partial<GanttBar> = {}): GanttBar {
   };
 }
 
-function renderTooltip(bar: GanttBar | null, position: { x: number; y: number } | null) {
+function renderTooltip(bar: GanttBar | null, position: { x: number; y: number } | null, showStatusSections = false) {
   render(
     <WithDi container={globalContainer}>
-      <GanttTooltip bar={bar} position={position} />
+      <GanttTooltip bar={bar} position={position} showStatusSections={showStatusSections} />
     </WithDi>
   );
 }
@@ -81,5 +81,24 @@ describe('GanttTooltip', () => {
     renderTooltip(makeBar({ isOpenEnded: true }), { x: 0, y: 0 });
 
     expect(screen.getByText(/not fixed|open-ended|Открыт/i)).toBeInTheDocument();
+  });
+
+  // A3: when status breakdown overrides a custom color rule, tell the user.
+  it('shows hint when showStatusSections is true and bar has a barColor', () => {
+    renderTooltip(makeBar({ barColor: '#FF5630' }), { x: 0, y: 0 }, true);
+
+    expect(screen.getByTestId('gantt-tooltip-color-overridden')).toBeInTheDocument();
+  });
+
+  it('does not show the override hint when showStatusSections is false', () => {
+    renderTooltip(makeBar({ barColor: '#FF5630' }), { x: 0, y: 0 }, false);
+
+    expect(screen.queryByTestId('gantt-tooltip-color-overridden')).toBeNull();
+  });
+
+  it('does not show the override hint when bar has no barColor', () => {
+    renderTooltip(makeBar(), { x: 0, y: 0 }, true);
+
+    expect(screen.queryByTestId('gantt-tooltip-color-overridden')).toBeNull();
   });
 });

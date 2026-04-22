@@ -1,6 +1,6 @@
 # TASK-20: GanttViewportModel
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: model
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

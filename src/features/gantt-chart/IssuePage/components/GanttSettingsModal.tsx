@@ -1,13 +1,47 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Button, Checkbox, ColorPicker, Form, Input, Modal, Radio, Select, Space, Spin, Switch, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import {
+  Button,
+  ColorPicker,
+  Empty,
+  Form,
+  Input,
+  Modal,
+  Alert,
+  Segmented,
+  Select,
+  Spin,
+  Switch,
+  Tabs,
+  Tag,
+  Tooltip,
+} from 'antd';
+import type { FormInstance } from 'antd';
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  CopyOutlined,
+  BarChartOutlined,
+  BranchesOutlined,
+  FilterOutlined,
+} from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { useGetStatuses } from 'src/shared/jira/stores/useGetStatuses';
-import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
-import type { JiraField } from 'src/shared/jira/types';
-import type { ColorRule, DateMappingSource, GanttScopeSettings, SettingsScope } from '../../types';
+import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
+import type { JiraField } from 'src/infrastructure/jira/types';
+import type {
+  ColorRule,
+  DateMapping,
+  DateMappingSource,
+  GanttScopeSettings,
+  QuickFilter,
+  SettingsScope,
+} from '../../types';
+import { parseJql } from 'src/shared/jql/simpleJqlParser';
+import { stopJiraHotkeys } from 'src/shared/dom/stopJiraHotkeys';
 
 function filterDateLikeFields(fields: JiraField[]): JiraField[] {
   return fields.filter(f => {
@@ -41,6 +75,30 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'Project + issue type',
     ru: 'Проект + тип задачи',
   },
+  scopeContextGlobal: {
+    en: 'Editing default settings for all projects',
+    ru: 'Редактируются настройки по умолчанию для всех проектов',
+  },
+  scopeContextProject: {
+    en: 'Editing settings for project {project}',
+    ru: 'Редактируются настройки для проекта {project}',
+  },
+  scopeContextProjectIssueType: {
+    en: 'Editing settings for {project} › {issueType}',
+    ru: 'Редактируются настройки для {project} › {issueType}',
+  },
+  tabBars: {
+    en: 'Bars',
+    ru: 'Полосы',
+  },
+  tabIssues: {
+    en: 'Issues',
+    ru: 'Задачи',
+  },
+  tabFilters: {
+    en: 'Filters',
+    ru: 'Фильтры',
+  },
   startMapping: {
     en: 'Start of bar',
     ru: 'Начало полосы',
@@ -49,9 +107,45 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'End of bar',
     ru: 'Конец полосы',
   },
+  startMappingHint: {
+    en: 'For each task, the first matching rule produces the date. Use ↑/↓ to reorder — the topmost match wins.',
+    ru: 'Для каждой задачи берётся первое сверху правило, которое даёт дату. Используйте ↑/↓ — выигрывает верхнее.',
+  },
+  endMappingHint: {
+    en: 'For each task, the first matching rule produces the date. Tasks with no end date are drawn as open-ended.',
+    ru: 'Для каждой задачи берётся первое сверху правило, которое даёт дату. Задачи без даты конца рисуются «открытыми».',
+  },
+  addStartMapping: {
+    en: 'Add another start source',
+    ru: 'Добавить ещё один источник начала',
+  },
+  addEndMapping: {
+    en: 'Add another end source',
+    ru: 'Добавить ещё один источник конца',
+  },
+  removeMapping: {
+    en: 'Remove rule',
+    ru: 'Удалить правило',
+  },
+  moveMappingUp: {
+    en: 'Move up (higher priority)',
+    ru: 'Поднять выше (выше приоритет)',
+  },
+  moveMappingDown: {
+    en: 'Move down (lower priority)',
+    ru: 'Опустить ниже (ниже приоритет)',
+  },
+  mappingPriorityBadge: {
+    en: 'Priority',
+    ru: 'Приоритет',
+  },
   mappingSource: {
     en: 'Source',
     ru: 'Источник',
+  },
+  ruleMatchBy: {
+    en: 'Match by',
+    ru: 'Сопоставить по',
   },
   sourceDateField: {
     en: 'Date field',
@@ -78,8 +172,16 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     ru: 'Статус конца',
   },
   tooltipFields: {
-    en: 'Tooltip fields',
-    ru: 'Поля подсказки',
+    en: 'Bar tooltip fields',
+    ru: 'Поля подсказки полосы',
+  },
+  tooltipFieldsHint: {
+    en: 'Fields shown in the bar tooltip on hover.',
+    ru: 'Поля, отображаемые в подсказке при наведении на полосу.',
+  },
+  colorRulesHint: {
+    en: 'Override bar color based on field value or JQL (e.g. priority = Critical → red).',
+    ru: 'Переопределить цвет полосы по значению поля или JQL (напр. priority = Critical → красный).',
   },
   colorRulesLegend: {
     en: 'Bar colors',
@@ -122,8 +224,8 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     ru: 'Фильтры исключения',
   },
   exclusionOrHint: {
-    en: 'Issue is excluded if it matches ANY filter (OR logic)',
-    ru: 'Задача исключается, если соответствует ЛЮБОМУ фильтру (логика ИЛИ)',
+    en: 'Issue is excluded if it matches ANY filter (OR logic).',
+    ru: 'Задача исключается, если соответствует ЛЮБОМУ фильтру (логика ИЛИ).',
   },
   addExclusionFilter: {
     en: 'Add exclusion filter',
@@ -153,13 +255,73 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'JQL fragment',
     ru: 'Фрагмент JQL',
   },
-  hideCompletedTasks: {
-    en: 'Hide completed tasks (statusCategory = Done)',
-    ru: 'Скрыть завершённые задачи (statusCategory = Done)',
+  quickFiltersLegend: {
+    en: 'Quick filters',
+    ru: 'Быстрые фильтры',
+  },
+  quickFiltersHint: {
+    en: 'Saved presets shown as toggleable chips on the toolbar. Multiple active chips combine via AND. Built-in chips (Unresolved, Hide completed) are always available.',
+    ru: 'Сохранённые пресеты, появляющиеся в виде переключаемых «чипов» на тулбаре. Несколько активных чипов объединяются через И. Встроенные чипы (Unresolved, Hide completed) доступны всегда.',
+  },
+  addQuickFilter: {
+    en: 'Add quick filter',
+    ru: 'Добавить быстрый фильтр',
+  },
+  removeQuickFilter: {
+    en: 'Remove quick filter',
+    ru: 'Удалить быстрый фильтр',
+  },
+  moveQuickFilterUp: {
+    en: 'Move up',
+    ru: 'Поднять выше',
+  },
+  moveQuickFilterDown: {
+    en: 'Move down',
+    ru: 'Опустить ниже',
+  },
+  quickFilterName: {
+    en: 'Chip label',
+    ru: 'Подпись чипа',
+  },
+  quickFilterModeField: {
+    en: 'Field value',
+    ru: 'Значение поля',
+  },
+  quickFilterModeJql: {
+    en: 'JQL',
+    ru: 'JQL',
+  },
+  quickFilterFieldId: {
+    en: 'Field',
+    ru: 'Поле',
+  },
+  quickFilterValue: {
+    en: 'Value',
+    ru: 'Значение',
+  },
+  quickFilterJql: {
+    en: 'JQL fragment',
+    ru: 'Фрагмент JQL',
+  },
+  quickFilterJqlError: {
+    en: 'Invalid JQL: {error}',
+    ru: 'Неверный JQL: {error}',
+  },
+  quickFilterNamePlaceholder: {
+    en: 'e.g. My team',
+    ru: 'напр. Моя команда',
+  },
+  quickFilterJqlPlaceholder: {
+    en: 'project = TRPA AND priority = High',
+    ru: 'project = TRPA AND priority = High',
   },
   save: {
     en: 'Save',
     ru: 'Сохранить',
+  },
+  saveDisabledHasErrors: {
+    en: 'Fix the highlighted errors before saving.',
+    ru: 'Исправьте выделенные ошибки перед сохранением.',
   },
   cancel: {
     en: 'Cancel',
@@ -169,29 +331,53 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'Copy from…',
     ru: 'Копировать из…',
   },
-  noDraft: {
-    en: 'No settings loaded.',
-    ru: 'Настройки не загружены.',
+  copyFromHint: {
+    en: 'Replace current draft with settings from another scope.',
+    ru: 'Заменить текущий черновик настройками из другой области.',
+  },
+  noDraftTitle: {
+    en: 'No settings for this scope yet',
+    ru: 'Для этой области пока нет настроек',
+  },
+  noDraftDescription: {
+    en: 'Pick a starting point — copy from a wider scope, or open that wider scope to create them.',
+    ru: 'Выберите отправную точку — скопируйте из более широкой области или откройте её настройки, чтобы создать.',
   },
   issueInclusionLegend: {
     en: 'Issue inclusion',
     ru: 'Включение задач',
   },
+  issueInclusionHint: {
+    en: 'Choose which related issues are pulled into the chart along with the root issue.',
+    ru: 'Выберите, какие связанные задачи подтягивать в чарт вместе с корневой.',
+  },
   includeSubtasks: {
     en: 'Include subtasks',
     ru: 'Включать подзадачи',
+  },
+  includeSubtasksHint: {
+    en: 'Pull child sub-tasks of the root issue.',
+    ru: 'Подтягивать дочерние подзадачи корневой задачи.',
   },
   includeEpicChildren: {
     en: 'Include epic children',
     ru: 'Включать дочерние эпика',
   },
+  includeEpicChildrenHint: {
+    en: 'Pull all issues that belong to this epic.',
+    ru: 'Подтягивать все задачи, принадлежащие эпику.',
+  },
   includeIssueLinks: {
     en: 'Include issue links',
     ru: 'Включать связанные задачи',
   },
+  includeIssueLinksHint: {
+    en: 'Pull issues linked via Jira issue links (Blocks, Relates, …).',
+    ru: 'Подтягивать задачи, связанные через типы связей Jira (Blocks, Relates, …).',
+  },
   issueLinkTypesHint: {
-    en: 'Restrict by link type and direction (Jira API integration pending). Leave empty to include all link types.',
-    ru: 'Ограничить типом связи и направлением (интеграция с Jira API впереди). Пусто — все типы связей.',
+    en: 'Restrict by link type and direction. Leave empty to include all link types.',
+    ru: 'Ограничить типом связи и направлением. Пусто — все типы связей.',
   },
   linkTypeId: {
     en: 'Link type',
@@ -202,16 +388,12 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     ru: 'Направление',
   },
   directionInward: {
-    en: 'Inward',
-    ru: 'Входящая',
+    en: '← Inward (linked → this)',
+    ru: '← Входящая (связанная → эта)',
   },
   directionOutward: {
-    en: 'Outward',
-    ru: 'Исходящая',
-  },
-  includeLinkTypeRow: {
-    en: 'Include',
-    ru: 'Включить',
+    en: '→ Outward (this → linked)',
+    ru: '→ Исходящая (эта → связанная)',
   },
   addLinkTypeRow: {
     en: 'Add link type',
@@ -225,15 +407,70 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'Select…',
     ru: 'Выберите…',
   },
+  emptyListHint: {
+    en: 'Nothing here yet. Use the button below to add the first one.',
+    ru: 'Здесь пока пусто. Используйте кнопку ниже, чтобы добавить первое.',
+  },
+  emptyColorRules: {
+    en: 'No color rules yet — bars will use the default color.',
+    ru: 'Правил цвета ещё нет — полосы будут использовать цвет по умолчанию.',
+  },
+  emptyQuickFilters: {
+    en: 'No quick filters yet — only built-in chips will appear on the toolbar.',
+    ru: 'Быстрых фильтров ещё нет — на тулбаре появятся только встроенные чипы.',
+  },
+  emptyExclusionFilters: {
+    en: 'No exclusion filters yet — every fetched issue will be drawn.',
+    ru: 'Фильтров исключения ещё нет — будут отображаться все загруженные задачи.',
+  },
+  emptyLinkTypes: {
+    en: 'No link type restrictions — all link types will be included.',
+    ru: 'Ограничений по типу связи нет — будут включены все типы связей.',
+  },
+  errorSummaryOneSingleTab: {
+    en: '1 error in {tabs} prevents saving',
+    ru: '1 ошибка на табе {tabs} мешает сохранить',
+  },
+  errorSummaryManySingleTab: {
+    en: '{count} errors in {tabs} prevent saving',
+    ru: 'Ошибок на табе {tabs}: {count}. Сохранить нельзя',
+  },
+  errorSummaryManyTabs: {
+    en: '{count} errors prevent saving — fix them in: {tabs}',
+    ru: 'Ошибок: {count}. Исправьте на табах: {tabs}',
+  },
+  errorSummaryJumpHint: {
+    en: 'Click a tab name above to jump there.',
+    ru: 'Нажмите на имя таба выше, чтобы перейти туда.',
+  },
+  colHeaderActions: {
+    en: 'Actions',
+    ru: 'Действия',
+  },
 } satisfies Texts<
   | 'title'
   | 'scopeLegend'
   | 'scopeGlobal'
   | 'scopeProject'
   | 'scopeProjectIssueType'
+  | 'scopeContextGlobal'
+  | 'scopeContextProject'
+  | 'scopeContextProjectIssueType'
+  | 'tabBars'
+  | 'tabIssues'
+  | 'tabFilters'
   | 'startMapping'
   | 'endMapping'
+  | 'startMappingHint'
+  | 'endMappingHint'
+  | 'addStartMapping'
+  | 'addEndMapping'
+  | 'removeMapping'
+  | 'moveMappingUp'
+  | 'moveMappingDown'
+  | 'mappingPriorityBadge'
   | 'mappingSource'
+  | 'ruleMatchBy'
   | 'sourceDateField'
   | 'sourceStatusTransition'
   | 'startDateField'
@@ -241,7 +478,9 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
   | 'endDateField'
   | 'endStatus'
   | 'tooltipFields'
+  | 'tooltipFieldsHint'
   | 'colorRulesLegend'
+  | 'colorRulesHint'
   | 'addColorRule'
   | 'removeColorRule'
   | 'colorRuleField'
@@ -259,28 +498,57 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
   | 'exclusionFieldId'
   | 'exclusionValue'
   | 'exclusionJql'
-  | 'hideCompletedTasks'
+  | 'quickFiltersLegend'
+  | 'quickFiltersHint'
+  | 'addQuickFilter'
+  | 'removeQuickFilter'
+  | 'moveQuickFilterUp'
+  | 'moveQuickFilterDown'
+  | 'quickFilterName'
+  | 'quickFilterModeField'
+  | 'quickFilterModeJql'
+  | 'quickFilterFieldId'
+  | 'quickFilterValue'
+  | 'quickFilterJql'
+  | 'quickFilterJqlError'
+  | 'quickFilterNamePlaceholder'
+  | 'quickFilterJqlPlaceholder'
   | 'save'
+  | 'saveDisabledHasErrors'
   | 'cancel'
   | 'copyFrom'
-  | 'noDraft'
+  | 'copyFromHint'
+  | 'noDraftTitle'
+  | 'noDraftDescription'
   | 'issueInclusionLegend'
+  | 'issueInclusionHint'
   | 'includeSubtasks'
+  | 'includeSubtasksHint'
   | 'includeEpicChildren'
+  | 'includeEpicChildrenHint'
   | 'includeIssueLinks'
+  | 'includeIssueLinksHint'
   | 'issueLinkTypesHint'
   | 'linkTypeId'
   | 'linkDirection'
   | 'directionInward'
   | 'directionOutward'
-  | 'includeLinkTypeRow'
   | 'addLinkTypeRow'
   | 'removeLinkTypeRow'
   | 'selectPlaceholder'
+  | 'emptyListHint'
+  | 'emptyColorRules'
+  | 'emptyQuickFilters'
+  | 'emptyExclusionFilters'
+  | 'emptyLinkTypes'
+  | 'errorSummaryOneSingleTab'
+  | 'errorSummaryManySingleTab'
+  | 'errorSummaryManyTabs'
+  | 'errorSummaryJumpHint'
+  | 'colHeaderActions'
 >;
 
 type IssueLinkFormRow = {
-  enabled: boolean;
   id: string;
   direction: 'inward' | 'outward';
 };
@@ -300,14 +568,26 @@ type ExclusionFilterFormRow = {
   jql: string;
 };
 
+type DateMappingFormRow = {
+  source: DateMappingSource;
+  detail: string;
+};
+
+type QuickFilterFormRow = {
+  id: string;
+  name: string;
+  selectorMode: 'field' | 'jql';
+  selectorFieldId: string;
+  selectorValue: string;
+  selectorJql: string;
+};
+
 type FormShape = {
-  startSource: DateMappingSource;
-  startDetail: string;
-  endSource: DateMappingSource;
-  endDetail: string;
+  startMappings: DateMappingFormRow[];
+  endMappings: DateMappingFormRow[];
   tooltipFieldIds: string[];
   colorRules: ColorRuleFormRow[];
-  hideCompletedTasks: boolean;
+  quickFilters: QuickFilterFormRow[];
   exclusionFilters: ExclusionFilterFormRow[];
   includeSubtasks: boolean;
   includeEpicChildren: boolean;
@@ -315,25 +595,44 @@ type FormShape = {
   issueLinkRows: IssueLinkFormRow[];
 };
 
+function generateQuickFilterId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+  return `qf-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function dateMappingToRow(m: DateMapping): DateMappingFormRow {
+  return {
+    source: m.source,
+    detail: m.source === 'dateField' ? (m.fieldId ?? '') : (m.statusName ?? ''),
+  };
+}
+
+function rowToDateMapping(row: DateMappingFormRow): DateMapping {
+  return row.source === 'dateField'
+    ? { source: 'dateField', fieldId: row.detail }
+    : { source: 'statusTransition', statusName: row.detail };
+}
+
 function draftToFormValues(draft: GanttScopeSettings): FormShape {
-  const issueLinkRows: IssueLinkFormRow[] =
-    draft.issueLinkTypesToInclude.length > 0
-      ? draft.issueLinkTypesToInclude.map(s => ({
-          enabled: true,
-          id: s.id,
-          direction: s.direction,
-        }))
-      : [];
+  const issueLinkRows: IssueLinkFormRow[] = draft.issueLinkTypesToInclude.map(s => ({
+    id: s.id,
+    direction: s.direction,
+  }));
+
+  const startMappings =
+    draft.startMappings.length > 0
+      ? draft.startMappings.map(dateMappingToRow)
+      : [{ source: 'dateField' as const, detail: '' }];
+  const endMappings =
+    draft.endMappings.length > 0
+      ? draft.endMappings.map(dateMappingToRow)
+      : [{ source: 'dateField' as const, detail: '' }];
 
   return {
-    startSource: draft.startMapping.source,
-    startDetail:
-      draft.startMapping.source === 'dateField'
-        ? (draft.startMapping.fieldId ?? '')
-        : (draft.startMapping.statusName ?? ''),
-    endSource: draft.endMapping.source,
-    endDetail:
-      draft.endMapping.source === 'dateField' ? (draft.endMapping.fieldId ?? '') : (draft.endMapping.statusName ?? ''),
+    startMappings,
+    endMappings,
     tooltipFieldIds: [...draft.tooltipFieldIds],
     colorRules: (draft.colorRules ?? []).map(
       (r): ColorRuleFormRow => ({
@@ -344,7 +643,16 @@ function draftToFormValues(draft: GanttScopeSettings): FormShape {
         color: r.color,
       })
     ),
-    hideCompletedTasks: draft.hideCompletedTasks ?? false,
+    quickFilters: (draft.quickFilters ?? []).map(
+      (q): QuickFilterFormRow => ({
+        id: q.id,
+        name: q.name,
+        selectorMode: q.selector.mode,
+        selectorFieldId: q.selector.mode === 'field' ? (q.selector.fieldId ?? '') : '',
+        selectorValue: q.selector.mode === 'field' ? (q.selector.value ?? '') : '',
+        selectorJql: q.selector.mode === 'jql' ? (q.selector.jql ?? '') : '',
+      })
+    ),
     exclusionFilters: (draft.exclusionFilters ?? []).map(
       (f): ExclusionFilterFormRow => ({
         mode: f.mode,
@@ -379,21 +687,29 @@ function formValuesToPatch(values: FormShape): Partial<GanttScopeSettings> {
 
   const rows = values.issueLinkRows ?? [];
   const issueLinkTypesToInclude = values.includeIssueLinks
-    ? rows.filter(r => r.enabled && r.id.trim() !== '').map(r => ({ id: r.id.trim(), direction: r.direction }))
+    ? rows.filter(r => r.id.trim() !== '').map(r => ({ id: r.id.trim(), direction: r.direction }))
     : [];
 
+  const startMappings: DateMapping[] = (values.startMappings ?? []).map(rowToDateMapping);
+  const endMappings: DateMapping[] = (values.endMappings ?? []).map(rowToDateMapping);
+
+  const quickFilters: QuickFilter[] = (values.quickFilters ?? [])
+    .filter(row => row.name.trim() !== '')
+    .map(row => ({
+      id: row.id,
+      name: row.name.trim(),
+      selector:
+        row.selectorMode === 'field'
+          ? { mode: 'field' as const, fieldId: row.selectorFieldId, value: row.selectorValue }
+          : { mode: 'jql' as const, jql: row.selectorJql },
+    }));
+
   return {
-    startMapping:
-      values.startSource === 'dateField'
-        ? { source: 'dateField', fieldId: values.startDetail }
-        : { source: 'statusTransition', statusName: values.startDetail },
-    endMapping:
-      values.endSource === 'dateField'
-        ? { source: 'dateField', fieldId: values.endDetail }
-        : { source: 'statusTransition', statusName: values.endDetail },
+    startMappings: startMappings.length > 0 ? startMappings : [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: endMappings.length > 0 ? endMappings : [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules,
     tooltipFieldIds: values.tooltipFieldIds ?? [],
-    hideCompletedTasks: values.hideCompletedTasks ?? false,
+    quickFilters,
     exclusionFilters,
     includeSubtasks: values.includeSubtasks,
     includeEpicChildren: values.includeEpicChildren,
@@ -402,11 +718,956 @@ function formValuesToPatch(values: FormShape): Partial<GanttScopeSettings> {
   };
 }
 
+// ---------- Layout helpers ----------
+
+/** Atlassian-style group caption. Uses an `<h3>` for accessibility and inline
+ *  styles so it works even outside the `[data-jh-gantt-root]` ancestor (e.g. in Storybook). */
+const SectionHeading: React.FC<{
+  children: React.ReactNode;
+  hint?: string;
+  count?: number;
+  /** small action node rendered to the right (e.g. "Add" button) */
+  right?: React.ReactNode;
+  /** When true, draws a thin separator above the heading. Use to break up consecutive sections. */
+  divider?: boolean;
+}> = ({ children, hint, count, right, divider }) => (
+  <div
+    style={{
+      marginTop: divider ? 16 : 4,
+      marginBottom: 6,
+      paddingTop: divider ? 16 : 0,
+      borderTop: divider ? '1px solid var(--ant-color-split, #f0f0f0)' : 'none',
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+      }}
+    >
+      <h3
+        style={{
+          margin: 0,
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          color: '#6b778c',
+          lineHeight: 1.4,
+        }}
+      >
+        {children}
+        {typeof count === 'number' && count > 0 ? (
+          <Tag style={{ marginLeft: 8 }} bordered={false} color="default">
+            {count}
+          </Tag>
+        ) : null}
+      </h3>
+      {right}
+    </div>
+    {hint ? (
+      <div style={{ marginTop: 4, fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>{hint}</div>
+    ) : null}
+  </div>
+);
+
+/** Visible "this list is empty" placeholder above the dashed `+ Add…` button. */
+const EmptyListPlaceholder: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div
+    style={{
+      padding: '12px 14px',
+      borderRadius: 6,
+      background: 'var(--ant-color-fill-quaternary, #fafafa)',
+      color: 'var(--ant-color-text-secondary, #6b778c)',
+      fontSize: 12,
+      marginBottom: 8,
+      textAlign: 'center',
+    }}
+  >
+    {children}
+  </div>
+);
+
+/** Visible "table-like" header for list rows — rendered ONCE per list, replaces per-row labels. */
+const ListColumnsHeader: React.FC<{ columns: { label: string; width?: string | number; flex?: number }[] }> = ({
+  columns,
+}) => (
+  <div
+    style={{
+      display: 'flex',
+      gap: 8,
+      padding: '4px 0',
+      fontSize: 11,
+      fontWeight: 600,
+      letterSpacing: '0.04em',
+      textTransform: 'uppercase',
+      color: 'var(--ant-color-text-tertiary, #97a0af)',
+      borderBottom: '1px solid var(--ant-color-split, #f0f0f0)',
+      marginBottom: 8,
+    }}
+  >
+    {columns.map((c, i) => (
+      <div
+        key={i}
+        style={{
+          width: c.width,
+          flex: c.flex ?? (c.width ? undefined : 1),
+          minWidth: 0,
+        }}
+      >
+        {c.label}
+      </div>
+    ))}
+  </div>
+);
+
+const ROW_ACTIONS_WIDTH = 96;
+
+/** A single inclusion switch (row): switch + bold label + secondary description. */
+const InclusionSwitchRow: React.FC<{
+  name: keyof FormShape;
+  label: string;
+  description: string;
+}> = ({ name, label, description }) => (
+  <Form.Item noStyle shouldUpdate={(prev, cur) => prev[name] !== cur[name]}>
+    {() => (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 12,
+          padding: '8px 0',
+          borderBottom: '1px solid var(--ant-color-split, #f0f0f0)',
+        }}
+      >
+        <Form.Item name={name as string} valuePropName="checked" noStyle>
+          <Switch aria-label={label} />
+        </Form.Item>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 500 }}>{label}</div>
+          <div style={{ fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>{description}</div>
+        </div>
+      </div>
+    )}
+  </Form.Item>
+);
+
+// ---------- Date mappings section (Bars tab) ----------
+
+type DateMappingsSectionTexts = {
+  mappingSource: string;
+  selectPlaceholder: string;
+  removeMapping: string;
+  moveMappingUp: string;
+  moveMappingDown: string;
+  mappingPriorityBadge: string;
+};
+
+interface RenderDateMappingsSectionArgs {
+  listName: 'startMappings' | 'endMappings';
+  heading: string;
+  hint: string;
+  addLabel: string;
+  dateLabel: string;
+  statusLabel: string;
+  defaultRow: DateMappingFormRow;
+  form: FormInstance<FormShape>;
+  sourceOptions: { value: DateMappingSource; label: string }[];
+  dateFieldOptions: { value: string; label: string }[];
+  statusOptions: { value: string; label: string }[];
+  isLoadingFields: boolean;
+  isLoadingStatuses: boolean;
+  selectFilterOption: (input: string, option?: { label?: string }) => boolean;
+  texts: DateMappingsSectionTexts;
+  /** Called after we mutate the form imperatively (e.g. clearing `detail` on source change). */
+  notifyFormChange: () => void;
+  'data-testid'?: string;
+}
+
+function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.ReactNode {
+  const {
+    listName,
+    heading,
+    hint,
+    addLabel,
+    dateLabel,
+    statusLabel,
+    defaultRow,
+    form,
+    sourceOptions,
+    dateFieldOptions,
+    statusOptions,
+    isLoadingFields,
+    isLoadingStatuses,
+    selectFilterOption,
+    texts,
+    notifyFormChange,
+  } = args;
+
+  return (
+    <div data-testid={args['data-testid']} style={{ marginBottom: 20 }}>
+      <SectionHeading hint={hint}>{heading}</SectionHeading>
+      <Form.List name={listName}>
+        {(rows, { add, remove, move }) => (
+          <>
+            <ListColumnsHeader
+              columns={[
+                { label: '#', width: 24 },
+                { label: texts.mappingSource, width: 140 },
+                { label: dateLabel, flex: 1 },
+                { label: '', width: ROW_ACTIONS_WIDTH },
+              ]}
+            />
+            {rows.map(({ key, name, ...restField }, index) => (
+              <div
+                key={key}
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'flex-start',
+                  marginBottom: 6,
+                }}
+              >
+                <div
+                  aria-label={texts.mappingPriorityBadge}
+                  title={`${texts.mappingPriorityBadge}: ${index + 1}`}
+                  style={{
+                    width: 24,
+                    height: 32,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--ant-color-text-secondary, #6b778c)',
+                  }}
+                >
+                  {index + 1}
+                </div>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'source']}
+                  rules={[{ required: true }]}
+                  style={{ marginBottom: 0, width: 140 }}
+                >
+                  <Select
+                    virtual={false}
+                    options={sourceOptions}
+                    onChange={() => {
+                      // Clear the dependent detail field (fieldId or statusName) so we never persist
+                      // a stale value from the previous source kind.
+                      form.setFieldValue([listName, name, 'detail'], undefined);
+                      notifyFormChange();
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item noStyle dependencies={[[listName, name, 'source']]}>
+                  {() => {
+                    const isStatus = form.getFieldValue([listName, name, 'source']) === 'statusTransition';
+                    return isStatus ? (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'detail']}
+                        aria-label={statusLabel}
+                        rules={[{ required: true }]}
+                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                      >
+                        <Select
+                          virtual={false}
+                          showSearch
+                          optionFilterProp="label"
+                          filterOption={selectFilterOption}
+                          placeholder={texts.selectPlaceholder}
+                          loading={isLoadingStatuses}
+                          notFoundContent={isLoadingStatuses ? <Spin size="small" /> : null}
+                          options={statusOptions}
+                        />
+                      </Form.Item>
+                    ) : (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'detail']}
+                        aria-label={dateLabel}
+                        rules={[{ required: true }]}
+                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                      >
+                        <Select
+                          virtual={false}
+                          showSearch
+                          optionFilterProp="label"
+                          filterOption={selectFilterOption}
+                          placeholder={texts.selectPlaceholder}
+                          loading={isLoadingFields}
+                          notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+                          options={dateFieldOptions}
+                        />
+                      </Form.Item>
+                    );
+                  }}
+                </Form.Item>
+                <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ArrowUpOutlined />}
+                    aria-label={texts.moveMappingUp}
+                    title={texts.moveMappingUp}
+                    disabled={index === 0}
+                    onClick={() => move(index, index - 1)}
+                  />
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ArrowDownOutlined />}
+                    aria-label={texts.moveMappingDown}
+                    title={texts.moveMappingDown}
+                    disabled={index === rows.length - 1}
+                    onClick={() => move(index, index + 1)}
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    aria-label={texts.removeMapping}
+                    title={texts.removeMapping}
+                    disabled={rows.length <= 1}
+                    onClick={() => remove(name)}
+                  />
+                </div>
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              onClick={() => add({ ...defaultRow })}
+              block
+              icon={<PlusOutlined />}
+              style={{ marginTop: 8 }}
+            >
+              {addLabel}
+            </Button>
+          </>
+        )}
+      </Form.List>
+    </div>
+  );
+}
+
+// ---------- Bar colors section ----------
+
+interface RenderColorRulesSectionArgs {
+  form: FormInstance<FormShape>;
+  texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
+  fieldOptions: { value: string; label: string }[];
+  isLoadingFields: boolean;
+  selectFilterOption: (input: string, option?: { label?: string }) => boolean;
+  handleValuesChange: (changed: Partial<FormShape>, all: FormShape) => void;
+}
+
+function renderColorRulesSection({
+  form,
+  texts,
+  fieldOptions,
+  isLoadingFields,
+  selectFilterOption,
+  handleValuesChange,
+}: RenderColorRulesSectionArgs): React.ReactNode {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <SectionHeading hint={texts.colorRulesHint} divider>
+        {texts.colorRulesLegend}
+      </SectionHeading>
+      <Form.List name="colorRules">
+        {(listFields, { add, remove }) => (
+          <>
+            {listFields.length > 0 ? (
+              <ListColumnsHeader
+                columns={[
+                  { label: texts.ruleMatchBy, width: 130 },
+                  { label: `${texts.colorRuleField} / ${texts.colorRuleJql}`, flex: 1 },
+                  { label: texts.colorRuleColor, width: 120 },
+                  { label: '', width: 36 },
+                ]}
+              />
+            ) : (
+              <EmptyListPlaceholder>{texts.emptyColorRules}</EmptyListPlaceholder>
+            )}
+            {listFields.map(({ key, name, ...restField }) => (
+              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'selectorMode']}
+                  rules={[{ required: true }]}
+                  style={{ marginBottom: 0, width: 130 }}
+                >
+                  <Select
+                    virtual={false}
+                    options={[
+                      { value: 'field' as const, label: texts.colorRuleModeField },
+                      { value: 'jql' as const, label: texts.colorRuleModeJql },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item noStyle dependencies={[['colorRules', name, 'selectorMode']]}>
+                  {() =>
+                    form.getFieldValue(['colorRules', name, 'selectorMode']) === 'field' ? (
+                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'selectorFieldId']}
+                          aria-label={texts.colorRuleField}
+                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        >
+                          <Select
+                            virtual={false}
+                            showSearch
+                            optionFilterProp="label"
+                            filterOption={selectFilterOption}
+                            placeholder={texts.colorRuleField}
+                            loading={isLoadingFields}
+                            notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+                            options={fieldOptions}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'selectorValue']}
+                          aria-label={texts.colorRuleValue}
+                          style={{ marginBottom: 0, width: 140 }}
+                        >
+                          <Input autoComplete="off" placeholder={texts.colorRuleValue} />
+                        </Form.Item>
+                      </div>
+                    ) : (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'selectorJql']}
+                        aria-label={texts.colorRuleJql}
+                        rules={[
+                          {
+                            validator: async (_rule, value: unknown) => {
+                              if (typeof value !== 'string' || value.trim() === '') return;
+                              try {
+                                parseJql(value);
+                              } catch (err) {
+                                const msg = err instanceof Error ? err.message : 'invalid';
+                                throw new Error(texts.quickFilterJqlError.replace('{error}', msg), {
+                                  cause: err,
+                                });
+                              }
+                            },
+                          },
+                        ]}
+                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                      >
+                        <Input.TextArea
+                          autoSize={{ minRows: 1, maxRows: 4 }}
+                          autoComplete="off"
+                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                          placeholder="priority = Critical"
+                        />
+                      </Form.Item>
+                    )
+                  }
+                </Form.Item>
+                <Form.Item {...restField} name={[name, 'color']} hidden>
+                  <input type="hidden" />
+                </Form.Item>
+                <div style={{ width: 120 }}>
+                  <Form.Item
+                    noStyle
+                    shouldUpdate={(p, c) => p.colorRules?.[name]?.color !== c.colorRules?.[name]?.color}
+                  >
+                    {() => (
+                      <ColorPicker
+                        value={form.getFieldValue(['colorRules', name, 'color']) || '#FF5630'}
+                        onChange={color => {
+                          const hexStr = typeof color === 'string' ? color : color.toHexString();
+                          form.setFieldValue(['colorRules', name, 'color'], hexStr);
+                          const allValues = form.getFieldsValue(true) as FormShape;
+                          handleValuesChange({}, allValues);
+                        }}
+                        showText
+                        size="small"
+                      />
+                    )}
+                  </Form.Item>
+                </div>
+                <Button
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={texts.removeColorRule}
+                  title={texts.removeColorRule}
+                  onClick={() => remove(name)}
+                />
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              onClick={() =>
+                add({
+                  selectorMode: 'field',
+                  selectorFieldId: '',
+                  selectorValue: '',
+                  selectorJql: '',
+                  color: '#FF5630',
+                })
+              }
+              block
+              icon={<PlusOutlined />}
+              style={{ marginTop: 8 }}
+            >
+              {texts.addColorRule}
+            </Button>
+          </>
+        )}
+      </Form.List>
+    </div>
+  );
+}
+
+// ---------- Quick filters section ----------
+
+interface RenderQuickFiltersSectionArgs {
+  form: FormInstance<FormShape>;
+  texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
+  fieldOptions: { value: string; label: string }[];
+  isLoadingFields: boolean;
+  selectFilterOption: (input: string, option?: { label?: string }) => boolean;
+}
+
+function renderQuickFiltersSection({
+  form,
+  texts,
+  fieldOptions,
+  isLoadingFields,
+  selectFilterOption,
+}: RenderQuickFiltersSectionArgs): React.ReactNode {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <SectionHeading hint={texts.quickFiltersHint}>{texts.quickFiltersLegend}</SectionHeading>
+      <Form.List name="quickFilters">
+        {(listFields, { add, remove, move }) => (
+          <>
+            {listFields.length > 0 ? (
+              <ListColumnsHeader
+                columns={[
+                  { label: texts.quickFilterName, width: 140 },
+                  { label: texts.ruleMatchBy, width: 120 },
+                  { label: `${texts.quickFilterFieldId} / ${texts.quickFilterJql}`, flex: 1 },
+                  { label: '', width: ROW_ACTIONS_WIDTH },
+                ]}
+              />
+            ) : (
+              <EmptyListPlaceholder>{texts.emptyQuickFilters}</EmptyListPlaceholder>
+            )}
+            {listFields.map(({ key, name, ...restField }, index) => (
+              <div
+                key={key}
+                data-testid={`gantt-settings-quick-filter-row-${index}`}
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'flex-start',
+                  marginBottom: 6,
+                }}
+              >
+                <Form.Item
+                  {...restField}
+                  name={[name, 'name']}
+                  aria-label={texts.quickFilterName}
+                  rules={[{ required: true, message: texts.quickFilterName }]}
+                  style={{ marginBottom: 0, width: 140 }}
+                >
+                  <Input autoComplete="off" placeholder={texts.quickFilterNamePlaceholder} />
+                </Form.Item>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'selectorMode']}
+                  rules={[{ required: true }]}
+                  style={{ marginBottom: 0, width: 120 }}
+                >
+                  <Select
+                    virtual={false}
+                    options={[
+                      { value: 'field' as const, label: texts.quickFilterModeField },
+                      { value: 'jql' as const, label: texts.quickFilterModeJql },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item noStyle dependencies={[['quickFilters', name, 'selectorMode']]}>
+                  {() =>
+                    form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'field' ? (
+                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'selectorFieldId']}
+                          aria-label={texts.quickFilterFieldId}
+                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        >
+                          <Select
+                            virtual={false}
+                            showSearch
+                            optionFilterProp="label"
+                            filterOption={selectFilterOption}
+                            placeholder={texts.quickFilterFieldId}
+                            loading={isLoadingFields}
+                            notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+                            options={fieldOptions}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'selectorValue']}
+                          aria-label={texts.quickFilterValue}
+                          style={{ marginBottom: 0, width: 140 }}
+                        >
+                          <Input autoComplete="off" placeholder={texts.quickFilterValue} />
+                        </Form.Item>
+                      </div>
+                    ) : (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'selectorJql']}
+                        aria-label={texts.quickFilterJql}
+                        rules={[
+                          {
+                            validator: async (_rule, value: unknown) => {
+                              if (typeof value !== 'string' || value.trim() === '') return;
+                              try {
+                                parseJql(value);
+                              } catch (err) {
+                                const msg = err instanceof Error ? err.message : 'invalid';
+                                throw new Error(texts.quickFilterJqlError.replace('{error}', msg), {
+                                  cause: err,
+                                });
+                              }
+                            },
+                          },
+                        ]}
+                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                      >
+                        <Input.TextArea
+                          autoSize={{ minRows: 1, maxRows: 4 }}
+                          autoComplete="off"
+                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                          placeholder={texts.quickFilterJqlPlaceholder}
+                        />
+                      </Form.Item>
+                    )
+                  }
+                </Form.Item>
+                <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ArrowUpOutlined />}
+                    aria-label={texts.moveQuickFilterUp}
+                    title={texts.moveQuickFilterUp}
+                    disabled={index === 0}
+                    onClick={() => move(index, index - 1)}
+                  />
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ArrowDownOutlined />}
+                    aria-label={texts.moveQuickFilterDown}
+                    title={texts.moveQuickFilterDown}
+                    disabled={index === listFields.length - 1}
+                    onClick={() => move(index, index + 1)}
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    aria-label={texts.removeQuickFilter}
+                    title={texts.removeQuickFilter}
+                    onClick={() => remove(name)}
+                  />
+                </div>
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              onClick={() =>
+                add({
+                  id: generateQuickFilterId(),
+                  name: '',
+                  selectorMode: 'field',
+                  selectorFieldId: '',
+                  selectorValue: '',
+                  selectorJql: '',
+                })
+              }
+              block
+              icon={<PlusOutlined />}
+              style={{ marginTop: 8 }}
+            >
+              {texts.addQuickFilter}
+            </Button>
+          </>
+        )}
+      </Form.List>
+    </div>
+  );
+}
+
+// ---------- Exclusion filters section ----------
+
+interface RenderExclusionFiltersSectionArgs {
+  form: FormInstance<FormShape>;
+  texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
+  fieldOptions: { value: string; label: string }[];
+  isLoadingFields: boolean;
+  selectFilterOption: (input: string, option?: { label?: string }) => boolean;
+}
+
+function renderExclusionFiltersSection({
+  form,
+  texts,
+  fieldOptions,
+  isLoadingFields,
+  selectFilterOption,
+}: RenderExclusionFiltersSectionArgs): React.ReactNode {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <SectionHeading hint={texts.exclusionOrHint} divider>
+        {texts.exclusionLegend}
+      </SectionHeading>
+      <Form.List name="exclusionFilters">
+        {(listFields, { add, remove }) => (
+          <>
+            {listFields.length > 0 ? (
+              <ListColumnsHeader
+                columns={[
+                  { label: texts.ruleMatchBy, width: 130 },
+                  { label: `${texts.exclusionFieldId} / ${texts.exclusionJql}`, flex: 1 },
+                  { label: '', width: 36 },
+                ]}
+              />
+            ) : (
+              <EmptyListPlaceholder>{texts.emptyExclusionFilters}</EmptyListPlaceholder>
+            )}
+            {listFields.map(({ key, name, ...restField }) => (
+              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'mode']}
+                  rules={[{ required: true }]}
+                  style={{ marginBottom: 0, width: 130 }}
+                >
+                  <Select
+                    virtual={false}
+                    options={[
+                      { value: 'field' as const, label: texts.exclusionModeField },
+                      { value: 'jql' as const, label: texts.exclusionModeJql },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item noStyle dependencies={[['exclusionFilters', name, 'mode']]}>
+                  {() =>
+                    form.getFieldValue(['exclusionFilters', name, 'mode']) === 'field' ? (
+                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'fieldId']}
+                          aria-label={texts.exclusionFieldId}
+                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        >
+                          <Select
+                            virtual={false}
+                            showSearch
+                            optionFilterProp="label"
+                            filterOption={selectFilterOption}
+                            placeholder={texts.exclusionFieldId}
+                            loading={isLoadingFields}
+                            notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+                            options={fieldOptions}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'value']}
+                          aria-label={texts.exclusionValue}
+                          style={{ marginBottom: 0, width: 140 }}
+                        >
+                          <Input autoComplete="off" placeholder={texts.exclusionValue} />
+                        </Form.Item>
+                      </div>
+                    ) : (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'jql']}
+                        aria-label={texts.exclusionJql}
+                        rules={[
+                          {
+                            validator: async (_rule, value: unknown) => {
+                              if (typeof value !== 'string' || value.trim() === '') return;
+                              try {
+                                parseJql(value);
+                              } catch (err) {
+                                const msg = err instanceof Error ? err.message : 'invalid';
+                                throw new Error(texts.quickFilterJqlError.replace('{error}', msg), {
+                                  cause: err,
+                                });
+                              }
+                            },
+                          },
+                        ]}
+                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                      >
+                        <Input.TextArea
+                          autoSize={{ minRows: 1, maxRows: 4 }}
+                          autoComplete="off"
+                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                          placeholder="status = Done"
+                        />
+                      </Form.Item>
+                    )
+                  }
+                </Form.Item>
+                <Button
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={texts.removeExclusionFilter}
+                  title={texts.removeExclusionFilter}
+                  onClick={() => remove(name)}
+                />
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              onClick={() => add({ mode: 'field', fieldId: '', value: '', jql: '' })}
+              block
+              icon={<PlusOutlined />}
+              style={{ marginTop: 8 }}
+            >
+              {texts.addExclusionFilter}
+            </Button>
+          </>
+        )}
+      </Form.List>
+    </div>
+  );
+}
+
+// ---------- Issue link types section ----------
+
+interface RenderIssueLinkTypesSectionArgs {
+  texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
+  linkTypeOptions: { value: string; label: string }[];
+  isLoadingLinkTypes: boolean;
+  selectFilterOption: (input: string, option?: { label?: string }) => boolean;
+}
+
+function renderIssueLinkTypesSection({
+  texts,
+  linkTypeOptions,
+  isLoadingLinkTypes,
+  selectFilterOption,
+}: RenderIssueLinkTypesSectionArgs): React.ReactNode {
+  return (
+    <div style={{ marginTop: 12, marginLeft: 44 }}>
+      <div style={{ marginBottom: 8, fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>
+        {texts.issueLinkTypesHint}
+      </div>
+      <Form.List name="issueLinkRows">
+        {(listFields, { add, remove }) => (
+          <>
+            {listFields.length > 0 ? (
+              <ListColumnsHeader
+                columns={[
+                  { label: texts.linkTypeId, flex: 1 },
+                  { label: texts.linkDirection, width: 220 },
+                  { label: '', width: 36 },
+                ]}
+              />
+            ) : (
+              <EmptyListPlaceholder>{texts.emptyLinkTypes}</EmptyListPlaceholder>
+            )}
+            {listFields.map(({ key, name, ...restField }) => (
+              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'id']}
+                  aria-label={texts.linkTypeId}
+                  style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                >
+                  <Select
+                    data-testid={`gantt-settings-link-type-select-${name}`}
+                    virtual={false}
+                    showSearch
+                    optionFilterProp="label"
+                    filterOption={selectFilterOption}
+                    placeholder={texts.selectPlaceholder}
+                    loading={isLoadingLinkTypes}
+                    notFoundContent={isLoadingLinkTypes ? <Spin size="small" /> : null}
+                    options={linkTypeOptions}
+                  />
+                </Form.Item>
+                <Form.Item
+                  {...restField}
+                  name={[name, 'direction']}
+                  aria-label={texts.linkDirection}
+                  style={{ marginBottom: 0, width: 220 }}
+                >
+                  <Select
+                    virtual={false}
+                    options={[
+                      { value: 'inward' as const, label: texts.directionInward },
+                      { value: 'outward' as const, label: texts.directionOutward },
+                    ]}
+                  />
+                </Form.Item>
+                <Button
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={texts.removeLinkTypeRow}
+                  title={texts.removeLinkTypeRow}
+                  onClick={() => remove(name)}
+                />
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              onClick={() => add({ id: '', direction: 'outward' })}
+              block
+              icon={<PlusOutlined />}
+              style={{ marginTop: 8 }}
+            >
+              {texts.addLinkTypeRow}
+            </Button>
+          </>
+        )}
+      </Form.List>
+    </div>
+  );
+}
+
+// ---------- Form content ----------
+
+export interface GanttSettingsValidityState {
+  hasErrors: boolean;
+  /** Number of validation errors per top-level form field path (e.g. "quickFilters", "exclusionFilters").
+   *  Used by parents to show error badges on tabs. */
+  errorsByPath: Record<string, number>;
+}
+
 export interface GanttSettingsFormContentProps {
   draft: GanttScopeSettings | null;
   currentScope: SettingsScope;
   onDraftChange: (patch: Partial<GanttScopeSettings>) => void;
   onScopeLevelChange: (level: SettingsScope['level']) => void;
+  /** Optional CTA shown in the empty state when there is no draft (e.g. open Copy-from dialog). */
+  onCopyFrom?: () => void;
+  /** Notifies the parent whenever the draft becomes valid/invalid. Used to gate the Save button. */
+  onValidityChange?: (state: GanttSettingsValidityState) => void;
 }
 
 /** Reusable form content for Gantt settings — used both in modal and inline in tab. */
@@ -415,10 +1676,13 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
   currentScope,
   onDraftChange,
   onScopeLevelChange,
+  onCopyFrom,
+  onValidityChange,
 }) => {
   const texts = useGetTextsByLocale(GANTT_SETTINGS_MODAL_TEXTS);
   const [form] = Form.useForm<FormShape>();
   const isApplyingDraft = useRef(false);
+  const [activeTab, setActiveTab] = React.useState<'bars' | 'issues' | 'filters'>('bars');
 
   const { fields, isLoading: isLoadingFields } = useGetFields();
   const { statuses, isLoading: isLoadingStatuses } = useGetStatuses();
@@ -438,7 +1702,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
     }));
   }, [fields]);
 
-  const exclusionFieldOptions = useMemo(() => {
+  const allFieldOptions = useMemo(() => {
     return (fields ?? []).map(f => ({
       value: f.id,
       label: fieldOptionLabel(f),
@@ -464,14 +1728,55 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
     }));
   }, [linkTypes]);
 
+  const initialValues = useMemo(() => (draft ? draftToFormValues(draft) : undefined), [draft]);
+
   useEffect(() => {
-    if (!draft) return;
+    if (!draft) {
+      onValidityChange?.({ hasErrors: false, errorsByPath: {} });
+      return;
+    }
     isApplyingDraft.current = true;
     form.setFieldsValue(draftToFormValues(draft));
     queueMicrotask(() => {
       isApplyingDraft.current = false;
+      // Fire a full validation pass so error styles, Save gating, and tab badges reflect the
+      // freshly loaded draft. AntD doesn't run rules on untouched fields by default, so this
+      // is what makes invalid JQL go red on first render.
+      void form
+        .validateFields()
+        .catch(() => undefined)
+        .finally(() => {
+          if (!onValidityChange) return;
+          const allErrors = form.getFieldsError();
+          const errorsByPath: Record<string, number> = {};
+          let total = 0;
+          for (const entry of allErrors) {
+            if (entry.errors.length === 0) continue;
+            total += entry.errors.length;
+            const top = String(entry.name[0] ?? '');
+            errorsByPath[top] = (errorsByPath[top] ?? 0) + entry.errors.length;
+          }
+          onValidityChange({ hasErrors: total > 0, errorsByPath });
+        });
     });
-  }, [draft, form]);
+  }, [draft, form, onValidityChange]);
+
+  const reportValidity = useCallback(() => {
+    if (!onValidityChange) return;
+    // antd validates async; wait one tick so the latest rule results are reflected.
+    Promise.resolve().then(() => {
+      const allErrors = form.getFieldsError();
+      const errorsByPath: Record<string, number> = {};
+      let total = 0;
+      for (const entry of allErrors) {
+        if (entry.errors.length === 0) continue;
+        total += entry.errors.length;
+        const top = String(entry.name[0] ?? '');
+        errorsByPath[top] = (errorsByPath[top] ?? 0) + entry.errors.length;
+      }
+      onValidityChange({ hasErrors: total > 0, errorsByPath });
+    });
+  }, [form, onValidityChange]);
 
   const handleValuesChange = useCallback(
     (_changed: Partial<FormShape>, allValues: FormShape) => {
@@ -479,13 +1784,19 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
         return;
       }
       onDraftChange(formValuesToPatch(allValues));
+      reportValidity();
     },
-    [draft, onDraftChange]
+    [draft, onDraftChange, reportValidity]
   );
 
+  const notifyFormChange = useCallback(() => {
+    if (isApplyingDraft.current || !draft) return;
+    onDraftChange(formValuesToPatch(form.getFieldsValue(true) as FormShape));
+  }, [draft, form, onDraftChange]);
+
   const handleScopeLevelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onScopeLevelChange(e.target.value as SettingsScope['level']);
+    (value: string | number) => {
+      onScopeLevelChange(value as SettingsScope['level']);
     },
     [onScopeLevelChange]
   );
@@ -498,452 +1809,360 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
   const selectFilterOption = (input: string, option?: { label?: string }) =>
     (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase());
 
+  // ---- Scope context line ("Editing settings for: TRPA › Bug") with bold tokens ----
+  const scopeContext = useMemo<React.ReactNode>(() => {
+    if (currentScope.level === 'global') return texts.scopeContextGlobal;
+
+    const renderTemplate = (template: string, tokens: Record<string, string>): React.ReactNode => {
+      const parts = template.split(/(\{[^}]+\})/g);
+      return parts.map((part, i) => {
+        const m = /^\{([^}]+)\}$/.exec(part);
+        if (!m) return <React.Fragment key={i}>{part}</React.Fragment>;
+        const value = tokens[m[1]] ?? '?';
+        return <strong key={i}>{value}</strong>;
+      });
+    };
+
+    if (currentScope.level === 'project') {
+      return renderTemplate(texts.scopeContextProject, { project: currentScope.projectKey ?? '?' });
+    }
+    return renderTemplate(texts.scopeContextProjectIssueType, {
+      project: currentScope.projectKey ?? '?',
+      issueType: currentScope.issueType ?? '?',
+    });
+  }, [currentScope, texts]);
+
+  // ---- Tab contents ----
+  const barsTab = (
+    <>
+      {renderDateMappingsSection({
+        listName: 'startMappings',
+        heading: texts.startMapping,
+        hint: texts.startMappingHint,
+        addLabel: texts.addStartMapping,
+        dateLabel: texts.startDateField,
+        statusLabel: texts.startStatus,
+        defaultRow: { source: 'dateField', detail: 'created' },
+        form,
+        sourceOptions,
+        dateFieldOptions,
+        statusOptions,
+        isLoadingFields,
+        isLoadingStatuses,
+        selectFilterOption,
+        texts,
+        notifyFormChange,
+        'data-testid': 'gantt-settings-start-mappings',
+      })}
+      {renderDateMappingsSection({
+        listName: 'endMappings',
+        heading: texts.endMapping,
+        hint: texts.endMappingHint,
+        addLabel: texts.addEndMapping,
+        dateLabel: texts.endDateField,
+        statusLabel: texts.endStatus,
+        defaultRow: { source: 'dateField', detail: 'duedate' },
+        form,
+        sourceOptions,
+        dateFieldOptions,
+        statusOptions,
+        isLoadingFields,
+        isLoadingStatuses,
+        selectFilterOption,
+        texts,
+        notifyFormChange,
+        'data-testid': 'gantt-settings-end-mappings',
+      })}
+      <div style={{ marginBottom: 20 }}>
+        <SectionHeading hint={texts.tooltipFieldsHint}>{texts.tooltipFields}</SectionHeading>
+        <Form.Item name="tooltipFieldIds" style={{ marginBottom: 0 }}>
+          <Select
+            data-testid="gantt-settings-tooltip-fields-select"
+            virtual={false}
+            mode="multiple"
+            showSearch
+            optionFilterProp="label"
+            filterOption={selectFilterOption}
+            placeholder={texts.selectPlaceholder}
+            loading={isLoadingFields}
+            notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+            options={tooltipFieldOptions}
+          />
+        </Form.Item>
+      </div>
+      {renderColorRulesSection({
+        form,
+        texts,
+        fieldOptions: allFieldOptions,
+        isLoadingFields,
+        selectFilterOption,
+        handleValuesChange,
+      })}
+    </>
+  );
+
+  const issuesTab = (
+    <>
+      <SectionHeading hint={texts.issueInclusionHint}>{texts.issueInclusionLegend}</SectionHeading>
+      <div data-testid="gantt-settings-inclusion-list">
+        <InclusionSwitchRow
+          name="includeSubtasks"
+          label={texts.includeSubtasks}
+          description={texts.includeSubtasksHint}
+        />
+        <InclusionSwitchRow
+          name="includeEpicChildren"
+          label={texts.includeEpicChildren}
+          description={texts.includeEpicChildrenHint}
+        />
+        <InclusionSwitchRow
+          name="includeIssueLinks"
+          label={texts.includeIssueLinks}
+          description={texts.includeIssueLinksHint}
+        />
+      </div>
+      <Form.Item noStyle shouldUpdate={(prev, cur) => prev.includeIssueLinks !== cur.includeIssueLinks}>
+        {() =>
+          form.getFieldValue('includeIssueLinks')
+            ? renderIssueLinkTypesSection({
+                texts,
+                linkTypeOptions: issueLinkTypeOptions,
+                isLoadingLinkTypes,
+                selectFilterOption,
+              })
+            : null
+        }
+      </Form.Item>
+    </>
+  );
+
+  const filtersTab = (
+    <>
+      {renderQuickFiltersSection({
+        form,
+        texts,
+        fieldOptions: allFieldOptions,
+        isLoadingFields,
+        selectFilterOption,
+      })}
+      {renderExclusionFiltersSection({
+        form,
+        texts,
+        fieldOptions: allFieldOptions,
+        isLoadingFields,
+        selectFilterOption,
+      })}
+    </>
+  );
+
+  // Wrap content in `data-jh-gantt-root` so any leaked Jira CSS or scoped overrides work
+  // (this matters when the modal is rendered outside the Gantt container, e.g. in Storybook).
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-      <div role="radiogroup" aria-label={texts.scopeLegend}>
-        <div style={{ marginBottom: 8, fontWeight: 500 }}>{texts.scopeLegend}</div>
-        <Radio.Group value={currentScope.level} onChange={handleScopeLevelChange}>
-          <Radio value="global">{texts.scopeGlobal}</Radio>
-          <Radio value="project">{texts.scopeProject}</Radio>
-          <Radio value="projectIssueType">{texts.scopeProjectIssueType}</Radio>
-        </Radio.Group>
+    <div data-jh-gantt-root="settings-modal" style={{ width: '100%' }}>
+      <SectionHeading>{texts.scopeLegend}</SectionHeading>
+      <Segmented
+        value={currentScope.level}
+        onChange={handleScopeLevelChange}
+        options={[
+          { value: 'global', label: texts.scopeGlobal },
+          { value: 'project', label: texts.scopeProject },
+          { value: 'projectIssueType', label: texts.scopeProjectIssueType },
+        ]}
+      />
+      <div
+        data-testid="gantt-settings-scope-context"
+        style={{
+          marginTop: 6,
+          fontSize: 12,
+          color: 'var(--ant-color-text-secondary, #6b778c)',
+        }}
+      >
+        {scopeContext}
       </div>
 
+      <div style={{ height: 1, background: 'var(--ant-color-split, #f0f0f0)', margin: '12px 0' }} />
+
       {!draft ? (
-        <span>{texts.noDraft}</span>
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{texts.noDraftTitle}</div>
+              <div style={{ fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>
+                {texts.noDraftDescription}
+              </div>
+            </div>
+          }
+        >
+          {onCopyFrom ? (
+            <Button type="primary" icon={<CopyOutlined />} onClick={onCopyFrom}>
+              {texts.copyFrom}
+            </Button>
+          ) : null}
+        </Empty>
       ) : (
         <Form
           form={form}
           layout="vertical"
           onValuesChange={handleValuesChange}
-          initialValues={draftToFormValues(draft)}
+          initialValues={initialValues}
+          onKeyDownCapture={stopJiraHotkeys}
+          onKeyUpCapture={stopJiraHotkeys}
         >
-          <div style={{ fontWeight: 500, marginBottom: 8 }}>{texts.startMapping}</div>
-          <Space wrap style={{ width: '100%' }} align="start">
-            <Form.Item
-              name="startSource"
-              label={texts.mappingSource}
-              rules={[{ required: true }]}
-              style={{ minWidth: 200 }}
-            >
-              <Select virtual={false} options={sourceOptions} />
-            </Form.Item>
-            <Form.Item noStyle shouldUpdate={(prev, cur) => prev.startSource !== cur.startSource}>
-              {() =>
-                form.getFieldValue('startSource') !== 'statusTransition' ? (
-                  <Form.Item
-                    name="startDetail"
-                    label={texts.startDateField}
-                    rules={[{ required: true }]}
-                    style={{ flex: 1, minWidth: 200 }}
-                  >
-                    <Select
-                      virtual={false}
-                      showSearch
-                      optionFilterProp="label"
-                      filterOption={selectFilterOption}
-                      placeholder={texts.selectPlaceholder}
-                      loading={isLoadingFields}
-                      notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-                      options={dateFieldOptions}
-                      style={{ minWidth: 260 }}
-                    />
-                  </Form.Item>
-                ) : (
-                  <Form.Item
-                    name="startDetail"
-                    label={texts.startStatus}
-                    rules={[{ required: true }]}
-                    style={{ flex: 1, minWidth: 200 }}
-                  >
-                    <Select
-                      virtual={false}
-                      showSearch
-                      optionFilterProp="label"
-                      filterOption={selectFilterOption}
-                      placeholder={texts.selectPlaceholder}
-                      loading={isLoadingStatuses}
-                      notFoundContent={isLoadingStatuses ? <Spin size="small" /> : null}
-                      options={statusOptions}
-                      style={{ minWidth: 260 }}
-                    />
-                  </Form.Item>
-                )
+          <Form.Item noStyle shouldUpdate={() => true}>
+            {() => {
+              const errorEntries = form.getFieldsError().filter(e => e.errors.length > 0);
+              if (errorEntries.length === 0) return null;
+              const total = errorEntries.reduce((s, e) => s + e.errors.length, 0);
+
+              type TabKey = 'bars' | 'issues' | 'filters';
+              const tabsWithErrors = new Set<TabKey>();
+              for (const entry of errorEntries) {
+                const top = String(entry.name[0] ?? '');
+                if (top === 'quickFilters' || top === 'exclusionFilters') tabsWithErrors.add('filters');
+                else if (top === 'issueLinkRows') tabsWithErrors.add('issues');
+                else tabsWithErrors.add('bars');
               }
-            </Form.Item>
-          </Space>
 
-          <div style={{ fontWeight: 500, marginBottom: 8 }}>{texts.endMapping}</div>
-          <Space wrap style={{ width: '100%' }} align="start">
-            <Form.Item
-              name="endSource"
-              label={texts.mappingSource}
-              rules={[{ required: true }]}
-              style={{ minWidth: 200 }}
-            >
-              <Select virtual={false} options={sourceOptions} />
-            </Form.Item>
-            <Form.Item noStyle shouldUpdate={(prev, cur) => prev.endSource !== cur.endSource}>
-              {() =>
-                form.getFieldValue('endSource') !== 'statusTransition' ? (
-                  <Form.Item
-                    name="endDetail"
-                    label={texts.endDateField}
-                    rules={[{ required: true }]}
-                    style={{ flex: 1, minWidth: 200 }}
-                  >
-                    <Select
-                      virtual={false}
-                      showSearch
-                      optionFilterProp="label"
-                      filterOption={selectFilterOption}
-                      placeholder={texts.selectPlaceholder}
-                      loading={isLoadingFields}
-                      notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-                      options={dateFieldOptions}
-                      style={{ minWidth: 260 }}
-                    />
-                  </Form.Item>
-                ) : (
-                  <Form.Item
-                    name="endDetail"
-                    label={texts.endStatus}
-                    rules={[{ required: true }]}
-                    style={{ flex: 1, minWidth: 200 }}
-                  >
-                    <Select
-                      virtual={false}
-                      showSearch
-                      optionFilterProp="label"
-                      filterOption={selectFilterOption}
-                      placeholder={texts.selectPlaceholder}
-                      loading={isLoadingStatuses}
-                      notFoundContent={isLoadingStatuses ? <Spin size="small" /> : null}
-                      options={statusOptions}
-                      style={{ minWidth: 260 }}
-                    />
-                  </Form.Item>
-                )
-              }
-            </Form.Item>
-          </Space>
+              const tabLabels: Record<TabKey, string> = {
+                bars: texts.tabBars,
+                issues: texts.tabIssues,
+                filters: texts.tabFilters,
+              };
 
-          <Form.Item name="tooltipFieldIds" label={texts.tooltipFields}>
-            <Select
-              data-testid="gantt-settings-tooltip-fields-select"
-              virtual={false}
-              mode="multiple"
-              showSearch
-              optionFilterProp="label"
-              filterOption={selectFilterOption}
-              placeholder={texts.selectPlaceholder}
-              loading={isLoadingFields}
-              notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-              options={tooltipFieldOptions}
-            />
-          </Form.Item>
-
-          <div style={{ fontWeight: 500, marginBottom: 8 }}>{texts.colorRulesLegend}</div>
-          <Form.List name="colorRules">
-            {(listFields, { add, remove }) => (
-              <>
-                {listFields.map(({ key, name, ...restField }) => (
-                  <Space key={key} wrap align="start" style={{ display: 'flex', marginBottom: 8, width: '100%' }}>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'selectorMode']}
-                      label={texts.mappingSource}
-                      rules={[{ required: true }]}
-                      style={{ marginBottom: 0, minWidth: 160 }}
-                    >
-                      <Select
-                        virtual={false}
-                        options={[
-                          { value: 'field' as const, label: texts.colorRuleModeField },
-                          { value: 'jql' as const, label: texts.colorRuleModeJql },
-                        ]}
-                      />
-                    </Form.Item>
-                    <Form.Item noStyle dependencies={[['colorRules', name, 'selectorMode']]}>
-                      {() =>
-                        form.getFieldValue(['colorRules', name, 'selectorMode']) === 'field' ? (
-                          <Space wrap align="start">
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'selectorFieldId']}
-                              label={texts.colorRuleField}
-                              style={{ marginBottom: 0, minWidth: 200 }}
-                            >
-                              <Select
-                                virtual={false}
-                                showSearch
-                                optionFilterProp="label"
-                                filterOption={selectFilterOption}
-                                placeholder={texts.selectPlaceholder}
-                                loading={isLoadingFields}
-                                notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-                                options={exclusionFieldOptions}
-                                style={{ minWidth: 220 }}
-                              />
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'selectorValue']}
-                              label={texts.colorRuleValue}
-                              style={{ marginBottom: 0, minWidth: 160 }}
-                            >
-                              <Input autoComplete="off" />
-                            </Form.Item>
-                          </Space>
-                        ) : (
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'selectorJql']}
-                            label={texts.colorRuleJql}
-                            style={{ marginBottom: 0, flex: 1, minWidth: 200 }}
-                          >
-                            <Input autoComplete="off" />
-                          </Form.Item>
-                        )
-                      }
-                    </Form.Item>
-                    <Form.Item {...restField} name={[name, 'color']} rules={[{ required: true }]} hidden>
-                      <input type="hidden" />
-                    </Form.Item>
-                    <Form.Item label={texts.colorRuleColor} style={{ marginBottom: 0, minWidth: 160 }}>
-                      <ColorPicker
-                        value={form.getFieldValue(['colorRules', name, 'color'])}
-                        onChange={color => {
-                          const hexStr = typeof color === 'string' ? color : color.toHexString();
-                          form.setFieldValue(['colorRules', name, 'color'], hexStr);
-                          const allValues = form.getFieldsValue(true) as FormShape;
-                          handleValuesChange({}, allValues);
-                        }}
-                        showText
-                        size="small"
-                      />
-                    </Form.Item>
-                    <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      aria-label={texts.removeColorRule}
-                      onClick={() => remove(name)}
-                    />
-                  </Space>
-                ))}
+              const tabKeys = [...tabsWithErrors];
+              // Render each tab name as a link that jumps focus there. Sentence is constructed
+              // with grammatically distinct copy for the single-tab vs multi-tab case (round-4 fix).
+              const renderTabLink = (key: TabKey) => (
                 <Button
-                  type="dashed"
-                  onClick={() =>
-                    add({
-                      selectorMode: 'field',
-                      selectorFieldId: '',
-                      selectorValue: '',
-                      selectorJql: '',
-                      color: '#FF5630',
-                    })
-                  }
-                  block
-                  icon={<PlusOutlined />}
+                  key={key}
+                  type="link"
+                  size="small"
+                  style={{ padding: 0, height: 'auto', fontWeight: 600 }}
+                  onClick={() => setActiveTab(key)}
                 >
-                  {texts.addColorRule}
+                  {tabLabels[key]}
                 </Button>
-              </>
-            )}
-          </Form.List>
+              );
 
-          <div style={{ fontWeight: 500, marginBottom: 8 }}>{texts.issueInclusionLegend}</div>
-          <Form.Item name="includeSubtasks" label={texts.includeSubtasks} valuePropName="checked">
-            <Switch />
-          </Form.Item>
-          <Form.Item name="includeEpicChildren" label={texts.includeEpicChildren} valuePropName="checked">
-            <Switch />
-          </Form.Item>
-          <Form.Item name="includeIssueLinks" label={texts.includeIssueLinks} valuePropName="checked">
-            <Switch />
-          </Form.Item>
-
-          <Form.Item noStyle shouldUpdate={(prev, cur) => prev.includeIssueLinks !== cur.includeIssueLinks}>
-            {() =>
-              form.getFieldValue('includeIssueLinks') ? (
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ marginBottom: 8, color: 'var(--ant-color-text-secondary)' }}>
-                    {texts.issueLinkTypesHint}
-                  </div>
-                  <Form.List name="issueLinkRows">
-                    {(fields, { add, remove }) => (
-                      <>
-                        {fields.map(({ key, name, ...restField }) => (
-                          <Space
-                            key={key}
-                            wrap
-                            align="center"
-                            style={{ display: 'flex', marginBottom: 8, width: '100%' }}
-                          >
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'enabled']}
-                              valuePropName="checked"
-                              style={{ marginBottom: 0 }}
-                              label={texts.includeLinkTypeRow}
-                            >
-                              <Checkbox />
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'id']}
-                              style={{ marginBottom: 0, flex: 1, minWidth: 160 }}
-                              label={texts.linkTypeId}
-                            >
-                              <Select
-                                data-testid={`gantt-settings-link-type-select-${name}`}
-                                virtual={false}
-                                showSearch
-                                optionFilterProp="label"
-                                filterOption={selectFilterOption}
-                                placeholder={texts.selectPlaceholder}
-                                loading={isLoadingLinkTypes}
-                                notFoundContent={isLoadingLinkTypes ? <Spin size="small" /> : null}
-                                options={issueLinkTypeOptions}
-                              />
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'direction']}
-                              style={{ marginBottom: 0, minWidth: 140 }}
-                              label={texts.linkDirection}
-                            >
-                              <Select
-                                virtual={false}
-                                options={[
-                                  { value: 'inward' as const, label: texts.directionInward },
-                                  { value: 'outward' as const, label: texts.directionOutward },
-                                ]}
-                              />
-                            </Form.Item>
-                            <Button
-                              type="text"
-                              danger
-                              icon={<DeleteOutlined />}
-                              aria-label={texts.removeLinkTypeRow}
-                              onClick={() => remove(name)}
-                            />
-                          </Space>
+              let message: React.ReactNode;
+              if (tabKeys.length === 1) {
+                const template = total === 1 ? texts.errorSummaryOneSingleTab : texts.errorSummaryManySingleTab;
+                const parts = template.split(/(\{tabs\}|\{count\})/g);
+                message = parts.map((part, i) => {
+                  if (part === '{tabs}') return <React.Fragment key={i}>{renderTabLink(tabKeys[0])}</React.Fragment>;
+                  if (part === '{count}') return <React.Fragment key={i}>{total}</React.Fragment>;
+                  return <React.Fragment key={i}>{part}</React.Fragment>;
+                });
+              } else {
+                const template = texts.errorSummaryManyTabs;
+                const parts = template.split(/(\{tabs\}|\{count\})/g);
+                message = parts.map((part, i) => {
+                  if (part === '{count}') return <React.Fragment key={i}>{total}</React.Fragment>;
+                  if (part === '{tabs}') {
+                    return (
+                      <React.Fragment key={i}>
+                        {tabKeys.map((k, idx) => (
+                          <React.Fragment key={k}>
+                            {idx > 0 ? ', ' : ''}
+                            {renderTabLink(k)}
+                          </React.Fragment>
                         ))}
-                        <Button
-                          type="dashed"
-                          onClick={() => add({ enabled: true, id: '', direction: 'outward' })}
-                          block
-                          icon={<PlusOutlined />}
-                        >
-                          {texts.addLinkTypeRow}
-                        </Button>
-                      </>
-                    )}
-                  </Form.List>
-                </div>
-              ) : null
-            }
-          </Form.Item>
+                      </React.Fragment>
+                    );
+                  }
+                  return <React.Fragment key={i}>{part}</React.Fragment>;
+                });
+              }
 
-          <Form.Item name="hideCompletedTasks" label={texts.hideCompletedTasks} valuePropName="checked">
-            <Checkbox />
+              return (
+                <Alert
+                  type="error"
+                  showIcon
+                  message={message}
+                  style={{ marginBottom: 12 }}
+                  data-testid="gantt-settings-error-summary"
+                />
+              );
+            }}
           </Form.Item>
+          <Form.Item
+            noStyle
+            shouldUpdate={() => true /* re-render every keystroke so tab counts/error badges stay live */}
+          >
+            {() => {
+              const errorsByTopField = (paths: string[]) =>
+                form
+                  .getFieldsError()
+                  .filter(e => paths.includes(String(e.name[0] ?? '')))
+                  .reduce((sum, e) => sum + e.errors.length, 0);
+              const filtersErrors = errorsByTopField(['quickFilters', 'exclusionFilters']);
+              const barsErrors = errorsByTopField(['startMappings', 'endMappings', 'colorRules']);
+              const issuesErrors = errorsByTopField(['issueLinkRows']);
 
-          <div style={{ fontWeight: 500, marginBottom: 8 }}>
-            {texts.exclusionLegend}{' '}
-            <Tooltip title={texts.exclusionOrHint}>
-              <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)' }} />
-            </Tooltip>
-          </div>
-          <Form.List name="exclusionFilters">
-            {(listFields, { add, remove }) => (
-              <>
-                {listFields.map(({ key, name, ...restField }) => (
-                  <Space key={key} wrap align="start" style={{ display: 'flex', marginBottom: 8, width: '100%' }}>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'mode']}
-                      label={texts.mappingSource}
-                      rules={[{ required: true }]}
-                      style={{ marginBottom: 0, minWidth: 160 }}
-                    >
-                      <Select
-                        virtual={false}
-                        options={[
-                          { value: 'field' as const, label: texts.exclusionModeField },
-                          { value: 'jql' as const, label: texts.exclusionModeJql },
-                        ]}
-                      />
-                    </Form.Item>
-                    <Form.Item noStyle dependencies={[['exclusionFilters', name, 'mode']]}>
-                      {() =>
-                        form.getFieldValue(['exclusionFilters', name, 'mode']) === 'field' ? (
-                          <Space wrap align="start">
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'fieldId']}
-                              label={texts.exclusionFieldId}
-                              style={{ marginBottom: 0, minWidth: 200 }}
-                            >
-                              <Select
-                                virtual={false}
-                                showSearch
-                                optionFilterProp="label"
-                                filterOption={selectFilterOption}
-                                placeholder={texts.selectPlaceholder}
-                                loading={isLoadingFields}
-                                notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-                                options={exclusionFieldOptions}
-                                style={{ minWidth: 220 }}
-                              />
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'value']}
-                              label={texts.exclusionValue}
-                              style={{ marginBottom: 0, minWidth: 160 }}
-                            >
-                              <Input autoComplete="off" />
-                            </Form.Item>
-                          </Space>
-                        ) : (
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'jql']}
-                            label={texts.exclusionJql}
-                            style={{ marginBottom: 0, flex: 1, minWidth: 200 }}
-                          >
-                            <Input autoComplete="off" />
-                          </Form.Item>
-                        )
-                      }
-                    </Form.Item>
-                    <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      aria-label={texts.removeExclusionFilter}
-                      onClick={() => remove(name)}
-                    />
-                  </Space>
-                ))}
-                <Button
-                  type="dashed"
-                  onClick={() => add({ mode: 'field', fieldId: '', value: '', jql: '' })}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  {texts.addExclusionFilter}
-                </Button>
-              </>
-            )}
-          </Form.List>
+              // Single-purpose error counter: red badge IFF there are validation errors in that tab.
+              // We deliberately do NOT show neutral item counts — that overloaded the same visual
+              // affordance with two different meanings (round-3 review).
+              const renderErrorBadge = (count: number) =>
+                count > 0 ? (
+                  <Tag bordered={false} color="error" style={{ marginLeft: 6, marginRight: 0 }}>
+                    {count}
+                  </Tag>
+                ) : null;
+
+              return (
+                <Tabs
+                  activeKey={activeTab}
+                  onChange={k => setActiveTab(k as 'bars' | 'issues' | 'filters')}
+                  items={[
+                    {
+                      key: 'bars',
+                      label: (
+                        <span>
+                          <BarChartOutlined style={{ marginRight: 6 }} />
+                          {texts.tabBars}
+                          {renderErrorBadge(barsErrors)}
+                        </span>
+                      ),
+                      children: barsTab,
+                      forceRender: true,
+                    },
+                    {
+                      key: 'issues',
+                      label: (
+                        <span>
+                          <BranchesOutlined style={{ marginRight: 6 }} />
+                          {texts.tabIssues}
+                          {renderErrorBadge(issuesErrors)}
+                        </span>
+                      ),
+                      children: issuesTab,
+                      forceRender: true,
+                    },
+                    {
+                      key: 'filters',
+                      label: (
+                        <span>
+                          <FilterOutlined style={{ marginRight: 6 }} />
+                          {texts.tabFilters}
+                          {renderErrorBadge(filtersErrors)}
+                        </span>
+                      ),
+                      children: filtersTab,
+                      forceRender: true,
+                    },
+                  ]}
+                />
+              );
+            }}
+          </Form.Item>
         </Form>
       )}
-    </Space>
+    </div>
   );
 };
+
+// ---------- Modal wrapper ----------
 
 export interface GanttSettingsModalProps {
   visible: boolean;
@@ -968,6 +2187,20 @@ export const GanttSettingsModal: React.FC<GanttSettingsModalProps> = ({
   onCopyFrom,
 }) => {
   const texts = useGetTextsByLocale(GANTT_SETTINGS_MODAL_TEXTS);
+  const [validity, setValidity] = React.useState<GanttSettingsValidityState>({
+    hasErrors: false,
+    errorsByPath: {},
+  });
+
+  // Reset validity whenever the modal closes/reopens so a stale error state doesn't disable Save.
+  useEffect(() => {
+    if (!visible) {
+      setValidity({ hasErrors: false, errorsByPath: {} });
+    }
+  }, [visible]);
+
+  const saveDisabled = !draft || validity.hasErrors;
+  const saveTooltip = !draft ? texts.noDraftTitle : validity.hasErrors ? texts.saveDisabledHasErrors : '';
 
   return (
     <Modal
@@ -975,27 +2208,41 @@ export const GanttSettingsModal: React.FC<GanttSettingsModalProps> = ({
       title={texts.title}
       onCancel={onCancel}
       zIndex={1010}
-      width={640}
+      width={760}
       maskClosable={false}
       destroyOnClose
       getContainer={false}
-      footer={[
-        <Button key="copy" onClick={onCopyFrom}>
-          {texts.copyFrom}
-        </Button>,
-        <Button key="cancel" onClick={onCancel}>
-          {texts.cancel}
-        </Button>,
-        <Button key="save" type="primary" onClick={onSave} disabled={!draft}>
-          {texts.save}
-        </Button>,
-      ]}
+      styles={{ body: { paddingTop: 8 } }}
+      footer={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <Tooltip title={texts.copyFromHint}>
+            <Button key="copy" icon={<CopyOutlined />} onClick={onCopyFrom}>
+              {texts.copyFrom}
+            </Button>
+          </Tooltip>
+          <div style={{ display: 'inline-flex', gap: 8 }}>
+            <Button key="cancel" onClick={onCancel}>
+              {texts.cancel}
+            </Button>
+            <Tooltip title={saveTooltip}>
+              {/* span wrapper so Tooltip works on a disabled Button */}
+              <span>
+                <Button key="save" type="primary" onClick={onSave} disabled={saveDisabled}>
+                  {texts.save}
+                </Button>
+              </span>
+            </Tooltip>
+          </div>
+        </div>
+      }
     >
       <GanttSettingsFormContent
         draft={draft}
         currentScope={currentScope}
         onDraftChange={onDraftChange}
         onScopeLevelChange={onScopeLevelChange}
+        onCopyFrom={onCopyFrom}
+        onValidityChange={setValidity}
       />
     </Modal>
   );

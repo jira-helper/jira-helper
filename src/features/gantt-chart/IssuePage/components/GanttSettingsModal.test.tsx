@@ -3,13 +3,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { globalContainer } from 'dioma';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
-import { useJiraFieldsStore } from 'src/shared/jira/fields/jiraFieldsStore';
+import { useJiraFieldsStore } from 'src/infrastructure/jira/fields/jiraFieldsStore';
 import { useJiraStatusesStore } from 'src/shared/jira/stores/jiraStatusesStore';
-import { useJiraIssueLinkTypesStore } from 'src/shared/jira/stores/jiraIssueLinkTypesStore';
-import type { JiraField, JiraIssueLinkType, JiraStatus } from 'src/shared/jira/types';
+import { useJiraIssueLinkTypesStore } from 'src/infrastructure/jira/stores/jiraIssueLinkTypesStore';
+import type { JiraField, JiraIssueLinkType, JiraStatus } from 'src/infrastructure/jira/types';
 import type { GanttScopeSettings, SettingsScope } from '../../types';
 import { GanttSettingsModal } from './GanttSettingsModal';
 
@@ -115,8 +115,8 @@ const mockLinkTypes: JiraIssueLinkType[] = [
 ];
 
 const baseDraft: GanttScopeSettings = {
-  startMapping: { source: 'dateField', fieldId: 'created' },
-  endMapping: { source: 'dateField', fieldId: 'duedate' },
+  startMappings: [{ source: 'dateField', fieldId: 'created' }],
+  endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
   colorRules: [],
   tooltipFieldIds: ['summary', 'status'],
   exclusionFilters: [{ mode: 'field', fieldId: 'issuetype', value: 'Bug' }],
@@ -152,6 +152,17 @@ function openAntSelect(testId: string) {
   const selector = root.querySelector('.ant-select-selector');
   expect(selector).toBeTruthy();
   fireEvent.mouseDown(selector!);
+}
+
+/**
+ * Activate one of the settings modal tabs (Bars / Issues / Filters).
+ * The modal renders all tabs (forceRender) but inactive panels are display:none,
+ * which hides them from accessibility queries — so tests must activate the tab
+ * before querying for elements inside it.
+ */
+async function activateTab(name: RegExp) {
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('tab', { name }));
 }
 
 function renderModal(overrides: Partial<React.ComponentProps<typeof GanttSettingsModal>> = {}) {
@@ -219,7 +230,7 @@ describe('GanttSettingsModal', () => {
     const user = userEvent.setup();
     const props = renderModal();
 
-    await user.click(screen.getByRole('button', { name: 'Copy from…' }));
+    await user.click(screen.getByRole('button', { name: /copy from/i }));
 
     expect(props.onCopyFrom).toHaveBeenCalledTimes(1);
   });
@@ -244,7 +255,11 @@ describe('GanttSettingsModal', () => {
     const user = userEvent.setup();
     const props = renderModal();
 
-    await user.click(screen.getByRole('radio', { name: 'Global' }));
+    const globalOption = screen
+      .getAllByRole('option')
+      .find(o => o.getAttribute('title') === 'Global' || o.textContent === 'Global');
+    expect(globalOption).toBeTruthy();
+    await user.click(globalOption!);
 
     expect(props.onScopeLevelChange).toHaveBeenCalledWith('global');
   });
@@ -262,8 +277,9 @@ describe('GanttSettingsModal', () => {
     });
   });
 
-  it('renders issue inclusion switches from draft', () => {
+  it('renders issue inclusion switches from draft', async () => {
     renderModal();
+    await activateTab(/issues/i);
 
     expect(screen.getByRole('switch', { name: 'Include subtasks' })).toBeChecked();
     expect(screen.getByRole('switch', { name: 'Include epic children' })).not.toBeChecked();
@@ -273,6 +289,7 @@ describe('GanttSettingsModal', () => {
   it('calls onDraftChange when Include epic children is toggled', async () => {
     const user = userEvent.setup();
     const props = renderModal();
+    await activateTab(/issues/i);
 
     await user.click(screen.getByRole('switch', { name: 'Include epic children' }));
 
@@ -284,6 +301,7 @@ describe('GanttSettingsModal', () => {
   it('calls onDraftChange when Include subtasks is toggled off', async () => {
     const user = userEvent.setup();
     const props = renderModal();
+    await activateTab(/issues/i);
 
     await user.click(screen.getByRole('switch', { name: 'Include subtasks' }));
 
@@ -295,6 +313,7 @@ describe('GanttSettingsModal', () => {
   it('shows link type list when Include issue links is on', async () => {
     const user = userEvent.setup();
     renderModal();
+    await activateTab(/issues/i);
 
     expect(screen.queryByRole('button', { name: /add link type/i })).not.toBeInTheDocument();
 
@@ -304,9 +323,34 @@ describe('GanttSettingsModal', () => {
     expect(screen.getByRole('button', { name: /add link type/i })).toBeInTheDocument();
   });
 
+  // A2: when the user changes a date-mapping `source` (e.g. dateField → statusTransition),
+  // the dependent `detail` (fieldId/statusName) must be cleared so we do not save mismatched data.
+  it('resets the detail value when start-mapping source changes from dateField to statusTransition', async () => {
+    const user = userEvent.setup();
+    const props = renderModal();
+
+    const startSection = screen.getByTestId('gantt-settings-start-mappings');
+    const selectors = startSection.querySelectorAll('.ant-select-selector');
+    expect(selectors.length).toBeGreaterThan(0);
+    fireEvent.mouseDown(selectors[0]);
+
+    const option = await screen.findByText('Status transition', { selector: '.ant-select-item-option-content' });
+    await user.click(option);
+
+    await waitFor(() => {
+      const payloads = props.onDraftChange.mock.calls.map(c => c[0] as Partial<GanttScopeSettings>);
+      const last = payloads[payloads.length - 1];
+      expect(last?.startMappings?.[0]).toMatchObject({ source: 'statusTransition' });
+      // The previous `created` field id must NOT carry over as a status name.
+      expect(last?.startMappings?.[0]?.statusName ?? '').toBe('');
+      expect(last?.startMappings?.[0]?.fieldId ?? '').toBe('');
+    });
+  });
+
   it('calls onDraftChange with issueLinkTypesToInclude when row link type is selected', async () => {
     const user = userEvent.setup();
     const props = renderModal({ draft: { ...baseDraft, includeIssueLinks: true } });
+    await activateTab(/issues/i);
 
     await user.click(screen.getByRole('button', { name: /add link type/i }));
 

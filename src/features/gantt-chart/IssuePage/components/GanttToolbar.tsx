@@ -1,60 +1,102 @@
-import React, { useCallback, useId } from 'react';
-import { Button, Space, Switch } from 'antd';
-import { FullscreenOutlined } from '@ant-design/icons';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Button, Divider, Input, Popover, Segmented, Switch, Tag, Tooltip } from 'antd';
+import {
+  CloseCircleOutlined,
+  FullscreenOutlined,
+  MinusOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  SettingOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
-import type { TimeInterval } from '../../types';
+import { parseJql } from 'src/shared/jql/simpleJqlParser';
+import { stopJiraHotkeys } from 'src/shared/dom/stopJiraHotkeys';
+import type { MissingDateIssue, QuickFilter, TimeInterval } from '../../types';
+import type { QuickFilterSearchMode } from '../../models/GanttQuickFiltersModel';
+import { MISSING_DATES_REASON_TO_TEXT_KEY, MISSING_DATES_TEXTS } from './MissingDatesSection';
 
 const INTERVALS: TimeInterval[] = ['hours', 'days', 'weeks', 'months'];
 
 const GANTT_TOOLBAR_TEXTS = {
-  zoomIn: {
-    en: 'Zoom in',
-    ru: 'Увеличить',
+  zoomIn: { en: 'Zoom in', ru: 'Увеличить' },
+  zoomOut: { en: 'Zoom out', ru: 'Уменьшить' },
+  zoomReset: { en: 'Reset zoom', ru: 'Сбросить масштаб' },
+  intervalLegend: { en: 'Time scale', ru: 'Шкала времени' },
+  intervalHours: { en: 'Hours', ru: 'Часы' },
+  intervalDays: { en: 'Days', ru: 'Дни' },
+  intervalWeeks: { en: 'Weeks', ru: 'Недели' },
+  intervalMonths: { en: 'Months', ru: 'Месяцы' },
+  statusBreakdown: { en: 'Status sections', ru: 'Сегменты статусов' },
+  statusBreakdownTooltip: {
+    en: 'Color each bar by status segments instead of one solid color.',
+    ru: 'Окрашивать бары по сегментам статусов вместо одной заливки.',
   },
-  zoomOut: {
-    en: 'Zoom out',
-    ru: 'Уменьшить',
+  statusBreakdownNoHistoryTagOne: {
+    en: 'No history for 1 task',
+    ru: 'Нет истории у 1 задачи',
   },
-  zoomReset: {
-    en: 'Reset zoom',
-    ru: 'Сбросить масштаб',
+  statusBreakdownNoHistoryTagMany: {
+    en: 'No history for {count} of {total} tasks',
+    ru: 'Нет истории у {count} из {total} задач',
   },
-  intervalLegend: {
-    en: 'Time interval',
-    ru: 'Интервал времени',
+  statusBreakdownNoHistoryTooltipHeader: {
+    en: 'Tasks without status history',
+    ru: 'Задачи без истории статусов',
   },
-  intervalHours: {
-    en: 'Hours',
-    ru: 'Часы',
+  statusBreakdownNoHistoryTooltipDescription: {
+    en: 'Status segments are not available for these tasks — their bars use the current status color.',
+    ru: 'Сегменты статусов недоступны для этих задач — их бары окрашены по текущему статусу.',
   },
-  intervalDays: {
-    en: 'Days',
-    ru: 'Дни',
+  statusBreakdownNoHistoryTooltipColIssue: { en: 'Issue', ru: 'Задача' },
+  statusBreakdownNoHistoryTooltipColSummary: { en: 'Summary', ru: 'Название' },
+  statusBreakdownNoHistoryTooltipMore: {
+    en: '… and {count} more',
+    ru: '… и ещё {count}',
   },
-  intervalWeeks: {
-    en: 'Weeks',
-    ru: 'Недели',
+  missingDatesTagOne: {
+    en: '1 task not on chart',
+    ru: '1 задача не на графике',
   },
-  intervalMonths: {
-    en: 'Months',
-    ru: 'Месяцы',
+  missingDatesTagMany: {
+    en: '{count} tasks not on chart',
+    ru: '{count} задач не на графике',
   },
-  statusBreakdown: {
-    en: 'Status breakdown',
-    ru: 'Разбивка по статусам',
+  missingDatesTooltipDescription: {
+    en: 'These issues are not drawn because they have no resolvable dates or are excluded by the current configuration. Full list is also available in the section below.',
+    ru: 'Эти задачи не отображены: у них нет дат либо они исключены текущими настройками. Полный список также доступен в секции ниже.',
   },
-  openSettings: {
-    en: 'Gantt settings',
-    ru: 'Настройки Ганта',
+  missingDatesTooltipColReason: { en: 'Reason', ru: 'Причина' },
+  missingDatesTooltipMore: {
+    en: '… and {count} more',
+    ru: '… и ещё {count}',
   },
-  openInModal: {
-    en: 'Open in modal',
-    ru: 'Открыть в модалке',
+  openSettings: { en: 'Gantt settings', ru: 'Настройки Ганта' },
+  openInModal: { en: 'Open fullscreen', ru: 'Открыть на весь экран' },
+  quickFiltersLegend: { en: 'Quick filters', ru: 'Быстрые фильтры' },
+  quickFiltersSearchPlaceholder: { en: 'Search by key or summary', ru: 'Поиск по ключу или названию' },
+  quickFiltersJqlSearchPlaceholder: {
+    en: 'e.g. assignee = currentUser() AND priority = High',
+    ru: 'например assignee = currentUser() AND priority = High',
   },
-  closeFullscreen: {
-    en: 'Close',
-    ru: 'Закрыть',
+  quickFiltersModeText: { en: 'Text', ru: 'Текст' },
+  quickFiltersModeJql: { en: 'JQL', ru: 'JQL' },
+  quickFiltersModeAriaLabel: { en: 'Quick filter search mode', ru: 'Режим поиска быстрых фильтров' },
+  quickFiltersSaveAsChip: { en: 'Save as quick filter', ru: 'Сохранить как чип' },
+  quickFiltersSavePopoverNameLabel: { en: 'Name', ru: 'Название' },
+  quickFiltersSavePopoverSave: { en: 'Save', ru: 'Сохранить' },
+  quickFiltersSavePopoverCancel: { en: 'Cancel', ru: 'Отмена' },
+  quickFiltersJqlInvalid: { en: 'Invalid JQL', ru: 'Неверный JQL' },
+  quickFiltersJqlInvalidPrefix: { en: 'Invalid JQL: {error}', ru: 'Неверный JQL: {error}' },
+  quickFiltersClearAll: { en: 'Clear quick filters', ru: 'Сбросить быстрые фильтры' },
+  quickFiltersHidden: {
+    en: '{hidden} hidden by quick filters',
+    ru: 'Скрыто быстрыми фильтрами: {hidden}',
+  },
+  quickFiltersEmpty: {
+    en: 'No quick filters configured. Add presets in settings.',
+    ru: 'Быстрые фильтры не настроены. Добавьте пресеты в настройках.',
   },
 } satisfies Texts<
   | 'zoomIn'
@@ -66,9 +108,36 @@ const GANTT_TOOLBAR_TEXTS = {
   | 'intervalWeeks'
   | 'intervalMonths'
   | 'statusBreakdown'
+  | 'statusBreakdownTooltip'
+  | 'statusBreakdownNoHistoryTagOne'
+  | 'statusBreakdownNoHistoryTagMany'
+  | 'statusBreakdownNoHistoryTooltipHeader'
+  | 'statusBreakdownNoHistoryTooltipDescription'
+  | 'statusBreakdownNoHistoryTooltipColIssue'
+  | 'statusBreakdownNoHistoryTooltipColSummary'
+  | 'statusBreakdownNoHistoryTooltipMore'
+  | 'missingDatesTagOne'
+  | 'missingDatesTagMany'
+  | 'missingDatesTooltipDescription'
+  | 'missingDatesTooltipColReason'
+  | 'missingDatesTooltipMore'
   | 'openSettings'
   | 'openInModal'
-  | 'closeFullscreen'
+  | 'quickFiltersLegend'
+  | 'quickFiltersSearchPlaceholder'
+  | 'quickFiltersJqlSearchPlaceholder'
+  | 'quickFiltersModeText'
+  | 'quickFiltersModeJql'
+  | 'quickFiltersModeAriaLabel'
+  | 'quickFiltersSaveAsChip'
+  | 'quickFiltersSavePopoverNameLabel'
+  | 'quickFiltersSavePopoverSave'
+  | 'quickFiltersSavePopoverCancel'
+  | 'quickFiltersJqlInvalid'
+  | 'quickFiltersJqlInvalidPrefix'
+  | 'quickFiltersClearAll'
+  | 'quickFiltersHidden'
+  | 'quickFiltersEmpty'
 >;
 
 const INTERVAL_LABEL_KEYS: Record<TimeInterval, keyof typeof GANTT_TOOLBAR_TEXTS> = {
@@ -82,6 +151,21 @@ export interface GanttToolbarProps {
   zoomLevel: number;
   interval: TimeInterval;
   statusBreakdownEnabled: boolean;
+  /**
+   * Coverage of the status-history feature for currently loaded bars. The tag near the Status
+   * sections switch is shown only when at least one task has no recorded transitions; the
+   * tooltip enumerates those tasks so users know which bars fall back to a single-color fill.
+   */
+  statusBreakdownAvailability?: {
+    total: number;
+    tasksWithoutHistory: ReadonlyArray<{ key: string; summary: string }>;
+  };
+  /**
+   * Issues that the Gantt model rejected (no resolvable dates / excluded by config). Renders a
+   * compact warning tag in the toolbar with a tooltip mirroring {@link MissingDatesSection}, so
+   * users can see *why* the task count is smaller than expected without scrolling.
+   */
+  missingDateIssues?: ReadonlyArray<MissingDateIssue>;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
@@ -90,8 +174,25 @@ export interface GanttToolbarProps {
   onOpenSettings: () => void;
   /** Opens fullscreen modal; omit in modal toolbar. */
   onOpenFullscreen?: () => void;
-  /** Closes fullscreen modal; omit on inline toolbar. */
-  onCloseFullscreen?: () => void;
+  /**
+   * Quick filter presets shown as toggleable chips. Built-in filters are appended by the parent
+   * (toolbar does not know which ids are built-in vs custom — they render identically).
+   */
+  quickFilters: ReadonlyArray<QuickFilter>;
+  /** Currently active filter ids from {@link GanttQuickFiltersModel}; chips render with `processing` state. */
+  activeQuickFilterIds: ReadonlyArray<string>;
+  /** Live search query bound to {@link GanttQuickFiltersModel}. */
+  quickFilterSearch: string;
+  /** Session-only search mode (FR-17). */
+  quickFilterSearchMode: QuickFilterSearchMode;
+  onQuickFilterSearchModeChange: (mode: QuickFilterSearchMode) => void;
+  /** Persist current JQL search as a custom chip (JQL mode only, when {@link onSaveJqlAsQuickFilter} is set). */
+  onSaveJqlAsQuickFilter?: (payload: { name: string; jql: string }) => void;
+  /** Number of bars hidden by the active quick filters / search; renders a hint when > 0. */
+  quickFilterHiddenCount: number;
+  onToggleQuickFilter: (id: string) => void;
+  onQuickFilterSearchChange: (query: string) => void;
+  onClearQuickFilters: () => void;
 }
 
 /** Toolbar above the Gantt chart: zoom, time interval, status breakdown, settings. */
@@ -99,6 +200,8 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
   zoomLevel,
   interval,
   statusBreakdownEnabled,
+  statusBreakdownAvailability,
+  missingDateIssues,
   onZoomIn,
   onZoomOut,
   onZoomReset,
@@ -106,90 +209,563 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
   onToggleStatusBreakdown,
   onOpenSettings,
   onOpenFullscreen,
-  onCloseFullscreen,
+  quickFilters,
+  activeQuickFilterIds,
+  quickFilterSearch,
+  quickFilterSearchMode,
+  onQuickFilterSearchModeChange,
+  onSaveJqlAsQuickFilter,
+  quickFilterHiddenCount,
+  onToggleQuickFilter,
+  onQuickFilterSearchChange,
+  onClearQuickFilters,
 }) => {
-  const intervalLabelId = useId();
   const texts = useGetTextsByLocale(GANTT_TOOLBAR_TEXTS);
+  const missingDatesTexts = useGetTextsByLocale(MISSING_DATES_TEXTS);
+  const zoomPercent = `${Math.round(zoomLevel * 100)}%`;
+  const activeIdSet = useMemo(() => new Set(activeQuickFilterIds), [activeQuickFilterIds]);
+  const hasActiveQuickFilters = activeIdSet.size > 0 || quickFilterSearch !== '';
 
-  const onIntervalInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value as TimeInterval;
-      onIntervalChange(value);
+  const jqlValidation = useMemo(() => {
+    if (quickFilterSearchMode !== 'jql') return { valid: true, error: null as string | null };
+    const t = quickFilterSearch.trim();
+    if (!t) return { valid: true, error: null };
+    try {
+      parseJql(t);
+      return { valid: true, error: null };
+    } catch (e) {
+      return { valid: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }, [quickFilterSearchMode, quickFilterSearch]);
+
+  const [savePopoverOpen, setSavePopoverOpen] = useState(false);
+  const [saveNameDraft, setSaveNameDraft] = useState('');
+
+  const showSaveJqlButton =
+    quickFilterSearchMode === 'jql' &&
+    quickFilterSearch.trim() !== '' &&
+    jqlValidation.valid &&
+    Boolean(onSaveJqlAsQuickFilter);
+
+  const searchPlaceholder =
+    quickFilterSearchMode === 'jql' ? texts.quickFiltersJqlSearchPlaceholder : texts.quickFiltersSearchPlaceholder;
+
+  const handleSavePopoverOpenChange = useCallback(
+    (open: boolean) => {
+      setSavePopoverOpen(open);
+      if (open) {
+        setSaveNameDraft(quickFilterSearch.slice(0, 40));
+      }
+    },
+    [quickFilterSearch]
+  );
+
+  const handleConfirmSaveJql = useCallback(() => {
+    const name = saveNameDraft.trim();
+    if (!name || !onSaveJqlAsQuickFilter) return;
+    onSaveJqlAsQuickFilter({ name, jql: quickFilterSearch });
+    setSavePopoverOpen(false);
+  }, [onSaveJqlAsQuickFilter, quickFilterSearch, saveNameDraft]);
+
+  const intervalOptions = useMemo(
+    () =>
+      INTERVALS.map(iv => ({
+        value: iv,
+        label: texts[INTERVAL_LABEL_KEYS[iv]],
+      })),
+    [texts]
+  );
+
+  const handleIntervalChange = useCallback(
+    (value: string | number) => {
+      onIntervalChange(value as TimeInterval);
     },
     [onIntervalChange]
   );
 
-  const zoomPercent = `${Math.round(zoomLevel * 100)}%`;
-
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-      <Space size="small" wrap>
-        <span>{zoomPercent}</span>
-        <Button type="default" size="small" onClick={onZoomIn}>
-          {texts.zoomIn}
-        </Button>
-        <Button type="default" size="small" onClick={onZoomOut}>
-          {texts.zoomOut}
-        </Button>
-        <Button type="default" size="small" onClick={onZoomReset}>
-          {texts.zoomReset}
-        </Button>
-      </Space>
-
-      <div
-        role="radiogroup"
-        aria-labelledby={intervalLabelId}
-        style={{ margin: 0, padding: '4px 8px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 4 }}
-      >
-        <div id={intervalLabelId} style={{ fontSize: 12, marginBottom: 4 }}>
-          {texts.intervalLegend}
+    <div
+      role="toolbar"
+      aria-label="Gantt toolbar"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+        padding: '8px 12px',
+        background: '#FAFBFC',
+        border: '1px solid #DFE1E6',
+        borderRadius: 6,
+        marginBottom: 8,
+      }}
+    >
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+        <div role="group" aria-label={texts.zoomReset} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Tooltip title={texts.zoomOut}>
+            <Button
+              type="text"
+              size="small"
+              icon={<MinusOutlined aria-hidden />}
+              onClick={onZoomOut}
+              aria-label={texts.zoomOut}
+            />
+          </Tooltip>
+          <Tooltip title={texts.zoomReset}>
+            <Button
+              type="text"
+              size="small"
+              onClick={onZoomReset}
+              aria-label={texts.zoomReset}
+              style={{ minWidth: 52, fontVariantNumeric: 'tabular-nums' }}
+            >
+              {zoomPercent}
+            </Button>
+          </Tooltip>
+          <Tooltip title={texts.zoomIn}>
+            <Button
+              type="text"
+              size="small"
+              icon={<PlusOutlined aria-hidden />}
+              onClick={onZoomIn}
+              aria-label={texts.zoomIn}
+            />
+          </Tooltip>
         </div>
-        <Space size="middle" wrap>
-          {INTERVALS.map(iv => (
-            <label key={iv} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-              <input
-                type="radio"
-                name="gantt-interval"
-                value={iv}
-                checked={interval === iv}
-                onChange={onIntervalInputChange}
+
+        <Divider type="vertical" style={{ height: 22, margin: '0 4px' }} />
+
+        <Tooltip title={texts.intervalLegend}>
+          <Segmented
+            aria-label={texts.intervalLegend}
+            size="small"
+            value={interval}
+            options={intervalOptions}
+            onChange={handleIntervalChange}
+          />
+        </Tooltip>
+
+        <Divider type="vertical" style={{ height: 22, margin: '0 4px' }} />
+
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Tooltip title={texts.statusBreakdownTooltip}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <Switch
+                checked={statusBreakdownEnabled}
+                onChange={() => {
+                  onToggleStatusBreakdown();
+                }}
+                aria-label={texts.statusBreakdown}
+                size="small"
               />
-              <span>{texts[INTERVAL_LABEL_KEYS[iv]]}</span>
+              <span style={{ fontSize: 12, color: '#42526E' }}>{texts.statusBreakdown}</span>
             </label>
-          ))}
-        </Space>
+          </Tooltip>
+          {statusBreakdownEnabled &&
+          statusBreakdownAvailability !== undefined &&
+          statusBreakdownAvailability.tasksWithoutHistory.length > 0
+            ? (() => {
+                const missing = statusBreakdownAvailability.tasksWithoutHistory;
+                const total = statusBreakdownAvailability.total;
+                const tagLabel =
+                  total === 1
+                    ? texts.statusBreakdownNoHistoryTagOne
+                    : texts.statusBreakdownNoHistoryTagMany
+                        .replace('{count}', String(missing.length))
+                        .replace('{total}', String(total));
+                return (
+                  <Tooltip
+                    placement="bottomLeft"
+                    overlayStyle={{ maxWidth: 460 }}
+                    title={
+                      <div data-testid="gantt-no-history-tooltip" style={{ fontSize: 12, lineHeight: 1.4 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                          {texts.statusBreakdownNoHistoryTooltipHeader}
+                        </div>
+                        <div style={{ marginBottom: 8, opacity: 0.85 }}>
+                          {texts.statusBreakdownNoHistoryTooltipDescription}
+                        </div>
+                        <table
+                          style={{
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            fontSize: 12,
+                          }}
+                        >
+                          <thead>
+                            <tr>
+                              <th
+                                scope="col"
+                                style={{
+                                  textAlign: 'left',
+                                  padding: '4px 8px 4px 0',
+                                  borderBottom: '1px solid rgba(255,255,255,0.25)',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {texts.statusBreakdownNoHistoryTooltipColIssue}
+                              </th>
+                              <th
+                                scope="col"
+                                style={{
+                                  textAlign: 'left',
+                                  padding: '4px 0 4px 8px',
+                                  borderBottom: '1px solid rgba(255,255,255,0.25)',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {texts.statusBreakdownNoHistoryTooltipColSummary}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {missing.slice(0, 20).map(t => (
+                              <tr key={t.key}>
+                                <td
+                                  style={{
+                                    padding: '4px 8px 4px 0',
+                                    verticalAlign: 'top',
+                                    fontVariantNumeric: 'tabular-nums',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {t.key}
+                                </td>
+                                <td style={{ padding: '4px 0 4px 8px', verticalAlign: 'top' }}>{t.summary}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {missing.length > 20 ? (
+                          <div style={{ marginTop: 6, opacity: 0.75 }}>
+                            {texts.statusBreakdownNoHistoryTooltipMore.replace('{count}', String(missing.length - 20))}
+                          </div>
+                        ) : null}
+                      </div>
+                    }
+                  >
+                    <Tag
+                      icon={<WarningOutlined aria-hidden />}
+                      color="warning"
+                      tabIndex={0}
+                      role="status"
+                      aria-label={tagLabel}
+                      data-testid="gantt-no-history-tag"
+                      style={{
+                        marginInlineEnd: 0,
+                        fontSize: 11,
+                        lineHeight: '16px',
+                        padding: '0 6px',
+                        cursor: 'help',
+                      }}
+                    >
+                      {tagLabel}
+                    </Tag>
+                  </Tooltip>
+                );
+              })()
+            : null}
+        </div>
+
+        {missingDateIssues && missingDateIssues.length > 0
+          ? (() => {
+              const tagLabel =
+                missingDateIssues.length === 1
+                  ? texts.missingDatesTagOne
+                  : texts.missingDatesTagMany.replace('{count}', String(missingDateIssues.length));
+              const reasonLabel = (issue: MissingDateIssue) =>
+                missingDatesTexts[MISSING_DATES_REASON_TO_TEXT_KEY[issue.reason]];
+              return (
+                <Tooltip
+                  placement="bottomLeft"
+                  overlayStyle={{ maxWidth: 520 }}
+                  title={
+                    <div data-testid="gantt-missing-dates-tooltip" style={{ fontSize: 12, lineHeight: 1.4 }}>
+                      <div style={{ fontWeight: 600, marginBottom: 4 }}>{tagLabel}</div>
+                      <div style={{ marginBottom: 8, opacity: 0.85 }}>{texts.missingDatesTooltipDescription}</div>
+                      <table
+                        style={{
+                          width: '100%',
+                          borderCollapse: 'collapse',
+                          fontSize: 12,
+                        }}
+                      >
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              style={{
+                                textAlign: 'left',
+                                padding: '4px 8px 4px 0',
+                                borderBottom: '1px solid rgba(255,255,255,0.25)',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {missingDatesTexts.colIssue}
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                textAlign: 'left',
+                                padding: '4px 8px',
+                                borderBottom: '1px solid rgba(255,255,255,0.25)',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {missingDatesTexts.colSummary}
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                textAlign: 'left',
+                                padding: '4px 0 4px 8px',
+                                borderBottom: '1px solid rgba(255,255,255,0.25)',
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {texts.missingDatesTooltipColReason}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {missingDateIssues.slice(0, 20).map(issue => (
+                            <tr key={issue.issueKey}>
+                              <td
+                                style={{
+                                  padding: '4px 8px 4px 0',
+                                  verticalAlign: 'top',
+                                  fontVariantNumeric: 'tabular-nums',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {issue.issueKey}
+                              </td>
+                              <td style={{ padding: '4px 8px', verticalAlign: 'top' }}>{issue.summary}</td>
+                              <td
+                                style={{
+                                  padding: '4px 0 4px 8px',
+                                  verticalAlign: 'top',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {reasonLabel(issue)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {missingDateIssues.length > 20 ? (
+                        <div style={{ marginTop: 6, opacity: 0.75 }}>
+                          {texts.missingDatesTooltipMore.replace('{count}', String(missingDateIssues.length - 20))}
+                        </div>
+                      ) : null}
+                    </div>
+                  }
+                >
+                  <Tag
+                    icon={<WarningOutlined aria-hidden />}
+                    color="warning"
+                    tabIndex={0}
+                    role="status"
+                    aria-label={tagLabel}
+                    data-testid="gantt-missing-dates-tag"
+                    style={{
+                      marginInlineEnd: 0,
+                      fontSize: 11,
+                      lineHeight: '16px',
+                      padding: '0 6px',
+                      cursor: 'help',
+                    }}
+                  >
+                    {tagLabel}
+                  </Tag>
+                </Tooltip>
+              );
+            })()
+          : null}
+
+        <div style={{ flex: 1 }} />
+
+        {onOpenFullscreen ? (
+          <Tooltip title={texts.openInModal}>
+            <Button
+              type="text"
+              size="small"
+              icon={<FullscreenOutlined aria-hidden />}
+              onClick={onOpenFullscreen}
+              aria-label={texts.openInModal}
+            />
+          </Tooltip>
+        ) : null}
+
+        <Tooltip title={texts.openSettings}>
+          <Button
+            type="text"
+            size="small"
+            icon={<SettingOutlined aria-hidden />}
+            onClick={onOpenSettings}
+            aria-label={texts.openSettings}
+          />
+        </Tooltip>
       </div>
 
-      <Switch
-        checked={statusBreakdownEnabled}
-        onChange={() => {
-          onToggleStatusBreakdown();
+      <div
+        role="group"
+        aria-label={texts.quickFiltersLegend}
+        data-testid="gantt-quick-filters-row"
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: 6,
+          paddingTop: 4,
+          borderTop: '1px dashed #EBECF0',
         }}
-        aria-label={texts.statusBreakdown}
-        size="small"
-      />
-
-      {onOpenFullscreen ? (
-        <Button
-          type="default"
+      >
+        <Segmented
           size="small"
-          icon={<FullscreenOutlined aria-hidden />}
-          onClick={onOpenFullscreen}
-          aria-label={texts.openInModal}
-        >
-          {texts.openInModal}
-        </Button>
-      ) : null}
+          value={quickFilterSearchMode}
+          aria-label={texts.quickFiltersModeAriaLabel}
+          data-testid="gantt-quick-filters-search-mode"
+          onChange={v => onQuickFilterSearchModeChange(v as QuickFilterSearchMode)}
+          options={[
+            { label: texts.quickFiltersModeText, value: 'text' },
+            { label: texts.quickFiltersModeJql, value: 'jql' },
+          ]}
+        />
 
-      {onCloseFullscreen ? (
-        <Button type="default" size="small" onClick={onCloseFullscreen}>
-          {texts.closeFullscreen}
-        </Button>
-      ) : null}
+        {jqlValidation.error ? (
+          <Tooltip title={texts.quickFiltersJqlInvalidPrefix.replace('{error}', jqlValidation.error)}>
+            <Input
+              size="small"
+              allowClear
+              status="error"
+              prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
+              placeholder={searchPlaceholder}
+              value={quickFilterSearch}
+              onChange={e => onQuickFilterSearchChange(e.target.value)}
+              onKeyDown={stopJiraHotkeys}
+              onKeyUp={stopJiraHotkeys}
+              aria-label={searchPlaceholder}
+              aria-invalid
+              data-testid="gantt-quick-filters-search"
+              style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
+            />
+          </Tooltip>
+        ) : (
+          <Input
+            size="small"
+            allowClear
+            prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
+            placeholder={searchPlaceholder}
+            value={quickFilterSearch}
+            onChange={e => onQuickFilterSearchChange(e.target.value)}
+            onKeyDown={stopJiraHotkeys}
+            onKeyUp={stopJiraHotkeys}
+            aria-label={searchPlaceholder}
+            data-testid="gantt-quick-filters-search"
+            style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
+          />
+        )}
 
-      <Button type="default" size="small" onClick={onOpenSettings}>
-        {texts.openSettings}
-      </Button>
+        {showSaveJqlButton ? (
+          <Popover
+            trigger="click"
+            open={savePopoverOpen}
+            onOpenChange={handleSavePopoverOpenChange}
+            content={
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 240 }}>
+                <label style={{ fontSize: 12, color: '#42526E' }}>
+                  {texts.quickFiltersSavePopoverNameLabel}
+                  <Input
+                    size="small"
+                    style={{ marginTop: 4 }}
+                    value={saveNameDraft}
+                    onChange={e => setSaveNameDraft(e.target.value)}
+                    onKeyDown={e => {
+                      stopJiraHotkeys(e);
+                      if (e.key === 'Enter' && saveNameDraft.trim() !== '') {
+                        e.preventDefault();
+                        handleConfirmSaveJql();
+                      }
+                    }}
+                    onKeyUp={stopJiraHotkeys}
+                    data-testid="gantt-quick-filters-save-name"
+                  />
+                </label>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                  <Button size="small" onClick={() => setSavePopoverOpen(false)}>
+                    {texts.quickFiltersSavePopoverCancel}
+                  </Button>
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={handleConfirmSaveJql}
+                    disabled={saveNameDraft.trim() === ''}
+                    data-testid="gantt-quick-filters-save-confirm"
+                  >
+                    {texts.quickFiltersSavePopoverSave}
+                  </Button>
+                </div>
+              </div>
+            }
+          >
+            <Button size="small" type="default" data-testid="gantt-quick-filters-save-as-chip">
+              {texts.quickFiltersSaveAsChip}
+            </Button>
+          </Popover>
+        ) : null}
+
+        <div style={{ display: 'inline-flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          {quickFilters.length === 0 ? (
+            <span style={{ fontSize: 12, color: '#7A869A' }} data-testid="gantt-quick-filters-empty">
+              {texts.quickFiltersEmpty}
+            </span>
+          ) : (
+            quickFilters.map(qf => {
+              const active = activeIdSet.has(qf.id);
+              return (
+                <Tag.CheckableTag
+                  key={qf.id}
+                  checked={active}
+                  onChange={() => onToggleQuickFilter(qf.id)}
+                  data-testid={`gantt-quick-filter-${qf.id}`}
+                  data-active={active ? 'true' : 'false'}
+                  style={{
+                    fontSize: 12,
+                    lineHeight: '20px',
+                    padding: '0 8px',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  {qf.name}
+                </Tag.CheckableTag>
+              );
+            })
+          )}
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {quickFilterHiddenCount > 0 ? (
+          <span data-testid="gantt-quick-filters-hidden-count" style={{ fontSize: 12, color: '#7A869A' }}>
+            {texts.quickFiltersHidden.replace('{hidden}', String(quickFilterHiddenCount))}
+          </span>
+        ) : null}
+
+        {hasActiveQuickFilters ? (
+          <Tooltip title={texts.quickFiltersClearAll}>
+            <Button
+              type="text"
+              size="small"
+              icon={<CloseCircleOutlined aria-hidden />}
+              onClick={onClearQuickFilters}
+              aria-label={texts.quickFiltersClearAll}
+              data-testid="gantt-quick-filters-clear"
+            />
+          </Tooltip>
+        ) : null}
+      </div>
     </div>
   );
 };

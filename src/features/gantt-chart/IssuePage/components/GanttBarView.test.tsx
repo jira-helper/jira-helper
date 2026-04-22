@@ -68,15 +68,27 @@ describe('GanttBarView', () => {
     expect(container.querySelector('text')).toBeTruthy();
   });
 
-  it('shows the bar label inside the bar', () => {
+  it('shows the bar label inside the bar when there is enough horizontal room', () => {
     const bar = makeBar({ label: 'TASK-42 summary' });
+    render(
+      <svg>
+        <GanttBarView bar={bar} x={0} y={0} width={240} height={20} />
+      </svg>
+    );
+
+    expect(screen.getByText('TASK-42 summary')).toBeInTheDocument();
+  });
+
+  it('truncates the label with an ellipsis when the bar is too narrow', () => {
+    const bar = makeBar({ label: 'TASK-42 a very very long summary that does not fit' });
     render(
       <svg>
         <GanttBarView bar={bar} x={0} y={0} width={100} height={20} />
       </svg>
     );
 
-    expect(screen.getByText('TASK-42 summary')).toBeInTheDocument();
+    const text = document.querySelector('text');
+    expect(text?.textContent ?? '').toMatch(/…$/);
   });
 
   it('calls onMouseEnter with bar and event, and onMouseLeave', () => {
@@ -122,7 +134,7 @@ describe('GanttBarView', () => {
     expect(onClick).toHaveBeenCalledWith(bar);
   });
 
-  it('renders open-ended warning marker when isOpenEnded is true', () => {
+  it('renders open-ended marker when isOpenEnded is true', () => {
     const bar = makeBar({ isOpenEnded: true });
     render(
       <svg>
@@ -130,10 +142,11 @@ describe('GanttBarView', () => {
       </svg>
     );
 
-    expect(screen.getByTestId('gantt-bar-open-ended-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('gantt-bar-open-ended')).toBeInTheDocument();
   });
 
-  it('with showStatusSections uses a single barColor rect when barColor is set', () => {
+  it('status sections take precedence over barColor when showStatusSections is on', () => {
+    // A3: when the user enables status breakdown, custom color rules must be ignored.
     const bar = makeBar({ barColor: '#FF5630' });
     render(
       <svg>
@@ -143,8 +156,9 @@ describe('GanttBarView', () => {
 
     const group = screen.getByTestId('gantt-bar');
     const barRects = group.querySelectorAll('[data-bar-rect="true"]');
-    expect(barRects).toHaveLength(1);
-    expect(barRects[0]).toHaveAttribute('fill', '#FF5630');
+    expect(barRects).toHaveLength(2);
+    expect(barRects[0]).toHaveAttribute('fill', '#DFE1E6');
+    expect(barRects[1]).toHaveAttribute('fill', '#B3D4FF');
   });
 
   it('with showStatusSections draws one rect per section with proportional widths and category colors', () => {

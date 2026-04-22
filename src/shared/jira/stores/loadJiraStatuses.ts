@@ -1,5 +1,5 @@
 import { globalContainer } from 'dioma';
-import { JiraServiceToken } from '../jiraService';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { useJiraStatusesStore } from './jiraStatusesStore';
 
 export const loadJiraStatuses = async (abortSignal: AbortSignal) => {

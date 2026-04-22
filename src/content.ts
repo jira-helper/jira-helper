@@ -60,6 +60,7 @@ import { ganttChartModule } from './features/gantt-chart/module';
 import { GanttChartIssuePage, ganttChartIssuePageToken } from './features/gantt-chart/IssuePage/GanttChartIssuePage';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
+import { LocalSettingsIssuePage, localSettingsIssuePageToken } from './features/local-settings/IssuePage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
 import {
   extensionApiServiceToken,
@@ -127,6 +128,7 @@ function initDiContainer() {
   });
   container.register({ token: diagnosticBoardPageToken, value: new DiagnosticBoardPage(container) });
   container.register({ token: localSettingsBoardPageToken, value: new LocalSettingsBoardPage(container) });
+  container.register({ token: localSettingsIssuePageToken, value: new LocalSettingsIssuePage(container) });
   container.register({ token: boardSettingsBoardPageToken, value: new BoardSettingsBoardPage(container) });
 
   container.register({ token: cardColorsSettingsPageToken, value: new CardColorsSettingsPage(container) });
@@ -193,6 +195,7 @@ async function start() {
     [Routes.ISSUE]: [
       container.inject(markFlaggedIssuesToken),
       container.inject(ganttChartIssuePageToken),
+      container.inject(localSettingsIssuePageToken),
       container.inject(toggleForRightSidebarToken),
     ],
     [Routes.SEARCH]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],

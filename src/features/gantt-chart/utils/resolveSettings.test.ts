@@ -4,8 +4,8 @@ import { buildScopeKey, resolveSettings } from './resolveSettings';
 
 function scopeSettings(overrides: Partial<GanttScopeSettings> = {}): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'created' },
-    endMapping: { source: 'dateField', fieldId: 'duedate' },
+    startMappings: [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],

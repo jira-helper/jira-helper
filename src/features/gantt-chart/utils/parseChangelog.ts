@@ -1,5 +1,5 @@
 import { mapStatusCategoryColorToProgressStatus } from 'src/features/sub-tasks-progress/colorSchemas';
-import type { ExternalIssueMapped } from 'src/shared/jira/types';
+import type { ExternalIssueMapped } from 'src/infrastructure/jira/types';
 import type { StatusTransition } from '../types';
 
 /** Optional status category metadata sometimes present on changelog items (expanded API / future shapes). */

@@ -15,10 +15,19 @@ export const GanttFullscreenModal: React.FC<GanttFullscreenModalProps> = ({ visi
     zIndex={1000}
     footer={null}
     width="100vw"
-    style={{ top: 0, padding: 0, margin: 0, maxWidth: '100vw' }}
+    style={{ top: 0, paddingBottom: 0, margin: 0, maxWidth: '100vw' }}
     styles={{
-      content: { padding: 0, margin: 0, borderRadius: 0 },
-      body: { height: 'calc(100vh - 55px)', overflow: 'auto', padding: 16 },
+      mask: { background: 'rgba(9,30,66,0.6)' },
+      wrapper: { padding: 0, overflow: 'hidden' },
+      content: {
+        padding: 0,
+        margin: 0,
+        borderRadius: 0,
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      body: { flex: 1, minHeight: 0, overflow: 'auto', padding: 16 },
     }}
     closable
     keyboard

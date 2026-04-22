@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'antd/es/modal';
 import { Tabs } from 'antd';
-import { WithDi } from 'src/shared/diContext';
+import { WithDi } from 'src/infrastructure/di/diContext';
 import { globalContainer } from 'dioma';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
 import { useGetTextsByLocale } from 'src/shared/texts';
@@ -12,7 +12,9 @@ import { getIssueSettingsEntry } from './issueSettingsModel';
 
 const ISSUE_SETTINGS_TEXTS = {
   close: { en: 'Close', ru: 'Закрыть' },
-} satisfies Texts<'close'>;
+  buttonLabel: { en: 'jira-helper settings', ru: 'Настройки jira-helper' },
+  buttonText: { en: 'Helper', ru: 'Helper' },
+} satisfies Texts<'close' | 'buttonLabel' | 'buttonText'>;
 
 const IssueSettingsModalInner: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,14 +24,27 @@ const IssueSettingsModalInner: React.FC = () => {
 
   return (
     <>
-      <div
+      <button
+        type="button"
+        className="aui-button"
         data-jh-component="issueSettingsButton"
-        title="Jira Helper Settings"
+        title={texts.buttonLabel}
+        aria-label={texts.buttonLabel}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(true)}
-        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          lineHeight: 1,
+          paddingTop: 3,
+          paddingBottom: 3,
+        }}
       >
-        <Image src={logoUrl} width={24} height={24} />
-      </div>
+        <Image src={logoUrl} width={20} height={20} />
+        <span>{texts.buttonText}</span>
+      </button>
       <Modal open={isOpen} onCancel={() => setIsOpen(false)} destroyOnClose width={720} footer={null} zIndex={1000}>
         <Tabs defaultActiveKey="0">
           {settings.map((setting, idx) => (

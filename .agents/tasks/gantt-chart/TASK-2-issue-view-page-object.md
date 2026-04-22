@@ -1,6 +1,6 @@
 # TASK-2: IssueViewPageObject
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: page-object
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

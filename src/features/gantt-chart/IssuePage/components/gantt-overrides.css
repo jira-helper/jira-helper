@@ -1,0 +1,52 @@
+/*
+ * Defensive overrides for Gantt UI inside Jira Server pages.
+ *
+ * Jira ships its own legacy CSS that leaks into our extension UI and can
+ * defeat low-specificity Ant Design styles (e.g. `.ant-segmented-item-selected`).
+ * These rules use the explicit `[data-jh-gantt-root]` ancestor + `!important`
+ * to win against Jira's stylesheet without affecting rest of the page.
+ */
+
+[data-jh-gantt-root] .ant-segmented {
+  background-color: #f0f2f5 !important;
+  padding: 2px !important;
+  border-radius: 6px !important;
+}
+
+[data-jh-gantt-root] .ant-segmented .ant-segmented-item {
+  color: #42526e !important;
+  background: transparent !important;
+  font-weight: 400 !important;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease !important;
+  border-radius: 4px !important;
+}
+
+[data-jh-gantt-root] .ant-segmented .ant-segmented-item:hover {
+  color: #172b4d !important;
+  background: rgba(9, 30, 66, 0.05) !important;
+}
+
+[data-jh-gantt-root] .ant-segmented .ant-segmented-item-selected,
+[data-jh-gantt-root] .ant-segmented .ant-segmented-item-selected:hover {
+  background-color: #ffffff !important;
+  color: #172b4d !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.18), 0 0 0 1px rgba(9, 30, 66, 0.08) !important;
+}
+
+/* Also ensure the antd "thumb" used during animations matches the selected pill. */
+[data-jh-gantt-root] .ant-segmented .ant-segmented-thumb {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.18), 0 0 0 1px rgba(9, 30, 66, 0.08) !important;
+  border-radius: 4px !important;
+}
+
+/* Section subheadings inside the settings modal — Atlassian-style group caption. */
+[data-jh-gantt-root] .jh-gantt-section-heading {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: #6b778c !important;
+  margin: 6px 0 8px !important;
+}

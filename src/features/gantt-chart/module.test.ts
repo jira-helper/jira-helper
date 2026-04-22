@@ -7,9 +7,9 @@ import {
   ganttViewportModelToken,
   issueViewPageObjectToken,
 } from './tokens';
-import { loggerToken, Logger } from 'src/shared/Logger';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import { IssueViewPageObject } from './page-objects/IssueViewPageObject';
-import { registerJiraServiceInDI } from 'src/shared/jira/jiraService';
+import { registerJiraServiceInDI } from 'src/infrastructure/jira/jiraService';
 
 describe('ganttChartModule', () => {
   let container: Container;

@@ -1,5 +1,5 @@
 import { Token } from 'dioma';
-import { modelEntry, type ModelEntry } from 'src/shared/di/Module';
+import { modelEntry, type ModelEntry } from 'src/infrastructure/di/Module';
 
 export type IssueSetting = {
   title: string;

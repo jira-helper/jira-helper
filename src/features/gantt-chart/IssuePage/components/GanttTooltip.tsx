@@ -16,7 +16,11 @@ const GANTT_TOOLTIP_TEXTS = {
     en: 'End date is not fixed (open-ended).',
     ru: 'Дата окончания не зафиксирована (открытый конец).',
   },
-} satisfies Texts<'start' | 'end' | 'openEndedWarning'>;
+  customColorOverridden: {
+    en: 'Custom color hidden while Status breakdown is on.',
+    ru: 'Кастомный цвет скрыт, пока включён режим «Статусы».',
+  },
+} satisfies Texts<'start' | 'end' | 'openEndedWarning' | 'customColorOverridden'>;
 
 function formatBarDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -25,12 +29,17 @@ function formatBarDate(d: Date): string {
 export interface GanttTooltipProps {
   bar: GanttBar | null;
   position: { x: number; y: number } | null;
+  /**
+   * When true and the bar has a `barColor`, the tooltip shows a small hint that the custom color rule is
+   * being overridden by the status breakdown (see `GanttBarView.computeDrawableRects`).
+   */
+  showStatusSections?: boolean;
 }
 
 /**
  * Hover tooltip for a Gantt bar: issue key, label, dates, optional fields. Presentation-only.
  */
-export function GanttTooltip({ bar, position }: GanttTooltipProps) {
+export function GanttTooltip({ bar, position, showStatusSections = false }: GanttTooltipProps) {
   const texts = useGetTextsByLocale(GANTT_TOOLTIP_TEXTS);
 
   if (!bar || !position) {
@@ -38,6 +47,8 @@ export function GanttTooltip({ bar, position }: GanttTooltipProps) {
   }
 
   const tooltipFieldEntries = Object.entries(bar.tooltipFields);
+  const hasCustomColor = typeof bar.barColor === 'string' && bar.barColor !== '';
+  const showColorOverriddenHint = showStatusSections && hasCustomColor;
 
   return (
     <div
@@ -70,6 +81,18 @@ export function GanttTooltip({ bar, position }: GanttTooltipProps) {
       {bar.isOpenEnded ? (
         <div style={{ marginBottom: tooltipFieldEntries.length > 0 ? 6 : 0, fontStyle: 'italic' }}>
           {texts.openEndedWarning}
+        </div>
+      ) : null}
+      {showColorOverriddenHint ? (
+        <div
+          data-testid="gantt-tooltip-color-overridden"
+          style={{
+            marginBottom: tooltipFieldEntries.length > 0 ? 6 : 0,
+            fontStyle: 'italic',
+            color: 'var(--ds-text-subtle, #5E6C84)',
+          }}
+        >
+          {texts.customColorOverridden}
         </div>
       ) : null}
       {tooltipFieldEntries.map(([fieldId, value]) => (

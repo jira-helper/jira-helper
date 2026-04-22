@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Ok, Err } from 'ts-results';
 import { proxy } from 'valtio';
-import { Logger } from 'src/shared/Logger';
-import type { IJiraService } from 'src/shared/jira/jiraService';
-import type { JiraIssueMapped } from 'src/shared/jira/types';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
+import { Logger } from 'src/infrastructure/logging/Logger';
+import type { IJiraService } from 'src/infrastructure/jira/jiraService';
+import type { JiraIssueMapped } from 'src/infrastructure/jira/types';
+import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
 import type { GanttScopeSettings } from '../types';
 import { GanttDataModel } from './GanttDataModel';
 
 function scopeSettings(overrides: Partial<GanttScopeSettings> = {}): GanttScopeSettings {
   return {
-    startMapping: { source: 'dateField', fieldId: 'created' },
-    endMapping: { source: 'dateField', fieldId: 'duedate' },
+    startMappings: [{ source: 'dateField', fieldId: 'created' }],
+    endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
     colorRules: [],
     tooltipFieldIds: [],
     exclusionFilters: [],

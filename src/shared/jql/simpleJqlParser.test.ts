@@ -175,4 +175,21 @@ describe('simpleJqlParser', () => {
     expect(() => parseJql('project = THF or Platform')(wrap({}))).toThrow('Expecting operator, but got END');
     expect(() => parseJql('project = THF or Platform = ')(wrap({}))).toThrow('Expecting value, but got END');
   });
+
+  // Real Jira accepts JQL without spaces around comparison operators (e.g. `project=TRPA`).
+  // The previous tokenizer treated `project=TRPA` as a single identifier, which then collided
+  // with the next `AND` and produced `Unknown operator: "AND"`. See user feedback for TASK-44.
+  it('parses operators without surrounding whitespace', () => {
+    expect(parseJql('Field1=value')(wrap({ Field1: 'value' }))).toBe(true);
+    expect(parseJql('Field1=value')(wrap({ Field1: 'other' }))).toBe(false);
+    expect(parseJql('Field1!=value')(wrap({ Field1: 'value' }))).toBe(false);
+    expect(parseJql('Field1!=value')(wrap({ Field1: 'other' }))).toBe(true);
+    expect(parseJql('project=TRPA AND status=Done')(wrap({ project: 'TRPA', status: 'Done' }))).toBe(true);
+    expect(parseJql('project=TRPA AND status=Done')(wrap({ project: 'TRPA', status: 'Open' }))).toBe(false);
+    // Mixed spacing
+    expect(parseJql('a =1 AND b= 2')(wrap({ a: '1', b: '2' }))).toBe(true);
+    // ~ and !~ also collapse
+    expect(parseJql('summary~win')(wrap({ summary: 'winter' }))).toBe(true);
+    expect(parseJql('summary!~win')(wrap({ summary: 'summer' }))).toBe(true);
+  });
 });

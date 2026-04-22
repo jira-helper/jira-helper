@@ -2,7 +2,9 @@ import { scaleTime, type ScaleTime } from 'd3-scale';
 import { utcDay, utcHour, utcMonth, utcWeek } from 'd3-time';
 import type { GanttBar, TimeInterval } from '../types';
 
-const PADDING_RATIO = 0.05;
+const LEFT_PADDING_RATIO = 0.05;
+const RIGHT_PADDING_RATIO = 0.1;
+const MIN_RIGHT_PADDING_MS = 3 * 86_400_000;
 
 /** One day in ms; used for empty bars and zero-span fallback. */
 const DAY_MS = 86_400_000;
@@ -14,8 +16,9 @@ function paddedDomainFromMinMax(minMs: number, maxMs: number): [Date, Date] {
   if (span <= 0) {
     span = DAY_MS;
   }
-  const pad = span * PADDING_RATIO;
-  return [new Date(minMs - pad), new Date(maxMs + pad)];
+  const leftPad = span * LEFT_PADDING_RATIO;
+  const rightPad = Math.max(span * RIGHT_PADDING_RATIO, MIN_RIGHT_PADDING_MS);
+  return [new Date(minMs - leftPad), new Date(maxMs + rightPad)];
 }
 
 function domainFromBars(bars: GanttBar[]): [Date, Date] {

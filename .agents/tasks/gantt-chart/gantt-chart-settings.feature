@@ -228,6 +228,44 @@ Feature: Gantt Chart - Settings
     Then the resolved scope should be "PROJD"
     And I should see a bar for "PROJD-11" from "2026-04-05" to "2026-04-10"
 
+  @SC-GANTT-SET-12
+  Scenario: FR-10 — Settings modal opens at the effective scope when the current scope has no direct settings
+    Given these Gantt scopes exist in storage:
+      | scope   | startMapping       | endMapping             | includeSubtasks | includeEpicChildren | includeIssueLinks |
+      | _global | dateField: created | statusTransition: Done | true            | false               | false             |
+      | PROJE   | dateField: created | dateField: dueDate     | true            | false               | false             |
+    And the persisted preferredScopeLevel is "projectIssueType"
+    And I opened issue view for issue "PROJE-10" of type "Story" in project "PROJE"
+    When I open Gantt settings from the gear button
+    Then the scope picker should show "Project" selected
+    And the settings form should show:
+      | setting      | value              |
+      | startMapping | dateField: created |
+      | endMapping   | dateField: dueDate |
+
+  @SC-GANTT-SET-13
+  Scenario: FR-3 — Add a fallback mapping with priority controls
+    Given no Gantt settings exist in storage
+    And the issue "PROJF-10" of type "Story" in project "PROJF" has these linked issues:
+      | key       | type | relation | created    | status      | statusCategory | dueDate    |
+      | PROJF-11  | Task | subtask  | 2026-04-01 | Done        | done           | 2026-04-05 |
+      | PROJF-12  | Task | subtask  | 2026-04-02 | Done        | done           | -          |
+    And the changelog for "PROJF-12" contains these status transitions:
+      | timestamp           | fromStatus  | toStatus | fromCategory  | toCategory |
+      | 2026-04-04T10:00:00 | In Progress | Done     | indeterminate | done       |
+    When I open Gantt settings from the gear button
+    And I set start mapping to "Date field" with field "created"
+    And I set end mapping to "Date field" with field "duedate"
+    And I add a fallback row to "End of bar" with "Status transition" and value "Done"
+    And I click "Save"
+    Then the settings modal should close
+    And localStorage key "jh-gantt-settings" should contain scope "_global" with:
+      | setting       | value                                       |
+      | startMapping  | dateField: created                          |
+      | endMappings   | dateField: duedate, statusTransition: Done  |
+    And I should see a bar for "PROJF-11" from "2026-04-01" to "2026-04-05"
+    And I should see a bar for "PROJF-12" from "2026-04-02" to "2026-04-04T10:00:00"
+
   @SC-GANTT-SET-11
   Scenario: Edge — Hover detail fields are configurable in settings
     Given the issue "PROJ-1100" of type "Epic" in project "PROJ" has these linked issues:

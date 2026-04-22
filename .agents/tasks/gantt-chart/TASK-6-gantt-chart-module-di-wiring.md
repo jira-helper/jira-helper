@@ -1,6 +1,6 @@
 # TASK-6: GanttChartModule (DI wiring)
 
-**Status**: TODO
+**Status**: VERIFICATION
 **Type**: di-wiring
 
 **Parent**: [EPIC-1](./EPIC-1-gantt-chart.md)

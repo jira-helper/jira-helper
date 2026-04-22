@@ -90,8 +90,17 @@ export class IssueViewPageObject implements IIssueViewPageObject {
     const toolbar = document.querySelector(this.selectors.toolbar2Secondary);
     if (!toolbar) return null;
 
-    const host = document.createElement('div');
+    /**
+     * `.aui-toolbar2-secondary` is a `<div>` whose children are inline `aui-buttons` groups.
+     * A plain `<div>` host falls onto its own line (this caused the previous icon to render
+     * below the toolbar). Use a `<span>` with inline-flex so the React-rendered
+     * `<button class="aui-button">` sits in the same row as Share / Export / >>.
+     */
+    const host = document.createElement('span');
     host.setAttribute('data-jh-component', 'issueSettingsHost');
+    host.style.display = 'inline-flex';
+    host.style.alignItems = 'center';
+    host.style.marginLeft = '5px';
     toolbar.appendChild(host);
     return host;
   }

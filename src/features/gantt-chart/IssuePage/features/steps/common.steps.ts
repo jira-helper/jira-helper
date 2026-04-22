@@ -84,10 +84,7 @@ Then('I should see a bar for {string} on the chart', (key: string) => {
 });
 
 Then('I should see a bar for {string} on the chart with a warning icon', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`)
-    .should('exist')
-    .find('[data-testid="gantt-bar-open-ended-warning"]')
-    .should('exist');
+  cy.get(`[data-issue-key="${key}"]`).should('exist').find('[data-testid="gantt-bar-open-ended"]').should('exist');
 });
 
 Then('I should not see a bar for {string} on the chart', (key: string) => {
@@ -95,11 +92,11 @@ Then('I should not see a bar for {string} on the chart', (key: string) => {
 });
 
 Then('the bar for {string} should have a warning icon on the right end', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended-warning"]').should('exist');
+  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended"]').should('exist');
 });
 
 Then('the bar for {string} should not have a warning icon', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended-warning"]').should('not.exist');
+  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended"]').should('not.exist');
 });
 
 Then('the bar for {string} should have fill color {string}', (key: string, color: string) => {
