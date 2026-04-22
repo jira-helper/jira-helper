@@ -171,6 +171,25 @@ describe('GanttDataModel', () => {
     expect(model.missingDateIssues).toEqual([]);
   });
 
+  it('replaceCachedIssuesForTests: refreshes bars from a new in-memory snapshot', async () => {
+    const a = datedIssue();
+    fetchSubtasks.mockResolvedValue(Ok({ subtasks: [a], externalLinks: [] }));
+    const model = proxy(createModel());
+    await model.loadSubtasks('ROOT-1', scopeSettings());
+    expect(model.bars).toHaveLength(1);
+
+    const b = datedIssue();
+    b.key = 'ST-2';
+    b.id = 'id-2';
+    b.fields.summary = 'Second';
+    b.fields.parent = { key: 'ROOT-1', id: 'id-root' };
+    model.replaceCachedIssuesForTests([a, b]);
+    model.recompute(scopeSettings());
+
+    expect(model.bars).toHaveLength(2);
+    expect(model.bars.map(x => x.issueKey)).toContain('ST-2');
+  });
+
   it('reset restores initial state and ignores stale load results', async () => {
     const issue = datedIssue();
     let finish!: () => void;

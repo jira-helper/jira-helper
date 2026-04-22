@@ -220,7 +220,7 @@ describe('computeBars', () => {
     expect(bars[0].statusCategory).toBe('done');
   });
 
-  it('label is always issue key and summary and tooltipFields follow tooltipFieldIds', () => {
+  it('default label is issue key and summary; tooltipFields follow tooltipFieldIds', () => {
     const settings = scopeSettings({
       tooltipFieldIds: ['assignee', 'priority'],
     });
@@ -239,6 +239,57 @@ describe('computeBars', () => {
       assignee: 'Jane Doe',
       priority: 'High',
     });
+  });
+
+  it('tooltip assignee is dash when Jira assignee is null', () => {
+    const settings = scopeSettings({
+      tooltipFieldIds: ['assignee', 'summary'],
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        summary: 'No owner',
+        assignee: null,
+      },
+    });
+    const { bars } = computeBars([issue], settings, now);
+    expect(bars[0].tooltipFields).toEqual({
+      assignee: '-',
+      summary: 'No owner',
+    });
+  });
+
+  it('one missing issue when end date exists but start (created) is absent', () => {
+    const settings = scopeSettings({
+      startMappings: [{ source: 'dateField', fieldId: 'created' }],
+      endMappings: [{ source: 'dateField', fieldId: 'duedate' }],
+    });
+    const root = 'R-0';
+    const normal: GanttIssueInput = {
+      id: '1',
+      key: 'R-1',
+      fields: {
+        summary: 'Normal',
+        status: { name: 'Done', statusCategory: { key: 'done' } },
+        created: '2026-04-01',
+        duedate: '2026-04-05',
+        parent: { key: root, id: 'r' },
+      },
+    };
+    const noStart: GanttIssueInput = {
+      id: '2',
+      key: 'R-2',
+      fields: {
+        summary: 'No start',
+        status: { name: 'To Do', statusCategory: { key: 'new' } },
+        duedate: '2026-04-10',
+        parent: { key: root, id: 'r' },
+      },
+    };
+    const { bars, missingDateIssues } = computeBars([normal, noStart], settings, now, root);
+    expect(bars).toHaveLength(1);
+    expect(missingDateIssues).toHaveLength(1);
+    expect(missingDateIssues[0].issueKey).toBe('R-2');
   });
 
   it('matchColorRule returns the first matching field rule color', () => {

@@ -26,7 +26,7 @@ export const FirstRunState: React.FC<FirstRunStateProps> = ({ onOpenSettings }) 
   return (
     <div style={{ padding: '16px' }}>
       <p style={{ marginBottom: '16px' }}>{texts.message}</p>
-      <Button type="primary" onClick={onOpenSettings}>
+      <Button type="primary" data-testid="gantt-first-run-open-settings" onClick={onOpenSettings}>
         {texts.openSettings}
       </Button>
     </div>

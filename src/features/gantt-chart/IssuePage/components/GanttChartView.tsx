@@ -325,7 +325,7 @@ export function GanttChartView({
             </g>
           ) : null}
 
-          <g data-testid="gantt-time-axis">
+          <g data-testid="gantt-time-axis" data-time-interval={interval}>
             <line
               x1={MARGIN_LEFT}
               y1={tickRowTop}
@@ -337,7 +337,7 @@ export function GanttChartView({
             {visibleTicks.map((tm, i) => {
               const x = MARGIN_LEFT + scale(tm);
               return (
-                <g key={`tick-${i}`}>
+                <g key={`tick-${i}`} data-testid="gantt-axis-tick">
                   <line x1={x} y1={tickRowTop} x2={x} y2={tickRowTop + 4} stroke="#C1C7D0" strokeWidth={1} />
                   <text
                     data-testid="gantt-axis-label"

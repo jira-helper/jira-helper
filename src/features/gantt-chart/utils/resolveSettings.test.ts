@@ -122,4 +122,47 @@ describe('resolveSettings', () => {
     };
     expect(resolveSettings(storage, '', 'Story')).toBe(global);
   });
+
+  /**
+   * Spec QF-12 (replaces deferred BDD): each scope owns its full `quickFilters` list — the
+   * resolver returns ONE level (most-specific match) and never merges/concats lists from
+   * outer scopes. So a project-level scope with its own quick filters must NOT inherit the
+   * global ones.
+   */
+  it('quickFilters do not cascade — project scope does not inherit global quick filters (QF-12)', () => {
+    const globalQf = {
+      id: 'qf-g',
+      name: 'Global filter',
+      selector: { mode: 'field' as const, fieldId: 'priority', value: 'High' },
+    };
+    const projectQf = {
+      id: 'qf-p',
+      name: 'Project filter',
+      selector: { mode: 'field' as const, fieldId: 'status', value: 'Done' },
+    };
+    const storage: GanttSettingsStorage = {
+      _global: scopeSettings({ quickFilters: [globalQf] }),
+      PROJA: scopeSettings({ quickFilters: [projectQf] }),
+    };
+
+    const resolved = resolveSettings(storage, 'PROJA');
+
+    expect(resolved?.quickFilters).toEqual([projectQf]);
+    expect(resolved?.quickFilters).not.toContain(globalQf);
+  });
+
+  it('quickFilters fall back to _global only when project scope is absent entirely', () => {
+    const globalQf = {
+      id: 'qf-g',
+      name: 'Global filter',
+      selector: { mode: 'field' as const, fieldId: 'priority', value: 'High' },
+    };
+    const storage: GanttSettingsStorage = {
+      _global: scopeSettings({ quickFilters: [globalQf] }),
+    };
+
+    const resolved = resolveSettings(storage, 'PROJA');
+
+    expect(resolved?.quickFilters).toEqual([globalQf]);
+  });
 });

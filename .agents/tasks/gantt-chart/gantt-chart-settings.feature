@@ -72,8 +72,8 @@ Feature: Gantt Chart - Settings
   @SC-GANTT-SET-4
   Scenario: S11 — Create project+issueType scope with Copy from Global
     Given these Gantt scopes exist in storage:
-      | scope   | startMapping       | endMapping             | labelFieldId | includeSubtasks | includeEpicChildren | includeIssueLinks |
-      | _global | dateField: created | statusTransition: Done | key          | true            | false               | false             |
+      | scope   | startMapping       | endMapping             | includeSubtasks | includeEpicChildren | includeIssueLinks |
+      | _global | dateField: created | statusTransition: Done | true            | false               | false             |
     And I opened issue view for issue "PROJA-50" of type "Story" in project "PROJA"
     When I open Gantt settings from the gear button
     And I select scope "This project + issue type"
@@ -84,7 +84,6 @@ Feature: Gantt Chart - Settings
       | setting      | value                      |
       | startMapping | dateField: created         |
       | endMapping   | statusTransition: Done     |
-      | labelFieldId | key                        |
     When I change start mapping to "Date field" with field "startDate"
     And I click "Save"
     Then localStorage key "jh-gantt-settings" should contain scope "PROJA:Story" with:
@@ -131,10 +130,10 @@ Feature: Gantt Chart - Settings
   @SC-GANTT-SET-7
   Scenario: Edge — Switching scope in settings updates form fields to match selected scope
     Given these Gantt scopes exist in storage:
-      | scope        | startMapping         | endMapping                 | labelFieldId | includeSubtasks | includeEpicChildren | includeIssueLinks |
-      | _global      | dateField: created   | statusTransition: Done     | key          | true            | false               | false             |
-      | PROJB        | dateField: startDate | dateField: dueDate         | summary      | true            | false               | false             |
-      | PROJB:Story  | dateField: created   | statusTransition: Released | key          | true            | false               | false             |
+      | scope        | startMapping         | endMapping                 | includeSubtasks | includeEpicChildren | includeIssueLinks |
+      | _global      | dateField: created   | statusTransition: Done     | true            | false               | false             |
+      | PROJB        | dateField: startDate | dateField: dueDate         | true            | false               | false             |
+      | PROJB:Story  | dateField: created   | statusTransition: Released | true            | false               | false             |
     And I opened issue view for issue "PROJB-10" of type "Story" in project "PROJB"
     When I open Gantt settings from the gear button
     And I select scope "Global"
@@ -142,26 +141,23 @@ Feature: Gantt Chart - Settings
       | setting      | value                  |
       | startMapping | dateField: created     |
       | endMapping   | statusTransition: Done |
-      | labelFieldId | key                    |
     When I select scope "This project"
     Then the settings form should show:
       | setting      | value              |
       | startMapping | dateField: startDate |
       | endMapping   | dateField: dueDate |
-      | labelFieldId | summary            |
     When I select scope "This project + issue type"
     Then the settings form should show:
       | setting      | value                      |
       | startMapping | dateField: created         |
       | endMapping   | statusTransition: Released |
-      | labelFieldId | key                        |
 
   @SC-GANTT-SET-8
   Scenario: Edge — Copy from project scope into new project+issueType scope
     Given these Gantt scopes exist in storage:
-      | scope   | startMapping         | endMapping         | labelFieldId | includeSubtasks | includeEpicChildren | includeIssueLinks |
-      | _global | dateField: created   | dateField: dueDate | key          | true            | false               | false             |
-      | PROJC   | dateField: startDate | dateField: dueDate | summary      | true            | false               | false             |
+      | scope   | startMapping         | endMapping         | includeSubtasks | includeEpicChildren | includeIssueLinks |
+      | _global | dateField: created   | dateField: dueDate | true            | false               | false             |
+      | PROJC   | dateField: startDate | dateField: dueDate | true            | false               | false             |
     And I opened issue view for issue "PROJC-20" of type "Bug" in project "PROJC"
     When I open Gantt settings from the gear button
     And I select scope "This project + issue type"
@@ -176,13 +172,11 @@ Feature: Gantt Chart - Settings
       | setting      | value                |
       | startMapping | dateField: startDate |
       | endMapping   | dateField: dueDate   |
-      | labelFieldId | summary              |
     When I click "Save"
     Then localStorage key "jh-gantt-settings" should contain scope "PROJC:Bug" with:
       | setting      | value                |
       | startMapping | dateField: startDate |
       | endMapping   | dateField: dueDate   |
-      | labelFieldId | summary              |
 
   @SC-GANTT-SET-9
   Scenario: FR-5 — Configure link type inclusion in settings

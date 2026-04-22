@@ -108,7 +108,7 @@ export const WithSavePopoverOpen: Story = {
   },
   play: async ({ canvasElement }) => {
     const btn = canvasElement.querySelector(
-      '[data-testid="gantt-quick-filters-save-as-chip"]'
+      '[data-testid="gantt-save-as-quick-filter-button"]'
     ) as HTMLButtonElement | null;
     btn?.click();
   },

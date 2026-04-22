@@ -80,4 +80,22 @@ describe('GanttSettingsContainer', () => {
 
     expect(screen.getByRole('dialog', { name: 'Gantt settings' })).toBeInTheDocument();
   });
+
+  /**
+   * Spec DISP-21 (replaces deferred BDD): the settings entry-point that lives INSIDE the
+   * Gantt section (toolbar gear / EmptyState / FirstRunState) opens a stand-alone Gantt
+   * settings modal — NOT the tabbed Issue Settings modal owned by `IssueSettingsComponent`.
+   * This guards against accidentally swapping the two modals when wiring `onOpenSettings`.
+   */
+  it('opens a stand-alone Gantt settings modal without tabs (DISP-21)', () => {
+    render(
+      <WithDi container={globalContainer}>
+        <GanttSettingsContainer container={globalContainer} visible onClose={vi.fn()} />
+      </WithDi>
+    );
+
+    const dialog = screen.getByRole('dialog', { name: 'Gantt settings' });
+    expect(dialog.querySelector('[role="tablist"]')).toBeNull();
+    expect(dialog.querySelector('.ant-tabs')).toBeNull();
+  });
 });

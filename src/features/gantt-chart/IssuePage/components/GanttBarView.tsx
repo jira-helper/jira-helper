@@ -70,12 +70,17 @@ function readableTextColorFor(bg: string): string {
 /** Slightly darker border to increase contrast around the bar regardless of fill. */
 const BAR_BORDER_COLOR = 'rgba(9,30,66,0.25)';
 
-function computeDrawableRects(
-  bar: GanttBar,
-  x: number,
-  width: number,
-  showStatusSections: boolean
-): Array<{ x: number; width: number; fill: string }> {
+type DrawableBarRect = {
+  x: number;
+  width: number;
+  fill: string;
+  /** Set when this rect is a status-breakdown segment (BDD: `[data-testid="gantt-bar-status-section"]`). */
+  statusCategory?: GanttBar['statusCategory'];
+  statusStartDate?: Date;
+  statusEndDate?: Date;
+};
+
+function computeDrawableRects(bar: GanttBar, x: number, width: number, showStatusSections: boolean): DrawableBarRect[] {
   const fallbackFill = fillForCategory(bar.statusCategory);
   const hasCustomColor = bar.barColor !== undefined && bar.barColor !== '';
   const useStatusSections = showStatusSections && bar.statusSections.length > 0;
@@ -95,7 +100,7 @@ function computeDrawableRects(
     return [{ x, width, fill: fallbackFill }];
   }
 
-  const rects: Array<{ x: number; width: number; fill: string }> = [];
+  const rects: DrawableBarRect[] = [];
   for (const section of bar.statusSections) {
     const sStart = Math.max(barStart, section.startDate.getTime());
     const sEnd = Math.min(barEnd, section.endDate.getTime());
@@ -106,6 +111,9 @@ function computeDrawableRects(
       x: x + left,
       width: w,
       fill: fillForCategory(section.category),
+      statusCategory: section.category,
+      statusStartDate: section.startDate,
+      statusEndDate: section.endDate,
     });
   }
 
@@ -174,6 +182,14 @@ export function GanttBarView({
         <rect
           key={`${bar.issueKey}-seg-${i}`}
           data-bar-rect="true"
+          {...(r.statusCategory != null
+            ? {
+                'data-testid': 'gantt-bar-status-section',
+                'data-bar-status-category': r.statusCategory,
+                'data-bar-status-start-iso': r.statusStartDate?.toISOString() ?? '',
+                'data-bar-status-end-iso': r.statusEndDate?.toISOString() ?? '',
+              }
+            : {})}
           x={r.x}
           y={y}
           width={r.width}

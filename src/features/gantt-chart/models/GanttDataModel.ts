@@ -104,6 +104,14 @@ export class GanttDataModel {
   }
 
   /**
+   * BDD / component tests: replace the in-memory issue list (normally from {@link loadSubtasks})
+   * and re-run {@link applyCompute} without a loading-state transition.
+   */
+  replaceCachedIssuesForTests(issues: JiraIssueMapped[]): void {
+    this.cachedIssues = issues.map(i => JSON.parse(JSON.stringify(i)) as JiraIssueMapped);
+  }
+
+  /**
    * Replace the Jira field metadata used by JQL/field selectors and trigger a recompute when the
    * dataset is already loaded. Identity-compared with {@link ref} semantics so a no-op call does not
    * trigger an extra `applyCompute`.
@@ -137,12 +145,16 @@ export class GanttDataModel {
       this.issueInputByKey = new Map();
       return;
     }
-    const input: GanttIssueInput[] = issues.map(issue => ({
-      id: issue.id,
-      key: issue.key,
-      fields: issue.fields,
-      changelog: issue.changelog,
-    }));
+    const input: GanttIssueInput[] = issues.map(issue =>
+      JSON.parse(
+        JSON.stringify({
+          id: issue.id,
+          key: issue.key,
+          fields: issue.fields,
+          changelog: issue.changelog,
+        })
+      )
+    ) as GanttIssueInput[];
     const map = new Map<string, GanttIssueInput>();
     for (const i of input) map.set(i.key, i);
     this.issueInputByKey = map;

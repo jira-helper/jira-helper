@@ -923,6 +923,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
             {rows.map(({ key, name, ...restField }, index) => (
               <div
                 key={key}
+                data-testid={`${args['data-testid']}-row-${index}`}
                 style={{
                   display: 'flex',
                   gap: 8,
@@ -953,6 +954,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                   style={{ marginBottom: 0, width: 140 }}
                 >
                   <Select
+                    data-testid="gantt-settings-mapping-source"
                     virtual={false}
                     options={sourceOptions}
                     onChange={() => {
@@ -975,6 +977,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                         style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
                       >
                         <Select
+                          data-testid="gantt-settings-mapping-value"
                           virtual={false}
                           showSearch
                           optionFilterProp="label"
@@ -994,6 +997,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                         style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
                       >
                         <Select
+                          data-testid="gantt-settings-mapping-value"
                           virtual={false}
                           showSearch
                           optionFilterProp="label"
@@ -1265,131 +1269,149 @@ function renderQuickFiltersSection({
               <EmptyListPlaceholder>{texts.emptyQuickFilters}</EmptyListPlaceholder>
             )}
             {listFields.map(({ key, name, ...restField }, index) => (
-              <div
-                key={key}
-                data-testid={`gantt-settings-quick-filter-row-${index}`}
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'flex-start',
-                  marginBottom: 6,
-                }}
-              >
-                <Form.Item
-                  {...restField}
-                  name={[name, 'name']}
-                  aria-label={texts.quickFilterName}
-                  rules={[{ required: true, message: texts.quickFilterName }]}
-                  style={{ marginBottom: 0, width: 140 }}
-                >
-                  <Input autoComplete="off" placeholder={texts.quickFilterNamePlaceholder} />
-                </Form.Item>
-                <Form.Item
-                  {...restField}
-                  name={[name, 'selectorMode']}
-                  rules={[{ required: true }]}
-                  style={{ marginBottom: 0, width: 120 }}
-                >
-                  <Select
-                    virtual={false}
-                    options={[
-                      { value: 'field' as const, label: texts.quickFilterModeField },
-                      { value: 'jql' as const, label: texts.quickFilterModeJql },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item noStyle dependencies={[['quickFilters', name, 'selectorMode']]}>
-                  {() =>
-                    form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'field' ? (
-                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'selectorFieldId']}
-                          aria-label={texts.quickFilterFieldId}
-                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
-                        >
-                          <Select
-                            virtual={false}
-                            showSearch
-                            optionFilterProp="label"
-                            filterOption={selectFilterOption}
-                            placeholder={texts.quickFilterFieldId}
-                            loading={isLoadingFields}
-                            notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
-                            options={fieldOptions}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'selectorValue']}
-                          aria-label={texts.quickFilterValue}
-                          style={{ marginBottom: 0, width: 140 }}
-                        >
-                          <Input autoComplete="off" placeholder={texts.quickFilterValue} />
-                        </Form.Item>
-                      </div>
-                    ) : (
+              <Form.Item key={key} noStyle shouldUpdate={() => true}>
+                {() => {
+                  const rowId = String(form.getFieldValue(['quickFilters', name, 'id']) ?? `idx-${index}`);
+                  return (
+                    <div
+                      data-testid={`gantt-quick-filter-row-${rowId}`}
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'flex-start',
+                        marginBottom: 6,
+                      }}
+                    >
+                      <Form.Item {...restField} name={[name, 'id']} hidden>
+                        <Input type="hidden" />
+                      </Form.Item>
                       <Form.Item
                         {...restField}
-                        name={[name, 'selectorJql']}
-                        aria-label={texts.quickFilterJql}
-                        rules={[
-                          {
-                            validator: async (_rule, value: unknown) => {
-                              if (typeof value !== 'string' || value.trim() === '') return;
-                              try {
-                                parseJql(value);
-                              } catch (err) {
-                                const msg = err instanceof Error ? err.message : 'invalid';
-                                throw new Error(texts.quickFilterJqlError.replace('{error}', msg), {
-                                  cause: err,
-                                });
-                              }
-                            },
-                          },
-                        ]}
-                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        name={[name, 'name']}
+                        aria-label={texts.quickFilterName}
+                        rules={[{ required: true, message: texts.quickFilterName }]}
+                        style={{ marginBottom: 0, width: 140 }}
                       >
-                        <Input.TextArea
-                          autoSize={{ minRows: 1, maxRows: 4 }}
-                          autoComplete="off"
-                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
-                          placeholder={texts.quickFilterJqlPlaceholder}
+                        <Input autoComplete="off" placeholder={texts.quickFilterNamePlaceholder} />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'selectorMode']}
+                        rules={[{ required: true }]}
+                        style={{ marginBottom: 0, width: 120 }}
+                      >
+                        <Select
+                          virtual={false}
+                          options={[
+                            { value: 'field' as const, label: texts.quickFilterModeField },
+                            { value: 'jql' as const, label: texts.quickFilterModeJql },
+                          ]}
                         />
                       </Form.Item>
-                    )
-                  }
-                </Form.Item>
-                <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<ArrowUpOutlined />}
-                    aria-label={texts.moveQuickFilterUp}
-                    title={texts.moveQuickFilterUp}
-                    disabled={index === 0}
-                    onClick={() => move(index, index - 1)}
-                  />
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<ArrowDownOutlined />}
-                    aria-label={texts.moveQuickFilterDown}
-                    title={texts.moveQuickFilterDown}
-                    disabled={index === listFields.length - 1}
-                    onClick={() => move(index, index + 1)}
-                  />
-                  <Button
-                    type="text"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    aria-label={texts.removeQuickFilter}
-                    title={texts.removeQuickFilter}
-                    onClick={() => remove(name)}
-                  />
-                </div>
-              </div>
+                      <Form.Item noStyle dependencies={[['quickFilters', name, 'selectorMode']]}>
+                        {() =>
+                          form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'field' ? (
+                            <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'selectorFieldId']}
+                                aria-label={texts.quickFilterFieldId}
+                                style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                              >
+                                <Select
+                                  virtual={false}
+                                  showSearch
+                                  optionFilterProp="label"
+                                  filterOption={selectFilterOption}
+                                  placeholder={texts.quickFilterFieldId}
+                                  loading={isLoadingFields}
+                                  notFoundContent={isLoadingFields ? <Spin size="small" /> : null}
+                                  options={fieldOptions}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'selectorValue']}
+                                aria-label={texts.quickFilterValue}
+                                style={{ marginBottom: 0, width: 140 }}
+                              >
+                                <Input autoComplete="off" placeholder={texts.quickFilterValue} />
+                              </Form.Item>
+                            </div>
+                          ) : (
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'selectorJql']}
+                              aria-label={texts.quickFilterJql}
+                              rules={[
+                                {
+                                  validator: async (_rule, value: unknown) => {
+                                    if (typeof value !== 'string' || value.trim() === '') return;
+                                    try {
+                                      parseJql(value);
+                                    } catch (err) {
+                                      const msg = err instanceof Error ? err.message : 'invalid';
+                                      throw new Error(texts.quickFilterJqlError.replace('{error}', msg), {
+                                        cause: err,
+                                      });
+                                    }
+                                  },
+                                },
+                              ]}
+                              style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                            >
+                              <Input.TextArea
+                                autoSize={{ minRows: 1, maxRows: 4 }}
+                                autoComplete="off"
+                                style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                                placeholder={texts.quickFilterJqlPlaceholder}
+                              />
+                            </Form.Item>
+                          )
+                        }
+                      </Form.Item>
+                      <Form.Item noStyle shouldUpdate={() => true}>
+                        {() =>
+                          form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'jql' &&
+                          form.getFieldError(['quickFilters', name, 'selectorJql']).length > 0 ? (
+                            <span data-testid="gantt-quick-filter-jql-error" style={{ display: 'none' }} aria-hidden />
+                          ) : null
+                        }
+                      </Form.Item>
+                      <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<ArrowUpOutlined />}
+                          aria-label={texts.moveQuickFilterUp}
+                          title={texts.moveQuickFilterUp}
+                          disabled={index === 0}
+                          onClick={() => move(index, index - 1)}
+                        />
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<ArrowDownOutlined />}
+                          aria-label={texts.moveQuickFilterDown}
+                          title={texts.moveQuickFilterDown}
+                          disabled={index === listFields.length - 1}
+                          onClick={() => move(index, index + 1)}
+                        />
+                        <Button
+                          type="text"
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          aria-label={texts.removeQuickFilter}
+                          title={texts.removeQuickFilter}
+                          data-testid={`gantt-quick-filter-row-delete-${rowId}`}
+                          onClick={() => remove(name)}
+                        />
+                      </div>
+                    </div>
+                  );
+                }}
+              </Form.Item>
             ))}
             <Button
               type="dashed"
@@ -1452,8 +1474,12 @@ function renderExclusionFiltersSection({
             ) : (
               <EmptyListPlaceholder>{texts.emptyExclusionFilters}</EmptyListPlaceholder>
             )}
-            {listFields.map(({ key, name, ...restField }) => (
-              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+            {listFields.map(({ key, name, ...restField }, index) => (
+              <div
+                key={key}
+                data-testid={`gantt-exclusion-filter-row-${index}`}
+                style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}
+              >
                 <Form.Item
                   {...restField}
                   name={[name, 'mode']}
@@ -1461,6 +1487,7 @@ function renderExclusionFiltersSection({
                   style={{ marginBottom: 0, width: 130 }}
                 >
                   <Select
+                    data-testid={`gantt-exclusion-filter-mode-${index}`}
                     virtual={false}
                     options={[
                       { value: 'field' as const, label: texts.exclusionModeField },
@@ -1479,6 +1506,7 @@ function renderExclusionFiltersSection({
                           style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
                         >
                           <Select
+                            data-testid={`gantt-exclusion-filter-field-${index}`}
                             virtual={false}
                             showSearch
                             optionFilterProp="label"
@@ -1495,7 +1523,11 @@ function renderExclusionFiltersSection({
                           aria-label={texts.exclusionValue}
                           style={{ marginBottom: 0, width: 140 }}
                         >
-                          <Input autoComplete="off" placeholder={texts.exclusionValue} />
+                          <Input
+                            data-testid={`gantt-exclusion-filter-value-${index}`}
+                            autoComplete="off"
+                            placeholder={texts.exclusionValue}
+                          />
                         </Form.Item>
                       </div>
                     ) : (
@@ -1542,6 +1574,7 @@ function renderExclusionFiltersSection({
             ))}
             <Button
               type="dashed"
+              data-testid="gantt-exclusion-filters-add"
               onClick={() => add({ mode: 'field', fieldId: '', value: '', jql: '' })}
               block
               icon={<PlusOutlined />}
@@ -1590,8 +1623,12 @@ function renderIssueLinkTypesSection({
             ) : (
               <EmptyListPlaceholder>{texts.emptyLinkTypes}</EmptyListPlaceholder>
             )}
-            {listFields.map(({ key, name, ...restField }) => (
-              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+            {listFields.map(({ key, name, ...restField }, index) => (
+              <div
+                key={key}
+                data-testid={`gantt-issue-link-type-row-${index}`}
+                style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}
+              >
                 <Form.Item
                   {...restField}
                   name={[name, 'id']}
@@ -1599,7 +1636,7 @@ function renderIssueLinkTypesSection({
                   style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
                 >
                   <Select
-                    data-testid={`gantt-settings-link-type-select-${name}`}
+                    data-testid={`gantt-settings-link-type-select-${index}`}
                     virtual={false}
                     showSearch
                     optionFilterProp="label"
@@ -1617,6 +1654,7 @@ function renderIssueLinkTypesSection({
                   style={{ marginBottom: 0, width: 220 }}
                 >
                   <Select
+                    data-testid={`gantt-issue-link-direction-${index}`}
                     virtual={false}
                     options={[
                       { value: 'inward' as const, label: texts.directionInward },
@@ -1636,6 +1674,7 @@ function renderIssueLinkTypesSection({
             ))}
             <Button
               type="dashed"
+              data-testid="gantt-issue-link-types-add"
               onClick={() => add({ id: '', direction: 'outward' })}
               block
               icon={<PlusOutlined />}
@@ -1880,6 +1919,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
             data-testid="gantt-settings-tooltip-fields-select"
             virtual={false}
             mode="multiple"
+            allowClear
             showSearch
             optionFilterProp="label"
             filterOption={selectFilterOption}
@@ -1961,6 +2001,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
     <div data-jh-gantt-root="settings-modal" style={{ width: '100%' }}>
       <SectionHeading>{texts.scopeLegend}</SectionHeading>
       <Segmented
+        data-testid="gantt-scope-picker"
         value={currentScope.level}
         onChange={handleScopeLevelChange}
         options={[
@@ -2227,7 +2268,13 @@ export const GanttSettingsModal: React.FC<GanttSettingsModalProps> = ({
             <Tooltip title={saveTooltip}>
               {/* span wrapper so Tooltip works on a disabled Button */}
               <span>
-                <Button key="save" type="primary" onClick={onSave} disabled={saveDisabled}>
+                <Button
+                  key="save"
+                  type="primary"
+                  data-testid="gantt-settings-save"
+                  onClick={onSave}
+                  disabled={saveDisabled}
+                >
                   {texts.save}
                 </Button>
               </span>

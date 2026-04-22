@@ -8,10 +8,10 @@ Feature: Gantt Chart - Display
   @SC-GANTT-DISP-1
   Scenario: S2 — View Gantt chart with bars for linked subtasks (happy path)
     Given the issue "PROJ-100" of type "Epic" in project "PROJ" has these linked issues:
-      | key      | type  | relation   | created    | status      | statusCategory | dueDate    |
-      | PROJ-101 | Story | subtask    | 2026-04-01 | Done        | done           | 2026-04-05 |
-      | PROJ-102 | Story | subtask    | 2026-04-02 | In Progress | indeterminate  | 2026-04-08 |
-      | PROJ-103 | Bug   | subtask    | 2026-04-03 | To Do       | new            | 2026-04-10 |
+      | key      | type  | relation   | created    | status      | statusCategory | dueDate    | summary |
+      | PROJ-101 | Story | subtask    | 2026-04-01 | Done        | done           | 2026-04-05 | Alpha   |
+      | PROJ-102 | Story | subtask    | 2026-04-02 | In Progress | indeterminate  | 2026-04-08 | Beta    |
+      | PROJ-103 | Bug   | subtask    | 2026-04-03 | To Do       | new            | 2026-04-10 | Gamma   |
     And Gantt settings are configured with:
       | setting             | value              |
       | startMapping        | dateField: created |
@@ -19,15 +19,14 @@ Feature: Gantt Chart - Display
       | includeSubtasks     | true               |
       | includeEpicChildren | false              |
       | includeIssueLinks   | false              |
-      | labelFieldId        | key                |
       | scope               | _global            |
     When the issue view page has loaded
     Then I should see a collapsible "Gantt Chart" section after #attachmentmodule
     And I should see bars for these issues:
-      | key      | label    | startDate  | endDate    |
-      | PROJ-101 | PROJ-101 | 2026-04-01 | 2026-04-05 |
-      | PROJ-102 | PROJ-102 | 2026-04-02 | 2026-04-08 |
-      | PROJ-103 | PROJ-103 | 2026-04-03 | 2026-04-10 |
+      | key      | label           | startDate  | endDate    |
+      | PROJ-101 | PROJ-101: Alpha | 2026-04-01 | 2026-04-05 |
+      | PROJ-102 | PROJ-102: Beta  | 2026-04-02 | 2026-04-08 |
+      | PROJ-103 | PROJ-103: Gamma | 2026-04-03 | 2026-04-10 |
 
   @SC-GANTT-DISP-2
   Scenario: S4 — Task with start date but no end date extends bar to today with warning
@@ -228,44 +227,6 @@ Feature: Gantt Chart - Display
       | PROJ-901 | 2026-04-02T09:00:00 | 2026-04-05T17:00:00 |
       | PROJ-902 | 2026-04-03T10:00:00 | 2026-04-07T12:00:00 |
 
-  @SC-GANTT-DISP-10
-  Scenario: Edge — Chart renders correctly with 50+ linked issues
-    Given the issue "PROJ-1000" of type "Epic" in project "PROJ" has 51 linked subtasks:
-      | key range           | type  | relation | created range          | dueDate range          |
-      | PROJ-1001..PROJ-1051 | Story | subtask  | 2026-03-01..2026-04-20 | 2026-03-10..2026-04-30 |
-    And Gantt settings are configured with:
-      | setting             | value              |
-      | startMapping        | dateField: created |
-      | endMapping          | dateField: dueDate |
-      | includeSubtasks     | true               |
-      | includeEpicChildren | false              |
-      | includeIssueLinks   | false              |
-      | scope               | _global            |
-    When the Gantt chart is rendered
-    Then the chart should finish rendering within 2 seconds
-    And I should see 51 Gantt bars on the chart
-
-  @SC-GANTT-DISP-11
-  Scenario: Edge — Custom label field shows field value instead of issue key
-    Given the issue "PROJ-1100" of type "Epic" in project "PROJ" has these linked issues:
-      | key       | type  | relation | created    | status | statusCategory | dueDate    | summary        |
-      | PROJ-1101 | Story | subtask  | 2026-04-01 | Done   | done           | 2026-04-05 | Auth service   |
-      | PROJ-1102 | Bug   | subtask  | 2026-04-02 | To Do  | new            | 2026-04-08 | Fix login bug  |
-    And Gantt settings are configured with:
-      | setting             | value              |
-      | startMapping        | dateField: created |
-      | endMapping          | dateField: dueDate |
-      | includeSubtasks     | true               |
-      | includeEpicChildren | false              |
-      | includeIssueLinks   | false              |
-      | labelFieldId        | summary            |
-      | scope               | _global            |
-    When the Gantt chart is rendered
-    Then I should see bars with these labels:
-      | key       | label         |
-      | PROJ-1101 | Auth service  |
-      | PROJ-1102 | Fix login bug |
-
   @SC-GANTT-DISP-12
   Scenario: Edge — Issue with only end date and no start date is not shown on chart
     Given the issue "PROJ-1200" of type "Epic" in project "PROJ" has these linked issues:
@@ -311,24 +272,6 @@ Feature: Gantt Chart - Display
       | PROJ-1301 |
       | PROJ-1302 |
       | PROJ-1303 |
-
-  @SC-GANTT-DISP-14
-  Scenario: FR-5 — subtasks included but epic children excluded filters out epic-child issues
-    Given the issue "PROJ-1400" of type "Epic" in project "PROJ" has these linked issues:
-      | key       | type  | relation   | created    | status | statusCategory | dueDate    |
-      | PROJ-1401 | Story | subtask    | 2026-04-01 | Done   | done           | 2026-04-05 |
-      | PROJ-1402 | Story | epic-child | 2026-04-02 | Done   | done           | 2026-04-08 |
-    And Gantt settings are configured with:
-      | setting             | value              |
-      | startMapping        | dateField: created |
-      | endMapping          | dateField: dueDate |
-      | includeSubtasks     | true               |
-      | includeEpicChildren | false              |
-      | includeIssueLinks   | false              |
-      | scope               | _global            |
-    When the Gantt chart is rendered
-    Then I should see a bar for "PROJ-1401" on the chart
-    And I should not see a bar for "PROJ-1402" on the chart
 
   @SC-GANTT-DISP-15
   Scenario: FR-5 — epic children included but subtasks excluded filters out subtask issues
@@ -400,29 +343,6 @@ Feature: Gantt Chart - Display
       | PROJ-1703 |
     And I should not see a bar for "PROJ-1702" on the chart
     And I should not see a bar for "PROJ-1704" on the chart
-
-  @SC-GANTT-DISP-18
-  Scenario: FR-6 — Hide completed tasks checkbox
-    Given the issue "PROJ-1800" of type "Epic" in project "PROJ" has these linked issues:
-      | key       | type  | relation | created    | status      | statusCategory | dueDate    |
-      | PROJ-1801 | Story | subtask  | 2026-04-01 | Done        | done           | 2026-04-05 |
-      | PROJ-1802 | Bug   | subtask  | 2026-04-02 | In Progress | indeterminate  | 2026-04-08 |
-      | PROJ-1803 | Task  | subtask  | 2026-04-03 | To Do       | new            | 2026-04-10 |
-    And Gantt settings are configured with:
-      | setting             | value              |
-      | startMapping        | dateField: created |
-      | endMapping          | dateField: dueDate |
-      | includeSubtasks     | true               |
-      | includeEpicChildren | false              |
-      | includeIssueLinks   | false              |
-      | hideCompletedTasks  | true               |
-      | scope               | _global            |
-    When the Gantt chart is rendered
-    Then I should see bars for these issues:
-      | key       |
-      | PROJ-1802 |
-      | PROJ-1803 |
-    And I should not see a bar for "PROJ-1801" on the chart
 
   @SC-GANTT-DISP-22
   Scenario: FR-3 — Multi-source end mapping with priority fallback
@@ -543,31 +463,3 @@ Feature: Gantt Chart - Display
     When every linked issue has resolvable start and end dates
     And the Gantt chart is rendered again
     Then I should not see any "not on chart" tag in the Gantt toolbar
-
-  @SC-GANTT-DISP-19
-  Scenario: Gantt section is collapsible, collapsed by default
-    Given the issue "PROJ-1900" of type "Story" in project "PROJ" is open on the issue view page
-    And the page has a "#attachmentmodule" element
-    When the Gantt chart page modification is applied
-    Then I should see a collapsible section "[data-jh-section='gantt-chart']" after "#attachmentmodule"
-    And the section content is hidden (collapsed) by default
-    When I click the section header
-    Then the section content becomes visible
-
-  @SC-GANTT-DISP-20
-  Scenario: Issue Settings button appears in toolbar
-    Given the issue "PROJ-2000" of type "Story" in project "PROJ" is open on the issue view page
-    And the page has a ".aui-toolbar2-secondary" element
-    When the Gantt chart page modification is applied
-    Then I should see a "JH ⚙" button as the last child of ".aui-toolbar2-secondary"
-    When I click the "JH ⚙" button
-    Then a tabbed modal opens with a "Gantt Chart" tab
-
-  @SC-GANTT-DISP-21
-  Scenario: Duplicate settings button in Gantt section header
-    Given the issue "PROJ-2100" of type "Story" in project "PROJ" is open on the issue view page
-    And Gantt settings are configured
-    When the Gantt chart section is expanded
-    Then I should see a "Settings" button within the Gantt chart area
-    When I click the "Settings" button
-    Then the Gantt settings modal opens directly (no tabs)

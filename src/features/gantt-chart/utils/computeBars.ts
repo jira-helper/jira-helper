@@ -229,10 +229,19 @@ function formatFieldForDisplay(raw: unknown): string {
   return '';
 }
 
+/** Values shown next to Jira field ids in the bar hover tooltip; empty or missing values render as a dash. */
+function formatTooltipFieldValue(raw: unknown): string {
+  if (raw === null || raw === undefined) {
+    return '-';
+  }
+  const s = formatFieldForDisplay(raw);
+  return s.trim() === '' ? '-' : s;
+}
+
 function buildTooltipFields(issue: GanttIssueInput, fieldIds: string[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const id of fieldIds) {
-    out[id] = formatFieldForDisplay(issue.fields[id]);
+    out[id] = formatTooltipFieldValue(issue.fields[id]);
   }
   return out;
 }

@@ -63,7 +63,13 @@ export const CopyFromDialog: React.FC<CopyFromDialogProps> = ({ visible, availab
         <Button key="cancel" onClick={onCancel}>
           {texts.cancel}
         </Button>,
-        <Button key="copy" type="primary" onClick={handleCopy} disabled={!selectedKey}>
+        <Button
+          key="copy"
+          type="primary"
+          data-testid="gantt-copy-from-confirm"
+          onClick={handleCopy}
+          disabled={!selectedKey}
+        >
           {texts.copy}
         </Button>,
       ]}
@@ -73,7 +79,7 @@ export const CopyFromDialog: React.FC<CopyFromDialogProps> = ({ visible, availab
         <Radio.Group value={selectedKey} onChange={e => setSelectedKey(e.target.value)}>
           <Space direction="vertical">
             {availableScopes.map(scope => (
-              <Radio key={scope.key} value={scope.key}>
+              <Radio key={scope.key} value={scope.key} data-testid="gantt-copy-from-option" data-scope-key={scope.key}>
                 {scope.label}
               </Radio>
             ))}

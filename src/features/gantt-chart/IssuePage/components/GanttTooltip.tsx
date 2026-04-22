@@ -3,6 +3,24 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
 import type { GanttBar } from '../../types';
 
+/** Renders the label column for a Jira field id in the hover tooltip (Title Case for built-ins). */
+const TOOLTIP_FIELD_HEADING: Record<string, string> = {
+  summary: 'Summary',
+  assignee: 'Assignee',
+  status: 'Status',
+  priority: 'Priority',
+  created: 'Created',
+  duedate: 'Due date',
+  startdate: 'Start date',
+  resolution: 'Resolution',
+  team: 'Team',
+  project: 'Project',
+};
+
+function tooltipFieldHeading(fieldId: string): string {
+  return TOOLTIP_FIELD_HEADING[fieldId] ?? fieldId;
+}
+
 const GANTT_TOOLTIP_TEXTS = {
   start: {
     en: 'Start',
@@ -96,8 +114,8 @@ export function GanttTooltip({ bar, position, showStatusSections = false }: Gant
         </div>
       ) : null}
       {tooltipFieldEntries.map(([fieldId, value]) => (
-        <div key={fieldId}>
-          <span style={{ color: 'var(--ds-text-subtle, #5E6C84)' }}>{fieldId}</span>
+        <div key={fieldId} data-testid={`gantt-bar-tooltip-field-${fieldId}`}>
+          <span style={{ color: 'var(--ds-text-subtle, #5E6C84)' }}>{tooltipFieldHeading(fieldId)}</span>
           {': '}
           {value}
         </div>

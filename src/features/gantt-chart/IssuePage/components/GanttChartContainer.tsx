@@ -9,6 +9,7 @@ import {
 } from '../../tokens';
 import type { GanttBar, QuickFilter } from '../../types';
 import { guessInterval } from '../../utils/guessInterval';
+import { parseChangelog } from '../../utils/parseChangelog';
 import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { BUILT_IN_QUICK_FILTERS } from '../../quickFilters/builtIns';
 import { applyQuickFiltersToBars } from '../../quickFilters/applyQuickFiltersToBars';
@@ -135,27 +136,30 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
     ]
   );
   const visibleBars = filterResult.bars;
+  const loadedBars = dataSnap.bars as GanttBar[];
 
   /**
-   * Bars with `statusSections.length <= 1` come from issues whose Jira changelog has no recorded
-   * status transitions, so we can't paint per-status segments and fall back to a single fill.
-   * The toolbar shows a warning tag enumerating these tasks.
+   * Toolbar warning: tasks whose changelog yields **no** parsed status transitions (same notion as
+   * “no history” in BDD). Using {@link parseChangelog} avoids mismatch with `statusSections` length
+   * when segments merge or clip differently than raw transition counts.
+   *
+   * Uses all **loaded** bars (not quick-filtered `visibleBars`) so the hint stays correct when chips
+   * or search hide some issues — the model still lacks history for those tasks.
    */
-  const tasksWithoutStatusHistory = useMemo(
-    () =>
-      visibleBars
-        .filter(b => b.statusSections.length <= 1)
-        .map(b => {
-          const prefix = `${b.issueKey}: `;
-          const summary = b.label.startsWith(prefix) ? b.label.slice(prefix.length) : b.label;
-          return { key: b.issueKey, summary };
-        }),
-    [visibleBars]
-  );
+  const tasksWithoutStatusHistory = useMemo(() => {
+    const byKey = dataModel.getIssuesByKey();
+    return loadedBars
+      .filter(bar => parseChangelog(byKey.get(bar.issueKey)?.changelog).length === 0)
+      .map(b => {
+        const prefix = `${b.issueKey}: `;
+        const summary = b.label.startsWith(prefix) ? b.label.slice(prefix.length) : b.label;
+        return { key: b.issueKey, summary };
+      });
+  }, [loadedBars, dataModel]);
   const showStatusSectionsEmptyHint =
     settingsSnap.statusBreakdownEnabled &&
-    visibleBars.length > 0 &&
-    tasksWithoutStatusHistory.length === visibleBars.length;
+    loadedBars.length > 0 &&
+    tasksWithoutStatusHistory.length === loadedBars.length;
 
   const settingsPanel = (
     <div data-jh-gantt-root>
@@ -292,8 +296,8 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
         interval={viewportSnap.interval}
         statusBreakdownEnabled={settingsSnap.statusBreakdownEnabled}
         statusBreakdownAvailability={
-          visibleBars.length > 0
-            ? { total: visibleBars.length, tasksWithoutHistory: tasksWithoutStatusHistory }
+          loadedBars.length > 0
+            ? { total: loadedBars.length, tasksWithoutHistory: tasksWithoutStatusHistory }
             : undefined
         }
         missingDateIssues={dataSnap.missingDateIssues}
@@ -309,6 +313,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
         onIntervalChange={iv => {
           userChangedInterval.current = true;
           viewportModel.setInterval(iv);
+          viewportModel.resetZoom();
         }}
         onToggleStatusBreakdown={() => {
           settingsModel.toggleStatusBreakdown();

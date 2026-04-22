@@ -154,6 +154,24 @@ flowchart LR
 | 45 | [TASK-45](./TASK-45-bdd-coverage-hotkeys-indicator-tags.md) | BDD-coverage для indicator tags no-history / missing-dates (P4); hotkeys (P1) — out-of-scope (lint, не BDD) | DONE |
 | 46 | [TASK-46](./TASK-46-feature-md-docs.md) | `src/features/gantt-chart/feature.md` — user-facing описание фичи | DONE |
 
+### Phase 8: BDD hardening (2026-04)
+
+> Контекст: read-only ревью BDD-покрытия (skill `bdd-features-reviewer`) выявил три «греха» — unclear state, обход UI, пропущенные сценарии. Покрытие 9/74 (12 %).
+
+| # | Task | Описание | Status |
+|---|------|----------|--------|
+| 47 | [TASK-47](./TASK-47-bdd-hardening.md) | Refactor existing BDD: Background, fix `Then localStorage`, mount real PageObject, фикс tag/step коллизий + добавить P0 missing scenarios + quick-filters runtime (минимум 6 сценариев) | VERIFICATION |
+| 48 | [TASK-48](./TASK-48-bdd-hardening-round-3.md) | BDD round 3: тэг-коллизии DISP-17/18, settings.steps `.ant-select.eq(N)` → testid, `Then localStorage` в QF-15 → reopen UI, расширить INT-4/5/SET-4, +10 P0 (DISP-5/6/16/23, ERR-3/4, SET-5, QF-3/11/13). Цель: 22→32/74 | VERIFICATION |
+
+### Phase 9: BDD coverage 30 → 64 / 74 (2026-04)
+
+> Контекст: после round 3 покрытие 30 / 74 ≈ 40 %. Цель — мигрировать ещё 34 P0/P1 спек-сценария
+> в исполняемые Cypress BDD, осознанно отложив 10 (perf, легаси, хрупкие d3-zoom). Анализ — в TASK-49.
+
+| # | Task | Описание | Status |
+|---|------|----------|--------|
+| 49 | [TASK-49](./TASK-49-bdd-coverage-30-to-64.md) | 6 волн миграции: Display variants (7), Scope contracts (9), Settings UI (4), Quick filters (9), Yellow tags (2), Interactions (3). Цель: 30 → 64 / 74 | TODO |
+
 ## Dependencies
 
 ```mermaid

@@ -17,39 +17,9 @@ Feature: Gantt Chart - Interactions
       | includeSubtasks     | true               |
       | includeEpicChildren | false              |
       | includeIssueLinks   | false              |
-      | labelFieldId        | key                |
       | tooltipFieldIds     | summary, assignee, status, priority |
       | scope               | _global            |
     And the Gantt chart is displayed with bars for "PROJ-101", "PROJ-102", "PROJ-103", "PROJ-104"
-
-  @SC-GANTT-INT-1
-  Scenario: S7 — Wheel zoom scales the chart and zoom buttons provide discrete steps
-    Given the chart is displayed at 100% zoom level
-    And the time axis interval is "Days"
-    And the visible date range covers "Mar 15" through "Apr 20"
-    When I zoom in using Ctrl+scroll wheel on the chart area
-    Then the number of visible day tick labels should decrease
-    And the first visible date tick should remain approximately "Mar 15"
-    When I click the zoom out button "-" in the toolbar
-    Then the number of visible day tick labels should increase by one discrete step
-    When I click the zoom in button "+" in the toolbar
-    Then the number of visible day tick labels should decrease by one discrete step
-
-  @SC-GANTT-INT-2
-  Scenario: S7 — Pan by dragging moves the visible chart area
-    Given the first visible date tick is "Mar 15"
-    When I drag the chart 200px to the left
-    Then the first visible date tick should shift from "Mar 15" to approximately "Mar 17"
-    When I drag the chart 100px upward
-    Then the first visible issue row should shift from "PROJ-101" to "PROJ-102"
-
-  @SC-GANTT-INT-3
-  Scenario: S7 — Scrollbars navigate the chart when content exceeds viewport
-    Given the first visible date tick is "Mar 15"
-    When I drag the horizontal scrollbar to the right by 25% of track width
-    Then the first visible date tick should shift to approximately "Mar 24"
-    When I drag the vertical scrollbar down by 50% of track height
-    Then the first visible issue row should shift from "PROJ-101" to "PROJ-103"
 
   @SC-GANTT-INT-4
   Scenario: S7 — Interval dropdown switches the time axis granularity

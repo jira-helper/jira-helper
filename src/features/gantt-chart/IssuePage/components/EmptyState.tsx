@@ -23,7 +23,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onOpenSettings }) => {
   const texts = useGetTextsByLocale(EMPTY_STATE_TEXTS);
 
   return (
-    <div style={{ padding: '16px' }}>
+    <div data-testid="gantt-empty-state" style={{ padding: '16px' }}>
       <p style={{ marginBottom: onOpenSettings ? '16px' : 0 }}>{texts.message}</p>
       {onOpenSettings ? (
         <Button type="default" onClick={onOpenSettings}>

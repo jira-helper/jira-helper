@@ -14,6 +14,8 @@ import type { GanttScopeSettings } from '../../types';
 import { buildScopeKey } from '../../utils/resolveSettings';
 import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
 import { GanttChartContainer } from './GanttChartContainer';
+import { applyGanttSettingsTable, ganttDisplayBddCtx, issueFromRow } from '../features/helpers';
+import { applyInitialGanttScopeForIssueView } from '../../utils/applyInitialGanttScopeForIssueView';
 
 const EN_FIRST_RUN = 'Gantt chart is not configured yet. Please configure start and end date mappings.';
 const EN_EMPTY =
@@ -193,5 +195,178 @@ describe('GanttChartContainer', () => {
     );
 
     expect(await screen.findByTestId('gantt-chart-svg')).toBeInTheDocument();
+  });
+
+  it('DISP-25: shows missing-dates toolbar warning when some subtasks lack resolvable dates', async () => {
+    ganttDisplayBddCtx.scenarioIssueKey = 'PROJ-2500';
+    ganttDisplayBddCtx.scenarioProjectKey = 'PROJ';
+    ganttDisplayBddCtx.scenarioIssueType = 'Epic';
+    const rows: Record<string, string>[] = [
+      {
+        key: 'PROJ-2501',
+        type: 'Story',
+        relation: 'subtask',
+        created: '2026-04-01',
+        status: 'Done',
+        statusCategory: 'done',
+        dueDate: '2026-04-05',
+        summary: 'Normal task',
+      },
+      {
+        key: 'PROJ-2502',
+        type: 'Story',
+        relation: 'subtask',
+        created: '-',
+        status: 'In Progress',
+        statusCategory: 'indeterminate',
+        dueDate: '-',
+        summary: 'No dates at all',
+      },
+      {
+        key: 'PROJ-2503',
+        type: 'Bug',
+        relation: 'subtask',
+        created: '-',
+        status: 'To Do',
+        statusCategory: 'new',
+        dueDate: '2026-04-10',
+        summary: 'No start date',
+      },
+    ];
+    const issues = rows.map(r => issueFromRow(r));
+    registerMockJira(vi.fn().mockResolvedValue(Ok({ subtasks: issues, externalLinks: [] })));
+    ganttChartModule.ensure(globalContainer);
+
+    applyGanttSettingsTable([
+      { setting: 'startMapping', value: 'dateField: created' },
+      { setting: 'endMapping', value: 'dateField: dueDate' },
+      { setting: 'includeSubtasks', value: 'true' },
+      { setting: 'includeEpicChildren', value: 'false' },
+      { setting: 'includeIssueLinks', value: 'false' },
+      { setting: 'scope', value: 'global' },
+    ]);
+
+    const { model } = globalContainer.inject(ganttSettingsModelToken);
+    model.load();
+    model.contextProjectKey = 'PROJ';
+    model.contextIssueType = 'Epic';
+    applyInitialGanttScopeForIssueView(model);
+
+    render(
+      <WithDi container={globalContainer}>
+        <GanttChartContainer issueKey="PROJ-2500" container={globalContainer} />
+      </WithDi>
+    );
+
+    expect(await screen.findByTestId('gantt-toolbar-warning-missing-dates')).toBeInTheDocument();
+    expect(screen.getByTestId('gantt-toolbar-warning-missing-dates')).toHaveTextContent('2 tasks not on chart');
+  });
+
+  it('DISP-24: shows no-history toolbar warning when status breakdown is on and some bars lack changelog', async () => {
+    ganttDisplayBddCtx.scenarioIssueKey = 'PROJ-2400';
+    ganttDisplayBddCtx.scenarioProjectKey = 'PROJ';
+    ganttDisplayBddCtx.scenarioIssueType = 'Epic';
+    const rows: Record<string, string>[] = [
+      {
+        key: 'PROJ-2401',
+        type: 'Story',
+        relation: 'subtask',
+        created: '2026-04-01',
+        status: 'Done',
+        statusCategory: 'done',
+        dueDate: '2026-04-07',
+        summary: 'Auth service',
+      },
+      {
+        key: 'PROJ-2402',
+        type: 'Story',
+        relation: 'subtask',
+        created: '2026-04-02',
+        status: 'In Progress',
+        statusCategory: 'indeterminate',
+        dueDate: '2026-04-08',
+        summary: 'Payment module',
+      },
+      {
+        key: 'PROJ-2403',
+        type: 'Bug',
+        relation: 'subtask',
+        created: '2026-04-03',
+        status: 'To Do',
+        statusCategory: 'new',
+        dueDate: '2026-04-09',
+        summary: 'Fix login bug',
+      },
+    ];
+    const issues = rows.map(r => issueFromRow(r));
+    const i2401 = issues.find(i => i.key === 'PROJ-2401')!;
+    i2401.changelog = {
+      startAt: 0,
+      maxResults: 2,
+      total: 2,
+      histories: [
+        {
+          created: '2026-04-02T10:00:00',
+          items: [
+            {
+              field: 'status',
+              fieldtype: 'jira',
+              from: null,
+              to: null,
+              fromString: 'To Do',
+              toString: 'In Progress',
+              fromStatusCategory: { key: 'new' },
+              toStatusCategory: { key: 'indeterminate' },
+            },
+          ],
+        },
+        {
+          created: '2026-04-05T14:00:00',
+          items: [
+            {
+              field: 'status',
+              fieldtype: 'jira',
+              from: null,
+              to: null,
+              fromString: 'In Progress',
+              toString: 'Done',
+              fromStatusCategory: { key: 'indeterminate' },
+              toStatusCategory: { key: 'done' },
+            },
+          ],
+        },
+      ],
+    };
+    delete issues.find(i => i.key === 'PROJ-2402')!.changelog;
+    delete issues.find(i => i.key === 'PROJ-2403')!.changelog;
+
+    registerMockJira(vi.fn().mockResolvedValue(Ok({ subtasks: issues, externalLinks: [] })));
+    ganttChartModule.ensure(globalContainer);
+
+    applyGanttSettingsTable([
+      { setting: 'startMapping', value: 'dateField: created' },
+      { setting: 'endMapping', value: 'dateField: dueDate' },
+      { setting: 'includeSubtasks', value: 'true' },
+      { setting: 'includeEpicChildren', value: 'false' },
+      { setting: 'includeIssueLinks', value: 'false' },
+      { setting: 'scope', value: 'global' },
+    ]);
+
+    const { model } = globalContainer.inject(ganttSettingsModelToken);
+    model.load();
+    model.contextProjectKey = 'PROJ';
+    model.contextIssueType = 'Epic';
+    applyInitialGanttScopeForIssueView(model);
+    model.toggleStatusBreakdown();
+    model.save();
+
+    render(
+      <WithDi container={globalContainer}>
+        <GanttChartContainer issueKey="PROJ-2400" container={globalContainer} />
+      </WithDi>
+    );
+
+    expect(await screen.findByTestId('gantt-toolbar-warning-no-history')).toBeInTheDocument();
+    expect(screen.getByTestId('gantt-toolbar-warning-no-history')).toHaveTextContent('No history for 2 of 3 tasks');
   });
 });

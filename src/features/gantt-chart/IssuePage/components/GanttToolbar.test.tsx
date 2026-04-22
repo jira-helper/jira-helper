@@ -141,7 +141,7 @@ describe('GanttToolbar', () => {
       },
     });
 
-    expect(screen.getByTestId('gantt-no-history-tag')).toHaveTextContent('No history for 9 of 12 tasks');
+    expect(screen.getByTestId('gantt-toolbar-warning-no-history')).toHaveTextContent('No history for 9 of 12 tasks');
   });
 
   it('hides availability tag when every loaded task has status history', () => {
@@ -150,7 +150,7 @@ describe('GanttToolbar', () => {
       statusBreakdownAvailability: { total: 12, tasksWithoutHistory: [] },
     });
 
-    expect(screen.queryByTestId('gantt-no-history-tag')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gantt-toolbar-warning-no-history')).not.toBeInTheDocument();
   });
 
   it('renders the no-history tag as a focusable warning with cursor:help', () => {
@@ -162,11 +162,12 @@ describe('GanttToolbar', () => {
       },
     });
 
-    const tag = screen.getByTestId('gantt-no-history-tag');
+    const wrap = screen.getByTestId('gantt-toolbar-warning-no-history');
+    const tag = within(wrap).getByRole('status');
     expect(tag).toHaveAttribute('tabindex', '0');
     expect(tag).toHaveStyle({ cursor: 'help' });
-    // The accessible name spells out which tasks are affected.
-    expect(tag.getAttribute('aria-label')).toMatch(/1.*4/);
+    expect(wrap).toHaveTextContent('No history for 1 task');
+    expect(tag.getAttribute('aria-label')).toBe('No history for 1 task');
   });
 
   it('renders a tooltip table listing the affected issues on hover/focus', async () => {
@@ -182,9 +183,10 @@ describe('GanttToolbar', () => {
       },
     });
 
-    await user.hover(screen.getByTestId('gantt-no-history-tag'));
+    await user.hover(within(screen.getByTestId('gantt-toolbar-warning-no-history')).getByRole('status'));
 
-    const tooltip = await screen.findByTestId('gantt-no-history-tooltip');
+    const tooltip = await screen.findByTestId('gantt-warning-tooltip');
+    expect(tooltip).toHaveAttribute('data-warning-type', 'no-history');
     expect(within(tooltip).getByText('Tasks without status history')).toBeInTheDocument();
     expect(within(tooltip).getByText('TTP-101')).toBeInTheDocument();
     expect(within(tooltip).getByText('Refactor signup')).toBeInTheDocument();
@@ -201,13 +203,13 @@ describe('GanttToolbar', () => {
       },
     });
 
-    expect(screen.queryByTestId('gantt-no-history-tag')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gantt-toolbar-warning-no-history')).not.toBeInTheDocument();
   });
 
   describe('missing dates tag', () => {
     it('does not render the tag when there are no missing-date issues', () => {
       renderToolbar({ missingDateIssues: [] });
-      expect(screen.queryByTestId('gantt-missing-dates-tag')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('gantt-toolbar-warning-missing-dates')).not.toBeInTheDocument();
     });
 
     it('renders a focusable warning tag with task count', () => {
@@ -219,8 +221,9 @@ describe('GanttToolbar', () => {
         ],
       });
 
-      const tag = screen.getByTestId('gantt-missing-dates-tag');
-      expect(tag).toHaveTextContent('3 tasks not on chart');
+      const wrap = screen.getByTestId('gantt-toolbar-warning-missing-dates');
+      const tag = within(wrap).getByRole('status');
+      expect(wrap).toHaveTextContent('3 tasks not on chart');
       expect(tag).toHaveAttribute('tabindex', '0');
       expect(tag).toHaveStyle({ cursor: 'help' });
       expect(tag.getAttribute('aria-label')).toMatch(/3.*not on chart/);
@@ -230,7 +233,7 @@ describe('GanttToolbar', () => {
       renderToolbar({
         missingDateIssues: [{ issueKey: 'TTP-7', summary: 'Lonely', reason: 'noStartAndEndDate' }],
       });
-      expect(screen.getByTestId('gantt-missing-dates-tag')).toHaveTextContent('1 task not on chart');
+      expect(screen.getByTestId('gantt-toolbar-warning-missing-dates')).toHaveTextContent('1 task not on chart');
     });
 
     it('renders a tooltip table with issue key, summary and reason on hover', async () => {
@@ -242,9 +245,10 @@ describe('GanttToolbar', () => {
         ],
       });
 
-      await user.hover(screen.getByTestId('gantt-missing-dates-tag'));
+      await user.hover(within(screen.getByTestId('gantt-toolbar-warning-missing-dates')).getByRole('status'));
 
-      const tooltip = await screen.findByTestId('gantt-missing-dates-tooltip');
+      const tooltip = await screen.findByTestId('gantt-warning-tooltip');
+      expect(tooltip).toHaveAttribute('data-warning-type', 'missing-dates');
       expect(within(tooltip).getByText('TTP-101')).toBeInTheDocument();
       expect(within(tooltip).getByText('Backfill release notes')).toBeInTheDocument();
       expect(within(tooltip).getByText('No start date')).toBeInTheDocument();
@@ -365,7 +369,7 @@ describe('GanttToolbar', () => {
         quickFilterSearchMode: 'text',
         quickFilterSearch: 'project = X',
       });
-      expect(screen.queryByTestId('gantt-quick-filters-save-as-chip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('gantt-save-as-quick-filter-button')).not.toBeInTheDocument();
     });
 
     it('does not show Save as quick filter when JQL is invalid', () => {
@@ -374,7 +378,7 @@ describe('GanttToolbar', () => {
         quickFilterSearchMode: 'jql',
         quickFilterSearch: '((( broken',
       });
-      expect(screen.queryByTestId('gantt-quick-filters-save-as-chip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('gantt-save-as-quick-filter-button')).not.toBeInTheDocument();
     });
 
     it('shows Save as quick filter when JQL mode and query is valid', () => {
@@ -383,7 +387,7 @@ describe('GanttToolbar', () => {
         quickFilterSearchMode: 'jql',
         quickFilterSearch: 'project = TRPA',
       });
-      expect(screen.getByTestId('gantt-quick-filters-save-as-chip')).toBeInTheDocument();
+      expect(screen.getByTestId('gantt-save-as-quick-filter-button')).toBeInTheDocument();
     });
 
     it('opens save popover and calls onSaveJqlAsQuickFilter with name and jql', async () => {
@@ -394,7 +398,7 @@ describe('GanttToolbar', () => {
         quickFilterSearch: 'team = "Alpha"',
       });
 
-      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+      await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
 
       const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
       await user.clear(nameInput);
@@ -415,7 +419,7 @@ describe('GanttToolbar', () => {
         quickFilterSearch: 'team = "Alpha"',
       });
 
-      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+      await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
       const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
       await user.clear(nameInput);
       await user.type(nameInput, 'Alpha team');
@@ -458,7 +462,7 @@ describe('GanttToolbar', () => {
         quickFilterSearch: 'team = "Alpha"',
       });
 
-      await user.click(screen.getByTestId('gantt-quick-filters-save-as-chip'));
+      await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
       const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
       await user.clear(nameInput);
 

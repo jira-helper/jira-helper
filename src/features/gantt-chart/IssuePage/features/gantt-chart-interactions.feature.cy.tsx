@@ -4,6 +4,7 @@ import { setupBackground } from './helpers';
 import featureText from './gantt-chart-interactions.feature?raw';
 import './steps/common.steps';
 import './steps/interactions.steps';
+import './steps/settings.steps';
 import 'cypress/support/gherkin-steps/common';
 
 defineFeature(featureText, ({ Background, AfterScenario }) => {

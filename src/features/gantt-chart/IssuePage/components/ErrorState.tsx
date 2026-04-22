@@ -24,7 +24,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ onRetry, errorMessage })
   const texts = useGetTextsByLocale(ERROR_STATE_TEXTS);
 
   return (
-    <div style={{ padding: '16px' }}>
+    <div data-testid="gantt-chart-error-state" style={{ padding: '16px' }}>
       <p style={{ marginBottom: '16px' }}>{texts.message}</p>
       {errorMessage ? (
         <pre

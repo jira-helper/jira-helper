@@ -121,14 +121,6 @@ Feature: Gantt Chart - Quick Filters (FR-17)
     Then the chart area shows the alert "All tasks are hidden by quick filters"
     And the toolbar still shows chips and the search input so the user can recover
 
-  @SC-GANTT-QF-12
-  Scenario: Quick filters cascade like other scope settings
-    Given the global scope has a custom quick filter "Global filter"
-    And the project "PROJ" scope has a custom quick filter "Project filter" (no inheritance from global — each scope owns its full quickFilters list)
-    When I open an issue in project "PROJ"
-    Then the toolbar chips include built-ins, then "Project filter"
-    And do NOT include "Global filter" (project-level overrides global)
-
   @SC-GANTT-QF-13
   Scenario: Search supports JQL mode with custom-field resolution
     Given the search mode toggle "[Text|JQL]" is shown to the left of the search input

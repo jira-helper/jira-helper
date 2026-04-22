@@ -34,6 +34,19 @@ export const GanttFullscreenModal: React.FC<GanttFullscreenModalProps> = ({ visi
     destroyOnClose={false}
     maskClosable={false}
   >
-    {children}
+    <div
+      data-testid="gantt-fullscreen-modal"
+      role="document"
+      tabIndex={-1}
+      onKeyDown={e => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          onClose();
+        }
+      }}
+      style={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}
+    >
+      {children}
+    </div>
   </Modal>
 );

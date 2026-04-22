@@ -285,6 +285,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
 
   return (
     <div
+      data-testid="gantt-toolbar-root"
       role="toolbar"
       aria-label="Gantt toolbar"
       style={{
@@ -315,6 +316,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               size="small"
               onClick={onZoomReset}
               aria-label={texts.zoomReset}
+              data-testid="gantt-toolbar-zoom-level"
               style={{ minWidth: 52, fontVariantNumeric: 'tabular-nums' }}
             >
               {zoomPercent}
@@ -335,6 +337,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
 
         <Tooltip title={texts.intervalLegend}>
           <Segmented
+            data-testid="gantt-toolbar-interval-segmented"
             aria-label={texts.intervalLegend}
             size="small"
             value={interval}
@@ -349,6 +352,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           <Tooltip title={texts.statusBreakdownTooltip}>
             <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
               <Switch
+                data-testid="gantt-status-breakdown-toggle"
                 checked={statusBreakdownEnabled}
                 onChange={() => {
                   onToggleStatusBreakdown();
@@ -364,9 +368,9 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           statusBreakdownAvailability.tasksWithoutHistory.length > 0
             ? (() => {
                 const missing = statusBreakdownAvailability.tasksWithoutHistory;
-                const total = statusBreakdownAvailability.total;
+                const { total } = statusBreakdownAvailability;
                 const tagLabel =
-                  total === 1
+                  missing.length === 1
                     ? texts.statusBreakdownNoHistoryTagOne
                     : texts.statusBreakdownNoHistoryTagMany
                         .replace('{count}', String(missing.length))
@@ -374,10 +378,15 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                 return (
                   <Tooltip
                     placement="bottomLeft"
+                    trigger={['hover', 'focus']}
                     overlayStyle={{ maxWidth: 460 }}
                     title={
-                      <div data-testid="gantt-no-history-tooltip" style={{ fontSize: 12, lineHeight: 1.4 }}>
-                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                      <div
+                        data-testid="gantt-warning-tooltip"
+                        data-warning-type="no-history"
+                        style={{ fontSize: 12, lineHeight: 1.4 }}
+                      >
+                        <div data-testid="gantt-warning-tooltip-heading" style={{ fontWeight: 600, marginBottom: 4 }}>
                           {texts.statusBreakdownNoHistoryTooltipHeader}
                         </div>
                         <div style={{ marginBottom: 8, opacity: 0.85 }}>
@@ -418,7 +427,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                           </thead>
                           <tbody>
                             {missing.slice(0, 20).map(t => (
-                              <tr key={t.key}>
+                              <tr key={t.key} data-testid="gantt-warning-tooltip-row" data-issue-key={t.key}>
                                 <td
                                   style={{
                                     padding: '4px 8px 4px 0',
@@ -442,23 +451,28 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                       </div>
                     }
                   >
-                    <Tag
-                      icon={<WarningOutlined aria-hidden />}
-                      color="warning"
-                      tabIndex={0}
-                      role="status"
-                      aria-label={tagLabel}
-                      data-testid="gantt-no-history-tag"
-                      style={{
-                        marginInlineEnd: 0,
-                        fontSize: 11,
-                        lineHeight: '16px',
-                        padding: '0 6px',
-                        cursor: 'help',
-                      }}
+                    <span
+                      data-testid="gantt-toolbar-warning-no-history"
+                      data-warning-type="no-history"
+                      style={{ display: 'inline-block' }}
                     >
-                      {tagLabel}
-                    </Tag>
+                      <Tag
+                        icon={<WarningOutlined aria-hidden />}
+                        color="warning"
+                        tabIndex={0}
+                        role="status"
+                        aria-label={tagLabel}
+                        style={{
+                          marginInlineEnd: 0,
+                          fontSize: 11,
+                          lineHeight: '16px',
+                          padding: '0 6px',
+                          cursor: 'help',
+                        }}
+                      >
+                        {tagLabel}
+                      </Tag>
+                    </span>
                   </Tooltip>
                 );
               })()
@@ -476,10 +490,17 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               return (
                 <Tooltip
                   placement="bottomLeft"
+                  trigger={['hover', 'focus']}
                   overlayStyle={{ maxWidth: 520 }}
                   title={
-                    <div data-testid="gantt-missing-dates-tooltip" style={{ fontSize: 12, lineHeight: 1.4 }}>
-                      <div style={{ fontWeight: 600, marginBottom: 4 }}>{tagLabel}</div>
+                    <div
+                      data-testid="gantt-warning-tooltip"
+                      data-warning-type="missing-dates"
+                      style={{ fontSize: 12, lineHeight: 1.4 }}
+                    >
+                      <div data-testid="gantt-warning-tooltip-heading" style={{ fontWeight: 600, marginBottom: 4 }}>
+                        {tagLabel}
+                      </div>
                       <div style={{ marginBottom: 8, opacity: 0.85 }}>{texts.missingDatesTooltipDescription}</div>
                       <table
                         style={{
@@ -528,7 +549,11 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                         </thead>
                         <tbody>
                           {missingDateIssues.slice(0, 20).map(issue => (
-                            <tr key={issue.issueKey}>
+                            <tr
+                              key={issue.issueKey}
+                              data-testid="gantt-warning-tooltip-row"
+                              data-issue-key={issue.issueKey}
+                            >
                               <td
                                 style={{
                                   padding: '4px 8px 4px 0',
@@ -561,23 +586,28 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                     </div>
                   }
                 >
-                  <Tag
-                    icon={<WarningOutlined aria-hidden />}
-                    color="warning"
-                    tabIndex={0}
-                    role="status"
-                    aria-label={tagLabel}
-                    data-testid="gantt-missing-dates-tag"
-                    style={{
-                      marginInlineEnd: 0,
-                      fontSize: 11,
-                      lineHeight: '16px',
-                      padding: '0 6px',
-                      cursor: 'help',
-                    }}
+                  <span
+                    data-testid="gantt-toolbar-warning-missing-dates"
+                    data-warning-type="missing-dates"
+                    style={{ display: 'inline-block' }}
                   >
-                    {tagLabel}
-                  </Tag>
+                    <Tag
+                      icon={<WarningOutlined aria-hidden />}
+                      color="warning"
+                      tabIndex={0}
+                      role="status"
+                      aria-label={tagLabel}
+                      style={{
+                        marginInlineEnd: 0,
+                        fontSize: 11,
+                        lineHeight: '16px',
+                        padding: '0 6px',
+                        cursor: 'help',
+                      }}
+                    >
+                      {tagLabel}
+                    </Tag>
+                  </span>
                 </Tooltip>
               );
             })()
@@ -590,6 +620,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
             <Button
               type="text"
               size="small"
+              data-testid="gantt-toolbar-fullscreen-button"
               icon={<FullscreenOutlined aria-hidden />}
               onClick={onOpenFullscreen}
               aria-label={texts.openInModal}
@@ -601,6 +632,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           <Button
             type="text"
             size="small"
+            data-testid="gantt-toolbar-settings-button"
             icon={<SettingOutlined aria-hidden />}
             onClick={onOpenSettings}
             aria-label={texts.openSettings}
@@ -621,24 +653,48 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           borderTop: '1px dashed #EBECF0',
         }}
       >
-        <Segmented
-          size="small"
-          value={quickFilterSearchMode}
-          aria-label={texts.quickFiltersModeAriaLabel}
-          data-testid="gantt-quick-filters-search-mode"
-          onChange={v => onQuickFilterSearchModeChange(v as QuickFilterSearchMode)}
-          options={[
-            { label: texts.quickFiltersModeText, value: 'text' },
-            { label: texts.quickFiltersModeJql, value: 'jql' },
-          ]}
-        />
+        <div data-testid="gantt-search-mode-toggle" data-mode={quickFilterSearchMode}>
+          <Segmented
+            size="small"
+            value={quickFilterSearchMode}
+            aria-label={texts.quickFiltersModeAriaLabel}
+            data-testid="gantt-quick-filters-search-mode"
+            onChange={v => onQuickFilterSearchModeChange(v as QuickFilterSearchMode)}
+            options={[
+              { label: texts.quickFiltersModeText, value: 'text' },
+              { label: texts.quickFiltersModeJql, value: 'jql' },
+            ]}
+          />
+        </div>
 
         {jqlValidation.error ? (
-          <Tooltip title={texts.quickFiltersJqlInvalidPrefix.replace('{error}', jqlValidation.error)}>
+          <span data-testid="gantt-quick-filters-search-error" data-error="true">
+            <Tooltip title={texts.quickFiltersJqlInvalidPrefix.replace('{error}', jqlValidation.error)}>
+              <Input
+                size="small"
+                allowClear
+                status="error"
+                prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
+                placeholder={searchPlaceholder}
+                value={quickFilterSearch}
+                onChange={e => onQuickFilterSearchChange(e.target.value)}
+                onKeyDown={stopJiraHotkeys}
+                onKeyUp={stopJiraHotkeys}
+                aria-label={searchPlaceholder}
+                aria-invalid
+                data-testid="gantt-quick-filters-search"
+                style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
+              />
+            </Tooltip>
+            <span data-testid="gantt-quick-filters-jql-parser-message" style={{ display: 'none' }} aria-hidden>
+              {jqlValidation.error}
+            </span>
+          </span>
+        ) : (
+          <span data-testid="gantt-quick-filters-search-wrapper" data-error="false">
             <Input
               size="small"
               allowClear
-              status="error"
               prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
               placeholder={searchPlaceholder}
               value={quickFilterSearch}
@@ -646,25 +702,10 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               onKeyDown={stopJiraHotkeys}
               onKeyUp={stopJiraHotkeys}
               aria-label={searchPlaceholder}
-              aria-invalid
               data-testid="gantt-quick-filters-search"
               style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
             />
-          </Tooltip>
-        ) : (
-          <Input
-            size="small"
-            allowClear
-            prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
-            placeholder={searchPlaceholder}
-            value={quickFilterSearch}
-            onChange={e => onQuickFilterSearchChange(e.target.value)}
-            onKeyDown={stopJiraHotkeys}
-            onKeyUp={stopJiraHotkeys}
-            aria-label={searchPlaceholder}
-            data-testid="gantt-quick-filters-search"
-            style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
-          />
+          </span>
         )}
 
         {showSaveJqlButton ? (
@@ -673,7 +714,10 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
             open={savePopoverOpen}
             onOpenChange={handleSavePopoverOpenChange}
             content={
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 240 }}>
+              <div
+                data-testid="gantt-quick-filters-save-popover"
+                style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 240 }}
+              >
                 <label style={{ fontSize: 12, color: '#42526E' }}>
                   {texts.quickFiltersSavePopoverNameLabel}
                   <Input
@@ -693,7 +737,11 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                   />
                 </label>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                  <Button size="small" onClick={() => setSavePopoverOpen(false)}>
+                  <Button
+                    size="small"
+                    data-testid="gantt-quick-filters-save-cancel"
+                    onClick={() => setSavePopoverOpen(false)}
+                  >
                     {texts.quickFiltersSavePopoverCancel}
                   </Button>
                   <Button
@@ -709,7 +757,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               </div>
             }
           >
-            <Button size="small" type="default" data-testid="gantt-quick-filters-save-as-chip">
+            <Button size="small" type="default" data-testid="gantt-save-as-quick-filter-button">
               {texts.quickFiltersSaveAsChip}
             </Button>
           </Popover>
@@ -729,6 +777,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                   checked={active}
                   onChange={() => onToggleQuickFilter(qf.id)}
                   data-testid={`gantt-quick-filter-${qf.id}`}
+                  data-toolbar-chip="true"
                   data-active={active ? 'true' : 'false'}
                   style={{
                     fontSize: 12,

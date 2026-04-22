@@ -102,6 +102,25 @@ describe('GanttChartIssuePage', () => {
       expect(screen.getByText(EN_FIRST_RUN)).toBeInTheDocument();
     });
 
+    /**
+     * Spec DISP-19 (replaces deferred BDD): the Gantt section must be inserted in the main
+     * issue flow immediately after `#attachmentmodule`, and its content must be hidden by
+     * default (collapsed). Click-to-expand is AntD's `Collapse` behavior — not retested here.
+     */
+    it('inserts the Gantt section right after #attachmentmodule and starts collapsed (DISP-19)', async () => {
+      setupIssueViewDOM();
+
+      const [data, el] = await Promise.all([modification.loadData(), modification.waitForLoading()]);
+      modification.apply(data, el);
+
+      const attachment = document.querySelector('#attachmentmodule');
+      const section = document.querySelector('[data-jh-section="gantt-chart"]');
+      expect(attachment?.nextElementSibling).toBe(section);
+
+      const collapseHeader = document.querySelector('[data-jh-section="gantt-chart"] .ant-collapse-header');
+      expect(collapseHeader?.getAttribute('aria-expanded')).toBe('false');
+    });
+
     it('renders Gantt empty state when settings are configured', async () => {
       setupIssueViewDOM();
 

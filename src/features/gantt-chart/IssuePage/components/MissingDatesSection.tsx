@@ -69,11 +69,13 @@ export interface MissingDatesSectionProps {
 export const MissingDatesSection: React.FC<MissingDatesSectionProps> = ({ issues }) => {
   const texts = useGetTextsByLocale(MISSING_DATES_TEXTS);
 
-  if (issues.length === 0) {
+  const list = issues.filter((i): i is (typeof issues)[number] => Boolean(i?.issueKey));
+
+  if (list.length === 0) {
     return null;
   }
 
-  const header = issues.length === 1 ? texts.headerOne : texts.headerMany.replace('{{count}}', String(issues.length));
+  const header = list.length === 1 ? texts.headerOne : texts.headerMany.replace('{{count}}', String(list.length));
 
   const reasonLabel = (reason: MissingDateReason) => texts[MISSING_DATES_REASON_TO_TEXT_KEY[reason]];
 
@@ -120,7 +122,7 @@ export const MissingDatesSection: React.FC<MissingDatesSectionProps> = ({ issues
         </tr>
       </thead>
       <tbody>
-        {issues.map(issue => (
+        {list.map(issue => (
           <tr key={issue.issueKey}>
             <td style={{ padding: '8px 12px 8px 0', verticalAlign: 'top' }}>{issue.issueKey}</td>
             <td style={{ padding: '8px 12px', verticalAlign: 'top' }}>{issue.summary}</td>
@@ -137,7 +139,13 @@ export const MissingDatesSection: React.FC<MissingDatesSectionProps> = ({ issues
         bordered={false}
         defaultActiveKey={[]}
         ghost
-        items={[{ key: 'missing', label: header, children: table }]}
+        items={[
+          {
+            key: 'missing',
+            label: <span data-testid="gantt-missing-dates-toggle">{header}</span>,
+            children: table,
+          },
+        ]}
       />
     </div>
   );

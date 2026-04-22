@@ -67,8 +67,8 @@ describe('GanttTooltip', () => {
     expect(screen.getByText(/2024-06-11/)).toBeInTheDocument();
     expect(screen.getByText(/customfield_10001/)).toBeInTheDocument();
     expect(screen.getByText(/High/)).toBeInTheDocument();
-    expect(screen.getByText(/priority/)).toBeInTheDocument();
-    expect(screen.getByText(/Major/)).toBeInTheDocument();
+    expect(screen.getByTestId('gantt-bar-tooltip-field-priority')).toHaveTextContent(/Priority/);
+    expect(screen.getByTestId('gantt-bar-tooltip-field-priority')).toHaveTextContent('Major');
   });
 
   it('always shows the full label as the tooltip title', () => {

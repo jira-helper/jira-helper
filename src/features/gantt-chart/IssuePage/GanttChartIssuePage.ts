@@ -8,8 +8,8 @@ import { routingServiceToken } from 'src/infrastructure/routing';
 import { registerIssueSettings } from 'src/issue-settings/actions/registerIssueSettings';
 import { IssueSettingsComponent } from 'src/issue-settings/IssueSettingsComponent';
 import { ganttChartModule } from '../module';
-import type { SettingsScope } from '../types';
 import { ganttSettingsModelToken, issueViewPageObjectToken } from '../tokens';
+import { applyInitialGanttScopeForIssueView } from '../utils/applyInitialGanttScopeForIssueView';
 import { CollapsibleGanttSection } from './components/CollapsibleGanttSection';
 import { GanttSettingsTab } from './components/GanttSettingsTab';
 
@@ -52,10 +52,7 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
     const pageObject = this.container.inject(issueViewPageObjectToken);
     model.contextProjectKey = projectKey;
     model.contextIssueType = pageObject.getIssueType() ?? '';
-
-    const initialLevel = model.effectiveScopeLevel ?? model.preferredScopeLevel;
-    const scope = this.buildScopeFromPreferred(initialLevel, projectKey);
-    model.setScope(scope);
+    applyInitialGanttScopeForIssueView(model);
 
     return Promise.resolve({ issueKey });
   }
@@ -70,16 +67,6 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
   private projectKeyFromIssueKey(issueKey: string): string {
     const m = issueKey.match(/^(.+)-(\d+)$/);
     return m ? m[1]! : issueKey;
-  }
-
-  private buildScopeFromPreferred(preferredLevel: SettingsScope['level'] | null, projectKey: string): SettingsScope {
-    if (preferredLevel === 'global') return { level: 'global' };
-    if (preferredLevel === 'projectIssueType') {
-      const pageObject = this.container.inject(issueViewPageObjectToken);
-      const issueType = pageObject.getIssueType();
-      if (issueType) return { level: 'projectIssueType', projectKey, issueType };
-    }
-    return { level: 'project', projectKey };
   }
 
   apply(data?: GanttChartIssuePageInitData): void {
