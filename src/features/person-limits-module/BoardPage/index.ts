@@ -30,6 +30,7 @@ interface EditData {
   };
   swimlanesConfig?: {
     swimlanes?: Array<{ id?: string; name: string }>;
+    swimlaneStrategy?: string;
   };
 }
 
@@ -105,6 +106,11 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     propertyModel.setData(effectivePersonLimits);
 
     const boardEditData = editData as EditData;
+    // Saved query swimlanes are only meaningful when the board's strategy is "custom".
+    // For other strategies (none/parentChild/assignee/epic/project) Jira still returns the
+    // historical query list, but it doesn't render — so we treat it as "no swimlanes".
+    const isCustomSwimlaneStrategy = boardEditData.swimlanesConfig?.swimlaneStrategy === 'custom';
+
     const canEdit = boardEditData?.canEdit;
     if (canEdit) {
       const rawColumns = boardEditData.rapidListConfig?.mappedColumns ?? [];
@@ -112,7 +118,7 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
         .filter((col: MappedColumn) => !col.isKanPlanColumn)
         .map((col: MappedColumn) => ({ id: col.id, name: col.name }));
 
-      const rawSwimlanes = boardEditData.swimlanesConfig?.swimlanes ?? [];
+      const rawSwimlanes = isCustomSwimlaneStrategy ? (boardEditData.swimlanesConfig?.swimlanes ?? []) : [];
       const swimlanes: Swimlane[] = rawSwimlanes.map((swim, index) => ({
         id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
         name: swim.name,
@@ -132,6 +138,7 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const runtime = boardRuntimeModel;
     const cssSelector = this.getCssSelectorOfIssues(editData);
     runtime.setCssSelectorOfIssues(cssSelector);
+    runtime.setSwimlanesActive(isCustomSwimlaneStrategy);
     runtime.apply();
 
     this.destroyed = false;

@@ -6,7 +6,7 @@
 import { globalContainer } from 'dioma';
 import { Given, When, Then, type DataTableRows } from 'cypress/support/bdd-runner';
 import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
-import { columns, swimlanes, mountSettingsButton, setSearchMockType } from '../helpers';
+import { columns, swimlanes, mountSettingsButton, setSearchMockType, setActiveSwimlanes } from '../helpers';
 import type { PersonLimit } from '../../state/types';
 
 const getNextLimitId = () => Date.now() + Math.random();
@@ -106,6 +106,16 @@ Given(
 Given('there are no limits configured', () => {
   globalContainer.inject(propertyModelToken).model.setData({ limits: [] });
   globalContainer.inject(settingsUIModelToken).model.reset();
+});
+
+// Mirrors SettingsPage/index.tsx: when board's swimlaneStrategy is not "custom",
+// the modal is fed an empty swimlane list (saved query swimlanes are inert in that case).
+Given('the board has no custom swimlanes', () => {
+  setActiveSwimlanes([]);
+});
+
+Given('the board has custom swimlanes', () => {
+  setActiveSwimlanes(swimlanes);
 });
 
 Given('search returns no users', () => {
@@ -322,4 +332,16 @@ Then('I should see search results dropdown', () => {
 Then('I should see {string} in the dropdown', (text: string) => {
   cy.get('.ant-select-dropdown').should('be.visible');
   cy.contains(text, { timeout: 2000 }).should('be.visible');
+});
+
+// --- Swimlane section visibility ---
+
+Then('I should not see the swimlane section', () => {
+  // Neither the section label nor the "All swimlanes" checkbox should be in the modal.
+  cy.contains('label', 'All swimlanes').should('not.exist');
+  cy.get('[data-testid="swimlane-list"]').should('not.exist');
+});
+
+Then('I should see the swimlane section', () => {
+  cy.contains('label', 'All swimlanes').should('exist');
 });

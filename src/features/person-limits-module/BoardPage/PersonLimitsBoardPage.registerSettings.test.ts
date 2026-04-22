@@ -12,7 +12,9 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import PersonLimitsBoardPage from './index';
 import { personLimitsModule } from '../module';
+import { boardRuntimeModelToken } from '../tokens';
 import { PERSON_LIMITS_TEXTS } from '../SettingsPage/texts';
+import type { ReactElement } from 'react';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
   registerSettings: vi.fn(),
@@ -169,5 +171,98 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
         component: expect.any(Function),
       })
     );
+  });
+
+  describe('swimlane strategy handling', () => {
+    // Jira's editmodel returns saved query swimlanes regardless of the active strategy.
+    // We must only expose them when strategy === 'custom'; otherwise the user would be
+    // able to filter by inert entries that won't match anything on the rendered board.
+
+    function getRegisteredSwimlanes(): unknown[] {
+      const callArgs = vi.mocked(registerSettings).mock.calls[0][0];
+      const tabComponent = callArgs.component as () => ReactElement<{ swimlanes: unknown[] }>;
+      return tabComponent().props.swimlanes;
+    }
+
+    it('passes board swimlanes to the registered tab when strategy is "custom"', () => {
+      const page = new PersonLimitsBoardPage(globalContainer);
+      page.apply([
+        {
+          canEdit: true,
+          rapidListConfig: { mappedColumns: [] },
+          swimlanesConfig: {
+            swimlaneStrategy: 'custom',
+            swimlanes: [
+              { id: 's1', name: 'Lane1' },
+              { id: 's2', name: 'Lane2' },
+            ],
+          },
+        },
+        minimalPersonLimits,
+      ]);
+
+      expect(getRegisteredSwimlanes()).toHaveLength(2);
+    });
+
+    it('passes empty swimlanes to the registered tab when strategy is not "custom"', () => {
+      const page = new PersonLimitsBoardPage(globalContainer);
+      page.apply([
+        {
+          canEdit: true,
+          rapidListConfig: { mappedColumns: [] },
+          swimlanesConfig: {
+            // Strategy is e.g. "none" / "parentChild" / "assignee" / "epic" / "project".
+            // Jira still returns historical query swimlanes — they must be hidden from the user.
+            swimlaneStrategy: 'parentChild',
+            swimlanes: [
+              { id: 's1', name: 'Stale1' },
+              { id: 's2', name: 'Stale2' },
+            ],
+          },
+        },
+        minimalPersonLimits,
+      ]);
+
+      expect(getRegisteredSwimlanes()).toHaveLength(0);
+    });
+
+    it('passes empty swimlanes when swimlanesConfig is missing entirely', () => {
+      const page = new PersonLimitsBoardPage(globalContainer);
+      page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
+
+      expect(getRegisteredSwimlanes()).toHaveLength(0);
+    });
+
+    it('enables runtime swimlanes when strategy is "custom"', () => {
+      const setSwimlanesActive = vi.spyOn(globalContainer.inject(boardRuntimeModelToken).model, 'setSwimlanesActive');
+
+      const page = new PersonLimitsBoardPage(globalContainer);
+      page.apply([
+        {
+          canEdit: true,
+          rapidListConfig: { mappedColumns: [] },
+          swimlanesConfig: { swimlaneStrategy: 'custom', swimlanes: [] },
+        },
+        minimalPersonLimits,
+      ]);
+
+      expect(setSwimlanesActive).toHaveBeenCalledWith(true);
+    });
+
+    it('disables runtime swimlanes when strategy is not "custom"', () => {
+      const setSwimlanesActive = vi.spyOn(globalContainer.inject(boardRuntimeModelToken).model, 'setSwimlanesActive');
+
+      const page = new PersonLimitsBoardPage(globalContainer);
+      page.apply([
+        {
+          canEdit: true,
+          rapidListConfig: { mappedColumns: [] },
+          swimlanesConfig: { swimlaneStrategy: 'epic', swimlanes: [{ id: 's1', name: 'Stale' }] },
+        },
+        minimalPersonLimits,
+      ]);
+
+      expect(setSwimlanesActive).toHaveBeenCalledWith(false);
+    });
   });
 });

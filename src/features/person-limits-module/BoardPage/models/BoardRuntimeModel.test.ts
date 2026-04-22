@@ -287,12 +287,160 @@ describe('BoardRuntimeModel', () => {
     model.stats = [{ issues: [] } as any];
     model.activeLimitId = 42;
     model.cssSelectorOfIssues = '.custom';
+    model.setSwimlanesActive(false);
 
     model.reset();
 
     expect(model.stats).toEqual([]);
     expect(model.activeLimitId).toBeNull();
     expect(model.cssSelectorOfIssues).toBe('.ghx-issue');
+  });
+
+  describe('swimlane strategy handling', () => {
+    // Jira's editmodel returns historical query swimlanes regardless of the active strategy.
+    // When the board's strategy is not "custom", those saved entries do not exist in the DOM,
+    // so the runtime must ignore the swimlane filter on saved limits to avoid filtering everything out.
+
+    it('calculateStats ignores saved swimlane filter when swimlanes are inactive', () => {
+      // Board renders without swimlane wrappers (strategy = "none" / "epic" / "assignee" / etc.)
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="i1">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="i2">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          person: personJohn,
+          limit: 5,
+          columns: [],
+          // Stale swimlane filter saved by the user when the board still had custom swimlanes.
+          swimlanes: [{ id: 'sw-old', name: 'Old Swimlane' }],
+          showAllPersonIssues: true,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.setSwimlanesActive(false);
+
+      const stats = model.calculateStats();
+
+      expect(stats[0].issues.length).toBe(2);
+    });
+
+    it('calculateStats keeps respecting saved swimlane filter when swimlanes are active (default)', () => {
+      // Custom swimlanes, but the limit only targets sw1.
+      document.body.innerHTML = `
+        <div class="ghx-swimlane-header" aria-label="custom swimlanes"></div>
+        <div id="ghx-pool">
+          <div class="ghx-swimlane" swimlane-id="sw1">
+            <div class="ghx-swimlane-header"></div>
+            <div class="ghx-column" data-column-id="col1">
+              <div class="ghx-issue">
+                <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+              </div>
+            </div>
+          </div>
+          <div class="ghx-swimlane" swimlane-id="sw2">
+            <div class="ghx-swimlane-header"></div>
+            <div class="ghx-column" data-column-id="col1">
+              <div class="ghx-issue">
+                <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          person: personJohn,
+          limit: 10,
+          columns: [],
+          swimlanes: [{ id: 'sw1', name: 'Team A' }],
+          showAllPersonIssues: true,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      // No setSwimlanesActive call → defaults to true (custom strategy).
+
+      const stats = model.calculateStats();
+
+      expect(stats[0].issues.length).toBe(1);
+    });
+
+    it('showOnlyChosen ignores saved swimlane filter when swimlanes are inactive', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="a">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          person: personJohn,
+          limit: 5,
+          columns: [],
+          // Saved swimlane that no longer exists in DOM.
+          swimlanes: [{ id: 'sw-old', name: 'Old' }],
+          // showAllPersonIssues=false → goes through the per-issue scope check.
+          showAllPersonIssues: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.setSwimlanesActive(false);
+      model.calculateStats();
+      model.activeLimitId = model.stats[0].id;
+
+      model.showOnlyChosen();
+
+      expect(document.getElementById('a')!.classList.contains('no-visibility')).toBe(false);
+    });
+
+    it('reset restores swimlanesActive to true', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          person: personJohn,
+          limit: 5,
+          columns: [],
+          swimlanes: [{ id: 'sw-missing', name: 'Missing' }],
+          showAllPersonIssues: true,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.setSwimlanesActive(false);
+
+      model.reset();
+
+      // After reset, default behavior (active=true) → saved swimlanes filter is respected,
+      // so issues without a matching swimlaneId in the DOM are not counted.
+      const stats = model.calculateStats();
+      expect(stats[0].issues.length).toBe(0);
+    });
   });
 
   it('calculateStats with custom swimlanes only counts issues in scoped swimlanes', () => {

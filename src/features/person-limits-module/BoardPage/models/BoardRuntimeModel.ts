@@ -20,11 +20,25 @@ export class BoardRuntimeModel {
 
   cssSelectorOfIssues: string = '.ghx-issue';
 
+  /**
+   * Whether the board's swimlane strategy is "custom" (Queries).
+   * When false, saved swimlane filters in person limits are inert
+   * (Jira's editmodel keeps query definitions across strategy switches),
+   * so we must ignore them during matching to avoid silently filtering everything out.
+   */
+  private swimlanesActive: boolean = true;
+
   constructor(
     private propertyModel: PropertyModel,
     private pageObject: IBoardPagePageObject,
     private logger: Logger
   ) {}
+
+  /** Strip saved swimlane filter when board strategy isn't "custom". */
+  private effectiveLimit(personLimit: PersonLimitStats): PersonLimitStats {
+    if (this.swimlanesActive) return personLimit;
+    return { ...personLimit, swimlanes: [] };
+  }
 
   private countIssuesInColumn(column: Element, stats: PersonLimitStats[], swimlaneId?: string | null): void {
     const columnId = this.pageObject.getColumnIdFromColumn(column);
@@ -37,7 +51,9 @@ export class BoardRuntimeModel {
 
       if (assignee) {
         stats.forEach(personLimit => {
-          if (isPersonLimitAppliedToIssue(personLimit, assignee, columnId, swimlaneId, issueType)) {
+          if (
+            isPersonLimitAppliedToIssue(this.effectiveLimit(personLimit), assignee, columnId, swimlaneId, issueType)
+          ) {
             personLimit.issues.push(issue);
           }
         });
@@ -113,7 +129,13 @@ export class BoardRuntimeModel {
         const columnId = this.pageObject.getColumnIdOfIssue(issue) ?? '';
         const swimlaneId = this.pageObject.getSwimlaneIdOfIssue(issue);
         const issueType = this.pageObject.getIssueTypeFromIssue(issue);
-        shouldShow = isPersonLimitAppliedToIssue(personLimit, assignee, columnId, swimlaneId, issueType);
+        shouldShow = isPersonLimitAppliedToIssue(
+          this.effectiveLimit(personLimit),
+          assignee,
+          columnId,
+          swimlaneId,
+          issueType
+        );
       }
       this.pageObject.setIssueVisibility(issue, shouldShow);
     });
@@ -152,9 +174,14 @@ export class BoardRuntimeModel {
     this.cssSelectorOfIssues = selector;
   }
 
+  setSwimlanesActive(active: boolean): void {
+    this.swimlanesActive = active;
+  }
+
   reset(): void {
     this.stats = [];
     this.activeLimitId = null;
     this.cssSelectorOfIssues = '.ghx-issue';
+    this.swimlanesActive = true;
   }
 }

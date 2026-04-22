@@ -45,6 +45,19 @@ export const swimlanes = [
   { id: 'swim2', name: 'Backend' },
 ];
 
+// Swimlanes the next mountSettingsButton() call will pass to the modal.
+// Mirrors what SettingsPage/index.tsx feeds based on `swimlanesConfig.swimlaneStrategy`:
+// "custom" → real list, anything else → empty.
+let activeSwimlanes: typeof swimlanes = swimlanes;
+
+export const setActiveSwimlanes = (value: typeof swimlanes) => {
+  activeSwimlanes = value;
+};
+
+const resetActiveSwimlanes = () => {
+  activeSwimlanes = swimlanes;
+};
+
 const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
   if (searchMockType === 'empty') {
     return [];
@@ -86,6 +99,7 @@ export const setupBackground = () => {
   globalContainer.reset();
   registerLogger(globalContainer);
   resetSearchMockType();
+  resetActiveSwimlanes();
 
   globalContainer.register({
     token: localeProviderToken,
@@ -146,7 +160,7 @@ export const mountSettingsButton = () => {
     <WithDi container={globalContainer}>
       <SettingsButtonContainer
         boardDataColumns={columns}
-        boardDataSwimlanes={swimlanes}
+        boardDataSwimlanes={activeSwimlanes}
         searchUsers={mockSearchUsers}
       />
     </WithDi>

@@ -333,15 +333,17 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               </div>
             </Form.Item>
 
-            <Form.Item label={texts.swimlanes}>
-              <SwimlaneSelector
-                swimlanes={swimlanesForSelector}
-                value={currentFormData.swimlanes}
-                onChange={ids => handleFormChange('swimlanes', ids)}
-                label={null}
-                allLabel={texts.allSwimlanes}
-              />
-            </Form.Item>
+            {swimlanesForSelector.length > 0 && (
+              <Form.Item label={texts.swimlanes}>
+                <SwimlaneSelector
+                  swimlanes={swimlanesForSelector}
+                  value={currentFormData.swimlanes}
+                  onChange={ids => handleFormChange('swimlanes', ids)}
+                  label={null}
+                  allLabel={texts.allSwimlanes}
+                />
+              </Form.Item>
+            )}
 
             <Form.Item>
               <Checkbox

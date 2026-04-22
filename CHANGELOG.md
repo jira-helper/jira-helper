@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Run `node scripts/generate-changelog.mjs [from-tag] [to-tag]` to generate entries from git commits.
 
 
-## [2.30.0] - 2026-04-18
+## [2.30.2] - 2026-04-22
+
+### Fixed
+
+- **person-limits**: Align swimlane handling with the board’s active strategy — hide query swimlanes in settings when the strategy is not “custom”, and ignore saved swimlane filters at runtime so limits still apply on boards without custom swimlanes (Jira’s editmodel can still return historical swimlane definitions).
+
 
 ## [2.30.1] - 2026-04-21
 

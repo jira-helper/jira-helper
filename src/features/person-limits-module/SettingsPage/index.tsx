@@ -23,6 +23,7 @@ type BoardData = {
   };
   swimlanesConfig: {
     swimlanes: BoardSwimlane[];
+    swimlaneStrategy?: string;
   };
   canEdit: boolean;
 };
@@ -62,7 +63,11 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
 
     this.boardData = boardData;
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter((i: any) => !i.isKanPlanColumn);
-    this.boardDataSwimlanes = this.boardData.swimlanesConfig.swimlanes;
+    // Jira's editmodel returns saved query swimlanes regardless of the active strategy.
+    // Only treat them as real swimlanes when the board uses the "custom" (Queries) strategy;
+    // otherwise the saved entries are inert and would only confuse the user / break matching.
+    const isCustomSwimlaneStrategy = this.boardData.swimlanesConfig?.swimlaneStrategy === 'custom';
+    this.boardDataSwimlanes = isCustomSwimlaneStrategy ? this.boardData.swimlanesConfig.swimlanes : [];
 
     const columns: Column[] = (this.boardDataColumns || []).map(col => ({
       id: col.id,

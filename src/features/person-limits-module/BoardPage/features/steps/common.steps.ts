@@ -105,6 +105,21 @@ Given('there are no WIP limits configured', () => {
   });
 });
 
+// Mirrors PersonLimitsBoardPage.apply(): when the board's swimlaneStrategy isn't "custom",
+// any saved swimlane filter on a person limit must be ignored at runtime — otherwise stale
+// references (e.g. limits saved when custom swimlanes existed) silently filter out everything.
+Given('the board swimlane strategy is not custom', () => {
+  cy.then(() => {
+    boardRuntime().setSwimlanesActive(false);
+  });
+});
+
+Given('the board swimlane strategy is custom', () => {
+  cy.then(() => {
+    boardRuntime().setSwimlanesActive(true);
+  });
+});
+
 Given('there are issues on the board', () => {
   cy.then(() => {
     const mock = mockPageObjectRef.current;
