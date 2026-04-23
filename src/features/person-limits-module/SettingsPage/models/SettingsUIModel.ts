@@ -78,11 +78,11 @@ export class SettingsUIModel {
         const selectedColumns = limit.columns.length === 0 ? [] : limit.columns.map(c => String(c.id));
         const swimlanes = limit.swimlanes.length === 0 ? [] : limit.swimlanes.map(s => String(s.id ?? s.name));
         this.formData = {
-          person: {
-            name: limit.person.name,
-            displayName: limit.person.displayName || limit.person.name,
-            self: limit.person.self,
-          },
+          persons: limit.persons.map(p => ({
+            name: p.name,
+            displayName: p.displayName || p.name,
+            self: p.self,
+          })),
           limit: limit.limit,
           selectedColumns,
           swimlanes,
@@ -103,9 +103,9 @@ export class SettingsUIModel {
     this.limits = limits;
   }
 
-  isDuplicate(personName: string, columns: string[], swimlanes: string[], issueTypes?: string[]): boolean {
+  isDuplicate(personNames: string[], columns: string[], swimlanes: string[], issueTypes?: string[]): boolean {
     return this.limits.some(l => {
-      const nameMatch = l.person.name === personName;
+      const nameMatch = l.persons.some(p => personNames.includes(p.name));
 
       const existingColIds = [...l.columns.map(c => c.id)].sort();
       const newColIds = [...columns].sort();
