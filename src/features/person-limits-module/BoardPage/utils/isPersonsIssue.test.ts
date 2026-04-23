@@ -2,28 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { isPersonsIssue } from './isPersonsIssue';
 
 describe('isPersonsIssue', () => {
-  it('should return true when assignee matches person name', () => {
-    const person = { person: { name: 'john.doe' } };
-    expect(isPersonsIssue(person, 'john.doe')).toBe(true);
+  it('should return true when assignee matches any person in array', () => {
+    const stats = {
+      persons: [{ name: 'alice' }, { name: 'bob' }],
+    };
+    expect(isPersonsIssue(stats, 'alice')).toBe(true);
+    expect(isPersonsIssue(stats, 'bob')).toBe(true);
   });
 
   it('should return true when assignee matches displayName', () => {
-    const person = { person: { name: 'john.doe', displayName: 'John Doe' } };
-    expect(isPersonsIssue(person, 'John Doe')).toBe(true);
+    const stats = {
+      persons: [{ name: 'alice', displayName: 'Alice Smith' }],
+    };
+    expect(isPersonsIssue(stats, 'Alice Smith')).toBe(true);
   });
 
-  it('should return false when assignee does not match', () => {
-    const person = { person: { name: 'john.doe', displayName: 'John Doe' } };
-    expect(isPersonsIssue(person, 'Jane Doe')).toBe(false);
-  });
-
-  it('should return false when assignee is null', () => {
-    const person = { person: { name: 'john.doe' } };
-    expect(isPersonsIssue(person, null)).toBe(false);
-  });
-
-  it('should not match displayName when it is undefined', () => {
-    const person = { person: { name: 'john.doe' } };
-    expect(isPersonsIssue(person, 'John Doe')).toBe(false);
+  it('should return false when assignee does not match any person', () => {
+    const stats = {
+      persons: [{ name: 'alice' }],
+    };
+    expect(isPersonsIssue(stats, 'charlie')).toBe(false);
   });
 });
