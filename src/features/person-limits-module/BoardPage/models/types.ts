@@ -1,14 +1,13 @@
 /**
- * Statistics for a single person's WIP limit.
+ * Statistics for person(s) WIP limit.
  * Calculated at runtime from board state.
  */
 export type PersonLimitStats = {
   id: number;
-  person: {
+  persons: Array<{
     name: string;
-    /** @deprecated Use `name` instead. */
     displayName?: string;
-  };
+  }>;
   limit: number;
   /** Issues that match this person's limit criteria */
   issues: Element[];
