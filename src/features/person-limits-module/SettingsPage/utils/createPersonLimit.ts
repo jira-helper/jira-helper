@@ -30,7 +30,7 @@ export function createPersonLimit({
 
   const personLimit: PersonLimit = {
     id,
-    person,
+    persons: [person],
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,

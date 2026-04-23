@@ -83,7 +83,14 @@ describe('person-limits PropertyModel', () => {
     it('should skip load when state is not initial (loaded)', async () => {
       const data: PersonWipLimitsProperty = {
         limits: [
-          { id: 1, person: { name: 'a', self: 's' }, limit: 1, columns: [], swimlanes: [], showAllPersonIssues: true },
+          {
+            id: 1,
+            persons: [{ name: 'a', self: 's' }],
+            limit: 1,
+            columns: [],
+            swimlanes: [],
+            showAllPersonIssues: true,
+          },
         ],
       };
       vi.mocked(mockBoardPropertyService.getBoardProperty).mockResolvedValueOnce(data);
@@ -124,7 +131,14 @@ describe('person-limits PropertyModel', () => {
   describe('persist', () => {
     it('should save current data with PERSON_LIMITS key', async () => {
       const limits: PersonLimit[] = [
-        { id: 1, person: { name: 'x', self: 'y' }, limit: 2, columns: [], swimlanes: [], showAllPersonIssues: false },
+        {
+          id: 1,
+          persons: [{ name: 'x', self: 'y' }],
+          limit: 2,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: false,
+        },
       ];
       const data: PersonWipLimitsProperty = { limits };
       const model = new PropertyModel(mockBoardPropertyService, mockLogger);
@@ -181,7 +195,7 @@ describe('person-limits PropertyModel', () => {
     it('should replace limits only', () => {
       const model = new PropertyModel(mockBoardPropertyService, mockLogger);
       const next: PersonLimit[] = [
-        { id: 2, person: { name: 'b', self: 'c' }, limit: 9, columns: [], swimlanes: [], showAllPersonIssues: true },
+        { id: 2, persons: [{ name: 'b', self: 'c' }], limit: 9, columns: [], swimlanes: [], showAllPersonIssues: true },
       ];
 
       model.setLimits(next);
@@ -197,7 +211,7 @@ describe('person-limits PropertyModel', () => {
         limits: [
           {
             id: 1,
-            person: { name: 'p', self: 'q' },
+            persons: [{ name: 'p', self: 'q' }],
             limit: 1,
             columns: [],
             swimlanes: [],

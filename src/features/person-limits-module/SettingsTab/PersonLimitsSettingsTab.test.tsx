@@ -137,7 +137,7 @@ describe('PersonLimitsSettingsTab', () => {
 
     uiModel.limits.push({
       id: 99,
-      person: { name: 'draft', self: 'http://jira/draft' },
+      persons: [{ name: 'draft', self: 'http://jira/draft' }],
       limit: 1,
       columns: [],
       swimlanes: [],
@@ -149,6 +149,6 @@ describe('PersonLimitsSettingsTab', () => {
 
     await waitFor(() => expect(initSpy).toHaveBeenCalledTimes(2));
     expect(uiModel.limits).toHaveLength(1);
-    expect(uiModel.limits[0]?.person.name).toBe('u1');
+    expect(uiModel.limits[0]?.persons[0].name).toBe('u1');
   });
 });

@@ -28,8 +28,7 @@ export const isPersonLimitAppliedToIssue = (
 
   // 3. Check swimlane match (empty array = all swimlanes)
   const isSwimlaneMatch =
-    stats.swimlanes.length === 0 ||
-    (swimlaneId != null && stats.swimlanes.some(sw => sw.id === swimlaneId));
+    stats.swimlanes.length === 0 || (swimlaneId != null && stats.swimlanes.some(sw => sw.id === swimlaneId));
   if (!isSwimlaneMatch) return false;
 
   // 4. Check issue type match (undefined/empty = all types)

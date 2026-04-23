@@ -3,7 +3,7 @@ import { computeLimitId, LimitParams } from './computeLimitId';
 
 describe('computeLimitId', () => {
   const baseLimit: LimitParams = {
-    person: { name: 'john.doe' },
+    persons: [{ name: 'john.doe' }],
     columns: [{ id: 'col-1' }, { id: 'col-2' }],
     swimlanes: [{ id: 'sw-1' }, { id: 'sw-2' }],
     includedIssueTypes: ['Bug', 'Task'],
@@ -57,8 +57,8 @@ describe('computeLimitId', () => {
   });
 
   it('should return different ids for different persons', () => {
-    const limit1: LimitParams = { ...baseLimit, person: { name: 'john.doe' } };
-    const limit2: LimitParams = { ...baseLimit, person: { name: 'jane.doe' } };
+    const limit1: LimitParams = { ...baseLimit, persons: [{ name: 'john.doe' }] };
+    const limit2: LimitParams = { ...baseLimit, persons: [{ name: 'jane.doe' }] };
 
     expect(computeLimitId(limit1)).not.toBe(computeLimitId(limit2));
   });
@@ -72,7 +72,7 @@ describe('computeLimitId', () => {
 
   it('should handle undefined includedIssueTypes', () => {
     const limit1: LimitParams = {
-      person: { name: 'john.doe' },
+      persons: [{ name: 'john.doe' }],
       columns: [{ id: 'col-1' }],
       swimlanes: [{ id: 'sw-1' }],
       includedIssueTypes: undefined,

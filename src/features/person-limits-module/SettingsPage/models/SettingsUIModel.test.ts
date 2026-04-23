@@ -12,11 +12,13 @@ describe('SettingsUIModel', () => {
 
   const sampleLimit = (overrides: Partial<PersonLimit> = {}): PersonLimit => ({
     id: 1,
-    person: {
-      name: 'testuser',
-      displayName: 'Test User',
-      self: 'https://test.com/user',
-    },
+    persons: [
+      {
+        name: 'testuser',
+        displayName: 'Test User',
+        self: 'https://test.com/user',
+      },
+    ],
     limit: 5,
     columns: [],
     swimlanes: [],
@@ -53,7 +55,7 @@ describe('SettingsUIModel', () => {
       mockPropertyModel.data = { limits: [limit] };
       model.limits = [{ ...sampleLimit(), id: 99 }];
       model.editingId = 1;
-      model.formData = { person: null, limit: 1, selectedColumns: [], swimlanes: [] };
+      model.formData = { persons: [], limit: 1, selectedColumns: [], swimlanes: [] };
 
       model.initFromProperty();
 
@@ -97,7 +99,7 @@ describe('SettingsUIModel', () => {
 
   describe('addLimit', () => {
     it('should push limit and clear formData', () => {
-      model.setFormData({ person: null, limit: 1, selectedColumns: [], swimlanes: [] });
+      model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
       model.addLimit(sampleLimit());
 
       expect(model.limits).toHaveLength(1);
@@ -109,7 +111,7 @@ describe('SettingsUIModel', () => {
     it('should update existing limit and clear editing state', () => {
       model.limits = [sampleLimit()];
       model.editingId = 1;
-      model.setFormData({ person: null, limit: 1, selectedColumns: [], swimlanes: [] });
+      model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
 
       model.updateLimit(1, { ...sampleLimit(), limit: 10 });
 
@@ -128,9 +130,9 @@ describe('SettingsUIModel', () => {
 
   describe('deleteLimit', () => {
     it('should remove limit and clear editing when matching', () => {
-      model.limits = [sampleLimit({ id: 1 }), sampleLimit({ id: 2, person: { name: 'u2', self: '' } })];
+      model.limits = [sampleLimit({ id: 1 }), sampleLimit({ id: 2, persons: [{ name: 'u2', self: '' }] })];
       model.editingId = 1;
-      model.setFormData({ person: null, limit: 1, selectedColumns: [], swimlanes: [] });
+      model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
 
       model.deleteLimit(1);
 
@@ -155,7 +157,7 @@ describe('SettingsUIModel', () => {
 
       expect(model.editingId).toBe(1);
       expect(model.formData).toEqual({
-        person: { name: 'testuser', displayName: 'Test User', self: 'https://test.com/user' },
+        persons: [{ name: 'testuser', displayName: 'Test User', self: 'https://test.com/user' }],
         limit: 5,
         selectedColumns: ['col1'],
         swimlanes: ['s1'],
@@ -174,7 +176,7 @@ describe('SettingsUIModel', () => {
     });
 
     it('should clear formData when id is null', () => {
-      model.setFormData({ person: null, limit: 1, selectedColumns: [], swimlanes: [] });
+      model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
       model.setEditingId(null);
       expect(model.formData).toBeNull();
     });
@@ -182,7 +184,7 @@ describe('SettingsUIModel', () => {
 
   describe('setLimits', () => {
     it('should replace limits array', () => {
-      model.setLimits([sampleLimit(), sampleLimit({ id: 2, person: { name: 'b', self: '' } })]);
+      model.setLimits([sampleLimit(), sampleLimit({ id: 2, persons: [{ name: 'b', self: '' }] })]);
       expect(model.limits).toHaveLength(2);
     });
   });
@@ -205,25 +207,25 @@ describe('SettingsUIModel', () => {
     });
 
     it('should return true when person, columns, swimlanes and types match (order ignored)', () => {
-      expect(model.isDuplicate('testuser', ['c1', 'c2'], ['a', 'b'], ['Task', 'Bug'])).toBe(true);
+      expect(model.isDuplicate(['testuser'], ['c1', 'c2'], ['a', 'b'], ['Task', 'Bug'])).toBe(true);
     });
 
     it('should return false when columns differ', () => {
-      expect(model.isDuplicate('testuser', ['c1'], ['a', 'b'], ['Task', 'Bug'])).toBe(false);
+      expect(model.isDuplicate(['testuser'], ['c1'], ['a', 'b'], ['Task', 'Bug'])).toBe(false);
     });
 
     it('should return false when swimlanes differ', () => {
-      expect(model.isDuplicate('testuser', ['c1', 'c2'], ['a'], ['Task', 'Bug'])).toBe(false);
+      expect(model.isDuplicate(['testuser'], ['c1', 'c2'], ['a'], ['Task', 'Bug'])).toBe(false);
     });
 
     it('should return false when issue types differ', () => {
-      expect(model.isDuplicate('testuser', ['c1', 'c2'], ['a', 'b'], ['Task'])).toBe(false);
+      expect(model.isDuplicate(['testuser'], ['c1', 'c2'], ['a', 'b'], ['Task'])).toBe(false);
     });
 
     it('should treat missing includedIssueTypes as empty when comparing', () => {
       model.limits = [sampleLimit({ includedIssueTypes: undefined })];
-      expect(model.isDuplicate('testuser', [], [], undefined)).toBe(true);
-      expect(model.isDuplicate('testuser', [], [], ['Task'])).toBe(false);
+      expect(model.isDuplicate(['testuser'], [], [], undefined)).toBe(true);
+      expect(model.isDuplicate(['testuser'], [], [], ['Task'])).toBe(false);
     });
   });
 
@@ -231,7 +233,7 @@ describe('SettingsUIModel', () => {
     it('should restore initial shape', () => {
       model.limits = [sampleLimit()];
       model.editingId = 1;
-      model.setFormData({ person: null, limit: 1, selectedColumns: [], swimlanes: [] });
+      model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
       model.state = 'loaded';
 
       model.reset();

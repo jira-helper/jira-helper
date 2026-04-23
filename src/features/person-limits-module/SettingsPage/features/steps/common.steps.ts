@@ -39,7 +39,7 @@ function createPersonLimit(
 
   return {
     id: getNextLimitId(),
-    person: { name: login, displayName, self: '' },
+    persons: [{ name: login, displayName, self: '' }],
     limit: value,
     columns: findColumnsByNames(colNames),
     swimlanes: findSwimlanesByNames(swimNames),

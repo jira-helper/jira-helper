@@ -1,4 +1,12 @@
-import type { PersonLimit, PersonLimit_2_29, PersonLimit_2_30, PersonLimit_2_31, PersonWipLimitsProperty, PersonWipLimitsProperty_2_29, PersonWipLimitsProperty_2_30 } from './types';
+import type {
+  PersonLimit,
+  PersonLimit_2_29,
+  PersonLimit_2_30,
+  PersonLimit_2_31,
+  PersonWipLimitsProperty,
+  PersonWipLimitsProperty_2_29,
+  PersonWipLimitsProperty_2_30,
+} from './types';
 
 /**
  * Migrates a single limit from v2.29/v2.30 to v2.31 format.
@@ -23,7 +31,8 @@ export function migratePersonLimitToLatest(
       showAllPersonIssues: 'showAllPersonIssues' in limit ? limit.showAllPersonIssues : true,
     };
     if ('includedIssueTypes' in limit) {
-      (result as PersonLimit_2_31 & { includedIssueTypes: typeof limit.includedIssueTypes }).includedIssueTypes = limit.includedIssueTypes;
+      (result as PersonLimit_2_31 & { includedIssueTypes: typeof limit.includedIssueTypes }).includedIssueTypes =
+        limit.includedIssueTypes;
     }
     return result;
   }
@@ -43,15 +52,12 @@ export function migratePropertyToLatest(
 }
 
 /**
- * Migrates a single limit from v2.29 to v2.30 format.
+ * Migrates a single limit from v2.29/v2.30 to v2.31 format.
  * Adds showAllPersonIssues: true if the field is missing.
  * Idempotent — does not overwrite existing values.
  */
 export function migratePersonLimit(limit: PersonLimit_2_29 | PersonLimit): PersonLimit {
-  return {
-    ...limit,
-    showAllPersonIssues: 'showAllPersonIssues' in limit ? limit.showAllPersonIssues : true,
-  };
+  return migratePersonLimitToLatest(limit);
 }
 
 /**

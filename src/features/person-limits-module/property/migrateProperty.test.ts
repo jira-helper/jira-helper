@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { migratePersonLimit, migratePersonLimitToLatest, migrateProperty, migratePropertyToLatest } from './migrateProperty';
+import {
+  migratePersonLimit,
+  migratePersonLimitToLatest,
+  migrateProperty,
+  migratePropertyToLatest,
+} from './migrateProperty';
 import type {
   PersonLimit,
   PersonLimit_2_29,
@@ -34,9 +39,8 @@ describe('migratePersonLimit', () => {
 
       expect(result.showAllPersonIssues).toBe(true);
       expect(result.id).toBe(1);
-      expect(result.person.name).toBe('john.doe');
-      expect(result.person.displayName).toBe('John Doe');
-      expect(result.person.avatar).toBe('https://jira.example.com/avatar/john.doe');
+      expect(result.persons[0].name).toBe('john.doe');
+      expect(result.persons[0].displayName).toBe('John Doe');
       expect(result.columns).toEqual(limit.columns);
       expect(result.swimlanes).toEqual(limit.swimlanes);
       expect(result.includedIssueTypes).toEqual(['Task', 'Bug']);
@@ -54,8 +58,7 @@ describe('migratePersonLimit', () => {
       const result = migratePersonLimit(limit);
 
       expect(result.showAllPersonIssues).toBe(true);
-      expect(result.person.displayName).toBeUndefined();
-      expect(result.person.avatar).toBeUndefined();
+      expect(result.persons[0].displayName).toBeUndefined();
       expect(result.includedIssueTypes).toBeUndefined();
     });
 
@@ -80,7 +83,7 @@ describe('migratePersonLimit', () => {
     it('should not overwrite showAllPersonIssues=true', () => {
       const limit: PersonLimit = {
         id: 1,
-        person: { name: 'john.doe', self: '' },
+        persons: [{ name: 'john.doe', self: '' }],
         limit: 3,
         columns: [],
         swimlanes: [],
@@ -95,7 +98,7 @@ describe('migratePersonLimit', () => {
     it('should not overwrite showAllPersonIssues=false', () => {
       const limit: PersonLimit = {
         id: 1,
-        person: { name: 'john.doe', self: '' },
+        persons: [{ name: 'john.doe', self: '' }],
         limit: 3,
         columns: [{ id: 'col1', name: 'In Progress' }],
         swimlanes: [],
@@ -144,8 +147,8 @@ describe('migrateProperty', () => {
     expect(result.limits).toHaveLength(2);
     expect(result.limits[0].showAllPersonIssues).toBe(true);
     expect(result.limits[1].showAllPersonIssues).toBe(true);
-    expect(result.limits[0].person.displayName).toBe('John Doe');
-    expect(result.limits[1].person.displayName).toBeUndefined();
+    expect(result.limits[0].persons[0].displayName).toBe('John Doe');
+    expect(result.limits[1].persons[0].displayName).toBeUndefined();
   });
 
   it('should not modify already-migrated v2.30 property', () => {
@@ -242,7 +245,7 @@ describe('migrateProperty', () => {
       expect(limit).toHaveProperty('showAllPersonIssues');
       expect(limit.showAllPersonIssues).toBe(true);
       expect(limit).toHaveProperty('id');
-      expect(limit).toHaveProperty('person');
+      expect(limit).toHaveProperty('persons');
       expect(limit).toHaveProperty('limit');
       expect(limit).toHaveProperty('columns');
       expect(limit).toHaveProperty('swimlanes');

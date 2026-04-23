@@ -62,7 +62,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -100,7 +100,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 2,
         columns: [{ id: 'col2', name: 'In Progress' }],
         swimlanes: [],
@@ -133,7 +133,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 1,
         columns: [],
         swimlanes: [],
@@ -172,7 +172,7 @@ describe('BoardRuntimeModel', () => {
     `;
 
     const model = modelWithLimits([
-      { id: 1, person: personJohn, limit: 5, columns: [], swimlanes: [], showAllPersonIssues: true },
+      { id: 1, persons: [personJohn], limit: 5, columns: [], swimlanes: [], showAllPersonIssues: true },
     ]);
     model.cssSelectorOfIssues = '.ghx-issue';
     model.calculateStats();
@@ -204,7 +204,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -240,7 +240,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }],
         swimlanes: [],
@@ -269,7 +269,7 @@ describe('BoardRuntimeModel', () => {
     `;
 
     const model = modelWithLimits([
-      { id: 1, person: personJohn, limit: 5, columns: [], swimlanes: [], showAllPersonIssues: true },
+      { id: 1, persons: [personJohn], limit: 5, columns: [], swimlanes: [], showAllPersonIssues: true },
     ]);
     model.cssSelectorOfIssues = '.ghx-issue';
     model.calculateStats();
@@ -319,7 +319,7 @@ describe('BoardRuntimeModel', () => {
       const model = modelWithLimits([
         {
           id: 1,
-          person: personJohn,
+          persons: [personJohn],
           limit: 5,
           columns: [],
           // Stale swimlane filter saved by the user when the board still had custom swimlanes.
@@ -362,7 +362,7 @@ describe('BoardRuntimeModel', () => {
       const model = modelWithLimits([
         {
           id: 1,
-          person: personJohn,
+          persons: [personJohn],
           limit: 10,
           columns: [],
           swimlanes: [{ id: 'sw1', name: 'Team A' }],
@@ -391,7 +391,7 @@ describe('BoardRuntimeModel', () => {
       const model = modelWithLimits([
         {
           id: 1,
-          person: personJohn,
+          persons: [personJohn],
           limit: 5,
           columns: [],
           // Saved swimlane that no longer exists in DOM.
@@ -424,7 +424,7 @@ describe('BoardRuntimeModel', () => {
       const model = modelWithLimits([
         {
           id: 1,
-          person: personJohn,
+          persons: [personJohn],
           limit: 5,
           columns: [],
           swimlanes: [{ id: 'sw-missing', name: 'Missing' }],
@@ -471,7 +471,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 10,
         columns: [],
         swimlanes: [{ id: 'sw1', name: 'Team A' }],
@@ -507,7 +507,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -542,7 +542,7 @@ describe('BoardRuntimeModel', () => {
     const model = modelWithLimits([
       {
         id: 1,
-        person: personJohn,
+        persons: [personJohn],
         limit: 5,
         columns: [],
         swimlanes: [],

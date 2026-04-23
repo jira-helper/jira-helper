@@ -34,7 +34,10 @@ const hashString = (str: string): number => {
  * @returns хеш-сумма параметров
  */
 export const computeLimitId = (limit: LimitParams): number => {
-  const personNames = limit.persons.map(p => p.name).sort().join(',');
+  const personNames = limit.persons
+    .map(p => p.name)
+    .sort()
+    .join(',');
   const columnIds = limit.columns
     .map(c => c.id)
     .sort()

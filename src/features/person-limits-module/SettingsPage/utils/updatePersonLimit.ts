@@ -29,13 +29,14 @@ export function updatePersonLimit({
     columns: columnObjects,
     swimlanes: swimlaneObjects,
     showAllPersonIssues: formData.showAllPersonIssues ?? existingLimit.showAllPersonIssues,
-    person: formData.person
-      ? {
-          name: formData.person.name,
-          displayName: formData.person.displayName,
-          self: formData.person.self,
-        }
-      : existingLimit.person,
+    persons:
+      formData.persons && formData.persons.length > 0
+        ? formData.persons.map(p => ({
+            name: p.name,
+            displayName: p.displayName,
+            self: p.self,
+          }))
+        : existingLimit.persons,
   };
 
   // Update or remove includedIssueTypes

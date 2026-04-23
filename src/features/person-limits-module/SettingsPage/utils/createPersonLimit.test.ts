@@ -4,11 +4,13 @@ import type { FormData } from '../state/types';
 
 describe('createPersonLimit', () => {
   const mockFormData: FormData = {
-    person: {
-      name: 'john.doe',
-      displayName: 'John Doe',
-      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-    },
+    persons: [
+      {
+        name: 'john.doe',
+        displayName: 'John Doe',
+        self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+      },
+    ],
     limit: 5,
     selectedColumns: ['col1', 'col2'],
     swimlanes: ['swim1', 'swim2'],
@@ -43,7 +45,7 @@ describe('createPersonLimit', () => {
 
     expect(result).toEqual({
       id,
-      person: mockPerson,
+      persons: [mockPerson],
       limit: 5,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
@@ -70,7 +72,7 @@ describe('createPersonLimit', () => {
     expect(result.includedIssueTypes).toBeUndefined();
     expect(result).toEqual({
       id,
-      person: mockPerson,
+      persons: [mockPerson],
       limit: 5,
       columns: mockColumns,
       swimlanes: mockSwimlanes,

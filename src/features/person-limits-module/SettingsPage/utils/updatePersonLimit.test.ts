@@ -5,12 +5,13 @@ import type { FormData, PersonLimit } from '../state/types';
 describe('updatePersonLimit', () => {
   const existingLimit: PersonLimit = {
     id: 1,
-    person: {
-      name: 'john.doe',
-      displayName: 'John Doe',
-      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-      avatar: 'https://jira.example.com/avatar.png',
-    },
+    persons: [
+      {
+        name: 'john.doe',
+        displayName: 'John Doe',
+        self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+      },
+    ],
     limit: 5,
     columns: [{ id: 'col1', name: 'To Do' }],
     swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -19,11 +20,13 @@ describe('updatePersonLimit', () => {
   };
 
   const mockFormData: FormData = {
-    person: {
-      name: 'john.doe',
-      displayName: 'John Doe',
-      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-    },
+    persons: [
+      {
+        name: 'john.doe',
+        displayName: 'John Doe',
+        self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+      },
+    ],
     limit: 10,
     selectedColumns: ['col1', 'col2'],
     swimlanes: ['swim1', 'swim2'],
@@ -50,11 +53,13 @@ describe('updatePersonLimit', () => {
 
     expect(result).toEqual({
       id: 1,
-      person: {
-        name: mockFormData.person!.name,
-        displayName: mockFormData.person!.displayName,
-        self: mockFormData.person!.self,
-      },
+      persons: [
+        {
+          name: mockFormData.persons![0].name,
+          displayName: mockFormData.persons![0].displayName,
+          self: mockFormData.persons![0].self,
+        },
+      ],
       limit: 10,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
@@ -71,20 +76,22 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
     });
 
-    expect(result.person.name).toEqual(mockFormData.person!.name);
-    expect(result.person.displayName).toEqual(mockFormData.person!.displayName);
-    expect(result.person.self).toEqual(mockFormData.person!.self);
-    expect(result.person).not.toBe(existingLimit.person);
+    expect(result.persons[0].name).toEqual(mockFormData.persons![0].name);
+    expect(result.persons[0].displayName).toEqual(mockFormData.persons![0].displayName);
+    expect(result.persons[0].self).toEqual(mockFormData.persons![0].self);
+    expect(result.persons[0]).not.toBe(existingLimit.persons[0]);
   });
 
   it('should update person from formData with new user', () => {
     const formDataWithNewPerson: FormData = {
       ...mockFormData,
-      person: {
-        name: 'jane.doe',
-        displayName: 'Jane Doe',
-        self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
-      },
+      persons: [
+        {
+          name: 'jane.doe',
+          displayName: 'Jane Doe',
+          self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
+        },
+      ],
     };
 
     const result = updatePersonLimit({
@@ -94,14 +101,14 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
     });
 
-    expect(result.person.name).toEqual('jane.doe');
-    expect(result.person.displayName).toEqual('Jane Doe');
+    expect(result.persons[0].name).toEqual('jane.doe');
+    expect(result.persons[0].displayName).toEqual('Jane Doe');
   });
 
-  it('should preserve existing person when formData.person is null', () => {
+  it('should preserve existing person when formData.persons is empty', () => {
     const formDataNoPerson: FormData = {
       ...mockFormData,
-      person: null,
+      persons: [],
     };
 
     const result = updatePersonLimit({
@@ -111,7 +118,7 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
     });
 
-    expect(result.person).toEqual(existingLimit.person);
+    expect(result.persons).toEqual(existingLimit.persons);
   });
 
   it('should remove includedIssueTypes if not provided in formData', () => {

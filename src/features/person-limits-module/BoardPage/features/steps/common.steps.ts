@@ -65,12 +65,13 @@ function createPersonLimit(
 ) {
   return {
     id: 0,
-    person: {
-      name: person,
-      displayName: displayName || toDisplayName(person),
-      self: '',
-      avatar: `https://avatar.example.com/${person}`,
-    },
+    persons: [
+      {
+        name: person,
+        displayName: displayName || toDisplayName(person),
+        self: '',
+      },
+    ],
     limit,
     columns: limitColumns,
     swimlanes: limitSwimlanes,
@@ -218,8 +219,8 @@ Then(/^all (\d+) issues for "([^"]*)" should be highlighted red$/, (countStr: st
       throw new Error('Mock PageObject has no getHighlightedIssues');
     }
     const { limits } = propertyModel().data;
-    const limit = limits.find(l => l.person.name === person);
-    const expectedDisplayName = limit?.person.displayName;
+    const limit = limits.find(l => l.persons[0].name === person);
+    const expectedDisplayName = limit?.persons[0].displayName;
     const highlighted = mock.getHighlightedIssues();
     expect(highlighted.length).to.eq(expectedCount);
     highlighted.forEach(issue => {
@@ -293,8 +294,8 @@ Then(/^only "([^"]*)" issues should be visible$/, (person: string) => {
     const mock = mockPageObjectRef.current;
     if (!mock) throw new Error('No mock PageObject');
     const { limits } = propertyModel().data;
-    const limit = limits.find(l => l.person.name === person);
-    const personDisplayName = limit?.person.displayName ?? toDisplayName(person);
+    const limit = limits.find(l => l.persons[0].name === person);
+    const personDisplayName = limit?.persons[0].displayName ?? toDisplayName(person);
     const issues = mock.getIssueElements('.ghx-issue');
     issues.forEach(issue => {
       const id = (issue as HTMLElement).getAttribute('data-issue-id');
