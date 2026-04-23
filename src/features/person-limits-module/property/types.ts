@@ -39,11 +39,19 @@ export type PersonWipLimitsProperty_2_29 = {
  * When false: clicking avatar shows only issues matching the limit criteria
  * (specific columns, swimlanes, issue types).
  */
-export type PersonLimit = PersonLimit_2_29 & {
+export type PersonLimit_2_30 = PersonLimit_2_29 & {
   showAllPersonIssues: boolean;
 };
 
-export type PersonLimit_2_30 = PersonLimit;
+export type PersonLimit_2_31 = Omit<PersonLimit_2_30, 'person'> & {
+  persons: Array<{ name: string; displayName?: string; self: string }>;
+};
+
+export type PersonWipLimitsProperty_2_31 = {
+  limits: PersonLimit_2_31[];
+};
+
+export type PersonLimit = PersonLimit_2_31;
 
 /**
  * Структура, хранимая в Jira Board Property (текущая версия)
