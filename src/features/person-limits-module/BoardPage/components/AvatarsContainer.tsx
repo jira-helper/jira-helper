@@ -2,17 +2,13 @@ import React from 'react';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
 import { boardRuntimeModelToken } from '../../tokens';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { AvatarBadge } from './AvatarBadge';
 
-/**
- * Container component for person limit avatars.
- *
- * Subscribes to BoardRuntimeModel and renders avatar badges for each person.
- * Handles click events to toggle person filter.
- */
 export const AvatarsContainer: React.FC = () => {
   const container = useDi();
   const buildAvatarUrl = container.inject(buildAvatarUrlToken);
+  const pageObject = container.inject(boardPagePageObjectToken);
   const { model, useModel } = container.inject(boardRuntimeModelToken);
   const { stats, activeLimitId } = useModel();
 
@@ -26,18 +22,26 @@ export const AvatarsContainer: React.FC = () => {
 
   return (
     <div id="avatars-limits" style={{ display: 'inline-flex', marginLeft: 30 }}>
-      {stats.map(stat => (
-        <AvatarBadge
-          key={stat.id}
-          avatar={buildAvatarUrl(stat.person.name)}
-          personName={stat.person.name}
-          limitId={stat.id}
-          currentCount={stat.issues.length}
-          limit={stat.limit}
-          isActive={activeLimitId === stat.id}
-          onClick={handleClick}
-        />
-      ))}
+      {stats.flatMap(stat =>
+        stat.persons.map(person => {
+          const personIssues = stat.issues.filter(issue => {
+            const assignee = pageObject.getAssigneeFromIssue(issue);
+            return assignee === person.name || assignee === person.displayName;
+          });
+          return (
+            <AvatarBadge
+              key={`${stat.id}-${person.name}`}
+              avatar={buildAvatarUrl(person.name)}
+              personName={person.name}
+              limitId={stat.id}
+              currentCount={personIssues.length}
+              limit={stat.limit}
+              isActive={activeLimitId === stat.id}
+              onClick={handleClick}
+            />
+          );
+        })
+      )}
     </div>
   );
 };
