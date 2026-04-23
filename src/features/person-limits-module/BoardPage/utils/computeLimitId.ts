@@ -2,7 +2,7 @@
  * LimitParams - параметры лимита для вычисления ID.
  */
 export type LimitParams = {
-  person: { name: string };
+  persons: Array<{ name: string }>;
   columns: Array<{ id: string }>;
   swimlanes: Array<{ id: string }>;
   includedIssueTypes?: string[];
@@ -27,14 +27,14 @@ const hashString = (str: string): number => {
  * computeLimitId - вычисляет стабильный ID лимита на основе его параметров.
  * Позволяет сопоставлять лимиты без явного ID (обратная совместимость).
  *
- * Формирует ключ: `${person.name}|${columnIds}|${swimlaneIds}|${issueTypes}`
+ * Формирует ключ: `${personNames}|${columnIds}|${swimlaneIds}|${issueTypes}`
  * Все списки ID сортируются перед объединением для обеспечения стабильности.
  *
  * @param limit - параметры лимита
  * @returns хеш-сумма параметров
  */
 export const computeLimitId = (limit: LimitParams): number => {
-  const personName = limit.person.name;
+  const personNames = limit.persons.map(p => p.name).sort().join(',');
   const columnIds = limit.columns
     .map(c => c.id)
     .sort()
@@ -45,6 +45,6 @@ export const computeLimitId = (limit: LimitParams): number => {
     .join(',');
   const issueTypes = (limit.includedIssueTypes || []).slice().sort().join(',');
 
-  const key = `${personName}|${columnIds}|${swimlaneIds}|${issueTypes}`;
+  const key = `${personNames}|${columnIds}|${swimlaneIds}|${issueTypes}`;
   return hashString(key);
 };

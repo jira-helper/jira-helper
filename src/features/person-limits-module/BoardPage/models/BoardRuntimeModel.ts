@@ -67,10 +67,14 @@ export class BoardRuntimeModel {
   calculateStats(): PersonLimitStats[] {
     const { limits } = this.propertyModel.data;
     const stats: PersonLimitStats[] = limits.map(limit => ({
-      ...limit,
       id: computeLimitId(limit),
-      /** ref: keep DOM nodes out of valtio proxy (native methods must stay bound). */
-      issues: ref([] as Element[]) as unknown as Element[],
+      persons: limit.persons.map(p => ({ name: p.name, displayName: p.displayName })),
+      limit: limit.limit,
+      issues: ref([]) as unknown as Element[],
+      columns: limit.columns,
+      swimlanes: limit.swimlanes,
+      includedIssueTypes: limit.includedIssueTypes,
+      showAllPersonIssues: limit.showAllPersonIssues,
     }));
 
     if (this.pageObject.hasCustomSwimlanes()) {
