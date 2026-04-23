@@ -86,12 +86,13 @@ export const SingleLimit: StoryObj = {
       initPersonLimitsStoryDi([
         {
           id: 1,
-          person: {
-            name: 'john.doe',
-            displayName: 'John Doe',
-            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'john.doe',
+              displayName: 'John Doe',
+              self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+            },
+          ],
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -108,12 +109,13 @@ export const MultipleLimits: StoryObj = {
       initPersonLimitsStoryDi([
         {
           id: 1,
-          person: {
-            name: 'john.doe',
-            displayName: 'John Doe',
-            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'john.doe',
+              displayName: 'John Doe',
+              self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+            },
+          ],
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -121,12 +123,13 @@ export const MultipleLimits: StoryObj = {
         },
         {
           id: 2,
-          person: {
-            name: 'jane.smith',
-            displayName: 'Jane Smith',
-            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'jane.smith',
+              displayName: 'Jane Smith',
+              self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+            },
+          ],
           limit: 5,
           columns: [
             { id: 'col2', name: 'In Progress' },
@@ -146,12 +149,13 @@ export const WithShowAllDisabled: StoryObj = {
       initPersonLimitsStoryDi([
         {
           id: 1,
-          person: {
-            name: 'john.doe',
-            displayName: 'John Doe',
-            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'john.doe',
+              displayName: 'John Doe',
+              self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+            },
+          ],
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -159,12 +163,13 @@ export const WithShowAllDisabled: StoryObj = {
         },
         {
           id: 2,
-          person: {
-            name: 'jane.smith',
-            displayName: 'Jane Smith',
-            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'jane.smith',
+              displayName: 'Jane Smith',
+              self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+            },
+          ],
           limit: 5,
           columns: [
             { id: 'col2', name: 'In Progress' },
@@ -184,12 +189,13 @@ export const WithIssueTypeFilter: StoryObj = {
       initPersonLimitsStoryDi([
         {
           id: 1,
-          person: {
-            name: 'john.doe',
-            displayName: 'John Doe',
-            self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'john.doe',
+              displayName: 'John Doe',
+              self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+            },
+          ],
           limit: 3,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -198,12 +204,13 @@ export const WithIssueTypeFilter: StoryObj = {
         },
         {
           id: 2,
-          person: {
-            name: 'jane.smith',
-            displayName: 'Jane Smith',
-            self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'jane.smith',
+              displayName: 'Jane Smith',
+              self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+            },
+          ],
           limit: 5,
           columns: [{ id: 'col2', name: 'In Progress' }],
           swimlanes: [{ id: 'swim2', name: 'Backend' }],

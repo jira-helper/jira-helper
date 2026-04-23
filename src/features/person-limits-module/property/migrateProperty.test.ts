@@ -12,7 +12,6 @@ import type {
   PersonLimit_2_31,
   PersonWipLimitsProperty,
   PersonWipLimitsProperty_2_29,
-  PersonWipLimitsProperty_2_30,
 } from './types';
 
 describe('migratePersonLimit', () => {
@@ -152,25 +151,24 @@ describe('migrateProperty', () => {
   });
 
   it('should not modify already-migrated v2.30 property', () => {
-    const data: PersonWipLimitsProperty_2_30 = {
-      limits: [
-        {
-          id: 1,
-          person: { name: 'john.doe', self: '' },
-          limit: 3,
-          columns: [],
-          swimlanes: [],
-          showAllPersonIssues: false,
-        },
-        {
-          id: 2,
-          person: { name: 'jane.doe', self: '' },
-          limit: 5,
-          columns: [],
-          swimlanes: [],
-          showAllPersonIssues: true,
-        },
-      ],
+    const limit1: PersonLimit_2_30 = {
+      id: 1,
+      person: { name: 'john.doe', self: '' },
+      limit: 3,
+      columns: [],
+      swimlanes: [],
+      showAllPersonIssues: false,
+    };
+    const limit2: PersonLimit_2_30 = {
+      id: 2,
+      person: { name: 'jane.doe', self: '' },
+      limit: 5,
+      columns: [],
+      swimlanes: [],
+      showAllPersonIssues: true,
+    };
+    const data = {
+      limits: [limit1, limit2],
     };
 
     const result = migrateProperty(data);

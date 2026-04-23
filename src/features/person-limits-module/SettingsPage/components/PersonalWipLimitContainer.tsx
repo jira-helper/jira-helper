@@ -50,7 +50,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   // swimlanes uses [] convention (empty = all)
   const defaultFormData = useMemo<FormData>(
     () => ({
-      person: null,
+      persons: [],
       limit: 1,
       selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: [], // [] = all swimlanes (convention)
@@ -72,7 +72,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
           : formData.selectedColumns.map(String);
 
       form.setFieldsValue({
-        person: formData.person,
+        person: formData.persons[0],
         limit: formData.limit,
         selectedColumns: columnsToShow,
       });
@@ -190,7 +190,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
 
   // Handle form submit
   const handleSubmit = () => {
-    const currentPerson: SelectedPerson | null = currentFormData.person;
+    const currentPerson: SelectedPerson | null = currentFormData.persons[0];
     const values = form.getFieldsValue();
 
     const columnsToSave =
@@ -206,13 +206,16 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       return;
     }
 
-    if (!isEditMode && settingsUi.isDuplicate(currentPerson.name, columnsToSave, swimlanesToSave, issueTypesToCheck)) {
+    if (
+      !isEditMode &&
+      settingsUi.isDuplicate([currentPerson.name], columnsToSave, swimlanesToSave, issueTypesToCheck)
+    ) {
       form.setFields([{ name: 'person', errors: ['A limit with the same filters already exists for this person'] }]);
       return;
     }
 
     const formDataToSubmit: FormData = {
-      person: currentPerson,
+      persons: [currentPerson],
       limit: values.limit || 0,
       selectedColumns: columnsToSave,
       swimlanes: swimlanesToSave,
@@ -237,8 +240,8 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               <PersonNameSelect
                 id={settingsJiraDOM.idPersonName}
                 searchUsers={searchUsers}
-                value={currentFormData.person}
-                onChange={person => handleFormChange('person', person)}
+                value={currentFormData.persons[0]}
+                onChange={person => handleFormChange('persons', [person])}
               />
             </Form.Item>
 

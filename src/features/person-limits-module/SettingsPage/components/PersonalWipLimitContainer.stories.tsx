@@ -122,12 +122,13 @@ export const AddMode: Story = {
 
 const singleLimit: PersonLimit = {
   id: 1,
-  person: {
-    name: 'john.doe',
-    displayName: 'John Doe',
-    self: 'https://jira.example.com/user',
-    avatar: 'https://via.placeholder.com/32',
-  },
+  persons: [
+    {
+      name: 'john.doe',
+      displayName: 'John Doe',
+      self: 'https://jira.example.com/user',
+    },
+  ],
   limit: 5,
   columns: [{ id: 'col1', name: 'To Do' }],
   swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -200,12 +201,13 @@ export const WithMultipleLimits: Story = {
       initContainerStoryDi([
         {
           id: 1,
-          person: {
-            name: 'john.doe',
-            displayName: 'John Doe',
-            self: 'https://jira.example.com/user',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'john.doe',
+              displayName: 'John Doe',
+              self: 'https://jira.example.com/user',
+            },
+          ],
           limit: 3,
           columns: [{ id: 'col1', name: 'To Do' }],
           swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -213,12 +215,13 @@ export const WithMultipleLimits: Story = {
         },
         {
           id: 2,
-          person: {
-            name: 'jane.smith',
-            displayName: 'Jane Smith',
-            self: 'https://jira.example.com/user',
-            avatar: 'https://via.placeholder.com/32',
-          },
+          persons: [
+            {
+              name: 'jane.smith',
+              displayName: 'Jane Smith',
+              self: 'https://jira.example.com/user',
+            },
+          ],
           limit: 5,
           columns: [],
           swimlanes: [],

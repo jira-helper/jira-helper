@@ -44,13 +44,13 @@ export const SettingsModalContainer: React.FC<SettingsModalContainerProps> = ({
       const updatedLimit = updatePersonLimit({ existingLimit, formData, columns, swimlanes });
       settingsUi.updateLimit(settingsUi.editingId, updatedLimit);
     } else {
-      if (!formData.person) return;
+      if (!formData.persons[0]) return;
       const personLimit = createPersonLimit({
         formData,
         person: {
-          name: formData.person.name,
-          displayName: formData.person.displayName,
-          self: formData.person.self,
+          name: formData.persons[0].name,
+          displayName: formData.persons[0].displayName,
+          self: formData.persons[0].self,
         },
         columns,
         swimlanes,

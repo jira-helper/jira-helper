@@ -171,11 +171,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Create a limit with only one column
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }], // Only one column
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -214,11 +216,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Empty array means "all columns"
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [], // empty = all columns
         swimlanes: [], // empty = all swimlanes
@@ -261,11 +265,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Empty array means "all columns"
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [], // empty = all columns
         swimlanes: [], // empty = all swimlanes
@@ -313,11 +319,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [{ id: 'col1', name: 'To Do' }],
         swimlanes: [{ id: 'swim1', name: 'Frontend' }],
@@ -435,14 +443,14 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       it('should reset issue types after adding a limit', () => {
         const onAddLimitMock = cy.stub().callsFake((formData: any) => {
           const mockPerson = {
-            name: formData.person?.name || 'unknown',
-            displayName: formData.person?.displayName || 'unknown',
-            self: formData.person?.self || 'https://test.com/user',
+            name: formData.persons?.[0]?.name || 'unknown',
+            displayName: formData.persons?.[0]?.displayName || 'unknown',
+            self: formData.persons?.[0]?.self || 'https://test.com/user',
           };
 
           const personLimit: PersonLimit = {
             id: Date.now(),
-            person: mockPerson,
+            persons: [mockPerson],
             limit: formData.limit,
             columns: [],
             swimlanes: [],
@@ -502,11 +510,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         const limit: PersonLimit = {
           id: 1,
-          person: {
-            name: 'testuser',
-            displayName: 'Test User',
-            self: 'https://test.com/user',
-          },
+          persons: [
+            {
+              name: 'testuser',
+              displayName: 'Test User',
+              self: 'https://test.com/user',
+            },
+          ],
           limit: 5,
           columns: [],
           swimlanes: [],
@@ -547,11 +557,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         const limit: PersonLimit = {
           id: 1,
-          person: {
-            name: 'testuser',
-            displayName: 'Test User',
-            self: 'https://test.com/user',
-          },
+          persons: [
+            {
+              name: 'testuser',
+              displayName: 'Test User',
+              self: 'https://test.com/user',
+            },
+          ],
           limit: 5,
           columns: [],
           swimlanes: [],
@@ -593,11 +605,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // Create a limit with specific columns (not all)
         const limit: PersonLimit = {
           id: 1,
-          person: {
-            name: 'testuser',
-            displayName: 'Test User',
-            self: 'https://test.com/user',
-          },
+          persons: [
+            {
+              name: 'testuser',
+              displayName: 'Test User',
+              self: 'https://test.com/user',
+            },
+          ],
           limit: 5,
           columns: [
             { id: 'col1', name: 'To Do' },
@@ -655,11 +669,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         // Create a limit with specific columns using numeric IDs as strings
         const limit: PersonLimit = {
           id: 1,
-          person: {
-            name: 'testuser',
-            displayName: 'Test User',
-            self: 'https://test.com/user',
-          },
+          persons: [
+            {
+              name: 'testuser',
+              displayName: 'Test User',
+              self: 'https://test.com/user',
+            },
+          ],
           limit: 5,
           columns: [
             { id: '123', name: 'To Do' },
@@ -790,11 +806,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'john.doe',
-          displayName: 'John Doe',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'john.doe',
+            displayName: 'John Doe',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -837,11 +855,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'john.doe',
-          displayName: 'John Doe',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'john.doe',
+            displayName: 'John Doe',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [],
         swimlanes: [],
@@ -912,11 +932,13 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       // Create a limit with issue types
       const limit: PersonLimit = {
         id: 1,
-        person: {
-          name: 'testuser',
-          displayName: 'Test User',
-          self: 'https://test.com/user',
-        },
+        persons: [
+          {
+            name: 'testuser',
+            displayName: 'Test User',
+            self: 'https://test.com/user',
+          },
+        ],
         limit: 5,
         columns: [],
         swimlanes: [],
