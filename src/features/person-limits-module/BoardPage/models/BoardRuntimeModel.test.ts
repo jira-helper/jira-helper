@@ -257,6 +257,189 @@ describe('BoardRuntimeModel', () => {
     expect(document.getElementById('b')!.classList.contains('no-visibility')).toBe(true);
   });
 
+  describe('per-person vs shared limit highlighting', () => {
+    const personJane = {
+      name: 'jane.doe',
+      displayName: 'Jane Doe',
+      self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
+      avatar: '',
+    };
+
+    it('toggleActivePerson with personName narrows showOnlyChosen to that single assignee', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="i-john">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="i-jane">
+              <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn, personJane],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.calculateStats();
+
+      model.toggleActivePerson(model.stats[0].id, 'john.doe');
+
+      expect(document.getElementById('i-john')!.classList.contains('no-visibility')).toBe(false);
+      expect(document.getElementById('i-jane')!.classList.contains('no-visibility')).toBe(true);
+    });
+
+    it('toggleActivePerson with personName=null highlights all persons in the limit', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="i-john">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="i-jane">
+              <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+            </div>
+            <div class="ghx-issue" id="i-other">
+              <img class="ghx-avatar-img" alt="Assignee: Bob" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn, personJane],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: true,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.calculateStats();
+
+      model.toggleActivePerson(model.stats[0].id, null);
+
+      expect(document.getElementById('i-john')!.classList.contains('no-visibility')).toBe(false);
+      expect(document.getElementById('i-jane')!.classList.contains('no-visibility')).toBe(false);
+      expect(document.getElementById('i-other')!.classList.contains('no-visibility')).toBe(true);
+    });
+
+    it('toggleActivePerson called twice with same args clears the selection', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn, personJane],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.calculateStats();
+      const { id } = model.stats[0];
+
+      model.toggleActivePerson(id, 'john.doe');
+      expect(model.activePerson).toEqual({ limitId: id, personName: 'john.doe' });
+
+      model.toggleActivePerson(id, 'john.doe');
+      expect(model.activePerson).toBeNull();
+    });
+
+    it('apply highlights only the offending person in a per-person limit', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="o1">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="o2">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="under">
+              <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn, personJane],
+          limit: 1,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+
+      model.apply();
+
+      expect((document.getElementById('o1') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+      expect((document.getElementById('o2') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+      expect((document.getElementById('under') as HTMLElement).style.backgroundColor).toBe('');
+    });
+
+    it('apply highlights all issues in a shared limit when total exceeds the bucket', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="j1">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+            <div class="ghx-issue" id="j2">
+              <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn, personJane],
+          limit: 1,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: true,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+
+      model.apply();
+
+      expect((document.getElementById('j1') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+      expect((document.getElementById('j2') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+    });
+  });
+
   it('toggleActiveLimitId sets active limit then clears on second toggle', () => {
     document.body.innerHTML = `
       <div id="ghx-pool">
@@ -282,16 +465,17 @@ describe('BoardRuntimeModel', () => {
     expect(model.activeLimitId).toBeNull();
   });
 
-  it('reset restores stats, activeLimitId and issue selector defaults', () => {
+  it('reset restores stats, activePerson and issue selector defaults', () => {
     const model = modelWithLimits([]);
     model.stats = [{ issues: [] } as any];
-    model.activeLimitId = 42;
+    model.activePerson = { limitId: 42, personName: null };
     model.cssSelectorOfIssues = '.custom';
     model.setSwimlanesActive(false);
 
     model.reset();
 
     expect(model.stats).toEqual([]);
+    expect(model.activePerson).toBeNull();
     expect(model.activeLimitId).toBeNull();
     expect(model.cssSelectorOfIssues).toBe('.ghx-issue');
   });

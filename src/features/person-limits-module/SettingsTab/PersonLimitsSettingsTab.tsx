@@ -35,14 +35,10 @@ export const PersonLimitsSettingsTab: React.FC<PersonLimitsSettingsTabProps> = (
       const updatedLimit = updatePersonLimit({ existingLimit, formData, columns, swimlanes });
       settingsUi.updateLimit(settingsUi.editingId, updatedLimit);
     } else {
-      if (!formData.persons[0]) return;
+      if (formData.persons.length === 0) return;
       const personLimit = createPersonLimit({
         formData,
-        person: {
-          name: formData.persons[0].name,
-          displayName: formData.persons[0].displayName,
-          self: formData.persons[0].self,
-        },
+        persons: formData.persons,
         columns,
         swimlanes,
         id: Date.now(),

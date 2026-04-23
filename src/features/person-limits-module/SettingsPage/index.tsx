@@ -59,8 +59,10 @@ export default class PersonalWIPLimit extends PageModification<[BoardData], Elem
   apply(data: [BoardData]): void {
     if (!data) return;
     const [boardData] = data;
-    if (!boardData.canEdit) return;
-
+    // Render the person-limits button on the columns settings tab regardless of
+    // `canEdit`: read-only users can still open the config and tweak it locally.
+    // Persistence will fail silently for them; that's acceptable until we surface
+    // a proper toaster.
     this.boardData = boardData;
     this.boardDataColumns = this.boardData.rapidListConfig.mappedColumns.filter((i: any) => !i.isKanPlanColumn);
     // Jira's editmodel returns saved query swimlanes regardless of the active strategy.

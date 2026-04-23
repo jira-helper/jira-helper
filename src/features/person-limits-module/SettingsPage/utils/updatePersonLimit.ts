@@ -23,20 +23,25 @@ export function updatePersonLimit({
     swimlanes,
   });
 
+  const persons =
+    formData.persons && formData.persons.length > 0
+      ? formData.persons.map(p => ({
+          name: p.name,
+          displayName: p.displayName,
+          self: p.self,
+        }))
+      : existingLimit.persons;
+
   const updatedLimit: PersonLimit = {
     ...existingLimit,
     limit: formData.limit,
     columns: columnObjects,
     swimlanes: swimlaneObjects,
     showAllPersonIssues: formData.showAllPersonIssues ?? existingLimit.showAllPersonIssues,
-    persons:
-      formData.persons && formData.persons.length > 0
-        ? formData.persons.map(p => ({
-            name: p.name,
-            displayName: p.displayName,
-            self: p.self,
-          }))
-        : existingLimit.persons,
+    persons,
+    // Reset sharedLimit when reduced to a single person; otherwise apply form value
+    // (or fall back to the previous setting).
+    sharedLimit: persons.length < 2 ? false : (formData.sharedLimit ?? existingLimit.sharedLimit ?? false),
   };
 
   // Update or remove includedIssueTypes

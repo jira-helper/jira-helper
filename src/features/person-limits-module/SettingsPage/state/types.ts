@@ -33,4 +33,10 @@ export type FormData = {
   swimlanes: string[];
   includedIssueTypes?: string[];
   showAllPersonIssues?: boolean;
+  /**
+   * When true, the limit applies as a single shared bucket across all selected persons:
+   * each avatar shows `total/limit`, and clicking any avatar highlights all of them.
+   * Defaults to `false` (per-person counters and highlighting).
+   */
+  sharedLimit?: boolean;
 };

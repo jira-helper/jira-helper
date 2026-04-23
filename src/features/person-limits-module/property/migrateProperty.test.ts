@@ -279,7 +279,7 @@ describe('migratePersonLimitToLatest', () => {
     expect(result.showAllPersonIssues).toBe(false);
   });
 
-  it('should preserve v2.31 limit with persons array', () => {
+  it('should preserve v2.31 limit with persons array and add sharedLimit=false', () => {
     const v2_31: PersonLimit_2_31 = {
       id: 1,
       persons: [{ name: 'alice', self: 'http://jira/alice' }],
@@ -289,7 +289,7 @@ describe('migratePersonLimitToLatest', () => {
       showAllPersonIssues: true,
     };
     const result = migratePersonLimitToLatest(v2_31);
-    expect(result).toEqual(v2_31);
+    expect(result).toEqual({ ...v2_31, sharedLimit: false });
   });
 
   it('should preserve showAllPersonIssues=false from v2.30', () => {
@@ -337,6 +337,37 @@ describe('migratePropertyToLatest', () => {
       ],
     };
     const result = migratePropertyToLatest(data);
-    expect(result.limits[0]).toEqual(data.limits[0]);
+    expect(result.limits[0]).toEqual({ ...data.limits[0], sharedLimit: false });
+  });
+
+  describe('sharedLimit field (v2.32)', () => {
+    it('defaults sharedLimit to false when migrating from v2.29', () => {
+      const v2_29: PersonWipLimitsProperty_2_29 = {
+        limits: [{ id: 1, person: { name: 'alice', self: '' }, limit: 1, columns: [], swimlanes: [] }],
+      };
+      const result = migratePropertyToLatest(v2_29);
+      expect(result.limits[0].sharedLimit).toBe(false);
+    });
+
+    it('preserves an explicit sharedLimit=true on already migrated data', () => {
+      const data: PersonWipLimitsProperty = {
+        limits: [
+          {
+            id: 1,
+            persons: [
+              { name: 'alice', self: '' },
+              { name: 'bob', self: '' },
+            ],
+            limit: 5,
+            columns: [],
+            swimlanes: [],
+            showAllPersonIssues: true,
+            sharedLimit: true,
+          },
+        ],
+      };
+      const result = migratePropertyToLatest(data);
+      expect(result.limits[0].sharedLimit).toBe(true);
+    });
   });
 });

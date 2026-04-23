@@ -88,6 +88,7 @@ export class SettingsUIModel {
           swimlanes,
           includedIssueTypes: limit.includedIssueTypes,
           showAllPersonIssues: limit.showAllPersonIssues,
+          sharedLimit: limit.sharedLimit ?? false,
         };
       }
     } else {

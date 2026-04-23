@@ -3,13 +3,14 @@ import { Alert, Form, InputNumber, Button, Space, Row, Col, Checkbox, Tooltip } 
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { SearchUsers } from 'src/infrastructure/di/jiraApiTokens';
+import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { IssueTypeSelector } from '../../../../shared/components/IssueTypeSelector';
 import { SwimlaneSelector } from 'src/shared/components/SwimlaneSelector';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
-import { PersonNameSelect } from './PersonNameSelect';
+import { MultiPersonSelect } from './PersonNameSelect';
 import { settingsUIModelToken } from '../../tokens';
-import type { FormData, Column, Swimlane, SelectedPerson } from '../state/types';
+import type { FormData, Column, Swimlane } from '../state/types';
 import { settingsJiraDOM } from '../constants';
 import { PERSON_LIMITS_TEXTS } from '../texts';
 
@@ -26,7 +27,15 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   searchUsers,
   onAddLimit,
 }) => {
-  const { model: settingsUi, useModel } = useDi().inject(settingsUIModelToken);
+  const container = useDi();
+  const { model: settingsUi, useModel } = container.inject(settingsUIModelToken);
+  const buildAvatarUrl = (() => {
+    try {
+      return container.inject(buildAvatarUrlToken);
+    } catch {
+      return undefined;
+    }
+  })();
   const snap = useModel();
   const { limits, editingId, formData } = snap;
   const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
@@ -55,6 +64,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       selectedColumns: availableColumns.map(col => String(col.id)),
       swimlanes: [], // [] = all swimlanes (convention)
       showAllPersonIssues: true,
+      sharedLimit: false,
     }),
     [availableColumns]
   );
@@ -63,7 +73,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   const currentFormData: FormData = formData || defaultFormData;
 
   // Initialize form when formData changes
-  // Note: swimlanes is managed separately (not via Form.Item name)
+  // Note: persons & swimlanes are managed via store (not Form.Item name)
   useEffect(() => {
     if (formData) {
       const columnsToShow =
@@ -72,13 +82,11 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
           : formData.selectedColumns.map(String);
 
       form.setFieldsValue({
-        person: formData.persons[0],
         limit: formData.limit,
         selectedColumns: columnsToShow,
       });
     } else {
       form.setFieldsValue({
-        person: null,
         limit: 1,
         selectedColumns: defaultFormData.selectedColumns,
       });
@@ -170,10 +178,11 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   }, [editingId, formData, availableColumns, userToggledColumns]);
 
   // Reset toggle flags and clear validation errors when editingId changes
+  const [personError, setPersonError] = useState<string | null>(null);
   useEffect(() => {
     setUserToggledColumns(false);
-    form.setFields([{ name: 'person', errors: [] }]);
-  }, [editingId, form]);
+    setPersonError(null);
+  }, [editingId]);
 
   // Handle form field changes — only update the specific field to avoid
   // cross-contamination (e.g., swimlane change overwriting columns representation)
@@ -190,7 +199,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
 
   // Handle form submit
   const handleSubmit = () => {
-    const currentPerson: SelectedPerson | null = currentFormData.persons[0];
+    const currentPersons = currentFormData.persons;
     const values = form.getFieldsValue();
 
     const columnsToSave =
@@ -201,25 +210,34 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
 
     const issueTypesToCheck = selectedTypes.length > 0 && !countAllTypes ? selectedTypes : undefined;
 
-    if (!currentPerson) {
-      form.setFields([{ name: 'person', errors: [texts.selectPerson] }]);
+    if (currentPersons.length === 0) {
+      setPersonError(texts.selectAtLeastOnePerson);
       return;
     }
 
     if (
       !isEditMode &&
-      settingsUi.isDuplicate([currentPerson.name], columnsToSave, swimlanesToSave, issueTypesToCheck)
+      settingsUi.isDuplicate(
+        currentPersons.map(p => p.name),
+        columnsToSave,
+        swimlanesToSave,
+        issueTypesToCheck
+      )
     ) {
-      form.setFields([{ name: 'person', errors: ['A limit with the same filters already exists for this person'] }]);
+      setPersonError('A limit with the same filters already exists for one of the selected persons');
       return;
     }
 
+    setPersonError(null);
+
     const formDataToSubmit: FormData = {
-      persons: [currentPerson],
+      persons: currentPersons,
       limit: values.limit || 0,
       selectedColumns: columnsToSave,
       swimlanes: swimlanesToSave,
       showAllPersonIssues: currentFormData.showAllPersonIssues ?? true,
+      // Only meaningful when ≥2 persons are selected — normalize to false otherwise.
+      sharedLimit: currentPersons.length >= 2 ? (currentFormData.sharedLimit ?? false) : false,
       ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
     };
 
@@ -233,15 +251,23 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
         <Row gutter={16}>
           <Col span={12} style={{ paddingRight: 8 }}>
             <Form.Item
-              label={texts.personJiraName}
-              name="person"
-              rules={[{ required: true, message: texts.selectPerson }]}
+              label={texts.persons}
+              required
+              validateStatus={personError ? 'error' : undefined}
+              help={personError ?? undefined}
             >
-              <PersonNameSelect
+              <MultiPersonSelect
                 id={settingsJiraDOM.idPersonName}
                 searchUsers={searchUsers}
-                value={currentFormData.persons[0]}
-                onChange={person => handleFormChange('persons', [person])}
+                buildAvatarUrl={buildAvatarUrl}
+                values={currentFormData.persons}
+                placeholder={texts.personsPlaceholder}
+                onChange={persons => {
+                  handleFormChange('persons', persons);
+                  if (persons.length > 0) {
+                    setPersonError(null);
+                  }
+                }}
               />
             </Form.Item>
 
@@ -258,6 +284,22 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
                 onChange={value => handleFormChange('limit', value || 0)}
               />
             </Form.Item>
+
+            {currentFormData.persons.length >= 2 && (
+              <Form.Item style={{ marginTop: -8 }}>
+                <span data-testid="shared-limit-checkbox">
+                  <Checkbox
+                    checked={currentFormData.sharedLimit ?? false}
+                    onChange={e => handleFormChange('sharedLimit', e.target.checked)}
+                  >
+                    {texts.sharedLimit}{' '}
+                    <Tooltip title={texts.sharedLimitTooltip}>
+                      <QuestionCircleOutlined style={{ color: 'rgba(0, 0, 0, 0.45)' }} />
+                    </Tooltip>
+                  </Checkbox>
+                </span>
+              </Form.Item>
+            )}
 
             <Form.Item style={{ marginTop: 16 }}>
               <IssueTypeSelector
@@ -380,6 +422,7 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
         <PersonalWipLimitTable
           texts={texts}
           limits={limits}
+          buildAvatarUrl={buildAvatarUrl}
           onDelete={(id: number) => settingsUi.deleteLimit(id)}
           onEdit={(id: number) => settingsUi.setEditingId(id)}
         />

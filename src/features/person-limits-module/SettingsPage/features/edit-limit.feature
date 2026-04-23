@@ -25,10 +25,11 @@ Feature: Personal WIP Limit Settings - Edit Limit
     Then I should see limit: name "John Doe" value 10 columns "all" swimlanes "all" issueTypes "all"
 
   @SC-EDIT-3
-  Scenario: Change person
+  Scenario: Replace person on a single-person limit
     Given a limit: login "john.doe" name "John Doe" value 5 columns "all" swimlanes "all" issueTypes "all"
     When I open the settings modal
     And I click "Edit" on the limit for "John Doe"
+    And I remove person "John Doe" from the selected list
     And I search for "jane" in person name field
     And I select "Jane Doe (jane.doe)" from search results
     And I click "Update limit"

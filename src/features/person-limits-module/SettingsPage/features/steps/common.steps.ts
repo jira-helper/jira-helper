@@ -152,8 +152,15 @@ When('I select {string} from search results', (optionText: string) => {
   const match = optionText.match(/^(.+?)\s*\(([^)]+)\)$/);
   const displayName = match ? match[1] : optionText;
 
-  cy.get('.ant-select-dropdown').should('be.visible');
-  cy.contains('.ant-select-item-option', displayName).click();
+  cy.get('.ant-select-dropdown:visible').should('be.visible');
+  cy.contains('.ant-select-dropdown:visible .ant-select-item-option', displayName).click({ force: true });
+});
+
+When('I remove person {string} from the selected list', (displayName: string) => {
+  cy.get('[data-testid="multi-person-selected"]')
+    .contains('.ant-tag', displayName)
+    .find('.ant-tag-close-icon')
+    .click({ force: true });
 });
 
 When(/^I set the limit to (\d+)$/, (value: string) => {
@@ -210,6 +217,17 @@ Then('I should see an empty limits table', () => {
 
 Then(/^I should see (\d+) limits? in the table$/, (count: string) => {
   cy.get('.ant-table-tbody .ant-table-row').should('have.length', parseInt(count, 10));
+});
+
+Then('the limits table row should list persons {string}', (personsCsv: string) => {
+  const names = personsCsv.split(',').map(s => s.trim());
+  cy.get('[data-testid="person-limit-table-persons-cell"]')
+    .first()
+    .within(() => {
+      names.forEach(name => {
+        cy.contains(name).should('exist');
+      });
+    });
 });
 
 Then(
@@ -271,7 +289,8 @@ Then(/^the limit field should show value (\d+)$/, (value: string) => {
 });
 
 Then('the person select should show {string}', (personName: string) => {
-  cy.get('.ant-select-selection-item').should('contain.text', personName);
+  // Persons in MultiPersonSelect are rendered as Tags below the input
+  cy.get('[data-testid="multi-person-selected"]').should('contain.text', personName);
 });
 
 Then('the button should show {string}', (buttonText: string) => {
@@ -298,10 +317,29 @@ Then('I should see the avatar warning message', () => {
 });
 
 Then('the person name select should be empty', () => {
-  cy.get('#edit-person-wip-limit-person-name')
-    .closest('.ant-select')
-    .find('.ant-select-selection-item')
-    .should('not.exist');
+  cy.get('[data-testid="multi-person-selected"]').should('not.exist');
+});
+
+Then('the person search input should be empty', () => {
+  cy.get('.ant-select-selection-search-input').first().should('have.value', '');
+});
+
+// --- Shared limit checkbox ---
+
+Then('the shared limit checkbox should not be visible', () => {
+  cy.get('[data-testid="shared-limit-checkbox"]').should('not.exist');
+});
+
+Then('the shared limit checkbox should be visible', () => {
+  cy.get('[data-testid="shared-limit-checkbox"]').should('be.visible');
+});
+
+When('I check the shared limit checkbox', () => {
+  cy.get('[data-testid="shared-limit-checkbox"]').find('input[type="checkbox"]').check({ force: true });
+});
+
+Then('the limit cell of the first row should show {string}', (text: string) => {
+  cy.get('[data-testid="person-limit-table-limit-cell"]').first().should('contain.text', text);
 });
 
 // --- Person search steps ---

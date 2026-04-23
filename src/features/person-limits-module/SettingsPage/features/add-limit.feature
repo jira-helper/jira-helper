@@ -92,7 +92,7 @@ Feature: Personal WIP Limit Settings - Add Limit
     When I open the settings modal
     And I set the limit to 5
     And I click "Add limit"
-    Then I should see validation error "Select a person"
+    Then I should see validation error "Select at least one person"
     And the person name field should have error highlight
     And I should see an empty limits table
 
@@ -151,6 +151,50 @@ Feature: Personal WIP Limit Settings - Add Limit
     And I click "Add limit"
     Then I should see limit: name "John Doe" value 3 columns "all" swimlanes "all" issueTypes "all"
     And the showAllPersonIssues column for "John Doe" should show "✓"
+
+  # === MULTI-PERSON ===
+
+  @SC-ADD-13
+  Scenario: Add a single limit covering multiple persons
+    When I open the settings modal
+    And I search for "alice" in person name field
+    And I select "Alice (alice)" from search results
+    And I search for "bob" in person name field
+    And I select "Bob (bob)" from search results
+    And I set the limit to 5
+    And I click "Add limit"
+    Then the limits table row should list persons "Alice, Bob"
+    And I should see 1 limit in the table
+
+  @SC-ADD-14
+  Scenario: Person search input clears after picking a user
+    When I open the settings modal
+    And I search for "alice" in person name field
+    And I select "Alice (alice)" from search results
+    Then the person search input should be empty
+
+  @SC-ADD-15
+  Scenario: Shared limit checkbox is hidden until 2+ persons are selected
+    When I open the settings modal
+    Then the shared limit checkbox should not be visible
+    When I search for "alice" in person name field
+    And I select "Alice (alice)" from search results
+    Then the shared limit checkbox should not be visible
+    When I search for "bob" in person name field
+    And I select "Bob (bob)" from search results
+    Then the shared limit checkbox should be visible
+
+  @SC-ADD-16
+  Scenario: Add a shared limit and see "(shared)" suffix in the table
+    When I open the settings modal
+    And I search for "alice" in person name field
+    And I select "Alice (alice)" from search results
+    And I search for "bob" in person name field
+    And I select "Bob (bob)" from search results
+    And I set the limit to 5
+    And I check the shared limit checkbox
+    And I click "Add limit"
+    Then the limit cell of the first row should show "5 (shared)"
 
   @SC-ADD-10
   Scenario: Validation error clears when switching to edit mode

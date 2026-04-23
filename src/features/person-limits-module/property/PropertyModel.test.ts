@@ -147,9 +147,14 @@ describe('person-limits PropertyModel', () => {
       const result = await model.persist();
 
       expect(result.ok).toBe(true);
+      // setData runs the migration, so the persisted payload has sharedLimit
+      // normalized onto each limit.
+      const expectedPersisted: PersonWipLimitsProperty = {
+        limits: data.limits.map(l => ({ ...l, sharedLimit: false })),
+      };
       expect(mockBoardPropertyService.updateBoardProperty).toHaveBeenCalledWith(
         BOARD_PROPERTIES.PERSON_LIMITS,
-        data,
+        expectedPersisted,
         {}
       );
     });

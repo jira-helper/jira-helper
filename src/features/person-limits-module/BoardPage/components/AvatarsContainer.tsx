@@ -10,11 +10,7 @@ export const AvatarsContainer: React.FC = () => {
   const buildAvatarUrl = container.inject(buildAvatarUrlToken);
   const pageObject = container.inject(boardPagePageObjectToken);
   const { model, useModel } = container.inject(boardRuntimeModelToken);
-  const { stats, activeLimitId } = useModel();
-
-  const handleClick = (limitId: number) => {
-    model.toggleActiveLimitId(limitId);
-  };
+  const { stats, activePerson } = useModel();
 
   if (stats.length === 0) {
     return null;
@@ -28,15 +24,25 @@ export const AvatarsContainer: React.FC = () => {
             const assignee = pageObject.getAssigneeFromIssue(issue);
             return assignee === person.name || assignee === person.displayName;
           });
+          // Shared limits: all avatars share the bucket and click highlights the whole limit.
+          // Per-person limits: each avatar carries its own counter and highlight target.
+          const isShared = stat.sharedLimit;
+          const currentCount = isShared ? stat.issues.length : personIssues.length;
+          const isActive = isShared
+            ? activePerson?.limitId === stat.id
+            : activePerson?.limitId === stat.id && activePerson?.personName === person.name;
+          const handleClick = (limitId: number) => {
+            model.toggleActivePerson(limitId, isShared ? null : person.name);
+          };
           return (
             <AvatarBadge
               key={`${stat.id}-${person.name}`}
               avatar={buildAvatarUrl(person.name)}
               personName={person.name}
               limitId={stat.id}
-              currentCount={personIssues.length}
+              currentCount={currentCount}
               limit={stat.limit}
-              isActive={activeLimitId === stat.id}
+              isActive={isActive}
               onClick={handleClick}
             />
           );

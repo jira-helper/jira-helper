@@ -51,7 +51,27 @@ export type PersonWipLimitsProperty_2_31 = {
   limits: PersonLimit_2_31[];
 };
 
-export type PersonLimit = PersonLimit_2_31;
+/**
+ * PersonLimit v2.32 — добавлено поле sharedLimit.
+ *
+ * sharedLimit=false (default): per-person semantics. Each avatar displays its own
+ *   counter `count(person)/limit`. Clicking an avatar highlights only that person.
+ *
+ * sharedLimit=true: shared semantics. All avatars in the limit share a single
+ *   counter `total/limit`. Clicking any avatar highlights all persons in the limit.
+ *
+ * Optional in the type to keep legacy stored data (and existing test fixtures)
+ * forward-compatible — readers must default to `false` when the field is absent.
+ */
+export type PersonLimit_2_32 = PersonLimit_2_31 & {
+  sharedLimit?: boolean;
+};
+
+export type PersonWipLimitsProperty_2_32 = {
+  limits: PersonLimit_2_32[];
+};
+
+export type PersonLimit = PersonLimit_2_32;
 
 /**
  * Структура, хранимая в Jira Board Property (текущая версия)

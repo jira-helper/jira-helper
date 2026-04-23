@@ -9,6 +9,18 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'Person JIRA name',
     ru: 'Имя пользователя в JIRA',
   },
+  persons: {
+    en: 'Persons',
+    ru: 'Пользователи',
+  },
+  selectAtLeastOnePerson: {
+    en: 'Select at least one person',
+    ru: 'Выберите хотя бы одного пользователя',
+  },
+  personsPlaceholder: {
+    en: 'Type to search and add users...',
+    ru: 'Введите имя пользователя для поиска...',
+  },
   maxIssuesAtWork: {
     en: 'Max issues at work',
     ru: 'Максимум задач в работе',
@@ -108,6 +120,18 @@ export const PERSON_LIMITS_TEXTS = {
   showAllPersonIssuesTooltip: {
     en: 'Clicking on the avatar hides issues of other people on the board. If enabled, all issues of this person will remain. If disabled, only issues matching the limit settings (columns, swimlanes, issue types) will remain.',
     ru: 'Клик на аватар скрывает чужие задачи на доске. Если опция включена — останутся все задачи этого человека. Если выключена — только задачи, подходящие под настройки лимита (колонки, свимлейны, типы задач).',
+  },
+  sharedLimit: {
+    en: 'Shared limit across all selected persons',
+    ru: 'Общий лимит на всех выбранных пользователей',
+  },
+  sharedLimitTooltip: {
+    en: 'When enabled, the limit applies as a single shared bucket: every avatar shows the same total/limit counter and clicking any avatar highlights tasks of all selected persons. When disabled, each person has their own counter and click highlight.',
+    ru: 'Если включено, лимит работает как единая общая корзина: все аватары показывают общий счётчик total/limit, и клик по любому из них подсвечивает задачи всех выбранных пользователей. Если выключено — у каждого пользователя свой счётчик и своя подсветка при клике.',
+  },
+  sharedSuffix: {
+    en: 'shared',
+    ru: 'общий',
   },
 } as const satisfies Texts;
 

@@ -129,6 +129,11 @@ export interface MultiPersonSelectProps {
   values?: SelectedPerson[];
   onChange?: (persons: SelectedPerson[]) => void;
   searchUsers: (query: string) => Promise<JiraUser[]>;
+  /**
+   * Optional helper to build an avatar URL from a person's login.
+   * When provided, selected persons are rendered with a 16x16 avatar inside the tag.
+   */
+  buildAvatarUrl?: (login: string) => string;
   id?: string;
   placeholder?: string;
 }
@@ -137,6 +142,7 @@ export const MultiPersonSelect: React.FC<MultiPersonSelectProps> = ({
   values = [],
   onChange,
   searchUsers,
+  buildAvatarUrl,
   id,
   placeholder = 'Type to search users...',
 }) => {
@@ -144,10 +150,26 @@ export const MultiPersonSelect: React.FC<MultiPersonSelectProps> = ({
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
+  // Controlled search input — reset to '' after every successful pick
+  // so the user can immediately type the next name without manual clearing.
+  const [searchValue, setSearchValue] = useState('');
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetSearchState = useCallback(() => {
+    setSearchValue('');
+    setOptions([]);
+    setNoResults(false);
+    setError(null);
+    setFetching(false);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+    }
+  }, []);
 
   const handleSearch = useCallback(
     (searchText: string) => {
+      setSearchValue(searchText);
       setError(null);
       setNoResults(false);
 
@@ -192,8 +214,9 @@ export const MultiPersonSelect: React.FC<MultiPersonSelectProps> = ({
           onChange([...values, newPerson]);
         }
       }
+      resetSearchState();
     },
-    [options, onChange, values]
+    [options, onChange, values, resetSearchState]
   );
 
   const handleRemove = useCallback(
@@ -217,9 +240,13 @@ export const MultiPersonSelect: React.FC<MultiPersonSelectProps> = ({
       <Select
         id={id}
         showSearch
-        allowClear
         filterOption={false}
         placeholder={placeholder}
+        // Keep selection state external (via tag list below): never reflect
+        // the picked value back into the input. Combined with `searchValue`
+        // this guarantees the input is empty after every pick.
+        value={null}
+        searchValue={searchValue}
         onSearch={handleSearch}
         onSelect={handleSelect}
         notFoundContent={notFoundContent}
@@ -243,15 +270,19 @@ export const MultiPersonSelect: React.FC<MultiPersonSelectProps> = ({
         ))}
       </Select>
       {values.length > 0 && (
-        <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+        <div data-testid="multi-person-selected" style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {values.map(person => (
             <Tag
               key={person.name}
               closable
               onClose={() => handleRemove(person.name)}
-              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+              data-person-name={person.name}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingInlineStart: 4 }}
             >
-              {person.displayName || person.name}
+              {buildAvatarUrl && (
+                <img src={buildAvatarUrl(person.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+              )}
+              <span>{person.displayName || person.name}</span>
             </Tag>
           ))}
         </div>

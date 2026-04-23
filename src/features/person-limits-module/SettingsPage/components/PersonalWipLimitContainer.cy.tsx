@@ -756,7 +756,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
           const callArgs = stub.getCall(0).args[0];
-          expect(callArgs.person?.name).to.eq('newuser');
+          expect(callArgs.persons?.[0]?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(3);
           // Should have selected columns (not empty, not all)
           expect(callArgs.selectedColumns).to.not.be.empty;
@@ -791,7 +791,7 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
 
         cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
           const callArgs = stub.getCall(0).args[0];
-          expect(callArgs.person?.name).to.eq('newuser');
+          expect(callArgs.persons?.[0]?.name).to.eq('newuser');
           expect(callArgs.limit).to.eq(5);
           // When all columns are selected, should save as empty array (meaning "all")
           expect(callArgs.selectedColumns).to.be.empty;
@@ -895,6 +895,193 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
       cy.then(() => {
         const fd = settingsUi().formData;
         expect(fd!.swimlanes).to.deep.equal([]);
+      });
+    });
+  });
+
+  describe('Multi-person selection', () => {
+    const selectUserFromDropdown = (query: string, displayName: string) => {
+      // Click the Select wrapper (not the inner input which can be obscured by an open dropdown)
+      cy.get('#edit-person-wip-limit-person-name').click({ force: true });
+      cy.get('#edit-person-wip-limit-person-name').clear({ force: true }).type(query, { force: true });
+      cy.get('.ant-select-dropdown:visible').should('be.visible');
+      cy.contains('.ant-select-dropdown:visible .ant-select-item-option', displayName).click({ force: true });
+    };
+
+    it('should add several persons as tags', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+      const searchUsers = async (query: string) => [
+        {
+          name: query,
+          displayName: `${query} display`,
+          avatarUrls: { '16x16': '', '32x32': '' },
+          self: `https://jira.example.com/u/${query}`,
+        },
+      ];
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={searchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      selectUserFromDropdown('alice', 'alice display');
+      selectUserFromDropdown('bob', 'bob display');
+
+      cy.get('[data-testid="multi-person-selected"]').within(() => {
+        cy.get('[data-person-name="alice"]').should('exist');
+        cy.get('[data-person-name="bob"]').should('exist');
+      });
+
+      cy.then(() => {
+        const fd = settingsUi().formData;
+        expect(fd?.persons.map(p => p.name)).to.deep.equal(['alice', 'bob']);
+      });
+    });
+
+    it('should remove a person when its tag close button is clicked', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      selectUserFromDropdown('alice', 'alice');
+      selectUserFromDropdown('bob', 'bob');
+
+      cy.get('[data-person-name="alice"] .ant-tag-close-icon').click();
+
+      cy.get('[data-testid="multi-person-selected"]').within(() => {
+        cy.get('[data-person-name="alice"]').should('not.exist');
+        cy.get('[data-person-name="bob"]').should('exist');
+      });
+
+      cy.then(() => {
+        const fd = settingsUi().formData;
+        expect(fd?.persons.map(p => p.name)).to.deep.equal(['bob']);
+      });
+    });
+
+    it('should call onAddLimit with all selected persons on submit', () => {
+      const onAddLimitMock = cy.stub().as('onAddLimit');
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimitMock}
+        />
+      );
+
+      selectUserFromDropdown('alice', 'alice');
+      selectUserFromDropdown('bob', 'bob');
+
+      cy.get('#edit-person-wip-limit-person-limit').clear().type('4');
+
+      cy.contains('button', 'Add limit').click();
+
+      cy.get('@onAddLimit').should('have.been.called');
+      cy.get<sinon.SinonStub>('@onAddLimit').then(stub => {
+        const callArgs = stub.getCall(0).args[0];
+        expect(callArgs.persons.map((p: { name: string }) => p.name)).to.deep.equal(['alice', 'bob']);
+        expect(callArgs.limit).to.eq(4);
+      });
+    });
+
+    it('should show validation error when no person is selected on submit', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('#edit-person-wip-limit-person-limit').clear().type('3');
+      cy.contains('button', 'Add limit').click();
+
+      cy.contains('Select at least one person').should('be.visible');
+      cy.get('@onAddLimit').should('not.have.been.called');
+    });
+
+    it('should pre-fill all persons as tags when editing a multi-person limit', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      const limit: PersonLimit = {
+        id: 1,
+        persons: [
+          { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+          { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+        ],
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+        showAllPersonIssues: true,
+      };
+
+      settingsUi().addLimit(limit);
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.contains('button', 'Edit').click();
+      cy.contains('button', 'Update limit').should('be.visible');
+
+      cy.get('[data-testid="multi-person-selected"]').within(() => {
+        cy.get('[data-person-name="alice"]').should('contain.text', 'Alice');
+        cy.get('[data-person-name="bob"]').should('contain.text', 'Bob');
+      });
+    });
+
+    it('renders the persons cell in the table with one entry per person', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      const limit: PersonLimit = {
+        id: 1,
+        persons: [
+          { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+          { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+          { name: 'carol', displayName: 'Carol', self: 'http://jira/c' },
+        ],
+        limit: 3,
+        columns: [],
+        swimlanes: [],
+        showAllPersonIssues: true,
+      };
+
+      settingsUi().addLimit(limit);
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('[data-testid="person-limit-table-persons-cell"]').within(() => {
+        cy.get('[data-person-name="alice"]').should('contain.text', 'Alice');
+        cy.get('[data-person-name="bob"]').should('contain.text', 'Bob');
+        cy.get('[data-person-name="carol"]').should('contain.text', 'Carol');
       });
     });
   });

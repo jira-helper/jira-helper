@@ -3,24 +3,24 @@ import { createPersonLimit } from './createPersonLimit';
 import type { FormData } from '../state/types';
 
 describe('createPersonLimit', () => {
+  const johnDoe = {
+    name: 'john.doe',
+    displayName: 'John Doe',
+    self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+  };
+
+  const janeSmith = {
+    name: 'jane.smith',
+    displayName: 'Jane Smith',
+    self: 'https://jira.example.com/rest/api/2/user?username=jane.smith',
+  };
+
   const mockFormData: FormData = {
-    persons: [
-      {
-        name: 'john.doe',
-        displayName: 'John Doe',
-        self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
-      },
-    ],
+    persons: [johnDoe],
     limit: 5,
     selectedColumns: ['col1', 'col2'],
     swimlanes: ['swim1', 'swim2'],
     includedIssueTypes: ['bug', 'task'],
-  };
-
-  const mockPerson = {
-    name: 'john.doe',
-    displayName: 'John Doe',
-    self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
   };
 
   const mockColumns = [
@@ -33,11 +33,11 @@ describe('createPersonLimit', () => {
     { id: 'swim2', name: 'Backend' },
   ];
 
-  it('should create a PersonLimit from FormData', () => {
+  it('creates a PersonLimit from FormData with a single person', () => {
     const id = 1234567890;
     const result = createPersonLimit({
       formData: mockFormData,
-      person: mockPerson,
+      persons: [johnDoe],
       columns: mockColumns,
       swimlanes: mockSwimlanes,
       id,
@@ -45,60 +45,110 @@ describe('createPersonLimit', () => {
 
     expect(result).toEqual({
       id,
-      persons: [mockPerson],
+      persons: [johnDoe],
       limit: 5,
       columns: mockColumns,
       swimlanes: mockSwimlanes,
       includedIssueTypes: ['bug', 'task'],
       showAllPersonIssues: true,
+      sharedLimit: false,
     });
   });
 
-  it('should create PersonLimit without includedIssueTypes if not provided', () => {
+  describe('sharedLimit', () => {
+    it('defaults sharedLimit to false', () => {
+      const result = createPersonLimit({
+        formData: mockFormData,
+        persons: [johnDoe],
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+        id: 1,
+      });
+      expect(result.sharedLimit).toBe(false);
+    });
+
+    it('preserves sharedLimit=true when at least 2 persons are selected', () => {
+      const result = createPersonLimit({
+        formData: { ...mockFormData, persons: [johnDoe, janeSmith], sharedLimit: true },
+        persons: [johnDoe, janeSmith],
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+        id: 2,
+      });
+      expect(result.sharedLimit).toBe(true);
+    });
+
+    it('forces sharedLimit=false for a single-person limit even when form says true', () => {
+      const result = createPersonLimit({
+        formData: { ...mockFormData, sharedLimit: true },
+        persons: [johnDoe],
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+        id: 3,
+      });
+      expect(result.sharedLimit).toBe(false);
+    });
+  });
+
+  it('creates a PersonLimit with multiple persons sharing the same limit and filters', () => {
+    const id = 1234567899;
+    const result = createPersonLimit({
+      formData: { ...mockFormData, persons: [johnDoe, janeSmith] },
+      persons: [johnDoe, janeSmith],
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id,
+    });
+
+    expect(result.persons).toEqual([johnDoe, janeSmith]);
+    expect(result.limit).toBe(5);
+    expect(result.columns).toEqual(mockColumns);
+    expect(result.swimlanes).toEqual(mockSwimlanes);
+    expect(result.includedIssueTypes).toEqual(['bug', 'task']);
+  });
+
+  it('throws when persons array is empty', () => {
+    expect(() =>
+      createPersonLimit({
+        formData: mockFormData,
+        persons: [],
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+        id: 1,
+      })
+    ).toThrow(/at least one person/);
+  });
+
+  it('omits includedIssueTypes when not provided', () => {
     const formDataWithoutTypes: FormData = {
       ...mockFormData,
       includedIssueTypes: undefined,
     };
 
-    const id = 1234567891;
     const result = createPersonLimit({
       formData: formDataWithoutTypes,
-      person: mockPerson,
+      persons: [johnDoe],
       columns: mockColumns,
       swimlanes: mockSwimlanes,
-      id,
+      id: 1234567891,
     });
 
     expect(result.includedIssueTypes).toBeUndefined();
-    expect(result).toEqual({
-      id,
-      persons: [mockPerson],
-      limit: 5,
-      columns: mockColumns,
-      swimlanes: mockSwimlanes,
-      showAllPersonIssues: true,
-    });
   });
 
-  it('should filter columns to only include selected ones', () => {
+  it('filters columns to only the selected ones', () => {
     const allColumns = [
       { id: 'col1', name: 'To Do' },
       { id: 'col2', name: 'In Progress' },
       { id: 'col3', name: 'Done' },
     ];
 
-    const formData: FormData = {
-      ...mockFormData,
-      selectedColumns: ['col1', 'col3'],
-    };
-
-    const id = 1234567892;
     const result = createPersonLimit({
-      formData,
-      person: mockPerson,
+      formData: { ...mockFormData, selectedColumns: ['col1', 'col3'] },
+      persons: [johnDoe],
       columns: allColumns,
       swimlanes: mockSwimlanes,
-      id,
+      id: 1234567892,
     });
 
     expect(result.columns).toEqual([
@@ -107,25 +157,19 @@ describe('createPersonLimit', () => {
     ]);
   });
 
-  it('should filter swimlanes to only include selected ones', () => {
+  it('filters swimlanes to only the selected ones', () => {
     const allSwimlanes = [
       { id: 'swim1', name: 'Frontend' },
       { id: 'swim2', name: 'Backend' },
       { id: 'swim3', name: 'QA' },
     ];
 
-    const formData: FormData = {
-      ...mockFormData,
-      swimlanes: ['swim1', 'swim3'],
-    };
-
-    const id = 1234567893;
     const result = createPersonLimit({
-      formData,
-      person: mockPerson,
+      formData: { ...mockFormData, swimlanes: ['swim1', 'swim3'] },
+      persons: [johnDoe],
       columns: mockColumns,
       swimlanes: allSwimlanes,
-      id,
+      id: 1234567893,
     });
 
     expect(result.swimlanes).toEqual([
@@ -134,21 +178,15 @@ describe('createPersonLimit', () => {
     ]);
   });
 
-  it('should handle swimlanes without id (use name as id)', () => {
+  it('uses name as id for swimlanes without id', () => {
     const swimlanesWithoutId = [{ name: 'Frontend' }, { name: 'Backend' }];
 
-    const formData: FormData = {
-      ...mockFormData,
-      swimlanes: ['Frontend', 'Backend'],
-    };
-
-    const id = 1234567894;
     const result = createPersonLimit({
-      formData,
-      person: mockPerson,
+      formData: { ...mockFormData, swimlanes: ['Frontend', 'Backend'] },
+      persons: [johnDoe],
       columns: mockColumns,
       swimlanes: swimlanesWithoutId,
-      id,
+      id: 1234567894,
     });
 
     expect(result.swimlanes).toEqual([
@@ -157,75 +195,38 @@ describe('createPersonLimit', () => {
     ]);
   });
 
-  it('should handle empty selectedColumns', () => {
-    const formData: FormData = {
-      ...mockFormData,
-      selectedColumns: [],
-    };
-
-    const id = 1234567895;
+  it('honors empty selectedColumns and swimlanes', () => {
     const result = createPersonLimit({
-      formData,
-      person: mockPerson,
+      formData: { ...mockFormData, selectedColumns: [], swimlanes: [] },
+      persons: [johnDoe],
       columns: mockColumns,
       swimlanes: mockSwimlanes,
-      id,
+      id: 1234567895,
     });
 
     expect(result.columns).toEqual([]);
-  });
-
-  it('should create PersonLimit with showAllPersonIssues=false when explicitly set', () => {
-    const formData: FormData = {
-      ...mockFormData,
-      showAllPersonIssues: false,
-    };
-
-    const id = 1234567897;
-    const result = createPersonLimit({
-      formData,
-      person: mockPerson,
-      columns: mockColumns,
-      swimlanes: mockSwimlanes,
-      id,
-    });
-
-    expect(result.showAllPersonIssues).toBe(false);
-  });
-
-  it('should default showAllPersonIssues to true when not provided in formData', () => {
-    const formData: FormData = {
-      ...mockFormData,
-    };
-    delete formData.showAllPersonIssues;
-
-    const id = 1234567898;
-    const result = createPersonLimit({
-      formData,
-      person: mockPerson,
-      columns: mockColumns,
-      swimlanes: mockSwimlanes,
-      id,
-    });
-
-    expect(result.showAllPersonIssues).toBe(true);
-  });
-
-  it('should handle empty swimlanes', () => {
-    const formData: FormData = {
-      ...mockFormData,
-      swimlanes: [],
-    };
-
-    const id = 1234567896;
-    const result = createPersonLimit({
-      formData,
-      person: mockPerson,
-      columns: mockColumns,
-      swimlanes: mockSwimlanes,
-      id,
-    });
-
     expect(result.swimlanes).toEqual([]);
+  });
+
+  it('passes through showAllPersonIssues flag', () => {
+    const off = createPersonLimit({
+      formData: { ...mockFormData, showAllPersonIssues: false },
+      persons: [johnDoe],
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id: 1234567897,
+    });
+    expect(off.showAllPersonIssues).toBe(false);
+
+    const noFlag: FormData = { ...mockFormData };
+    delete noFlag.showAllPersonIssues;
+    const on = createPersonLimit({
+      formData: noFlag,
+      persons: [johnDoe],
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id: 1234567898,
+    });
+    expect(on.showAllPersonIssues).toBe(true);
   });
 });

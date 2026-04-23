@@ -11,10 +11,13 @@
   height: 32px;
   border-radius: 10px;
   border: none;
+  /* Reserve space for the outline so toggling .active does not shift layout. */
+  outline: solid 2px transparent;
+  outline-offset: -2px;
 }
 
 .avatarImage.active {
-  border: solid 2px #0052cc;
+  outline-color: #0052cc;
 }
 
 .badge {

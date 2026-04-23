@@ -143,10 +143,16 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     );
   });
 
-  it('does not register when canEdit is false', () => {
+  it('still registers when canEdit is false (read-only viewers can inspect/tweak locally)', () => {
     const page = new PersonLimitsBoardPage(globalContainer);
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
-    expect(registerSettings).not.toHaveBeenCalled();
+    expect(registerSettings).toHaveBeenCalledTimes(1);
+    expect(registerSettings).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: PERSON_LIMITS_TEXTS.tabTitle.en,
+        component: expect.any(Function),
+      })
+    );
   });
 
   it('registers when canEdit and person limits property is empty', () => {

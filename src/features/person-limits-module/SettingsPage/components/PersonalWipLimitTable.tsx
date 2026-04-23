@@ -9,23 +9,73 @@ export interface PersonalWipLimitTableProps {
   limits: PersonLimit[];
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
+  /**
+   * Optional avatar URL builder. When provided, persons in the table are
+   * displayed with a 16x16 avatar in front of the name.
+   */
+  buildAvatarUrl?: (login: string) => string;
 }
 
-export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ texts, limits, onDelete, onEdit }) => {
+type LegacyOrCurrentLimit = PersonLimit | (Omit<PersonLimit, 'persons'> & { person: PersonLimit['persons'][number] });
+
+function readPersons(record: LegacyOrCurrentLimit): PersonLimit['persons'] {
+  if ('persons' in record && Array.isArray(record.persons)) {
+    return record.persons;
+  }
+  if ('person' in record && record.person) {
+    return [record.person];
+  }
+  return [];
+}
+
+export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
+  texts,
+  limits,
+  onDelete,
+  onEdit,
+  buildAvatarUrl,
+}) => {
   const columns = [
     {
-      title: texts.person,
+      title: texts.persons,
       key: 'persons',
-      render: (_: any, record: PersonLimit) => {
-        const persons = (record as { persons?: PersonLimit['persons']; person?: PersonLimit['persons'][number] })
-          .persons ?? [(record as any).person];
-        return persons.map(p => p.displayName || p.name).join(', ');
+      render: (_: unknown, record: PersonLimit) => {
+        const persons = readPersons(record as LegacyOrCurrentLimit);
+        return (
+          <div
+            data-testid="person-limit-table-persons-cell"
+            style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}
+          >
+            {persons.map((p, idx) => (
+              <span
+                key={p.name}
+                data-person-name={p.name}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+              >
+                {buildAvatarUrl && (
+                  <img src={buildAvatarUrl(p.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+                )}
+                <span>{p.displayName || p.name}</span>
+                {idx < persons.length - 1 && <span style={{ marginRight: 2 }}>,</span>}
+              </span>
+            ))}
+          </div>
+        );
       },
     },
     {
       title: texts.limit,
-      dataIndex: 'limit',
       key: 'limit',
+      render: (_: unknown, record: PersonLimit) => {
+        const isShared = (record as PersonLimit).sharedLimit === true;
+        const personsCount = readPersons(record as LegacyOrCurrentLimit).length;
+        return (
+          <span data-testid="person-limit-table-limit-cell" data-shared={isShared ? 'true' : 'false'}>
+            {record.limit}
+            {isShared && personsCount >= 2 ? ` (${texts.sharedSuffix})` : ''}
+          </span>
+        );
+      },
     },
     {
       title: texts.columns,
@@ -57,7 +107,7 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ te
     {
       title: texts.actions,
       key: 'actions',
-      render: (_: any, record: PersonLimit) => (
+      render: (_: unknown, record: PersonLimit) => (
         <Space split={<span>|</span>}>
           <Button type="link" danger onClick={() => onDelete(Number(record.id))}>
             {texts.delete}

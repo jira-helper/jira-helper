@@ -163,6 +163,7 @@ describe('SettingsUIModel', () => {
         swimlanes: ['s1'],
         includedIssueTypes: ['Task'],
         showAllPersonIssues: true,
+        sharedLimit: false,
       });
     });
 
@@ -179,6 +180,24 @@ describe('SettingsUIModel', () => {
       model.setFormData({ persons: [], limit: 1, selectedColumns: [], swimlanes: [] });
       model.setEditingId(null);
       expect(model.formData).toBeNull();
+    });
+
+    it('should populate formData with all persons when limit has multiple persons', () => {
+      model.limits = [
+        sampleLimit({
+          persons: [
+            { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+            { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+          ],
+        }),
+      ];
+
+      model.setEditingId(1);
+
+      expect(model.formData?.persons).toEqual([
+        { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+        { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+      ]);
     });
   });
 
@@ -226,6 +245,19 @@ describe('SettingsUIModel', () => {
       model.limits = [sampleLimit({ includedIssueTypes: undefined })];
       expect(model.isDuplicate(['testuser'], [], [], undefined)).toBe(true);
       expect(model.isDuplicate(['testuser'], [], [], ['Task'])).toBe(false);
+    });
+
+    it('should detect duplicate when any of the new persons matches any existing person with same filters', () => {
+      model.limits = [
+        sampleLimit({
+          persons: [{ name: 'alice', self: '' }],
+          columns: [],
+          swimlanes: [],
+        }),
+      ];
+
+      expect(model.isDuplicate(['alice', 'bob'], [], [], undefined)).toBe(true);
+      expect(model.isDuplicate(['bob', 'charlie'], [], [], undefined)).toBe(false);
     });
   });
 

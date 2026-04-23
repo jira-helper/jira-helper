@@ -65,6 +65,46 @@ describe('updatePersonLimit', () => {
       swimlanes: mockSwimlanes,
       includedIssueTypes: ['bug', 'task'],
       showAllPersonIssues: true,
+      sharedLimit: false,
+    });
+  });
+
+  describe('sharedLimit', () => {
+    const johnDoe = existingLimit.persons[0];
+    const janeDoe = {
+      name: 'jane.doe',
+      displayName: 'Jane Doe',
+      self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
+    };
+
+    it('forces sharedLimit=false when reduced to a single person', () => {
+      const result = updatePersonLimit({
+        existingLimit: { ...existingLimit, persons: [johnDoe, janeDoe], sharedLimit: true },
+        formData: { ...mockFormData, persons: [johnDoe], sharedLimit: true },
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+      });
+      expect(result.sharedLimit).toBe(false);
+    });
+
+    it('keeps sharedLimit=true when ≥2 persons and form requests it', () => {
+      const result = updatePersonLimit({
+        existingLimit: { ...existingLimit, persons: [johnDoe, janeDoe] },
+        formData: { ...mockFormData, persons: [johnDoe, janeDoe], sharedLimit: true },
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+      });
+      expect(result.sharedLimit).toBe(true);
+    });
+
+    it('falls back to existing sharedLimit when form omits it', () => {
+      const result = updatePersonLimit({
+        existingLimit: { ...existingLimit, persons: [johnDoe, janeDoe], sharedLimit: true },
+        formData: { ...mockFormData, persons: [johnDoe, janeDoe] },
+        columns: mockColumns,
+        swimlanes: mockSwimlanes,
+      });
+      expect(result.sharedLimit).toBe(true);
     });
   });
 

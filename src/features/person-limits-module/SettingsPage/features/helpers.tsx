@@ -71,6 +71,8 @@ const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
     'john.doe': { name: 'john.doe', displayName: 'John Doe' },
     jane: { name: 'jane.doe', displayName: 'Jane Doe' },
     'jane.doe': { name: 'jane.doe', displayName: 'Jane Doe' },
+    alice: { name: 'alice', displayName: 'Alice' },
+    bob: { name: 'bob', displayName: 'Bob' },
   };
   const user = knownUsers[query.toLowerCase()];
   if (user) {

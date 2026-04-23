@@ -111,26 +111,27 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     // historical query list, but it doesn't render — so we treat it as "no swimlanes".
     const isCustomSwimlaneStrategy = boardEditData.swimlanesConfig?.swimlaneStrategy === 'custom';
 
-    const canEdit = boardEditData?.canEdit;
-    if (canEdit) {
-      const rawColumns = boardEditData.rapidListConfig?.mappedColumns ?? [];
-      const columns: Column[] = rawColumns
-        .filter((col: MappedColumn) => !col.isKanPlanColumn)
-        .map((col: MappedColumn) => ({ id: col.id, name: col.name }));
+    // Settings tab is intentionally registered regardless of `canEdit`:
+    // viewers should also be able to inspect the existing config and tweak
+    // it locally (changes apply to the live board until reload, even if
+    // persistence to Jira fails due to missing edit permissions).
+    const rawColumns = boardEditData.rapidListConfig?.mappedColumns ?? [];
+    const columns: Column[] = rawColumns
+      .filter((col: MappedColumn) => !col.isKanPlanColumn)
+      .map((col: MappedColumn) => ({ id: col.id, name: col.name }));
 
-      const rawSwimlanes = isCustomSwimlaneStrategy ? (boardEditData.swimlanesConfig?.swimlanes ?? []) : [];
-      const swimlanes: Swimlane[] = rawSwimlanes.map((swim, index) => ({
-        id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
-        name: swim.name,
-      }));
+    const rawSwimlanes = isCustomSwimlaneStrategy ? (boardEditData.swimlanesConfig?.swimlanes ?? []) : [];
+    const swimlanes: Swimlane[] = rawSwimlanes.map((swim, index) => ({
+      id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
+      name: swim.name,
+    }));
 
-      const TabComponent = () => React.createElement(PersonLimitsSettingsTab, { columns, swimlanes });
+    const TabComponent = () => React.createElement(PersonLimitsSettingsTab, { columns, swimlanes });
 
-      registerSettings({
-        title: getPersonLimitsSettingsTabTitle(this.container),
-        component: TabComponent,
-      });
-    }
+    registerSettings({
+      title: getPersonLimitsSettingsTabTitle(this.container),
+      component: TabComponent,
+    });
 
     if (!effectivePersonLimits.limits.length) return;
 
