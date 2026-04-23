@@ -24,10 +24,10 @@ export type SelectedPerson = {
 
 /**
  * Form data structure — current state of the form.
- * `person` holds the fully resolved Jira user selected via PersonNameSelect.
+ * `persons` holds the fully resolved Jira users selected via PersonNameSelect.
  */
 export type FormData = {
-  person: SelectedPerson | null;
+  persons: SelectedPerson[];
   limit: number;
   selectedColumns: string[];
   swimlanes: string[];
