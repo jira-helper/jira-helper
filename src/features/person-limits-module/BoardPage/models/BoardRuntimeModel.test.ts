@@ -669,6 +669,50 @@ describe('BoardRuntimeModel', () => {
     expect(stats[0].issues.length).toBe(1);
   });
 
+  // Regression for: "0/N counter despite issues being present" on boards where
+  // only the default swimlane (e.g. "Everything Else") is visible. Jira does
+  // not render `.ghx-swimlane-header` for default swimlanes, so the legacy
+  // header-based swimlane discovery returned an empty list and made every
+  // saved swimlane filter reject every issue.
+  it('calculateStats counts issues inside a swimlane that has no .ghx-swimlane-header (default swimlane)', () => {
+    document.body.innerHTML = `
+      <div id="ghx-pool">
+        <div class="ghx-swimlane ghx-first" swimlane-id="1201235">
+          <ul class="ghx-columns">
+            <li class="ghx-column" data-column-id="col1">
+              <div class="ghx-issue" id="i1">
+                <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+              </div>
+              <div class="ghx-issue" id="i2">
+                <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const model = modelWithLimits([
+      {
+        id: 1,
+        persons: [personJohn],
+        limit: 5,
+        columns: [{ id: 'col1', name: 'To Do' }],
+        // Saved both possible swimlanes; only "1201235" survives in the DOM.
+        swimlanes: [
+          { id: '1201234', name: 'Expedite' },
+          { id: '1201235', name: 'Everything Else' },
+        ],
+        showAllPersonIssues: true,
+      },
+    ]);
+    model.cssSelectorOfIssues = '.ghx-issue';
+
+    const stats = model.calculateStats();
+
+    expect(stats[0].issues.length).toBe(2);
+  });
+
   it('showOnlyChosen hides parent group when all its issues are filtered out', () => {
     document.body.innerHTML = `
       <div class="ghx-parent-group" id="pg">

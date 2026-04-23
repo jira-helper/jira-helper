@@ -69,7 +69,22 @@ export class BoardRuntimeModel {
     return { ...personLimit, swimlanes: [] };
   }
 
-  private countIssuesInColumn(column: Element, stats: PersonLimitStats[], swimlaneId?: string | null): void {
+  /**
+   * Count one column's issues into the running stats.
+   *
+   * The swimlane id is derived per-issue via `getSwimlaneIdOfIssue` rather than
+   * passed in from the caller. That deliberately avoids relying on
+   * `pageObject.getSwimlanes()` / `hasCustomSwimlanes()` — both require a
+   * `.ghx-swimlane-header` element that Jira does NOT render for the default
+   * swimlane (e.g. "Everything Else"). When a board has only the default
+   * swimlane visible, the header-based discovery returns nothing and previously
+   * caused every issue to be filtered out by saved swimlane filters.
+   *
+   * Reading the id straight off `.ghx-swimlane[swimlane-id]` (the wrapper that
+   * IS always present when swimlanes are active) keeps the saved swimlane
+   * filter semantics intact while supporting both cases.
+   */
+  private countIssuesInColumn(column: Element, stats: PersonLimitStats[]): void {
     const columnId = this.pageObject.getColumnIdFromColumn(column);
     if (!columnId) return;
 
@@ -77,6 +92,7 @@ export class BoardRuntimeModel {
     issues.forEach(issue => {
       const assignee = this.pageObject.getAssigneeFromIssue(issue);
       const issueType = this.pageObject.getIssueTypeFromIssue(issue);
+      const swimlaneId = this.pageObject.getSwimlaneIdOfIssue(issue);
 
       if (assignee) {
         stats.forEach(personLimit => {
@@ -107,16 +123,8 @@ export class BoardRuntimeModel {
       sharedLimit: limit.sharedLimit ?? false,
     }));
 
-    if (this.pageObject.hasCustomSwimlanes()) {
-      const swimlanes = this.pageObject.getSwimlanes();
-      swimlanes.forEach(sw => {
-        const columns = this.pageObject.getColumnsInSwimlane(sw.element);
-        columns.forEach(column => this.countIssuesInColumn(column, stats, sw.id));
-      });
-    } else {
-      const columns = this.pageObject.getColumnElements();
-      columns.forEach(column => this.countIssuesInColumn(column, stats));
-    }
+    const columns = this.pageObject.getColumnElements();
+    columns.forEach(column => this.countIssuesInColumn(column, stats));
 
     this.stats = stats;
     return stats;

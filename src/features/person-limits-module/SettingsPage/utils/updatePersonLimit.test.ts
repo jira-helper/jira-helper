@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { updatePersonLimit } from './updatePersonLimit';
-import type { FormData, PersonLimit } from '../state/types';
+import type { FormData, PersonLimit, SelectedPerson } from '../state/types';
 
 describe('updatePersonLimit', () => {
   const existingLimit: PersonLimit = {
@@ -70,8 +70,12 @@ describe('updatePersonLimit', () => {
   });
 
   describe('sharedLimit', () => {
-    const johnDoe = existingLimit.persons[0];
-    const janeDoe = {
+    const johnDoe: SelectedPerson = {
+      name: 'john.doe',
+      displayName: 'John Doe',
+      self: 'https://jira.example.com/rest/api/2/user?username=john.doe',
+    };
+    const janeDoe: SelectedPerson = {
       name: 'jane.doe',
       displayName: 'Jane Doe',
       self: 'https://jira.example.com/rest/api/2/user?username=jane.doe',
