@@ -1,0 +1,28 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "userDataDir": "/Users/m.sosnov/.cache/jira-helper-chrome-profile",
+    "launchOptions": {
+      "channel": "chrome",
+      "headless": false,
+      "args": [
+        "--enable-unsafe-extension-debugging",
+        "--load-extension=/Users/m.sosnov/projects/personal/jira-helper/dist",
+        "--no-first-run",
+        "--no-default-browser-check"
+      ],
+      "ignoreDefaultArgs": [
+        "--disable-extensions",
+        "--disable-component-extensions-with-background-pages"
+      ]
+    },
+    "contextOptions": {
+      "viewport": null
+    }
+  },
+  "outputDir": ".playwright/output",
+  "outputMode": "stdout",
+  "console": {
+    "level": "info"
+  }
+}

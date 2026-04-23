@@ -29,3 +29,5 @@ cypress-coverage
 cypress/reports
 cypress/screenshots
 cypress/videos
+
+.playwright/output/
