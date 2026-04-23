@@ -15,8 +15,11 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({ te
   const columns = [
     {
       title: texts.person,
-      key: 'person',
-      render: (_: any, record: PersonLimit) => record.person.displayName || record.person.name,
+      key: 'persons',
+      render: (_: any, record: PersonLimit) => {
+        const persons = (record as { persons?: PersonLimit['persons']; person?: PersonLimit['persons'][number] }).persons ?? [(record as any).person];
+        return persons.map(p => p.displayName || p.name).join(', ');
+      },
     },
     {
       title: texts.limit,
