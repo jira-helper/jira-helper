@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { migratePersonLimit, migrateProperty } from './migrateProperty';
+import { migratePersonLimit, migratePersonLimitToLatest, migrateProperty, migratePropertyToLatest } from './migrateProperty';
 import type {
   PersonLimit,
   PersonLimit_2_29,
+  PersonLimit_2_30,
+  PersonLimit_2_31,
   PersonWipLimitsProperty,
   PersonWipLimitsProperty_2_29,
   PersonWipLimitsProperty_2_30,
@@ -245,5 +247,95 @@ describe('migrateProperty', () => {
       expect(limit).toHaveProperty('columns');
       expect(limit).toHaveProperty('swimlanes');
     });
+  });
+});
+
+describe('migratePersonLimitToLatest', () => {
+  it('should convert v2.29 limit with single person to persons array', () => {
+    const v2_29: PersonLimit_2_29 = {
+      id: 1,
+      person: { name: 'alice', self: 'http://jira/alice' },
+      limit: 5,
+      columns: [],
+      swimlanes: [],
+    };
+    const result = migratePersonLimitToLatest(v2_29);
+    expect(result.persons).toEqual([{ name: 'alice', self: 'http://jira/alice' }]);
+    expect(result.showAllPersonIssues).toBe(true);
+  });
+
+  it('should convert v2.30 limit with single person to persons array', () => {
+    const v2_30: PersonLimit_2_30 = {
+      id: 1,
+      person: { name: 'bob', self: 'http://jira/bob' },
+      limit: 3,
+      columns: [{ id: 'col1', name: 'To Do' }],
+      swimlanes: [],
+      showAllPersonIssues: false,
+    };
+    const result = migratePersonLimitToLatest(v2_30);
+    expect(result.persons).toEqual([{ name: 'bob', self: 'http://jira/bob' }]);
+    expect(result.showAllPersonIssues).toBe(false);
+  });
+
+  it('should preserve v2.31 limit with persons array', () => {
+    const v2_31: PersonLimit_2_31 = {
+      id: 1,
+      persons: [{ name: 'alice', self: 'http://jira/alice' }],
+      limit: 5,
+      columns: [],
+      swimlanes: [],
+      showAllPersonIssues: true,
+    };
+    const result = migratePersonLimitToLatest(v2_31);
+    expect(result).toEqual(v2_31);
+  });
+
+  it('should preserve showAllPersonIssues=false from v2.30', () => {
+    const v2_30: PersonLimit_2_30 = {
+      id: 1,
+      person: { name: 'carol', self: 'http://jira/carol' },
+      limit: 2,
+      columns: [],
+      swimlanes: [],
+      showAllPersonIssues: false,
+    };
+    const result = migratePersonLimitToLatest(v2_30);
+    expect(result.showAllPersonIssues).toBe(false);
+  });
+});
+
+describe('migratePropertyToLatest', () => {
+  it('should migrate v2.29 property to v2.31', () => {
+    const data: PersonWipLimitsProperty_2_29 = {
+      limits: [
+        {
+          id: 1,
+          person: { name: 'alice', self: 'http://jira/alice' },
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+        },
+      ],
+    };
+    const result = migratePropertyToLatest(data);
+    expect(result.limits[0].persons).toEqual([{ name: 'alice', self: 'http://jira/alice' }]);
+  });
+
+  it('should preserve already migrated property', () => {
+    const data: PersonWipLimitsProperty = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'alice', self: 'http://jira/alice' }],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const result = migratePropertyToLatest(data);
+    expect(result.limits[0]).toEqual(data.limits[0]);
   });
 });
