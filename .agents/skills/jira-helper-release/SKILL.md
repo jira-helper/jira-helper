@@ -13,9 +13,9 @@ description: >-
 
 Выполняй **по порядку**:
 
-1. **Версия** — в `manifest.json` поле `"version"` = будущий релиз (`M.m.p` без префикса `v`). При необходимости отдельный коммит «chore: bump version» + пуш в `master`.
+1. **Версия** — **одинаковая** в `package.json` и `manifest.json` (`"version": "M.m.p"`). Сборка падает, если не совпадают (`vite.config.ts` проверяет консистентность). Для магазинов важен манифест; `package.json` — часть релизного бампа. Обычно один коммит «chore: bump version to M.m.p» + пуш в `master`.
 2. **Проверка кода** — `npm ci`, `npm run lint`, `npm test` (и при желании `npm run prod` + `npm run prod:firefox`, чтобы убедиться, что zip собираются локально). Быстрый вариант: `npm run precommit`, если настроен.
-3. **Тег** — аннотированный тег **`vM.m.p`** (с буквой `v`) на коммите с **этой** версией манифеста:  
+3. **Тег** — аннотированный тег **`vM.m.p`** (с буквой `v`) на коммите, где `package.json` и `manifest.json` уже на **этой** версии:  
    `git tag -a vM.m.p -m "vM.m.p" && git push origin vM.m.p`
 4. **GitHub Release** — **опубликовать** релиз на этот тег (UI или `gh release create vM.m.p --title "vM.m.p" --notes "..."`).  
    **Ассеты на релиз вручную не прикладывать** — workflow сам соберёт Chrome и Firefox, зальёт `jira-helper-<VER>-chrome.zip` и `jira-helper-<VER>-firefox.zip` (`VER` = без `v`), опубликует Chrome-zip в Chrome Web Store.
