@@ -9,7 +9,7 @@ jobs:
     name: Publish to Chrome Web Store
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout code
@@ -44,6 +44,30 @@ jobs:
           fi
           echo "✅ jira-helper.zip found ($(du -h jira-helper.zip | cut -f1))"
 
+      - name: Build Firefox extension
+        run: npm run prod:firefox
+        env:
+          CI: true
+
+      - name: Verify Firefox zip file exists
+        run: |
+          if [ ! -f jira-helper-firefox.zip ]; then
+            echo "❌ jira-helper-firefox.zip not found!"
+            exit 1
+          fi
+          echo "✅ jira-helper-firefox.zip found ($(du -h jira-helper-firefox.zip | cut -f1))"
+
+      - name: Upload zips to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VER="${TAG#v}"
+          cp jira-helper.zip "jira-helper-${VER}-chrome.zip"
+          cp jira-helper-firefox.zip "jira-helper-${VER}-firefox.zip"
+          gh release upload "$TAG" \
+            "jira-helper-${VER}-chrome.zip" "jira-helper-${VER}-firefox.zip" --clobber
+
       - name: Publish to Chrome Web Store
         run: node tools/publish-chrome-webstore.js
         env:
@@ -54,6 +78,8 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: chrome-extension-${{ github.event.release.tag_name }}
-          path: jira-helper.zip
+          name: jira-helper-${{ github.event.release.tag_name }}
+          path: |
+            jira-helper.zip
+            jira-helper-firefox.zip
           retention-days: 30
