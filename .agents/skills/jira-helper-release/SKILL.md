@@ -14,7 +14,7 @@ description: >-
 Выполняй **по порядку**:
 
 1. **Версия** — **одинаковая** в `package.json` и `manifest.json` (`"version": "M.m.p"`). Сборка падает, если не совпадают (`vite.config.ts` проверяет консистентность). Для магазинов важен манифест; `package.json` — часть релизного бампа. Обычно один коммит «chore: bump version to M.m.p» + пуш в `master`.
-2. **Проверка кода** — `npm ci`, `npm run lint`, `npm test` (и при желании `npm run prod` + `npm run prod:firefox`, чтобы убедиться, что zip собираются локально). Быстрый вариант: `npm run precommit`, если настроен.
+2. **Проверка кода** — `npm ci`, `npm run lint`, `npm test` (и при желании `npm run prod` + `npm run prod:firefox`, чтобы убедиться, что zip собираются локально).
 3. **Тег** — аннотированный тег **`vM.m.p`** (с буквой `v`) на коммите, где `package.json` и `manifest.json` уже на **этой** версии:  
    `git tag -a vM.m.p -m "vM.m.p" && git push origin vM.m.p`
 4. **GitHub Release** — **опубликовать** релиз на этот тег (UI или `gh release create vM.m.p --title "vM.m.p" --notes "..."`).  
@@ -52,11 +52,3 @@ description: >-
 
 **Секреты:** `CHROME_WEBSTORE_CREDENTIALS` обязателен для шага 5. Для `gh release` используется `GITHUB_TOKEN` (нужен `contents: write` в job).
 
----
-
-## Когда применять skill
-
-- Релиз / выкат / тег / Chrome Web Store.
-- «Почему workflow не стартовал после пуша тега».
-- «Как пересоздать релиз и перезапустить публикацию».
-- «Какие команды прогнать перед релизом».
