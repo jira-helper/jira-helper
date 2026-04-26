@@ -164,8 +164,21 @@ export const Default: Story = {
 - [ ] `args` вместо `render` где возможно
 - [ ] Storybook запускается без ошибок
 
+## Visual Regression Testing
+
+For screenshot-based visual regression testing, tag stories with `tags: ['visual']` and follow the [visual testing guide](../testing-visual.md).
+
+**Example:**
+```tsx
+export const MyStory = {
+  args: { /* ... */ },
+  tags: ['visual']  // Opt-in to visual testing
+} satisfies Story
+```
+
 ## Референсы
 
 - `src/features/field-limits-module/SettingsPage/components/LimitForm.stories.tsx`
 - `src/features/field-limits-module/BoardPage/components/FieldLimitBadge.stories.tsx`
 - `src/person-limits-module/SettingsPage/components/SettingsModal/SettingsModal.stories.tsx`
+- `src/person-limits-module/BoardPage/components/AvatarBadge.stories.tsx` - Example of visual-tagged stories

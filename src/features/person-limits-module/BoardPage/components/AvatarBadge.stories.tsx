@@ -17,9 +17,13 @@ const meta: Meta<typeof AvatarBadge> = {
 export default meta;
 type Story = StoryObj<typeof AvatarBadge>;
 
-const defaultAvatar = 'https://avatar-management.jira.com/default.png';
+const defaultAvatar =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="%236b7280"/><circle cx="16" cy="12" r="6" fill="white"/><path d="M6 28c1.5-5.5 6-8 10-8s8.5 2.5 10 8" fill="white"/></svg>';
+
+const visualTags = ['visual'];
 
 export const UnderLimit: Story = {
+  tags: visualTags,
   args: {
     avatar: defaultAvatar,
     personName: 'john.doe',
@@ -30,6 +34,7 @@ export const UnderLimit: Story = {
 };
 
 export const AtLimit: Story = {
+  tags: visualTags,
   args: {
     avatar: defaultAvatar,
     personName: 'jane.smith',
@@ -40,6 +45,7 @@ export const AtLimit: Story = {
 };
 
 export const OverLimit: Story = {
+  tags: visualTags,
   args: {
     avatar: defaultAvatar,
     personName: 'bob.johnson',
@@ -50,6 +56,7 @@ export const OverLimit: Story = {
 };
 
 export const Active: Story = {
+  tags: visualTags,
   args: {
     avatar: defaultAvatar,
     personName: 'alice.brown',
@@ -60,6 +67,7 @@ export const Active: Story = {
 };
 
 export const ActiveOverLimit: Story = {
+  tags: visualTags,
   args: {
     avatar: defaultAvatar,
     personName: 'charlie.wilson',
@@ -70,6 +78,7 @@ export const ActiveOverLimit: Story = {
 };
 
 export const MultipleAvatars: Story = {
+  tags: visualTags,
   render: () => (
     <div style={{ display: 'inline-flex', gap: 4 }}>
       <AvatarBadge

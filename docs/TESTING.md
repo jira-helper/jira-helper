@@ -33,6 +33,17 @@
 | React Testing Library (RTL) | Все компонентные тесты — через Cypress |
 | vitest-cucumber | BDD тесты — только через Cypress BDD runner |
 
+## Visual Regression Testing
+
+Screenshot-based tests for UI components using Storybook + Playwright.
+
+**See:** [Visual Testing Guide](testing-visual.md)
+
+**Commands:**
+- `npm run visual:build` - Build Storybook for visual testing
+- `npm run visual:test` - Run visual tests
+- `npm run visual:update` - Update baseline images
+
 ## Структура файлов
 
 ```
@@ -123,4 +134,7 @@ const item = { name: 'Alpha', title: 'Beta', label: 'Gamma' };
 | `npx cypress run --component` | Все Cypress component тесты |
 | `npx cypress open --component` | Cypress UI |
 | `npm run storybook` | Storybook dev server |
+| `npm run visual:build` | Build Storybook for visual testing |
+| `npm run visual:test` | Run visual regression tests |
+| `npm run visual:update` | Update visual test baselines |
 | `npm run lint:eslint -- --fix` | ESLint |
