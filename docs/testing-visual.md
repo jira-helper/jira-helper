@@ -61,8 +61,23 @@ When visual tests fail:
 2. If intentional: run `npm run visual:update` and commit new baselines
 3. If unintentional: fix the visual regression
 
+## Git LFS Storage
+
+Visual test snapshots (PNG files) are stored using Git LFS (Large File Storage) to keep the repository size manageable.
+
+### Requirements
+- Git LFS must be installed: `git lfs install`
+- When cloning: `git clone` with LFS support or run `git lfs pull` after clone
+
+### File tracking
+- Pattern: `tests/visual/**/*.png`
+- Configured in `.gitattributes`
+
+See [Git LFS Setup](../git-lfs.md) for detailed setup instructions.
+
 ## Reference
 
 - `playwright.config.ts` - Playwright configuration with Storybook server
 - `tests/visual/storybook.visual.spec.ts` - Visual test runner with story discovery
 - `src/features/person-limits-module/BoardPage/components/AvatarBadge.stories.tsx` - Example of tagged visual stories
+- `docs/git-lfs.md` - Git LFS setup and usage guide
