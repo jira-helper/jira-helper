@@ -25,6 +25,7 @@ keys
 tools/local
 
 storybook-static
+.worktrees/
 cypress-coverage
 cypress/reports
 cypress/screenshots
