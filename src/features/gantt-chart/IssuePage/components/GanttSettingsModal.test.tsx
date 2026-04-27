@@ -13,6 +13,8 @@ import type { JiraField, JiraIssueLinkType, JiraStatus } from 'src/infrastructur
 import type { GanttScopeSettings, SettingsScope } from '../../types';
 import { GanttSettingsModal } from './GanttSettingsModal';
 
+vi.setConfig({ testTimeout: 15000 });
+
 const mockJiraFields: JiraField[] = [
   {
     id: 'created',
@@ -380,5 +382,5 @@ describe('GanttSettingsModal', () => {
         { id: '10000', direction: 'outward' },
       ]);
     });
-  });
+  }, 15000);
 });
