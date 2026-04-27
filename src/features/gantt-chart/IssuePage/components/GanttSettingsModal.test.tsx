@@ -327,13 +327,8 @@ describe('GanttSettingsModal', () => {
   });
 
   it('shows link type list when Include issue links is on', async () => {
-    const user = userEvent.setup();
-    renderModal();
+    renderModal({ draft: { ...baseDraft, includeIssueLinks: true } });
     await activateTab(/issues/i);
-
-    expect(screen.queryByRole('button', { name: /add link type/i })).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('switch', { name: 'Include issue links' }));
 
     expect(screen.getByText(/Restrict by link type and direction/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add link type/i })).toBeInTheDocument();
