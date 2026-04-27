@@ -11,7 +11,7 @@ import { GANTT_SETTINGS_STORAGE_KEY } from '../models/GanttSettingsModel';
 import type { GanttScopeSettings } from '../types';
 import { buildScopeKey } from '../utils/resolveSettings';
 import { JiraServiceToken, type IJiraService } from 'src/infrastructure/jira/jiraService';
-import { resetIssueSettings } from 'src/issue-settings/issueSettingsModel';
+import { getIssueSettingsEntry, resetIssueSettings } from 'src/issue-settings/issueSettingsModel';
 
 const EN_FIRST_RUN = 'Gantt chart is not configured yet. Please configure start and end date mappings.';
 const EN_EMPTY =
@@ -68,6 +68,36 @@ describe('GanttChartIssuePage', () => {
     });
   });
 
+  describe('shouldApply', () => {
+    it('does not apply the Gantt issue view while the release toggle is disabled', () => {
+      expect(modification.shouldApply()).toBe(false);
+    });
+
+    it('does not preload data while the release toggle is disabled', async () => {
+      await expect(modification.loadData()).resolves.toBeUndefined();
+    });
+
+    it('does not render the Gantt section or issue settings icon while disabled', () => {
+      const details = document.createElement('div');
+      details.id = 'details-module';
+      document.body.appendChild(details);
+
+      const attach = document.createElement('div');
+      attach.id = 'attachmentmodule';
+      document.body.appendChild(attach);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'aui-toolbar2-secondary';
+      document.body.appendChild(toolbar);
+
+      modification.apply();
+
+      expect(document.querySelector('[data-jh-section="gantt-chart"]')).toBeNull();
+      expect(document.querySelector('[data-jh-component="issueSettingsHost"]')).toBeNull();
+      expect(getIssueSettingsEntry().model.settings).toEqual([]);
+    });
+  });
+
   describe('waitForLoading', () => {
     it('resolves to #details-module when it appears', async () => {
       const details = document.createElement('div');
@@ -80,7 +110,7 @@ describe('GanttChartIssuePage', () => {
     });
   });
 
-  describe('apply', () => {
+  describe.skip('apply when enabled', () => {
     function setupIssueViewDOM() {
       const details = document.createElement('div');
       details.id = 'details-module';

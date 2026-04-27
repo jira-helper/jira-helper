@@ -17,6 +17,8 @@ export type GanttChartIssuePageInitData = {
   issueKey: string;
 };
 
+const GANTT_CHART_ISSUE_PAGE_ENABLED = false;
+
 /**
  * PageModification for Jira issue view: inserts collapsible Gantt section after #attachmentmodule,
  * adds a settings button to .aui-toolbar2-secondary, and registers a Gantt tab in Issue Settings.
@@ -27,7 +29,7 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
   }
 
   shouldApply(): boolean {
-    return this.routing.getIssueId() != null;
+    return GANTT_CHART_ISSUE_PAGE_ENABLED && this.routing.getIssueId() != null;
   }
 
   getModificationId(): string {
@@ -39,6 +41,10 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
   }
 
   loadData(): Promise<GanttChartIssuePageInitData | undefined> {
+    if (!GANTT_CHART_ISSUE_PAGE_ENABLED) {
+      return Promise.resolve(undefined);
+    }
+
     ganttChartModule.ensure(this.container);
     const issueKey = this.routing.getIssueId() ?? this.getIssueKeyFromDocument();
     if (!issueKey) {
@@ -71,6 +77,10 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
 
   apply(data?: GanttChartIssuePageInitData, el?: Element): void {
     void el;
+    if (!GANTT_CHART_ISSUE_PAGE_ENABLED) {
+      return;
+    }
+
     ganttChartModule.ensure(this.container);
     const { model } = this.container.inject(ganttSettingsModelToken);
     model.load();
