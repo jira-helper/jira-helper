@@ -1,0 +1,70 @@
+.table {
+  width: 100%;
+}
+
+.table :global(.ant-table) {
+  width: 100%;
+}
+
+.table :global(.ant-table-cell) {
+  vertical-align: top;
+}
+
+.personsColumn {
+  width: 22%;
+  min-width: 0;
+}
+
+.wrapColumn {
+  width: 17%;
+  min-width: 0;
+}
+
+.issueTypesColumn {
+  width: 12%;
+  min-width: 0;
+}
+
+.limitColumn {
+  width: 72px;
+  white-space: nowrap;
+}
+
+.avatarClickColumn {
+  width: 96px;
+  text-align: center;
+  white-space: normal;
+}
+
+.actionsColumn {
+  width: 128px;
+  white-space: nowrap;
+}
+
+.personsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.personToken {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.personName,
+.wrapCell {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.booleanCell {
+  display: inline-block;
+  min-width: 1em;
+  text-align: center;
+}

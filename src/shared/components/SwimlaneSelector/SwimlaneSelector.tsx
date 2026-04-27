@@ -1,5 +1,5 @@
 /* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Checkbox } from 'antd';
 
 export type Swimlane = {
@@ -38,38 +38,43 @@ export const SwimlaneSelector: React.FC<SwimlaneSelectorProps> = ({
 }) => {
   const safeSwimlanes = swimlanes ?? [];
   const safeValue = value ?? [];
-  const allIds = safeSwimlanes.map(s => s.id);
 
-  // Track if user has expanded the list by unchecking "All"
-  const [expanded, setExpanded] = useState(false);
+  /**
+   * User can open manual mode with value still [] (convention: all) until they pick
+   * individual items — in that case "All" must be unchecked and list shown (issue #23).
+   * External prop change from a non-empty selection to [] resets this (e.g. parent/save).
+   */
+  const [userOpenedManual, setUserOpenedManual] = useState(false);
 
-  // Sync expanded state with selection:
-  // - Partial selection: expand to show individual checkboxes
-  // - All selected (empty array or full array): collapse the list
+  /** Reset local UI when the parent forces selection from "something" to [] (e.g. save/load) without the All control. */
+  const prevValueLenRef = useRef<number | null>(null);
   useEffect(() => {
-    const isPartialSelection = safeValue.length > 0 && safeValue.length < safeSwimlanes.length;
-    const isAllSelected = safeValue.length === 0 || safeValue.length === safeSwimlanes.length;
-    if (isPartialSelection) {
-      setExpanded(true);
-    } else if (isAllSelected) {
-      setExpanded(false);
+    if (prevValueLenRef.current === null) {
+      prevValueLenRef.current = safeValue.length;
+      return;
     }
-  }, [safeValue.length, safeSwimlanes.length]);
+    if (prevValueLenRef.current > 0 && safeValue.length === 0) {
+      setUserOpenedManual(false);
+    }
+    prevValueLenRef.current = safeValue.length;
+  }, [safeValue.length]);
 
-  const allChecked = safeValue.length === 0 || safeValue.length === safeSwimlanes.length;
-  const isPartialSelection = safeValue.length > 0 && safeValue.length < safeSwimlanes.length;
-  const showList = expanded || isPartialSelection;
-  const displayValue = safeValue.length === 0 ? allIds : safeValue;
+  /** All mode: persisted/semantic `[]` only; any non-`[]` `value` is manual selection (incl. full id list) until `handleListChange` normalizes. */
+  const allChecked = safeValue.length === 0 && !userOpenedManual;
+
+  const showList = userOpenedManual || safeValue.length > 0;
+
+  const valueIdSet = new Set(safeValue);
+  const displayValue: string[] = safeSwimlanes.map(s => s.id).filter(id => valueIdSet.has(id));
 
   const handleAllChange = (e: { target: { checked: boolean } }) => {
     if (e.target.checked) {
       // User checked "All" - collapse the list and emit empty (= all)
-      setExpanded(false);
+      setUserOpenedManual(false);
       onChange([]);
     } else {
-      // User unchecked "All" - just expand the list to show individual checkboxes
-      // NO onChange here - selection hasn't changed yet, user just wants to see the list
-      setExpanded(true);
+      // User unchecked "All" - show the list; no onChange until individual picks (FR-2 / open Q)
+      setUserOpenedManual(true);
     }
   };
 
@@ -78,8 +83,12 @@ export const SwimlaneSelector: React.FC<SwimlaneSelectorProps> = ({
     // Keep list expanded when changing individual items
     // Emit [] if all selected (convention), otherwise emit specific IDs
     if (newValues.length === safeSwimlanes.length) {
+      setUserOpenedManual(false);
       onChange([]);
     } else {
+      if (newValues.length === 0) {
+        setUserOpenedManual(false);
+      }
       onChange(newValues);
     }
   };

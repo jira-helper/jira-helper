@@ -1,6 +1,7 @@
 /* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { SwimlaneSelector } from './SwimlaneSelector';
 import type { Swimlane } from './SwimlaneSelector';
 
@@ -10,6 +11,7 @@ const meta: Meta<typeof SwimlaneSelector> = {
   parameters: {
     layout: 'padded',
   },
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -34,12 +36,35 @@ const SwimlaneSelectorWrapper: React.FC<{
   );
 };
 
-export const Default: Story = {
-  render: () => <SwimlaneSelectorWrapper swimlanes={defaultSwimlanes} />,
+const allModeRender = () => <SwimlaneSelectorWrapper swimlanes={defaultSwimlanes} initialValue={[]} />;
+
+/** `[]` — all swimlanes: All checked, list hidden. */
+export const AllMode: Story = {
+  render: allModeRender,
 };
 
-export const Expanded: Story = {
+export const Default: Story = {
+  render: allModeRender,
+};
+
+/** Partial ids — manual mode: All unchecked, list visible. */
+export const ManualSelection: Story = {
   render: () => <SwimlaneSelectorWrapper swimlanes={defaultSwimlanes} initialValue={['frontend', 'backend']} />,
+};
+
+/**
+ * Starts in all mode; play unchecks **All swimlanes** so the individual list opens (manual mode).
+ * Final canvas shows the list + unchanged `[]` in JSON until user picks checkboxes.
+ */
+export const AllMode_UncheckOpensManual: Story = {
+  render: allModeRender,
+  play: async ({ canvasElement }) => {
+    const allCheckbox = canvasElement.querySelector('[data-testid="swimlane-all-checkbox"]') as HTMLElement | null;
+    expect(allCheckbox).toBeTruthy();
+    allCheckbox!.click();
+    const list = canvasElement.querySelector('[data-testid="swimlane-list"]');
+    await expect(list).toBeInTheDocument();
+  },
 };
 
 export const EmptySwimlanes: Story = {

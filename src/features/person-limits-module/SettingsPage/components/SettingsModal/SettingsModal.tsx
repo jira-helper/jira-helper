@@ -1,5 +1,8 @@
 import React from 'react';
 import { Modal, Button } from 'antd';
+import styles from './SettingsModal.module.css';
+
+const MODAL_WIDTH = 1040;
 
 export type SettingsModalProps = {
   title: string;
@@ -24,7 +27,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     open
     title={title}
     onCancel={onClose}
-    width={800}
+    width={MODAL_WIDTH}
+    className={styles.settingsModal}
     maskClosable={false}
     getContainer={false}
     footer={[

@@ -1,9 +1,10 @@
 /* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
-import { Table, Button, Space } from 'antd';
+import { Table, Button, Space, Tooltip } from 'antd';
 import type { PersonLimit } from '../state/types';
 import type { PersonLimitsTextKeys } from '../texts';
 import { settingsJiraDOM } from '../constants';
+import styles from './PersonalWipLimitTable.module.css';
 
 export interface PersonalWipLimitTableProps {
   texts: Record<PersonLimitsTextKeys, string>;
@@ -40,23 +41,17 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
     {
       title: texts.persons,
       key: 'persons',
+      className: styles.personsColumn,
       render: (_: unknown, record: PersonLimit) => {
         const persons = readPersons(record as LegacyOrCurrentLimit);
         return (
-          <div
-            data-testid="person-limit-table-persons-cell"
-            style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}
-          >
+          <div data-testid="person-limit-table-persons-cell" className={styles.personsCell}>
             {persons.map((p, idx) => (
-              <span
-                key={p.name}
-                data-person-name={p.name}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
-              >
+              <span key={p.name} data-person-name={p.name} className={styles.personToken}>
                 {buildAvatarUrl && (
                   <img src={buildAvatarUrl(p.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
                 )}
-                <span>{p.displayName || p.name}</span>
+                <span className={styles.personName}>{p.displayName || p.name}</span>
                 {idx < persons.length - 1 && <span style={{ marginRight: 2 }}>,</span>}
               </span>
             ))}
@@ -67,6 +62,7 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
     {
       title: texts.limit,
       key: 'limit',
+      className: styles.limitColumn,
       render: (_: unknown, record: PersonLimit) => {
         const isShared = (record as PersonLimit).sharedLimit === true;
         const personsCount = readPersons(record as LegacyOrCurrentLimit).length;
@@ -82,32 +78,49 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
       title: texts.columns,
       dataIndex: 'columns',
       key: 'columns',
+      className: styles.wrapColumn,
       render: (columnList: { name: string }[]) =>
-        columnList.length === 0 ? texts.allColumns : columnList.map(c => c.name).join(', '),
+        columnList.length === 0 ? (
+          texts.allColumns
+        ) : (
+          <span className={styles.wrapCell}>{columnList.map(c => c.name).join(', ')}</span>
+        ),
     },
     {
       title: texts.swimlanes,
       dataIndex: 'swimlanes',
       key: 'swimlanes',
+      className: styles.wrapColumn,
       render: (swimlanes: { name: string }[]) =>
-        swimlanes.length === 0 ? texts.allSwimlanes : swimlanes.map(s => s.name).join(', '),
+        swimlanes.length === 0 ? (
+          texts.allSwimlanes
+        ) : (
+          <span className={styles.wrapCell}>{swimlanes.map(s => s.name).join(', ')}</span>
+        ),
     },
     {
       title: texts.issueTypes,
       dataIndex: 'includedIssueTypes',
       key: 'includedIssueTypes',
+      className: styles.issueTypesColumn,
       render: (includedIssueTypes: string[] | undefined) =>
-        !includedIssueTypes || includedIssueTypes.length === 0 ? texts.allTypes : includedIssueTypes.join(', '),
+        !includedIssueTypes || includedIssueTypes.length === 0 ? (
+          texts.allTypes
+        ) : (
+          <span className={styles.wrapCell}>{includedIssueTypes.join(', ')}</span>
+        ),
     },
     {
-      title: texts.showAllPersonIssues,
+      title: <Tooltip title={texts.showAllPersonIssues}>{texts.showAllPersonIssuesShort}</Tooltip>,
       dataIndex: 'showAllPersonIssues',
       key: 'showAllPersonIssues',
-      render: (value: boolean) => (value ? '✓' : '—'),
+      className: styles.avatarClickColumn,
+      render: (value: boolean) => <span className={styles.booleanCell}>{value ? '✓' : '—'}</span>,
     },
     {
       title: texts.actions,
       key: 'actions',
+      className: styles.actionsColumn,
       render: (_: unknown, record: PersonLimit) => (
         <Space split={<span>|</span>}>
           <Button type="link" danger onClick={() => onDelete(Number(record.id))}>
@@ -130,6 +143,7 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
       rowClassName={record => `person-row person-row-${record.id}`}
       pagination={false}
       size="small"
+      className={styles.table}
     />
   );
 };

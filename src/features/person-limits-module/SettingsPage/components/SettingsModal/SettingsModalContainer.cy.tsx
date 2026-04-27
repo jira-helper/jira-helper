@@ -12,6 +12,7 @@ import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueT
 import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
 import { SettingsModalContainer } from './SettingsModalContainer';
 import type { Column, Swimlane } from '../../state/types';
+import type { PersonLimit } from '../../../property/types';
 import { personLimitsModule } from '../../../module';
 import { propertyModelToken, settingsUIModelToken } from '../../../tokens';
 
@@ -77,6 +78,57 @@ describe('SettingsModalContainer', () => {
 
     cy.contains('Personal WIP Limit').should('be.visible');
     cy.get('[role="dialog"]').scrollIntoView().should('be.visible');
+  });
+
+  it('should keep personal limits table contained within the modal width', () => {
+    const wideLimit: PersonLimit = {
+      id: 1,
+      persons: [
+        { name: 'john.doe', displayName: 'John Doe', self: 'https://jira.example.com/user?username=john.doe' },
+        { name: 'jane.smith', displayName: 'Jane Smith', self: 'https://jira.example.com/user?username=jane.smith' },
+      ],
+      limit: 5,
+      columns: [
+        { id: 'col1', name: 'Very Long Column Name - Discovery And Analysis' },
+        { id: 'col2', name: 'Very Long Column Name - Implementation In Progress' },
+      ],
+      swimlanes: [
+        { id: 'swim1', name: 'Frontend Platform And UI' },
+        { id: 'swim2', name: 'Backend Services And Integrations' },
+      ],
+      includedIssueTypes: ['Story', 'Bug', 'Tech Debt'],
+      showAllPersonIssues: true,
+      sharedLimit: true,
+    };
+    globalContainer.inject(propertyModelToken).model.setData({ limits: [wideLimit] });
+    globalContainer.inject(settingsUIModelToken).model.initFromProperty();
+
+    cy.mount(
+      <WithDi container={globalContainer}>
+        <SettingsModalContainer
+          columns={columns}
+          swimlanes={swimlanes}
+          searchUsers={mockSearchUsers}
+          onClose={() => {}}
+          onSave={async () => {}}
+        />
+      </WithDi>
+    );
+
+    cy.get('[role="dialog"]').should('be.visible');
+    cy.get('#edit-person-wip-limit-persons-limit-body').should('be.visible');
+
+    cy.get('[role="dialog"]').then($dialog => {
+      const modalRect = $dialog[0].getBoundingClientRect();
+      cy.get('#edit-person-wip-limit-persons-limit-body')
+        .closest('.ant-table-wrapper')
+        .then($tableWrapper => {
+          const tableRect = $tableWrapper[0].getBoundingClientRect();
+          expect(tableRect.left).to.be.greaterThan(modalRect.left - 1);
+          expect(tableRect.right).to.be.lessThan(modalRect.right + 1);
+          expect($tableWrapper[0].scrollWidth).to.be.lessThan($tableWrapper[0].clientWidth + 1);
+        });
+    });
   });
 
   it('should call onClose when Cancel is clicked', () => {
