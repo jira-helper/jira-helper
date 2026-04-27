@@ -11,6 +11,9 @@ jobs:
   pre-release:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
+    env:
+      # Verbose step logs and core.debug() from actions (e.g. automatic-releases). Remove after fixing CI.
+      ACTIONS_STEP_DEBUG: "true"
 
     steps:
       - uses: actions/checkout@v4
