@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useEffect } from 'react';
 import { FieldLimitBadge } from './FieldLimitBadge';
 import { boardRuntimeModelToken } from '../../tokens';

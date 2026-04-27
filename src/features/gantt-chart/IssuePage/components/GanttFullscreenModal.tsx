@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
+import './gantt-ui.css';
 
 export interface GanttFullscreenModalProps {
   visible: boolean;
@@ -15,7 +16,7 @@ export const GanttFullscreenModal: React.FC<GanttFullscreenModalProps> = ({ visi
     zIndex={1000}
     footer={null}
     width="100vw"
-    style={{ top: 0, paddingBottom: 0, margin: 0, maxWidth: '100vw' }}
+    className="jh-gantt-fullscreen-modal"
     styles={{
       mask: { background: 'rgba(9,30,66,0.6)' },
       wrapper: { padding: 0, overflow: 'hidden' },
@@ -44,7 +45,7 @@ export const GanttFullscreenModal: React.FC<GanttFullscreenModalProps> = ({ visi
           onClose();
         }
       }}
-      style={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}
+      className="jh-gantt-fullscreen-inner"
     >
       {children}
     </div>

@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState } from 'react';
 import Modal from 'antd/es/modal';
 import { Tabs } from 'antd';

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { JiraStatus } from '../types';
+import type { JiraStatus } from 'src/infrastructure/jira/types';
 
 interface JiraStatusesState {
   statuses: JiraStatus[];

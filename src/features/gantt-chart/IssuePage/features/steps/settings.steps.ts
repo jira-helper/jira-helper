@@ -147,7 +147,7 @@ function expectMappingVisibleInSection(
     .should($el => {
       const t = $el.text();
       if (m.source === 'dateField') {
-        const id = m.fieldId.toLowerCase();
+        const id = (m.fieldId ?? '').toLowerCase();
         expect(t.toLowerCase()).to.include(id);
       } else {
         expect(t).to.include(m.statusName);
@@ -171,7 +171,7 @@ function expectMappingsListVisibleInSection(
       .should($el => {
         const t = $el.text();
         if (m.source === 'dateField') {
-          const id = m.fieldId.toLowerCase();
+          const id = (m.fieldId ?? '').toLowerCase();
           expect(t.toLowerCase()).to.include(id);
         } else {
           expect(t).to.include(m.statusName);

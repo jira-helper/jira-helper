@@ -1,6 +1,7 @@
 import React, { useId, useState } from 'react';
 import type { ActiveStatuses } from 'src/features/sub-tasks-progress/types';
 import type { GanttBar } from '../../types';
+import './gantt-ui.css';
 
 export interface GanttBarViewProps {
   bar: GanttBar;
@@ -162,7 +163,7 @@ export function GanttBarView({
       data-issue-key={bar.issueKey}
       data-start-iso={bar.startDate.toISOString()}
       data-end-iso={endIso}
-      style={{ cursor: onClick ? 'pointer' : undefined }}
+      className={onClick ? 'jh-gantt-bar--clickable' : undefined}
       onMouseEnter={e => {
         setHovered(true);
         onMouseEnter?.(bar, e);
@@ -227,13 +228,10 @@ export function GanttBarView({
           dominantBaseline="middle"
           textAnchor="start"
           clipPath={`url(#${clipId})`}
-          style={{
-            fontSize,
-            fontWeight: 500,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            fill: textColor,
-          }}
+          className="jh-gantt-bar-label"
+          fontSize={fontSize}
+          fontWeight={500}
+          fill={textColor}
         >
           {displayLabel}
         </text>
@@ -241,7 +239,7 @@ export function GanttBarView({
       {bar.isOpenEnded ? (
         <g
           data-testid="gantt-bar-open-ended"
-          style={{ pointerEvents: 'none' }}
+          className="jh-gantt-bar-open-ended"
           aria-label="Open-ended bar — no end date"
           clipPath={`url(#${clipId})`}
         >

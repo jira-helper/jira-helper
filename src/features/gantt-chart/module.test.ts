@@ -8,7 +8,7 @@ import {
   issueViewPageObjectToken,
 } from './tokens';
 import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
-import { IssueViewPageObject } from './page-objects/IssueViewPageObject';
+import { IssueViewPageObject } from 'src/infrastructure/page-objects/IssueViewPageObject';
 import { registerJiraServiceInDI } from 'src/infrastructure/jira/jiraService';
 
 describe('ganttChartModule', () => {
@@ -34,7 +34,7 @@ describe('ganttChartModule', () => {
 
     const pageObject = container.inject(issueViewPageObjectToken);
     expect(pageObject).toBeInstanceOf(IssueViewPageObject);
-    expect(pageObject.insertGanttContainer).toBeTypeOf('function');
+    expect(pageObject.addSectionInMainFlow).toBeTypeOf('function');
   });
 
   it('should return singleton model entry on repeated injects', () => {

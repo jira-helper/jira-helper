@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useCallback } from 'react';
 import { InputNumber } from 'antd';
 import { IssueTypeSelector } from 'src/shared/components/IssueTypeSelector';

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
 import type { GanttBar } from '../../types';
+import './gantt-ui.css';
 
 /** Renders the label column for a Jira field id in the hover tooltip (Title Case for built-ins). */
 const TOOLTIP_FIELD_HEADING: Record<string, string> = {
@@ -59,6 +60,14 @@ export interface GanttTooltipProps {
  */
 export function GanttTooltip({ bar, position, showStatusSections = false }: GanttTooltipProps) {
   const texts = useGetTextsByLocale(GANTT_TOOLTIP_TEXTS);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el || !position) return;
+    el.style.left = `${position.x}px`;
+    el.style.top = `${position.y}px`;
+  }, [position?.x, position?.y, bar]);
 
   if (!bar || !position) {
     return null;
@@ -69,53 +78,36 @@ export function GanttTooltip({ bar, position, showStatusSections = false }: Gant
   const showColorOverriddenHint = showStatusSections && hasCustomColor;
 
   return (
-    <div
-      data-testid="gantt-tooltip"
-      role="tooltip"
-      style={{
-        position: 'fixed',
-        left: position.x,
-        top: position.y,
-        zIndex: 10_000,
-        pointerEvents: 'none',
-        minWidth: 160,
-        maxWidth: 320,
-        padding: '8px 10px',
-        fontSize: '12px',
-        lineHeight: 1.4,
-        color: 'var(--ds-text, #172B4D)',
-        background: 'var(--ds-surface, #fff)',
-        borderRadius: '3px',
-        boxShadow: '0 4px 8px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
-      }}
-    >
-      <div style={{ fontWeight: 600, marginBottom: 4 }}>{bar.label}</div>
+    <div data-testid="gantt-tooltip" ref={rootRef} role="tooltip" className="jh-gantt-tooltip">
+      <div className="jh-gantt-tooltip-title">{bar.label}</div>
       <div>
         {texts.start}: {formatBarDate(bar.startDate)}
       </div>
-      <div style={{ marginBottom: bar.isOpenEnded || tooltipFieldEntries.length > 0 ? 6 : 0 }}>
+      <div className={bar.isOpenEnded || tooltipFieldEntries.length > 0 ? 'jh-gantt-tooltip-row--mb' : undefined}>
         {texts.end}: {formatBarDate(bar.endDate)}
       </div>
       {bar.isOpenEnded ? (
-        <div style={{ marginBottom: tooltipFieldEntries.length > 0 ? 6 : 0, fontStyle: 'italic' }}>
+        <div
+          className={['jh-gantt-tooltip-italic', tooltipFieldEntries.length > 0 ? 'jh-gantt-tooltip-row--mb' : '']
+            .filter(Boolean)
+            .join(' ')}
+        >
           {texts.openEndedWarning}
         </div>
       ) : null}
       {showColorOverriddenHint ? (
         <div
           data-testid="gantt-tooltip-color-overridden"
-          style={{
-            marginBottom: tooltipFieldEntries.length > 0 ? 6 : 0,
-            fontStyle: 'italic',
-            color: 'var(--ds-text-subtle, #5E6C84)',
-          }}
+          className={['jh-gantt-tooltip-hint', tooltipFieldEntries.length > 0 ? 'jh-gantt-tooltip-row--mb' : '']
+            .filter(Boolean)
+            .join(' ')}
         >
           {texts.customColorOverridden}
         </div>
       ) : null}
       {tooltipFieldEntries.map(([fieldId, value]) => (
         <div key={fieldId} data-testid={`gantt-bar-tooltip-field-${fieldId}`}>
-          <span style={{ color: 'var(--ds-text-subtle, #5E6C84)' }}>{tooltipFieldHeading(fieldId)}</span>
+          <span className="jh-gantt-tooltip-field-label">{tooltipFieldHeading(fieldId)}</span>
           {': '}
           {value}
         </div>

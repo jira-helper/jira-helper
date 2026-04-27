@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Card, Select, Input, Button, ColorPicker, Space, Tooltip, Checkbox } from 'antd';
 import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';

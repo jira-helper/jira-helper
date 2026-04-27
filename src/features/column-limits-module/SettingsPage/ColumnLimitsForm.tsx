@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { InputNumber, Space, Card } from 'antd';
 import { IssueTypeSelector } from '../../../shared/components/IssueTypeSelector';

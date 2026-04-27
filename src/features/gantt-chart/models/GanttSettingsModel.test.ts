@@ -122,6 +122,22 @@ describe('GanttSettingsModel', () => {
     expect(model.resolvedSettings?.tooltipFieldIds).toEqual(['g']);
   });
 
+  it('resolvedQuickFilters returns built-ins before cascaded custom filters', () => {
+    const model = createModel();
+    model.storage = {
+      _global: scopeSettings({
+        quickFilters: [{ id: 'custom:backend', name: 'Backend', selector: { mode: 'field', fieldId: 'Platform' } }],
+      }),
+    };
+    model.currentScope = { level: 'global' };
+
+    expect(model.resolvedQuickFilters.map(f => f.id)).toEqual([
+      'builtin:unresolved',
+      'builtin:hideCompleted',
+      'custom:backend',
+    ]);
+  });
+
   it('setScope: updates currentScope', () => {
     const model = createModel();
     const scope: SettingsScope = { level: 'project', projectKey: 'PROJA' };

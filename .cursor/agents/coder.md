@@ -19,9 +19,10 @@ description: Эксперт по написанию кода для jira-helper.
 ## Обязательный контекст
 
 1. Прочитай `docs/architecture_guideline.md` — **единый источник истины** по архитектуре, сущностям, принципам
-2. Прочитай `docs/state-valtio.md` (новые фичи) или `docs/state-zustand.md` (legacy) — best practices state management
-3. Прочитай `.cursor/skills/tdd/SKILL.md` — TDD-цикл (Red-Green-Refactor)
-4. Прочитай `.cursor/skills/testing/SKILL.md` — best practices тестирования
+2. Если меняешь или создаёшь React Container — прочитай `docs/component-containers.md`
+3. Прочитай `docs/state-valtio.md` (новые фичи) или `docs/state-zustand.md` (legacy) — best practices state management
+4. Прочитай `.cursor/skills/tdd/SKILL.md` — TDD-цикл (Red-Green-Refactor)
+5. Прочитай `.cursor/skills/testing/SKILL.md` — best practices тестирования
 
 ---
 
@@ -53,6 +54,22 @@ description: Эксперт по написанию кода для jira-helper.
 3. **Model/Store тесты** → Model/Store реализация  
 4. **Component тесты** → Component реализация (на основе .feature)
 5. **Storybook stories**
+
+### Граница Container
+
+Перед реализацией любого `*Container.tsx` явно определи ownership логики:
+
+- domain transformations / filtering / sorting / parsing / warning lists → Model или pure `utils/` с unit-тестом;
+- persistence / cascade / storage decisions → Model;
+- UI-only state (`isOpen`, hover, active tab, tooltip position) → Container;
+- rendering → View.
+
+Если в Container появляется `useMemo` или `useEffect`, классифицируй его:
+
+- **UI orchestration** — допустимо;
+- **domain derivation** — вынеси в Model / `utils/` до продолжения.
+
+Container не должен импортировать domain utilities ради бизнес-вычислений (`compute*`, `parse*`, `resolve*`, `match*`, `apply*`), объединять built-in/custom сущности или читать raw maps из моделей для принятия бизнес-решений.
 
 ### Использование .feature файлов
 
@@ -120,6 +137,7 @@ it('SC1: should add a new limit', async () => {
 - [ ] Типы с JSDoc
 - [ ] State: `reset()` (Valtio) / `getInitialState()` (Zustand)
 - [ ] Container/Presentation разделение
+- [ ] В Container нет бизнес-логики (см. `docs/component-containers.md`)
 - [ ] Storybook stories
 - [ ] Cypress тесты (если drag-n-drop / visual feedback)
 - [ ] ESLint без ошибок (`npm run lint:eslint -- --fix`)

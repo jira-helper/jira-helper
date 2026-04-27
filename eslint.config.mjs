@@ -11,6 +11,7 @@ import noChainedStubAs from './eslint-local-rules/no-chained-stub-as.js';
 import noDirectValtioSnapshot from './eslint-local-rules/no-direct-valtio-snapshot.js';
 import moduleImportBoundary from './eslint-local-rules/module-import-boundary.js';
 import requireStorybookTitleHierarchy from './eslint-local-rules/require-storybook-title-hierarchy.js';
+import noInlineStyles from './eslint-local-rules/no-inline-styles.js';
 
 const localPlugin = {
   rules: {
@@ -18,6 +19,7 @@ const localPlugin = {
     'module-import-boundary': moduleImportBoundary,
     'require-gherkin-steps-import': requireGherkinStepsImport,
     'require-storybook-title-hierarchy': requireStorybookTitleHierarchy,
+    'no-inline-styles': noInlineStyles,
   },
 };
 
@@ -99,6 +101,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
 
       'local/no-direct-valtio-snapshot': 'error',
+      'local/no-inline-styles': 'error',
     },
   },
 

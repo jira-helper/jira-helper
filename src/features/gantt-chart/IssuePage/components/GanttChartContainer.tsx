@@ -7,12 +7,9 @@ import {
   ganttSettingsModelToken,
   ganttViewportModelToken,
 } from '../../tokens';
-import type { GanttBar, QuickFilter } from '../../types';
+import type { GanttBar } from '../../types';
 import { guessInterval } from '../../utils/guessInterval';
-import { parseChangelog } from '../../utils/parseChangelog';
 import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
-import { BUILT_IN_QUICK_FILTERS } from '../../quickFilters/builtIns';
-import { applyQuickFiltersToBars } from '../../quickFilters/applyQuickFiltersToBars';
 import { FirstRunState } from './FirstRunState';
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
@@ -24,6 +21,7 @@ import { GanttToolbar } from './GanttToolbar';
 import { GanttTooltip } from './GanttTooltip';
 import { MissingDatesSection } from './MissingDatesSection';
 import './gantt-overrides.css';
+import './gantt-ui.css';
 
 export interface GanttChartContainerProps {
   issueKey: string;
@@ -97,39 +95,18 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
     viewportModel.setInterval(guessInterval(dataSnap.bars as GanttBar[]));
   }, [dataSnap.loadingState, dataSnap.bars, viewportModel]);
 
-  /**
-   * Toolbar quick filters: built-ins are merged ahead of user-defined custom presets so the
-   * always-available chips appear first. Custom presets cascade through `resolved`.
-   */
-  const customQuickFilters: ReadonlyArray<QuickFilter> = useMemo(() => resolved?.quickFilters ?? [], [resolved]);
-  const allQuickFilters = useMemo<ReadonlyArray<QuickFilter>>(
-    () => [...BUILT_IN_QUICK_FILTERS, ...customQuickFilters],
-    [customQuickFilters]
-  );
-
-  // Drop active selections that no longer reference an existing preset (e.g. after user removed a custom one).
   useEffect(() => {
-    quickFiltersModel.pruneMissingIds(allQuickFilters.map(f => f.id));
-  }, [allQuickFilters, quickFiltersModel]);
-
-  const activeQuickFilters = useMemo<ReadonlyArray<QuickFilter>>(
-    () => allQuickFilters.filter(f => quickFiltersSnap.activeIds.includes(f.id)),
-    [allQuickFilters, quickFiltersSnap.activeIds]
-  );
+    quickFiltersModel.syncAvailableFilters(settingsModel.resolvedQuickFilters);
+  }, [quickFiltersModel, settingsModel, resolved]);
 
   const filterResult = useMemo(
-    () =>
-      applyQuickFiltersToBars(
-        dataSnap.bars as GanttBar[],
-        dataModel.getIssuesByKey(),
-        activeQuickFilters,
-        { mode: quickFiltersSnap.searchMode, value: quickFiltersSnap.searchQuery },
-        jiraFields ?? []
-      ),
+    () => quickFiltersModel.applyToBars(dataSnap.bars as GanttBar[], dataModel.getIssuesByKey(), jiraFields ?? []),
     [
       dataSnap.bars,
       dataModel,
-      activeQuickFilters,
+      quickFiltersModel,
+      quickFiltersSnap.activeIds,
+      quickFiltersSnap.availableFilters,
       quickFiltersSnap.searchQuery,
       quickFiltersSnap.searchMode,
       jiraFields,
@@ -137,25 +114,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
   );
   const visibleBars = filterResult.bars;
   const loadedBars = dataSnap.bars as GanttBar[];
-
-  /**
-   * Toolbar warning: tasks whose changelog yields **no** parsed status transitions (same notion as
-   * “no history” in BDD). Using {@link parseChangelog} avoids mismatch with `statusSections` length
-   * when segments merge or clip differently than raw transition counts.
-   *
-   * Uses all **loaded** bars (not quick-filtered `visibleBars`) so the hint stays correct when chips
-   * or search hide some issues — the model still lacks history for those tasks.
-   */
-  const tasksWithoutStatusHistory = useMemo(() => {
-    const byKey = dataModel.getIssuesByKey();
-    return loadedBars
-      .filter(bar => parseChangelog(byKey.get(bar.issueKey)?.changelog).length === 0)
-      .map(b => {
-        const prefix = `${b.issueKey}: `;
-        const summary = b.label.startsWith(prefix) ? b.label.slice(prefix.length) : b.label;
-        return { key: b.issueKey, summary };
-      });
-  }, [loadedBars, dataModel]);
+  const { tasksWithoutStatusHistory } = dataSnap;
   const showStatusSectionsEmptyHint =
     settingsSnap.statusBreakdownEnabled &&
     loadedBars.length > 0 &&
@@ -192,7 +151,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
   if (dataSnap.loadingState === 'initial' || dataSnap.loadingState === 'loading') {
     return (
       <>
-        <div style={{ padding: '16px' }} data-testid="gantt-chart-loading">
+        <div className="jh-gantt-loading" data-testid="gantt-chart-loading">
           <Spin />
         </div>
         {settingsPanel}
@@ -232,56 +191,24 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
     <div
       data-testid="gantt-chart-body"
       data-jh-gantt-root
-      style={{
-        background: '#FFFFFF',
-        border: inFullscreen ? 'none' : '1px solid #DFE1E6',
-        borderRadius: inFullscreen ? 0 : 6,
-        padding: inFullscreen ? 0 : 12,
-      }}
+      className={`jh-gantt-chart-body${inFullscreen ? ' jh-gantt-chart-body--fullscreen' : ''}`}
     >
-      <div
-        data-testid="gantt-chart-header"
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          gap: 12,
-          marginBottom: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: inFullscreen ? 17 : 14,
-            fontWeight: 600,
-            color: '#172B4D',
-            letterSpacing: inFullscreen ? -0.1 : 0,
-          }}
-        >
+      <div data-testid="gantt-chart-header" className="jh-gantt-chart-header">
+        <div className={`jh-gantt-chart-title${inFullscreen ? ' jh-gantt-chart-title--fullscreen' : ''}`}>
           Gantt Chart
           {inFullscreen ? (
             <a
               href={`/browse/${issueKey}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                marginLeft: 8,
-                fontSize: 14,
-                fontWeight: 500,
-                color: '#0052CC',
-                textDecoration: 'none',
-              }}
+              className="jh-gantt-chart-issue-link"
               title={`Open ${issueKey} in a new tab`}
             >
               {issueKey} ↗
             </a>
           ) : null}
           <span
-            style={{
-              marginLeft: 10,
-              fontSize: inFullscreen ? 13 : 12,
-              fontWeight: 400,
-              color: '#6B778C',
-            }}
+            className={`jh-gantt-chart-meta${inFullscreen ? ' jh-gantt-chart-meta--fullscreen' : ''}`}
             data-testid="gantt-chart-task-count"
           >
             {visibleBars.length} {visibleBars.length === 1 ? 'task' : 'tasks'}
@@ -321,7 +248,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
         }}
         onOpenSettings={() => setSettingsVisible(true)}
         onOpenFullscreen={inFullscreen ? undefined : () => setFullscreenVisible(true)}
-        quickFilters={allQuickFilters}
+        quickFilters={settingsModel.resolvedQuickFilters}
         activeQuickFilterIds={quickFiltersSnap.activeIds}
         quickFilterSearch={quickFiltersSnap.searchQuery}
         quickFilterSearchMode={quickFiltersSnap.searchMode}
@@ -336,7 +263,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
         <Alert
           type="info"
           showIcon
-          style={{ marginBottom: 8 }}
+          className="jh-gantt-alert-mb-8"
           message="Status sections are enabled, but none of the loaded issues have status history yet. Bars are shown with a single fallback color."
         />
       ) : null}
@@ -344,7 +271,7 @@ export const GanttChartContainer: React.FC<GanttChartContainerProps> = ({ issueK
         <Alert
           type="info"
           showIcon
-          style={{ marginBottom: 8 }}
+          className="jh-gantt-alert-mb-8"
           message="All tasks are hidden by quick filters. Adjust the search or toggle off active filter chips."
           data-testid="gantt-quick-filters-all-hidden"
         />

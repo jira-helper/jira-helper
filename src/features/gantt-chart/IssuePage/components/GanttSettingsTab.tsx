@@ -8,6 +8,7 @@ import type { GanttScopeSettings, SettingsScope } from '../../types';
 import { buildScopeKey } from '../../utils/resolveSettings';
 import { GanttSettingsFormContent } from './GanttSettingsModal';
 import { CopyFromDialog } from './CopyFromDialog';
+import './gantt-ui.css';
 
 const TAB_TEXTS = {
   save: { en: 'Save', ru: 'Сохранить' },
@@ -85,14 +86,14 @@ export const GanttSettingsTab: React.FC = () => {
   );
 
   return (
-    <div style={{ padding: '8px 0' }}>
+    <div className="jh-gantt-settings-tab">
       <GanttSettingsFormContent
         draft={snap.draftSettings}
         currentScope={snap.currentScope}
         onDraftChange={handleDraftChange}
         onScopeLevelChange={handleScopeLevelChange}
       />
-      <Space style={{ marginTop: 16 }}>
+      <Space className="jh-gantt-space-mt-16">
         <Button onClick={() => setCopyFromVisible(true)}>{texts.copyFrom}</Button>
         <Button type="primary" onClick={handleSave} disabled={!snap.draftSettings}>
           {texts.save}

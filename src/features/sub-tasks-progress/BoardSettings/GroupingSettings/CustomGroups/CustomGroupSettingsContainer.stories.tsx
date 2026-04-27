@@ -14,6 +14,7 @@ globalContainer.register({
     getProjectFields: () => Promise.resolve(new Ok([{ id: 'priority', name: 'Priority', schema: { type: 'string' } }])),
     getIssueLinkTypes: () =>
       Promise.resolve(new Ok([{ id: '1', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }])),
+    getStatuses: () => Promise.resolve(new Ok([])),
   },
 });
 

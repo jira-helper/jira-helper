@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState, useEffect, useRef } from 'react';
 import { Select, Input, Alert, Tooltip, Row, Col } from 'antd';
 import { InfoCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';

@@ -1,7 +1,7 @@
 import { Container, Token } from 'dioma';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { getNameFromTooltip } from '../utils/getNameFromTooltip';
+import { getNameFromTooltip } from 'src/infrastructure/page-objects/utils/getNameFromTooltip';
 
 const NO_VISIBILITY_CLASS = 'no-visibility';
 

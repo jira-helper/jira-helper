@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { Table, Button, Space } from 'antd';
 import type { PersonLimit } from '../state/types';

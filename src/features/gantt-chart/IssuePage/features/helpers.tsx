@@ -357,6 +357,38 @@ export function applyEmptyLinkTypeInclusion(): void {
   localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
 }
 
+function mockLinkedIssue(key: string): JiraIssueMapped['fields']['issuelinks'][number]['outwardIssue'] {
+  const linkedIssue = new JiraTestDataBuilder().key(key).build();
+  return {
+    id: `id-${key}`,
+    key,
+    self: '',
+    fields: linkedIssue.fields,
+  } as unknown as JiraIssueMapped['fields']['issuelinks'][number]['outwardIssue'];
+}
+
+function mockIssueLink(
+  issue: JiraIssueMapped,
+  args: {
+    typeId: string;
+    typeName: string;
+    direction: 'inwardIssue' | 'outwardIssue';
+  }
+): JiraIssueMapped['fields']['issuelinks'][number] {
+  return {
+    id: `link-${issue.key}-${args.typeId}-${args.direction}`,
+    self: '',
+    type: {
+      id: args.typeId,
+      name: args.typeName,
+      inward: args.typeName,
+      outward: args.typeName,
+      self: '',
+    },
+    [args.direction]: mockLinkedIssue(ganttDisplayBddCtx.scenarioIssueKey),
+  };
+}
+
 export function issueFromRow(row: Record<string, string>): JiraIssueMapped {
   const statusCategory = row.statusCategory as 'new' | 'indeterminate' | 'done';
   const statusColor = statusCategory === 'done' ? 'green' : statusCategory === 'new' ? 'blue' : 'yellow';
@@ -389,31 +421,17 @@ export function issueFromRow(row: Record<string, string>): JiraIssueMapped {
 
   if (relation === 'issueLink') {
     issue.fields.issuelinks = [
-      {
-        type: { id: '10000', name: 'Relates' },
-        outwardIssue: { key: ganttDisplayBddCtx.scenarioIssueKey },
-      },
+      mockIssueLink(issue, { typeId: '10000', typeName: 'Relates', direction: 'outwardIssue' }),
     ];
   } else if (relation === 'blocks (inward)') {
-    issue.fields.issuelinks = [
-      {
-        type: { id: '10000', name: 'Blocks' },
-        inwardIssue: { key: ganttDisplayBddCtx.scenarioIssueKey },
-      },
-    ];
+    issue.fields.issuelinks = [mockIssueLink(issue, { typeId: '10000', typeName: 'Blocks', direction: 'inwardIssue' })];
   } else if (relation === 'is cloned by (inward)') {
     issue.fields.issuelinks = [
-      {
-        type: { id: '10001', name: 'Relates' },
-        inwardIssue: { key: ganttDisplayBddCtx.scenarioIssueKey },
-      },
+      mockIssueLink(issue, { typeId: '10001', typeName: 'Relates', direction: 'inwardIssue' }),
     ];
   } else if (relation === 'relates to (outward)') {
     issue.fields.issuelinks = [
-      {
-        type: { id: '10001', name: 'Relates' },
-        outwardIssue: { key: ganttDisplayBddCtx.scenarioIssueKey },
-      },
+      mockIssueLink(issue, { typeId: '10001', typeName: 'Relates', direction: 'outwardIssue' }),
     ];
   } else if (relation === 'epicChild' || relation === 'epic-child') {
     issue.fields.issuelinks = [];
@@ -775,14 +793,25 @@ export function setMockIssueChangelogFromTransitionsTable(
     startAt: 0,
     maxResults: table.length,
     total: table.length,
-    histories: table.map(row => ({
+    histories: table.map((row, index) => ({
+      id: `history-${issueKey}-${index}`,
+      author: {
+        self: '',
+        name: 'bdd',
+        key: 'bdd',
+        emailAddress: 'bdd@example.com',
+        avatarUrls: { '48x48': '', '24x24': '', '16x16': '', '32x32': '' },
+        displayName: 'BDD',
+        active: true,
+        timeZone: 'UTC',
+      },
       created: row.timestamp,
       items: [
         {
           field: 'status',
           fieldtype: 'jira',
-          from: null,
-          to: null,
+          from: '',
+          to: '',
           fromString: row.fromStatus,
           toString: row.toStatus,
           ...(opts.withCategory
@@ -794,7 +823,7 @@ export function setMockIssueChangelogFromTransitionsTable(
         },
       ],
     })),
-  };
+  } as JiraIssueMapped['changelog'];
 }
 
 /** Preset transitions fully inside each issue’s bar window (DISP-24 dynamic steps). */

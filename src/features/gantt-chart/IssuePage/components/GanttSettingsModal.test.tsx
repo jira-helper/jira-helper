@@ -172,7 +172,7 @@ function renderModal(overrides: Partial<React.ComponentProps<typeof GanttSetting
     currentScope: projectIssueScope,
     ...defaultCallbacks,
     ...overrides,
-  };
+  } as React.ComponentProps<typeof GanttSettingsModal> & typeof defaultCallbacks;
   render(
     <WithDi container={globalContainer}>
       <GanttSettingsModal {...props} />

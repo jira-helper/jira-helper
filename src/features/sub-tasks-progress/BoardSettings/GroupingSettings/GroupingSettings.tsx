@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useMemo } from 'react';
 import { Card, Checkbox, ColorPicker, Select, Tag, Tooltip } from 'antd';
 import { useShallow } from 'zustand/react/shallow';

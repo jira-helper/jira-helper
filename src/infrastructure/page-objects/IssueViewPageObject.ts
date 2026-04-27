@@ -2,21 +2,17 @@
  * @module IssueViewPageObject
  *
  * Monopoly on DOM operations for the Jira issue view page.
- * DOM-only — no React.
+ * DOM-only — no React and no feature-specific selectors.
  */
 
 export interface IIssueViewPageObject {
   readonly selectors: {
     readonly detailsBlock: string;
-    readonly ganttContainer: string;
     readonly issueType: string;
     readonly attachmentModule: string;
     readonly toolbar2Secondary: string;
     readonly toolbarButton: string;
   };
-  /** @deprecated Use {@link addSectionInMainFlow} instead. */
-  insertGanttContainer(): HTMLElement | null;
-  removeGanttContainer(): void;
   getIssueType(): string | null;
   /**
    * Create a container div in the main issue flow after `#attachmentmodule`.
@@ -35,27 +31,11 @@ export interface IIssueViewPageObject {
 export class IssueViewPageObject implements IIssueViewPageObject {
   readonly selectors = {
     detailsBlock: '#details-module',
-    ganttContainer: '[data-jh-component="ganttChart"]',
     issueType: '#type-val',
     attachmentModule: '#attachmentmodule',
     toolbar2Secondary: '.aui-toolbar2-secondary',
     toolbarButton: '[data-jh-component="issueSettingsHost"]',
   } as const;
-
-  /** @deprecated */
-  insertGanttContainer(): HTMLElement | null {
-    const details = document.querySelector(this.selectors.detailsBlock);
-    if (!details) return null;
-    this.removeGanttContainer();
-    const container = document.createElement('div');
-    container.setAttribute('data-jh-component', 'ganttChart');
-    details.insertAdjacentElement('afterend', container);
-    return container;
-  }
-
-  removeGanttContainer(): void {
-    document.querySelectorAll(this.selectors.ganttContainer).forEach(el => el.remove());
-  }
 
   getIssueType(): string | null {
     const el = document.querySelector(this.selectors.issueType) as HTMLElement | null;

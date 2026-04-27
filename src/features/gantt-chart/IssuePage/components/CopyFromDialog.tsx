@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Radio, Space } from 'antd';
+import './gantt-ui.css';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
+import './gantt-ui.css';
 
 const COPY_FROM_DIALOG_TEXTS = {
   title: {
@@ -74,7 +76,7 @@ export const CopyFromDialog: React.FC<CopyFromDialogProps> = ({ visible, availab
         </Button>,
       ]}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space direction="vertical" size="middle" className="jh-gantt-copy-dialog-space">
         <span>{texts.scopeLegend}</span>
         <Radio.Group value={selectedKey} onChange={e => setSelectedKey(e.target.value)}>
           <Space direction="vertical">

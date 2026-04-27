@@ -1,8 +1,107 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import React from 'react';
+import { useJiraFieldsStore } from 'src/infrastructure/jira/fields/jiraFieldsStore';
+import { useJiraIssueLinkTypesStore } from 'src/infrastructure/jira/stores/jiraIssueLinkTypesStore';
+import type { JiraField, JiraIssueLinkType, JiraStatus } from 'src/infrastructure/jira/types';
+import { useJiraStatusesStore } from 'src/shared/jira/stores/jiraStatusesStore';
 import type { GanttScopeSettings, SettingsScope } from '../../types';
 import { GanttSettingsModal } from './GanttSettingsModal';
 
 const noop = () => {};
+
+const storyFields: JiraField[] = [
+  {
+    id: 'customfield_10015',
+    name: 'Start date',
+    custom: true,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['cf[10015]'],
+    schema: { type: 'date' },
+  },
+  {
+    id: 'duedate',
+    name: 'Due date',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['duedate'],
+    schema: { type: 'date' },
+  },
+  {
+    id: 'assignee',
+    name: 'Assignee',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['assignee'],
+    schema: { type: 'user' },
+  },
+  {
+    id: 'status',
+    name: 'Status',
+    custom: false,
+    orderable: false,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['status'],
+    schema: { type: 'status' },
+  },
+  {
+    id: 'priority',
+    name: 'Priority',
+    custom: false,
+    orderable: false,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['priority'],
+    schema: { type: 'priority' },
+  },
+  {
+    id: 'issuetype',
+    name: 'Issue Type',
+    custom: false,
+    orderable: false,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['issuetype'],
+    schema: { type: 'issuetype' },
+  },
+  {
+    id: 'customfield_178101',
+    name: 'Team',
+    custom: true,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['cf[178101]'],
+    schema: { type: 'string' },
+  },
+];
+
+const storyStatuses: JiraStatus[] = [
+  { id: '1', name: 'To Do', statusCategory: { id: 2, key: 'new', colorName: 'blue-gray', name: 'To Do' } },
+  {
+    id: '2',
+    name: 'In Progress',
+    statusCategory: { id: 4, key: 'indeterminate', colorName: 'yellow', name: 'In Progress' },
+  },
+  { id: '3', name: 'Done', statusCategory: { id: 3, key: 'done', colorName: 'green', name: 'Done' } },
+];
+
+const storyLinkTypes: JiraIssueLinkType[] = [
+  { id: 'Blocks', name: 'Blocks', inward: 'is blocked by', outward: 'blocks', self: '' },
+  { id: 'Relates', name: 'Relates', inward: 'relates to', outward: 'relates to', self: '' },
+];
+
+function seedStoryJiraMetadata() {
+  useJiraFieldsStore.setState({ fields: storyFields, isLoading: false, error: null });
+  useJiraStatusesStore.setState({ statuses: storyStatuses, isLoading: false, error: null });
+  useJiraIssueLinkTypesStore.setState({ linkTypes: storyLinkTypes, isLoading: false, error: null });
+}
 
 const projectIssueScope: SettingsScope = {
   level: 'projectIssueType',
@@ -81,6 +180,12 @@ const meta: Meta<typeof GanttSettingsModal> = {
     onScopeLevelChange: noop,
     onCopyFrom: noop,
   },
+  decorators: [
+    Story => {
+      seedStoryJiraMetadata();
+      return <Story />;
+    },
+  ],
 };
 
 export default meta;

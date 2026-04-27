@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button } from 'antd';
+import './gantt-ui.css';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
+import './gantt-ui.css';
 
 const ERROR_STATE_TEXTS = {
   message: {
@@ -24,23 +26,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ onRetry, errorMessage })
   const texts = useGetTextsByLocale(ERROR_STATE_TEXTS);
 
   return (
-    <div data-testid="gantt-chart-error-state" style={{ padding: '16px' }}>
-      <p style={{ marginBottom: '16px' }}>{texts.message}</p>
-      {errorMessage ? (
-        <pre
-          style={{
-            marginBottom: '16px',
-            padding: '8px',
-            fontSize: '12px',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            background: 'var(--ds-surface-sunken, #f4f5f7)',
-            borderRadius: '3px',
-          }}
-        >
-          {errorMessage}
-        </pre>
-      ) : null}
+    <div data-testid="gantt-chart-error-state" className="jh-gantt-pad-16">
+      <p className="jh-gantt-state-p">{texts.message}</p>
+      {errorMessage ? <pre className="jh-gantt-error-pre">{errorMessage}</pre> : null}
       <Button type="primary" onClick={onRetry}>
         {texts.retry}
       </Button>

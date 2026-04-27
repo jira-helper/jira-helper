@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { Checkbox, InputNumber, Radio, Select, Space, Typography, Spin } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';

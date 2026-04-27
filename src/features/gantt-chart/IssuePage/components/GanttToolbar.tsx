@@ -16,6 +16,7 @@ import { stopJiraHotkeys } from 'src/shared/dom/stopJiraHotkeys';
 import type { MissingDateIssue, QuickFilter, TimeInterval } from '../../types';
 import type { QuickFilterSearchMode } from '../../models/GanttQuickFiltersModel';
 import { MISSING_DATES_REASON_TO_TEXT_KEY, MISSING_DATES_TEXTS } from './MissingDatesSection';
+import './gantt-ui.css';
 
 const INTERVALS: TimeInterval[] = ['hours', 'days', 'weeks', 'months'];
 
@@ -284,23 +285,9 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
   );
 
   return (
-    <div
-      data-testid="gantt-toolbar-root"
-      role="toolbar"
-      aria-label="Gantt toolbar"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-        padding: '8px 12px',
-        background: '#FAFBFC',
-        border: '1px solid #DFE1E6',
-        borderRadius: 6,
-        marginBottom: 8,
-      }}
-    >
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-        <div role="group" aria-label={texts.zoomReset} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+    <div data-testid="gantt-toolbar-root" role="toolbar" aria-label="Gantt toolbar" className="jh-gantt-toolbar-root">
+      <div className="jh-gantt-toolbar-row">
+        <div role="group" aria-label={texts.zoomReset} className="jh-gantt-toolbar-zoom-group">
           <Tooltip title={texts.zoomOut}>
             <Button
               type="text"
@@ -317,7 +304,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               onClick={onZoomReset}
               aria-label={texts.zoomReset}
               data-testid="gantt-toolbar-zoom-level"
-              style={{ minWidth: 52, fontVariantNumeric: 'tabular-nums' }}
+              className="jh-gantt-toolbar-zoom-level-btn"
             >
               {zoomPercent}
             </Button>
@@ -333,7 +320,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           </Tooltip>
         </div>
 
-        <Divider type="vertical" style={{ height: 22, margin: '0 4px' }} />
+        <Divider type="vertical" className="jh-gantt-toolbar-divider" />
 
         <Tooltip title={texts.intervalLegend}>
           <Segmented
@@ -346,11 +333,11 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           />
         </Tooltip>
 
-        <Divider type="vertical" style={{ height: 22, margin: '0 4px' }} />
+        <Divider type="vertical" className="jh-gantt-toolbar-divider" />
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <div className="jh-gantt-toolbar-status-wrap">
           <Tooltip title={texts.statusBreakdownTooltip}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <label className="jh-gantt-toolbar-status-label">
               <Switch
                 data-testid="gantt-status-breakdown-toggle"
                 checked={statusBreakdownEnabled}
@@ -360,7 +347,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                 aria-label={texts.statusBreakdown}
                 size="small"
               />
-              <span style={{ fontSize: 12, color: '#42526E' }}>{texts.statusBreakdown}</span>
+              <span className="jh-gantt-toolbar-status-text">{texts.statusBreakdown}</span>
             </label>
           </Tooltip>
           {statusBreakdownEnabled &&
@@ -384,43 +371,21 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                       <div
                         data-testid="gantt-warning-tooltip"
                         data-warning-type="no-history"
-                        style={{ fontSize: 12, lineHeight: 1.4 }}
+                        className="jh-gantt-warning-tooltip"
                       >
-                        <div data-testid="gantt-warning-tooltip-heading" style={{ fontWeight: 600, marginBottom: 4 }}>
+                        <div data-testid="gantt-warning-tooltip-heading" className="jh-gantt-warning-tooltip-heading">
                           {texts.statusBreakdownNoHistoryTooltipHeader}
                         </div>
-                        <div style={{ marginBottom: 8, opacity: 0.85 }}>
+                        <div className="jh-gantt-warning-tooltip-desc">
                           {texts.statusBreakdownNoHistoryTooltipDescription}
                         </div>
-                        <table
-                          style={{
-                            width: '100%',
-                            borderCollapse: 'collapse',
-                            fontSize: 12,
-                          }}
-                        >
+                        <table className="jh-gantt-warning-tooltip-table">
                           <thead>
                             <tr>
-                              <th
-                                scope="col"
-                                style={{
-                                  textAlign: 'left',
-                                  padding: '4px 8px 4px 0',
-                                  borderBottom: '1px solid rgba(255,255,255,0.25)',
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <th scope="col" className="jh-gantt-warning-tooltip-th">
                                 {texts.statusBreakdownNoHistoryTooltipColIssue}
                               </th>
-                              <th
-                                scope="col"
-                                style={{
-                                  textAlign: 'left',
-                                  padding: '4px 0 4px 8px',
-                                  borderBottom: '1px solid rgba(255,255,255,0.25)',
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <th scope="col" className="jh-gantt-warning-tooltip-th--pad-left">
                                 {texts.statusBreakdownNoHistoryTooltipColSummary}
                               </th>
                             </tr>
@@ -428,23 +393,14 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                           <tbody>
                             {missing.slice(0, 20).map(t => (
                               <tr key={t.key} data-testid="gantt-warning-tooltip-row" data-issue-key={t.key}>
-                                <td
-                                  style={{
-                                    padding: '4px 8px 4px 0',
-                                    verticalAlign: 'top',
-                                    fontVariantNumeric: 'tabular-nums',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {t.key}
-                                </td>
-                                <td style={{ padding: '4px 0 4px 8px', verticalAlign: 'top' }}>{t.summary}</td>
+                                <td className="jh-gantt-warning-tooltip-td-key">{t.key}</td>
+                                <td className="jh-gantt-warning-tooltip-td-summary">{t.summary}</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                         {missing.length > 20 ? (
-                          <div style={{ marginTop: 6, opacity: 0.75 }}>
+                          <div className="jh-gantt-warning-tooltip-more">
                             {texts.statusBreakdownNoHistoryTooltipMore.replace('{count}', String(missing.length - 20))}
                           </div>
                         ) : null}
@@ -454,7 +410,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                     <span
                       data-testid="gantt-toolbar-warning-no-history"
                       data-warning-type="no-history"
-                      style={{ display: 'inline-block' }}
+                      className="jh-gantt-toolbar-warning-host"
                     >
                       <Tag
                         icon={<WarningOutlined aria-hidden />}
@@ -462,13 +418,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                         tabIndex={0}
                         role="status"
                         aria-label={tagLabel}
-                        style={{
-                          marginInlineEnd: 0,
-                          fontSize: 11,
-                          lineHeight: '16px',
-                          padding: '0 6px',
-                          cursor: 'help',
-                        }}
+                        className="jh-gantt-toolbar-warning-tag"
                       >
                         {tagLabel}
                       </Tag>
@@ -496,53 +446,22 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                     <div
                       data-testid="gantt-warning-tooltip"
                       data-warning-type="missing-dates"
-                      style={{ fontSize: 12, lineHeight: 1.4 }}
+                      className="jh-gantt-warning-tooltip"
                     >
-                      <div data-testid="gantt-warning-tooltip-heading" style={{ fontWeight: 600, marginBottom: 4 }}>
+                      <div data-testid="gantt-warning-tooltip-heading" className="jh-gantt-warning-tooltip-heading">
                         {tagLabel}
                       </div>
-                      <div style={{ marginBottom: 8, opacity: 0.85 }}>{texts.missingDatesTooltipDescription}</div>
-                      <table
-                        style={{
-                          width: '100%',
-                          borderCollapse: 'collapse',
-                          fontSize: 12,
-                        }}
-                      >
+                      <div className="jh-gantt-warning-tooltip-desc">{texts.missingDatesTooltipDescription}</div>
+                      <table className="jh-gantt-warning-tooltip-table">
                         <thead>
                           <tr>
-                            <th
-                              scope="col"
-                              style={{
-                                textAlign: 'left',
-                                padding: '4px 8px 4px 0',
-                                borderBottom: '1px solid rgba(255,255,255,0.25)',
-                                fontWeight: 600,
-                              }}
-                            >
+                            <th scope="col" className="jh-gantt-warning-tooltip-th">
                               {missingDatesTexts.colIssue}
                             </th>
-                            <th
-                              scope="col"
-                              style={{
-                                textAlign: 'left',
-                                padding: '4px 8px',
-                                borderBottom: '1px solid rgba(255,255,255,0.25)',
-                                fontWeight: 600,
-                              }}
-                            >
+                            <th scope="col" className="jh-gantt-warning-tooltip-th--mid">
                               {missingDatesTexts.colSummary}
                             </th>
-                            <th
-                              scope="col"
-                              style={{
-                                textAlign: 'left',
-                                padding: '4px 0 4px 8px',
-                                borderBottom: '1px solid rgba(255,255,255,0.25)',
-                                fontWeight: 600,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
+                            <th scope="col" className="jh-gantt-warning-tooltip-th--nowrap">
                               {texts.missingDatesTooltipColReason}
                             </th>
                           </tr>
@@ -554,32 +473,15 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                               data-testid="gantt-warning-tooltip-row"
                               data-issue-key={issue.issueKey}
                             >
-                              <td
-                                style={{
-                                  padding: '4px 8px 4px 0',
-                                  verticalAlign: 'top',
-                                  fontVariantNumeric: 'tabular-nums',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                {issue.issueKey}
-                              </td>
-                              <td style={{ padding: '4px 8px', verticalAlign: 'top' }}>{issue.summary}</td>
-                              <td
-                                style={{
-                                  padding: '4px 0 4px 8px',
-                                  verticalAlign: 'top',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                {reasonLabel(issue)}
-                              </td>
+                              <td className="jh-gantt-warning-tooltip-td-key">{issue.issueKey}</td>
+                              <td className="jh-gantt-warning-tooltip-td-summary-pad">{issue.summary}</td>
+                              <td className="jh-gantt-warning-tooltip-td-reason">{reasonLabel(issue)}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                       {missingDateIssues.length > 20 ? (
-                        <div style={{ marginTop: 6, opacity: 0.75 }}>
+                        <div className="jh-gantt-warning-tooltip-more">
                           {texts.missingDatesTooltipMore.replace('{count}', String(missingDateIssues.length - 20))}
                         </div>
                       ) : null}
@@ -589,7 +491,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                   <span
                     data-testid="gantt-toolbar-warning-missing-dates"
                     data-warning-type="missing-dates"
-                    style={{ display: 'inline-block' }}
+                    className="jh-gantt-toolbar-warning-host"
                   >
                     <Tag
                       icon={<WarningOutlined aria-hidden />}
@@ -597,13 +499,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                       tabIndex={0}
                       role="status"
                       aria-label={tagLabel}
-                      style={{
-                        marginInlineEnd: 0,
-                        fontSize: 11,
-                        lineHeight: '16px',
-                        padding: '0 6px',
-                        cursor: 'help',
-                      }}
+                      className="jh-gantt-toolbar-warning-tag"
                     >
                       {tagLabel}
                     </Tag>
@@ -613,7 +509,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
             })()
           : null}
 
-        <div style={{ flex: 1 }} />
+        <div className="jh-gantt-toolbar-spacer" />
 
         {onOpenFullscreen ? (
           <Tooltip title={texts.openInModal}>
@@ -644,14 +540,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
         role="group"
         aria-label={texts.quickFiltersLegend}
         data-testid="gantt-quick-filters-row"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: 6,
-          paddingTop: 4,
-          borderTop: '1px dashed #EBECF0',
-        }}
+        className="jh-gantt-quick-filters-row"
       >
         <div data-testid="gantt-search-mode-toggle" data-mode={quickFilterSearchMode}>
           <Segmented
@@ -674,7 +563,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                 size="small"
                 allowClear
                 status="error"
-                prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
+                prefix={<SearchOutlined className="jh-gantt-toolbar-search-icon" aria-hidden />}
                 placeholder={searchPlaceholder}
                 value={quickFilterSearch}
                 onChange={e => onQuickFilterSearchChange(e.target.value)}
@@ -683,10 +572,14 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                 aria-label={searchPlaceholder}
                 aria-invalid
                 data-testid="gantt-quick-filters-search"
-                style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
+                className={
+                  quickFilterSearchMode === 'jql'
+                    ? 'jh-gantt-quick-filter-input--jql'
+                    : 'jh-gantt-quick-filter-input--text'
+                }
               />
             </Tooltip>
-            <span data-testid="gantt-quick-filters-jql-parser-message" style={{ display: 'none' }} aria-hidden>
+            <span data-testid="gantt-quick-filters-jql-parser-message" className="jh-gantt-sr-only" aria-hidden>
               {jqlValidation.error}
             </span>
           </span>
@@ -695,7 +588,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
             <Input
               size="small"
               allowClear
-              prefix={<SearchOutlined aria-hidden style={{ color: '#7A869A' }} />}
+              prefix={<SearchOutlined className="jh-gantt-toolbar-search-icon" aria-hidden />}
               placeholder={searchPlaceholder}
               value={quickFilterSearch}
               onChange={e => onQuickFilterSearchChange(e.target.value)}
@@ -703,7 +596,11 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               onKeyUp={stopJiraHotkeys}
               aria-label={searchPlaceholder}
               data-testid="gantt-quick-filters-search"
-              style={{ width: quickFilterSearchMode === 'jql' ? 380 : 220 }}
+              className={
+                quickFilterSearchMode === 'jql'
+                  ? 'jh-gantt-quick-filter-input--jql'
+                  : 'jh-gantt-quick-filter-input--text'
+              }
             />
           </span>
         )}
@@ -714,15 +611,12 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
             open={savePopoverOpen}
             onOpenChange={handleSavePopoverOpenChange}
             content={
-              <div
-                data-testid="gantt-quick-filters-save-popover"
-                style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 240 }}
-              >
-                <label style={{ fontSize: 12, color: '#42526E' }}>
+              <div data-testid="gantt-quick-filters-save-popover" className="jh-gantt-save-popover">
+                <label className="jh-gantt-save-popover-label">
                   {texts.quickFiltersSavePopoverNameLabel}
                   <Input
                     size="small"
-                    style={{ marginTop: 4 }}
+                    className="jh-gantt-save-popover-input"
                     value={saveNameDraft}
                     onChange={e => setSaveNameDraft(e.target.value)}
                     onKeyDown={e => {
@@ -736,7 +630,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                     data-testid="gantt-quick-filters-save-name"
                   />
                 </label>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <div className="jh-gantt-save-popover-actions">
                   <Button
                     size="small"
                     data-testid="gantt-quick-filters-save-cancel"
@@ -763,9 +657,9 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           </Popover>
         ) : null}
 
-        <div style={{ display: 'inline-flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+        <div className="jh-gantt-quick-filter-chips">
           {quickFilters.length === 0 ? (
-            <span style={{ fontSize: 12, color: '#7A869A' }} data-testid="gantt-quick-filters-empty">
+            <span className="jh-gantt-quick-filters-empty" data-testid="gantt-quick-filters-empty">
               {texts.quickFiltersEmpty}
             </span>
           ) : (
@@ -779,13 +673,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                   data-testid={`gantt-quick-filter-${qf.id}`}
                   data-toolbar-chip="true"
                   data-active={active ? 'true' : 'false'}
-                  style={{
-                    fontSize: 12,
-                    lineHeight: '20px',
-                    padding: '0 8px',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                  }}
+                  className="jh-gantt-quick-filter-chip"
                 >
                   {qf.name}
                 </Tag.CheckableTag>
@@ -794,10 +682,10 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           )}
         </div>
 
-        <div style={{ flex: 1 }} />
+        <div className="jh-gantt-toolbar-spacer" />
 
         {quickFilterHiddenCount > 0 ? (
-          <span data-testid="gantt-quick-filters-hidden-count" style={{ fontSize: 12, color: '#7A869A' }}>
+          <span data-testid="gantt-quick-filters-hidden-count" className="jh-gantt-quick-filters-hidden">
             {texts.quickFiltersHidden.replace('{hidden}', String(quickFilterHiddenCount))}
           </span>
         ) : null}

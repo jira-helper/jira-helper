@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import Checkbox from 'antd/es/checkbox';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, Tooltip } from 'antd';

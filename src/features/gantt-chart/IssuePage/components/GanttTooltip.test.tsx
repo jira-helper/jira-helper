@@ -60,7 +60,9 @@ describe('GanttTooltip', () => {
 
     const tip = screen.getByTestId('gantt-tooltip');
     expect(tip).toBeInTheDocument();
-    expect(tip).toHaveStyle({ position: 'fixed', left: '42px', top: '24px' });
+    expect(tip).toHaveClass('jh-gantt-tooltip');
+    expect(tip.style.left).toBe('42px');
+    expect(tip.style.top).toBe('24px');
 
     expect(screen.getByText('PROJ-1: Test issue')).toBeInTheDocument();
     expect(screen.getByText(/2024-06-01/)).toBeInTheDocument();

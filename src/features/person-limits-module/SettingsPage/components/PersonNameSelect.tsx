@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState, useRef, useCallback } from 'react';
 import { Select, Spin, Tag } from 'antd';
 import type { JiraUser } from 'src/infrastructure/jira/jiraApi';

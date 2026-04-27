@@ -1,3 +1,28 @@
+import type React from 'react';
+
+type CardPageObject = {
+  getIssueId(): string;
+  getCardElement(): Element;
+};
+
+export interface SwimlaneElement {
+  id: string;
+  element: Element;
+  header: Element;
+}
+
+export interface IssueCountOptions {
+  excludeDone?: boolean;
+  excludeSubtasks?: boolean;
+  includedIssueTypes?: string[];
+}
+
+export type ColumnIssueCountOptions = {
+  ignoredSwimlanes?: string[];
+  includedIssueTypes?: string[];
+  cssFilter?: string;
+};
+
 export interface IBoardPagePageObject {
   selectors: {
     pool: string;

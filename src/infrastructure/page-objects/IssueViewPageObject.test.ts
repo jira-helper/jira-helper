@@ -10,43 +10,10 @@ describe('IssueViewPageObject', () => {
   });
 
   describe('selectors', () => {
-    it('exposes detailsBlock and ganttContainer selectors', () => {
+    it('exposes Jira issue view selectors', () => {
       expect(pageObject.selectors.detailsBlock).toBe('#details-module');
-      expect(pageObject.selectors.ganttContainer).toBe('[data-jh-component="ganttChart"]');
-    });
-  });
-
-  describe('insertGanttContainer', () => {
-    it('inserts a gantt container immediately after #details-module', () => {
-      const details = document.createElement('div');
-      details.id = 'details-module';
-      document.body.appendChild(details);
-
-      const inserted = pageObject.insertGanttContainer();
-
-      expect(inserted).not.toBeNull();
-      expect(inserted?.getAttribute('data-jh-component')).toBe('ganttChart');
-      expect(details.nextElementSibling).toBe(inserted);
-      expect(document.querySelectorAll(pageObject.selectors.ganttContainer)).toHaveLength(1);
-    });
-
-    it('returns null when #details-module is missing', () => {
-      expect(pageObject.insertGanttContainer()).toBeNull();
-      expect(document.querySelector(pageObject.selectors.ganttContainer)).toBeNull();
-    });
-
-    it('replaces an existing gantt container when called again', () => {
-      const details = document.createElement('div');
-      details.id = 'details-module';
-      document.body.appendChild(details);
-
-      const first = pageObject.insertGanttContainer();
-      const second = pageObject.insertGanttContainer();
-
-      expect(document.querySelectorAll(pageObject.selectors.ganttContainer)).toHaveLength(1);
-      expect(second).not.toBeNull();
-      expect(second).not.toBe(first);
-      expect(details.nextElementSibling).toBe(second);
+      expect(pageObject.selectors.attachmentModule).toBe('#attachmentmodule');
+      expect(pageObject.selectors.issueType).toBe('#type-val');
     });
   });
 
@@ -71,24 +38,6 @@ describe('IssueViewPageObject', () => {
       document.body.appendChild(typeVal);
 
       expect(pageObject.getIssueType()).toBeNull();
-    });
-  });
-
-  describe('removeGanttContainer', () => {
-    it('removes the gantt container from the document', () => {
-      const details = document.createElement('div');
-      details.id = 'details-module';
-      document.body.appendChild(details);
-      pageObject.insertGanttContainer();
-
-      pageObject.removeGanttContainer();
-
-      expect(document.querySelector(pageObject.selectors.ganttContainer)).toBeNull();
-      expect(details.nextElementSibling).toBeNull();
-    });
-
-    it('is safe when no gantt container exists', () => {
-      expect(() => pageObject.removeGanttContainer()).not.toThrow();
     });
   });
 

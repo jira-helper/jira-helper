@@ -165,6 +165,17 @@ Over-engineered
 
 Don't add features, refactor other code, or "improve" beyond the test.
 
+### Architecture Gate During GREEN
+
+Even in minimal implementation, keep domain logic in the correct layer:
+
+- Model / Store owns state transitions, persisted/cascade decisions, runtime derived data, warning lists.
+- Pure `utils/` own stateless domain transformations.
+- Container owns DI wiring, snapshot reads, UI-only state, and calls to model methods.
+- View owns presentation only.
+
+If code needs a React Container and you add `useMemo` / `useEffect`, decide whether it is UI orchestration or domain derivation. Domain derivation must be moved to a Model or pure utility before GREEN is considered complete. See `docs/component-containers.md`.
+
 ### Verify GREEN - Watch It Pass
 
 **MANDATORY.**

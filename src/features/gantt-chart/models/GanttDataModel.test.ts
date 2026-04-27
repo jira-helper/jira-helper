@@ -45,6 +45,7 @@ describe('GanttDataModel', () => {
       getExternalIssues: vi.fn(),
       getProjectFields: vi.fn(),
       getIssueLinkTypes: vi.fn(),
+      getStatuses: vi.fn().mockResolvedValue(Ok([])),
     };
   });
 
@@ -127,7 +128,20 @@ describe('GanttDataModel', () => {
     const issue = datedIssue();
     issue.key = 'LINK-1';
     delete (issue.fields as Record<string, unknown>).parent;
-    issue.fields.issuelinks = [{ type: { id: '10000', name: 'Relates' }, outwardIssue: { key: 'ROOT-1' } }];
+    const rootIssue = new JiraTestDataBuilder().key('ROOT-1').build();
+    issue.fields.issuelinks = [
+      {
+        id: 'link-1',
+        self: '',
+        type: { id: '10000', name: 'Relates', inward: 'relates from', outward: 'relates to', self: '' },
+        outwardIssue: {
+          id: 'id-root',
+          key: 'ROOT-1',
+          self: '',
+          fields: rootIssue.fields,
+        } as unknown as JiraIssueMapped['fields']['issuelinks'][number]['outwardIssue'],
+      },
+    ];
     fetchSubtasks.mockResolvedValue(Ok({ subtasks: [issue], externalLinks: [] }));
 
     const model = proxy(createModel());
@@ -188,6 +202,55 @@ describe('GanttDataModel', () => {
 
     expect(model.bars).toHaveLength(2);
     expect(model.bars.map(x => x.issueKey)).toContain('ST-2');
+  });
+
+  it('derives tasksWithoutStatusHistory from loaded bars and raw issue changelog', async () => {
+    const noHistory = datedIssue();
+    noHistory.key = 'NO-1';
+    noHistory.fields.summary = 'No history task';
+
+    const withHistory = datedIssue();
+    withHistory.key = 'YES-1';
+    withHistory.id = 'id-yes';
+    withHistory.fields.summary = 'Has history task';
+    withHistory.fields.parent = { key: 'ROOT-1', id: 'id-root' };
+    withHistory.changelog = {
+      histories: [
+        {
+          created: '2021-05-01T10:00:00.000Z',
+          id: 'history-1',
+          author: {
+            self: '',
+            name: 'tester',
+            key: 'tester',
+            emailAddress: 'tester@example.com',
+            avatarUrls: { '48x48': '', '24x24': '', '16x16': '', '32x32': '' },
+            displayName: 'Tester',
+            active: true,
+            timeZone: 'UTC',
+          },
+          items: [
+            {
+              field: 'status',
+              fieldtype: 'jira',
+              from: '',
+              to: '',
+              fromString: 'To Do',
+              toString: 'In Progress',
+            },
+          ],
+        },
+      ],
+      startAt: 0,
+      total: 1,
+      maxResults: 1,
+    };
+    fetchSubtasks.mockResolvedValue(Ok({ subtasks: [noHistory, withHistory], externalLinks: [] }));
+
+    const model = proxy(createModel());
+    await model.loadSubtasks('ROOT-1', scopeSettings());
+
+    expect(model.tasksWithoutStatusHistory).toEqual([{ key: 'NO-1', summary: 'No history task' }]);
   });
 
   it('reset restores initial state and ignores stale load results', async () => {

@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState, useMemo, useEffect } from 'react';
 import { Input, Select, Checkbox, Button, Form } from 'antd';
 import { useGetTextsByLocale } from 'src/shared/texts';

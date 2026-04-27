@@ -2,6 +2,7 @@ import React from 'react';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
 import type { GanttScopeSettings } from '../../types';
+import './gantt-ui.css';
 
 const GANTT_LEGEND_TEXTS = {
   legendLabel: { en: 'Legend', ru: 'Легенда' },
@@ -58,17 +59,17 @@ function colorRulesFromSettings(settings: GanttScopeSettings | null): ColorRuleH
 }
 
 const Swatch: React.FC<{ color: string; rounded?: boolean }> = ({ color, rounded }) => (
-  <span
-    style={{
-      display: 'inline-block',
-      width: 12,
-      height: 12,
-      backgroundColor: color,
-      borderRadius: rounded === true ? 6 : 2,
-      border: '1px solid rgba(9,30,66,0.25)',
-      verticalAlign: 'middle',
-    }}
-  />
+  <svg width={12} height={12} aria-hidden className="jh-gantt-legend-swatch-svg">
+    <rect
+      x={0.5}
+      y={0.5}
+      width={11}
+      height={11}
+      rx={rounded === true ? 6 : 2}
+      fill={color}
+      stroke="rgba(9,30,66,0.25)"
+    />
+  </svg>
 );
 
 /** Compact legend bar shown beneath the chart, explaining colors and markers. */
@@ -77,22 +78,14 @@ export const GanttLegend: React.FC<GanttLegendProps> = ({ showStatusSections, se
   const colorRules = colorRulesFromSettings(settings);
 
   const todayChip = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <span
-        aria-hidden
-        style={{
-          display: 'inline-block',
-          width: 14,
-          borderTop: '1.5px dashed #0052CC',
-          verticalAlign: 'middle',
-        }}
-      />
+    <span className="jh-gantt-legend-chip">
+      <span aria-hidden className="jh-gantt-legend-today-line" />
       {texts.today}
     </span>
   );
   const openEndedChip = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <svg width="22" height="10" aria-hidden style={{ verticalAlign: 'middle' }}>
+    <span className="jh-gantt-legend-chip">
+      <svg width="22" height="10" aria-hidden className="jh-gantt-legend-open-ended-svg">
         <rect x={0.5} y={1} width={18} height={8} rx={2} fill="#B3D4FF" stroke="rgba(9,30,66,0.25)" />
         <line x1={19} y1={2} x2={19} y2={9} stroke="#172B4D" strokeWidth={1.5} strokeDasharray="2 2" opacity={0.7} />
       </svg>
@@ -102,21 +95,8 @@ export const GanttLegend: React.FC<GanttLegendProps> = ({ showStatusSections, se
 
   if (!showStatusSections && colorRules.length === 0) {
     return (
-      <div
-        data-testid="gantt-legend"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 16,
-          alignItems: 'center',
-          padding: '6px 10px',
-          marginTop: 8,
-          fontSize: 12,
-          color: '#42526E',
-          borderTop: '1px solid #EBECF0',
-        }}
-      >
-        <span style={{ fontWeight: 600 }}>{texts.legendLabel}:</span>
+      <div data-testid="gantt-legend" className="jh-gantt-legend">
+        <span className="jh-gantt-legend-title">{texts.legendLabel}:</span>
         {todayChip}
         {openEndedChip}
       </div>
@@ -124,25 +104,12 @@ export const GanttLegend: React.FC<GanttLegendProps> = ({ showStatusSections, se
   }
 
   return (
-    <div
-      data-testid="gantt-legend"
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 16,
-        alignItems: 'center',
-        padding: '6px 10px',
-        marginTop: 8,
-        fontSize: 12,
-        color: '#42526E',
-        borderTop: '1px solid #EBECF0',
-      }}
-    >
-      <span style={{ fontWeight: 600 }}>{texts.legendLabel}:</span>
+    <div data-testid="gantt-legend" className="jh-gantt-legend">
+      <span className="jh-gantt-legend-title">{texts.legendLabel}:</span>
 
       {showStatusSections
         ? STATUS_LEGEND.map(item => (
-            <span key={item.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span key={item.key} className="jh-gantt-legend-chip">
               <Swatch color={item.color} />
               {texts[item.key]}
             </span>
@@ -150,7 +117,7 @@ export const GanttLegend: React.FC<GanttLegendProps> = ({ showStatusSections, se
         : null}
 
       {colorRules.map((r, i) => (
-        <span key={`rule-${i}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <span key={`rule-${i}`} className="jh-gantt-legend-chip">
           <Swatch color={r.color} />
           {r.label}
         </span>

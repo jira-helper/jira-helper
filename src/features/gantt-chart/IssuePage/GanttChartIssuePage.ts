@@ -69,7 +69,8 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
     return m ? m[1]! : issueKey;
   }
 
-  apply(data?: GanttChartIssuePageInitData): void {
+  apply(data?: GanttChartIssuePageInitData, el?: Element): void {
+    void el;
     ganttChartModule.ensure(this.container);
     const { model } = this.container.inject(ganttSettingsModelToken);
     model.load();
@@ -99,11 +100,10 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
     const chartRoot = createRoot(sectionContent);
     flushSync(() => {
       chartRoot.render(
-        React.createElement(
-          WithDi,
-          { container: this.container },
-          React.createElement(CollapsibleGanttSection, { issueKey, container: this.container })
-        )
+        React.createElement(WithDi, {
+          container: this.container,
+          children: React.createElement(CollapsibleGanttSection, { issueKey, container: this.container }),
+        })
       );
     });
 

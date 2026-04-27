@@ -8,6 +8,7 @@ import { useGanttViewportInterval } from '../../hooks/useGanttViewportInterval';
 import { computeTimeScale } from '../../utils/computeTimeScale';
 import { GanttBarView } from './GanttBarView';
 import { useContainerWidth } from '../../hooks/useContainerWidth';
+import './gantt-ui.css';
 
 /** Row height for one Gantt bar (px). */
 export const BAR_HEIGHT = 28;
@@ -223,7 +224,7 @@ export function GanttChartView({
   const tickRowTop = MARGIN_TOP - 22;
 
   return (
-    <div ref={containerRef} style={{ width: '100%' }}>
+    <div ref={containerRef} className="jh-gantt-w-full">
       <svg
         ref={svgRef}
         data-testid="gantt-chart-svg"
@@ -315,7 +316,7 @@ export function GanttChartView({
                       y={monthHeaderY + monthHeaderHeight / 2 + 1}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      style={{ fontSize: 11, fontWeight: 600, fill: '#42526E' }}
+                      className="jh-gantt-svg-month-label"
                     >
                       {g.label}
                     </text>
@@ -344,7 +345,7 @@ export function GanttChartView({
                     x={x}
                     y={tickLabelY}
                     textAnchor="middle"
-                    style={{ fontSize: 11, fill: '#42526E' }}
+                    className="jh-gantt-svg-axis-label"
                   >
                     {tickFormat(tm)}
                   </text>
@@ -382,7 +383,7 @@ export function GanttChartView({
                 const maxCx = MARGIN_LEFT + chartInnerWidth - half - 1;
                 const cx = Math.min(maxCx, Math.max(minCx, todayX));
                 return (
-                  <g data-testid="gantt-today-marker" style={{ pointerEvents: 'none' }}>
+                  <g data-testid="gantt-today-marker" className="jh-gantt-svg-today-marker">
                     <line
                       x1={todayX}
                       y1={monthHeaderY + monthHeaderHeight}
@@ -394,12 +395,7 @@ export function GanttChartView({
                       opacity={0.8}
                     />
                     <rect x={cx - half} y={tickRowTop - 12} width={badgeW} height={12} rx={2} fill="#0052CC" />
-                    <text
-                      x={cx}
-                      y={tickRowTop - 3}
-                      textAnchor="middle"
-                      style={{ fontSize: 9, fontWeight: 700, fill: '#FFFFFF', letterSpacing: 0.4 }}
-                    >
+                    <text x={cx} y={tickRowTop - 3} textAnchor="middle" className="jh-gantt-svg-today-label">
                       TODAY
                     </text>
                   </g>

@@ -42,6 +42,7 @@ import type {
 } from '../../types';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
 import { stopJiraHotkeys } from 'src/shared/dom/stopJiraHotkeys';
+import './gantt-ui.css';
 
 function filterDateLikeFields(fields: JiraField[]): JiraField[] {
   return fields.filter(f => {
@@ -720,8 +721,25 @@ function formValuesToPatch(values: FormShape): Partial<GanttScopeSettings> {
 
 // ---------- Layout helpers ----------
 
-/** Atlassian-style group caption. Uses an `<h3>` for accessibility and inline
- *  styles so it works even outside the `[data-jh-gantt-root]` ancestor (e.g. in Storybook). */
+function ganttListColClass(c: { width?: string | number; flex?: number }): string {
+  const parts: string[] = ['jh-gantt-list-col'];
+  if (c.flex != null && c.flex !== 0) {
+    parts.push('jh-gantt-list-col--flex');
+    return parts.join(' ');
+  }
+  const w = c.width;
+  if (w === 24) parts.push('jh-gantt-list-col--w-24');
+  else if (w === 36) parts.push('jh-gantt-list-col--w-36');
+  else if (w === 96) parts.push('jh-gantt-list-col--w-96');
+  else if (w === 120) parts.push('jh-gantt-list-col--w-120');
+  else if (w === 130) parts.push('jh-gantt-list-col--w-130');
+  else if (w === 140) parts.push('jh-gantt-list-col--w-140');
+  else if (w === 220) parts.push('jh-gantt-list-col--w-220');
+  else parts.push('jh-gantt-list-col--flex');
+  return parts.join(' ');
+}
+
+/** Atlassian-style group caption. Uses an `<h3>` for accessibility. */
 const SectionHeading: React.FC<{
   children: React.ReactNode;
   hint?: string;
@@ -732,91 +750,37 @@ const SectionHeading: React.FC<{
   divider?: boolean;
 }> = ({ children, hint, count, right, divider }) => (
   <div
-    style={{
-      marginTop: divider ? 16 : 4,
-      marginBottom: 6,
-      paddingTop: divider ? 16 : 0,
-      borderTop: divider ? '1px solid var(--ant-color-split, #f0f0f0)' : 'none',
-    }}
+    className={
+      divider ? 'jh-gantt-section-heading-wrap jh-gantt-section-heading-wrap--divider' : 'jh-gantt-section-heading-wrap'
+    }
   >
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 8,
-      }}
-    >
-      <h3
-        style={{
-          margin: 0,
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          color: '#6b778c',
-          lineHeight: 1.4,
-        }}
-      >
+    <div className="jh-gantt-section-heading-row">
+      <h3 className="jh-gantt-section-heading-h3">
         {children}
         {typeof count === 'number' && count > 0 ? (
-          <Tag style={{ marginLeft: 8 }} bordered={false} color="default">
+          <Tag className="jh-gantt-section-heading-count-tag" bordered={false} color="default">
             {count}
           </Tag>
         ) : null}
       </h3>
       {right}
     </div>
-    {hint ? (
-      <div style={{ marginTop: 4, fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>{hint}</div>
-    ) : null}
+    {hint ? <div className="jh-gantt-section-heading-hint">{hint}</div> : null}
   </div>
 );
 
 /** Visible "this list is empty" placeholder above the dashed `+ Add…` button. */
 const EmptyListPlaceholder: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div
-    style={{
-      padding: '12px 14px',
-      borderRadius: 6,
-      background: 'var(--ant-color-fill-quaternary, #fafafa)',
-      color: 'var(--ant-color-text-secondary, #6b778c)',
-      fontSize: 12,
-      marginBottom: 8,
-      textAlign: 'center',
-    }}
-  >
-    {children}
-  </div>
+  <div className="jh-gantt-empty-list-placeholder">{children}</div>
 );
 
 /** Visible "table-like" header for list rows — rendered ONCE per list, replaces per-row labels. */
 const ListColumnsHeader: React.FC<{ columns: { label: string; width?: string | number; flex?: number }[] }> = ({
   columns,
 }) => (
-  <div
-    style={{
-      display: 'flex',
-      gap: 8,
-      padding: '4px 0',
-      fontSize: 11,
-      fontWeight: 600,
-      letterSpacing: '0.04em',
-      textTransform: 'uppercase',
-      color: 'var(--ant-color-text-tertiary, #97a0af)',
-      borderBottom: '1px solid var(--ant-color-split, #f0f0f0)',
-      marginBottom: 8,
-    }}
-  >
+  <div className="jh-gantt-list-columns-header">
     {columns.map((c, i) => (
-      <div
-        key={i}
-        style={{
-          width: c.width,
-          flex: c.flex ?? (c.width ? undefined : 1),
-          minWidth: 0,
-        }}
-      >
+      <div key={i} className={ganttListColClass(c)}>
         {c.label}
       </div>
     ))}
@@ -833,21 +797,13 @@ const InclusionSwitchRow: React.FC<{
 }> = ({ name, label, description }) => (
   <Form.Item noStyle shouldUpdate={(prev, cur) => prev[name] !== cur[name]}>
     {() => (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 12,
-          padding: '8px 0',
-          borderBottom: '1px solid var(--ant-color-split, #f0f0f0)',
-        }}
-      >
+      <div className="jh-gantt-inclusion-row">
         <Form.Item name={name as string} valuePropName="checked" noStyle>
           <Switch aria-label={label} />
         </Form.Item>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 500 }}>{label}</div>
-          <div style={{ fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>{description}</div>
+        <div className="jh-gantt-inclusion-text">
+          <div className="jh-gantt-inclusion-label">{label}</div>
+          <div className="jh-gantt-inclusion-desc">{description}</div>
         </div>
       </div>
     )}
@@ -865,7 +821,7 @@ type DateMappingsSectionTexts = {
   mappingPriorityBadge: string;
 };
 
-interface RenderDateMappingsSectionArgs {
+interface DateMappingsSectionProps {
   listName: 'startMappings' | 'endMappings';
   heading: string;
   hint: string;
@@ -886,7 +842,7 @@ interface RenderDateMappingsSectionArgs {
   'data-testid'?: string;
 }
 
-function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.ReactNode {
+const DateMappingsSection: React.FC<DateMappingsSectionProps> = args => {
   const {
     listName,
     heading,
@@ -907,7 +863,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
   } = args;
 
   return (
-    <div data-testid={args['data-testid']} style={{ marginBottom: 20 }}>
+    <div data-testid={args['data-testid']} className="jh-gantt-form-section-mb">
       <SectionHeading hint={hint}>{heading}</SectionHeading>
       <Form.List name={listName}>
         {(rows, { add, remove, move }) => (
@@ -921,29 +877,11 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
               ]}
             />
             {rows.map(({ key, name, ...restField }, index) => (
-              <div
-                key={key}
-                data-testid={`${args['data-testid']}-row-${index}`}
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'flex-start',
-                  marginBottom: 6,
-                }}
-              >
+              <div key={key} data-testid={`${args['data-testid']}-row-${index}`} className="jh-gantt-mapping-row">
                 <div
                   aria-label={texts.mappingPriorityBadge}
                   title={`${texts.mappingPriorityBadge}: ${index + 1}`}
-                  style={{
-                    width: 24,
-                    height: 32,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: 'var(--ant-color-text-secondary, #6b778c)',
-                  }}
+                  className="jh-gantt-mapping-priority"
                 >
                   {index + 1}
                 </div>
@@ -951,7 +889,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                   {...restField}
                   name={[name, 'source']}
                   rules={[{ required: true }]}
-                  style={{ marginBottom: 0, width: 140 }}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
                 >
                   <Select
                     data-testid="gantt-settings-mapping-source"
@@ -974,7 +912,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                         name={[name, 'detail']}
                         aria-label={statusLabel}
                         rules={[{ required: true }]}
-                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                       >
                         <Select
                           data-testid="gantt-settings-mapping-value"
@@ -994,7 +932,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                         name={[name, 'detail']}
                         aria-label={dateLabel}
                         rules={[{ required: true }]}
-                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                       >
                         <Select
                           data-testid="gantt-settings-mapping-value"
@@ -1011,7 +949,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
                     );
                   }}
                 </Form.Item>
-                <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
+                <div className="jh-gantt-row-actions">
                   <Button
                     type="text"
                     size="small"
@@ -1048,7 +986,7 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
               onClick={() => add({ ...defaultRow })}
               block
               icon={<PlusOutlined />}
-              style={{ marginTop: 8 }}
+              className="jh-gantt-btn-mt-8"
             >
               {addLabel}
             </Button>
@@ -1057,11 +995,11 @@ function renderDateMappingsSection(args: RenderDateMappingsSectionArgs): React.R
       </Form.List>
     </div>
   );
-}
+};
 
 // ---------- Bar colors section ----------
 
-interface RenderColorRulesSectionArgs {
+interface ColorRulesSectionProps {
   form: FormInstance<FormShape>;
   texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
   fieldOptions: { value: string; label: string }[];
@@ -1070,16 +1008,16 @@ interface RenderColorRulesSectionArgs {
   handleValuesChange: (changed: Partial<FormShape>, all: FormShape) => void;
 }
 
-function renderColorRulesSection({
+const ColorRulesSection: React.FC<ColorRulesSectionProps> = ({
   form,
   texts,
   fieldOptions,
   isLoadingFields,
   selectFilterOption,
   handleValuesChange,
-}: RenderColorRulesSectionArgs): React.ReactNode {
+}) => {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div className="jh-gantt-form-section-mb">
       <SectionHeading hint={texts.colorRulesHint} divider>
         {texts.colorRulesLegend}
       </SectionHeading>
@@ -1099,12 +1037,12 @@ function renderColorRulesSection({
               <EmptyListPlaceholder>{texts.emptyColorRules}</EmptyListPlaceholder>
             )}
             {listFields.map(({ key, name, ...restField }) => (
-              <div key={key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+              <div key={key} className="jh-gantt-mapping-row">
                 <Form.Item
                   {...restField}
                   name={[name, 'selectorMode']}
                   rules={[{ required: true }]}
-                  style={{ marginBottom: 0, width: 130 }}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-130"
                 >
                   <Select
                     virtual={false}
@@ -1117,12 +1055,12 @@ function renderColorRulesSection({
                 <Form.Item noStyle dependencies={[['colorRules', name, 'selectorMode']]}>
                   {() =>
                     form.getFieldValue(['colorRules', name, 'selectorMode']) === 'field' ? (
-                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                      <div className="jh-gantt-flex-row-gap">
                         <Form.Item
                           {...restField}
                           name={[name, 'selectorFieldId']}
                           aria-label={texts.colorRuleField}
-                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                          className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                         >
                           <Select
                             virtual={false}
@@ -1139,7 +1077,7 @@ function renderColorRulesSection({
                           {...restField}
                           name={[name, 'selectorValue']}
                           aria-label={texts.colorRuleValue}
-                          style={{ marginBottom: 0, width: 140 }}
+                          className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
                         >
                           <Input autoComplete="off" placeholder={texts.colorRuleValue} />
                         </Form.Item>
@@ -1164,12 +1102,12 @@ function renderColorRulesSection({
                             },
                           },
                         ]}
-                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                       >
                         <Input.TextArea
                           autoSize={{ minRows: 1, maxRows: 4 }}
                           autoComplete="off"
-                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                          className="jh-gantt-input-code"
                           placeholder="priority = Critical"
                         />
                       </Form.Item>
@@ -1179,7 +1117,7 @@ function renderColorRulesSection({
                 <Form.Item {...restField} name={[name, 'color']} hidden>
                   <input type="hidden" />
                 </Form.Item>
-                <div style={{ width: 120 }}>
+                <div className="jh-gantt-color-picker-cell">
                   <Form.Item
                     noStyle
                     shouldUpdate={(p, c) => p.colorRules?.[name]?.color !== c.colorRules?.[name]?.color}
@@ -1222,7 +1160,7 @@ function renderColorRulesSection({
               }
               block
               icon={<PlusOutlined />}
-              style={{ marginTop: 8 }}
+              className="jh-gantt-btn-mt-8"
             >
               {texts.addColorRule}
             </Button>
@@ -1231,11 +1169,11 @@ function renderColorRulesSection({
       </Form.List>
     </div>
   );
-}
+};
 
 // ---------- Quick filters section ----------
 
-interface RenderQuickFiltersSectionArgs {
+interface QuickFiltersSectionProps {
   form: FormInstance<FormShape>;
   texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
   fieldOptions: { value: string; label: string }[];
@@ -1243,15 +1181,15 @@ interface RenderQuickFiltersSectionArgs {
   selectFilterOption: (input: string, option?: { label?: string }) => boolean;
 }
 
-function renderQuickFiltersSection({
+const QuickFiltersSection: React.FC<QuickFiltersSectionProps> = ({
   form,
   texts,
   fieldOptions,
   isLoadingFields,
   selectFilterOption,
-}: RenderQuickFiltersSectionArgs): React.ReactNode {
+}) => {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div className="jh-gantt-form-section-mb">
       <SectionHeading hint={texts.quickFiltersHint}>{texts.quickFiltersLegend}</SectionHeading>
       <Form.List name="quickFilters">
         {(listFields, { add, remove, move }) => (
@@ -1273,15 +1211,7 @@ function renderQuickFiltersSection({
                 {() => {
                   const rowId = String(form.getFieldValue(['quickFilters', name, 'id']) ?? `idx-${index}`);
                   return (
-                    <div
-                      data-testid={`gantt-quick-filter-row-${rowId}`}
-                      style={{
-                        display: 'flex',
-                        gap: 8,
-                        alignItems: 'flex-start',
-                        marginBottom: 6,
-                      }}
-                    >
+                    <div data-testid={`gantt-quick-filter-row-${rowId}`} className="jh-gantt-mapping-row">
                       <Form.Item {...restField} name={[name, 'id']} hidden>
                         <Input type="hidden" />
                       </Form.Item>
@@ -1290,7 +1220,7 @@ function renderQuickFiltersSection({
                         name={[name, 'name']}
                         aria-label={texts.quickFilterName}
                         rules={[{ required: true, message: texts.quickFilterName }]}
-                        style={{ marginBottom: 0, width: 140 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
                       >
                         <Input autoComplete="off" placeholder={texts.quickFilterNamePlaceholder} />
                       </Form.Item>
@@ -1298,7 +1228,7 @@ function renderQuickFiltersSection({
                         {...restField}
                         name={[name, 'selectorMode']}
                         rules={[{ required: true }]}
-                        style={{ marginBottom: 0, width: 120 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-120"
                       >
                         <Select
                           virtual={false}
@@ -1311,12 +1241,12 @@ function renderQuickFiltersSection({
                       <Form.Item noStyle dependencies={[['quickFilters', name, 'selectorMode']]}>
                         {() =>
                           form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'field' ? (
-                            <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                            <div className="jh-gantt-flex-row-gap">
                               <Form.Item
                                 {...restField}
                                 name={[name, 'selectorFieldId']}
                                 aria-label={texts.quickFilterFieldId}
-                                style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                                className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                               >
                                 <Select
                                   virtual={false}
@@ -1333,7 +1263,7 @@ function renderQuickFiltersSection({
                                 {...restField}
                                 name={[name, 'selectorValue']}
                                 aria-label={texts.quickFilterValue}
-                                style={{ marginBottom: 0, width: 140 }}
+                                className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
                               >
                                 <Input autoComplete="off" placeholder={texts.quickFilterValue} />
                               </Form.Item>
@@ -1358,12 +1288,12 @@ function renderQuickFiltersSection({
                                   },
                                 },
                               ]}
-                              style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                              className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                             >
                               <Input.TextArea
                                 autoSize={{ minRows: 1, maxRows: 4 }}
                                 autoComplete="off"
-                                style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                                className="jh-gantt-input-code"
                                 placeholder={texts.quickFilterJqlPlaceholder}
                               />
                             </Form.Item>
@@ -1374,11 +1304,11 @@ function renderQuickFiltersSection({
                         {() =>
                           form.getFieldValue(['quickFilters', name, 'selectorMode']) === 'jql' &&
                           form.getFieldError(['quickFilters', name, 'selectorJql']).length > 0 ? (
-                            <span data-testid="gantt-quick-filter-jql-error" style={{ display: 'none' }} aria-hidden />
+                            <span data-testid="gantt-quick-filter-jql-error" className="jh-gantt-sr-only" aria-hidden />
                           ) : null
                         }
                       </Form.Item>
-                      <div style={{ display: 'inline-flex', width: ROW_ACTIONS_WIDTH, justifyContent: 'flex-end' }}>
+                      <div className="jh-gantt-row-actions">
                         <Button
                           type="text"
                           size="small"
@@ -1427,7 +1357,7 @@ function renderQuickFiltersSection({
               }
               block
               icon={<PlusOutlined />}
-              style={{ marginTop: 8 }}
+              className="jh-gantt-btn-mt-8"
             >
               {texts.addQuickFilter}
             </Button>
@@ -1436,11 +1366,11 @@ function renderQuickFiltersSection({
       </Form.List>
     </div>
   );
-}
+};
 
 // ---------- Exclusion filters section ----------
 
-interface RenderExclusionFiltersSectionArgs {
+interface ExclusionFiltersSectionProps {
   form: FormInstance<FormShape>;
   texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
   fieldOptions: { value: string; label: string }[];
@@ -1448,15 +1378,15 @@ interface RenderExclusionFiltersSectionArgs {
   selectFilterOption: (input: string, option?: { label?: string }) => boolean;
 }
 
-function renderExclusionFiltersSection({
+const ExclusionFiltersSection: React.FC<ExclusionFiltersSectionProps> = ({
   form,
   texts,
   fieldOptions,
   isLoadingFields,
   selectFilterOption,
-}: RenderExclusionFiltersSectionArgs): React.ReactNode {
+}) => {
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div className="jh-gantt-form-section-mb">
       <SectionHeading hint={texts.exclusionOrHint} divider>
         {texts.exclusionLegend}
       </SectionHeading>
@@ -1475,16 +1405,12 @@ function renderExclusionFiltersSection({
               <EmptyListPlaceholder>{texts.emptyExclusionFilters}</EmptyListPlaceholder>
             )}
             {listFields.map(({ key, name, ...restField }, index) => (
-              <div
-                key={key}
-                data-testid={`gantt-exclusion-filter-row-${index}`}
-                style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}
-              >
+              <div key={key} data-testid={`gantt-exclusion-filter-row-${index}`} className="jh-gantt-mapping-row">
                 <Form.Item
                   {...restField}
                   name={[name, 'mode']}
                   rules={[{ required: true }]}
-                  style={{ marginBottom: 0, width: 130 }}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-130"
                 >
                   <Select
                     data-testid={`gantt-exclusion-filter-mode-${index}`}
@@ -1498,12 +1424,12 @@ function renderExclusionFiltersSection({
                 <Form.Item noStyle dependencies={[['exclusionFilters', name, 'mode']]}>
                   {() =>
                     form.getFieldValue(['exclusionFilters', name, 'mode']) === 'field' ? (
-                      <div style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+                      <div className="jh-gantt-flex-row-gap">
                         <Form.Item
                           {...restField}
                           name={[name, 'fieldId']}
                           aria-label={texts.exclusionFieldId}
-                          style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                          className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                         >
                           <Select
                             data-testid={`gantt-exclusion-filter-field-${index}`}
@@ -1521,7 +1447,7 @@ function renderExclusionFiltersSection({
                           {...restField}
                           name={[name, 'value']}
                           aria-label={texts.exclusionValue}
-                          style={{ marginBottom: 0, width: 140 }}
+                          className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
                         >
                           <Input
                             data-testid={`gantt-exclusion-filter-value-${index}`}
@@ -1550,12 +1476,12 @@ function renderExclusionFiltersSection({
                             },
                           },
                         ]}
-                        style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                        className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                       >
                         <Input.TextArea
                           autoSize={{ minRows: 1, maxRows: 4 }}
                           autoComplete="off"
-                          style={{ fontFamily: 'var(--ant-font-family-code, monospace)' }}
+                          className="jh-gantt-input-code"
                           placeholder="status = Done"
                         />
                       </Form.Item>
@@ -1578,7 +1504,7 @@ function renderExclusionFiltersSection({
               onClick={() => add({ mode: 'field', fieldId: '', value: '', jql: '' })}
               block
               icon={<PlusOutlined />}
-              style={{ marginTop: 8 }}
+              className="jh-gantt-btn-mt-8"
             >
               {texts.addExclusionFilter}
             </Button>
@@ -1587,28 +1513,26 @@ function renderExclusionFiltersSection({
       </Form.List>
     </div>
   );
-}
+};
 
 // ---------- Issue link types section ----------
 
-interface RenderIssueLinkTypesSectionArgs {
+interface IssueLinkTypesSectionProps {
   texts: ReturnType<typeof useGetTextsByLocale<keyof typeof GANTT_SETTINGS_MODAL_TEXTS>>;
   linkTypeOptions: { value: string; label: string }[];
   isLoadingLinkTypes: boolean;
   selectFilterOption: (input: string, option?: { label?: string }) => boolean;
 }
 
-function renderIssueLinkTypesSection({
+const IssueLinkTypesSection: React.FC<IssueLinkTypesSectionProps> = ({
   texts,
   linkTypeOptions,
   isLoadingLinkTypes,
   selectFilterOption,
-}: RenderIssueLinkTypesSectionArgs): React.ReactNode {
+}) => {
   return (
-    <div style={{ marginTop: 12, marginLeft: 44 }}>
-      <div style={{ marginBottom: 8, fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>
-        {texts.issueLinkTypesHint}
-      </div>
+    <div className="jh-gantt-issue-link-section">
+      <div className="jh-gantt-issue-link-hint">{texts.issueLinkTypesHint}</div>
       <Form.List name="issueLinkRows">
         {(listFields, { add, remove }) => (
           <>
@@ -1624,16 +1548,12 @@ function renderIssueLinkTypesSection({
               <EmptyListPlaceholder>{texts.emptyLinkTypes}</EmptyListPlaceholder>
             )}
             {listFields.map(({ key, name, ...restField }, index) => (
-              <div
-                key={key}
-                data-testid={`gantt-issue-link-type-row-${index}`}
-                style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}
-              >
+              <div key={key} data-testid={`gantt-issue-link-type-row-${index}`} className="jh-gantt-mapping-row">
                 <Form.Item
                   {...restField}
                   name={[name, 'id']}
                   aria-label={texts.linkTypeId}
-                  style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-flex"
                 >
                   <Select
                     data-testid={`gantt-settings-link-type-select-${index}`}
@@ -1651,7 +1571,7 @@ function renderIssueLinkTypesSection({
                   {...restField}
                   name={[name, 'direction']}
                   aria-label={texts.linkDirection}
-                  style={{ marginBottom: 0, width: 220 }}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-220"
                 >
                   <Select
                     data-testid={`gantt-issue-link-direction-${index}`}
@@ -1678,7 +1598,7 @@ function renderIssueLinkTypesSection({
               onClick={() => add({ id: '', direction: 'outward' })}
               block
               icon={<PlusOutlined />}
-              style={{ marginTop: 8 }}
+              className="jh-gantt-btn-mt-8"
             >
               {texts.addLinkTypeRow}
             </Button>
@@ -1687,7 +1607,7 @@ function renderIssueLinkTypesSection({
       </Form.List>
     </div>
   );
-}
+};
 
 // ---------- Form content ----------
 
@@ -1874,47 +1794,47 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
   // ---- Tab contents ----
   const barsTab = (
     <>
-      {renderDateMappingsSection({
-        listName: 'startMappings',
-        heading: texts.startMapping,
-        hint: texts.startMappingHint,
-        addLabel: texts.addStartMapping,
-        dateLabel: texts.startDateField,
-        statusLabel: texts.startStatus,
-        defaultRow: { source: 'dateField', detail: 'created' },
-        form,
-        sourceOptions,
-        dateFieldOptions,
-        statusOptions,
-        isLoadingFields,
-        isLoadingStatuses,
-        selectFilterOption,
-        texts,
-        notifyFormChange,
-        'data-testid': 'gantt-settings-start-mappings',
-      })}
-      {renderDateMappingsSection({
-        listName: 'endMappings',
-        heading: texts.endMapping,
-        hint: texts.endMappingHint,
-        addLabel: texts.addEndMapping,
-        dateLabel: texts.endDateField,
-        statusLabel: texts.endStatus,
-        defaultRow: { source: 'dateField', detail: 'duedate' },
-        form,
-        sourceOptions,
-        dateFieldOptions,
-        statusOptions,
-        isLoadingFields,
-        isLoadingStatuses,
-        selectFilterOption,
-        texts,
-        notifyFormChange,
-        'data-testid': 'gantt-settings-end-mappings',
-      })}
-      <div style={{ marginBottom: 20 }}>
+      <DateMappingsSection
+        listName="startMappings"
+        heading={texts.startMapping}
+        hint={texts.startMappingHint}
+        addLabel={texts.addStartMapping}
+        dateLabel={texts.startDateField}
+        statusLabel={texts.startStatus}
+        defaultRow={{ source: 'dateField', detail: 'created' }}
+        form={form}
+        sourceOptions={sourceOptions}
+        dateFieldOptions={dateFieldOptions}
+        statusOptions={statusOptions}
+        isLoadingFields={isLoadingFields}
+        isLoadingStatuses={isLoadingStatuses}
+        selectFilterOption={selectFilterOption}
+        texts={texts}
+        notifyFormChange={notifyFormChange}
+        data-testid="gantt-settings-start-mappings"
+      />
+      <DateMappingsSection
+        listName="endMappings"
+        heading={texts.endMapping}
+        hint={texts.endMappingHint}
+        addLabel={texts.addEndMapping}
+        dateLabel={texts.endDateField}
+        statusLabel={texts.endStatus}
+        defaultRow={{ source: 'dateField', detail: 'duedate' }}
+        form={form}
+        sourceOptions={sourceOptions}
+        dateFieldOptions={dateFieldOptions}
+        statusOptions={statusOptions}
+        isLoadingFields={isLoadingFields}
+        isLoadingStatuses={isLoadingStatuses}
+        selectFilterOption={selectFilterOption}
+        texts={texts}
+        notifyFormChange={notifyFormChange}
+        data-testid="gantt-settings-end-mappings"
+      />
+      <div className="jh-gantt-form-section-mb">
         <SectionHeading hint={texts.tooltipFieldsHint}>{texts.tooltipFields}</SectionHeading>
-        <Form.Item name="tooltipFieldIds" style={{ marginBottom: 0 }}>
+        <Form.Item name="tooltipFieldIds" className="jh-gantt-form-item-mb-0">
           <Select
             data-testid="gantt-settings-tooltip-fields-select"
             virtual={false}
@@ -1930,14 +1850,14 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
           />
         </Form.Item>
       </div>
-      {renderColorRulesSection({
-        form,
-        texts,
-        fieldOptions: allFieldOptions,
-        isLoadingFields,
-        selectFilterOption,
-        handleValuesChange,
-      })}
+      <ColorRulesSection
+        form={form}
+        texts={texts}
+        fieldOptions={allFieldOptions}
+        isLoadingFields={isLoadingFields}
+        selectFilterOption={selectFilterOption}
+        handleValuesChange={handleValuesChange}
+      />
     </>
   );
 
@@ -1963,14 +1883,14 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
       </div>
       <Form.Item noStyle shouldUpdate={(prev, cur) => prev.includeIssueLinks !== cur.includeIssueLinks}>
         {() =>
-          form.getFieldValue('includeIssueLinks')
-            ? renderIssueLinkTypesSection({
-                texts,
-                linkTypeOptions: issueLinkTypeOptions,
-                isLoadingLinkTypes,
-                selectFilterOption,
-              })
-            : null
+          form.getFieldValue('includeIssueLinks') ? (
+            <IssueLinkTypesSection
+              texts={texts}
+              linkTypeOptions={issueLinkTypeOptions}
+              isLoadingLinkTypes={isLoadingLinkTypes}
+              selectFilterOption={selectFilterOption}
+            />
+          ) : null
         }
       </Form.Item>
     </>
@@ -1978,27 +1898,27 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
 
   const filtersTab = (
     <>
-      {renderQuickFiltersSection({
-        form,
-        texts,
-        fieldOptions: allFieldOptions,
-        isLoadingFields,
-        selectFilterOption,
-      })}
-      {renderExclusionFiltersSection({
-        form,
-        texts,
-        fieldOptions: allFieldOptions,
-        isLoadingFields,
-        selectFilterOption,
-      })}
+      <QuickFiltersSection
+        form={form}
+        texts={texts}
+        fieldOptions={allFieldOptions}
+        isLoadingFields={isLoadingFields}
+        selectFilterOption={selectFilterOption}
+      />
+      <ExclusionFiltersSection
+        form={form}
+        texts={texts}
+        fieldOptions={allFieldOptions}
+        isLoadingFields={isLoadingFields}
+        selectFilterOption={selectFilterOption}
+      />
     </>
   );
 
   // Wrap content in `data-jh-gantt-root` so any leaked Jira CSS or scoped overrides work
   // (this matters when the modal is rendered outside the Gantt container, e.g. in Storybook).
   return (
-    <div data-jh-gantt-root="settings-modal" style={{ width: '100%' }}>
+    <div data-jh-gantt-root="settings-modal" className="jh-gantt-settings-root">
       <SectionHeading>{texts.scopeLegend}</SectionHeading>
       <Segmented
         data-testid="gantt-scope-picker"
@@ -2010,28 +1930,19 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
           { value: 'projectIssueType', label: texts.scopeProjectIssueType },
         ]}
       />
-      <div
-        data-testid="gantt-settings-scope-context"
-        style={{
-          marginTop: 6,
-          fontSize: 12,
-          color: 'var(--ant-color-text-secondary, #6b778c)',
-        }}
-      >
+      <div data-testid="gantt-settings-scope-context" className="jh-gantt-settings-scope-context">
         {scopeContext}
       </div>
 
-      <div style={{ height: 1, background: 'var(--ant-color-split, #f0f0f0)', margin: '12px 0' }} />
+      <div className="jh-gantt-settings-hr" role="separator" />
 
       {!draft ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{texts.noDraftTitle}</div>
-              <div style={{ fontSize: 12, color: 'var(--ant-color-text-secondary, #6b778c)' }}>
-                {texts.noDraftDescription}
-              </div>
+              <div className="jh-gantt-settings-no-draft-title">{texts.noDraftTitle}</div>
+              <div className="jh-gantt-settings-no-draft-desc">{texts.noDraftDescription}</div>
             </div>
           }
         >
@@ -2079,7 +1990,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
                   key={key}
                   type="link"
                   size="small"
-                  style={{ padding: 0, height: 'auto', fontWeight: 600 }}
+                  className="jh-gantt-tab-error-link"
                   onClick={() => setActiveTab(key)}
                 >
                   {tabLabels[key]}
@@ -2121,7 +2032,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
                   type="error"
                   showIcon
                   message={message}
-                  style={{ marginBottom: 12 }}
+                  className="jh-gantt-settings-error-alert"
                   data-testid="gantt-settings-error-summary"
                 />
               );
@@ -2146,7 +2057,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
               // affordance with two different meanings (round-3 review).
               const renderErrorBadge = (count: number) =>
                 count > 0 ? (
-                  <Tag bordered={false} color="error" style={{ marginLeft: 6, marginRight: 0 }}>
+                  <Tag bordered={false} color="error" className="jh-gantt-tab-error-badge">
                     {count}
                   </Tag>
                 ) : null;
@@ -2160,7 +2071,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
                       key: 'bars',
                       label: (
                         <span>
-                          <BarChartOutlined style={{ marginRight: 6 }} />
+                          <BarChartOutlined className="jh-gantt-tab-icon" />
                           {texts.tabBars}
                           {renderErrorBadge(barsErrors)}
                         </span>
@@ -2172,7 +2083,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
                       key: 'issues',
                       label: (
                         <span>
-                          <BranchesOutlined style={{ marginRight: 6 }} />
+                          <BranchesOutlined className="jh-gantt-tab-icon" />
                           {texts.tabIssues}
                           {renderErrorBadge(issuesErrors)}
                         </span>
@@ -2184,7 +2095,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
                       key: 'filters',
                       label: (
                         <span>
-                          <FilterOutlined style={{ marginRight: 6 }} />
+                          <FilterOutlined className="jh-gantt-tab-icon" />
                           {texts.tabFilters}
                           {renderErrorBadge(filtersErrors)}
                         </span>
@@ -2255,13 +2166,13 @@ export const GanttSettingsModal: React.FC<GanttSettingsModalProps> = ({
       getContainer={false}
       styles={{ body: { paddingTop: 8 } }}
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+        <div className="jh-gantt-modal-footer">
           <Tooltip title={texts.copyFromHint}>
             <Button key="copy" icon={<CopyOutlined />} onClick={onCopyFrom}>
               {texts.copyFrom}
             </Button>
           </Tooltip>
-          <div style={{ display: 'inline-flex', gap: 8 }}>
+          <div className="jh-gantt-modal-footer-actions">
             <Button key="cancel" onClick={onCancel}>
               {texts.cancel}
             </Button>

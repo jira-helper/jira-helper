@@ -45,6 +45,7 @@ function registerMockJira(fetchSubtasks: IJiraService['fetchSubtasks']): void {
     getExternalIssues: vi.fn(),
     getProjectFields: vi.fn(),
     getIssueLinkTypes: vi.fn(),
+    getStatuses: vi.fn().mockResolvedValue(Ok([])),
   };
   globalContainer.register({ token: JiraServiceToken, value: mock });
 }
@@ -311,8 +312,8 @@ describe('GanttChartContainer', () => {
             {
               field: 'status',
               fieldtype: 'jira',
-              from: null,
-              to: null,
+              from: '',
+              to: '',
               fromString: 'To Do',
               toString: 'In Progress',
               fromStatusCategory: { key: 'new' },
@@ -326,8 +327,8 @@ describe('GanttChartContainer', () => {
             {
               field: 'status',
               fieldtype: 'jira',
-              from: null,
-              to: null,
+              from: '',
+              to: '',
               fromString: 'In Progress',
               toString: 'Done',
               fromStatusCategory: { key: 'indeterminate' },
@@ -336,7 +337,7 @@ describe('GanttChartContainer', () => {
           ],
         },
       ],
-    };
+    } as unknown as NonNullable<typeof i2401.changelog>;
     delete issues.find(i => i.key === 'PROJ-2402')!.changelog;
     delete issues.find(i => i.key === 'PROJ-2403')!.changelog;
 

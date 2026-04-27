@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { WithDi } from 'src/infrastructure/di/diContext';
 import { Container } from 'dioma';

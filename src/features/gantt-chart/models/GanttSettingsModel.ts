@@ -1,6 +1,7 @@
 import type { GanttScopeSettings, GanttSettingsStorage, QuickFilter, SettingsScope, ScopeKey } from '../types';
 import { buildScopeKey, resolveSettings } from '../utils/resolveSettings';
 import type { Logger } from 'src/infrastructure/logging/Logger';
+import { BUILT_IN_QUICK_FILTERS } from '../quickFilters/builtIns';
 
 export const GANTT_SETTINGS_STORAGE_KEY = 'jh-gantt-settings';
 
@@ -146,6 +147,10 @@ export class GanttSettingsModel {
   get resolvedSettings(): GanttScopeSettings | null {
     const { projectKey, issueType } = resolveArgsForScope(this.currentScope);
     return resolveSettings(this.storage, projectKey, issueType);
+  }
+
+  get resolvedQuickFilters(): QuickFilter[] {
+    return [...BUILT_IN_QUICK_FILTERS, ...(this.resolvedSettings?.quickFilters ?? [])];
   }
 
   /** True when at least one scope has saved settings. */

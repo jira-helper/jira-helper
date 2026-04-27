@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button } from 'antd';
+import './gantt-ui.css';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
+import './gantt-ui.css';
 
 const EMPTY_STATE_TEXTS = {
   message: {
@@ -23,8 +25,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onOpenSettings }) => {
   const texts = useGetTextsByLocale(EMPTY_STATE_TEXTS);
 
   return (
-    <div data-testid="gantt-empty-state" style={{ padding: '16px' }}>
-      <p style={{ marginBottom: onOpenSettings ? '16px' : 0 }}>{texts.message}</p>
+    <div data-testid="gantt-empty-state" className="jh-gantt-pad-16">
+      <p className={onOpenSettings ? 'jh-gantt-state-p' : 'jh-gantt-state-p--tight'}>{texts.message}</p>
       {onOpenSettings ? (
         <Button type="default" onClick={onOpenSettings}>
           {texts.openSettings}

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import type { GanttBar } from '../../types';
 import { GanttTooltip } from './GanttTooltip';
+import './gantt-ui.css';
 
 function makeBar(overrides: Partial<GanttBar> = {}): GanttBar {
   const startDate = new Date('2024-06-03T00:00:00.000Z');
@@ -32,14 +33,7 @@ const meta: Meta<typeof GanttTooltip> = {
   tags: ['autodocs'],
   decorators: [
     Story => (
-      <div
-        style={{
-          position: 'relative',
-          minHeight: 220,
-          border: '1px dashed rgba(9, 30, 66, 0.2)',
-          borderRadius: 4,
-        }}
-      >
+      <div className="jh-gantt-story-tooltip-frame">
         <Story />
       </div>
     ),

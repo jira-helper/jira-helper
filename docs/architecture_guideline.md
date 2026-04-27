@@ -269,6 +269,10 @@ myFeatureModule.ensure(container);
 - Вызывает Actions или **методы модели только у `model` из `ModelEntry`**, а не у значения `useModel()` (см. `docs/state-valtio.md`)
 - НЕ содержит бизнес-логики
 
+Подробные границы Container, признаки бизнес-логики и чек-лист ревью — в `docs/component-containers.md`.
+
+Короткое правило: если Container начинает парсить доменные данные, фильтровать/сортировать business collections, вычислять warning/recommendation списки, объединять built-in/custom сущности или знать persisted storage/cascade shape — это логика Model или pure `utils/`, а не React.
+
 ### Локальный стейт — только для UI
 
 - Показать/скрыть dropdown

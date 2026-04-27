@@ -56,6 +56,7 @@ describe('GanttSettingsContainer', () => {
       getExternalIssues: vi.fn(),
       getProjectFields: vi.fn(),
       getIssueLinkTypes: vi.fn(),
+      getStatuses: vi.fn().mockResolvedValue(Ok([])),
     };
     globalContainer.register({ token: JiraServiceToken, value: mockJira });
     ganttChartModule.ensure(globalContainer);

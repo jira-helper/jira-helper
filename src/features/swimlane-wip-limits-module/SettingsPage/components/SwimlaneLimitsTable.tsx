@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { Empty } from 'antd';
 import { SwimlaneSettingRow } from './SwimlaneSettingRow';

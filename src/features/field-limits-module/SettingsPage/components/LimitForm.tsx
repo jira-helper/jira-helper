@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useState, useEffect } from 'react';
 import { Select, Input, InputNumber, Button, Space, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';

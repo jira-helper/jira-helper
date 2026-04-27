@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { Ok } from 'ts-results';
@@ -19,6 +20,7 @@ globalContainer.register({
     getProjectFields: () => Promise.resolve(new Ok([{ id: 'priority', name: 'Priority', schema: { type: 'string' } }])),
     getIssueLinkTypes: () =>
       Promise.resolve(new Ok([{ id: '1', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }])),
+    getStatuses: () => Promise.resolve(new Ok([])),
   },
 });
 

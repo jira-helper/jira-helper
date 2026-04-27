@@ -165,7 +165,7 @@ describe('GanttToolbar', () => {
     const wrap = screen.getByTestId('gantt-toolbar-warning-no-history');
     const tag = within(wrap).getByRole('status');
     expect(tag).toHaveAttribute('tabindex', '0');
-    expect(tag).toHaveStyle({ cursor: 'help' });
+    expect(tag).toHaveClass('jh-gantt-toolbar-warning-tag');
     expect(wrap).toHaveTextContent('No history for 1 task');
     expect(tag.getAttribute('aria-label')).toBe('No history for 1 task');
   });
@@ -225,7 +225,7 @@ describe('GanttToolbar', () => {
       const tag = within(wrap).getByRole('status');
       expect(wrap).toHaveTextContent('3 tasks not on chart');
       expect(tag).toHaveAttribute('tabindex', '0');
-      expect(tag).toHaveStyle({ cursor: 'help' });
+      expect(tag).toHaveClass('jh-gantt-toolbar-warning-tag');
       expect(tag.getAttribute('aria-label')).toMatch(/3.*not on chart/);
     });
 

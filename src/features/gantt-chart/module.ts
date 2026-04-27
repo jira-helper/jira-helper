@@ -11,7 +11,7 @@ import { GanttDataModel } from './models/GanttDataModel';
 import { GanttQuickFiltersModel } from './models/GanttQuickFiltersModel';
 import { GanttSettingsModel } from './models/GanttSettingsModel';
 import { GanttViewportModel } from './models/GanttViewportModel';
-import { IssueViewPageObject } from './page-objects/IssueViewPageObject';
+import { IssueViewPageObject } from 'src/infrastructure/page-objects/IssueViewPageObject';
 import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 

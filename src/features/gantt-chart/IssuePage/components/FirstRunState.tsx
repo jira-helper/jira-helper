@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button } from 'antd';
+import './gantt-ui.css';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
+import './gantt-ui.css';
 
 const FIRST_RUN_TEXTS = {
   message: {
@@ -24,8 +26,8 @@ export const FirstRunState: React.FC<FirstRunStateProps> = ({ onOpenSettings }) 
   const texts = useGetTextsByLocale(FIRST_RUN_TEXTS);
 
   return (
-    <div style={{ padding: '16px' }}>
-      <p style={{ marginBottom: '16px' }}>{texts.message}</p>
+    <div className="jh-gantt-pad-16">
+      <p className="jh-gantt-state-p">{texts.message}</p>
       <Button type="primary" data-testid="gantt-first-run-open-settings" onClick={onOpenSettings}>
         {texts.openSettings}
       </Button>

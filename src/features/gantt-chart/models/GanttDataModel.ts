@@ -4,6 +4,12 @@ import type { IJiraService } from 'src/infrastructure/jira/jiraService';
 import type { JiraField, JiraIssueMapped } from 'src/infrastructure/jira/types';
 import type { GanttBar, GanttScopeSettings, LoadingState, MissingDateIssue } from '../types';
 import { computeBars, type GanttIssueInput } from '../utils/computeBars';
+import { parseChangelog } from '../utils/parseChangelog';
+
+export type TaskWithoutStatusHistory = {
+  key: string;
+  summary: string;
+};
 
 /** Empty constant returned by {@link GanttDataModel.getIssuesByKey} when nothing is loaded. */
 const EMPTY_ISSUE_MAP: ReadonlyMap<string, GanttIssueInput> = new Map();
@@ -19,6 +25,9 @@ export class GanttDataModel {
   bars: GanttBar[] = [];
 
   missingDateIssues: MissingDateIssue[] = [];
+
+  /** Loaded issues whose changelog yields no status transitions; used by status-segment warnings. */
+  tasksWithoutStatusHistory: TaskWithoutStatusHistory[] = [];
 
   error: string | null = null;
 
@@ -78,6 +87,7 @@ export class GanttDataModel {
       this.lastIssueKey = '';
       this.bars = [];
       this.missingDateIssues = [];
+      this.tasksWithoutStatusHistory = [];
       this.issueInputByKey = new Map();
       return;
     }
@@ -131,6 +141,7 @@ export class GanttDataModel {
     this.loadingState = 'initial';
     this.bars = [];
     this.missingDateIssues = [];
+    this.tasksWithoutStatusHistory = [];
     this.error = null;
     this.cachedIssues = null;
     this.lastIssueKey = '';
@@ -142,6 +153,7 @@ export class GanttDataModel {
     if (!issues?.length) {
       this.bars = [];
       this.missingDateIssues = [];
+      this.tasksWithoutStatusHistory = [];
       this.issueInputByKey = new Map();
       return;
     }
@@ -167,5 +179,19 @@ export class GanttDataModel {
     );
     this.bars = bars;
     this.missingDateIssues = missingDateIssues;
+    this.tasksWithoutStatusHistory = this.computeTasksWithoutStatusHistory(bars, map);
+  }
+
+  private computeTasksWithoutStatusHistory(
+    bars: ReadonlyArray<GanttBar>,
+    issuesByKey: ReadonlyMap<string, GanttIssueInput>
+  ): TaskWithoutStatusHistory[] {
+    return bars
+      .filter(bar => parseChangelog(issuesByKey.get(bar.issueKey)?.changelog).length === 0)
+      .map(bar => {
+        const prefix = `${bar.issueKey}: `;
+        const summary = bar.label.startsWith(prefix) ? bar.label.slice(prefix.length) : bar.label;
+        return { key: bar.issueKey, summary };
+      });
   }
 }

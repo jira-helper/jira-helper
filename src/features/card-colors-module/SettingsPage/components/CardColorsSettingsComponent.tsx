@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 /**
  * View компонент для настроек цветов карточек.
  * Отвечает только за отображение, не содержит логики.

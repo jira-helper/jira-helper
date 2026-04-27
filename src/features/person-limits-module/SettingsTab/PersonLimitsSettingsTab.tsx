@@ -1,3 +1,4 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useEffect, useState } from 'react';
 import { Button, Space } from 'antd';
 import { useDi } from 'src/infrastructure/di/diContext';

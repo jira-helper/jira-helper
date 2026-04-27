@@ -42,6 +42,10 @@ description: Код-ревью реализации задачи jira-helper. И
 - Модуль зарегистрирован в `content.ts` (`module.ensure(container)`), а не в PageModification?
 - Используются `lazy()` + `modelEntry()`, а не прямой `proxy()` / `useSnapshot()` в module.ts?
 - В контейнерах: методы модели вызываются у **`entry.model`**, а не у результата **`entry.useModel()`** (снапшот read-only)?
+- Для каждого `*Container.tsx`: проверены imports, `useMemo`, `useEffect`, callbacks и local state по `docs/component-containers.md`?
+- Container не импортирует domain utilities ради бизнес-вычислений (`compute*`, `parse*`, `resolve*`, `match*`, `apply*`)?
+- Container не фильтрует/сортирует/группирует domain collections, не вычисляет warning/recommendation lists, не объединяет built-in/custom сущности и не знает persisted storage/cascade shape?
+- Если domain derivation осталась в Container — это `Warning` или `Critical` (в зависимости от влияния), с предложением перенести в Model / pure utils и покрыть unit-тестом.
 
 ### 3. Типы
 
