@@ -1,0 +1,19 @@
+---
+description: Run noisy shell commands through a cheap summarizing subagent
+alwaysApply: true
+---
+
+# Large Shell Output
+
+For shell commands that may produce large output, run them through a cheap subagent instead of streaming the full output into the main chat.
+
+Use this for commands like full test suites, Storybook tests, Cypress, Playwright, builds with verbose bundler logs, large diffs, large `gh` outputs, or long-running CI/log inspection.
+
+Ask the subagent to:
+
+- use the cheapest available model (`composer-2-fast` when choosing explicitly);
+- run the command and save full stdout/stderr to a local log file under `.logs/`;
+- return only a concise summary: command, exit code, key failures or warnings, and the log path;
+- preserve enough detail that the main agent can decide the next action without reading the full log.
+
+Only stream command output directly in the main chat when it is expected to be short or the user explicitly asks to see the raw output.
