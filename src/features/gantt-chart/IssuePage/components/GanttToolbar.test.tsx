@@ -363,6 +363,34 @@ describe('GanttToolbar', () => {
       expect(affix?.className ?? '').toMatch(/ant-input-status-error/);
     });
 
+    it('keeps focus in JQL search when the first typed character makes the query invalid', async () => {
+      const user = userEvent.setup();
+
+      const StatefulToolbar: React.FC = () => {
+        const [query, setQuery] = React.useState('');
+        return (
+          <WithDi container={globalContainer}>
+            <GanttToolbar
+              {...defaultProps}
+              quickFilters={filters}
+              quickFilterSearchMode="jql"
+              quickFilterSearch={query}
+              onQuickFilterSearchChange={setQuery}
+            />
+          </WithDi>
+        );
+      };
+
+      render(<StatefulToolbar />);
+
+      const search = screen.getByTestId('gantt-quick-filters-search') as HTMLInputElement;
+      await user.click(search);
+      await user.type(search, '(');
+
+      expect(screen.getByTestId('gantt-quick-filters-search')).toHaveFocus();
+      expect(screen.getByTestId('gantt-quick-filters-search')).toHaveAttribute('aria-invalid', 'true');
+    });
+
     it('does not show Save as quick filter in text mode', () => {
       renderToolbar({
         quickFilters: filters,

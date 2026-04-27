@@ -50,6 +50,8 @@ function colorRulesFromSettings(settings: GanttScopeSettings | null): ColorRuleH
     .map((rule): ColorRuleHint | null => {
       const { color } = rule;
       if (typeof color !== 'string' || color === '') return null;
+      const name = rule.name?.trim();
+      if (name) return { color, label: name };
       const { value } = rule.selector;
       const field = rule.selector.fieldId;
       const label = typeof value === 'string' && value !== '' ? value : (field ?? '—');
@@ -75,7 +77,7 @@ const Swatch: React.FC<{ color: string; rounded?: boolean }> = ({ color, rounded
 /** Compact legend bar shown beneath the chart, explaining colors and markers. */
 export const GanttLegend: React.FC<GanttLegendProps> = ({ showStatusSections, settings }) => {
   const texts = useGetTextsByLocale(GANTT_LEGEND_TEXTS);
-  const colorRules = colorRulesFromSettings(settings);
+  const colorRules = showStatusSections ? [] : colorRulesFromSettings(settings);
 
   const todayChip = (
     <span className="jh-gantt-legend-chip">

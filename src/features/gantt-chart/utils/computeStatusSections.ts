@@ -151,7 +151,20 @@ export function computeStatusSections(
     ];
   }
 
-  const sorted = [...transitions].sort(compareTransitionTime);
+  const sortedAll = [...transitions].sort(compareTransitionTime);
+  const sorted = sortedAll.filter(tr => tr.fromStatus.trim() !== tr.toStatus.trim());
+
+  if (!sorted.length) {
+    const first = sortedAll[0];
+    return [
+      {
+        statusName: first.fromStatus,
+        category: resolveCategoryWithFallback(first.fromCategory, first.fromStatus, categoryByStatusName),
+        startDate: barStart,
+        endDate: barEnd,
+      },
+    ];
+  }
 
   const splitMs = new Set<number>([barStartMs, barEndMs]);
   for (const tr of sorted) {

@@ -196,6 +196,10 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
     en: 'Remove color rule',
     ru: 'Удалить правило цвета',
   },
+  colorRuleName: {
+    en: 'Name',
+    ru: 'Название',
+  },
   colorRuleField: {
     en: 'Field',
     ru: 'Поле',
@@ -484,6 +488,7 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
   | 'colorRulesHint'
   | 'addColorRule'
   | 'removeColorRule'
+  | 'colorRuleName'
   | 'colorRuleField'
   | 'colorRuleValue'
   | 'colorRuleJql'
@@ -555,6 +560,7 @@ type IssueLinkFormRow = {
 };
 
 type ColorRuleFormRow = {
+  name: string;
   selectorMode: 'field' | 'jql';
   selectorFieldId: string;
   selectorValue: string;
@@ -637,6 +643,7 @@ function draftToFormValues(draft: GanttScopeSettings): FormShape {
     tooltipFieldIds: [...draft.tooltipFieldIds],
     colorRules: (draft.colorRules ?? []).map(
       (r): ColorRuleFormRow => ({
+        name: r.name ?? '',
         selectorMode: r.selector.mode,
         selectorFieldId: r.selector.fieldId ?? '',
         selectorValue: r.selector.value ?? '',
@@ -676,15 +683,19 @@ function formValuesToPatch(values: FormShape): Partial<GanttScopeSettings> {
       : { mode: 'jql' as const, jql: row.jql }
   );
 
-  const colorRules: ColorRule[] = (values.colorRules ?? []).map(row => ({
-    selector: {
-      mode: row.selectorMode,
-      fieldId: row.selectorMode === 'field' ? row.selectorFieldId : undefined,
-      value: row.selectorMode === 'field' ? row.selectorValue : undefined,
-      jql: row.selectorMode === 'jql' ? row.selectorJql : undefined,
-    },
-    color: row.color,
-  }));
+  const colorRules: ColorRule[] = (values.colorRules ?? []).map(row => {
+    const name = row.name.trim();
+    return {
+      ...(name ? { name } : {}),
+      selector: {
+        mode: row.selectorMode,
+        fieldId: row.selectorMode === 'field' ? row.selectorFieldId : undefined,
+        value: row.selectorMode === 'field' ? row.selectorValue : undefined,
+        jql: row.selectorMode === 'jql' ? row.selectorJql : undefined,
+      },
+      color: row.color,
+    };
+  });
 
   const rows = values.issueLinkRows ?? [];
   const issueLinkTypesToInclude = values.includeIssueLinks
@@ -1027,6 +1038,7 @@ const ColorRulesSection: React.FC<ColorRulesSectionProps> = ({
             {listFields.length > 0 ? (
               <ListColumnsHeader
                 columns={[
+                  { label: texts.colorRuleName, width: 140 },
                   { label: texts.ruleMatchBy, width: 130 },
                   { label: `${texts.colorRuleField} / ${texts.colorRuleJql}`, flex: 1 },
                   { label: texts.colorRuleColor, width: 120 },
@@ -1036,8 +1048,20 @@ const ColorRulesSection: React.FC<ColorRulesSectionProps> = ({
             ) : (
               <EmptyListPlaceholder>{texts.emptyColorRules}</EmptyListPlaceholder>
             )}
-            {listFields.map(({ key, name, ...restField }) => (
+            {listFields.map(({ key, name, ...restField }, index) => (
               <div key={key} className="jh-gantt-mapping-row">
+                <Form.Item
+                  {...restField}
+                  name={[name, 'name']}
+                  aria-label={texts.colorRuleName}
+                  className="jh-gantt-form-item-mb-0 jh-gantt-form-item-w-140"
+                >
+                  <Input
+                    autoComplete="off"
+                    placeholder={texts.colorRuleName}
+                    data-testid={`gantt-color-rule-name-${index}`}
+                  />
+                </Form.Item>
                 <Form.Item
                   {...restField}
                   name={[name, 'selectorMode']}
@@ -1151,6 +1175,7 @@ const ColorRulesSection: React.FC<ColorRulesSectionProps> = ({
               type="dashed"
               onClick={() =>
                 add({
+                  name: '',
                   selectorMode: 'field',
                   selectorFieldId: '',
                   selectorValue: '',

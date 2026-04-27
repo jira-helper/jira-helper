@@ -251,6 +251,22 @@ describe('GanttSettingsModal', () => {
     });
   });
 
+  it('persists color rule name from the bar colors section', async () => {
+    const user = userEvent.setup();
+    const props = renderModal();
+
+    await user.click(screen.getByRole('button', { name: /add color rule/i }));
+    await user.type(screen.getByTestId('gantt-color-rule-name-0'), 'Critical work');
+
+    await waitFor(() => {
+      const lastCall = props.onDraftChange.mock.calls.at(-1)?.[0] as Partial<GanttScopeSettings> | undefined;
+      expect(lastCall?.colorRules?.[0]).toMatchObject({
+        name: 'Critical work',
+        color: '#FF5630',
+      });
+    });
+  });
+
   it('calls onScopeLevelChange when scope level changes', async () => {
     const user = userEvent.setup();
     const props = renderModal();

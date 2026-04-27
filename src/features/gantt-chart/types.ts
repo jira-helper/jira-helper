@@ -38,6 +38,8 @@ export type ExclusionFilter = {
  * Rule that assigns a bar fill color when the selector matches (field mode evaluated when computing bars; JQL reserved).
  */
 export type ColorRule = {
+  /** Human-readable label shown in the legend. Legacy unnamed rules fall back to selector text. */
+  name?: string;
   selector: { mode: 'field' | 'jql'; fieldId?: string; value?: string; jql?: string };
   color: string;
 };

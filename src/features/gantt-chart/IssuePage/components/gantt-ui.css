@@ -463,6 +463,19 @@
   margin-bottom: 6px;
 }
 
+.jh-gantt-tooltip-status-history {
+  margin-bottom: 6px;
+}
+
+.jh-gantt-tooltip-status-history-title {
+  font-weight: 600;
+}
+
+.jh-gantt-tooltip-status-history-list {
+  margin: 2px 0 0;
+  padding-left: 16px;
+}
+
 .jh-gantt-tooltip-field-label {
   color: var(--ds-text-subtle, #5e6c84);
 }

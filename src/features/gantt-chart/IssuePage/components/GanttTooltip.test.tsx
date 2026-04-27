@@ -103,4 +103,57 @@ describe('GanttTooltip', () => {
 
     expect(screen.queryByTestId('gantt-tooltip-color-overridden')).toBeNull();
   });
+
+  it('shows status history when status sections are enabled', () => {
+    renderTooltip(
+      makeBar({
+        statusSections: [
+          {
+            statusName: 'ToDo',
+            category: 'todo',
+            startDate: new Date('2026-01-02T00:00:00.000Z'),
+            endDate: new Date('2026-01-03T03:02:01.000Z'),
+          },
+          {
+            statusName: 'Developing',
+            category: 'inProgress',
+            startDate: new Date('2026-01-03T03:02:01.000Z'),
+            endDate: new Date('2026-01-03T03:03:11.000Z'),
+          },
+          {
+            statusName: 'ToDo',
+            category: 'todo',
+            startDate: new Date('2026-01-03T03:03:11.000Z'),
+            endDate: new Date('2026-01-12T06:07:16.000Z'),
+          },
+        ],
+      }),
+      { x: 0, y: 0 },
+      true
+    );
+
+    expect(screen.getByTestId('gantt-tooltip-status-history')).toHaveTextContent('Status History:');
+    expect(screen.getByText('ToDo: 2026-01-02 - 2026-01-03 (1d 3h 2m 1sec)')).toBeInTheDocument();
+    expect(screen.getByText('Developing: 2026-01-03 (1m 10sec)')).toBeInTheDocument();
+    expect(screen.getByText('ToDo: 2026-01-03 - 2026-01-12 (1w 2d 3h 4m 5sec)')).toBeInTheDocument();
+  });
+
+  it('does not show status history when status sections are disabled', () => {
+    renderTooltip(
+      makeBar({
+        statusSections: [
+          {
+            statusName: 'ToDo',
+            category: 'todo',
+            startDate: new Date('2026-01-02T00:00:00.000Z'),
+            endDate: new Date('2026-01-03T00:00:00.000Z'),
+          },
+        ],
+      }),
+      { x: 0, y: 0 },
+      false
+    );
+
+    expect(screen.queryByTestId('gantt-tooltip-status-history')).toBeNull();
+  });
 });

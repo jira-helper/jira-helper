@@ -556,38 +556,19 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
           />
         </div>
 
-        {jqlValidation.error ? (
-          <span data-testid="gantt-quick-filters-search-error" data-error="true">
-            <Tooltip title={texts.quickFiltersJqlInvalidPrefix.replace('{error}', jqlValidation.error)}>
-              <Input
-                size="small"
-                allowClear
-                status="error"
-                prefix={<SearchOutlined className="jh-gantt-toolbar-search-icon" aria-hidden />}
-                placeholder={searchPlaceholder}
-                value={quickFilterSearch}
-                onChange={e => onQuickFilterSearchChange(e.target.value)}
-                onKeyDown={stopJiraHotkeys}
-                onKeyUp={stopJiraHotkeys}
-                aria-label={searchPlaceholder}
-                aria-invalid
-                data-testid="gantt-quick-filters-search"
-                className={
-                  quickFilterSearchMode === 'jql'
-                    ? 'jh-gantt-quick-filter-input--jql'
-                    : 'jh-gantt-quick-filter-input--text'
-                }
-              />
-            </Tooltip>
-            <span data-testid="gantt-quick-filters-jql-parser-message" className="jh-gantt-sr-only" aria-hidden>
-              {jqlValidation.error}
-            </span>
-          </span>
-        ) : (
-          <span data-testid="gantt-quick-filters-search-wrapper" data-error="false">
+        <span
+          data-testid={jqlValidation.error ? 'gantt-quick-filters-search-error' : 'gantt-quick-filters-search-wrapper'}
+          data-error={jqlValidation.error ? 'true' : 'false'}
+        >
+          <Tooltip
+            title={
+              jqlValidation.error ? texts.quickFiltersJqlInvalidPrefix.replace('{error}', jqlValidation.error) : ''
+            }
+          >
             <Input
               size="small"
               allowClear
+              status={jqlValidation.error ? 'error' : undefined}
               prefix={<SearchOutlined className="jh-gantt-toolbar-search-icon" aria-hidden />}
               placeholder={searchPlaceholder}
               value={quickFilterSearch}
@@ -595,6 +576,7 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
               onKeyDown={stopJiraHotkeys}
               onKeyUp={stopJiraHotkeys}
               aria-label={searchPlaceholder}
+              aria-invalid={jqlValidation.error ? true : undefined}
               data-testid="gantt-quick-filters-search"
               className={
                 quickFilterSearchMode === 'jql'
@@ -602,8 +584,13 @@ export const GanttToolbar: React.FC<GanttToolbarProps> = ({
                   : 'jh-gantt-quick-filter-input--text'
               }
             />
-          </span>
-        )}
+          </Tooltip>
+          {jqlValidation.error ? (
+            <span data-testid="gantt-quick-filters-jql-parser-message" className="jh-gantt-sr-only" aria-hidden>
+              {jqlValidation.error}
+            </span>
+          ) : null}
+        </span>
 
         {showSaveJqlButton ? (
           <Popover

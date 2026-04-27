@@ -336,4 +336,36 @@ describe('computeStatusSections', () => {
       category: 'done',
     });
   });
+
+  it('ignores no-op transitions from a status to itself even when categories differ', () => {
+    const transitions: StatusTransition[] = [
+      transition({
+        timestamp: '2024-06-03T00:00:00.000Z',
+        fromStatus: 'Open',
+        toStatus: 'Open',
+        fromCategory: 'todo',
+        toCategory: 'done',
+      }),
+      transition({
+        timestamp: '2024-06-05T00:00:00.000Z',
+        fromStatus: 'Open',
+        toStatus: 'In Progress',
+        fromCategory: 'todo',
+        toCategory: 'inProgress',
+      }),
+    ];
+
+    const sections = computeStatusSections(transitions, barStart, barEnd);
+    expect(sections).toHaveLength(2);
+    expect(sections[0]).toMatchObject({
+      statusName: 'Open',
+      category: 'todo',
+      startDate: barStart,
+      endDate: new Date('2024-06-05T00:00:00.000Z'),
+    });
+    expect(sections[1]).toMatchObject({
+      statusName: 'In Progress',
+      category: 'inProgress',
+    });
+  });
 });
