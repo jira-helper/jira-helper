@@ -79,19 +79,32 @@ function setupDi(container: Container) {
 }
 
 describe('PersonLimitsBoardPage — registerSettings', () => {
+  let pages: PersonLimitsBoardPage[] = [];
+
+  function createPage(): PersonLimitsBoardPage {
+    const page = new PersonLimitsBoardPage(globalContainer);
+    pages.push(page);
+    return page;
+  }
+
   beforeEach(() => {
     vi.mocked(registerSettings).mockClear();
     useLocalSettingsStore.getState().updateSettings({ locale: 'auto' });
     document.body.innerHTML = '<div id="subnav-title"></div><div id="ghx-pool"></div>';
     setupDi(globalContainer);
+    pages = [];
   });
 
   afterEach(() => {
+    // Unmount React roots and observers before JSDOM teardown; async work otherwise
+    // can touch `window` after the environment is torn down (flaky CI).
+    pages.forEach(page => page.clear());
+    pages = [];
     document.body.innerHTML = '';
   });
 
   it('registers board settings tab when canEdit and person limits property is non-empty', () => {
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     const editData = {
       canEdit: true,
       rapidListConfig: {
@@ -116,7 +129,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
 
   it('uses Russian tab title when local settings locale is ru', () => {
     useLocalSettingsStore.getState().updateSettings({ locale: 'ru' });
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
     expect(registerSettings).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,7 +146,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
       value: new MockLocaleProvider('ru'),
     });
 
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
 
     expect(registerSettings).toHaveBeenCalledWith(
@@ -144,7 +157,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
   });
 
   it('still registers when canEdit is false (read-only viewers can inspect/tweak locally)', () => {
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
     expect(registerSettings).toHaveBeenCalledTimes(1);
     expect(registerSettings).toHaveBeenCalledWith(
@@ -156,7 +169,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
   });
 
   it('registers when canEdit and person limits property is empty', () => {
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, { limits: [] }]);
     expect(registerSettings).toHaveBeenCalledTimes(1);
     expect(registerSettings).toHaveBeenCalledWith(
@@ -168,7 +181,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
   });
 
   it('registers when canEdit and person limits property is null', () => {
-    const page = new PersonLimitsBoardPage(globalContainer);
+    const page = createPage();
     page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, null]);
     expect(registerSettings).toHaveBeenCalledTimes(1);
     expect(registerSettings).toHaveBeenCalledWith(
@@ -191,7 +204,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     }
 
     it('passes board swimlanes to the registered tab when strategy is "custom"', () => {
-      const page = new PersonLimitsBoardPage(globalContainer);
+      const page = createPage();
       page.apply([
         {
           canEdit: true,
@@ -211,7 +224,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     });
 
     it('passes empty swimlanes to the registered tab when strategy is not "custom"', () => {
-      const page = new PersonLimitsBoardPage(globalContainer);
+      const page = createPage();
       page.apply([
         {
           canEdit: true,
@@ -233,7 +246,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     });
 
     it('passes empty swimlanes when swimlanesConfig is missing entirely', () => {
-      const page = new PersonLimitsBoardPage(globalContainer);
+      const page = createPage();
       page.apply([{ canEdit: true, rapidListConfig: { mappedColumns: [] } }, minimalPersonLimits]);
 
       expect(getRegisteredSwimlanes()).toHaveLength(0);
@@ -242,7 +255,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     it('enables runtime swimlanes when strategy is "custom"', () => {
       const setSwimlanesActive = vi.spyOn(globalContainer.inject(boardRuntimeModelToken).model, 'setSwimlanesActive');
 
-      const page = new PersonLimitsBoardPage(globalContainer);
+      const page = createPage();
       page.apply([
         {
           canEdit: true,
@@ -258,7 +271,7 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     it('disables runtime swimlanes when strategy is not "custom"', () => {
       const setSwimlanesActive = vi.spyOn(globalContainer.inject(boardRuntimeModelToken).model, 'setSwimlanesActive');
 
-      const page = new PersonLimitsBoardPage(globalContainer);
+      const page = createPage();
       page.apply([
         {
           canEdit: true,

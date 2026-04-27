@@ -43,7 +43,7 @@ export default defineConfig({
       exclude: ['src/**/*.stories.tsx'],
       reporter: ['lcov'],
     },
-    exclude: ['src/**/*.stories.{ts,tsx}', 'tests/visual/**', 'node_modules/**'],
+    exclude: ['src/**/*.stories.{ts,tsx}', 'tests/visual/**', 'node_modules/**', '.worktrees/**'],
   },
   resolve: {
     alias: {
