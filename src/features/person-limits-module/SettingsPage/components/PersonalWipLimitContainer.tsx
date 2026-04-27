@@ -426,6 +426,8 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
           buildAvatarUrl={buildAvatarUrl}
           onDelete={(id: number) => settingsUi.deleteLimit(id)}
           onEdit={(id: number) => settingsUi.setEditingId(id)}
+          onMove={(id, direction) => settingsUi.moveLimit(id, direction)}
+          onMovePerson={(id, personName, direction) => settingsUi.movePersonInLimit(id, personName, direction)}
         />
       </div>
     </>

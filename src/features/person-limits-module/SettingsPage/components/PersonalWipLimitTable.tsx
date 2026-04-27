@@ -11,6 +11,8 @@ export interface PersonalWipLimitTableProps {
   limits: PersonLimit[];
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
+  onMove: (id: number, direction: 'up' | 'down') => void;
+  onMovePerson: (limitId: number, personName: string, direction: 'up' | 'down') => void;
   /**
    * Optional avatar URL builder. When provided, persons in the table are
    * displayed with a 16x16 avatar in front of the name.
@@ -35,6 +37,8 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
   limits,
   onDelete,
   onEdit,
+  onMove,
+  onMovePerson,
   buildAvatarUrl,
 }) => {
   const columns = [
@@ -47,12 +51,34 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
         return (
           <div data-testid="person-limit-table-persons-cell" className={styles.personsCell}>
             {persons.map((p, idx) => (
-              <span key={p.name} data-person-name={p.name} className={styles.personToken}>
-                {buildAvatarUrl && (
-                  <img src={buildAvatarUrl(p.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+              <span key={p.name} data-person-name={p.name} className={styles.personRow}>
+                <span className={styles.personToken}>
+                  {buildAvatarUrl && (
+                    <img src={buildAvatarUrl(p.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+                  )}
+                  <span className={styles.personName}>{p.displayName || p.name}</span>
+                  {idx < persons.length - 1 && <span style={{ marginRight: 2 }}>,</span>}
+                </span>
+                {persons.length > 1 && (
+                  <span className={styles.personMoveControls}>
+                    <Button
+                      type="link"
+                      size="small"
+                      disabled={idx === 0}
+                      onClick={() => onMovePerson(Number(record.id), p.name, 'up')}
+                    >
+                      {texts.moveUp}
+                    </Button>
+                    <Button
+                      type="link"
+                      size="small"
+                      disabled={idx === persons.length - 1}
+                      onClick={() => onMovePerson(Number(record.id), p.name, 'down')}
+                    >
+                      {texts.moveDown}
+                    </Button>
+                  </span>
                 )}
-                <span className={styles.personName}>{p.displayName || p.name}</span>
-                {idx < persons.length - 1 && <span style={{ marginRight: 2 }}>,</span>}
               </span>
             ))}
           </div>
@@ -121,8 +147,14 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
       title: texts.actions,
       key: 'actions',
       className: styles.actionsColumn,
-      render: (_: unknown, record: PersonLimit) => (
-        <Space split={<span>|</span>}>
+      render: (_: unknown, record: PersonLimit, index: number) => (
+        <Space split={<span>|</span>} wrap>
+          <Button type="link" disabled={index === 0} onClick={() => onMove(Number(record.id), 'up')}>
+            {texts.moveUp}
+          </Button>
+          <Button type="link" disabled={index === limits.length - 1} onClick={() => onMove(Number(record.id), 'down')}>
+            {texts.moveDown}
+          </Button>
           <Button type="link" danger onClick={() => onDelete(Number(record.id))}>
             {texts.delete}
           </Button>

@@ -69,11 +69,29 @@ const mockLimits: PersonLimit[] = [
 ];
 
 export const EmptyState: Story = {
-  render: () => <PersonalWipLimitTable texts={mockTexts} limits={[]} onDelete={() => {}} onEdit={() => {}} />,
+  render: () => (
+    <PersonalWipLimitTable
+      texts={mockTexts}
+      limits={[]}
+      onDelete={() => {}}
+      onEdit={() => {}}
+      onMove={() => {}}
+      onMovePerson={() => {}}
+    />
+  ),
 };
 
 export const WithLimits: Story = {
-  render: () => <PersonalWipLimitTable texts={mockTexts} limits={mockLimits} onDelete={() => {}} onEdit={() => {}} />,
+  render: () => (
+    <PersonalWipLimitTable
+      texts={mockTexts}
+      limits={mockLimits}
+      onDelete={() => {}}
+      onEdit={() => {}}
+      onMove={() => {}}
+      onMovePerson={() => {}}
+    />
+  ),
 };
 
 export const WithMixedShowAllPersonIssues: Story = {
@@ -109,7 +127,16 @@ export const WithMixedShowAllPersonIssues: Story = {
       },
     ];
 
-    return <PersonalWipLimitTable texts={mockTexts} limits={limits} onDelete={() => {}} onEdit={() => {}} />;
+    return (
+      <PersonalWipLimitTable
+        texts={mockTexts}
+        limits={limits}
+        onDelete={() => {}}
+        onEdit={() => {}}
+        onMove={() => {}}
+        onMovePerson={() => {}}
+      />
+    );
   },
 };
 
@@ -130,6 +157,15 @@ export const WithAllColumnsAndSwimlanes: Story = {
       showAllPersonIssues: true,
     };
 
-    return <PersonalWipLimitTable texts={mockTexts} limits={[limitWithAll]} onDelete={() => {}} onEdit={() => {}} />;
+    return (
+      <PersonalWipLimitTable
+        texts={mockTexts}
+        limits={[limitWithAll]}
+        onDelete={() => {}}
+        onEdit={() => {}}
+        onMove={() => {}}
+        onMovePerson={() => {}}
+      />
+    );
   },
 };

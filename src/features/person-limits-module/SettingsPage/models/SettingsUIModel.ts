@@ -104,6 +104,42 @@ export class SettingsUIModel {
     this.limits = limits;
   }
 
+  /** Moves a limit by one position. Boundary rows and unknown ids are no-ops. */
+  moveLimit(id: number, direction: 'up' | 'down'): void {
+    const currentIndex = this.limits.findIndex(limit => limit.id === id);
+    const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= this.limits.length) {
+      return;
+    }
+
+    const nextLimits = [...this.limits];
+    [nextLimits[currentIndex], nextLimits[nextIndex]] = [nextLimits[nextIndex], nextLimits[currentIndex]];
+    this.limits = nextLimits;
+  }
+
+  /** Moves one person by one position inside a multi-person limit. */
+  movePersonInLimit(limitId: number, personName: string, direction: 'up' | 'down'): void {
+    const limitIndex = this.limits.findIndex(limit => limit.id === limitId);
+    if (limitIndex === -1) {
+      return;
+    }
+
+    const limit = this.limits[limitIndex];
+    const currentIndex = limit.persons.findIndex(person => person.name === personName);
+    const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex === -1 || nextIndex < 0 || nextIndex >= limit.persons.length) {
+      return;
+    }
+
+    const nextPersons = [...limit.persons];
+    [nextPersons[currentIndex], nextPersons[nextIndex]] = [nextPersons[nextIndex], nextPersons[currentIndex]];
+    const nextLimits = [...this.limits];
+    nextLimits[limitIndex] = { ...limit, persons: nextPersons };
+    this.limits = nextLimits;
+  }
+
   isDuplicate(personNames: string[], columns: string[], swimlanes: string[], issueTypes?: string[]): boolean {
     return this.limits.some(l => {
       const nameMatch = l.persons.some(p => personNames.includes(p.name));

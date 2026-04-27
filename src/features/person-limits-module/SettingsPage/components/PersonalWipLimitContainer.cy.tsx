@@ -38,6 +38,16 @@ const mockSearchUsers = async (query: string): Promise<JiraUser[]> => [
   },
 ];
 
+const samplePersonLimit = (overrides: Partial<PersonLimit> = {}): PersonLimit => ({
+  id: 1,
+  persons: [{ name: 'testuser', displayName: 'Test User', self: 'https://test.com/user' }],
+  limit: 5,
+  columns: [],
+  swimlanes: [],
+  showAllPersonIssues: true,
+  ...overrides,
+});
+
 describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
   const mockColumns = [
     { id: 'col1', name: 'To Do', isKanPlanColumn: false },
@@ -1082,6 +1092,168 @@ describe('PersonalWipLimitContainer - Bug fixes (C1-C8)', () => {
         cy.get('[data-person-name="alice"]').should('contain.text', 'Alice');
         cy.get('[data-person-name="bob"]').should('contain.text', 'Bob');
         cy.get('[data-person-name="carol"]').should('contain.text', 'Carol');
+      });
+    });
+  });
+
+  describe('Reordering limits', () => {
+    it('should move a personal WIP limit down in the table', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 1,
+          persons: [{ name: 'alice', displayName: 'Alice', self: 'http://jira/a' }],
+        })
+      );
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 2,
+          persons: [{ name: 'bob', displayName: 'Bob', self: 'http://jira/b' }],
+        })
+      );
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('.person-row').eq(0).should('contain.text', 'Alice');
+      cy.get('.person-row').eq(1).should('contain.text', 'Bob');
+
+      cy.get('.person-row-1').contains('button', 'Move down').click();
+
+      cy.get('.person-row').eq(0).should('contain.text', 'Bob');
+      cy.get('.person-row').eq(1).should('contain.text', 'Alice');
+      cy.then(() => {
+        expect(settingsUi().limits.map(limit => limit.id)).to.deep.equal([2, 1]);
+      });
+
+      cy.get('.person-row-1').contains('button', 'Move up').click();
+
+      cy.get('.person-row').eq(0).should('contain.text', 'Alice');
+      cy.get('.person-row').eq(1).should('contain.text', 'Bob');
+      cy.then(() => {
+        expect(settingsUi().limits.map(limit => limit.id)).to.deep.equal([1, 2]);
+      });
+    });
+
+    it('should disable move buttons at list boundaries', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 1,
+          persons: [{ name: 'alice', displayName: 'Alice', self: 'http://jira/a' }],
+        })
+      );
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 2,
+          persons: [{ name: 'bob', displayName: 'Bob', self: 'http://jira/b' }],
+        })
+      );
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('.person-row-1').contains('button', 'Move up').should('be.disabled');
+      cy.get('.person-row-2').contains('button', 'Move down').should('be.disabled');
+    });
+  });
+
+  describe('Reordering persons inside a multi-person limit', () => {
+    it('should move a person inside the same limit row', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 1,
+          persons: [
+            { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+            { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+            { name: 'carol', displayName: 'Carol', self: 'http://jira/c' },
+          ],
+        })
+      );
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('.person-row-1 [data-person-name]').then($persons => {
+        expect([...$persons].map(person => person.getAttribute('data-person-name'))).to.deep.equal([
+          'alice',
+          'bob',
+          'carol',
+        ]);
+      });
+
+      cy.get('.person-row-1 [data-person-name="bob"]').contains('button', 'Move up').click();
+
+      cy.get('.person-row-1 [data-person-name]').then($persons => {
+        expect([...$persons].map(person => person.getAttribute('data-person-name'))).to.deep.equal([
+          'bob',
+          'alice',
+          'carol',
+        ]);
+      });
+      cy.then(() => {
+        expect(settingsUi().limits.map(limit => limit.id)).to.deep.equal([1]);
+        expect(settingsUi().limits[0].persons.map(person => person.name)).to.deep.equal(['bob', 'alice', 'carol']);
+      });
+
+      cy.get('.person-row-1 [data-person-name="alice"]').contains('button', 'Move down').click();
+
+      cy.get('.person-row-1 [data-person-name]').then($persons => {
+        expect([...$persons].map(person => person.getAttribute('data-person-name'))).to.deep.equal([
+          'bob',
+          'carol',
+          'alice',
+        ]);
+      });
+      cy.then(() => {
+        expect(settingsUi().limits[0].persons.map(person => person.name)).to.deep.equal(['bob', 'carol', 'alice']);
+      });
+    });
+
+    it('should not show person move controls for a single-person limit', () => {
+      const onAddLimit = cy.stub().as('onAddLimit');
+
+      settingsUi().addLimit(
+        samplePersonLimit({
+          id: 1,
+          persons: [{ name: 'alice', displayName: 'Alice', self: 'http://jira/a' }],
+        })
+      );
+
+      cy.mount(
+        <WrappedContainer
+          columns={mockColumns}
+          swimlanes={mockSwimlanes}
+          searchUsers={mockSearchUsers}
+          onAddLimit={onAddLimit}
+        />
+      );
+
+      cy.get('.person-row-1 [data-person-name="alice"]').within(() => {
+        cy.contains('button', 'Move up').should('not.exist');
+        cy.contains('button', 'Move down').should('not.exist');
       });
     });
   });

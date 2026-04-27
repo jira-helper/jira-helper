@@ -208,6 +208,72 @@ describe('SettingsUIModel', () => {
     });
   });
 
+  describe('moveLimit', () => {
+    beforeEach(() => {
+      model.limits = [
+        sampleLimit({ id: 1, persons: [{ name: 'first', self: '' }] }),
+        sampleLimit({ id: 2, persons: [{ name: 'second', self: '' }] }),
+        sampleLimit({ id: 3, persons: [{ name: 'third', self: '' }] }),
+      ];
+    });
+
+    it('should move a limit up', () => {
+      model.moveLimit(2, 'up');
+
+      expect(model.limits.map(limit => limit.id)).toEqual([2, 1, 3]);
+    });
+
+    it('should move a limit down', () => {
+      model.moveLimit(2, 'down');
+
+      expect(model.limits.map(limit => limit.id)).toEqual([1, 3, 2]);
+    });
+
+    it('should keep order unchanged at boundaries or when id is missing', () => {
+      model.moveLimit(1, 'up');
+      model.moveLimit(3, 'down');
+      model.moveLimit(999, 'down');
+
+      expect(model.limits.map(limit => limit.id)).toEqual([1, 2, 3]);
+    });
+  });
+
+  describe('movePersonInLimit', () => {
+    beforeEach(() => {
+      model.limits = [
+        sampleLimit({
+          id: 1,
+          persons: [
+            { name: 'alice', displayName: 'Alice', self: 'http://jira/a' },
+            { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
+            { name: 'carol', displayName: 'Carol', self: 'http://jira/c' },
+          ],
+        }),
+      ];
+    });
+
+    it('should move a person up inside a multi-person limit', () => {
+      model.movePersonInLimit(1, 'bob', 'up');
+
+      expect(model.limits[0].persons.map(person => person.name)).toEqual(['bob', 'alice', 'carol']);
+    });
+
+    it('should move a person down inside a multi-person limit', () => {
+      model.movePersonInLimit(1, 'bob', 'down');
+
+      expect(model.limits[0].persons.map(person => person.name)).toEqual(['alice', 'carol', 'bob']);
+    });
+
+    it('should keep order unchanged at boundaries or when limit/person is missing', () => {
+      model.movePersonInLimit(1, 'alice', 'up');
+      model.movePersonInLimit(1, 'carol', 'down');
+      model.movePersonInLimit(999, 'bob', 'down');
+      model.movePersonInLimit(1, 'nobody', 'down');
+
+      expect(model.limits[0].persons.map(person => person.name)).toEqual(['alice', 'bob', 'carol']);
+    });
+  });
+
   describe('isDuplicate', () => {
     beforeEach(() => {
       model.limits = [

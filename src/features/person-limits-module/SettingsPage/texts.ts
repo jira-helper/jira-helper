@@ -69,6 +69,14 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'Delete',
     ru: 'Удалить',
   },
+  moveUp: {
+    en: 'Move up',
+    ru: 'Вверх',
+  },
+  moveDown: {
+    en: 'Move down',
+    ru: 'Вниз',
+  },
   allColumns: {
     en: 'All columns',
     ru: 'Все колонки',
