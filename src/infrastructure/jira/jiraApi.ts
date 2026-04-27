@@ -15,6 +15,7 @@ import { Ok, Err, Result } from 'ts-results';
 import { defaultHeaders } from 'src/shared/defaultHeaders';
 import manifest from '../../../manifest.json';
 import { JiraField, JiraIssue, JiraIssueLinkType, JiraStatus } from './types';
+import { getJiraWebBaseUrl } from './jiraWebContext';
 
 const PACKAGE_VERSION = manifest.version;
 
@@ -27,28 +28,10 @@ const boardEditDataURL = 'greenhopper/1.0/rapidviewconfig/editmodel.json?rapidVi
 
 const invalidatedProperties: Record<string, boolean> = {};
 
-// Function to get the base URL based on Jira's installation type
-const getContextPath = (() => {
-  const { location } = window;
-  // @ts-expect-error dont know what is contextPath
-  // eslint-disable-next-line prefer-destructuring
-  const contextPath: string | undefined = window.contextPath;
-
-  if (typeof contextPath === 'string') {
-    return `${location.origin}${contextPath}`;
-  }
-
-  if (location.hostname.indexOf('atlassian.net') === -1 && location.toString().split('/')[3] === 'jira') {
-    return `${location.origin}/jira`;
-  }
-
-  return location.origin;
-})();
-
 const EXTENSION_HEADERS = {
   'browser-plugin': `jira-helper/${PACKAGE_VERSION}`,
 };
-const BASE_URL = `${getContextPath}/rest/`;
+const BASE_URL = `${getJiraWebBaseUrl()}/rest/`;
 
 // Configure the Jira request with base plugins
 const requestJira = request([
