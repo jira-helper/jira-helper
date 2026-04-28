@@ -1,6 +1,8 @@
 import { mapStatusCategoryColorToProgressStatus } from 'src/features/sub-tasks-progress/colorSchemas';
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
 import type { ExternalIssueMapped, JiraField } from 'src/infrastructure/jira/types';
+import { resolveProgressBucket } from 'src/shared/status-progress-mapping/utils/resolveProgressBucket';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 import { extractTokensFromRawValue, getFieldValueForJql } from 'src/infrastructure/jira/fields/getFieldValueForJql';
 import type {
   BarStatusCategory,
@@ -25,6 +27,7 @@ export type GanttIssueInput = {
   fields: Record<string, unknown> & {
     summary?: string;
     status?: {
+      id?: string;
       name?: string;
       statusCategory?: {
         key?: string;
@@ -127,15 +130,15 @@ function parseFieldDate(raw: unknown): Date | null {
   return null;
 }
 
-function findFirstTransitionToStatus(
+function findFirstTransitionForStatusId(
   changelog: JiraChangelogInput | null | undefined,
-  statusName: string
+  statusId: string
 ): Date | null {
-  const target = statusName.trim();
+  const target = statusId.trim();
   if (!target) return null;
   const transitions = parseChangelog(changelog);
   for (const t of transitions) {
-    if (t.toStatus.trim() === target) return t.timestamp;
+    if (t.fromStatusId === target || t.toStatusId === target) return t.timestamp;
   }
   return null;
 }
@@ -147,9 +150,9 @@ function resolveSingleMappingDate(mapping: DateMapping, issue: GanttIssueInput):
     return parseFieldDate(issue.fields[id]);
   }
   if (mapping.source === 'statusTransition') {
-    const name = mapping.statusName;
-    if (!name) return null;
-    return findFirstTransitionToStatus(issue.changelog, name);
+    const { statusId } = mapping;
+    if (!statusId) return null;
+    return findFirstTransitionForStatusId(issue.changelog, statusId);
   }
   return null;
 }
@@ -267,6 +270,43 @@ function resolveStatusCategory(issue: GanttIssueInput): BarStatusCategory {
   if (fromKey) return fromKey;
 
   return 'todo';
+}
+
+function resolveStatusCategoryWithMapping(
+  issue: GanttIssueInput,
+  mapping: StatusProgressMapping | undefined
+): BarStatusCategory {
+  const statusId = issue.fields.status?.id;
+  if (statusId && mapping?.[statusId]?.statusId === statusId) {
+    return resolveProgressBucket(statusId, issue.fields.status?.statusCategory?.key ?? '', mapping);
+  }
+
+  return resolveStatusCategory(issue);
+}
+
+function resolveMappedTransitionCategory(
+  statusId: string,
+  rawCategory: string,
+  mapping: StatusProgressMapping | undefined
+): string {
+  if (statusId && mapping?.[statusId]?.statusId === statusId) {
+    return resolveProgressBucket(statusId, 'done', mapping);
+  }
+
+  return rawCategory;
+}
+
+function applyStatusProgressMappingToTransitions(
+  transitions: ReturnType<typeof parseChangelog>,
+  mapping: StatusProgressMapping | undefined
+): ReturnType<typeof parseChangelog> {
+  if (!mapping) return transitions;
+
+  return transitions.map(transition => ({
+    ...transition,
+    fromCategory: resolveMappedTransitionCategory(transition.fromStatusId, transition.fromCategory, mapping),
+    toCategory: resolveMappedTransitionCategory(transition.toStatusId, transition.toCategory, mapping),
+  }));
 }
 
 function issueSummary(issue: GanttIssueInput): string {
@@ -387,10 +427,13 @@ export function computeBars(
       resolvedEnd = endDate;
     }
 
-    const statusCategory = resolveStatusCategory(issue);
+    const statusCategory = resolveStatusCategoryWithMapping(issue, settings.statusProgressMapping);
     const statusName = issue.fields.status?.name ?? '';
 
-    const transitions = parseChangelog(issue.changelog);
+    const transitions = applyStatusProgressMappingToTransitions(
+      parseChangelog(issue.changelog),
+      settings.statusProgressMapping
+    );
     const statusSections: BarStatusSection[] =
       transitions.length > 0
         ? computeStatusSections(transitions, resolvedStart, resolvedEnd, categoryByStatusName)

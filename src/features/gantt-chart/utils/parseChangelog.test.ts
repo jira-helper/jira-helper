@@ -15,7 +15,7 @@ describe('parseChangelog', () => {
     expect(parseChangelog({ histories: [] })).toEqual([]);
   });
 
-  it('parses a single status transition', () => {
+  it('parses a single status transition with ids from from/to and labels from fromString/toString', () => {
     const changelog = {
       histories: [
         {
@@ -38,10 +38,66 @@ describe('parseChangelog', () => {
         timestamp: new Date('2024-01-15T09:00:00.000Z'),
         fromStatus: 'To Do',
         toStatus: 'In Progress',
+        fromStatusId: '10000',
+        toStatusId: '10001',
+        fromStatusName: 'To Do',
+        toStatusName: 'In Progress',
         fromCategory: '',
         toCategory: '',
       },
     ]);
+  });
+
+  it('does not put display names into id fields when from/to are missing', () => {
+    const changelog = {
+      histories: [
+        {
+          created: '2024-01-15T09:00:00.000+0000',
+          items: [
+            {
+              field: 'status',
+              fromString: 'Open',
+              toString: 'Closed',
+              from: null,
+              to: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const [row] = parseChangelog(changelog);
+    expect(row.fromStatusId).toBe('');
+    expect(row.toStatusId).toBe('');
+    expect(row.fromStatusName).toBe('Open');
+    expect(row.toStatusName).toBe('Closed');
+    expect(row.fromStatus).toBe('Open');
+    expect(row.toStatus).toBe('Closed');
+  });
+
+  it('preserves empty-string ids instead of replacing them with display names', () => {
+    const changelog = {
+      histories: [
+        {
+          created: '2024-01-15T09:00:00.000+0000',
+          items: [
+            {
+              field: 'status',
+              fromString: 'Ready for QA',
+              toString: 'Ready for Release',
+              from: '',
+              to: '',
+            },
+          ],
+        },
+      ],
+    };
+
+    const [row] = parseChangelog(changelog);
+    expect(row.fromStatusId).toBe('');
+    expect(row.toStatusId).toBe('');
+    expect(row.fromStatusName).toBe('Ready for QA');
+    expect(row.toStatusName).toBe('Ready for Release');
   });
 
   it('collects multiple transitions and sorts oldest first', () => {
@@ -63,6 +119,8 @@ describe('parseChangelog', () => {
     expect(result).toHaveLength(2);
     expect(result[0].timestamp).toEqual(new Date('2024-01-15T09:00:00.000Z'));
     expect(result[0].fromStatus).toBe('To Do');
+    expect(result[0].fromStatusId).toBe('');
+    expect(result[0].toStatusId).toBe('');
     expect(result[1].timestamp).toEqual(new Date('2024-01-20T10:00:00.000Z'));
     expect(result[1].toStatus).toBe('Done');
   });
@@ -74,7 +132,7 @@ describe('parseChangelog', () => {
           created: '2024-01-15T09:00:00.000+0000',
           items: [
             { field: 'assignee', fromString: 'a', toString: 'b' },
-            { field: 'status', fromString: 'Open', toString: 'Closed' },
+            { field: 'status', fromString: 'Open', toString: 'Closed', from: '1', to: '2' },
             { field: 'priority', fromString: 'Low', toString: 'High' },
           ],
         },
@@ -86,6 +144,10 @@ describe('parseChangelog', () => {
         timestamp: new Date('2024-01-15T09:00:00.000Z'),
         fromStatus: 'Open',
         toStatus: 'Closed',
+        fromStatusId: '1',
+        toStatusId: '2',
+        fromStatusName: 'Open',
+        toStatusName: 'Closed',
         fromCategory: '',
         toCategory: '',
       },
@@ -115,6 +177,10 @@ describe('parseChangelog', () => {
         timestamp: new Date('2024-01-15T09:00:00.000Z'),
         fromStatus: 'A',
         toStatus: 'B',
+        fromStatusId: '',
+        toStatusId: '',
+        fromStatusName: 'A',
+        toStatusName: 'B',
         fromCategory: 'todo',
         toCategory: 'inProgress',
       },
@@ -144,6 +210,10 @@ describe('parseChangelog', () => {
         timestamp: new Date('2024-01-15T09:00:00.000Z'),
         fromStatus: 'A',
         toStatus: 'B',
+        fromStatusId: '',
+        toStatusId: '',
+        fromStatusName: 'A',
+        toStatusName: 'B',
         fromCategory: 'todo',
         toCategory: 'inProgress',
       },
@@ -192,8 +262,8 @@ describe('parseChangelog', () => {
         {
           created: '2024-01-15T09:00:00.000+0000',
           items: [
-            { field: 'status', fromString: 'A', toString: 'B' },
-            { field: 'status', fromString: 'B', toString: 'C' },
+            { field: 'status', fromString: 'A', toString: 'B', from: '10', to: '20' },
+            { field: 'status', fromString: 'B', toString: 'C', from: '20', to: '30' },
           ],
         },
       ],
@@ -202,7 +272,9 @@ describe('parseChangelog', () => {
     const result = parseChangelog(changelog);
     expect(result).toHaveLength(2);
     expect(result[0].toStatus).toBe('B');
+    expect(result[0].toStatusId).toBe('20');
     expect(result[1].fromStatus).toBe('B');
+    expect(result[1].fromStatusId).toBe('20');
     expect(result[0].timestamp).toEqual(result[1].timestamp);
   });
 });

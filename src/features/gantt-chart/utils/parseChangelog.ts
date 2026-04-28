@@ -62,10 +62,19 @@ export function parseChangelog(changelog: JiraChangelogInput | null | undefined)
     for (const item of history.items ?? []) {
       if (item.field !== 'status') continue;
 
+      const fromStatusName = item.fromString ?? '';
+      const toStatusName = item.toString ?? '';
+      const fromStatusId = item.from ?? '';
+      const toStatusId = item.to ?? '';
+
       transitions.push({
         timestamp,
-        fromStatus: item.fromString ?? '',
-        toStatus: item.toString ?? '',
+        fromStatus: fromStatusName,
+        toStatus: toStatusName,
+        fromStatusId,
+        toStatusId,
+        fromStatusName,
+        toStatusName,
         fromCategory: resolveTransitionSideCategory(item.fromStatusCategory),
         toCategory: resolveTransitionSideCategory(item.toStatusCategory),
       });

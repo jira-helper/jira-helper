@@ -1,4 +1,5 @@
 import type { IssueLinkTypeSelection } from 'src/features/sub-tasks-progress/types';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 
 export type { IssueLinkTypeSelection };
 
@@ -8,19 +9,21 @@ export type { IssueLinkTypeSelection };
 export type DateMappingSource = 'dateField' | 'statusTransition';
 
 /**
- * Mapping configuration for one bar endpoint (start or end): either a field id or a status name in the changelog.
+ * Mapping configuration for one bar endpoint (start or end): either a field id or a status transition id.
  *
  * @example Date field mapping
  * { source: 'dateField', fieldId: 'created' }
  *
  * @example Status transition mapping
- * { source: 'statusTransition', statusName: 'Done' }
+ * { source: 'statusTransition', statusId: '10002', statusName: 'Done' }
  */
 export type DateMapping = {
   source: DateMappingSource;
   /** Jira field id when `source` is `dateField`. */
   fieldId?: string;
-  /** Status name to anchor on when `source` is `statusTransition`. */
+  /** Stable Jira status id from changelog `from` / `to` when `source` is `statusTransition`. */
+  statusId?: string;
+  /** Display/debug fallback for legacy rows. Runtime matching must not use this field. */
   statusName?: string;
 };
 
@@ -89,6 +92,8 @@ export type GanttScopeSettings = {
    * resolved settings always normalize to an array via the migration in `GanttSettingsModel`.
    */
   quickFilters?: QuickFilter[];
+  /** Optional Jira status id -> progress bucket overrides for Gantt progress/status calculation. */
+  statusProgressMapping?: StatusProgressMapping;
   /** @deprecated Replaced by built-in quick filter `builtin:hideCompleted`. Kept on type for migration only. */
   hideCompletedTasks?: boolean;
   /** Include subtasks of the root issue in the chart. */
@@ -139,11 +144,24 @@ export type BarStatusSection = {
 
 /**
  * Single changelog-derived status transition with categories for timeline reconstruction.
+ *
+ * Status ids come from Jira changelog `from` / `to`; display labels from `fromString` / `toString`.
+ * `fromStatus` / `toStatus` mirror the display names for legacy call sites (e.g. date mapping by name).
  */
 export type StatusTransition = {
   timestamp: Date;
+  /** Display name before transition (`fromString`). */
   fromStatus: string;
+  /** Display name after transition (`toString`). */
   toStatus: string;
+  /** Jira status id before transition (`from`). */
+  fromStatusId: string;
+  /** Jira status id after transition (`to`). */
+  toStatusId: string;
+  /** Same as `fromStatus`; explicit label for UI / debug. */
+  fromStatusName: string;
+  /** Same as `toStatus`; explicit label for UI / debug. */
+  toStatusName: string;
   fromCategory: string;
   toCategory: string;
 };

@@ -8,6 +8,7 @@ import { resetBoardProperty } from 'src/features/sub-tasks-progress/BoardSetting
 import { ColumnsSettingsContainer } from 'src/features/sub-tasks-progress/BoardSettings/ColumnSettings/ColumnSettings';
 import { CountSettings } from 'src/features/sub-tasks-progress/BoardSettings/CountSettings/CountSettings';
 import { GroupingSettings } from 'src/features/sub-tasks-progress/BoardSettings/GroupingSettings/GroupingSettings';
+import { StatusProgressMappingContainer } from 'src/features/sub-tasks-progress/BoardSettings/StatusProgressMapping/StatusProgressMappingContainer';
 import { UserGuide } from 'src/features/sub-tasks-progress/BoardSettings/UserGuide';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetSettings } from '../SubTaskProgressSettings/hooks/useGetSettings';
@@ -58,6 +59,7 @@ export const BoardSettingsTabContent = () => {
 
       <ColumnsSettingsContainer />
       <CountSettings />
+      <StatusProgressMappingContainer />
 
       <GroupingSettings />
     </div>

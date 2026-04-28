@@ -1,6 +1,7 @@
 import { CustomGroup } from '../../BoardSettings/GroupingSettings/CustomGroups/types';
 
 import { BoardProperty, CountType, GroupFields, IssueLinkTypeSelection } from '../../types';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 
 export type State = {
   data: Required<BoardProperty>;
@@ -10,6 +11,9 @@ export type State = {
     setColumns: (columns: { name: string; enabled: boolean }[]) => void;
     setState: (state: 'initial' | 'loading' | 'loaded') => void;
     setGroupingField: (groupingField: GroupFields) => void;
+    setStatusProgressMapping: (mapping: StatusProgressMapping) => void;
+    removeStatusProgressMapping: (statusId: string) => void;
+    clearStatusProgressMapping: () => void;
     changeCount: (countType: CountType, value: boolean) => void;
     addIgnoredGroup: (group: string) => void;
     removeIgnoredGroup: (group: string) => void;

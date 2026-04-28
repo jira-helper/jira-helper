@@ -2,10 +2,25 @@ import { describe, it, expect } from 'vitest';
 import type { StatusTransition } from '../types';
 import { computeStatusSections, mapCategoryStringToBarStatusCategory } from './computeStatusSections';
 
-function transition(partial: Omit<StatusTransition, 'timestamp'> & { timestamp: string }): StatusTransition {
+function transition(
+  partial: Omit<StatusTransition, 'timestamp' | 'fromStatusId' | 'toStatusId' | 'fromStatusName' | 'toStatusName'> & {
+    timestamp: string;
+    fromStatusId?: string;
+    toStatusId?: string;
+    fromStatusName?: string;
+    toStatusName?: string;
+  }
+): StatusTransition {
+  const { timestamp, fromStatus, toStatus, fromStatusId, toStatusId, fromStatusName, toStatusName, ...rest } = partial;
   return {
-    ...partial,
-    timestamp: new Date(partial.timestamp),
+    ...rest,
+    timestamp: new Date(timestamp),
+    fromStatus,
+    toStatus,
+    fromStatusId: fromStatusId ?? '',
+    toStatusId: toStatusId ?? '',
+    fromStatusName: fromStatusName ?? fromStatus,
+    toStatusName: toStatusName ?? toStatus,
   };
 }
 

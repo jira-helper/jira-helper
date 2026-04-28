@@ -188,10 +188,10 @@ describe('computeBars', () => {
   // computeBars no longer reads that field — quick filters are applied at the presentation layer
   // (see `applyQuickFiltersToBars`).
 
-  it('resolves dates from first changelog transition to configured status', () => {
+  it('resolves dates from first changelog transition to configured status id', () => {
     const settings = scopeSettings({
-      startMappings: [{ source: 'statusTransition', statusName: 'In Progress' }],
-      endMappings: [{ source: 'statusTransition', statusName: 'Done' }],
+      startMappings: [{ source: 'statusTransition', statusId: '10001', statusName: 'Renamed In Progress' }],
+      endMappings: [{ source: 'statusTransition', statusId: '10002', statusName: 'Renamed Done' }],
     });
     const issue = baseIssue({
       fields: {
@@ -202,11 +202,11 @@ describe('computeBars', () => {
         histories: [
           {
             created: '2024-01-05T10:00:00.000Z',
-            items: [{ field: 'status', fromString: 'Open', toString: 'In Progress' }],
+            items: [{ field: 'status', fromString: 'Open', toString: 'In Progress', from: '10000', to: '10001' }],
           },
           {
             created: '2024-01-20T15:00:00.000Z',
-            items: [{ field: 'status', fromString: 'In Progress', toString: 'Done' }],
+            items: [{ field: 'status', fromString: 'In Progress', toString: 'Done', from: '10001', to: '10002' }],
           },
         ],
       },
@@ -218,6 +218,69 @@ describe('computeBars', () => {
     expect(bars[0].startDate.toISOString()).toBe('2024-01-05T10:00:00.000Z');
     expect(bars[0].endDate.toISOString()).toBe('2024-01-20T15:00:00.000Z');
     expect(bars[0].statusCategory).toBe('done');
+  });
+
+  it('does not resolve legacy statusTransition rows by statusName alone', () => {
+    const settings = scopeSettings({
+      startMappings: [{ source: 'statusTransition', statusName: 'In Progress' }],
+      endMappings: [{ source: 'statusTransition', statusName: 'Done' }],
+    });
+    const issue = baseIssue({
+      fields: {
+        summary: 'Legacy changelog issue',
+        status: { name: 'Done', statusCategory: { key: 'done', colorName: 'green' } },
+      },
+      changelog: {
+        histories: [
+          {
+            created: '2024-01-05T10:00:00.000Z',
+            items: [{ field: 'status', fromString: 'Open', toString: 'In Progress', from: '10000', to: '10001' }],
+          },
+          {
+            created: '2024-01-20T15:00:00.000Z',
+            items: [{ field: 'status', fromString: 'In Progress', toString: 'Done', from: '10001', to: '10002' }],
+          },
+        ],
+      },
+    });
+
+    const { bars, missingDateIssues } = computeBars([issue], settings, now);
+
+    expect(bars).toEqual([]);
+    expect(missingDateIssues).toEqual([
+      { issueKey: 'PROJ-1', summary: 'Legacy changelog issue', reason: 'noStartAndEndDate' },
+    ]);
+  });
+
+  it('does not collide when two changelog statuses share the same display name but have different ids', () => {
+    const settings = scopeSettings({
+      startMappings: [{ source: 'statusTransition', statusId: '20001', statusName: 'Review' }],
+      endMappings: [{ source: 'statusTransition', statusId: '20002', statusName: 'Review' }],
+    });
+    const issue = baseIssue({
+      fields: {
+        summary: 'Duplicate display names',
+        status: { name: 'Review', statusCategory: { key: 'indeterminate', colorName: 'yellow' } },
+      },
+      changelog: {
+        histories: [
+          {
+            created: '2024-01-03T08:00:00.000Z',
+            items: [{ field: 'status', fromString: 'Open', toString: 'Review', from: '20000', to: '20001' }],
+          },
+          {
+            created: '2024-01-09T18:00:00.000Z',
+            items: [{ field: 'status', fromString: 'Review', toString: 'Review', from: '20001', to: '20002' }],
+          },
+        ],
+      },
+    });
+
+    const { bars, missingDateIssues } = computeBars([issue], settings, now);
+
+    expect(missingDateIssues).toEqual([]);
+    expect(bars[0].startDate.toISOString()).toBe('2024-01-03T08:00:00.000Z');
+    expect(bars[0].endDate.toISOString()).toBe('2024-01-09T18:00:00.000Z');
   });
 
   it('default label is issue key and summary; tooltipFields follow tooltipFieldIds', () => {
@@ -361,6 +424,101 @@ describe('computeBars', () => {
     });
     const { bars } = computeBars([issue], settings, now);
     expect(bars[0].barColor).toBe('#FF5630');
+  });
+
+  it('uses custom status progress mapping by current Jira status id', () => {
+    const settings = scopeSettings({
+      statusProgressMapping: {
+        '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+      },
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        status: {
+          id: '10001',
+          name: 'Ready for Release',
+          statusCategory: { key: 'new', colorName: 'blue-gray' },
+        },
+      },
+    });
+
+    const { bars } = computeBars([issue], settings, now);
+
+    expect(bars[0].statusCategory).toBe('done');
+    expect(bars[0].statusSections[0].category).toBe('done');
+  });
+
+  it('does not apply custom status progress mapping by matching status name with a different id', () => {
+    const settings = scopeSettings({
+      statusProgressMapping: {
+        '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+      },
+    });
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        status: {
+          id: '10002',
+          name: 'Ready for Release',
+          statusCategory: { key: 'new', colorName: 'blue-gray' },
+        },
+      },
+    });
+
+    const { bars } = computeBars([issue], settings, now);
+
+    expect(bars[0].statusCategory).toBe('todo');
+  });
+
+  it('keeps default Jira statusCategory behavior when statusProgressMapping is missing', () => {
+    const issue = baseIssue({
+      fields: {
+        ...baseIssue().fields,
+        status: {
+          id: '10001',
+          name: 'Ready for Release',
+          statusCategory: { key: 'indeterminate', colorName: 'yellow' },
+        },
+      },
+    });
+
+    const { bars } = computeBars([issue], scopeSettings(), now);
+
+    expect(bars[0].statusCategory).toBe('inProgress');
+  });
+
+  it('uses custom status progress mapping for changelog status sections by status id', () => {
+    const settings = scopeSettings({
+      statusProgressMapping: {
+        '10002': { statusId: '10002', statusName: 'Ready for Release', bucket: 'done' },
+      },
+    });
+    const issue = baseIssue({
+      fields: {
+        summary: 'Mapped changelog issue',
+        status: { id: '10002', name: 'Ready for Release', statusCategory: { key: 'new', colorName: 'blue-gray' } },
+        customfield_start: '2024-06-01',
+        customfield_end: '2024-06-10',
+      },
+      changelog: {
+        histories: [
+          {
+            created: '2024-06-03T00:00:00.000Z',
+            items: [{ field: 'status', fromString: 'Open', toString: 'Ready for Release', from: '10000', to: '10002' }],
+          },
+        ],
+      },
+    });
+
+    const { bars } = computeBars([issue], settings, now);
+
+    expect(bars[0].statusSections[1]).toEqual({
+      statusName: 'Ready for Release',
+      category: 'done',
+      startDate: new Date('2024-06-03T00:00:00.000Z'),
+      endDate: new Date('2024-06-10'),
+    });
   });
 
   // A1: composite Jira values (project, assignee, status, priority...) must be matchable

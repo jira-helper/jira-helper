@@ -2,6 +2,8 @@ import type { GanttScopeSettings, GanttSettingsStorage, QuickFilter, SettingsSco
 import { buildScopeKey, resolveSettings } from '../utils/resolveSettings';
 import type { Logger } from 'src/infrastructure/logging/Logger';
 import { BUILT_IN_QUICK_FILTERS } from '../quickFilters/builtIns';
+import { PROGRESS_BUCKET_VALUES } from 'src/shared/status-progress-mapping/constants';
+import type { ProgressBucket } from 'src/shared/status-progress-mapping/types';
 
 export const GANTT_SETTINGS_STORAGE_KEY = 'jh-gantt-settings';
 
@@ -21,6 +23,32 @@ type ParsedPayload = {
   preferredScopeLevel: SettingsScope['level'] | null;
 };
 
+function isProgressBucket(value: unknown): value is ProgressBucket {
+  return typeof value === 'string' && PROGRESS_BUCKET_VALUES.includes(value as (typeof PROGRESS_BUCKET_VALUES)[number]);
+}
+
+function normalizeStatusProgressMapping(settings: Record<string, unknown>): void {
+  const raw = settings.statusProgressMapping;
+  if (raw === undefined) return;
+  if (!isRecord(raw)) {
+    delete settings.statusProgressMapping;
+    return;
+  }
+
+  const normalized: Record<string, { statusId: string; statusName: string; bucket: 'todo' | 'inProgress' | 'done' }> =
+    {};
+  for (const value of Object.values(raw)) {
+    if (!isRecord(value)) continue;
+    const { statusId, statusName, bucket } = value;
+    if (typeof statusId !== 'string' || statusId.trim() === '') continue;
+    if (typeof statusName !== 'string') continue;
+    if (!isProgressBucket(bucket)) continue;
+    normalized[statusId] = { statusId, statusName, bucket };
+  }
+
+  settings.statusProgressMapping = normalized;
+}
+
 /**
  * Migrates legacy persisted scope settings to the current shape:
  * - `exclusionFilter` (single) → `exclusionFilters` (array)
@@ -37,6 +65,7 @@ function migrateScope(settings: Record<string, unknown>): void {
   if (!Array.isArray(settings.quickFilters)) {
     settings.quickFilters = [];
   }
+  normalizeStatusProgressMapping(settings);
   // `hideCompletedTasks` was replaced by the built-in quick filter `builtin:hideCompleted`.
   // We drop it silently — there is effectively no installed user base yet.
   delete settings.hideCompletedTasks;
@@ -107,6 +136,20 @@ function scopeKeyFromScope(scope: SettingsScope): ScopeKey {
 
 function cloneScopeSettings(settings: GanttScopeSettings): GanttScopeSettings {
   return JSON.parse(JSON.stringify(settings));
+}
+
+function normalizedScopeClone(settings: GanttScopeSettings): GanttScopeSettings {
+  const clone = cloneScopeSettings(settings);
+  migrateScope(clone as unknown as Record<string, unknown>);
+  return clone;
+}
+
+function normalizeStorage(storage: GanttSettingsStorage): void {
+  for (const settings of Object.values(storage)) {
+    if (settings && typeof settings === 'object') {
+      migrateScope(settings as unknown as Record<string, unknown>);
+    }
+  }
 }
 
 /** Defaults when no cascading settings exist yet for the current scope. */
@@ -203,6 +246,7 @@ export class GanttSettingsModel {
   }
 
   save(): void {
+    normalizeStorage(this.storage);
     const payload: PersistedPayloadV1 = {
       storage: this.storage,
       statusBreakdownEnabled: this.statusBreakdownEnabled,
@@ -264,7 +308,7 @@ export class GanttSettingsModel {
       return;
     }
     const key = scopeKeyFromScope(this.currentScope);
-    this.storage[key] = cloneScopeSettings(this.draftSettings);
+    this.storage[key] = normalizedScopeClone(this.draftSettings);
     this.save();
   }
 

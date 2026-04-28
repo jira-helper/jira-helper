@@ -69,6 +69,71 @@ describe('GanttSettingsModel', () => {
     expect(model.statusBreakdownEnabled).toBe(false);
   });
 
+  it('openDraft: default scope settings omit statusProgressMapping', () => {
+    const model = createModel();
+    model.openDraft();
+
+    expect(model.draftSettings?.statusProgressMapping).toBeUndefined();
+  });
+
+  it('load: existing payload without statusProgressMapping remains compatible', () => {
+    const persisted = {
+      storage: {
+        _global: scopeSettings({ tooltipFieldIds: ['legacy-without-mapping'] }),
+      } as GanttSettingsStorage,
+    };
+    localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(persisted));
+
+    const model = createModel();
+    model.load();
+
+    expect(model.storage._global?.tooltipFieldIds).toEqual(['legacy-without-mapping']);
+    expect(model.storage._global?.statusProgressMapping).toBeUndefined();
+  });
+
+  it('saveDraft: persists valid statusProgressMapping rows', () => {
+    const model = createModel();
+    model.currentScope = { level: 'global' };
+    model.openDraft();
+    model.draftSettings = scopeSettings({
+      statusProgressMapping: {
+        '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+      },
+    });
+
+    model.saveDraft();
+
+    const fromDisk = JSON.parse(localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY) ?? '{}');
+    expect(fromDisk.storage._global.statusProgressMapping).toEqual({
+      '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+    });
+  });
+
+  it('load: drops invalid statusProgressMapping rows', () => {
+    localStorage.setItem(
+      GANTT_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        storage: {
+          _global: {
+            ...scopeSettings(),
+            statusProgressMapping: {
+              '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+              missingId: { statusName: 'No id', bucket: 'todo' },
+              badBucket: { statusId: '10003', statusName: 'Blocked-ish', bucket: 'blocked' },
+            },
+          },
+        },
+      })
+    );
+
+    const model = createModel();
+    model.load();
+
+    expect(model.storage._global?.statusProgressMapping).toEqual({
+      '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+    });
+  });
+
   it('load: invalid JSON logs and keeps defaults', () => {
     const logSpy = vi.spyOn(logger, 'log');
     localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, '{not json');

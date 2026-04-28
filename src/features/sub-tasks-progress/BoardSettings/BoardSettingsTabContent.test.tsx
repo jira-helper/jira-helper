@@ -1,15 +1,19 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/infrastructure/di/diContext';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
+import { useJiraStatusesStore } from 'src/shared/jira/stores/jiraStatusesStore';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { step } from 'src/shared/testTools/step';
 import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { Err } from 'ts-results';
+import type { JiraStatus } from 'src/infrastructure/jira/types';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 import { BoardSettingsTabContent } from './BoardSettingsTabContent';
 import { BoardSettingsTabContentPageObject } from './BoardSettingsTabContent.pageObject';
 
@@ -17,12 +21,36 @@ import { AvailableColorSchemas } from '../colorSchemas';
 import { BoardProperty, GroupFields, Status } from '../types';
 import { loadSubTaskProgressBoardProperty } from '../SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
 
+const mockStatuses: JiraStatus[] = [
+  { id: '1', name: 'To Do', statusCategory: { id: 2, key: 'new', colorName: 'blue-gray', name: 'To Do' } },
+  {
+    id: '2',
+    name: 'In Progress',
+    statusCategory: { id: 4, key: 'indeterminate', colorName: 'yellow', name: 'In Progress' },
+  },
+  { id: '3', name: 'Done', statusCategory: { id: 3, key: 'done', colorName: 'green', name: 'Done' } },
+];
+
+function openAntSelect(testId: string) {
+  const root = screen.getByTestId(testId);
+  const selector = root.querySelector('.ant-select-selector');
+  expect(selector).toBeTruthy();
+  fireEvent.mouseDown(selector!);
+}
+
+async function findAntSelectOption(label: string) {
+  return screen.findByText((_, element) => {
+    return element?.classList.contains('ant-select-item-option-content') === true && element.textContent === label;
+  });
+}
+
 function setup({
   columnsOnBoard,
   columnsOnBoardProperty,
   colorScheme,
   groupingField,
   statusMapping,
+  statusProgressMapping,
   useCustomColorScheme,
 }: {
   columnsOnBoard: string[];
@@ -30,6 +58,7 @@ function setup({
   colorScheme?: AvailableColorSchemas;
   groupingField?: GroupFields;
   statusMapping?: Record<number, { progressStatus: Status; name: string }>;
+  statusProgressMapping?: StatusProgressMapping;
   useCustomColorScheme?: boolean;
 }) {
   const container = globalContainer;
@@ -49,6 +78,7 @@ function setup({
         selectedColorScheme: colorScheme,
         groupingField,
         newStatusMapping: statusMapping,
+        ...(statusProgressMapping ? { statusProgressMapping } : {}),
         useCustomColorScheme,
       }) as Promise<BoardProperty>
   );
@@ -71,6 +101,7 @@ function setup({
   });
 
   useSubTaskProgressBoardPropertyStore.setState(useSubTaskProgressBoardPropertyStore.getInitialState());
+  useJiraStatusesStore.setState({ statuses: mockStatuses, isLoading: false, error: null });
 
   registerTestDependencies(container);
 
@@ -219,6 +250,102 @@ describe('BoardSettingsTabContent', () => {
     // check that new grouping field is selected
     const updatedGroupingField = BoardSettingsTabContentPageObject.getGroupingField();
     expect(updatedGroupingField).toEqual('assignee');
+  });
+
+  it('renders status progress mapping after Counting settings and before Task grouping', async () => {
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1'],
+    });
+
+    await loadSubTaskProgressBoardProperty();
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    const counting = screen.getByText('Counting settings');
+    const mapping = screen.getByText('Status progress mapping');
+    const grouping = screen.getByText('Task Progress Tracking');
+
+    expect(counting.compareDocumentPosition(mapping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(mapping.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('stores statusProgressMapping when a status and bucket are selected', async () => {
+    const user = userEvent.setup();
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1'],
+    });
+
+    await loadSubTaskProgressBoardProperty();
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await user.click(screen.getByRole('button', { name: '+ Add status mapping' }));
+    openAntSelect('status-progress-mapping-status-0');
+    await user.click(await screen.findByText('In Progress', { selector: '.ant-select-item-option-content' }));
+    openAntSelect('status-progress-mapping-bucket-0');
+    await user.click(await findAntSelectOption('Done'));
+
+    await waitFor(() => {
+      expect(useSubTaskProgressBoardPropertyStore.getState().data.statusProgressMapping).toEqual({
+        '2': { statusId: '2', statusName: 'In Progress', bucket: 'done' },
+      });
+    });
+  });
+
+  it('removes a statusProgressMapping row', async () => {
+    const user = userEvent.setup();
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1'],
+      statusProgressMapping: {
+        '2': { statusId: '2', statusName: 'In Progress', bucket: 'done' },
+      },
+    });
+
+    await loadSubTaskProgressBoardProperty();
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Remove status mapping' }));
+
+    expect(useSubTaskProgressBoardPropertyStore.getState().data.statusProgressMapping).toEqual({});
+  });
+
+  it('does not persist arbitrary status search text as a statusProgressMapping row', async () => {
+    const user = userEvent.setup();
+    const { container } = setup({
+      columnsOnBoard: ['Column 1', 'Column 2'],
+      columnsOnBoardProperty: ['Column 1'],
+    });
+
+    await loadSubTaskProgressBoardProperty();
+
+    render(
+      <WithDi container={container}>
+        <BoardSettingsTabContent />
+      </WithDi>
+    );
+
+    await user.click(screen.getByRole('button', { name: '+ Add status mapping' }));
+    openAntSelect('status-progress-mapping-status-0');
+    await user.type(screen.getByRole('combobox', { name: 'Jira status' }), 'Missing Status');
+
+    expect(screen.getByText('No status found')).toBeInTheDocument();
+    expect(useSubTaskProgressBoardPropertyStore.getState().data.statusProgressMapping).toEqual({});
   });
 
   it('enabled and disabled settings', async () => {

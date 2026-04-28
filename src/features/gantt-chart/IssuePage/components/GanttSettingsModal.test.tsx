@@ -104,6 +104,11 @@ const mockStatuses: JiraStatus[] = [
     name: 'Open',
     statusCategory: { id: 1, key: 'new', colorName: 'blue-gray', name: 'To Do' },
   },
+  {
+    id: '2',
+    name: 'In Progress',
+    statusCategory: { id: 2, key: 'indeterminate', colorName: 'yellow', name: 'In Progress' },
+  },
 ];
 
 const mockLinkTypes: JiraIssueLinkType[] = [
@@ -154,6 +159,12 @@ function openAntSelect(testId: string) {
   const selector = root.querySelector('.ant-select-selector');
   expect(selector).toBeTruthy();
   fireEvent.mouseDown(selector!);
+}
+
+async function findAntSelectOption(label: string) {
+  return screen.findByText((_, element) => {
+    return element?.classList.contains('ant-select-item-option-content') === true && element.textContent === label;
+  });
 }
 
 /**
@@ -358,6 +369,147 @@ describe('GanttSettingsModal', () => {
       expect(last?.startMappings?.[0]?.statusName ?? '').toBe('');
       expect(last?.startMappings?.[0]?.fieldId ?? '').toBe('');
     });
+  });
+
+  it('saves statusTransition mapping with status id and fallback status name', async () => {
+    const user = userEvent.setup();
+    const props = renderModal({
+      draft: {
+        ...baseDraft,
+        startMappings: [{ source: 'statusTransition', statusId: '1', statusName: 'Open' }],
+      },
+    });
+
+    const startSection = screen.getByTestId('gantt-settings-start-mappings');
+    const valueSelects = startSection.querySelectorAll(
+      '[data-testid="gantt-settings-mapping-value"] .ant-select-selector'
+    );
+    expect(valueSelects.length).toBeGreaterThan(0);
+    fireEvent.mouseDown(valueSelects[0]);
+    await user.click(await screen.findByText('In Progress', { selector: '.ant-select-item-option-content' }));
+
+    await waitFor(() => {
+      const last = props.onDraftChange.mock.calls.at(-1)?.[0] as Partial<GanttScopeSettings> | undefined;
+      expect(last?.startMappings?.[0]).toEqual({
+        source: 'statusTransition',
+        statusId: '2',
+        statusName: 'In Progress',
+      });
+    });
+  });
+
+  it('renders legacy statusTransition name as fallback without saving it as status id', async () => {
+    const user = userEvent.setup();
+    const props = renderModal({
+      draft: {
+        ...baseDraft,
+        startMappings: [{ source: 'statusTransition', statusName: 'Legacy Done' }],
+      },
+    });
+
+    const startSection = screen.getByTestId('gantt-settings-start-mappings');
+    expect(within(startSection).getByText('Legacy Done')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(props.onSave).toHaveBeenCalledTimes(1);
+    expect(props.onDraftChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        startMappings: [expect.objectContaining({ statusId: 'Legacy Done' })],
+      })
+    );
+  });
+
+  it('renders status progress mapping after start/end mappings and before tooltip fields', () => {
+    renderModal();
+
+    const start = screen.getByText('Start of bar');
+    const end = screen.getByText('End of bar');
+    const mapping = screen.getByText('Status progress mapping');
+    const tooltip = screen.getByText('Bar tooltip fields');
+
+    expect(start.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(end.compareDocumentPosition(mapping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(mapping.compareDocumentPosition(tooltip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('patches draft statusProgressMapping when a status mapping row changes', async () => {
+    const user = userEvent.setup();
+    const props = renderModal({
+      draft: {
+        ...baseDraft,
+        statusProgressMapping: {
+          '1': { statusId: '1', statusName: 'Open', bucket: 'todo' },
+        },
+      },
+    });
+
+    openAntSelect('status-progress-mapping-status-0');
+    await user.click(await screen.findByText('In Progress', { selector: '.ant-select-item-option-content' }));
+
+    openAntSelect('status-progress-mapping-bucket-0');
+    await user.click(await findAntSelectOption('Done'));
+
+    await waitFor(() => {
+      const last = props.onDraftChange.mock.calls.at(-1)?.[0] as Partial<GanttScopeSettings> | undefined;
+      expect(last?.statusProgressMapping).toEqual({
+        '2': { statusId: '2', statusName: 'In Progress', bucket: 'done' },
+      });
+    });
+  });
+
+  it('does not persist arbitrary status search text as a Gantt status mapping row', async () => {
+    const user = userEvent.setup();
+    const props = renderModal({
+      draft: {
+        ...baseDraft,
+        statusProgressMapping: {
+          '1': { statusId: '1', statusName: 'Open', bucket: 'todo' },
+        },
+      },
+    });
+
+    openAntSelect('status-progress-mapping-status-0');
+    await user.type(screen.getByRole('combobox', { name: 'Jira status' }), 'Missing Status');
+
+    expect(screen.getByText('No status found')).toBeInTheDocument();
+    expect(props.onDraftChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusProgressMapping: expect.objectContaining({
+          'Missing Status': expect.anything(),
+        }),
+      })
+    );
+  });
+
+  it('clears draft statusProgressMapping when the last valid row is removed and an empty row remains', async () => {
+    const user = userEvent.setup();
+    const props = renderModal({
+      draft: {
+        ...baseDraft,
+        statusProgressMapping: {
+          '1': { statusId: '1', statusName: 'Open', bucket: 'todo' },
+        },
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: '+ Add status mapping' }));
+    await user.click(screen.getAllByRole('button', { name: 'Remove status mapping' })[0]);
+
+    await waitFor(() => {
+      const last = props.onDraftChange.mock.calls.at(-1)?.[0] as Partial<GanttScopeSettings> | undefined;
+      expect(last?.statusProgressMapping).toEqual({});
+    });
+  });
+
+  it('keeps a new empty status mapping row local until a status is selected', async () => {
+    const user = userEvent.setup();
+    const props = renderModal();
+
+    await user.click(screen.getByRole('button', { name: '+ Add status mapping' }));
+
+    expect(screen.getByTestId('status-progress-mapping-status-0')).toBeInTheDocument();
+    expect(props.onDraftChange).not.toHaveBeenCalled();
   });
 
   it('calls onDraftChange with issueLinkTypesToInclude when row link type is selected', async () => {

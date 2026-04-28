@@ -133,6 +133,22 @@ const draftWithLinkTypes: GanttScopeSettings = {
   ],
 };
 
+const draftWithStatusProgressMapping: GanttScopeSettings = {
+  ...draftDefault,
+  statusProgressMapping: {
+    '1': { statusId: '1', statusName: 'To Do', bucket: 'todo' },
+    '2': { statusId: '2', statusName: 'In Progress', bucket: 'inProgress' },
+    '3': { statusId: '3', statusName: 'Done', bucket: 'done' },
+  },
+};
+
+const draftWithMissingStatusProgressMapping: GanttScopeSettings = {
+  ...draftDefault,
+  statusProgressMapping: {
+    '99': { statusId: '99', statusName: 'QA Review', bucket: 'inProgress' },
+  },
+};
+
 /**
  * Pre-fills the Quick filters list with one valid JQL preset and one preset whose JQL is intentionally
  * malformed. Use this story to visually verify that the quick-filter row stays aligned even when the
@@ -207,6 +223,56 @@ export const NoDraft: Story = {
 export const WithLinkTypes: Story = {
   args: {
     draft: draftWithLinkTypes,
+  },
+};
+
+export const EmptyStatusProgressMapping: Story = {
+  args: {
+    draft: draftDefault,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows the production placement of the Status progress mapping section on the Bars tab after Start/End of bar and before tooltip fields, with no saved mapping rows.',
+      },
+    },
+  },
+};
+
+export const WithStatusProgressMapping: Story = {
+  args: {
+    draft: draftWithStatusProgressMapping,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows saved Jira status id mappings using labels from the Jira statuses store and the three allowed progress buckets.',
+      },
+    },
+  },
+};
+
+export const MissingStatusProgressMappingFallback: Story = {
+  args: {
+    draft: draftWithMissingStatusProgressMapping,
+  },
+  render: args => {
+    useJiraStatusesStore.setState({
+      statuses: storyStatuses.filter(status => status.id !== '99'),
+      isLoading: false,
+      error: null,
+    });
+    return <GanttSettingsModal {...args} />;
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows the saved fallback status name when a persisted Jira status id is not present in the current statuses response.',
+      },
+    },
   },
 };
 

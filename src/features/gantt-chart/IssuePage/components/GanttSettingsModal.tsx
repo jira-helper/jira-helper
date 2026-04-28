@@ -32,6 +32,11 @@ import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { useGetStatuses } from 'src/shared/jira/stores/useGetStatuses';
 import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
 import type { JiraField } from 'src/infrastructure/jira/types';
+import {
+  StatusProgressMappingSection,
+  type StatusProgressMappingSectionProps,
+} from 'src/shared/status-progress-mapping/components/StatusProgressMappingSection';
+import type { StatusProgressMapping, StatusProgressMappingRow } from 'src/shared/status-progress-mapping/types';
 import type {
   ColorRule,
   DateMapping,
@@ -171,6 +176,42 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
   endStatus: {
     en: 'End status',
     ru: 'Статус конца',
+  },
+  statusProgressMappingTitle: {
+    en: 'Status progress mapping',
+    ru: 'Маппинг прогресса по статусу',
+  },
+  statusProgressMappingDescription: {
+    en: 'Choose how Jira statuses should affect Gantt progress and status section colors.',
+    ru: 'Выберите, как статусы Jira влияют на прогресс и цвета секций Gantt.',
+  },
+  addStatusProgressMapping: {
+    en: '+ Add status mapping',
+    ru: '+ Добавить маппинг статуса',
+  },
+  statusProgressMappingStatusLabel: {
+    en: 'Jira status',
+    ru: 'Статус Jira',
+  },
+  statusProgressMappingBucketLabel: {
+    en: 'Progress bucket',
+    ru: 'Бакет прогресса',
+  },
+  statusProgressMappingStatusPlaceholder: {
+    en: 'Select Jira status',
+    ru: 'Выберите статус Jira',
+  },
+  statusProgressMappingBucketPlaceholder: {
+    en: 'Select bucket',
+    ru: 'Выберите бакет',
+  },
+  statusProgressMappingRemoveRow: {
+    en: 'Remove status mapping',
+    ru: 'Удалить маппинг статуса',
+  },
+  statusProgressMappingNoStatusFound: {
+    en: 'No status found',
+    ru: 'Статус не найден',
   },
   tooltipFields: {
     en: 'Bar tooltip fields',
@@ -482,6 +523,15 @@ const GANTT_SETTINGS_MODAL_TEXTS = {
   | 'startStatus'
   | 'endDateField'
   | 'endStatus'
+  | 'statusProgressMappingTitle'
+  | 'statusProgressMappingDescription'
+  | 'addStatusProgressMapping'
+  | 'statusProgressMappingStatusLabel'
+  | 'statusProgressMappingBucketLabel'
+  | 'statusProgressMappingStatusPlaceholder'
+  | 'statusProgressMappingBucketPlaceholder'
+  | 'statusProgressMappingRemoveRow'
+  | 'statusProgressMappingNoStatusFound'
   | 'tooltipFields'
   | 'tooltipFieldsHint'
   | 'colorRulesLegend'
@@ -578,6 +628,8 @@ type ExclusionFilterFormRow = {
 type DateMappingFormRow = {
   source: DateMappingSource;
   detail: string;
+  statusName?: string;
+  statusDetailKind?: 'statusId' | 'legacyStatusName';
 };
 
 type QuickFilterFormRow = {
@@ -610,16 +662,56 @@ function generateQuickFilterId(): string {
 }
 
 function dateMappingToRow(m: DateMapping): DateMappingFormRow {
+  if (m.source === 'statusTransition') {
+    return {
+      source: m.source,
+      detail: m.statusId ?? m.statusName ?? '',
+      statusName: m.statusName,
+      statusDetailKind: m.statusId ? 'statusId' : 'legacyStatusName',
+    };
+  }
+
   return {
     source: m.source,
-    detail: m.source === 'dateField' ? (m.fieldId ?? '') : (m.statusName ?? ''),
+    detail: m.fieldId ?? '',
   };
 }
 
 function rowToDateMapping(row: DateMappingFormRow): DateMapping {
-  return row.source === 'dateField'
-    ? { source: 'dateField', fieldId: row.detail }
-    : { source: 'statusTransition', statusName: row.detail };
+  if (row.source === 'dateField') {
+    return { source: 'dateField', fieldId: row.detail };
+  }
+
+  const statusName = row.statusName?.trim();
+  if (row.statusDetailKind === 'legacyStatusName') {
+    return {
+      source: 'statusTransition',
+      ...(statusName ? { statusName } : {}),
+    };
+  }
+
+  return {
+    source: 'statusTransition',
+    statusId: row.detail,
+    ...(statusName ? { statusName } : {}),
+  };
+}
+
+function statusProgressMappingToRows(mapping: StatusProgressMapping | undefined): StatusProgressMappingRow[] {
+  return Object.values(mapping ?? {});
+}
+
+function rowsToStatusProgressMapping(rows: StatusProgressMappingRow[]): StatusProgressMapping {
+  return rows.reduce<StatusProgressMapping>((acc, row) => {
+    const statusId = row.statusId.trim();
+    if (!statusId) return acc;
+    acc[statusId] = {
+      statusId,
+      statusName: row.statusName,
+      bucket: row.bucket,
+    };
+    return acc;
+  }, {});
 }
 
 function draftToFormValues(draft: GanttScopeSettings): FormShape {
@@ -907,12 +999,20 @@ const DateMappingsSection: React.FC<DateMappingsSectionProps> = args => {
                     virtual={false}
                     options={sourceOptions}
                     onChange={() => {
-                      // Clear the dependent detail field (fieldId or statusName) so we never persist
+                      // Clear the dependent detail field (fieldId or statusId) so we never persist
                       // a stale value from the previous source kind.
                       form.setFieldValue([listName, name, 'detail'], undefined);
+                      form.setFieldValue([listName, name, 'statusName'], undefined);
+                      form.setFieldValue([listName, name, 'statusDetailKind'], undefined);
                       notifyFormChange();
                     }}
                   />
+                </Form.Item>
+                <Form.Item {...restField} name={[name, 'statusName']} hidden>
+                  <input type="hidden" />
+                </Form.Item>
+                <Form.Item {...restField} name={[name, 'statusDetailKind']} hidden>
+                  <input type="hidden" />
                 </Form.Item>
                 <Form.Item noStyle dependencies={[[listName, name, 'source']]}>
                   {() => {
@@ -935,6 +1035,13 @@ const DateMappingsSection: React.FC<DateMappingsSectionProps> = args => {
                           loading={isLoadingStatuses}
                           notFoundContent={isLoadingStatuses ? <Spin size="small" /> : null}
                           options={statusOptions}
+                          onChange={(_value, option) => {
+                            const selected = Array.isArray(option) ? option[0] : option;
+                            const label = typeof selected?.label === 'string' ? selected.label : '';
+                            form.setFieldValue([listName, name, 'statusName'], label);
+                            form.setFieldValue([listName, name, 'statusDetailKind'], 'statusId');
+                            notifyFormChange();
+                          }}
                         />
                       </Form.Item>
                     ) : (
@@ -1696,11 +1803,11 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
   const statusOptions = useMemo(() => {
     const seen = new Set<string>();
     return (statuses ?? []).reduce<{ value: string; label: string }[]>((acc, s) => {
-      if (seen.has(s.name)) {
+      if (seen.has(s.id)) {
         return acc;
       }
-      seen.add(s.name);
-      acc.push({ value: s.name, label: s.name });
+      seen.add(s.id);
+      acc.push({ value: s.id, label: s.name });
       return acc;
     }, []);
   }, [statuses]);
@@ -1713,6 +1820,12 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
   }, [linkTypes]);
 
   const initialValues = useMemo(() => (draft ? draftToFormValues(draft) : undefined), [draft]);
+  const draftStatusProgressMappingRows = useMemo(
+    () => statusProgressMappingToRows(draft?.statusProgressMapping),
+    [draft?.statusProgressMapping]
+  );
+  const [statusProgressMappingRows, setStatusProgressMappingRows] =
+    React.useState<StatusProgressMappingRow[]>(draftStatusProgressMappingRows);
 
   useEffect(() => {
     if (!draft) {
@@ -1721,6 +1834,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
     }
     isApplyingDraft.current = true;
     form.setFieldsValue(draftToFormValues(draft));
+    setStatusProgressMappingRows(draftStatusProgressMappingRows);
     queueMicrotask(() => {
       isApplyingDraft.current = false;
       // Fire a full validation pass so error styles, Save gating, and tab badges reflect the
@@ -1743,7 +1857,7 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
           onValidityChange({ hasErrors: total > 0, errorsByPath });
         });
     });
-  }, [draft, form, onValidityChange]);
+  }, [draft, draftStatusProgressMappingRows, form, onValidityChange]);
 
   const reportValidity = useCallback(() => {
     if (!onValidityChange) return;
@@ -1778,6 +1892,21 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
     onDraftChange(formValuesToPatch(form.getFieldsValue(true) as FormShape));
   }, [draft, form, onDraftChange]);
 
+  const handleStatusProgressMappingChange = useCallback(
+    (rows: StatusProgressMappingRow[]) => {
+      const previousHadValidRows = statusProgressMappingRows.some(row => row.statusId.trim() !== '');
+      setStatusProgressMappingRows(rows);
+      if (isApplyingDraft.current || !draft) return;
+      const statusProgressMapping = rowsToStatusProgressMapping(rows);
+      if (rows.length > 0 && Object.keys(statusProgressMapping).length === 0 && !previousHadValidRows) return;
+      onDraftChange({
+        ...formValuesToPatch(form.getFieldsValue(true) as FormShape),
+        statusProgressMapping,
+      });
+    },
+    [draft, form, onDraftChange, statusProgressMappingRows]
+  );
+
   const handleScopeLevelChange = useCallback(
     (value: string | number) => {
       onScopeLevelChange(value as SettingsScope['level']);
@@ -1792,6 +1921,15 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
 
   const selectFilterOption = (input: string, option?: { label?: string }) =>
     (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase());
+
+  const statusProgressMappingTexts: StatusProgressMappingSectionProps['texts'] = {
+    statusLabel: texts.statusProgressMappingStatusLabel,
+    bucketLabel: texts.statusProgressMappingBucketLabel,
+    selectStatusPlaceholder: texts.statusProgressMappingStatusPlaceholder,
+    selectBucketPlaceholder: texts.statusProgressMappingBucketPlaceholder,
+    removeRow: texts.statusProgressMappingRemoveRow,
+    noStatusFound: texts.statusProgressMappingNoStatusFound,
+  };
 
   // ---- Scope context line ("Editing settings for: TRPA › Bug") with bold tokens ----
   const scopeContext = useMemo<React.ReactNode>(() => {
@@ -1857,6 +1995,18 @@ export const GanttSettingsFormContent: React.FC<GanttSettingsFormContentProps> =
         notifyFormChange={notifyFormChange}
         data-testid="gantt-settings-end-mappings"
       />
+      <div className="jh-gantt-form-section-mb">
+        <StatusProgressMappingSection
+          title={texts.statusProgressMappingTitle}
+          description={texts.statusProgressMappingDescription}
+          addButtonLabel={texts.addStatusProgressMapping}
+          rows={statusProgressMappingRows}
+          statuses={statuses ?? []}
+          isLoadingStatuses={isLoadingStatuses}
+          onChange={handleStatusProgressMappingChange}
+          texts={statusProgressMappingTexts}
+        />
+      </div>
       <div className="jh-gantt-form-section-mb">
         <SectionHeading hint={texts.tooltipFieldsHint}>{texts.tooltipFields}</SectionHeading>
         <Form.Item name="tooltipFieldIds" className="jh-gantt-form-item-mb-0">

@@ -1,5 +1,6 @@
 import { CustomGroup } from './BoardSettings/GroupingSettings/CustomGroups/types';
 import { AvailableColorSchemas } from './colorSchemas';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 
 export type ActiveStatuses = 'todo' | 'inProgress' | 'done' | 'blocked';
 export type Status = ActiveStatuses;
@@ -26,7 +27,17 @@ export type BoardProperty = {
   enabled?: boolean;
   columnsToTrack?: string[];
   groupingField?: GroupFields;
+  /**
+   * Optional Jira status id -> progress bucket mapping for sub-tasks progress.
+   * Missing block keeps the default Jira statusCategory behavior.
+   *
+   * The configurable buckets intentionally exclude `blocked`: blocked remains
+   * a runtime override derived from flags/link settings, not a status mapping value.
+   */
+  statusProgressMapping?: StatusProgressMapping;
+  /** Legacy readable compatibility mapping; new status progress mapping writes must not use it. */
   statusMapping?: Record<string, Status>;
+  /** Legacy readable compatibility mapping; new status progress mapping writes must not use it. */
   newStatusMapping?: Record<StatusId, { progressStatus: Status; name: string }>;
   useCustomColorScheme?: boolean;
   ignoredGroups?: string[];

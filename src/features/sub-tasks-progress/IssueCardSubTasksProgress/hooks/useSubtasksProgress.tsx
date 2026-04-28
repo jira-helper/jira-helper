@@ -14,6 +14,8 @@ import { ActiveStatuses, IssueLinkTypeSelection, SubTasksProgress } from '../../
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
 import { CustomGroup } from '../../BoardSettings/GroupingSettings/CustomGroups/types';
+import { resolveProgressBucket } from 'src/shared/status-progress-mapping/utils/resolveProgressBucket';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 
 const getLinkedIssues = (issue: JiraIssueMapped, subtasks: JiraIssueMapped[]) => {
   const issueLinks = issue?.fields.issuelinks || [];
@@ -163,21 +165,12 @@ const matchToCustomGroupByField = (issue: JiraIssueMapped, cg: CustomGroup, fiel
   return values.some(v => v === cg.value);
 };
 
-const mapStatusCategeoryToProgressStatus = (statusCategory: JiraIssueMapped['statusCategory']) => {
-  if (statusCategory === 'new') {
-    return 'todo';
-  }
-  if (statusCategory === 'indeterminate') {
-    return 'inProgress';
-  }
-  return 'done';
-};
-
-function calcProgress(
+export function calcProgress(
   subtasks: JiraIssueMapped[],
   settings: {
     flagsAsBlocked: boolean;
     blockedByLinksAsBlocked: boolean;
+    statusProgressMapping?: StatusProgressMapping;
   },
   texts: {
     flaggedIssue: string;
@@ -192,22 +185,23 @@ function calcProgress(
   };
   const comments: string[] = [];
   for (const issue of subtasks) {
-    const status: { name: string; progressStatus: ActiveStatuses } = {
-      name: issue.status,
-      progressStatus: mapStatusCategeoryToProgressStatus(issue.statusCategory),
-    };
+    let progressStatus: ActiveStatuses = resolveProgressBucket(
+      String(issue.statusId),
+      issue.statusCategory,
+      settings.statusProgressMapping
+    );
 
     if (issue.isFlagged && settings.flagsAsBlocked) {
-      status.progressStatus = 'blocked';
+      progressStatus = 'blocked';
       comments.push(`${texts.flaggedIssue}: ${issue.key}`);
     }
 
     if (issue.isBlockedByLinks && settings.blockedByLinksAsBlocked) {
-      status.progressStatus = 'blocked';
+      progressStatus = 'blocked';
       comments.push(`${texts.blockedByLinks}: ${issue.key}`);
     }
 
-    progress[status.progressStatus] += 1;
+    progress[progressStatus] += 1;
   }
 
   return {
@@ -339,7 +333,7 @@ export type SubTasksCounterProgressByGroup = Record<
 export const useSubtasksProgressByCustomGroup = (issueKey: string): SubTasksCounterProgressByGroup => {
   const subtasks = useGetSubtasksToCountProgress(issueKey);
   const {
-    settings: { customGroups, flagsAsBlocked, blockedByLinksAsBlocked },
+    settings: { customGroups, flagsAsBlocked, blockedByLinksAsBlocked, statusProgressMapping },
   } = useGetSettings();
   const { fields } = useGetFields();
   const texts = useGetTextsByLocale(TEXTS);
@@ -366,6 +360,7 @@ export const useSubtasksProgressByCustomGroup = (issueKey: string): SubTasksCoun
       {
         flagsAsBlocked,
         blockedByLinksAsBlocked,
+        statusProgressMapping,
       },
       texts
     );
