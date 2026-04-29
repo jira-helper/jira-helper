@@ -1,7 +1,7 @@
 /* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
-import { Card, Button, Space, Divider, Alert, Spin } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Divider, Alert, Spin, Checkbox, Tooltip } from 'antd';
+import { InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
@@ -36,6 +36,14 @@ export const TEXTS = {
   errorLoadingLinkTypes: {
     en: 'Failed to load link types. Please refresh the page.',
     ru: 'Не удалось загрузить типы связей. Пожалуйста, обновите страницу.',
+  },
+  clickableIssueLinks: {
+    en: 'Make issue links clickable',
+    ru: 'Сделать связи задач кликабельными',
+  },
+  clickableIssueLinksTooltip: {
+    en: 'If enabled, issue link badges open linked issues in a new tab',
+    ru: 'Если включено, бейджи связей открывают связанные задачи в новой вкладке',
   },
 } as const;
 
@@ -94,6 +102,18 @@ export const IssueLinkSettings: React.FC = () => {
   return (
     <Card title={texts.issueLinksTitle} style={{ marginBottom: '16px' }} type="inner">
       <p style={{ marginBottom: '16px' }}>{texts.issueLinksDescription}</p>
+
+      <Checkbox
+        checked={data.clickableIssueLinks}
+        onChange={() => actions.setClickableIssueLinks(!data.clickableIssueLinks)}
+        data-testid="clickable-issue-links-checkbox"
+        style={{ marginBottom: '16px' }}
+      >
+        {texts.clickableIssueLinks}
+        <Tooltip title={texts.clickableIssueLinksTooltip}>
+          <InfoCircleOutlined style={{ marginLeft: '4px', color: '#1677ff' }} />
+        </Tooltip>
+      </Checkbox>
 
       <Space direction="vertical" style={{ width: '100%' }}>
         {data.issueLinks.length === 0 ? (

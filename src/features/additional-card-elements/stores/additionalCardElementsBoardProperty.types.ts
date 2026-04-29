@@ -10,6 +10,8 @@ export type RequiredBoardProperty = {
   enabled: boolean;
   columnsToTrack: string[];
   showInBacklog: boolean;
+  clickableEpicLinks: boolean;
+  clickableIssueLinks: boolean;
   issueLinks: IssueLink[];
   daysInColumn: DaysInColumnSettings;
   daysToDeadline: DaysToDeadlineSettings;
@@ -25,6 +27,8 @@ export type State = {
     setEnabled: (enabled: boolean) => void;
     setColumns: (columns: { name: string; enabled: boolean }[]) => void;
     setShowInBacklog: (showInBacklog: boolean) => void;
+    setClickableEpicLinks: (clickableEpicLinks: boolean) => void;
+    setClickableIssueLinks: (clickableIssueLinks: boolean) => void;
     setIssueLinks: (issueLinks: IssueLink[]) => void;
     addIssueLink: (issueLink: IssueLink) => void;
     updateIssueLink: (index: number, issueLink: IssueLink) => void;

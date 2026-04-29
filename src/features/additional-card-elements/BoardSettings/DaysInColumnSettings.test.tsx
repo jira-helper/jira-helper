@@ -131,6 +131,8 @@ describe('DaysInColumnSettings', () => {
         enabled: true,
         columnsToTrack: ['In Progress', 'Testing'],
         showInBacklog: false,
+        clickableEpicLinks: true,
+        clickableIssueLinks: true,
         issueLinks: [],
         issueConditionChecks: [],
         daysInColumn: {

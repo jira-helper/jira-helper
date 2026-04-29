@@ -21,6 +21,8 @@ describe('IssueConditionCheckSettings', () => {
         enabled: true,
         columnsToTrack: [],
         showInBacklog: false,
+        clickableEpicLinks: true,
+        clickableIssueLinks: true,
         issueLinks: [],
         daysInColumn: {
           enabled: false,

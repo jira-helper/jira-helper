@@ -114,6 +114,8 @@ export const Disabled: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {
@@ -138,6 +140,8 @@ export const EnabledWithGlobalThresholds: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {
@@ -165,6 +169,8 @@ export const EnabledWithInvalidGlobalThresholds: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {
@@ -192,6 +198,8 @@ export const EnabledWithPerColumnThresholds: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {
@@ -222,6 +230,8 @@ export const PerColumnWithNonExistentColumn: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {
@@ -252,6 +262,8 @@ export const PerColumnWithPartialThresholds: Story = {
           enabled: true,
           columnsToTrack: ['In Progress', 'Code Review', 'Testing'],
           showInBacklog: false,
+          clickableEpicLinks: true,
+          clickableIssueLinks: true,
           issueLinks: [],
           issueConditionChecks: [],
           daysInColumn: {

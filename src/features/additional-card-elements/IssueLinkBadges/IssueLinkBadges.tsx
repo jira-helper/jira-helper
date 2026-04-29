@@ -246,6 +246,7 @@ export const IssueLinkBadges: React.FC<IssueLinkBadgesProps> = ({ issueKey, hori
           link={link.link}
           summary={link.summary}
           multilineSummary={link.multilineSummary}
+          clickable={settings.clickableIssueLinks}
         />
       ))}
     </span>

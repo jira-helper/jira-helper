@@ -1,0 +1,14 @@
+.link {
+  display: inline-block;
+  max-width: 100%;
+  text-decoration: none;
+}
+
+.link:hover,
+.link:focus-visible {
+  text-decoration: underline;
+}
+
+.link :global(.ant-tag) {
+  cursor: pointer;
+}

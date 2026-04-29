@@ -8,12 +8,14 @@ const mockStore = {
   data: {
     enabled: true,
     columnsToTrack: [] as string[],
+    clickableIssueLinks: true,
     issueLinks: [] as any[],
   },
   actions: {
     setEnabled: vi.fn(),
     setData: vi.fn(),
     setColumns: vi.fn(),
+    setClickableIssueLinks: vi.fn(),
     setIssueLinks: vi.fn(),
     addIssueLink: vi.fn(),
     updateIssueLink: vi.fn(),
@@ -36,6 +38,8 @@ vi.mock('src/shared/texts', () => ({
     noLinksConfigured: 'No link configurations yet.',
     loadingLinkTypes: 'Loading available link types...',
     errorLoadingLinkTypes: 'Failed to load link types.',
+    clickableIssueLinks: 'Make issue links clickable',
+    clickableIssueLinksTooltip: 'If enabled, issue link badges open linked issues in a new tab',
   }),
 }));
 
@@ -86,6 +90,7 @@ describe('IssueLinkSettings', () => {
 
       expect(screen.getByText('Issue Link Configurations')).toBeInTheDocument();
       expect(screen.getByText('Configure how related issues are displayed on cards.')).toBeInTheDocument();
+      expect(screen.getByTestId('clickable-issue-links-checkbox')).toBeChecked();
       expect(screen.getByText('No link configurations yet.')).toBeInTheDocument();
       expect(screen.getByTestId('add-issue-link-button')).toBeInTheDocument();
       expect(screen.queryByTestId('clear-all-issue-links-button')).not.toBeInTheDocument();
@@ -105,6 +110,16 @@ describe('IssueLinkSettings', () => {
       expect(screen.getByTestId('issue-link-item-0')).toBeInTheDocument();
       expect(screen.getByText('Test Link')).toBeInTheDocument();
       expect(screen.getByTestId('clear-all-issue-links-button')).toBeInTheDocument();
+    });
+
+    it('toggles clickable issue links when checkbox is clicked', () => {
+      mockStore.data.issueLinks = [];
+      mockStore.data.clickableIssueLinks = true;
+
+      render(<IssueLinkSettings />);
+      fireEvent.click(screen.getByTestId('clickable-issue-links-checkbox'));
+
+      expect(mockStore.actions.setClickableIssueLinks).toHaveBeenCalledWith(false);
     });
   });
 

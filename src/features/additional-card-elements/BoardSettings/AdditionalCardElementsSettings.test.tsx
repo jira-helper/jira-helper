@@ -9,6 +9,8 @@ const mockStore = {
     enabled: false,
     columnsToTrack: [] as string[],
     showInBacklog: false,
+    clickableEpicLinks: true,
+    clickableIssueLinks: true,
     issueLinks: [],
     daysInColumn: {
       enabled: false,
@@ -26,6 +28,8 @@ const mockStore = {
     setData: vi.fn(),
     setColumns: vi.fn(),
     setShowInBacklog: vi.fn(),
+    setClickableEpicLinks: vi.fn(),
+    setClickableIssueLinks: vi.fn(),
     setIssueLinks: vi.fn(),
     addIssueLink: vi.fn(),
     updateIssueLink: vi.fn(),
@@ -51,6 +55,8 @@ vi.mock('src/shared/texts', () => ({
     issueLinksTitle: 'Issue Link Settings',
     showInBacklog: 'Show links in backlog',
     showInBacklogTooltip: 'If enabled, issue links will be displayed on cards in the backlog view',
+    clickableEpicLinks: 'Make Epic Link clickable',
+    clickableEpicLinksTooltip: 'If enabled, Jira Epic Link badges on cards open the epic in a new tab',
   }),
 }));
 
@@ -95,6 +101,7 @@ describe('AdditionalCardElementsSettings', () => {
       expect(screen.getByText('Enable additional card elements')).toBeInTheDocument();
       expect(screen.getByTestId('additional-card-elements-enabled-checkbox')).not.toBeChecked();
       expect(screen.getByTestId('reset-board-property-button')).toBeDisabled();
+      expect(screen.getByTestId('clickable-epic-links-checkbox')).toBeInTheDocument();
       expect(screen.queryByTestId('additional-card-elements-column-selector')).not.toBeInTheDocument();
       expect(screen.queryByTestId('issue-link-settings')).not.toBeInTheDocument();
     });
@@ -107,6 +114,7 @@ describe('AdditionalCardElementsSettings', () => {
       expect(screen.getByTestId('additional-card-elements-enabled-checkbox')).toBeChecked();
       expect(screen.getByTestId('reset-board-property-button')).not.toBeDisabled();
       expect(screen.getByTestId('additional-card-elements-column-selector')).toBeInTheDocument();
+      expect(screen.getByTestId('clickable-epic-links-checkbox')).toBeInTheDocument();
       expect(screen.getByTestId('issue-link-settings')).toBeInTheDocument();
     });
   });
@@ -135,6 +143,8 @@ describe('AdditionalCardElementsSettings', () => {
         enabled: false,
         columnsToTrack: [],
         showInBacklog: false,
+        clickableEpicLinks: true,
+        clickableIssueLinks: true,
         issueLinks: [],
       });
     });
@@ -155,7 +165,29 @@ describe('AdditionalCardElementsSettings', () => {
 
       expect(screen.getByTestId('additional-card-elements-column-selector')).toBeInTheDocument();
       expect(screen.getByTestId('show-in-backlog-checkbox')).toBeInTheDocument();
+      expect(screen.getByTestId('clickable-epic-links-checkbox')).toBeInTheDocument();
       expect(screen.getByTestId('issue-link-settings')).toBeInTheDocument();
+    });
+  });
+
+  describe('Clickable Epic Link', () => {
+    it('renders checked clickable Epic Link checkbox by default when enabled', () => {
+      mockStore.data.enabled = true;
+      mockStore.data.clickableEpicLinks = true;
+
+      render(<AdditionalCardElementsSettings />);
+
+      expect(screen.getByTestId('clickable-epic-links-checkbox')).toBeChecked();
+    });
+
+    it('toggles clickable Epic Link setting when checkbox is clicked', () => {
+      mockStore.data.enabled = true;
+      mockStore.data.clickableEpicLinks = true;
+
+      render(<AdditionalCardElementsSettings />);
+      fireEvent.click(screen.getByTestId('clickable-epic-links-checkbox'));
+
+      expect(mockStore.actions.setClickableEpicLinks).toHaveBeenCalledWith(false);
     });
   });
 
@@ -199,6 +231,7 @@ describe('AdditionalCardElementsSettings', () => {
       render(<AdditionalCardElementsSettings />);
 
       expect(screen.queryByTestId('show-in-backlog-checkbox')).not.toBeInTheDocument();
+      expect(screen.getByTestId('clickable-epic-links-checkbox')).toBeInTheDocument();
     });
   });
 

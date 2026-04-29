@@ -127,6 +127,44 @@ describe('Additional Card Elements Store', () => {
     });
   });
 
+  describe('clickable links settings', () => {
+    it('should enable clickable Epic Link and Issue Link by default', () => {
+      const { data } = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      expect(data.clickableEpicLinks).toBe(true);
+      expect(data.clickableIssueLinks).toBe(true);
+    });
+
+    it('should use default clickable settings when board property does not provide them', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setData({
+        enabled: true,
+        issueLinks: [],
+      });
+
+      const { data } = useAdditionalCardElementsBoardPropertyStore.getState();
+      expect(data.clickableEpicLinks).toBe(true);
+      expect(data.clickableIssueLinks).toBe(true);
+    });
+
+    it('should update clickable Epic Link setting', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setClickableEpicLinks(false);
+
+      expect(useAdditionalCardElementsBoardPropertyStore.getState().data.clickableEpicLinks).toBe(false);
+    });
+
+    it('should update clickable Issue Link setting', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setClickableIssueLinks(false);
+
+      expect(useAdditionalCardElementsBoardPropertyStore.getState().data.clickableIssueLinks).toBe(false);
+    });
+  });
+
   describe('loadAdditionalCardElementsBoardProperty with showInBacklog', () => {
     it('should load showInBacklog from Board Property', () => {
       // This test verifies that setData correctly handles showInBacklog

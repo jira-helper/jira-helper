@@ -23,6 +23,8 @@ const initialData: RequiredBoardProperty = {
   enabled: false,
   columnsToTrack: [],
   showInBacklog: false,
+  clickableEpicLinks: true,
+  clickableIssueLinks: true,
   issueLinks: [],
   daysInColumn: DEFAULT_DAYS_IN_COLUMN,
   daysToDeadline: DEFAULT_DAYS_TO_DEADLINE,
@@ -57,6 +59,20 @@ export const useAdditionalCardElementsBoardPropertyStore = create<State>()(set =
       set(
         produce((state: State) => {
           state.data.showInBacklog = showInBacklog;
+        })
+      ),
+
+    setClickableEpicLinks: (clickableEpicLinks: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.clickableEpicLinks = clickableEpicLinks;
+        })
+      ),
+
+    setClickableIssueLinks: (clickableIssueLinks: boolean) =>
+      set(
+        produce((state: State) => {
+          state.data.clickableIssueLinks = clickableIssueLinks;
         })
       ),
 
@@ -176,6 +192,20 @@ useAdditionalCardElementsBoardPropertyStore.getInitialState = () => ({
       useAdditionalCardElementsBoardPropertyStore.setState(
         produce((state: State) => {
           state.data.showInBacklog = showInBacklog;
+        })
+      );
+    },
+    setClickableEpicLinks: (clickableEpicLinks: boolean) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.clickableEpicLinks = clickableEpicLinks;
+        })
+      );
+    },
+    setClickableIssueLinks: (clickableIssueLinks: boolean) => {
+      useAdditionalCardElementsBoardPropertyStore.setState(
+        produce((state: State) => {
+          state.data.clickableIssueLinks = clickableIssueLinks;
         })
       );
     },

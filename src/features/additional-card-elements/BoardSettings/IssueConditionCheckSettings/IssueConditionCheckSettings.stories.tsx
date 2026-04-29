@@ -23,6 +23,8 @@ const StoreInitializer: React.FC<{
         enabled: true,
         columnsToTrack: [],
         showInBacklog: false,
+        clickableEpicLinks: true,
+        clickableIssueLinks: true,
         issueLinks: [],
         daysInColumn: {
           enabled: false,

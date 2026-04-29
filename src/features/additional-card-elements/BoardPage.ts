@@ -9,6 +9,7 @@ import { autosyncStoreWithBoardProperty } from './BoardSettings/actions/autosync
 import { IssueLinkBadgesContainer } from './IssueLinkBadgesContainer/IssueLinkBadgesContainer';
 import { CardStatusBadgesContainer } from './CardStatusBadgesContainer/CardStatusBadgesContainer';
 import { IssueConditionCheckContainer } from './IssueConditionCheck/IssueConditionCheckContainer';
+import { linkifyEpicLinkBadges, unlinkifyEpicLinkBadges } from './utils/linkifyEpicLinkBadges';
 
 export class AdditionalCardElementsBoardPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -35,9 +36,32 @@ export class AdditionalCardElementsBoardPage extends PageModification<void, Elem
     if (store.data.enabled && store.data.daysInColumn?.enabled) {
       BoardPagePageObject.hideDaysInColumn();
     }
+    let { clickableEpicLinks } = store.data;
+    const applyEpicLinkClickability = (enabled: boolean) => {
+      document.querySelectorAll(BoardPagePageObject.selectors.issue).forEach(card => {
+        if (enabled) {
+          linkifyEpicLinkBadges(card);
+        } else {
+          unlinkifyEpicLinkBadges(card);
+        }
+      });
+    };
+    const unsubscribeClickableEpicLinks = useAdditionalCardElementsBoardPropertyStore.subscribe(state => {
+      if (state.data.clickableEpicLinks === clickableEpicLinks) {
+        return;
+      }
+
+      clickableEpicLinks = state.data.clickableEpicLinks;
+      applyEpicLinkClickability(clickableEpicLinks);
+    });
+    this.sideEffects.push(unsubscribeClickableEpicLinks);
 
     const unlisten = BoardPagePageObject.listenCards(cards => {
       cards.forEach(card => {
+        const currentSettings = useAdditionalCardElementsBoardPropertyStore.getState().data;
+        if (currentSettings.clickableEpicLinks) {
+          linkifyEpicLinkBadges(card.getCardElement());
+        }
         // Issue link badges - after summary
         card.attach(IssueLinkBadgesContainer, 'issue-link-badges', {
           position: 'aftersummary',

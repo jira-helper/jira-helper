@@ -50,6 +50,8 @@ export type AdditionalCardElementsBoardProperty = {
   enabled?: boolean;
   columnsToTrack?: string[];
   showInBacklog?: boolean;
+  clickableEpicLinks?: boolean;
+  clickableIssueLinks?: boolean;
   issueLinks?: IssueLink[];
   daysInColumn?: DaysInColumnSettings;
   daysToDeadline?: DaysToDeadlineSettings;
