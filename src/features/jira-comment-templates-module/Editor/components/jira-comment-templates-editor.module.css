@@ -1,0 +1,13 @@
+.container {
+  position: relative;
+  display: block;
+  padding-right: 0;
+}
+
+.notificationSlot {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  max-width: min(420px, 100%);
+}

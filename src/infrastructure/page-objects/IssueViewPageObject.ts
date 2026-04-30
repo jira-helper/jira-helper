@@ -12,7 +12,10 @@ export interface IIssueViewPageObject {
     readonly attachmentModule: string;
     readonly toolbar2Secondary: string;
     readonly toolbarButton: string;
+    readonly issueKey: string;
   };
+  /** Issue key from `#key-val` and/or `/browse/KEY` (or `/jira/browse/KEY`) URL; null if unknown. */
+  getIssueKey(): string | null;
   getIssueType(): string | null;
   /**
    * Create a container div in the main issue flow after `#attachmentmodule`.
@@ -35,7 +38,22 @@ export class IssueViewPageObject implements IIssueViewPageObject {
     attachmentModule: '#attachmentmodule',
     toolbar2Secondary: '.aui-toolbar2-secondary',
     toolbarButton: '[data-jh-component="issueSettingsHost"]',
+    issueKey: '#key-val',
   } as const;
+
+  getIssueKey(): string | null {
+    const keyEl = document.querySelector<HTMLElement>(this.selectors.issueKey);
+    const fromDom = keyEl?.textContent?.trim();
+    if (fromDom) return fromDom;
+
+    const { pathname } = window.location;
+    if (pathname.startsWith('/browse') || pathname.startsWith('/jira/browse')) {
+      const tail = pathname.split('/browse/')[1] ?? '';
+      const segment = tail.split('/')[0]?.split('?')[0]?.trim();
+      return segment || null;
+    }
+    return null;
+  }
 
   getIssueType(): string | null {
     const el = document.querySelector(this.selectors.issueType) as HTMLElement | null;

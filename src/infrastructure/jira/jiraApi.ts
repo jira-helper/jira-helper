@@ -308,6 +308,38 @@ export const getUser = (query: string): Promise<any> =>
 export const getJiraIssue = (issueId: string, options: RequestInit = {}): Promise<Result<JiraIssue, Error>> =>
   requestJsonViaFetch<JiraIssue>(`api/2/issue/${issueId}`, options);
 
+/**
+ * Adds a user as a watcher on a Jira issue (Server REST: POST body is a JSON-encoded username string).
+ *
+ * @see https://docs.atlassian.com/software/jira/docs/api/REST/7.6.1/#api/2/issue-addWatcher
+ */
+export const addWatcher = async (
+  issueKey: string,
+  username: string,
+  options: RequestInit = {}
+): Promise<Result<void, Error>> => {
+  const result = await requestJiraViaFetch(
+    `api/2/issue/${issueKey}/watchers`,
+    {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(username),
+      headers: {
+        ...EXTENSION_HEADERS,
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    },
+    5
+  );
+
+  if (result.err) {
+    return Err(result.val);
+  }
+
+  return Ok(undefined);
+};
+
 export const getExternalIssues = (issueKey: string, options: RequestInit = {}): Promise<Result<any, Error>> =>
   requestJsonViaFetch<any>(`api/2/issue/${issueKey}/remotelink`, options);
 

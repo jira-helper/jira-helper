@@ -15,6 +15,7 @@ globalContainer.register({
     getIssueLinkTypes: () =>
       Promise.resolve(new Ok([{ id: '1', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }])),
     getStatuses: () => Promise.resolve(new Ok([])),
+    addWatcher: () => Promise.resolve(new Ok(undefined)),
   },
 });
 

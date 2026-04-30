@@ -46,6 +46,7 @@ describe('GanttDataModel', () => {
       getProjectFields: vi.fn(),
       getIssueLinkTypes: vi.fn(),
       getStatuses: vi.fn().mockResolvedValue(Ok([])),
+      addWatcher: vi.fn().mockResolvedValue(Ok(undefined)),
     };
   });
 

@@ -50,6 +50,7 @@ import { registerRoutingServiceInDI } from './infrastructure/routing';
 import { registerJiraApiInDI } from './infrastructure/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
+import { registerLocalStorageServiceInDI } from './infrastructure/storage/tokens';
 import { columnLimitsModule } from './features/column-limits-module/module';
 import { personLimitsModule } from './features/person-limits-module/module';
 import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/module';
@@ -58,6 +59,11 @@ import { swimlaneHistogramModule } from './features/swimlane-histogram-module/mo
 import { cardColorsModule } from './features/card-colors-module/module';
 import { ganttChartModule } from './features/gantt-chart/module';
 import { GanttChartIssuePage, ganttChartIssuePageToken } from './features/gantt-chart/IssuePage/GanttChartIssuePage';
+import {
+  CommentTemplatesPageModification,
+  jiraCommentTemplatesModule,
+  jiraCommentTemplatesPageModificationToken,
+} from './features/jira-comment-templates-module';
 import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { LocalSettingsIssuePage, localSettingsIssuePageToken } from './features/local-settings/IssuePage';
@@ -74,6 +80,7 @@ import {
   AdditionalCardElementsBoardBacklogPage,
   additionalCardElementsBoardBacklogPageToken,
 } from './features/additional-card-elements/BoardBacklogPage';
+import { registerCommentsEditorPageObjectInDI } from './infrastructure/page-objects/CommentsEditor';
 
 setAutoFreeze(false);
 
@@ -88,6 +95,7 @@ function initDiContainer() {
   registerExtensionApiServiceInDI(container);
   registerBlurSensitiveFeatureInDI(container);
   registerBoardPagePageObjectInDI(container);
+  registerCommentsEditorPageObjectInDI(container);
   registerSettingsPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
@@ -96,6 +104,7 @@ function initDiContainer() {
   registerRoutingInDI(container);
   registerJiraApiInDI(container);
   registerIssueTypeServiceInDI(container);
+  registerLocalStorageServiceInDI(container);
   container.register({
     token: localeProviderToken,
     value: new JiraLocaleProvider(),
@@ -108,6 +117,7 @@ function initDiContainer() {
   swimlaneHistogramModule.ensure(container);
   cardColorsModule.ensure(container);
   ganttChartModule.ensure(container);
+  jiraCommentTemplatesModule.ensure(container);
 
   // Register PageModification instances as value tokens
   container.register({ token: cardColorsBoardPageToken, value: new CardColorsBoardPage(container) });
@@ -130,6 +140,10 @@ function initDiContainer() {
   container.register({ token: localSettingsBoardPageToken, value: new LocalSettingsBoardPage(container) });
   container.register({ token: localSettingsIssuePageToken, value: new LocalSettingsIssuePage(container) });
   container.register({ token: boardSettingsBoardPageToken, value: new BoardSettingsBoardPage(container) });
+  container.register({
+    token: jiraCommentTemplatesPageModificationToken,
+    value: new CommentTemplatesPageModification({ container }),
+  });
 
   container.register({ token: cardColorsSettingsPageToken, value: new CardColorsSettingsPage(container) });
   container.register({ token: columnLimitsSettingsPageToken, value: new WIPLimitsSettingsPage(container) });
@@ -182,6 +196,7 @@ async function start() {
       container.inject(localSettingsBoardPageToken),
       container.inject(diagnosticBoardPageToken),
       container.inject(additionalCardElementsBoardPageToken),
+      container.inject(jiraCommentTemplatesPageModificationToken),
     ],
     [Routes.BOARD_BACKLOG]: [container.inject(additionalCardElementsBoardBacklogPageToken)],
     [Routes.SETTINGS]: [
@@ -197,6 +212,7 @@ async function start() {
       container.inject(ganttChartIssuePageToken),
       container.inject(localSettingsIssuePageToken),
       container.inject(toggleForRightSidebarToken),
+      container.inject(jiraCommentTemplatesPageModificationToken),
     ],
     [Routes.SEARCH]: [container.inject(markFlaggedIssuesToken), container.inject(toggleForRightSidebarToken)],
     [Routes.REPORTS]: [container.inject(addSlaLineToken), container.inject(addChartGridToken)],

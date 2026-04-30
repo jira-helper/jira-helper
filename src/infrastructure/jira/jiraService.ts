@@ -1,6 +1,7 @@
 import { Err, Ok, Result } from 'ts-results';
 import { Container, Scopes, Token } from 'dioma';
 import {
+  addWatcher as jiraApiAddWatcher,
   getExternalIssues,
   getIssueLinkTypes,
   getJiraIssue,
@@ -228,6 +229,7 @@ export interface IJiraService {
   getProjectFields: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
   getIssueLinkTypes: (abortSignal: AbortSignal) => Promise<Result<any, Error>>;
   getStatuses: (abortSignal: AbortSignal) => Promise<Result<JiraStatus[], Error>>;
+  addWatcher: (issueKey: string, username: string, signal?: AbortSignal) => Promise<Result<void, Error>>;
 }
 
 /**
@@ -639,6 +641,18 @@ export class JiraService implements IJiraService {
     });
 
     return statuses;
+  }
+
+  async addWatcher(issueKey: string, username: string, signal?: AbortSignal): Promise<Result<void, Error>> {
+    try {
+      const result = await jiraApiAddWatcher(issueKey, username, signal ? { signal } : {});
+      if (result.err) {
+        return Err(wrapUnknownError(result.val, `addWatcher issueKey=${issueKey} username=${username}`));
+      }
+      return Ok(undefined);
+    } catch (error) {
+      return Err(wrapUnknownError(error, `addWatcher issueKey=${issueKey} username=${username}`));
+    }
   }
 }
 

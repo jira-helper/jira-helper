@@ -916,6 +916,44 @@ describe('BoardPagePageObject person-limits DOM helpers', () => {
     expect(issue.classList.contains('no-visibility')).toBe(false);
   });
 
+  describe('getSelectedIssueKey', () => {
+    const initialHref = window.location.href;
+
+    afterEach(() => {
+      window.history.replaceState({}, '', initialHref);
+    });
+
+    it('returns selectedIssue when view param is present', () => {
+      window.history.pushState({}, '', '/secure/RapidBoard.jspa?selectedIssue=FOO-1&view=detail');
+
+      expect(BoardPagePageObject.getSelectedIssueKey?.()).toBe('FOO-1');
+    });
+
+    it('returns selectedIssue when modal param is present', () => {
+      window.history.pushState({}, '', '/secure/RapidBoard.jspa?selectedIssue=BAR-2&modal=coworkers');
+
+      expect(BoardPagePageObject.getSelectedIssueKey?.()).toBe('BAR-2');
+    });
+
+    it('returns null when selectedIssue is set without view or modal', () => {
+      window.history.pushState({}, '', '/secure/RapidBoard.jspa?selectedIssue=ORPHAN-3');
+
+      expect(BoardPagePageObject.getSelectedIssueKey?.()).toBeNull();
+    });
+
+    it('falls back to #ghx-detail-view [data-issue-key] when query does not resolve', () => {
+      window.history.pushState({}, '', '/secure/RapidBoard.jspa');
+      const detail = document.createElement('div');
+      detail.id = 'ghx-detail-view';
+      const row = document.createElement('div');
+      row.setAttribute('data-issue-key', 'PANEL-9');
+      detail.appendChild(row);
+      document.body.appendChild(detail);
+
+      expect(BoardPagePageObject.getSelectedIssueKey?.()).toBe('PANEL-9');
+    });
+  });
+
   it('setSwimlaneVisibility and setParentGroupVisibility toggle no-visibility', () => {
     const swimlane = document.createElement('div');
     const group = document.createElement('div');

@@ -64,4 +64,5 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   setIssueVisibility: () => {},
   setSwimlaneVisibility: () => {},
   setParentGroupVisibility: () => {},
+  getSelectedIssueKey: () => null,
 };

@@ -694,6 +694,7 @@ function registerMockJira(): void {
     getProjectFields: async () => Ok(bddMockJiraFields),
     getIssueLinkTypes: async () => Ok(bddMockLinkTypes),
     getStatuses: async () => Ok(bddMockStatuses),
+    addWatcher: async () => Ok(undefined),
   };
   globalContainer.register({ token: JiraServiceToken, value: mock });
 }

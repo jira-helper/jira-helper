@@ -287,6 +287,14 @@ export interface IBoardPagePageObject {
   setSwimlaneVisibility(swimlane: Element, visible: boolean): void;
 
   setParentGroupVisibility(group: Element, visible: boolean): void;
+
+  /**
+   * Rapid Board: issue key for the opened detail / selected card — `selectedIssue` when `view` or `modal`
+   * is present in the query string, else a simple DOM fallback (`#ghx-detail-view` / `.ghx-issue-compact`).
+   *
+   * Optional on the interface so existing mocks do not require the method until they opt in.
+   */
+  getSelectedIssueKey?(): string | null;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
@@ -752,6 +760,20 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     } else {
       group.classList.add(NO_VISIBILITY_CLASS);
     }
+  },
+
+  getSelectedIssueKey(): string | null {
+    const params = new URLSearchParams(window.location.search);
+    const selected = params.get('selectedIssue');
+    if (selected && (params.get('view') || params.get('modal'))) {
+      const trimmed = selected.trim();
+      return trimmed || null;
+    }
+    const fromDom =
+      document.querySelector<HTMLElement>('#ghx-detail-view [data-issue-key]') ??
+      document.querySelector<HTMLElement>('.ghx-issue-compact [data-issue-key]');
+    const keyAttr = fromDom?.getAttribute('data-issue-key')?.trim();
+    return keyAttr || null;
   },
 };
 

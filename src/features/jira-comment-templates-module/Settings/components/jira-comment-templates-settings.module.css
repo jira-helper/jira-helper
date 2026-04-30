@@ -1,0 +1,280 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #172b4d;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #dfe1e6;
+  padding-bottom: 10px;
+}
+
+.title {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.secondaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.importExport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 8px;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  padding: 10px;
+  background: #fafbfc;
+}
+
+.fileInputLabel {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.fileInputLabel:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button,
+.primaryButton,
+.secondaryButton,
+.dangerButton,
+.destructiveTextButton,
+.fileInputButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  padding: 5px 10px;
+  font: inherit;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.secondaryButton,
+.fileInputButton {
+  background: #ffffff;
+  color: #172b4d;
+}
+
+.primaryButton {
+  border-color: #0052cc;
+  background: #0052cc;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.dangerButton {
+  border-color: #ffbdad;
+  background: #ffffff;
+  color: #bf2600;
+}
+
+.destructiveTextButton {
+  justify-self: end;
+  border-color: transparent;
+  background: transparent;
+  color: #6b778c;
+}
+
+.button:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.fileInputLabel:hover .fileInputButton {
+  background: #f4f5f7;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #0065ff;
+}
+
+.dangerButton:hover:not(:disabled) {
+  border-color: #ffbdad;
+  background: #ffebe6;
+}
+
+.destructiveTextButton:hover:not(:disabled),
+.destructiveTextButton:focus-visible {
+  color: #bf2600;
+  background: #ffebe6;
+}
+
+.button:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.destructiveTextButton:focus-visible,
+.fileInputLabel:focus-within .fileInputButton,
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid #4c9aff;
+  outline-offset: 2px;
+}
+
+.button:disabled,
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.destructiveTextButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.visuallyHiddenFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.globalError {
+  border: 1px solid #de350b;
+  border-radius: 3px;
+  padding: 8px;
+  color: #172b4d;
+  background: #ffebe6;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 14px;
+}
+
+.footerActions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #dfe1e6;
+  padding-top: 10px;
+  background: #ffffff;
+}
+
+.footerStatus {
+  margin-right: auto;
+  color: #6b778c;
+  font-size: 12px;
+}
+
+.emptyState {
+  margin: 0;
+  border: 1px dashed #c1c7d0;
+  border-radius: 3px;
+  padding: 16px;
+  color: #6b778c;
+  background: #fafbfc;
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 1px rgba(9, 30, 66, 0.08);
+}
+
+.rowHeader {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(140px, 220px) auto;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.rowHeaderDelete {
+  display: flex;
+  justify-content: flex-end;
+  align-self: start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  color: #42526e;
+  font-weight: 600;
+}
+
+.input,
+.select,
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #c1c7d0;
+  border-radius: 3px;
+  padding: 6px 8px;
+  background: #ffffff;
+  color: #172b4d;
+  font: inherit;
+}
+
+.textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.templateColorPicker {
+  max-width: 100%;
+}
+
+.fieldHint {
+  display: block;
+  margin-top: 4px;
+  color: #6b778c;
+  font-size: 12px;
+}
+
+.fieldError {
+  margin: 0;
+  color: #de350b;
+}
+
+@media (max-width: 700px) {
+  .rowHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    width: 100%;
+  }
+}

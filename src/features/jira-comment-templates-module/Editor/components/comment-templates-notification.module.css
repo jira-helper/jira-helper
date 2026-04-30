@@ -1,0 +1,58 @@
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 8px 10px;
+  color: #172b4d;
+  background: #fff;
+}
+
+.success {
+  border-color: #36b37e;
+  background: #e3fcef;
+}
+
+.warning {
+  border-color: #ffab00;
+  background: #fffae6;
+}
+
+.error {
+  border-color: #de350b;
+  background: #ffebe6;
+}
+
+.content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.message {
+  margin: 0;
+  font-weight: 600;
+}
+
+.details {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.dismissButton {
+  flex: 0 0 auto;
+  cursor: pointer;
+  border: 0;
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+}
+
+.dismissButton:hover,
+.dismissButton:focus-visible {
+  background: rgba(9, 30, 66, 0.12);
+}

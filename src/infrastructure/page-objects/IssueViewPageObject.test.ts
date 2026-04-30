@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { IssueViewPageObject } from './IssueViewPageObject';
 
 describe('IssueViewPageObject', () => {
@@ -14,6 +14,52 @@ describe('IssueViewPageObject', () => {
       expect(pageObject.selectors.detailsBlock).toBe('#details-module');
       expect(pageObject.selectors.attachmentModule).toBe('#attachmentmodule');
       expect(pageObject.selectors.issueType).toBe('#type-val');
+      expect(pageObject.selectors.issueKey).toBe('#key-val');
+    });
+  });
+
+  describe('getIssueKey', () => {
+    const originalHref = typeof window !== 'undefined' ? window.location.href : '';
+
+    afterEach(() => {
+      window.history.replaceState({}, '', originalHref);
+    });
+
+    it('returns trimmed text from #key-val when present', () => {
+      const el = document.createElement('span');
+      el.id = 'key-val';
+      el.textContent = '  PROJ-99  ';
+      document.body.appendChild(el);
+
+      expect(pageObject.getIssueKey()).toBe('PROJ-99');
+    });
+
+    it('returns key from /browse/KEY when URL matches', () => {
+      window.history.pushState({}, '', '/browse/ABC-7');
+
+      expect(pageObject.getIssueKey()).toBe('ABC-7');
+    });
+
+    it('returns key from /jira/browse/KEY when URL matches', () => {
+      window.history.pushState({}, '', '/jira/browse/XYZ-1?focusedCommentId=1');
+
+      expect(pageObject.getIssueKey()).toBe('XYZ-1');
+    });
+
+    it('prefers #key-val over browse URL when both exist', () => {
+      window.history.pushState({}, '', '/browse/URL-ONLY');
+      const el = document.createElement('span');
+      el.id = 'key-val';
+      el.textContent = 'DOM-WINS';
+      document.body.appendChild(el);
+
+      expect(pageObject.getIssueKey()).toBe('DOM-WINS');
+    });
+
+    it('returns null when no key-val and not a browse URL', () => {
+      window.history.pushState({}, '', '/secure/RapidBoard.jspa');
+
+      expect(pageObject.getIssueKey()).toBeNull();
     });
   });
 
