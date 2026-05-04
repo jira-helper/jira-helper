@@ -35,7 +35,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "img/*"
+                "img/*",
+                "jira-helper-comment-insert-bridge.js"
             ],
             "matches": [
                 "*://*/*"

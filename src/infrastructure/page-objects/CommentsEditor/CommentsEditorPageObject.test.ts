@@ -1,5 +1,6 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { COMMENT_WIKI_INSERT_MESSAGE_SOURCE, buildCommentWikiInsertMessage } from './commentWikiInsertMessaging';
 import {
   CommentsEditorPageObject,
   DATA_JIRA_HELPER_COMMENT_EDITOR_ID,
@@ -7,6 +8,15 @@ import {
 } from './CommentsEditorPageObject';
 import type { CommentEditorId, CommentEditorToolComponent, CommentEditorToolProps } from './ICommentsEditorPageObject';
 import { toCommentEditorId } from './ICommentsEditorPageObject';
+
+function stubChromeGetUrl(): void {
+  vi.stubGlobal('chrome', {
+    runtime: {
+      /** Avoid happy-dom fetch to chrome-extension:// in unit tests; bridge listener not required for these assertions. */
+      getURL: () => 'data:text/javascript,void%200',
+    },
+  });
+}
 
 function noIssueKeyStubs(): ConstructorParameters<typeof CommentsEditorPageObject>[0] {
   return {
@@ -62,6 +72,37 @@ function buildIssueAddCommentWikiEditOnly(): HTMLElement {
   wiki.setAttribute('contenteditable', 'true');
   root.appendChild(wiki);
   document.body.appendChild(root);
+  return root;
+}
+
+/**
+ * Jira Visual mode: wiki textarea is present but visually hidden; TinyMCE iframe holds WYSIWYG.
+ */
+function buildAddCommentTinyMceVisual(options: { tinymce?: unknown } = {}): HTMLElement {
+  const root = document.createElement('div');
+  root.id = 'addcomment';
+
+  const ta = document.createElement('textarea');
+  ta.id = 'comment';
+  ta.style.opacity = '0';
+  root.appendChild(ta);
+
+  const iframe = document.createElement('iframe');
+  iframe.id = 'mce_0_ifr';
+  iframe.className = 'tox-edit-area__iframe';
+  root.appendChild(iframe);
+
+  document.body.appendChild(root);
+
+  const doc = iframe.contentDocument!;
+  doc.open();
+  doc.write('<!DOCTYPE html><html><head></head><body><div id="tinymce"><p id="tinymce-body"></p></div></body></html>');
+  doc.close();
+
+  if (options.tinymce !== undefined) {
+    vi.stubGlobal('tinymce', options.tinymce);
+  }
+
   return root;
 }
 
@@ -400,5 +441,132 @@ describe('CommentsEditorPageObject', () => {
     po.attachTools('aui-dlg', Tool);
 
     expect(document.querySelector(`[${DATA_JIRA_HELPER_TOOL}="aui-dlg"]`)).toBeNull();
+  });
+
+  it('insertText with TinyMCE visual posts raw wiki markup to page bridge and does not use insertContent', () => {
+    stubChromeGetUrl();
+    const insertContent = vi.fn();
+    buildAddCommentTinyMceVisual({
+      tinymce: {
+        get: (id: string) =>
+          id === 'mce_0'
+            ? {
+                id: 'mce_0',
+                insertContent,
+                save: vi.fn(),
+                fire: vi.fn(),
+              }
+            : null,
+      },
+    });
+
+    const postMessageSpy = vi.spyOn(window, 'postMessage');
+
+    let id = toCommentEditorId('');
+    const Tool: CommentEditorToolComponent = p => {
+      id = p.commentEditorId;
+      return React.createElement('span');
+    };
+    const po = new CommentsEditorPageObject({
+      issueViewPageObject: { getIssueKey: () => 'TMCE-1' },
+      boardPagePageObject: { getSelectedIssueKey: () => null },
+    });
+    po.attachTools('tmce', Tool);
+
+    const wiki = '*hello*\n- a\n{code}b{code}';
+    const ta = document.querySelector('textarea#comment') as HTMLTextAreaElement;
+    const res = po.insertText(id, wiki);
+    expect(res.ok).toBe(true);
+
+    expect(ta.value).toBe(wiki);
+    expect(insertContent).not.toHaveBeenCalled();
+
+    const payload = buildCommentWikiInsertMessage(id, wiki, 'TMCE-1');
+    expect(postMessageSpy).toHaveBeenCalledWith(payload, '*');
+    postMessageSpy.mockRestore();
+  });
+
+  it('insertText plain textarea + extension runtime posts wiki bridge message (no pre-fill: Jira text mode uses bridge)', () => {
+    stubChromeGetUrl();
+    buildIssueAddCommentWithTextarea();
+    const postMessageSpy = vi.spyOn(window, 'postMessage');
+
+    let id = toCommentEditorId('');
+    const Tool: CommentEditorToolComponent = p => {
+      id = p.commentEditorId;
+      return React.createElement('span');
+    };
+    const po = new CommentsEditorPageObject(noIssueKeyStubs());
+    po.attachTools('txt-bridge', Tool);
+
+    const wiki = '*x* {code}y{code}';
+    const ta = document.querySelector('textarea#comment') as HTMLTextAreaElement;
+    const res = po.insertText(id, wiki);
+    expect(res.ok).toBe(true);
+    expect(ta.value).toBe('');
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      {
+        source: COMMENT_WIKI_INSERT_MESSAGE_SOURCE,
+        action: 'insertWiki',
+        commentEditorId: id,
+        wikiText: wiki,
+        issueKey: null,
+      },
+      '*'
+    );
+    postMessageSpy.mockRestore();
+  });
+
+  it('insertText TinyMCE without extension API uses last-resort plain insertContent escaping', () => {
+    const insertContent = vi.fn();
+    buildAddCommentTinyMceVisual({
+      tinymce: {
+        get: (id: string) =>
+          id === 'mce_0'
+            ? {
+                id: 'mce_0',
+                insertContent,
+                save: vi.fn(),
+                fire: vi.fn(),
+              }
+            : null,
+      },
+    });
+
+    let id = toCommentEditorId('');
+    const Tool: CommentEditorToolComponent = p => {
+      id = p.commentEditorId;
+      return React.createElement('span');
+    };
+    const po = new CommentsEditorPageObject(noIssueKeyStubs());
+    po.attachTools('tmce-nobridge', Tool);
+
+    po.insertText(id, 'hello\nworld');
+    expect(insertContent.mock.calls[0]![0]).toBe('hello<br />world');
+
+    vi.clearAllMocks();
+    po.insertText(id, 'a<x>b');
+    expect(insertContent.mock.calls[0]![0]).toBe('a&lt;x&gt;b');
+  });
+
+  it('insertText TinyMCE fallback updates iframe #tinymce body when tinymce API is missing', () => {
+    buildAddCommentTinyMceVisual();
+
+    let id = toCommentEditorId('');
+    const Tool: CommentEditorToolComponent = p => {
+      id = p.commentEditorId;
+      return React.createElement('span');
+    };
+    const po = new CommentsEditorPageObject(noIssueKeyStubs());
+    po.attachTools('tmce-fb', Tool);
+
+    const ta = document.querySelector('textarea#comment') as HTMLTextAreaElement;
+    const iframe = document.querySelector<HTMLIFrameElement>('#mce_0_ifr')!;
+    const body = iframe.contentDocument!.getElementById('tinymce-body') as HTMLElement;
+
+    const res = po.insertText(id, 'plain');
+    expect(res.ok).toBe(true);
+    expect(ta.value).toBe('plain');
+    expect(body.innerHTML).toContain('plain');
   });
 });
