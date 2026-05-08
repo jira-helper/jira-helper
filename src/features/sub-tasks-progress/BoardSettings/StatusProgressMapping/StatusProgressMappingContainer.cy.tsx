@@ -90,6 +90,23 @@ describe('StatusProgressMappingContainer', () => {
     });
   });
 
+  it('keeps a second draft row visible after Add when the first row is already mapped', () => {
+    useSubTaskProgressBoardPropertyStore.getState().actions.setStatusProgressMapping({
+      '10001': { statusId: '10001', statusName: 'Ready for Release', bucket: 'done' },
+    });
+
+    cy.mount(
+      <WithDi container={globalContainer}>
+        <StatusProgressMappingContainer />
+      </WithDi>
+    );
+
+    cy.get('[data-testid="status-progress-mapping-status-0"]').should('exist');
+    cy.contains('button', '+ Add status mapping').click();
+    cy.get('[data-testid="status-progress-mapping-status-1"]').should('exist');
+    cy.get('[data-testid="status-progress-mapping-bucket-1"]').should('exist');
+  });
+
   it('loads Jira statuses for autocomplete when the board settings store is empty', () => {
     useJiraStatusesStore.setState({ statuses: [], isLoading: false, error: null });
     globalContainer.register({

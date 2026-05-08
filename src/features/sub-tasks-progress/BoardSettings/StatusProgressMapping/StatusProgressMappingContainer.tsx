@@ -67,6 +67,22 @@ function rowsToMapping(rows: StatusProgressMappingRow[]): StatusProgressMapping 
   }, {});
 }
 
+/** True when persisted mapping equals the subset derived from rows (draft rows with empty statusId omitted). */
+function isSamePersistedMapping(
+  persisted: StatusProgressMapping | undefined,
+  fromRows: StatusProgressMapping
+): boolean {
+  const p = persisted ?? {};
+  const keys = Object.keys(fromRows);
+  if (Object.keys(p).length !== keys.length) return false;
+  return keys.every(
+    id =>
+      p[id]?.bucket === fromRows[id]?.bucket &&
+      p[id]?.statusId === fromRows[id]?.statusId &&
+      p[id]?.statusName === fromRows[id]?.statusName
+  );
+}
+
 export const StatusProgressMappingContainer = () => {
   const texts = useGetTextsByLocale(TEXTS);
   const { settings } = useGetSettings();
@@ -115,9 +131,19 @@ export const StatusProgressMappingContainer = () => {
         }
       }
 
+      if (isSamePersistedMapping(settings.statusProgressMapping, nextMapping)) {
+        return;
+      }
+
       setStatusProgressMapping(nextMapping);
     },
-    [clearStatusProgressMapping, removeStatusProgressMapping, rows, setStatusProgressMapping]
+    [
+      clearStatusProgressMapping,
+      removeStatusProgressMapping,
+      rows,
+      setStatusProgressMapping,
+      settings.statusProgressMapping,
+    ]
   );
 
   return (

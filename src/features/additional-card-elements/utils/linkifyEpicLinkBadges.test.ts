@@ -24,9 +24,9 @@ describe('linkifyEpicLinkBadges', () => {
     expect(link).toHaveStyle({ textDecoration: 'none' });
 
     link?.dispatchEvent(new MouseEvent('mouseenter'));
-    expect(link).toHaveStyle({ textDecoration: 'underline' });
+    expect(link).toHaveStyle({ textDecoration: 'none' });
 
-    link?.dispatchEvent(new MouseEvent('mouseleave'));
+    link?.dispatchEvent(new FocusEvent('focus'));
     expect(link).toHaveStyle({ textDecoration: 'none' });
   });
 

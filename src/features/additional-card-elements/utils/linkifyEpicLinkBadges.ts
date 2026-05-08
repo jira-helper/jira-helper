@@ -44,18 +44,6 @@ function createEpicAnchor(epicKey: string): HTMLAnchorElement {
   anchor.style.color = 'inherit';
   anchor.style.cursor = 'pointer';
   anchor.style.textDecoration = 'none';
-  anchor.addEventListener('mouseenter', () => {
-    anchor.style.textDecoration = 'underline';
-  });
-  anchor.addEventListener('mouseleave', () => {
-    anchor.style.textDecoration = 'none';
-  });
-  anchor.addEventListener('focus', () => {
-    anchor.style.textDecoration = 'underline';
-  });
-  anchor.addEventListener('blur', () => {
-    anchor.style.textDecoration = 'none';
-  });
   anchor.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
