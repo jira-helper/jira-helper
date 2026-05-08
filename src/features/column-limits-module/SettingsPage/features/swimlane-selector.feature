@@ -29,9 +29,9 @@ Feature: Column Limits - Swimlane Selection
     When I open the settings modal
     And I uncheck "All swimlanes"
     Then I see element "[data-testid='swimlane-list']"
-    And I see checkbox "Frontend" is checked
-    And I see checkbox "Backend" is checked
-    And I see checkbox "Expedite" is checked
+    And I see checkbox "Frontend" is unchecked
+    And I see checkbox "Backend" is unchecked
+    And I see checkbox "Expedite" is unchecked
 
   @SC-SWIM-UI-3
   Scenario: Select specific swimlanes
@@ -40,7 +40,8 @@ Feature: Column Limits - Swimlane Selection
       | group-1 | In Progress | 5     |
     When I open the settings modal
     And I uncheck "All swimlanes"
-    And I uncheck "Expedite"
+    And I check "Frontend"
+    And I check "Backend"
     Then I see checkbox "Frontend" is checked
     And I see checkbox "Backend" is checked
     And I see checkbox "Expedite" is unchecked
@@ -52,7 +53,8 @@ Feature: Column Limits - Swimlane Selection
       | group-1 | In Progress | 5     |
     When I open the settings modal
     And I uncheck "All swimlanes"
-    And I uncheck "Expedite"
+    And I check "Frontend"
+    And I check "Backend"
     And I check "Expedite"
     Then I see checkbox "All swimlanes" is checked
     And I do not see element "[data-testid='swimlane-list']"
@@ -64,6 +66,7 @@ Feature: Column Limits - Swimlane Selection
       | group-1 | In Progress | 5     |
     When I open the settings modal
     And I uncheck "All swimlanes"
-    And I uncheck "Expedite"
+    And I check "Frontend"
+    And I check "Backend"
     And I click "Save" button
     Then group "group-1" should have swimlanes "Frontend, Backend" in property

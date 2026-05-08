@@ -73,7 +73,7 @@ export const SwimlaneSelector: React.FC<SwimlaneSelectorProps> = ({
       setUserOpenedManual(false);
       onChange([]);
     } else {
-      // User unchecked "All" - show the list; no onChange until individual picks (FR-2 / open Q)
+      // User unchecked "All" — expand manual list; value stays [] until user picks lanes (#23).
       setUserOpenedManual(true);
     }
   };

@@ -15,6 +15,10 @@ import {
   updateMockSubtaskField,
 } from '../helpers';
 
+const GANTT_BAR_TIMEOUT_MS = 20000;
+/** Prefer chart bars (`data-testid`) when present; SVG `<g>` uses hyphenated attributes that remain queryable in Cypress. */
+const ganttBarSelector = (issueKey: string) => `[data-testid="gantt-bar"][data-issue-key="${issueKey}"]`;
+
 Given(
   /^the issue "([^"]*)" of type "([^"]*)" in project "([^"]*)" has these linked issues:$/,
   (issueKey: string, issueType: string, projectKey: string, table: DataTableRows) => {
@@ -90,13 +94,13 @@ Then('I should see the Gantt chart below the issue details block', () => {
 
 Then(/^I should see bars with these labels:$/, (table: DataTableRows) => {
   for (const row of table) {
-    cy.get(`[data-issue-key="${row.key}"]`).should('contain.text', row.label);
+    cy.get(ganttBarSelector(row.key), { timeout: GANTT_BAR_TIMEOUT_MS }).should('contain.text', row.label);
   }
 });
 
 Then(/^I should see bars for these issues:$/, (table: DataTableRows) => {
   for (const row of table) {
-    const bar = cy.get(`[data-issue-key="${row.key}"]`);
+    const bar = cy.get(ganttBarSelector(row.key), { timeout: GANTT_BAR_TIMEOUT_MS });
     bar.should('exist');
     if (row.label) {
       bar.should('contain.text', row.label);
@@ -120,7 +124,7 @@ Then(/^I should see bars for these issues:$/, (table: DataTableRows) => {
 });
 
 Then('I should see a bar for {string} from {string} to {string}', (key: string, startDay: string, endDay: string) => {
-  cy.get(`[data-issue-key="${key}"]`).should($el => {
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS }).should($el => {
     const start = $el.attr('data-start-iso') ?? '';
     const end = $el.attr('data-end-iso') ?? '';
     expect(start.slice(0, 10)).to.eq(startDay);
@@ -129,27 +133,34 @@ Then('I should see a bar for {string} from {string} to {string}', (key: string, 
 });
 
 Then('I should see a bar for {string} on the chart', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).should('exist');
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS }).should('exist');
 });
 
 Then('I should see a bar for {string} on the chart with a warning icon', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).should('exist').find('[data-testid="gantt-bar-open-ended"]').should('exist');
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS })
+    .should('exist')
+    .find('[data-testid="gantt-bar-open-ended"]')
+    .should('exist');
 });
 
 Then('I should not see a bar for {string} on the chart', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).should('not.exist');
+  cy.get(ganttBarSelector(key)).should('not.exist');
 });
 
 Then('the bar for {string} should have a warning icon on the right end', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended"]').should('exist');
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS })
+    .find('[data-testid="gantt-bar-open-ended"]')
+    .should('exist');
 });
 
 Then('the bar for {string} should not have a warning icon', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`).find('[data-testid="gantt-bar-open-ended"]').should('not.exist');
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS })
+    .find('[data-testid="gantt-bar-open-ended"]')
+    .should('not.exist');
 });
 
 Then('the bar for {string} should have fill color {string}', (key: string, color: string) => {
-  cy.get(`[data-issue-key="${key}"]`)
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS })
     .find('[data-bar-rect="true"]')
     .should($el => {
       expect($el.attr('fill')).to.eq(color);
@@ -157,7 +168,7 @@ Then('the bar for {string} should have fill color {string}', (key: string, color
 });
 
 Then('the bar for {string} should have default category fill color', (key: string) => {
-  cy.get(`[data-issue-key="${key}"]`)
+  cy.get(ganttBarSelector(key), { timeout: GANTT_BAR_TIMEOUT_MS })
     .find('[data-bar-rect="true"]')
     .should($el => {
       expect($el.attr('fill')).to.eq('#DFE1E6');
@@ -169,7 +180,7 @@ Then(/^I should see "([^"]*)" button$/, (label: string) => {
 });
 
 Then('I should not see any Gantt bars', () => {
-  cy.get('[data-issue-key]').should('not.exist');
+  cy.get('[data-testid="gantt-bar"]').should('not.exist');
 });
 
 Then(/^I should see empty state message "([^"]*)"$/, (message: string) => {

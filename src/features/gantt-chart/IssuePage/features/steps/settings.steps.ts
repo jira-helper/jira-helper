@@ -306,8 +306,9 @@ Then('the settings modal should close', () => {
 Then(/^the Gantt chart should render with bars:$/, (table: DataTableRows) => {
   for (const row of table) {
     const r = row as { key: string; startDate: string; endDate: string };
-    cy.get(`[data-issue-key="${r.key}"]`, { timeout: 30000 }).should('exist');
-    cy.get(`[data-issue-key="${r.key}"]`).should($el => {
+    const barSel = `[data-testid="gantt-bar"][data-issue-key="${r.key}"]`;
+    cy.get(barSel, { timeout: 30000 }).should('exist');
+    cy.get(barSel).should($el => {
       const start = $el.attr('data-start-iso') ?? '';
       const end = $el.attr('data-end-iso') ?? '';
       if (r.startDate.includes('T')) {

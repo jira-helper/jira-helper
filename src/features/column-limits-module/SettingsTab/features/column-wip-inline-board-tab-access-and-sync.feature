@@ -1,14 +1,14 @@
 Feature: Column WIP Limits — доступ к табу и совместимость с Board Settings
 
-  Таб регистрируется только при canEdit; данные общие с модалкой
+  Таб доступен и без прав редактора доски (как person-limits); данные общие с модалкой
   Board Settings → Columns → Column group WIP limits (один и тот же board property).
 
   @SC-JHTAB-6
-  Scenario: Нет прав на редактирование доски — таб не показывается
+  Scenario: Нет прав на редактирование доски — таб Column WIP Limits всё равно доступен
     Given I am on the agile board page
     And I do not have permission to edit the board
     When I open the Jira Helper panel
-    Then I should not see the "Column WIP Limits" tab
+    Then I should see the "Column WIP Limits" tab
 
   @SC-JHTAB-7
   Scenario: Совместимость — данные из Board Settings видны в табе на board page

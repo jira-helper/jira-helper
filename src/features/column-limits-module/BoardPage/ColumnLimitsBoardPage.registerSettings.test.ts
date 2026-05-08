@@ -111,10 +111,10 @@ describe('ColumnLimitsBoardPage — registerSettings', () => {
     );
   });
 
-  it('does not register when canEdit is false', () => {
+  it('registers when canEdit is false (viewers can open the tab)', () => {
     const page = new ColumnLimitsBoardPage(globalContainer);
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, { G1: { columns: ['c1'], max: 5 } }]);
-    expect(registerSettings).not.toHaveBeenCalled();
+    expect(registerSettings).toHaveBeenCalledTimes(1);
   });
 
   it('registers when canEdit and WIP property is empty (S6 empty state)', () => {
@@ -129,9 +129,9 @@ describe('ColumnLimitsBoardPage — registerSettings', () => {
     );
   });
 
-  it('does not register when canEdit is false and WIP property is empty', () => {
+  it('registers when canEdit is false and WIP property is empty', () => {
     const page = new ColumnLimitsBoardPage(globalContainer);
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, {}]);
-    expect(registerSettings).not.toHaveBeenCalled();
+    expect(registerSettings).toHaveBeenCalledTimes(1);
   });
 });

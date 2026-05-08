@@ -1,6 +1,9 @@
 # scope values: "global" | "project:KEY" | "projectIssueType:KEY:Type"
 Feature: Gantt Chart - Settings
 
+  Background:
+    Given today is "2026-04-15"
+
   @SC-GANTT-SET-1
   Scenario: S1 — First open without saved settings shows first-run state
     Given the issue "PROJ-100" of type "Epic" in project "PROJ" has these linked issues:
@@ -62,7 +65,7 @@ Feature: Gantt Chart - Settings
       | timestamp           | fromStatus  | toStatus | fromCategory  | toCategory    |
       | 2026-04-06T10:00:00 | In Progress | Released | indeterminate | done          |
     When the issue view page has loaded
-    Then I should see a bar for "PROJA-61" from "2026-04-05" to "2026-04-06"
+    Then I should see a bar for "PROJA-61" from "2026-04-05" to "2026-04-15"
 
   @SC-GANTT-SET-6
   Scenario: S11 — Non-matching issue type falls back to global scope
@@ -78,7 +81,7 @@ Feature: Gantt Chart - Settings
       | 2026-04-03T15:00:00 | In Progress | Done     | indeterminate | done          |
     When the issue view page has loaded
     Then the resolved scope should be "_global"
-    And I should see a bar for "PROJA-71" from "2026-04-01" to "2026-04-03"
+    And I should see a bar for "PROJA-71" from "2026-04-01" to "2026-04-15"
 
   @SC-GANTT-SET-7
   Scenario: Edge — Switching scope in settings updates form fields
@@ -163,8 +166,8 @@ Feature: Gantt Chart - Settings
     Then the settings modal should close
     And the Gantt chart should render with bars:
       | key      | startDate  | endDate    |
-      | PROJ-201 | 2026-04-01 | 2026-04-04 |
-      | PROJ-202 | 2026-04-03 | 2026-04-06 |
+      | PROJ-201 | 2026-04-01 | 2026-04-15 |
+      | PROJ-202 | 2026-04-03 | 2026-04-15 |
     When I reopen Gantt settings
     Then the settings form should show:
       | setting      | value                  |
@@ -189,7 +192,7 @@ Feature: Gantt Chart - Settings
     And I click "Save" button
     Then the settings modal should close
     And I should see a bar for "PROJF-11" from "2026-04-01" to "2026-04-05"
-    And I should see a bar for "PROJF-12" from "2026-04-02" to "2026-04-04"
+    And I should see a bar for "PROJF-12" from "2026-04-02" to "2026-04-15"
     When I reopen Gantt settings
     Then the settings form should show:
       | setting     | value                                       |

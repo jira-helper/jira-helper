@@ -14,6 +14,7 @@ import { ColumnLimitsSettingsTab } from '../SettingsTab';
 import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
 
 interface EditData {
+  /** Present on Jira edit payload; not used to gate the helper panel tab. */
   canEdit?: boolean;
   rapidListConfig: {
     mappedColumns: Array<{
@@ -65,21 +66,20 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     const { model: propertyModel } = this.container.inject(propertyModelToken);
     (propertyModel as PropertyModel).setData(boardGroups);
 
-    const { canEdit } = editData as EditData;
-    if (canEdit) {
-      const rawSwimlanes = (editData as EditData).swimlanesConfig?.swimlanes ?? [];
-      const swimlanes = rawSwimlanes.map((swim, index) => ({
-        id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
-        name: swim.name,
-      }));
+    // Settings tab is registered regardless of `canEdit`: viewers can inspect and
+    // tweak locally (same pattern as person-limits); persistence may fail without edit rights.
+    const rawSwimlanes = (editData as EditData).swimlanesConfig?.swimlanes ?? [];
+    const swimlanes = rawSwimlanes.map((swim, index) => ({
+      id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
+      name: swim.name,
+    }));
 
-      const TabComponent = () => React.createElement(ColumnLimitsSettingsTab, { swimlanes });
+    const TabComponent = () => React.createElement(ColumnLimitsSettingsTab, { swimlanes });
 
-      registerSettings({
-        title: getColumnLimitsSettingsTabTitle(this.container),
-        component: TabComponent,
-      });
-    }
+    registerSettings({
+      title: getColumnLimitsSettingsTabTitle(this.container),
+      component: TabComponent,
+    });
 
     if (Object.keys(boardGroups).length === 0) return;
 

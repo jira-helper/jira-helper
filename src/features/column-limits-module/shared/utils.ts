@@ -119,5 +119,16 @@ export const mapColumnsToGroups = ({
     resultGroupsMap.byGroupId[name].byColumnId[columnId!] = { column, id: columnId! };
   });
 
+  // Property may list groups that have no matching columns on this screen (orphan / stale);
+  // `allGroupIds` includes those keys but `byGroupId` would otherwise stay missing → crash in buildInitDataFromGroupMap.
+  keys(wipLimits).forEach(groupId => {
+    if (!resultGroupsMap.byGroupId[groupId]) {
+      resultGroupsMap.byGroupId[groupId] = { allColumnIds: [], byColumnId: {} };
+    }
+  });
+  if (!resultGroupsMap.byGroupId[withoutGroupId]) {
+    resultGroupsMap.byGroupId[withoutGroupId] = { allColumnIds: [], byColumnId: {} };
+  }
+
   return resultGroupsMap;
 };

@@ -9,18 +9,18 @@ import { registerSettings } from 'src/features/board-settings/actions/registerSe
 import { propertyModelToken } from '../../../tokens';
 import { COLUMN_LIMITS_TEXTS } from '../../../SettingsPage/texts';
 import { ColumnLimitsSettingsTab } from '../../ColumnLimitsSettingsTab';
-import { columns, mountBoardTabHarnessOnce, setCanEditBoard, canEditBoard } from '../helpers';
+import { columns, mountBoardTabHarnessOnce } from '../helpers';
 
 Given('I am on the agile board page', () => {
   /* Board DOM is mocked via boardPagePageObject in helpers.setupBackground */
 });
 
 Given('I have permission to edit the board', () => {
-  setCanEditBoard(true);
+  /* No-op: Column WIP Limits tab is available regardless of board edit permission. */
 });
 
 Given('I do not have permission to edit the board', () => {
-  setCanEditBoard(false);
+  /* Same: used for scenario intent only. */
 });
 
 Given('column groups were configured via Board Settings modal:', (table: DataTableRows) => {
@@ -45,12 +45,10 @@ Given('column groups were configured via Board Settings modal:', (table: DataTab
 });
 
 When('I open the Jira Helper panel', () => {
-  if (canEditBoard) {
-    registerSettings({
-      title: COLUMN_LIMITS_TEXTS.tabTitle.en,
-      component: () => React.createElement(ColumnLimitsSettingsTab, { swimlanes: [] }),
-    });
-  }
+  registerSettings({
+    title: COLUMN_LIMITS_TEXTS.tabTitle.en,
+    component: () => React.createElement(ColumnLimitsSettingsTab, { swimlanes: [] }),
+  });
   mountBoardTabHarnessOnce();
   cy.get('[data-jh-component="boardSettingsComponent"]').click();
   cy.get('[role="dialog"]').should('be.visible');
@@ -83,6 +81,10 @@ When('I open the Board Settings column limits modal', () => {
 
 Then(/^I should not see the "([^"]*)" tab$/, (title: string) => {
   cy.contains('.ant-tabs-tab', title).should('not.exist');
+});
+
+Then(/^I should see the "([^"]*)" tab$/, (title: string) => {
+  cy.contains('.ant-tabs-tab', title).should('be.visible');
 });
 
 Then(/^I should see group with column "([^"]*)" and limit (\d+)$/, (columnName: string, limitStr: string) => {

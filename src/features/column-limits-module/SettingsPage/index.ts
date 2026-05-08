@@ -37,8 +37,8 @@ export default class SettingsWIPLimits extends PageModification<[any, any], Elem
   apply(data: [any, any] | undefined): void {
     if (!data) return;
     const [boardData = {}, wipLimits = {}] = data;
-    if (!boardData.canEdit) return;
 
+    // Button on Board Settings → Columns regardless of `canEdit` (same as board tab / person-limits).
     const { model: propertyModel } = this.container.inject(propertyModelToken);
     propertyModel.setData(wipLimits);
 

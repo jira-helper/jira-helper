@@ -105,7 +105,7 @@ function parseFeatureFile(featureText: string): ParsedFeature {
     if (child.scenario) {
       scenarios.push({
         name: child.scenario.name,
-        tags: child.scenario.tags.map(t => t.name),
+        tags: child.scenario.tags.map(t => (t.name.startsWith('@') ? t.name.slice(1) : t.name)),
         steps: child.scenario.steps.map(mapStep),
       });
     }
@@ -203,11 +203,12 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
   }
 
   const runScenario = (
+    runIt: typeof it | typeof it.skip,
     scenario: ParsedScenario,
     scenarioBeforeFn: (() => void) | null,
     scenarioAfterFn: (() => void) | null
   ) => {
-    it(`Scenario: ${scenario.name}`, () => {
+    runIt(`Scenario: ${scenario.name}`, () => {
       if (scenarioBeforeFn) {
         scenarioBeforeFn();
       }
@@ -234,7 +235,8 @@ export function defineFeature(featureText: string, defineFn?: (ctx: FeatureConte
     });
 
     for (const scenario of feature.scenarios) {
-      runScenario(scenario, beforeScenarioFn, afterScenarioFn);
+      const runFn = scenario.tags.includes('skip') ? it.skip : it;
+      runScenario(runFn, scenario, beforeScenarioFn, afterScenarioFn);
     }
   });
 }

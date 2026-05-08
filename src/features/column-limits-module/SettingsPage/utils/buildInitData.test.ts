@@ -3,6 +3,7 @@ import { buildInitDataFromColumns, buildInitDataFromGroupMap } from './buildInit
 import type { Column, WipLimitsProperty } from '../../types';
 import { WITHOUT_GROUP_ID } from '../../types';
 import type { GroupMap } from '../../shared/utils';
+import { mapColumnsToGroups } from '../../shared/utils';
 
 describe('buildInitDataFromColumns', () => {
   it('maps all columns to withoutGroup when wipLimits is empty', () => {
@@ -175,5 +176,32 @@ describe('buildInitDataFromColumns', () => {
     const result = buildInitDataFromColumns(columns, wipLimits);
 
     expect(result.groups[0].swimlanes).toEqual(swimlanes);
+  });
+
+  it('mapColumnsToGroups: seeds empty groups from property when no DOM column maps to them (Board Settings)', () => {
+    const colEl = document.createElement('div');
+    colEl.dataset.columnId = 'c1';
+    const wipLimits: WipLimitsProperty = {
+      orphanInProperty: { columns: ['deleted-column-id'], max: 3 },
+      onBoard: { columns: ['c1'], max: 2 },
+    };
+    const groupMap = mapColumnsToGroups({
+      columnsHtmlNodes: [colEl],
+      wipLimits,
+      withoutGroupId: WITHOUT_GROUP_ID,
+    });
+
+    expect(groupMap.byGroupId.orphanInProperty).toEqual({
+      allColumnIds: [],
+      byColumnId: {},
+    });
+
+    const init = buildInitDataFromGroupMap(groupMap, wipLimits, () => 'x');
+    expect(init.groups.find(g => g.id === 'orphanInProperty')).toMatchObject({
+      id: 'orphanInProperty',
+      columns: [],
+      max: 3,
+    });
+    expect(init.groups.find(g => g.id === 'onBoard')?.columns).toEqual([{ id: 'c1', name: 'x' }]);
   });
 });

@@ -30,7 +30,6 @@ import { createButtonStubs, columns, type ButtonStubs } from '../../SettingsPage
 export { columns };
 
 let harnessMounted = false;
-export let canEditBoard = true;
 let buttonStubs: ButtonStubs;
 
 const issueTypes = [
@@ -142,13 +141,8 @@ export const ColumnLimitsBoardTabBddHarness: React.FC<HarnessProps> = ({ stubs }
   </div>
 );
 
-export const setCanEditBoard = (value: boolean) => {
-  canEditBoard = value;
-};
-
 export const setupBackground = () => {
   harnessMounted = false;
-  canEditBoard = true;
   buttonStubs = createButtonStubs();
 
   globalContainer.reset();

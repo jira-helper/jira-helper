@@ -65,9 +65,11 @@ export function buildInitDataFromGroupMap(
   wipLimits: WipLimitsProperty,
   getColumnName: (el: HTMLElement) => string
 ): InitFromPropertyData {
-  const withoutGroupColumns: Column[] = (groupMap.byGroupId[WITHOUT_GROUP_ID]?.allColumnIds ?? []).map(colId => {
-    const col = groupMap.byGroupId[WITHOUT_GROUP_ID].byColumnId[colId];
-    return { id: col.id, name: getColumnName(col.column) };
+  const withoutBucket = groupMap.byGroupId[WITHOUT_GROUP_ID];
+  const withoutGroupColumns: Column[] = (withoutBucket?.allColumnIds ?? []).flatMap(colId => {
+    const col = withoutBucket?.byColumnId[colId];
+    if (!col) return [];
+    return [{ id: col.id, name: getColumnName(col.column) }];
   });
 
   const groups: UIGroup[] = groupMap.allGroupIds
@@ -75,11 +77,22 @@ export function buildInitDataFromGroupMap(
     .map(groupId => {
       const groupData = groupMap.byGroupId[groupId];
       const wipLimit = wipLimits[groupId] ?? {};
+      if (!groupData) {
+        return {
+          id: groupId,
+          columns: [],
+          max: wipLimit.max,
+          customHexColor: wipLimit.customHexColor,
+          includedIssueTypes: wipLimit.includedIssueTypes,
+          swimlanes: wipLimit.swimlanes,
+        };
+      }
       return {
         id: groupId,
-        columns: groupData.allColumnIds.map(colId => {
+        columns: groupData.allColumnIds.flatMap(colId => {
           const col = groupData.byColumnId[colId];
-          return { id: col.id, name: getColumnName(col.column) };
+          if (!col) return [];
+          return [{ id: col.id, name: getColumnName(col.column) }];
         }),
         max: wipLimit.max,
         customHexColor: wipLimit.customHexColor,

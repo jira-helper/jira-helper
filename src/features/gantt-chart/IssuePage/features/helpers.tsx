@@ -193,9 +193,17 @@ export function setPersistedPreferredScopeLevel(level: 'global' | 'project' | 'p
 
 export function applyGanttSettingsTable(rows: DataTableRows): void {
   const { scopeKey, settings } = scopeSettingsFromTable(rows);
+  const raw = localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY);
+  const prev = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+  const prevStorage =
+    prev.storage && typeof prev.storage === 'object' ? { ...(prev.storage as Record<string, GanttScopeSettings>) } : {};
   const payload = {
-    storage: { [scopeKey]: settings } as Record<string, GanttScopeSettings>,
-    statusBreakdownEnabled: false,
+    ...prev,
+    storage: {
+      ...prevStorage,
+      [scopeKey]: settings,
+    },
+    statusBreakdownEnabled: Boolean(prev.statusBreakdownEnabled),
   };
   localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
 }
