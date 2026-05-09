@@ -1,24 +1,74 @@
+---
+sidebar_position: 2
+---
+
 # Quick Start
 
-After installing jira-helper, open any Jira board to get started.
+Get your first WIP limit running in under 2 minutes.
+
+> **TL;DR** — Install the extension → open any Jira board → click the **Jira Helper** button in the board toolbar (a square button labeled "Jira Helper", to the right of Jira's gear icon) → **Columns** tab → scroll to **Column group WIP limits** → drag columns from the panel into a group slot, set a limit, save. Done.
+
+## Prerequisites
+
+- [Jira Helper installed](/docs/getting-started/installation) and enabled in your browser
+- **Board administrator** permissions on at least one Jira board
+- A Scrum or Kanban board (not a service desk / JSM board)
 
 ## 1. Open a Board
 
-Navigate to any Scrum or Kanban board in Jira. The extension activates automatically.
+Navigate to any Scrum or Kanban board in Jira. The extension activates automatically — you'll see the **Jira Helper** button in the board toolbar, a square button labeled "Jira Helper" usually positioned to the right of Jira's native gear icon.
 
-## 2. Open Settings
+<!-- SCREENSHOT: The Jira Helper button in the board toolbar (top-right area, near the native Jira gear icon), with a red circle around it -->
 
-Click the **Jira Helper** button in the board sidebar or toolbar to open settings. Each feature has its own settings tab.
+## 2. Open the Jira Helper Panel
 
-## 3. Configure a Feature
+Click the **Jira Helper** button in the board toolbar to open the extension's settings panel. Each feature has its own tab: **Columns**, **Swimlanes**, **Card Colors**, **Gantt Chart**, and more.
 
-For example, to set up Column WIP Limits:
+<!-- SCREENSHOT: The Jira Helper settings dialog open to the Columns tab, showing the "Column group WIP limits" section -->
 
-1. Open Board Settings → Columns
-2. Find the **Column group WIP limits** section
-3. Drag columns into groups and set a limit
-4. Save — the board updates immediately
+## 3. Configure Your First Feature
 
-## 4. Explore Features
+### Example: Column Group WIP Limits
 
-Browse the [Features Overview](/docs/intro) to see what jira-helper can do.
+1. In the settings panel, switch to the **Columns** tab
+2. Scroll to the **Column group WIP limits** section
+3. Drag columns from the right-side panel into a group slot (e.g., drop "In Progress" and "Review" together into one group)
+4. Set the **Max issues** number (e.g., `5`)
+5. Click **Save**
+
+The board updates immediately. You'll see a **current / limit** badge on the group's first column header.
+
+## 4. Verify It Works
+
+- Look for a **counter badge** on the first column of each group (e.g. `3 / 5`)
+- When the group exceeds its limit, the column area turns **red**
+
+<!-- SCREENSHOT: A board view showing a column group with "3 / 5" badge and red background on an overloaded group -->
+
+## Troubleshooting
+
+### Jira Helper button is missing
+
+- Refresh the page (F5)
+- Ensure the extension is **pinned** and **enabled**
+- Confirm you're on a **board view**, not the backlog or an issue page
+- See [Installation troubleshooting](/docs/getting-started/installation#troubleshooting)
+
+### Settings don't save
+
+You need **board administrator** permissions. Ask your Jira admin to grant you board admin access. Features that store settings in board properties (Column Limits, Swimlane Limits, Card Colors, etc.) require edit permissions on the board.
+
+### Configured limits not showing on the board
+
+- Click **Save** in the settings panel after making changes
+- Ensure the board is **refreshed** after saving
+- Verify you have board admin permissions (some features are view-only without admin rights)
+- Check that the feature is **enabled** — some features have an on/off toggle in settings
+
+## Next Steps
+
+- **[Column Group WIP Limits](/docs/features/wip-limits/column-limits)** — full documentation with swimlane scoping, issue type filtering, and color configuration
+- **[Features Overview](/docs/intro)** — explore all features Jira Helper offers
+- **[Settings guide](/docs/settings)** — understand where settings are stored (team-shared vs personal)
+- **[Installation](/docs/getting-started/installation)** — installation and browser support
+- **[FAQ](/docs/advanced/faq)** — common questions and troubleshooting
