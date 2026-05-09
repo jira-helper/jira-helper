@@ -7,7 +7,7 @@
 
 ## Цель
 
-Создать статический сайт на Docusaurus (GitHub Pages), совмещающий маркетинговый лендинг и полноценную документацию для jira-helper. Сайт на двух языках (RU/EN), документирует все 20 фич расширения с пошаговыми инструкциями и скриншотами.
+Создать статический сайт на Docusaurus (GitHub Pages), совмещающий маркетинговый лендинг и полноценную документацию для jira-helper. Сайт на двух языках (RU/EN), документирует все фичи расширения с пошаговыми инструкциями и скриншотами.
 
 ## Requirements
 
@@ -59,7 +59,7 @@
 | 107 | [Gantt Chart] | Gantt-диаграмма (самая большая страница) | TODO |
 | 108 | [Control Chart] | SLA Line + Scale Ruler | TODO |
 | 109 | [Flag Issue] | Подсветка флагов на панели задачи | TODO |
-| 110 | [Issue Templates] | Bug template + Comment templates | TODO |
+| 110 | [Issue Templates] | Comment templates | TODO |
 | 111 | [Data Blurring + Local Settings] | Размытие данных + настройка языка | TODO |
 
 ### Phase 5: Settings + Advanced
@@ -76,14 +76,12 @@
 | 114 | [Landing RU] | Перевод Hero, Features Grid, Stats, CTA на русский | TODO |
 | 115 | [Docs RU] | Перевод всей документации на русский | TODO |
 
-### Phase 7: QA + Polish
+### Phase 7: Polish
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
 | 116 | [SEO] | Open Graph, мета-теги, sitemap, robots.txt | TODO |
-| 117 | [Lighthouse] | Performance ≥ 90, A11y ≥ 90, SEO ≥ 90 | TODO |
-| 118 | [Accessibility] | ARIA, контраст, клавиатурная навигация | TODO |
-| 119 | [Assets] | Подготовка скриншотов/гифок, оптимизация WebP | TODO |
+| 117 | [Assets] | Подготовка скриншотов/гифок, оптимизация WebP | TODO |
 
 ## Dependencies
 
@@ -97,7 +95,7 @@ flowchart LR
     F3 --> F6
     F4 --> F6
     F5 --> F6
-    F6 --> F7[Phase 7: QA + Polish]
+    F6 --> F7[Phase 7: Polish]
 ```
 
 ## Acceptance Criteria
@@ -109,10 +107,9 @@ flowchart LR
 - [ ] Поиск по документации
 - [ ] Адаптивная вёрстка
 - [ ] SEO: мета-теги, Open Graph, sitemap
-- [ ] Lighthouse: Performance ≥ 90, Accessibility ≥ 90, SEO ≥ 90
 - [ ] CI/CD: сборка и деплой из main
 - [ ] 404 страница
-- [ ] Все ссылки на Chrome Web Store / GitHub работают
+- [ ] Все ссылки на Chrome Web Store / Firefox / GitHub работают
 
 ---
 

@@ -76,7 +76,7 @@
 
 **FR-1.4**: CTA Block
 - Повторные кнопки установки
-- Ссылки: GitHub, Chrome Web Store, Firefox (about:debugging), Documentation
+- Ссылки: GitHub, Chrome Web Store, Firefox Add-ons, Documentation
 
 ### FR-2: Документация
 
@@ -86,7 +86,7 @@
 - Поиск по документации
 
 **FR-2.2**: Getting Started
-- Страница установки: Chrome Web Store, Firefox manual load
+- Страница установки: Chrome Web Store, Firefox Add-ons
 - Быстрый старт: включить первую фичу, открыть настройки доски
 - Системные требования: Chrome 88+, Firefox 58+
 
@@ -249,26 +249,20 @@ User Jobs:
 - **Zero-config** — автоматически подсвечивает задачи с флагом
 - **Issue view** — иконка флага, жёлтый фон для связанных задач
 
-**FR-2.3.17: Bug Template / Description Template**
-
-User Jobs:
-- **Вставить шаблон в описание задачи**
-- **Сохранить текущее описание как новый шаблон**
-
-**FR-2.3.18: Comment Templates**
+**FR-2.3.17: Comment Templates**
 
 User Jobs:
 - **Управлять шаблонами** — add, edit, delete
 - **Импорт/экспорт** — JSON
 - **Вставить шаблон из тулбара редактора**
 
-**FR-2.3.19: Data Blurring**
+**FR-2.3.18: Data Blurring**
 
 User Jobs:
 - **Включить/выключить через контекстное меню**
 - **All pages view** — размытый текст и изображения
 
-**FR-2.3.20: Local Settings (Language)**
+**FR-2.3.19: Local Settings (Language)**
 
 User Jobs:
 - **Сменить язык** — Auto / English / Russian
@@ -345,22 +339,11 @@ User Jobs:
 
 ## 6. Нефункциональные требования
 
-**Testing**:
-- Lighthouse audit: Performance ≥ 90, Accessibility ≥ 90, SEO ≥ 90
-- Проверка битых ссылок
-- Визуальная проверка адаптивности (десктоп, планшет, мобилка)
-
 **Performance**:
 - Статический экспорт (pre-rendered HTML)
 - Минимальный JS бандл (Docusaurus core + минимальные плагины)
 - Оптимизированные изображения (WebP, lazy loading)
 - Time to Interactive < 2s
-
-**Accessibility**:
-- ARIA-метки на CTA-кнопках
-- Alt-тексты для всех скриншотов
-- Контрастность текста ≥ 4.5:1
-- Навигация с клавиатуры
 
 **SEO**:
 - Open Graph и Twitter Card мета-теги
@@ -397,7 +380,6 @@ User Jobs:
 - [ ] Docusaurus тема: default Classic или кастомная через swizzling?
 - [ ] Кастомный домен или поддомен GitHub Pages?
 - [ ] Ассеты: откуда брать скриншоты/гифки — переиспользовать из `images` ветки pavelpower/jira-helper или делать новые под лендинг?
-- [ ] Кнопка установки для Firefox — какой линк? (about:debugging или Firefox Add-ons после публикации)
 - [ ] Порядок фич в Features Grid и в сайдбаре документации
 - [ ] Какой контент для Hero — существующие скриншоты или нужны новые?
 
@@ -407,15 +389,14 @@ User Jobs:
 
 - [ ] Сайт опубликован на GitHub Pages
 - [ ] Лендинг: Hero, Features Grid (6-8 карточек с гифками), Stats, CTA
-- [ ] Документация: Getting Started + все фичи (20 шт) с Overview и User Jobs
+- [ ] Документация: Getting Started + все фичи с Overview и User Jobs
 - [ ] RU/EN локализация с переключателем
 - [ ] Поиск по документации работает
 - [ ] Адаптивная вёрстка (десктоп, планшет, мобилка)
 - [ ] SEO: мета-теги, Open Graph, sitemap
-- [ ] Lighthouse: Performance ≥ 90, Accessibility ≥ 90, SEO ≥ 90
 - [ ] CI/CD: GitHub Actions сборка и деплой
 - [ ] 404 страница
-- [ ] Все ссылки на Chrome Web Store / GitHub работают
+- [ ] Все ссылки на Chrome Web Store / Firefox Add-ons / GitHub работают
 
 ---
 
@@ -464,7 +445,6 @@ User Jobs:
 │   │   │   └── scale-ruler.md
 │   │   ├── flag-issue.md
 │   │   ├── issue-templates/
-│   │   │   ├── bug-template.md
 │   │   │   └── comment-templates.md
 │   │   ├── data-blurring.md
 │   │   └── local-settings.md
