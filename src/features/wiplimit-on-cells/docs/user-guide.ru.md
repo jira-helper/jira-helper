@@ -10,6 +10,17 @@
 
 Задать единый лимит незавершённой работы для выбранного блока ячеек доски (пересечений колонок и swimlane). Область выделяется контуром, на отдельных ячейках можно включить счётчики, а при превышении лимита ячейки подсвечиваются. Диапазоны можно пометить как отключённые — для визуальной группировки без активного WIP-контроля.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-swimlane">
+      <div class="mockup-swimlane-header">Team Backend</div>
+        <div class="mockup-cell-wip"><div class="mockup-cell-wip-badge">3/5</div>
+        <div class="mockup-columns"><div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card">TASK-99</div><div class="mockup-card">TASK-98</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

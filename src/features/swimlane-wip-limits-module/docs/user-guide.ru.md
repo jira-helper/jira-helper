@@ -10,6 +10,27 @@
 
 Задать отдельный лимит незавершённой работы для каждой строки swimlane. Возможна фильтрация по типам задач для каждой дорожки. Дополняет групповые лимиты по колонкам, создавая многоуровневый контроль WIP.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-swimlane">
+      <div class="mockup-swimlane-header">Team Frontend <span class="mockup-wip-badge mockup-wip-badge--green">2/5</span></div>
+      <div class="mockup-columns">
+        <div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
+        <div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card">TASK-99</div></div>
+        <div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
+      </div>
+    </div>
+    <div class="mockup-swimlane">
+      <div class="mockup-swimlane-header">Team Backend <span class="mockup-wip-badge mockup-wip-badge--red">4/3</span></div>
+      <div class="mockup-columns">
+        <div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-201</div></div>
+        <div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-199</div><div class="mockup-card mockup-card--warn">TASK-198</div></div>
+        <div class="mockup-col"><div class="mockup-col-header">Done</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

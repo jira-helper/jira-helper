@@ -10,6 +10,24 @@
 
 Cap how many issues each teammate can have in progress on the board. Each limit has its own maximum and scope (columns, swimlanes, issue types). The board shows avatar badges with counters, highlights overloaded cards, and supports one-click filtering to focus on a person's workload.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-avatars">
+      <div class="mockup-avatar mockup-avatar--green">
+        <div class="mockup-avatar-face">A</div><span class="mockup-avatar__count">2/3</span>
+      </div>
+      <div class="mockup-avatar mockup-avatar--red">
+        <div class="mockup-avatar-face">B</div><span class="mockup-avatar__count">4/3</span>
+      </div>
+    </div>
+    <div class="mockup-columns">
+      <div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
+      <div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card mockup-card--warn">TASK-98</div></div>
+      <div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
+    </div>
+  </div>
+</div>
+
 ## How to configure
 
 ### Where to find settings

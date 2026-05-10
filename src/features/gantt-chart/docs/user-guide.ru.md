@@ -10,6 +10,34 @@
 
 Добавить на страницу задачи в классическом виде горизонтальную диаграмму Ганта, которая показывает все связанные задачи — подзадачи, дети эпика и связанные задачи — на общей временной шкале, чтобы видеть, когда выполняется каждая часть работы и как менялся её статус.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span class="mockup-badge blue">Нерешённые</span>
+      <span class="mockup-badge green">Скрыть готовые</span>
+      <span style="font-size:0.65rem;color:#5e6c84;margin-left:auto;">дни</span>
+    </div>
+    <div style="position:relative;padding-left:60px;font-size:0.65rem;">
+      <div style="position:absolute;left:8px;top:0;color:#5e6c84;">TASK-99</div>
+      <div style="background:#4c9aff;height:14px;border-radius:3px;margin:4px 0;display:flex;">
+        <div style="background:#dfe1e6;width:20%"></div><div style="background:#4c9aff;width:30%"></div><div style="background:#36b37e;width:25%"></div><div style="background:#ff5630;width:25%"></div>
+      </div>
+      <div style="position:absolute;left:8px;top:22px;color:#5e6c84;">TASK-88</div>
+      <div style="background:#ff8b00;height:14px;border-radius:3px;margin:4px 0;display:flex;">
+        <div style="background:#dfe1e6;width:5%"></div><div style="background:#ff8b00;width:70%"></div><div style="background:#36b37e;width:25%"></div>
+      </div>
+      <div style="position:absolute;left:8px;top:44px;color:#5e6c84;">TASK-77</div>
+      <div style="background:#36b37e;height:14px;border-radius:3px;margin:4px 0"></div>
+    </div>
+    <div style="display:flex;gap:2px;margin-top:6px;font-size:0.55rem;color:#5e6c84;">
+      <span>Сделать</span><span style="background:#dfe1e6;width:12px;height:8px;border-radius:2px"></span>
+      <span>В работе</span><span style="background:#4c9aff;width:12px;height:8px;border-radius:2px"></span>
+      <span>Готово</span><span style="background:#36b37e;width:12px;height:8px;border-radius:2px"></span>
+      <span>Заблокировано</span><span style="background:#ff5630;width:12px;height:8px;border-radius:2px"></span>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

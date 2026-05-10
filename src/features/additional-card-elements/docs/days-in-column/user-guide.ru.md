@@ -10,6 +10,19 @@
 
 Показать, сколько дней задача находится в текущей колонке, с цветовой индикацией порогов «внимания» для быстрого выявления застоявшихся задач.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-columns">
+      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
+        <div class="mockup-card"><span class="mockup-badge blue">3d</span> TASK-99 API</div>
+        <div class="mockup-card"><span class="mockup-badge green">1d</span> TASK-101 UI</div>
+        <div class="mockup-card"><span class="mockup-badge yellow">8d</span> TASK-88 Auth</div>
+        <div class="mockup-card"><span class="mockup-badge red">14d</span> TASK-76 Legacy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

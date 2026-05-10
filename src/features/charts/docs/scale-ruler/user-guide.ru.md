@@ -10,6 +10,21 @@
 
 Наложить на Control Chart перетаскиваемую и масштабируемую измерительную сетку для считывания lead/cycle time относительно шагов в духе story points (пресеты Fibonacci или Linear), упрощая оценку дней по позиции на диаграмме.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div style="position:relative;height:100px;padding:8px 20px 20px 30px;">
+      <div style="position:absolute;left:30px;bottom:20px;right:20px;top:8px;">
+        <div style="position:absolute;left:0;right:0;bottom:25%;border-top:1px dashed #dfe1e6"></div>
+        <div style="position:absolute;left:0;right:0;bottom:50%;border-top:1px dashed #dfe1e6"></div>
+        <div style="position:absolute;left:0;right:0;bottom:75%;border-top:1px dashed #dfe1e6"></div>
+        <div style="position:absolute;right:4px;bottom:22%;font-size:0.55rem;color:#5e6c84">1</div>
+        <div style="position:absolute;right:4px;bottom:47%;font-size:0.55rem;color:#5e6c84">2</div>
+        <div style="position:absolute;right:4px;bottom:72%;font-size:0.55rem;color:#5e6c84">3</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

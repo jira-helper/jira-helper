@@ -10,6 +10,17 @@
 
 Отображать связанные задачи прямо на карточках доски в виде цветных бейджей под заголовком (summary) задачи, чтобы быстро видеть контекст и зависимости.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-columns">
+      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
+        <div class="mockup-card">TASK-99 API <div class="mockup-link-chip blocks">← PROJ-12</div><div class="mockup-link-chip relates">→ PROJ-34</div></div>
+        <div class="mockup-card">TASK-101 <div class="mockup-link-chip blocks">← PROJ-13</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Where to find settings

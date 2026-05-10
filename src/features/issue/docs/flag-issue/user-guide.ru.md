@@ -10,6 +10,19 @@
 
 Визуально выделять задачи с флагом в иерархии и на странице задачи, чтобы легко замечать помеченную флагом работу.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div style="font-size:0.67rem;">
+      <div style="background:#fffae6;padding:6px 8px;border-radius:4px;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:0.8rem;">🚩</span> <strong>TASK-99</strong> API authentication
+      </div>
+      <div style="color:#5e6c84;font-size:0.62rem;margin-bottom:4px;">Связи задачи — с флагом</div>
+      <div class="mockup-card" style="background:#fffae6;margin-bottom:3px;"><span style="font-size:0.7rem;">🚩</span> PROJ-12 Config service</div>
+      <div class="mockup-card" style="background:#fffae6;margin-bottom:3px;"><span style="font-size:0.7rem;">🚩</span> PROJ-34 Auth service</div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 Настройка не требуется. Фича работает автоматически на страницах задач, в панели деталей задачи на доске и в результатах поиска.

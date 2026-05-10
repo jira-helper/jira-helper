@@ -10,6 +10,23 @@
 
 Скрыть читаемый текст и размыть изображения по всему Jira для демонстрации экрана, презентаций или показов — вёрстка остаётся на месте, содержимое становится нечитаемым.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div style="display:flex;gap:8px;">
+      <div class="mockup-col" style="flex:1">
+        <div class="mockup-col-header">Обычный вид</div>
+        <div class="mockup-card"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
+        <div class="mockup-card"><strong>TASK-102</strong><br/>Payment integration</div>
+      </div>
+      <div class="mockup-col" style="flex:1">
+        <div class="mockup-col-header">Размытый вид</div>
+        <div class="mockup-card" style="filter:blur(4px);user-select:none;"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
+        <div class="mockup-card" style="filter:blur(4px);user-select:none;"><strong>TASK-102</strong><br/>Payment integration</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Где найти настройки

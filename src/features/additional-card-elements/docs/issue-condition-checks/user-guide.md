@@ -10,6 +10,18 @@
 
 Отображать на карточках настраиваемые иконки-бейджи, когда задача (или связанные с ней подзадачи) удовлетворяет заданному JQL-условию. Позволяет быстро замечать важные состояния задач без открытия каждой из них.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-columns">
+      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
+        <div class="mockup-card"><span class="mockup-icon mockup-icon--warn">⚠</span> TASK-99 No reviewer</div>
+        <div class="mockup-card"><span class="mockup-icon mockup-icon--ok">✓</span> TASK-101 All checks passed</div>
+        <div class="mockup-card"><span class="mockup-icon mockup-icon--info">i</span> TASK-88 Needs estimation</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Where to find settings

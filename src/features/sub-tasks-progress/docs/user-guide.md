@@ -10,6 +10,21 @@
 
 Show stacked progress bars and/or compact counters on board cards for child and linked work — sub-tasks, epic children, linked issues, and optional external links — in «To Do», «In Progress», «Done», and «Blocked» buckets at a glance.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div class="mockup-columns">
+      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
+        <div class="mockup-card">TASK-99 API
+          <div class="mockup-progress"><div class="mockup-progress-bar"><div class="mockup-progress-bar__done" style="width:60%"></div><div class="mockup-progress-bar__wip" style="width:40%"></div></div><span>3/5</span></div>
+        </div>
+        <div class="mockup-card">TASK-101 UI
+          <div class="mockup-progress"><div class="mockup-progress-bar"><div class="mockup-progress-bar__done" style="width:100%"></div></div><span>4/4</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Where to find settings

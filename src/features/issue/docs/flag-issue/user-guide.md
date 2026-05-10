@@ -10,6 +10,19 @@
 
 Visually highlight flagged issues in the issue hierarchy and on the issue detail page, making it easy to spot flagged work at a glance.
 
+<div class="feature-mockup">
+  <div class="mockup-board">
+    <div style="font-size:0.67rem;">
+      <div style="background:#fffae6;padding:6px 8px;border-radius:4px;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:0.8rem;">🚩</span> <strong>TASK-99</strong> API authentication
+      </div>
+      <div style="color:#5e6c84;font-size:0.62rem;margin-bottom:4px;">Issue links — flagged</div>
+      <div class="mockup-card" style="background:#fffae6;margin-bottom:3px;"><span style="font-size:0.7rem;">🚩</span> PROJ-12 Config service</div>
+      <div class="mockup-card" style="background:#fffae6;margin-bottom:3px;"><span style="font-size:0.7rem;">🚩</span> PROJ-34 Auth service</div>
+    </div>
+  </div>
+</div>
+
 ## Как настроить
 
 ### Where to find settings
