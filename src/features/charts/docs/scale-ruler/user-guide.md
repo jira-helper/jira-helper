@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Где настраивается | Reports → Control Chart → Grid checkbox and preset selector in chart options |
+| Где настраивается | «Reports» → «Control Chart» → «Grid» checkbox and preset selector in chart options |
 | Где видно | Reports (Control Chart) |
 | Settings apply to | Only for you (session) |
 
@@ -14,13 +14,13 @@ Overlay a draggable, resizable measurement grid on the Control Chart to read lea
 
 ### Where to find settings
 
-1. Open **Reports** for your board and select the **Control Chart**.
-2. In the chart options column, find the **Grid** checkbox and preset selector.
+1. Open **«Reports»** for your board and select the **«Control Chart»**.
+2. In the chart options column, find the **«Grid»** checkbox and preset selector.
 
 ### How to configure
 
-- **Enable the grid**: check the **Grid** checkbox.
-- **Choose a preset**: select from **Fibonacci** (1,2,3,5; 1,2,3,5,8; 1,2,3,5,8,13) or **Linear** (2–10 steps).
+- **Enable the grid**: check the **«Grid»** checkbox.
+- **Choose a preset**: select from **«Fibonacci»** (1,2,3,5; 1,2,3,5,8; 1,2,3,5,8,13) or **«Linear»** (2–10 steps).
 - **Reposition**: drag the overlay to reposition it on the chart.
 - **Resize**: use the resize handle (bottom-right corner) to adjust the overlay size.
 

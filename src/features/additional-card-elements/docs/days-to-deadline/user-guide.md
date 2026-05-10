@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Где настраивается | Board Settings → Additional Card Elements → Days to Deadline Badge |
+| Где настраивается | «Board Settings» → «Additional Card Elements» → «Days to Deadline Badge» |
 | Где видно | Board (detail view) |
 | Settings apply to | For the whole team ||
 
@@ -14,20 +14,20 @@
 
 ### Where to find settings
 
-1. Откройте доску, затем **Jira Helper** → настройки доски.
-2. Перейдите на вкладку **Additional Card Elements**.
+1. Откройте доску, затем **«Jira Helper»** → настройки доски.
+2. Перейдите на вкладку **«Additional Card Elements»**.
 
 ### How to configure
 
-- **Enable the feature**: включите главный переключатель **Enable additional card elements**.
-- **Choose columns**: выберите колонки, в которых должен отображаться бейдж, в секции **Column Selection**.
-- **Show days to deadline badge**: включите **Show days to deadline badge** в секции **Days to Deadline Badge**.
+- **Enable the feature**: включите главный переключатель **«Enable additional card elements»**.
+- **Choose columns**: выберите колонки, в которых должен отображаться бейдж, в секции **«Column Selection»**.
+- **Show days to deadline badge**: включите **«Show days to deadline badge»** в секции **«Days to Deadline Badge»**.
 - **Select the deadline field**: в выпадающем списке выберите поле, содержащее дату дедлайна (типы `date`, `datetime`, `string`).
 - **Choose display mode**:
-  - **Always** — бейдж показывается всегда (если есть дедлайн).
-  - **Less than X days or overdue** — показывается, если осталось ≤ X дней или дедлайн просрочен.
-  - **Overdue only** — показывается только для просроченных задач.
-- **Set warning threshold**: при необходимости задайте **Warning threshold** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
+  - **«Always»** — бейдж показывается всегда (если есть дедлайн).
+  - **«Less than X days or overdue»** — показывается, если осталось ≤ X дней или дедлайн просрочен.
+  - **«Overdue only»** — показывается только для просроченных задач.
+- **Set warning threshold**: при необходимости задайте **«Warning threshold»** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
 
 ## Как использовать
 
@@ -41,7 +41,7 @@
   - Красный — дедлайн просрочен (всегда).
   - Жёлтый — сегодня (0 дней) или завтра (1 день), либо осталось ≤ warning threshold.
   - Синий — остальные случаи.
-- В режиме **Overdue only** жёлтый порог не применяется.
+- В режиме **«Overdue only»** жёлтый порог не применяется.
 - В бэклоге бейдж не отображается.
 
 ## Сценарии использования

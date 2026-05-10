@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Где настраивается | Reports → Control Chart → SLA input field in chart options |
+| Где настраивается | «Reports» → «Control Chart» → «SLA» input field in chart options |
 | Где видно | Reports (Control Chart) |
 | Settings apply to | For the whole team |(`slaConfig3`) |
 
@@ -14,14 +14,14 @@ Add a horizontal SLA reference line to the Control Chart report with a shaded pe
 
 ### Where to find settings
 
-1. Open **Reports** for your board and select the **Control Chart**.
-2. In the chart options column, find the **SLA** input field.
+1. Open **«Reports»** for your board and select the **«Control Chart»**.
+2. In the chart options column, find the **«SLA»** input field.
 
 ### How to configure
 
 - **Set SLA target**: enter a target value in **days**. The chart updates immediately, showing a green reference line and shaded band.
 
-Click **Save** to persist the SLA value for everyone using this board. The value is stored as a Jira board property.
+Click **«Save»** to persist the SLA value for everyone using this board. The value is stored as a Jira board property.
 
 The SLA line can also be changed temporarily via the URL parameter `sla` without saving — useful for quick "what-if" analysis.
 
@@ -30,7 +30,7 @@ The SLA line can also be changed temporarily via the URL parameter `sla` without
 - A green horizontal line appears at the SLA position on the chart.
 - A translucent green band spans the percentile range of issues at or below the SLA.
 - The line label shows two values: the SLA in days (e.g. `5d`) and the percentage of issues at or below that SLA (e.g. `85%`).
-- An **SLA** entry is added to the chart legend for clarity.
+- An **«SLA»** entry is added to the chart legend for clarity.
 - Changing the input value updates the chart live — use this to explore different SLA targets before committing.
 
 ## Сценарии использования

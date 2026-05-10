@@ -2,32 +2,32 @@
 
 | | |
 |---|---|
-| Где настраивается | Board Settings → Sub-tasks progress tab |
+| Где настраивается | «Board Settings» → «Sub-tasks progress» tab |
 | Где видно | Board (card detail view in tracked columns) |
 | Settings apply to | For the whole team ||
 
 ## Цель
 
-Show stacked progress bars and/or compact counters on board cards for child and linked work — sub-tasks, epic children, linked issues, and optional external links — in To Do, In Progress, Done, and Blocked buckets at a glance.
+Show stacked progress bars and/or compact counters on board cards for child and linked work — sub-tasks, epic children, linked issues, and optional external links — in «To Do», «In Progress», «Done», and «Blocked» buckets at a glance.
 
 ## Как настроить
 
 ### Where to find settings
 
-1. Open your Jira board and click **Jira Helper** next to the sidebar.
-2. Open the **Sub-tasks progress** tab.
+1. Open your Jira board and click **«Jira Helper»** next to the sidebar.
+2. Open the **«Sub-tasks progress»** tab.
 
 ### How to configure
 
-- **Enable the feature**: turn the feature on. Use **Reset all settings** to restore defaults.
+- **Enable the feature**: turn the feature on. Use **«Reset all settings»** to restore defaults.
 - **Choose tracked columns**: select which board columns show progress on cards.
 - **Enable counting sources**: pick desired sources — epic children, sub-tasks, linked issues (optionally filtered by link type), and external links.
 - **Configure grouping**: select a default grouping field (project, assignee, issue type, etc.), define ignored groups, and create custom groups with names, rules, bar-vs-counter style, colors, and visibility.
-- **Map statuses to progress categories**: assign Jira statuses to the four categories (to do, in progress, done, blocked). Unmapped statuses are excluded from totals.
+- **Map statuses to progress categories**: assign Jira statuses to the four categories («To Do», «In Progress», «Done», «Blocked»). Unmapped statuses are excluded from totals.
 - **Enable blocked/flagged handling**: count flagged issues as blocked and show warning hints on cards.
 - **Adjust colors**: choose a preset scheme or a custom palette.
 
-Click **Save** to store settings for this board.
+Click **«Save»** to store settings for this board.
 
 ## Как использовать
 

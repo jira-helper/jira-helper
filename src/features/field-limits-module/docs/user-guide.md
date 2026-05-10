@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Card layout → Edit WIP limits by field |
+| Where configured | «Board Settings» → «Card layout» → «Edit WIP limits by field» |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |(`fieldLimitsJH`) |
 
@@ -14,9 +14,9 @@ Turn a card field into a capacity-style limit. Count or sum how issues contribut
 
 ### Where to find settings
 
-1. Open **Board settings**.
-2. Go to the **Card layout** tab. Ensure the field you want to use is visible on the board cards.
-3. Click **Edit WIP limits by field**.
+1. Open **«Board settings»**.
+2. Go to the **«Card layout»** tab. Ensure the field you want to use is visible on the board cards.
+3. Click **«Edit WIP limits by field»**.
 
 ### How to configure
 
@@ -31,18 +31,18 @@ In the dialog you can add, edit, or delete rules. For each rule:
 - **Set column scope**: optionally restrict to specific columns.
 - **Set swimlane scope**: optionally restrict to specific swimlanes.
 
-Click **Save** to store, or **Cancel** to discard.
+Click **«Save»** to store, or **«Cancel»** to discard.
 
 ## How to use
 
 - A row of **badges** appears in the toolbar area above the board — one per configured rule — with the label and colors you chose.
-- Badge colors show status: **green** (under limit), **yellow** (at limit), **red** (over limit).
-- When a limit is **exceeded**, cards that count toward that rule get a **red tint** so overloaded buckets stand out.
+- Badge colors show status: green (under limit), yellow (at limit), red (over limit).
+- When a limit is **exceeded**, cards that count toward that rule get a red tint so overloaded buckets stand out.
 - Counts update as cards move, respecting Jira's board-level issue-counting settings.
 
 ## Usage scenarios
 
-- "I want to limit how many high-priority issues are in progress, based on the Priority field."
+- "I want to limit how many high-priority issues are in progress, based on the «Priority» field."
 - "I want to sum story points in a column to enforce a capacity limit."
 - "I want to count how many issues have a specific label and cap that number."
 - "I want separate badges for different field values visible at the top of the board."

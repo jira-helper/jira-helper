@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Где настраивается | Right-click context menu → Blur secret data (checkbox toggle) |
+| Где настраивается | Right-click context menu → «Blur secret data» (checkbox toggle) |
 | Где видно | All Jira pages (boards, issues, search, backlog, settings) |
 | Settings apply to | Only for you |(`blurSensitive`) |
 
@@ -15,11 +15,11 @@ Hide readable text and blur images across Jira for screen sharing, presentations
 ### Where to find settings
 
 1. On any Jira page where the extension is active, **right-click** the page (or use the browser's page context menu).
-2. Find the extension entry **Blur secret data**.
+2. Find the extension entry **«Blur secret data»**.
 
 ### How to configure
 
-- **Blur secret data**: toggle the checkbox — checked = blur on, unchecked = blur off.
+- **«Blur secret data»**: toggle the checkbox — checked = blur on, unchecked = blur off.
 
 There is no switch in the board settings panel. The setting persists across page loads and new tabs.
 

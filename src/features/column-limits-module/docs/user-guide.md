@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Columns → Column group WIP limits<br/>**or** Board toolbar → Jira Helper → Column WIP Limits tab |
+| Where configured | «Board Settings» → «Columns» → «Column group WIP limits»<br/>**or** Board toolbar → «Jira Helper» → «Column WIP Limits» tab |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |
 
@@ -16,16 +16,16 @@ Group multiple columns under a single work-in-progress limit, so cards across th
 
 The column WIP limits dialog opens in two ways:
 
-**Via Board Settings:**
+**Via «Board Settings»:**
 
-1. Open **Board settings** for your Scrum or Kanban board.
-2. Go to the **Columns** tab.
-3. Click **Column group WIP limits**.
+1. Open **«Board settings»** for your Scrum or Kanban board.
+2. Go to the **«Columns»** tab.
+3. Click **«Column group WIP limits»**.
 
 **Via the Jira Helper panel on the board:**
 
-1. On the board toolbar, open the **Jira Helper** panel.
-2. Switch to the **Column WIP Limits** tab.
+1. On the board toolbar, open the **«Jira Helper»** panel.
+2. Switch to the **«Column WIP Limits»** tab.
 
 Both methods open the same dialog.
 
@@ -40,13 +40,13 @@ In the dialog you can:
 - **Choose swimlane scope**: restrict the limit to specific swimlanes.
 - **Choose issue types**: specify which issue types (Bug, Task, Story, etc.) count toward the group's limit.
 
-Click **Save** to store the configuration for the entire team on this board.
+Click **«Save»** to store the configuration for the entire team on this board.
 
 ## How to use
 
 - On the board, each column group shows a **current / limit** badge on its first column header.
 - Grouped column headers are styled with the group's color so the group is easy to identify.
-- When a group exceeds its limit, affected column areas turn **red** to make the overload obvious.
+- When a group exceeds its limit, affected column areas turn red to make the overload obvious.
 - If subtask counting is enabled in the board's column settings, subtasks are also counted toward the limit.
 
 ## Usage scenarios

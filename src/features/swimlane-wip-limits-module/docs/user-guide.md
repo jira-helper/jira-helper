@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Swimlanes → Configure WIP Limits |
+| Where configured | «Board Settings» → «Swimlanes» → «Configure WIP Limits» |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |
 
@@ -14,10 +14,10 @@ Give each swimlane row its own work-in-progress cap. Optionally narrow counting 
 
 ### Where to find settings
 
-1. Open **Board settings**.
-2. Go to the **Swimlanes** tab.
-3. Set Jira's swimlane strategy to **Custom** using the native swimlane strategy control. This feature requires **Custom** strategy.
-4. Click **Configure WIP Limits**.
+1. Open **«Board settings»**.
+2. Go to the **«Swimlanes»** tab.
+3. Set Jira's swimlane strategy to **«Custom»** using the native swimlane strategy control. This feature requires **«Custom»** strategy.
+4. Click **«Configure WIP Limits»**.
 
 ### How to configure
 
@@ -26,7 +26,7 @@ In the modal, each swimlane on the board has a row where you can:
 - **Set a limit**: enter the maximum number of issues allowed in the swimlane.
 - **Choose issue types**: optionally narrow counting to specific issue types (Bug, Task, Story, etc.).
 
-Click **OK** to save all changes, or **Cancel** to discard.
+Click **«OK»** to save all changes, or **«Cancel»** to discard.
 
 ## How to use
 

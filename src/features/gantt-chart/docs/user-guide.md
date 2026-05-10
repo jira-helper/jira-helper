@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Где настраивается | Issue Page → Helper button or gear in Gantt panel → Gantt Chart tab |
+| Где настраивается | «Issue Page» → «Helper» button or gear in «Gantt» panel → «Gantt Chart» tab |
 | Где видно | Issue Page (classic view, below attachments) |
 | Settings apply to | Only for you |(`jh-gantt-settings`) |
 
@@ -18,8 +18,8 @@ The Gantt chart settings can be opened in two ways:
 
 **Via the issue toolbar:**
 
-1. Open any issue in the classic view and click **Helper** in the issue toolbar.
-2. Select the **Gantt Chart** tab.
+1. Open any issue in the classic view and click **«Helper»** in the issue toolbar.
+2. Select the **«Gantt Chart»** tab.
 
 **Via the chart panel:**
 
@@ -30,20 +30,20 @@ Both methods open the same settings dialog.
 
 ### How to configure
 
-- **Select a scope**: choose *Global*, *This project*, or *This project + issue type*. Use **Copy from…** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
-- **Set bar start and end sources**: build a priority list of date fields or status transitions. Use **Add fallback** and the up/down arrows to set order — the first source that yields a date for each task wins.
+- **Select a scope**: choose «Global», «This project», or «This project + issue type». Use **«Copy from…»** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
+- **Set bar start and end sources**: build a priority list of date fields or status transitions. Use **«Add fallback»** and the up/down arrows to set order — the first source that yields a date for each task wins.
 - **Choose issue categories**: include sub-tasks, epic children, linked issues. For links, optionally restrict by link type and direction.
 - **Add exclusion filters**: drop tasks you never want on the chart — a task is excluded if any filter matches.
 - **Add bar colour rules**: highlight work by field value or JQL expression. Rules are evaluated top to bottom; first match wins.
-- **Add quick filters**: create reusable toggle chips in *field value* or *JQL* mode. Built-in *Unresolved* and *Hide completed* chips are always available.
+- **Add quick filters**: create reusable toggle chips in «field value» or JQL mode. Built-in **«Unresolved»** and **«Hide completed»** chips are always available.
 - **Pick tooltip fields**: select extra fields to show in the hover tooltip.
 
-Click **Save** to persist settings. Settings cascade: project+issue type → project → global. Settings survive browser reload.
+Click **«Save»** to persist settings. Settings cascade: project+issue type → project → global. Settings survive browser reload.
 
 ## Как использовать
 
 - The Gantt section is **collapsed by default**. Click to expand and load the chart.
-- **Zoom and pan:** Scroll-wheel zoom, +/- buttons, interval selector (*hours*, *days*, *weeks*, *months*), drag-to-pan anywhere on the chart.
+- **Zoom and pan:** Scroll-wheel zoom, +/- buttons, interval selector («hours», «days», «weeks», «months»), drag-to-pan anywhere on the chart.
 - **Hover tooltip:** Hover any bar to see the issue key, summary, status, dates, and any extra configured fields.
 - **Status breakdown:** Enable in settings to split each bar into colored segments (gray = to do, blue = in progress, green = done, red = blocked).
 - **Quick filters:** Use the chips above the chart to filter visible tasks. Type in the search box for text or JQL search. Multiple chips combine with AND.

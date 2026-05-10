@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Columns → Edit WIP limits by cells |
+| Where configured | «Board Settings» → «Columns» → «Edit WIP limits by cells» |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |(`wipLimitCells`) |
 
@@ -14,9 +14,9 @@ Define a single work-in-progress limit for a custom block of board cells (column
 
 ### Where to find settings
 
-1. Open **Board settings**.
-2. Go to the **Columns** tab.
-3. Click **Edit WIP limits by cells**.
+1. Open **«Board settings»**.
+2. Go to the **«Columns»** tab.
+3. Click **«Edit WIP limits by cells»**.
 
 ### How to configure
 
@@ -28,12 +28,12 @@ In the dialog you can add, edit, or delete ranges. For each range:
 - **Choose issue types**: optionally narrow which issue types count toward the limit.
 - **Define cells**: use the table of swimlane–column pairs to select which cells belong to the range. For each cell, toggle the indicator badge on or off.
 
-Click **Save** to store for everyone on the board, or **Cancel** to discard.
+Click **«Save»** to store for everyone on the board, or **«Cancel»** to discard.
 
 ## How to use
 
 - The covered block of cells is outlined with a **dashed blue border** so the range shape is clear.
-- On cells with the indicator enabled, a badge shows **current / limit** with color: **green** (under), **yellow** (at), **red** (over).
+- On cells with the indicator enabled, a badge shows **current / limit** with color: green (under), yellow (at), red (over).
 - When the range exceeds its limit, all cells in the range get a **semi-transparent red** background.
 - **Disabled** ranges display a **hatched overlay** and show no active WIP behavior — useful for marking areas without enforcing limits.
 - All issues within the range's cells count toward the **single shared limit**.

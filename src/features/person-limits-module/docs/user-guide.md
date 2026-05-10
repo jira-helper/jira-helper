@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Columns → Manage per-person WIP-limits<br/>**or** Board toolbar → Jira Helper → Per-person WIP Limits tab |
+| Where configured | «Board Settings» → «Columns» → «Manage per-person WIP-limits»<br/>**or** Board toolbar → «Jira Helper» → «Per-person WIP Limits» tab |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |
 
@@ -16,16 +16,16 @@ Cap how many issues each teammate can have in progress on the board. Each limit 
 
 The per-person WIP limits dialog opens in two ways:
 
-**Via Board Settings:**
+**Via «Board Settings»:**
 
-1. Open **Board settings**.
-2. Go to the **Columns** tab.
-3. Click **Manage per-person WIP-limits**.
+1. Open **«Board settings»**.
+2. Go to the **«Columns»** tab.
+3. Click **«Manage per-person WIP-limits»**.
 
 **Via the Jira Helper panel on the board:**
 
-1. On the board toolbar, open the **Jira Helper** panel.
-2. Switch to the **Per-person WIP Limits** tab.
+1. On the board toolbar, open the **«Jira Helper»** panel.
+2. Switch to the **«Per-person WIP Limits»** tab.
 
 Both methods open the same dialog.
 
@@ -35,19 +35,19 @@ In the modal you can:
 
 - **Add a limit**: find a user by name, set the **max number of issues**, and optionally narrow the scope by **columns**, **swimlanes**, and **issue types**.
 - **Add multiple people**: include several people in one limit and choose the mode:
-  - **Shared**: the limit applies to everyone combined. Example: limit 5 across 4 people — one shared counter for the group.
-  - **Per-user**: each person gets their own limit. Example: limit 5 across 4 people — each person gets 5.
-- **Edit a limit**: click **Edit** on an existing limit row and update the parameters.
-- **Delete a limit**: click **Delete** on a limit row to remove it.
+  - «Shared»: the limit applies to everyone combined. Example: limit 5 across 4 people — one shared counter for the group.
+  - «Per-user»: each person gets their own limit. Example: limit 5 across 4 people — each person gets 5.
+- **Edit a limit**: click **«Edit»** on an existing limit row and update the parameters.
+- **Delete a limit**: click **«Delete»** on a limit row to remove it.
 - **Create multiple limits per person**: you can define several limits with different scopes for the same person. Each limit is counted and displayed independently.
 
-Click **Save** to apply for everyone on the board, or **Cancel** to discard all unsaved changes.
+Click **«Save»** to apply for everyone on the board, or **«Cancel»** to discard all unsaved changes.
 
 ## How to use
 
 - Avatar badges appear in the toolbar area above the board, showing each person's **current / limit** count.
-- Badge colors: **green** (under limit), **yellow** (at limit), **red** (over limit).
-- When a person exceeds a limit, their cards that contribute to that limit are highlighted in **red**.
+- Badge colors: green (under limit), yellow (at limit), red (over limit).
+- When a person exceeds a limit, their cards that contribute to that limit are highlighted in red.
 - **Click a badge** to filter the board — only cards matching that limit's scope remain visible. Click again to clear the filter.
 
 ## Usage scenarios
