@@ -8,70 +8,34 @@ Jira Helper is a browser extension that adds WIP limits, Gantt charts, and other
 
 **Privacy:** No data is ever sent to third parties. The extension communicates only with your Jira instance through its existing API. No analytics, no telemetry, no external servers.
 
-## Requirements
+## Supported Browsers
 
-- **Chrome**, **Edge**, **Yandex** and other Chromium-based browsers, **Firefox** (latest versions)
-- A Jira instance with board access (Server or Data Center)
-- No additional software or accounts required
+- **Chrome**, **Edge**, **Yandex** and other Chromium-based browsers
+- **Firefox**
+- Safari is not supported
 
-<!-- SCREENSHOT: Chrome Web Store listing page with "Add to Chrome" button highlighted -->
+## Install
 
-## Chrome / Chromium / Edge
+### Chromium (Chrome, Edge, Yandex, etc.)
 
 1. Open the [Chrome Web Store page](https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl)
-2. Click **Add to Chrome**
-3. Click **Add Extension** in the confirmation dialog
-4. (Optional) Pin the extension: click the extensions icon (puzzle piece) in the toolbar, then the pin icon next to **Jira Helper**
-5. Navigate to your Jira board — the extension activates automatically
+2. Click **Add to Chrome** → **Add Extension**
 
-## Firefox
+### Firefox
 
 1. Open the [Firefox Add-ons page](https://addons.mozilla.org/ru/firefox/addon/jira-helper-for-ff/)
-2. Click **Add to Firefox**
-3. Click **Add** in the confirmation dialog
-4. Navigate to your Jira board — the extension activates automatically
+2. Click **Add to Firefox** → **Add**
 
-## Edge
+## After Installation
 
-Microsoft Edge supports Chrome extensions directly from the Chrome Web Store. Click **Allow extensions from other stores** in the Edge banner when prompted, then follow the Chrome instructions above.
+1. Reload your Jira page
+2. Open any Scrum or Kanban board
+3. You'll see the **Jira Helper** button in the board toolbar — a square button labeled "Jira Helper", to the right of Jira's gear icon
 
-## Verify Installation
-
-1. Open any Jira board (Scrum or Kanban)
-2. Look for the **Jira Helper** button — a square button labeled "Jira Helper" in the board toolbar, usually to the right of Jira's native gear icon
-3. If you don't see it, expand your extension toolbar and ensure the extension is pinned
-
-<!-- SCREENSHOT: Jira board with Jira Helper button visible in the toolbar, circled -->
-
-## Troubleshooting
-
-### Extension not appearing after installation
-
-- **Refresh** the Jira page (F5)
-- Ensure the extension is **enabled** in `chrome://extensions` / `about:addons`
-- Make sure you're on a supported page: **board view** (not backlog, not issue search)
-- Check browser compatibility: minimum Chrome 88, Firefox 58, Edge 88
-
-### Enterprise-managed Chrome blocks the extension
-
-If your organization blocks extension installation:
-1. Ask your IT admin to **force-install** the extension via Group Policy
-2. The extension ID is `egombomekcmpieccamghfgjgnlllgbgdl`
-3. Alternatively, request the extension be added to your organization's allowlist
-
-### Extension installed but features don't work
-
-Some features require **board administrator** permissions to save configuration. These include Column Group WIP Limits, Swimlane WIP Limits, Personal WIP Limits, Field Value WIP Limits, Cell WIP Limits, Sub-tasks Progress, Days in Column, Days to Deadline, Issue Links Display, Issue Condition Checks, and SLA Line — all features that store settings in Jira board properties.
-
-View-only features (Swimlane Histogram, Flag on Issue Panel, Scale Ruler, Data Blurring) and personal features (Gantt Chart, Comment Templates, Local Settings) work without board admin permissions.
-
-See [Board Properties & Local Storage](/docs/settings#board-properties-team-shared) for the full breakdown.
+Alternatively, open **Board settings** — you'll see Jira Helper configuration buttons in various sections: **Columns**, **Swimlanes**, **Card layout**, etc.
 
 ## Next Steps
 
 - **[Quick Start](/docs/getting-started/quick-start)** — configure your first WIP limit in under 2 minutes
 - **[Features Overview](/docs/intro)** — see everything Jira Helper can do
-- **[FAQ](/docs/advanced/faq)** — common questions and troubleshooting
-- **[Board Properties & Local Storage](/docs/settings)** — understand where settings are stored
-
-
+- **[FAQ](/docs/advanced/faq)** — common questions

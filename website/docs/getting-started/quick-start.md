@@ -45,26 +45,6 @@ The board updates immediately. You'll see a **current / limit** badge on the gro
 
 <!-- SCREENSHOT: A board view showing a column group with "3 / 5" badge and red background on an overloaded group -->
 
-## Troubleshooting
-
-### Jira Helper button is missing
-
-- Refresh the page (F5)
-- Ensure the extension is **pinned** and **enabled**
-- Confirm you're on a **board view**, not the backlog or an issue page
-- See [Installation troubleshooting](/docs/getting-started/installation#troubleshooting)
-
-### Settings don't save
-
-You need **board administrator** permissions. Ask your Jira admin to grant you board admin access. Features that store settings in board properties (Column Limits, Swimlane Limits, etc.) require edit permissions on the board.
-
-### Configured limits not showing on the board
-
-- Click **Save** in the settings panel after making changes
-- Ensure the board is **refreshed** after saving
-- Verify you have board admin permissions (some features are view-only without admin rights)
-- Check that the feature is **enabled** — some features have an on/off toggle in settings
-
 ## Next Steps
 
 - **[Column Group WIP Limits](/docs/features/wip-limits/column-limits)** — full documentation with swimlane scoping, issue type filtering, and color configuration
