@@ -1,0 +1,34 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.Getting Started": {
+    "message": "Getting Started",
+    "description": "The label for category 'Getting Started' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.WIP Limits": {
+    "message": "WIP Limits",
+    "description": "The label for category 'WIP Limits' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Board Visualization": {
+    "message": "Board Visualization",
+    "description": "The label for category 'Board Visualization' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Card Information": {
+    "message": "Card Information",
+    "description": "The label for category 'Card Information' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Control Chart": {
+    "message": "Control Chart",
+    "description": "The label for category 'Control Chart' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Advanced": {
+    "message": "Advanced",
+    "description": "The label for category 'Advanced' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.doc.Features Overview": {
+    "message": "Features Overview",
+    "description": "The label for the doc item 'Features Overview' in sidebar 'docsSidebar', linking to the doc intro"
+  }
+}
