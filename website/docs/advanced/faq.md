@@ -50,7 +50,7 @@ Yes, but you may need your IT admin to force-install or allowlist the extension.
 It depends on the feature:
 
 - **View-only features** (Swimlane Histogram, Flag on Issue Panel, Scale Ruler, Data Blurring) — no special permissions; any user with board access can use them
-- **Configurable team-shared features** (Column WIP Limits, Card Colors, Days in Column, Sub-tasks Progress, etc.) — require **board administrator** permissions to save settings. Viewers can see the settings but not change them
+- **Configurable team-shared features** (Column WIP Limits, Days in Column, Sub-tasks Progress, etc.) — require **board administrator** permissions to save settings. Viewers can see the settings but not change them
 - **Personal features** (Gantt Chart, Comment Templates, Language) — no special permissions; stored in your browser
 
 ### Why can't I save WIP limit settings?
@@ -88,13 +88,6 @@ No. Each feature is optional. Some work out of the box without configuration (Sw
 2. Check **issue inclusion settings**: subtasks, epics, linked issues may all be toggled
 3. Review **exclusion filters** — a single matching filter removes the task from the chart
 4. Ensure status-based date sources match your actual workflow status names exactly
-
-### Card colors not applying / whole card not colored
-
-1. Jira's native **Card Colors** JQL rules must be configured first (board settings → Card Colors)
-2. Check that the **Fill whole card** checkbox is enabled in Jira Helper's Card Colors settings
-3. Flagged/blocked cards keep their original styling — this is intentional
-4. Cards without a matching JQL rule remain white
 
 ### Feature not working after Jira UI update
 
