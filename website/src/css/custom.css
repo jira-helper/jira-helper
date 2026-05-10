@@ -84,48 +84,115 @@
 .mockup-board {
   background: #f4f5f7;
   border-radius: 10px;
-  padding: 14px;
+  padding: 12px;
   color: #172b4d;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   transform: rotate(1deg);
 }
 
 .mockup-header {
   font-weight: 600;
-  margin-bottom: 10px;
-  font-size: 0.8rem;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
   color: #5e6c84;
 }
 
+/* ── Person avatar badges row ── */
+
+.mockup-avatars {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.mockup-avatar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  border-radius: 12px;
+  padding: 2px 8px 2px 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.mockup-avatar-face {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mockup-avatar--green  .mockup-avatar-face { background: #36b37e; }
+.mockup-avatar--yellow .mockup-avatar-face { background: #ff8b00; }
+.mockup-avatar--red    .mockup-avatar-face { background: #ff5630; }
+
+.mockup-avatar__count {
+  color: #172b4d;
+}
+
+/* ── Swimlane ── */
+
+.mockup-swimlane {
+  margin-bottom: 6px;
+}
+
+.mockup-swimlane-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #5e6c84;
+  margin-bottom: 4px;
+}
+
+.mockup-swimlane-header .mockup-wip-badge {
+  position: static;
+  font-size: 0.6rem;
+  padding: 0 6px;
+}
+
+.mockup-wip-badge--red {
+  background: #ff5630;
+  color: white;
+}
+
+.mockup-wip-badge--green {
+  background: #36b37e;
+  color: white;
+}
+
+/* ── Columns ── */
+
 .mockup-columns {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mockup-col {
   background: #ebecf0;
   border-radius: 6px;
-  padding: 8px;
+  padding: 6px;
   flex: 1;
-  min-width: 80px;
+  min-width: 70px;
 }
 
 .mockup-col-header {
   font-weight: 600;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   color: #5e6c84;
-  margin-bottom: 6px;
-}
-
-.mockup-card {
-  background: white;
-  border-radius: 4px;
-  padding: 5px 7px;
-  margin-bottom: 4px;
-  font-size: 0.7rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  margin-bottom: 5px;
 }
 
 .mockup-col-group {
@@ -141,14 +208,10 @@
   border: 1px solid #dfe1e6;
 }
 
-.mockup-col--full {
-  border-left: 3px solid #6554c0;
-}
-
 .mockup-wip {
   border: 2px dashed #ff5630;
   border-radius: 6px;
-  padding: 6px;
+  padding: 5px;
 }
 
 .mockup-wip-badge {
@@ -158,23 +221,122 @@
   background: #ff5630;
   color: white;
   font-weight: 700;
-  font-size: 0.68rem;
-  padding: 2px 8px;
+  font-size: 0.65rem;
+  padding: 1px 7px;
   border-radius: 10px;
 }
+
+/* ── Cards ── */
+
+.mockup-card {
+  background: white;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin-bottom: 3px;
+  font-size: 0.67rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+.mockup-card--warn {
+  border-left: 3px solid #ff5630;
+}
+
+/* ── Card badges: days, deadline, links, conditions ── */
 
 .mockup-badge {
   display: inline-block;
   padding: 0 4px;
   border-radius: 3px;
   font-weight: 600;
-  font-size: 0.65rem;
-  margin-right: 4px;
+  font-size: 0.62rem;
+  margin-right: 3px;
+  vertical-align: middle;
 }
 
-.mockup-badge.blue { background: #deebff; color: #0747a6; }
-.mockup-badge.green { background: #e3fcef; color: #006644; }
+.mockup-badge.blue   { background: #deebff; color: #0747a6; }
+.mockup-badge.green  { background: #e3fcef; color: #006644; }
 .mockup-badge.yellow { background: #fffae6; color: #974f0c; }
+.mockup-badge.red    { background: #ffebe6; color: #bf2600; }
+
+.mockup-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  font-size: 0.55rem;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+.mockup-icon--warn  { background: #ffebe6; color: #bf2600; }
+.mockup-icon--ok    { background: #e3fcef; color: #006644; }
+.mockup-icon--info  { background: #deebff; color: #0747a6; }
+
+/* ── Progress bar ── */
+
+.mockup-progress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 0.6rem;
+  color: #5e6c84;
+}
+
+.mockup-progress-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex: 1;
+  background: #dfe1e6;
+}
+
+.mockup-progress-bar__done {
+  background: #36b37e;
+}
+
+.mockup-progress-bar__wip {
+  background: #4c9aff;
+}
+
+/* ── Link chip ── */
+
+.mockup-link-chip {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 0.58rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.mockup-link-chip.blocks  { background: #ffebe6; color: #bf2600; }
+.mockup-link-chip.relates { background: #deebff; color: #0747a6; }
+
+/* ── Cell WIP ── */
+
+.mockup-cell-wip {
+  border: 2px dashed #ff5630;
+  border-radius: 4px;
+  padding: 2px;
+  position: relative;
+}
+
+.mockup-cell-wip-badge {
+  position: absolute;
+  top: -9px;
+  right: 4px;
+  background: #ff5630;
+  color: white;
+  font-weight: 700;
+  font-size: 0.55rem;
+  padding: 0 5px;
+  border-radius: 8px;
+}
 
 /* ── Sections ── */
 
@@ -296,4 +458,16 @@
 
 .cta-section .section__subtitle {
   color: rgba(255,255,255,0.8);
+}
+
+/* ── Feature mockup (user-guide pages) ── */
+
+.feature-mockup {
+  background: #f4f5f7;
+  border-radius: 10px;
+  padding: 14px;
+  color: #172b4d;
+  font-size: 0.72rem;
+  max-width: 700px;
+  margin: 0 auto;
 }

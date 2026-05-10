@@ -27,27 +27,62 @@ function HeroSection() {
         <div className="hero__mockup">
           <div className="mockup-board">
             <div className="mockup-header">Jira Board — with jira-helper</div>
-            <div className="mockup-columns">
-              <div className="mockup-col mockup-col--full">
-                <div className="mockup-col-header">To Do</div>
-                <div className="mockup-card">TASK-101 Design</div>
-                <div className="mockup-card">TASK-102 Research</div>
+
+            <div className="mockup-avatars">
+              <div className="mockup-avatar mockup-avatar--green">
+                <div className="mockup-avatar-face">A</div>
+                <span className="mockup-avatar__count">2/3</span>
               </div>
-              <div className="mockup-col-group mockup-wip">
-                <div className="mockup-wip-badge">3 / 5</div>
-                <div className="mockup-col mockup-col--group">
-                  <div className="mockup-col-header">In Progress</div>
-                  <div className="mockup-card"><span className="mockup-badge blue">3d</span> TASK-99 API</div>
-                </div>
-                <div className="mockup-col mockup-col--group">
-                  <div className="mockup-col-header">Review</div>
-                  <div className="mockup-card"><span className="mockup-badge green">1d</span> TASK-97 UI</div>
-                  <div className="mockup-card"><span className="mockup-badge yellow">5d</span> TASK-95 Auth</div>
-                </div>
+              <div className="mockup-avatar mockup-avatar--red">
+                <div className="mockup-avatar-face">B</div>
+                <span className="mockup-avatar__count">4/3</span>
               </div>
-              <div className="mockup-col">
-                <div className="mockup-col-header">Done</div>
-                <div className="mockup-card">TASK-90 Docs</div>
+            </div>
+
+            <div className="mockup-swimlane">
+              <div className="mockup-swimlane-header">
+                Team Backend
+                <span className="mockup-wip-badge mockup-wip-badge--green">2/5</span>
+              </div>
+              <div className="mockup-columns">
+                <div className="mockup-col">
+                  <div className="mockup-col-header">To Do</div>
+                  <div className="mockup-card">TASK-103 Setup CI</div>
+                </div>
+                <div className="mockup-col-group mockup-wip">
+                  <div className="mockup-wip-badge">3 / 5</div>
+                  <div className="mockup-col mockup-col--group">
+                    <div className="mockup-col-header">In Progress</div>
+                    <div className="mockup-card">
+                      <span className="mockup-badge blue">3d</span>
+                      <span className="mockup-badge red">⏰ 1d</span>
+                      TASK-99 API
+                      <div className="mockup-link-chip blocks">← PROJ-12</div>
+                    </div>
+                  </div>
+                  <div className="mockup-col mockup-col--group">
+                    <div className="mockup-col-header">Review</div>
+                    <div className="mockup-card">
+                      <span className="mockup-badge green">1d</span>
+                      <span className="mockup-icon mockup-icon--ok">✓</span>
+                      TASK-97 UI
+                      <div className="mockup-progress">
+                        <div className="mockup-progress-bar"><div className="mockup-progress-bar__done" style={{width:'60%'}}/><div className="mockup-progress-bar__wip" style={{width:'40%'}}/></div>
+                        <span>3/5</span>
+                      </div>
+                    </div>
+                    <div className="mockup-card">
+                      <span className="mockup-badge yellow">5d</span>
+                      <span className="mockup-icon mockup-icon--warn">⚠</span>
+                      TASK-95 Auth
+                      <div className="mockup-link-chip relates">→ PROJ-34</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mockup-col">
+                  <div className="mockup-col-header">Done</div>
+                  <div className="mockup-card">TASK-90 Docs</div>
+                </div>
               </div>
             </div>
           </div>
