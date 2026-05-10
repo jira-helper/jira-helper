@@ -18,7 +18,7 @@ The column WIP limits dialog opens in two ways:
 
 **Via Board Settings:**
 
-1. Open **Board settings** for your Scrum or Kanban board (requires board configuration permissions).
+1. Open **Board settings** for your Scrum or Kanban board.
 2. Go to the **Columns** tab.
 3. Click **Column group WIP limits**.
 
@@ -47,7 +47,7 @@ Click **Save** to store the configuration for the entire team on this board.
 - On the board, each column group shows a **current / limit** badge on its first column header.
 - Grouped column headers are styled with the group's color so the group is easy to identify.
 - When a group exceeds its limit, affected column areas turn **red** to make the overload obvious.
-- Issue counting follows Jira's board statistics settings (e.g., subtask inclusion).
+- If subtask counting is enabled in the board's column settings, subtasks are also counted toward the limit.
 
 ## Usage scenarios
 
