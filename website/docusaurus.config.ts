@@ -8,7 +8,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://jira-helper.github.io',
-  baseUrl: '/',
+  baseUrl: '/jira-helper/',
 
   organizationName: 'jira-helper',
   projectName: 'jira-helper',
