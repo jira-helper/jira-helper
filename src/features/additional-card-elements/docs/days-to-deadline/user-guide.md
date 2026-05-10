@@ -6,24 +6,11 @@
 | Где видно | Board (detail view) |
 | Settings apply to | For the whole team ||
 
-## Purpose
+## Цель
 
 Показать, сколько дней осталось до дедлайна задачи, с цветовой индикацией приближающихся и пропущенных сроков. Бейдж отмечен эмодзи ⏰ для визуального отличия от других бейджей на карточке.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card"><span class="mockup-badge green">⏰ 5d</span> TASK-101 UI</div>
-        <div class="mockup-card"><span class="mockup-badge yellow">⏰ 2d</span> TASK-99 API</div>
-        <div class="mockup-card"><span class="mockup-badge red">⏰ overdue</span> TASK-88 Auth</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -42,7 +29,7 @@
   - **«Overdue only»** — показывается только для просроченных задач.
 - **Set warning threshold**: при необходимости задайте **«Warning threshold»** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
 
-## How to use
+## Как использовать
 
 - Бейдж отображается в конце карточки (после бейджа «Дни в колонке», если он включён).
 - **Формат текста**:
@@ -57,19 +44,19 @@
 - В режиме **«Overdue only»** жёлтый порог не применяется.
 - В бэклоге бейдж не отображается.
 
-## Usage scenarios
+## Сценарии использования
 
 1. **Отслеживание всех дедлайнов** — режим «Always» показывает бейдж для всех задач с установленным дедлайном.
 2. **Фокус на приближающихся сроках** — режим «Less than 5 days or overdue» показывает только те задачи, до дедлайна которых осталось 5 или меньше дней.
 3. **Работа только с просрочкой** — режим «Overdue only» для отслеживания исключительно проблемных задач.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Бейдж не отображается**: проверьте, что выбрано поле дедлайна и в задаче заполнено значение этого поля.
 - **Выбранное поле не появляется в списке**: список полей загружается из проекта. Убедитесь, что поле существует и имеет тип `date`, `datetime` или `string`.
 - **Цвет не меняется на жёлтый**: «Сегодня» и «Завтра» всегда жёлтые, независимо от warning threshold. Для остальных дней проверьте, что порог задан и осталось дней ≤ порога.
 
-## See also
+## См. также
 
 - [Days in Column](/docs/features/card-information/days-in-column)
 - [Issue Links Display](/docs/features/card-information/issue-links-display)

@@ -10,22 +10,6 @@
 
 Показывать на карточках доски составной прогресс (полосы и/или компактные счётчики) по дочерней и связанной работе — подзадачам, задачам под эпиком, связанным задачам и при необходимости внешним ссылкам — в разрезе To Do, In Progress, Done и Blocked.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card">TASK-99 API
-          <div class="mockup-progress"><div class="mockup-progress-bar"><div class="mockup-progress-bar__done" style="width:60%"></div><div class="mockup-progress-bar__wip" style="width:40%"></div></div><span>3/5</span></div>
-        </div>
-        <div class="mockup-card">TASK-101 UI
-          <div class="mockup-progress"><div class="mockup-progress-bar"><div class="mockup-progress-bar__done" style="width:100%"></div></div><span>4/4</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 ## Как настроить
 
 ### Где найти настройки

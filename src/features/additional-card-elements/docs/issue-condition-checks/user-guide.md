@@ -6,24 +6,11 @@
 | Где видно | Board (detail view) |
 | Settings apply to | For the whole team ||
 
-## Purpose
+## Цель
 
 Отображать на карточках настраиваемые иконки-бейджи, когда задача (или связанные с ней подзадачи) удовлетворяет заданному JQL-условию. Позволяет быстро замечать важные состояния задач без открытия каждой из них.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card"><span class="mockup-icon mockup-icon--warn">⚠</span> TASK-99 No reviewer</div>
-        <div class="mockup-card"><span class="mockup-icon mockup-icon--ok">✓</span> TASK-101 All checks passed</div>
-        <div class="mockup-card"><span class="mockup-icon mockup-icon--info">i</span> TASK-88 Needs estimation</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -48,7 +35,7 @@
   - **«Color»** — цвет фона бейджа (опционально).
   - **«Animation»** — анимация иконки (**«None»**, **«Pulse»**, **«Breathe»**, **«Blink»**, **«Blink Fast»**, **«Shake»**).
 
-## How to use
+## Как использовать
 
 - Бейджи-иконки отображаются в нижней части карточки в выбранных колонках.
 - При наведении на иконку показывается tooltip с текстом из настроек правила.
@@ -57,7 +44,7 @@
 - В режиме **«With Subtasks»** можно настроить, чтобы условие проверялось не только для самой задачи, но и для её подзадач, дочерних задач эпика или связанных задач.
 - В бэклоге бейджи не отображаются.
 
-## Usage scenarios
+## Сценарии использования
 
 1. **Блокирующие задачи** — иконка 🛑 с JQL `status = Blocked`, анимация Blink.
 2. **Высокий приоритет** — иконка 🔥 с JQL `priority = Highest`.
@@ -65,14 +52,14 @@
 4. **Просроченные подзадачи** — режим withSubtasks, `subtaskJql: duedate < now()`, иконка ⏰, match mode `any`.
 5. **Все подзадачи завершены** — режим withSubtasks, `subtaskJql: status = Done`, match mode `all`, иконка ✅.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Иконка не отображается**: проверьте, что правило включено («Enabled»), JQL корректен, и задача действительно удовлетворяет условию.
 - **JQL не работает**: используйте простые условия для проверки. JQL валидируется при вводе — ошибка подсвечивается в настройках.
 - **Подзадачи не учитываются**: в режиме withSubtasks убедитесь, что выбраны нужные источники (Subtask Sources) и задача действительно имеет подзадачи.
 - **Анимация не видна**: некоторые анимации (например, Breathe) малозаметны — попробуйте Blink или Shake для более явного эффекта.
 
-## See also
+## См. также
 
 - [Days in Column](/docs/features/card-information/days-in-column)
 - [Days to Deadline](/docs/features/card-information/days-to-deadline)

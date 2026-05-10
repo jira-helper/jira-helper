@@ -6,23 +6,11 @@
 | Где видно | Board (detail view + backlog) |
 | Settings apply to | For the whole team ||
 
-## Purpose
+## Цель
 
 Отображать связанные задачи прямо на карточках доски в виде цветных бейджей под заголовком (summary) задачи, чтобы быстро видеть контекст и зависимости.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card">TASK-99 API <div class="mockup-link-chip blocks">← PROJ-12</div><div class="mockup-link-chip relates">→ PROJ-34</div></div>
-        <div class="mockup-card">TASK-101 <div class="mockup-link-chip blocks">← PROJ-13</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -43,7 +31,7 @@
   - **«Track all linked tasks»** — какие связанные задачи показывать (все или по JQL/фильтру).
 - **Add multiple configurations**: при необходимости добавьте несколько конфигураций для разных типов связей.
 
-## How to use
+## Как использовать
 
 **На доске**:
 - Бейджи отображаются вертикально под заголовком карточки в выбранных колонках.
@@ -54,20 +42,20 @@
 - При включённой опции **«Show links in backlog»** бейджи отображаются горизонтально (в ряд) в конце карточки.
 - Настройки колонок в бэклоге не учитываются — связи показываются для всех задач.
 
-## Usage scenarios
+## Сценарии использования
 
 1. **Показ родительских задач** — настроить связь «is Parent of», видеть проект или эпик, к которому относится задача.
 2. **Фильтрация по типу задачи** — показывать только связанные задачи типа «Project» с фильтром по JQL: `issueType = Project`.
 3. **Фильтрация по статусу** — показывать только незавершённые связанные задачи: `status != Done`.
 4. **Комбинированный фильтр** — `(issueType = Project AND status != Done) OR (issueType = Objective AND labels = "Business")`.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Бейджи не отображаются**: проверьте, что главный переключатель включён, выбраны колонки на доске и добавлена хотя бы одна конфигурация связей.
 - **Связанные задачи не находятся**: убедитесь, что тип связи выбран корректно и задача действительно связана по этому типу.
 - **Цвета не применяются**: при включённых уникальных цветах цвет генерируется автоматически; для фиксированного цвета выберите его в «ColorPicker».
 
-## See also
+## См. также
 
 - [Days in Column](/docs/features/card-information/days-in-column)
 - [Days to Deadline](/docs/features/card-information/days-to-deadline)

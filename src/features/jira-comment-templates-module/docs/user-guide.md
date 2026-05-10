@@ -6,28 +6,11 @@
 | Где видно | Issue Page (comment editor toolbar) |
 | Settings apply to | Only for you |(`jira_helper_comment_templates`) |
 
-## Purpose
+## Цель
 
 Provide reusable comment templates that can be inserted with one click from the comment editor toolbar, with optional automatic watcher assignment.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div style="font-size:0.65rem;margin-bottom:6px;font-weight:600;color:#5e6c84;">Comment editor</div>
-    <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
-      <span class="mockup-badge blue" style="cursor:default">Status</span>
-      <span class="mockup-badge green" style="cursor:default">QA sign-off</span>
-      <span class="mockup-avatar mockup-avatar--green" style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:0.62rem;"><div class="mockup-avatar-face">G</div> Go/No-Go</span>
-    </div>
-    <div style="background:white;border-radius:4px;padding:8px;font-size:0.62rem;color:#5e6c84;">
-      <div>✔ QA passed on staging</div>
-      <div>🔗 Build: 0.2.12-rc3</div>
-      <div>📋 Signed off by: @reviewer</div>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -58,7 +41,7 @@ Both methods open the same settings panel.
 
 Click **«Save»** to persist changes to browser local storage. Templates are personal and stored in your browser, not on the Jira server.
 
-## How to use
+## Как использовать
 
 - In the **comment editor** on any issue page, a toolbar appears with labeled, color-coded template buttons.
 - Click a template button to **insert** its text into the comment field.
@@ -66,14 +49,14 @@ Click **«Save»** to persist changes to browser local storage. Templates are pe
 - A transient notification confirms insertion success or reports watcher errors.
 - Click **«Manage templates»** in the toolbar to open the settings panel.
 
-## Usage scenarios
+## Сценарии использования
 
 - **Standard responses:** Create templates for common replies (e.g., "Will investigate", "Merged to master", "Needs review").
 - **Onboarding:** Share a JSON export with new team members so they have the same templates.
 - **Watcher automation:** Include watchers in templates to automatically notify relevant people.
 - **Multi-language teams:** Create templates in different languages for cross-team communication.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Templates not appearing:** Ensure templates are saved (click **«Save»** in settings). The toolbar only appears on issue pages with a comment editor.
 - **Insertion failed:** The comment editor might not be fully loaded. Wait for the page to finish loading and try again.
@@ -81,6 +64,6 @@ Click **«Save»** to persist changes to browser local storage. Templates are pe
 - **Import error:** Ensure the JSON file matches the expected template format. Use **«Export templates»** to see the correct structure.
 - **Templates lost after clearing browser data:** Templates are stored in localStorage. Clearing browser data will remove them — export regularly as backup.
 
-## See also
+## См. также
 
 - [Local Settings](/docs/features/local-settings)

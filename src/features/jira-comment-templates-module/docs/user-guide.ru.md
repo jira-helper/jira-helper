@@ -12,19 +12,19 @@
 
 
 <div class="feature-mockup">
-  <div class="mockup-board">
-    <div style="font-size:0.65rem;margin-bottom:6px;font-weight:600;color:#5e6c84;">Редактор комментария</div>
-    <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
-      <span class="mockup-badge blue" style="cursor:default">Статус</span>
-      <span class="mockup-badge green" style="cursor:default">QA sign-off</span>
-      <span class="mockup-avatar mockup-avatar--green" style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:0.62rem;"><div class="mockup-avatar-face">G</div> Go/No-Go</span>
-    </div>
-    <div style="background:white;border-radius:4px;padding:8px;font-size:0.62rem;color:#5e6c84;">
-      <div>✔ QA пройден на staging</div>
-      <div>🔗 Сборка: 0.2.12-rc3</div>
-      <div>📋 Подтверждено: @reviewer</div>
-    </div>
-  </div>
+<div class="mockup-board">
+<div class="mockup-editor-label">Comment editor</div>
+<div class="mockup-templates-bar">
+<span class="mockup-badge blue">Status</span>
+<span class="mockup-badge green">QA sign-off</span>
+<div class="mockup-avatar mockup-avatar--green"><div class="mockup-avatar-face">G</div> Go/No-Go</div>
+</div>
+<div class="mockup-comment-preview">
+<div>QA passed on staging</div>
+<div>Build: 0.2.12-rc3</div>
+<div>Signed off by: @reviewer</div>
+</div>
+</div>
 </div>
 
 ## Как настроить

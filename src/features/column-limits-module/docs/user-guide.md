@@ -12,30 +12,58 @@ Group multiple columns under a single work-in-progress limit, so cards across th
 
 
 <div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col">
-        <div class="mockup-col-header">To Do</div>
-        <div class="mockup-card">TASK-101</div>
-      </div>
-      <div class="mockup-col-group mockup-wip" style="flex:2">
-        <div class="mockup-wip-badge">3 / 5</div>
-        <div class="mockup-col mockup-col--group">
-          <div class="mockup-col-header">In Progress</div>
-          <div class="mockup-card">TASK-99</div>
-        </div>
-        <div class="mockup-col mockup-col--group">
-          <div class="mockup-col-header">Review</div>
-          <div class="mockup-card">TASK-97</div>
-          <div class="mockup-card">TASK-95</div>
-        </div>
-      </div>
-      <div class="mockup-col">
-        <div class="mockup-col-header">Done</div>
-        <div class="mockup-card">TASK-90</div>
-      </div>
-    </div>
-  </div>
+<div class="mockup-board">
+<div class="mockup-columns">
+<div class="mockup-col">
+<div class="mockup-col-header">To Do</div>
+<div class="mockup-card">TASK-101</div>
+</div>
+<div class="mockup-col-group mockup-wip">
+<div class="mockup-wip-badge">3 / 5</div>
+<div class="mockup-col mockup-col--group">
+<div class="mockup-col-header">In Progress</div>
+<div class="mockup-card">TASK-99</div>
+</div>
+<div class="mockup-col mockup-col--group">
+<div class="mockup-col-header">Review</div>
+<div class="mockup-card">TASK-97</div>
+<div class="mockup-card">TASK-95</div>
+</div>
+</div>
+<div class="mockup-col">
+<div class="mockup-col-header">Done</div>
+<div class="mockup-card">TASK-90</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="feature-mockup">
+<div class="mockup-board">
+<div class="mockup-columns">
+<div class="mockup-col">
+<div class="mockup-col-header">To Do</div>
+<div class="mockup-card">TASK-101</div>
+</div>
+<div class="mockup-col-group mockup-wip">
+<div class="mockup-wip-badge">3 / 5</div>
+<div class="mockup-col mockup-col--group">
+<div class="mockup-col-header">In Progress</div>
+<div class="mockup-card">TASK-99</div>
+</div>
+<div class="mockup-col mockup-col--group">
+<div class="mockup-col-header">Review</div>
+<div class="mockup-card">TASK-97</div>
+<div class="mockup-card">TASK-95</div>
+</div>
+</div>
+<div class="mockup-col">
+<div class="mockup-col-header">Done</div>
+<div class="mockup-card">TASK-90</div>
+</div>
+</div>
+</div>
 </div>
 
 ## How to configure

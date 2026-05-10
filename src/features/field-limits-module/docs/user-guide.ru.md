@@ -12,18 +12,18 @@
 
 
 <div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-avatars">
-      <span class="mockup-badge green">Component 4/5</span>
-      <span class="mockup-badge red">Priority 7/3</span>
-      <span class="mockup-badge blue">Assignee 2/3</span>
-    </div>
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card">TASK-98</div></div>
-      <div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
-    </div>
-  </div>
+<div class="mockup-board">
+<div class="mockup-avatars">
+<span class="mockup-badge green">Component 4/5</span>
+<span class="mockup-badge red">Priority 7/3</span>
+<span class="mockup-badge blue">Assignee 2/3</span>
+</div>
+<div class="mockup-columns">
+<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
+<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card">TASK-98</div></div>
+<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
+</div>
+</div>
 </div>
 
 ## Как настроить

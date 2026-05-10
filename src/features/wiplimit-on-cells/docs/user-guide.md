@@ -10,18 +10,6 @@
 
 Define a single work-in-progress limit for a custom block of board cells (column–swimlane intersections). The covered area is outlined, optional per-cell counters show usage, and overloaded cells are visually highlighted. Ranges can be marked as disabled for visual-only grouping.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-swimlane">
-      <div class="mockup-swimlane-header">Team Backend</div>
-        <div class="mockup-cell-wip"><div class="mockup-cell-wip-badge">3/5</div>
-        <div class="mockup-columns"><div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card">TASK-99</div><div class="mockup-card">TASK-98</div></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 ## How to configure
 
 ### Where to find settings

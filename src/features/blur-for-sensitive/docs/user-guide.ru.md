@@ -12,20 +12,20 @@
 
 
 <div class="feature-mockup">
-  <div class="mockup-board">
-    <div style="display:flex;gap:8px;">
-      <div class="mockup-col" style="flex:1">
-        <div class="mockup-col-header">Обычный вид</div>
-        <div class="mockup-card"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
-        <div class="mockup-card"><strong>TASK-102</strong><br/>Payment integration</div>
-      </div>
-      <div class="mockup-col" style="flex:1">
-        <div class="mockup-col-header">Размытый вид</div>
-        <div class="mockup-card" style="filter:blur(4px);user-select:none;"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
-        <div class="mockup-card" style="filter:blur(4px);user-select:none;"><strong>TASK-102</strong><br/>Payment integration</div>
-      </div>
-    </div>
-  </div>
+<div class="mockup-board">
+<div class="mockup-compare">
+<div class="mockup-col">
+<div class="mockup-col-header">Normal view</div>
+<div class="mockup-card"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
+<div class="mockup-card"><strong>TASK-102</strong><br/>Payment integration</div>
+</div>
+<div class="mockup-col mockup-col--blurred">
+<div class="mockup-col-header">Blurred view</div>
+<div class="mockup-card"><strong>TASK-101</strong><br/>Customer onboarding flow</div>
+<div class="mockup-card"><strong>TASK-102</strong><br/>Payment integration</div>
+</div>
+</div>
+</div>
 </div>
 
 ## Как настроить

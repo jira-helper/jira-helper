@@ -10,19 +10,6 @@
 
 Показать, сколько дней осталось до дедлайна задачи, с цветовой индикацией приближающихся и пропущенных сроков. Бейдж отмечен эмодзи ⏰ для визуального отличия от других бейджей на карточке.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card"><span class="mockup-badge green">⏰ 5d</span> TASK-101 UI</div>
-        <div class="mockup-card"><span class="mockup-badge yellow">⏰ 2d</span> TASK-99 API</div>
-        <div class="mockup-card"><span class="mockup-badge red">⏰ overdue</span> TASK-88 Auth</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 ## Как настроить
 
 ### Где найти настройки

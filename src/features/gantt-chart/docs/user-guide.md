@@ -6,40 +6,11 @@
 | Где видно | Issue Page (classic view, below attachments) |
 | Settings apply to | Only for you |(`jh-gantt-settings`) |
 
-## Purpose
+## Цель
 
 Add a horizontal Gantt diagram to the classic issue view that lays out every related task — sub-tasks, epic children, and linked issues — on a shared timeline so you can see when each piece of work runs and how its status has changed over time.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <span class="mockup-badge blue">Unresolved</span>
-      <span class="mockup-badge green">Hide done</span>
-      <span style="font-size:0.65rem;color:#5e6c84;margin-left:auto;">days</span>
-    </div>
-    <div style="position:relative;padding-left:60px;font-size:0.65rem;">
-      <div style="position:absolute;left:8px;top:0;color:#5e6c84;">TASK-99</div>
-      <div style="background:#4c9aff;height:14px;border-radius:3px;margin:4px 0;display:flex;">
-        <div style="background:#dfe1e6;width:20%"></div><div style="background:#4c9aff;width:30%"></div><div style="background:#36b37e;width:25%"></div><div style="background:#ff5630;width:25%"></div>
-      </div>
-      <div style="position:absolute;left:8px;top:22px;color:#5e6c84;">TASK-88</div>
-      <div style="background:#ff8b00;height:14px;border-radius:3px;margin:4px 0;display:flex;">
-        <div style="background:#dfe1e6;width:5%"></div><div style="background:#ff8b00;width:70%"></div><div style="background:#36b37e;width:25%"></div>
-      </div>
-      <div style="position:absolute;left:8px;top:44px;color:#5e6c84;">TASK-77</div>
-      <div style="background:#36b37e;height:14px;border-radius:3px;margin:4px 0"></div>
-    </div>
-    <div style="display:flex;gap:2px;margin-top:6px;font-size:0.55rem;color:#5e6c84;">
-      <span>To Do</span><span style="background:#dfe1e6;width:12px;height:8px;border-radius:2px"></span>
-      <span>In Progress</span><span style="background:#4c9aff;width:12px;height:8px;border-radius:2px"></span>
-      <span>Done</span><span style="background:#36b37e;width:12px;height:8px;border-radius:2px"></span>
-      <span>Blocked</span><span style="background:#ff5630;width:12px;height:8px;border-radius:2px"></span>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -69,7 +40,7 @@ Both methods open the same settings dialog.
 
 Click **«Save»** to persist settings. Settings cascade: project+issue type → project → global. Settings survive browser reload.
 
-## How to use
+## Как использовать
 
 - The Gantt section is **collapsed by default**. Click to expand and load the chart.
 - **Zoom and pan:** Scroll-wheel zoom, +/- buttons, interval selector («hours», «days», «weeks», «months»), drag-to-pan anywhere on the chart.
@@ -80,20 +51,20 @@ Click **«Save»** to persist settings. Settings cascade: project+issue type →
 - **Yellow warnings:** Alert chips appear when the chart is incomplete — "No history for X of Y tasks" or "X tasks not on chart". Hover for details.
 - While typing in Gantt inputs, Jira keyboard shortcuts are suppressed.
 
-## Usage scenarios
+## Сценарии использования
 
 - **Sprint planning:** See all related tasks on a timeline to assess readiness and dependencies.
 - **Status review:** Use the status breakdown to see how long issues spent in each state.
 - **Dependency tracking:** Include linked issues to visualize cross-issue dependencies.
 - **Team sync:** Use the modal view during stand-ups to walk through the timeline.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Chart not loading:** Check browser console for errors. The chart may fail if Jira API requests are rate-limited.
 - **Tasks missing from chart:** Check exclusion filters and ensure start/end mappings yield dates for those tasks. Look in the "not on chart" section for reasons.
 - **Status breakdown wrong:** Verify the status-to-category mapping in settings or the scope's status progress mapping.
 - **Settings not persisting:** Ensure localStorage is not cleared between sessions and the browser does not block local storage.
 
-## See also
+## См. также
 
 - [Sub-tasks Progress](/docs/features/sub-tasks-progress)

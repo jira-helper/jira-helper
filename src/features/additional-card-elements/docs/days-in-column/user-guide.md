@@ -6,25 +6,11 @@
 | Где видно | Board (detail view) |
 | Settings apply to | For the whole team ||
 
-## Purpose
+## Цель
 
 Показать, сколько дней задача находится в текущей колонке, с цветовой индикацией порогов «внимания» для быстрого выявления застоявшихся задач.
 
-
-<div class="feature-mockup">
-  <div class="mockup-board">
-    <div class="mockup-columns">
-      <div class="mockup-col"><div class="mockup-col-header">In Progress</div>
-        <div class="mockup-card"><span class="mockup-badge blue">3d</span> TASK-99 API</div>
-        <div class="mockup-card"><span class="mockup-badge green">1d</span> TASK-101 UI</div>
-        <div class="mockup-card"><span class="mockup-badge yellow">8d</span> TASK-88 Auth</div>
-        <div class="mockup-card"><span class="mockup-badge red">14d</span> TASK-76 Legacy</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-## How to configure
+## Как настроить
 
 ### Where to find settings
 
@@ -44,7 +30,7 @@
 
 Стандартный счётчик дней Jira (`.ghx-days`) автоматически скрывается при включении фичи.
 
-## How to use
+## Как использовать
 
 - Бейдж отображается в конце карточки в выбранных колонках.
 - **Формат текста**: `<1 day in column`, `1 day in column`, `X days in column`.
@@ -52,20 +38,20 @@
 - При использовании порогов по колонкам для каждой колонки действуют свои значения.
 - В бэклоге бейдж не отображается.
 
-## Usage scenarios
+## Сценарии использования
 
 1. **Выявление застоявшихся задач** — красный бейдж сразу привлекает внимание к задачам, которые слишком долго находятся в одной колонке.
 2. **Контроль SLA по этапам** — разные пороги для разных колонок (например, Code Review — 1 день, тестирование — 3 дня).
 3. **Оценка потока** — жёлтые бейджи сигнализируют о задачах, приближающихся к критическому времени пребывания.
 
-## Troubleshooting
+## Устранение неполадок
 
 - **Бейдж не отображается**: проверьте, что фича включена, выбраны нужные колонки и включён сам бейдж дней в колонке.
 - **Цвета не меняются**: проверьте, что пороги заданы корректно (warning < danger) и количество дней достигло порога.
 - **Стандартный счётчик Jira не скрылся**: обновите страницу — скрытие применяется при инициализации фичи.
 - **Устаревшие колонки в настройках**: при использовании порогов по колонкам для колонок, которых больше нет на доске, отображается предупреждение — нажмите **«Remove»** для очистки.
 
-## See also
+## См. также
 
 - [Days to Deadline](/docs/features/card-information/days-to-deadline)
 - [Issue Condition Checks](/docs/features/card-information/issue-condition-checks)
