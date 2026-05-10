@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Columns → Column group WIP limits |
 | Where visible | Board (detail view) |
-| Storage | Jira Board Property (`subgroupsJH`) |
+| Settings apply to | For the whole team |(`subgroupsJH`) |
 
 ## Purpose
 

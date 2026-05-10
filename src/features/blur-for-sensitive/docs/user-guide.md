@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Right-click context menu → Blur secret data (checkbox toggle) |
 | Где видно | All Jira pages (boards, issues, search, backlog, settings) |
-| Хранилище | localStorage (`blurSensitive`) |
+| Settings apply to | Only for you |(`blurSensitive`) |
 
 ## Цель
 

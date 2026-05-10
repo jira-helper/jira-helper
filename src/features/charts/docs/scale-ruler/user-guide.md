@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Reports → Control Chart → Grid checkbox and preset selector in chart options |
 | Где видно | Reports (Control Chart) |
-| Хранилище | None (session only) |
+| Settings apply to | Only for you (session) |
 
 ## Цель
 

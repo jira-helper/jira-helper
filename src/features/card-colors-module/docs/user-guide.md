@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board Settings → Card Colors |
 | Где видно | Board (detail view) |
-| Хранилище | Jira Board Property (`card-colors`) |
+| Settings apply to | For the whole team |(`card-colors`) |
 
 ## Цель
 

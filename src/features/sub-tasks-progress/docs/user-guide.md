@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board Settings → Sub-tasks progress tab |
 | Где видно | Board (card detail view in tracked columns) |
-| Хранилище | Jira Board Property |
+| Settings apply to | For the whole team ||
 
 ## Цель
 

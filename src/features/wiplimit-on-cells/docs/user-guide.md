@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Columns → Edit WIP limits by cells |
 | Where visible | Board (detail view) |
-| Storage | Jira Board Property (`wipLimitCells`) |
+| Settings apply to | For the whole team |(`wipLimitCells`) |
 
 ## Purpose
 

@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Swimlanes → Configure WIP Limits |
 | Where visible | Board (detail view) |
-| Storage | Jira Board Property (`jiraHelperSwimlaneSettings`) |
+| Settings apply to | For the whole team |(`jiraHelperSwimlaneSettings`) |
 
 ## Purpose
 

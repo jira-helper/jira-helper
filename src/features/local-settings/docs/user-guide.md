@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board → Jira Helper → Local Settings tab |
 | Где видно | All Jira pages (extension UI only) |
-| Хранилище | localStorage |
+| Settings apply to | Only for you ||
 
 ## Цель
 

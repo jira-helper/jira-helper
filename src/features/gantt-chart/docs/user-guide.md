@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Issue Page → Helper button or gear in Gantt panel → Gantt Chart tab |
 | Где видно | Issue Page (classic view, below attachments) |
-| Хранилище | localStorage (`jh-gantt-settings`) |
+| Settings apply to | Only for you |(`jh-gantt-settings`) |
 
 ## Цель
 

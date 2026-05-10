@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Columns → Manage per-person WIP-limits |
 | Where visible | Board (detail view) |
-| Storage | Jira Board Property (`personLimitsSettings`) |
+| Settings apply to | For the whole team |(`personLimitsSettings`) |
 
 ## Purpose
 

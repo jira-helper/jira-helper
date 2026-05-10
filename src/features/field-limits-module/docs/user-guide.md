@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Card layout → Edit WIP limits by field |
 | Where visible | Board (detail view) |
-| Storage | Jira Board Property (`fieldLimitsJH`) |
+| Settings apply to | For the whole team |(`fieldLimitsJH`) |
 
 ## Purpose
 

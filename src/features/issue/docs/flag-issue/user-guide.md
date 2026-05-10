@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | No configuration required |
 | Где видно | Issue Page, Board issue panel, Search results |
-| Хранилище | None (zero-config) |
+| Settings apply to | Not required |
 
 ## Цель
 

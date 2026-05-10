@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Настройки доски → Swimlanes → Configure WIP Limits |
 | Где видно | Доска (детальный вид) |
-| Хранилище | Свойство доски Jira (`jiraHelperSwimlaneSettings`) |
+| Настройки действуют | Свойство доски Jira (`jiraHelperSwimlaneSettings`) |
 
 ## Цель
 

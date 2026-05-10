@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Reports → Control Chart → SLA input field in chart options |
 | Где видно | Reports (Control Chart) |
-| Хранилище | Jira Board Property (`slaConfig3`) |
+| Settings apply to | For the whole team |(`slaConfig3`) |
 
 ## Цель
 

@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Reports → Control Chart → поле SLA в опциях диаграммы |
 | Где видно | Reports (Control Chart) |
-| Хранилище | Jira Board Property (`slaConfig3`) |
+| Настройки действуют | Для всей команды |(`slaConfig3`) |
 
 ## Цель
 

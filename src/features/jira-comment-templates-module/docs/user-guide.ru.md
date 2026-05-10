@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board Settings → вкладка Comment templates или Issue Settings → вкладка Comment templates |
 | Где видно | Страница задачи (тулбар редактора комментариев) |
-| Хранилище | localStorage (`jira_helper_comment_templates`) |
+| Настройки действуют | Только для вас |(`jira_helper_comment_templates`) |
 
 ## Цель
 

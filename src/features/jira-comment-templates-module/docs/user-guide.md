@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board Settings → Comment templates tab or Issue Settings → Comment templates tab |
 | Где видно | Issue Page (comment editor toolbar) |
-| Хранилище | localStorage (`jira_helper_comment_templates`) |
+| Settings apply to | Only for you |(`jira_helper_comment_templates`) |
 
 ## Цель
 

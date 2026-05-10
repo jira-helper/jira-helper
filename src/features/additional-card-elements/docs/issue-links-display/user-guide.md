@@ -4,7 +4,7 @@
 |---|---|
 | Где настраивается | Board Settings → Additional Card Elements → Issue Links |
 | Где видно | Board (detail view + backlog) |
-| Хранилище | Jira Board Property |
+| Settings apply to | For the whole team ||
 
 ## Цель
 

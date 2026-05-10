@@ -29,7 +29,7 @@ src/features/<module>/
 |---|---|
 | Где настраивается | Board Settings → вкладка → точный путь |
 | Где видно | Board (detail view) / Issue Page / Reports |
-| Хранилище | Jira Board Property (`propertyKey`) или localStorage (`storageKey`) |
+| Настройки действуют | Jira Board Property (`propertyKey`) или localStorage (`storageKey`) |
 
 ## Цель
 
