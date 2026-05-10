@@ -1,94 +1,78 @@
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import clsx from 'clsx';
-
-const features = [
-  {
-    icon: '🎯',
-    title: 'Column WIP Limits',
-    description: 'Group columns under shared WIP limits with visual feedback when exceeded.',
-    link: '/docs/features/wip-limits/column-limits',
-  },
-  {
-    icon: '👤',
-    title: 'Personal WIP Limits',
-    description: 'Balance workload with per-person limits. Avatar badges show current count.',
-    link: '/docs/features/wip-limits/personal-limits',
-  },
-  {
-    icon: '📊',
-    title: 'Gantt Chart',
-    description: 'Interactive Gantt chart on any issue page. Zoom, pan, quick filters.',
-    link: '/docs/features/gantt-chart',
-  },
-  {
-    icon: '🎨',
-    title: 'Card Colors',
-    description: 'Full card highlighting based on JQL — not just a thin left strip.',
-    link: '/docs/features/board-visualization/card-colors',
-  },
-  {
-    icon: '📅',
-    title: 'Days in Column / Deadline',
-    description: 'See how long issues sit in a column and days until due date.',
-    link: '/docs/features/card-information/days-in-column',
-  },
-  {
-    icon: '📈',
-    title: 'Sub-tasks Progress',
-    description: 'Progress bars on cards showing completion of subtasks and epics.',
-    link: '/docs/features/sub-tasks-progress',
-  },
-  {
-    icon: '⏱️',
-    title: 'Control Chart SLA',
-    description: 'SLA percentile line and measurement grids on Jira Control Chart.',
-    link: '/docs/features/control-chart/sla-line',
-  },
-  {
-    icon: '🔗',
-    title: 'Issue Links Display',
-    description: 'Show related issues (blockers, parents) directly on board cards.',
-    link: '/docs/features/card-information/issue-links-display',
-  },
-];
 
 function HeroSection() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <div className="hero">
-      <h1 className="hero__title">{siteConfig.tagline}</h1>
-      <p className="hero__subtitle">
-        WIP limits • Board visualization • Gantt • Analytics — all inside your Jira.
-      </p>
-      <div className="hero__cta">
-        <Link
-          className="button button--secondary button--lg"
-          href="https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl">
-          Install from Chrome Web Store
-        </Link>
-        <Link
-          className="button button--primary button--lg"
-          to="/docs/getting-started/installation">
-          Documentation
-        </Link>
+    <header className="hero">
+      <div className="container hero__inner">
+        <div className="hero__text">
+          <h1 className="hero__title">{siteConfig.tagline}</h1>
+          <p className="hero__subtitle">
+            Open-source browser extension. No servers, no accounts, no telemetry.
+            Just professional Kanban — inside your existing Jira.
+          </p>
+          <div className="hero__cta">
+            <Link className="button button--secondary button--lg"
+              href="https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl">
+              Add to Chrome — free
+            </Link>
+            <Link className="button button--outline button--lg"
+              to="/docs/getting-started/installation">
+              Documentation →
+            </Link>
+          </div>
+        </div>
+        <div className="hero__mockup">
+          <div className="mockup-board">
+            <div className="mockup-header">Jira Board — with jira-helper</div>
+            <div className="mockup-columns">
+              <div className="mockup-col mockup-col--full">
+                <div className="mockup-col-header">To Do</div>
+                <div className="mockup-card">TASK-101 Design</div>
+                <div className="mockup-card">TASK-102 Research</div>
+              </div>
+              <div className="mockup-col-group mockup-wip">
+                <div className="mockup-wip-badge">3 / 5</div>
+                <div className="mockup-col mockup-col--group">
+                  <div className="mockup-col-header">In Progress</div>
+                  <div className="mockup-card"><span className="mockup-badge blue">3d</span> TASK-99 API</div>
+                </div>
+                <div className="mockup-col mockup-col--group">
+                  <div className="mockup-col-header">Review</div>
+                  <div className="mockup-card"><span className="mockup-badge green">1d</span> TASK-97 UI</div>
+                  <div className="mockup-card"><span className="mockup-badge yellow">5d</span> TASK-95 Auth</div>
+                </div>
+              </div>
+              <div className="mockup-col">
+                <div className="mockup-col-header">Done</div>
+                <div className="mockup-card">TASK-90 Docs</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 
-function FeaturesGridSection() {
+function FeaturesSection() {
   return (
-    <section style={{padding: '2rem 0'}}>
+    <section className="section">
       <div className="container">
-        <h2 style={{textAlign: 'center', marginBottom: '2rem'}}>Features</h2>
+        <h2 className="section__title">Features</h2>
+        <p className="section__subtitle">Everything you need for professional Kanban in Jira</p>
         <div className="features-grid">
-          {features.map((f) => (
-            <Link key={f.title} href={f.link} className="feature-card">
-              <div className="feature-card__icon">{f.icon}</div>
-              <div className="feature-card__title">{f.title}</div>
-              <div className="feature-card__description">{f.description}</div>
+          {features.map((f, i) => (
+            <Link key={i} href={f.link} className="feature-card">
+              <div className={`feature-card__icon feature-card__icon--${f.color}`}>
+                {f.icon}
+              </div>
+              <div>
+                <div className="feature-card__title">{f.title}</div>
+                <div className="feature-card__description">{f.description}</div>
+              </div>
             </Link>
           ))}
         </div>
@@ -97,28 +81,37 @@ function FeaturesGridSection() {
   );
 }
 
+const features = [
+  { icon: '≡', color: 'blue', title: 'Column WIP Limits', description: 'Group columns under shared limits. Visual alerts when exceeded.', link: '/docs/features/wip-limits/column-limits' },
+  { icon: '◉', color: 'green', title: 'Personal WIP Limits', description: 'Per-person workload balance with avatar badges.', link: '/docs/features/wip-limits/personal-limits' },
+  { icon: '↗', color: 'orange', title: 'Gantt Chart', description: 'Interactive timeline on issue pages. Zoom, pan, filters.', link: '/docs/features/gantt-chart' },
+  { icon: '⬡', color: 'red', title: 'Card Colors', description: 'Full card highlighting via JQL — not just a thin strip.', link: '/docs/features/board-visualization/card-colors' },
+  { icon: '◷', color: 'blue', title: 'Days in Column', description: 'See how long each issue sits in its current column.', link: '/docs/features/card-information/days-in-column' },
+  { icon: '⏽', color: 'green', title: 'Sub-tasks Progress', description: 'Progress bars on parent cards for subtasks & epics.', link: '/docs/features/sub-tasks-progress' },
+  { icon: '⏱', color: 'orange', title: 'Control Chart SLA', description: 'SLA reference line with percentile on Control Chart.', link: '/docs/features/control-chart/sla-line' },
+  { icon: '⫸', color: 'red', title: 'Issue Links Display', description: 'Show blockers, parents & related issues on cards.', link: '/docs/features/card-information/issue-links-display' },
+];
+
 function StatsSection() {
   return (
-    <section style={{padding: '2rem 0', background: 'var(--ifm-color-emphasis-100)'}}>
+    <section className="section stats-section">
       <div className="container">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '3rem',
-          flexWrap: 'wrap',
-          textAlign: 'center',
-        }}>
-          <div>
-            <div style={{fontSize: '2.5rem', fontWeight: 700}}>19</div>
-            <div>Features</div>
+        <div className="stats-grid">
+          <div className="stat-item">
+            <span className="stat-number">19</span>
+            <span className="stat-label">Features</span>
           </div>
-          <div>
-            <div style={{fontSize: '2.5rem', fontWeight: 700}}>2</div>
-            <div>Languages</div>
+          <div className="stat-item">
+            <span className="stat-number">58</span>
+            <span className="stat-label">Releases</span>
           </div>
-          <div>
-            <div style={{fontSize: '2.5rem', fontWeight: 700}}>Open Source</div>
-            <div>ISC License</div>
+          <div className="stat-item">
+            <span className="stat-number">2</span>
+            <span className="stat-label">Languages</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">ISC</span>
+            <span className="stat-label">Open Source</span>
           </div>
         </div>
       </div>
@@ -128,22 +121,14 @@ function StatsSection() {
 
 function CtaSection() {
   return (
-    <section style={{padding: '3rem 0', textAlign: 'center'}}>
-      <div className="container">
-        <h2>Get Started</h2>
-        <p style={{marginBottom: '2rem'}}>
-          Install the extension, explore the docs, or contribute on GitHub.
-        </p>
+    <section className="section cta-section">
+      <div className="container" style={{textAlign: 'center'}}>
+        <h2 className="section__title">Install & Go</h2>
+        <p className="section__subtitle">No setup. No account. Just add to your browser and open Jira.</p>
         <div className="hero__cta">
-          <Link className="button button--secondary button--lg" href="https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl">
-            Chrome Web Store
-          </Link>
-          <Link className="button button--secondary button--lg" href="https://addons.mozilla.org/firefox/addon/jira-helper/">
-            Firefox Add-ons
-          </Link>
-          <Link className="button button--primary button--lg" href="https://github.com/jira-helper/jira-helper">
-            GitHub
-          </Link>
+          <Link className="button button--secondary button--lg" href="https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl">Chrome Web Store</Link>
+          <Link className="button button--secondary button--lg" href="https://addons.mozilla.org/firefox/addon/jira-helper/">Firefox Add-ons</Link>
+          <Link className="button button--primary button--lg" href="https://github.com/jira-helper/jira-helper">GitHub</Link>
         </div>
       </div>
     </section>
@@ -151,11 +136,10 @@ function CtaSection() {
 }
 
 export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
   return (
-    <Layout title={siteConfig.tagline} description="Browser extension that turns Jira into a real Kanban system with WIP limits, Gantt charts, and board visualization.">
+    <Layout title="Turn Jira into a real Kanban system" description="Browser extension with WIP limits, Gantt charts, and board visualization for Jira.">
       <HeroSection />
-      <FeaturesGridSection />
+      <FeaturesSection />
       <StatsSection />
       <CtaSection />
     </Layout>

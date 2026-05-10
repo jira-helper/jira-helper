@@ -7,7 +7,6 @@
   --ifm-color-primary-lighter: #20996b;
   --ifm-color-primary-lightest: #24ad79;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme='dark'] {
@@ -18,75 +17,283 @@
   --ifm-color-primary-light: #69e3c9;
   --ifm-color-primary-lighter: #76e6ce;
   --ifm-color-primary-lightest: #9eeedc;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+/* ── Hero ── */
+
 .hero {
-  text-align: center;
-  padding: 4rem 0;
-  background: linear-gradient(135deg, #1b855c 0%, #125d3f 100%);
+  background: linear-gradient(160deg, #0e4d33 0%, #1b855c 50%, #1a6e4f 100%);
   color: white;
+  padding: 5rem 0;
+  overflow: hidden;
+}
+
+.hero__inner {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.hero__text {
+  flex: 1;
+  min-width: 0;
 }
 
 .hero__title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
 }
 
 .hero__subtitle {
-  font-size: 1.5rem;
-  opacity: 0.9;
+  font-size: 1.15rem;
+  opacity: 0.85;
+  line-height: 1.6;
   margin-bottom: 2rem;
+  max-width: 480px;
 }
 
 .hero__cta {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
 .hero__cta .button {
-  font-size: 1.1rem;
-  padding: 0.75rem 2rem;
+  font-weight: 600;
 }
+
+.hero__mockup {
+  flex: 1;
+  display: none;
+}
+
+@media (min-width: 996px) {
+  .hero__mockup {
+    display: block;
+  }
+  .hero__title {
+    font-size: 3.2rem;
+  }
+}
+
+/* ── Board Mockup (Hero) ── */
+
+.mockup-board {
+  background: #f4f5f7;
+  border-radius: 10px;
+  padding: 14px;
+  color: #172b4d;
+  font-size: 0.78rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  transform: rotate(1deg);
+}
+
+.mockup-header {
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: #5e6c84;
+}
+
+.mockup-columns {
+  display: flex;
+  gap: 8px;
+}
+
+.mockup-col {
+  background: #ebecf0;
+  border-radius: 6px;
+  padding: 8px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.mockup-col-header {
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #5e6c84;
+  margin-bottom: 6px;
+}
+
+.mockup-card {
+  background: white;
+  border-radius: 4px;
+  padding: 5px 7px;
+  margin-bottom: 4px;
+  font-size: 0.7rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.mockup-col-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  padding: 2px;
+  flex: 2;
+}
+
+.mockup-col--group {
+  border: 1px solid #dfe1e6;
+}
+
+.mockup-col--full {
+  border-left: 3px solid #6554c0;
+}
+
+.mockup-wip {
+  border: 2px dashed #ff5630;
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.mockup-wip-badge {
+  position: absolute;
+  top: -10px;
+  right: 6px;
+  background: #ff5630;
+  color: white;
+  font-weight: 700;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.mockup-badge {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.65rem;
+  margin-right: 4px;
+}
+
+.mockup-badge.blue { background: #deebff; color: #0747a6; }
+.mockup-badge.green { background: #e3fcef; color: #006644; }
+.mockup-badge.yellow { background: #fffae6; color: #974f0c; }
+
+/* ── Sections ── */
+
+.section {
+  padding: 4rem 0;
+}
+
+.section__title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.section__subtitle {
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Features Grid ── */
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
 }
 
 .feature-card {
+  display: flex;
+  gap: 1rem;
   border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 8px;
-  padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  text-decoration: none;
-  color: inherit;
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-decoration: none;
-  color: inherit;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transform: translateY(-1px);
 }
 
 .feature-card__icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
 }
 
+.feature-card__icon--blue   { background: #4c9aff; }
+.feature-card__icon--green  { background: #36b37e; }
+.feature-card__icon--orange { background: #ff8b00; }
+.feature-card__icon--red    { background: #ff5630; }
+
 .feature-card__title {
-  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
 }
 
 .feature-card__description {
-  font-size: 0.9rem;
-  color: var(--ifm-color-emphasis-700);
+  font-size: 0.82rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1.5;
+}
+
+/* ── Stats ── */
+
+.stats-section {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--ifm-color-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── CTA ── */
+
+.cta-section {
+  background: linear-gradient(160deg, #0e4d33 0%, #1b855c 100%);
+  color: white;
+}
+
+.cta-section .section__title {
+  color: white;
+}
+
+.cta-section .section__subtitle {
+  color: rgba(255,255,255,0.8);
 }
