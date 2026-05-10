@@ -12,7 +12,13 @@ Visually highlight flagged issues in the issue hierarchy and on the issue detail
 
 ## Как настроить
 
-No configuration needed. The feature runs automatically on issue pages, in the board's issue detail panel, and in search results.
+### How to open settings
+
+No configuration required. The feature runs automatically on issue pages, in the board's issue detail panel, and in search results.
+
+### What you can configure
+
+There are no settings to configure for this feature.
 
 ## Как использовать
 

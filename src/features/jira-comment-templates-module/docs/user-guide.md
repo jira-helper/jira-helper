@@ -12,18 +12,34 @@ Provide reusable comment templates that can be inserted with one click from the 
 
 ## Как настроить
 
-1. Open board settings via **Jira Helper** next to the sidebar, or issue settings via the **Helper** button in the issue toolbar, and select the **Comment templates** tab.
-2. Click **Add template** to create a new template. Each template has:
-   - **Label** — a short name shown on the toolbar button.
-   - **Color** — a preset or custom hex color for the button.
-   - **Text** — the comment body to insert.
-   - **Watchers** (optional) — Jira users to add as watchers when the template is inserted.
-3. Edit, reorder, or delete templates as needed.
-4. Click **Save** to persist changes to browser local storage.
-5. Use **Import JSON file** and **Export templates** to transfer templates between browsers.
-6. Use **Reset to defaults** to restore the built-in template set.
+### How to open settings
 
-Templates are personal and stored in your browser, not on the Jira server.
+The comment templates settings can be opened in two ways:
+
+**Via the board:**
+
+1. Open your board and click **Jira Helper** next to the sidebar.
+2. Select the **Comment templates** tab.
+
+**Via an issue:**
+
+1. Open any issue and click **Helper** in the issue toolbar.
+2. Select the **Comment templates** tab.
+
+Both methods open the same settings panel.
+
+### What you can configure
+
+- **Add a template**: click **Add template** and set up:
+  - **Label** — a short name shown on the toolbar button.
+  - **Color** — a preset or custom hex color for the button.
+  - **Text** — the comment body to insert.
+  - **Watchers** (optional) — Jira users to add as watchers when the template is inserted.
+- **Edit, reorder, or delete templates** as needed.
+- **Import / Export**: use **Import JSON file** and **Export templates** to transfer templates between browsers.
+- **Reset to defaults**: restore the built-in template set.
+
+Click **Save** to persist changes to browser local storage. Templates are personal and stored in your browser, not on the Jira server.
 
 ## Как использовать
 

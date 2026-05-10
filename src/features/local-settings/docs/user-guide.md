@@ -12,12 +12,17 @@ Set the language used by the Jira Helper extension for its own interface labels 
 
 ## Как настроить
 
+### How to open settings
+
 1. Open your board and click **Jira Helper** next to the sidebar.
 2. Open the **Local Settings** tab.
-3. Under **UI language**, select one of:
-   - **Auto** — follows the browser's language preference.
-   - **English** — force English for extension UI.
-   - **Russian** — force Russian for extension UI.
+
+### What you can configure
+
+- **UI language**: select one of:
+  - **Auto** — follows the browser's language preference.
+  - **English** — force English for extension UI.
+  - **Russian** — force Russian for extension UI.
 
 The change applies immediately after selection. No separate save step is needed. This setting is personal and saved locally in your browser — it does not affect Jira's own language settings.
 

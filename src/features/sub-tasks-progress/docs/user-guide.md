@@ -12,17 +12,22 @@ Show stacked progress bars and/or compact counters on board cards for child and 
 
 ## Как настроить
 
+### How to open settings
+
 1. Open your Jira board and click **Jira Helper** next to the sidebar.
 2. Open the **Sub-tasks progress** tab.
-3. Turn the feature on. Use **Reset all settings** to restore defaults.
-4. Under **Tracked columns**, choose which board columns show progress on cards.
-5. In the **Counting** section, enable desired sources: epic children, sub-tasks, linked issues (optionally filtered by link type), and external links.
-6. Configure **Grouping**: select a default grouping field (project, assignee, issue type, etc.), define ignored groups, and create custom groups with names, rules, bar-vs-counter style, colors, and visibility.
-7. Map Jira **statuses** to the four progress categories (to do, in progress, done, blocked). Statuses left unmapped are excluded from totals.
-8. Optionally enable **Blocked/Flagged** handling to count flagged issues as blocked and show warning hints on cards.
-9. Adjust **Colors** — choose a preset scheme or a custom palette.
 
-Settings are per board and saved by users with board-editing permission.
+### What you can configure
+
+- **Enable the feature**: turn the feature on. Use **Reset all settings** to restore defaults.
+- **Choose tracked columns**: select which board columns show progress on cards.
+- **Enable counting sources**: pick desired sources — epic children, sub-tasks, linked issues (optionally filtered by link type), and external links.
+- **Configure grouping**: select a default grouping field (project, assignee, issue type, etc.), define ignored groups, and create custom groups with names, rules, bar-vs-counter style, colors, and visibility.
+- **Map statuses to progress categories**: assign Jira statuses to the four categories (to do, in progress, done, blocked). Unmapped statuses are excluded from totals.
+- **Enable blocked/flagged handling**: count flagged issues as blocked and show warning hints on cards.
+- **Adjust colors**: choose a preset scheme or a custom palette.
+
+Click **Save** to store settings for this board.
 
 ## Как использовать
 

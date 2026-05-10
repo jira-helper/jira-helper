@@ -12,10 +12,16 @@ Add a horizontal SLA reference line to the Control Chart report with a shaded pe
 
 ## Как настроить
 
+### How to open settings
+
 1. Open **Reports** for your board and select the **Control Chart**.
 2. In the chart options column, find the **SLA** input field.
-3. Enter a target value in **days**. The chart updates immediately, showing a green reference line and shaded band.
-4. Click **Save** to persist the SLA value for everyone using this board (requires board-editing permission). The value is stored as a Jira board property.
+
+### What you can configure
+
+- **Set SLA target**: enter a target value in **days**. The chart updates immediately, showing a green reference line and shaded band.
+
+Click **Save** to persist the SLA value for everyone using this board. The value is stored as a Jira board property.
 
 The SLA line can also be changed temporarily via the URL parameter `sla` without saving — useful for quick "what-if" analysis.
 

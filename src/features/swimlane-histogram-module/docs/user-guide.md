@@ -12,7 +12,13 @@
 
 ## Как настроить
 
-Настройка не требуется. Диаграмма появляется автоматически на поддерживаемых видах доски (Scrum/Kanban), когда включены swimlanes.
+### How to open settings
+
+No configuration required. The histogram appears automatically on supported board views (Scrum/Kanban) when swimlanes are enabled.
+
+### What you can configure
+
+There are no settings to configure for this feature.
 
 ## Как использовать
 

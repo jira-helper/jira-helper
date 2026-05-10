@@ -12,23 +12,28 @@
 
 ## Как настроить
 
+### How to open settings
+
 1. Откройте доску, затем **Jira Helper** → настройки доски.
 2. Перейдите на вкладку **Additional Card Elements**.
-3. Включите главный переключатель **Enable additional card elements**.
-4. Выберите колонки для отображения бейджей в секции **Column Selection**.
-5. В секции **Issue Condition Checks** нажмите **Add Condition Check** и настройте правило:
-   - **Name** — название проверки (обязательно).
-   - **Tooltip Text** — текст всплывающей подсказки при наведении на иконку (обязательно).
-   - **Mode** — режим проверки:
-     - **Simple** — проверяется только сама задача по JQL.
-     - **With Subtasks** — задача проверяется по одному JQL, её подзадачи — по другому.
-   - **JQL** — JQL-запрос для проверки задачи (или `issueJql` в режиме withSubtasks).
-   - **Subtask JQL** — JQL-запрос для проверки подзадач (только в режиме withSubtasks).
-   - **Subtask Match Mode** — `any` (хотя бы одна подзадача) или `all` (все подзадачи).
-   - **Subtask Sources** — какие подзадачи учитывать: прямые подзадачи, дочерние задачи эпика, связанные задачи.
-   - **Icon** — выбор иконки из набора (⚠️, ✅, 🔥, 🚀 и др.).
-   - **Color** — цвет фона бейджа (опционально).
-   - **Animation** — анимация иконки (None, Pulse, Breathe, Blink, Blink Fast, Shake).
+
+### What you can configure
+
+- **Enable the feature**: включите главный переключатель **Enable additional card elements**.
+- **Choose columns**: выберите колонки для отображения бейджей в секции **Column Selection**.
+- **Add a condition check**: в секции **Issue Condition Checks** нажмите **Add Condition Check** и настройте правило:
+  - **Name** — название проверки (обязательно).
+  - **Tooltip Text** — текст всплывающей подсказки при наведении на иконку (обязательно).
+  - **Mode** — режим проверки:
+    - **Simple** — проверяется только сама задача по JQL.
+    - **With Subtasks** — задача проверяется по одному JQL, её подзадачи — по другому.
+  - **JQL** — JQL-запрос для проверки задачи (или `issueJql` в режиме withSubtasks).
+  - **Subtask JQL** — JQL-запрос для проверки подзадач (только в режиме withSubtasks).
+  - **Subtask Match Mode** — `any` (хотя бы одна подзадача) или `all` (все подзадачи).
+  - **Subtask Sources** — какие подзадачи учитывать: прямые подзадачи, дочерние задачи эпика, связанные задачи.
+  - **Icon** — выбор иконки из набора (⚠️, ✅, 🔥, 🚀 и др.).
+  - **Color** — цвет фона бейджа (опционально).
+  - **Animation** — анимация иконки (None, Pulse, Breathe, Blink, Blink Fast, Shake).
 
 ## Как использовать
 

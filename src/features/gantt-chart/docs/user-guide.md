@@ -12,16 +12,33 @@ Add a horizontal Gantt diagram to the classic issue view that lays out every rel
 
 ## Как настроить
 
-1. Open any issue in the classic view and click **Helper** in the issue toolbar, then select the **Gantt Chart** tab. You can also open settings from the gear button in the chart's toolbar.
-2. Select the **Scope** to edit: *Global*, *This project*, or *This project + issue type*. Use **Copy from…** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
-3. Under **Start of bar** and **End of bar**, build a priority list of sources (date fields or status transitions). Use **Add fallback** and the up/down arrows to set order; the first source that yields a date for each task wins.
-4. In the **Issues** section, choose categories to include: sub-tasks, epic children, linked issues. For links, optionally restrict by link type and direction.
-5. Add **Exclusion filters** to drop tasks you never want on the chart (a task is excluded if any filter matches).
-6. Add **Bar colour rules** to highlight work by field value or JQL expression. Rules are evaluated top to bottom; first match wins.
-7. Add **Quick filters** for reusable toggle chips. Choose *field value* or *JQL* mode. Built-in *Unresolved* and *Hide completed* chips are always available.
-8. Pick extra fields to show in the **hover tooltip** and press **Save**.
+### How to open settings
 
-Settings cascade: project+issue type → project → global. Settings survive browser reload.
+The Gantt chart settings can be opened in two ways:
+
+**Via the issue toolbar:**
+
+1. Open any issue in the classic view and click **Helper** in the issue toolbar.
+2. Select the **Gantt Chart** tab.
+
+**Via the chart panel:**
+
+1. Open the Gantt chart panel on an issue page.
+2. Click the gear button in the chart's toolbar.
+
+Both methods open the same settings dialog.
+
+### What you can configure
+
+- **Select a scope**: choose *Global*, *This project*, or *This project + issue type*. Use **Copy from…** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
+- **Set bar start and end sources**: build a priority list of date fields or status transitions. Use **Add fallback** and the up/down arrows to set order — the first source that yields a date for each task wins.
+- **Choose issue categories**: include sub-tasks, epic children, linked issues. For links, optionally restrict by link type and direction.
+- **Add exclusion filters**: drop tasks you never want on the chart — a task is excluded if any filter matches.
+- **Add bar colour rules**: highlight work by field value or JQL expression. Rules are evaluated top to bottom; first match wins.
+- **Add quick filters**: create reusable toggle chips in *field value* or *JQL* mode. Built-in *Unresolved* and *Hide completed* chips are always available.
+- **Pick tooltip fields**: select extra fields to show in the hover tooltip.
+
+Click **Save** to persist settings. Settings cascade: project+issue type → project → global. Settings survive browser reload.
 
 ## Как использовать
 

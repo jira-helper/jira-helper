@@ -12,19 +12,26 @@ Turn a card field into a capacity-style limit. Count or sum how issues contribut
 
 ## How to configure
 
+### How to open settings
+
 1. Open **Board settings**.
 2. Go to the **Card layout** tab. Ensure the field you want to use is visible on the board cards.
 3. Click **Edit WIP limits by field**.
-4. Add, edit, or delete rules. For each rule:
-   - **Field** — select a field from the board's card layout.
-   - **Calculation mode** — choose how issues contribute: field is filled, exact match, any of selected values, or sum of numeric values.
-   - **Values** — if the mode requires it, specify which values to match.
-   - **Display name** — a short label for the badge.
-   - **Limit** — the numeric cap.
-   - **Badge color**, **Column scope**, **Swimlane scope** — optional.
-5. Click **Save** to store, or **Cancel** to discard.
 
-Only board administrators (or users with board configuration access) can save.
+### What you can configure
+
+In the dialog you can add, edit, or delete rules. For each rule:
+
+- **Select a field**: choose a field from the board's card layout.
+- **Choose a calculation mode**: pick how issues contribute — field is filled, exact match, any of selected values, or sum of numeric values.
+- **Specify values**: if the mode requires it, set which values to match.
+- **Set a display name**: a short label shown on the badge above the board.
+- **Set a limit**: the numeric cap for the rule.
+- **Choose a badge color**: optionally pick a color for the badge.
+- **Set column scope**: optionally restrict to specific columns.
+- **Set swimlane scope**: optionally restrict to specific swimlanes.
+
+Click **Save** to store, or **Cancel** to discard.
 
 ## How to use
 

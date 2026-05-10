@@ -12,18 +12,23 @@ Define a single work-in-progress limit for a custom block of board cells (column
 
 ## How to configure
 
+### How to open settings
+
 1. Open **Board settings**.
 2. Go to the **Columns** tab.
 3. Click **Edit WIP limits by cells**.
-4. Add, edit, or delete ranges. For each range set:
-   - **Name** — a label for the range.
-   - **Limit** — the numeric cap for all issues inside the range.
-   - **Disabled** — mark as visually disabled (hatched overlay, no active WIP behavior).
-   - **Issue types** — optionally narrow which issue types count.
-   - **Cells** — a table of swimlane–column pairs that define the range. For each cell, toggle the indicator badge on or off.
-5. Click **Save** to store for everyone on the board, or **Cancel** to discard.
 
-Only board administrators (or users with board configuration access) can save.
+### What you can configure
+
+In the dialog you can add, edit, or delete ranges. For each range:
+
+- **Set a name**: a label for the range.
+- **Set a limit**: the numeric cap for all issues inside the range.
+- **Mark as disabled**: toggle a hatched overlay with no active WIP behavior — useful for visual grouping without enforcing limits.
+- **Choose issue types**: optionally narrow which issue types count toward the limit.
+- **Define cells**: use the table of swimlane–column pairs to select which cells belong to the range. For each cell, toggle the indicator badge on or off.
+
+Click **Save** to store for everyone on the board, or **Cancel** to discard.
 
 ## How to use
 

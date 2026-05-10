@@ -12,10 +12,17 @@ Overlay a draggable, resizable measurement grid on the Control Chart to read lea
 
 ## Как настроить
 
+### How to open settings
+
 1. Open **Reports** for your board and select the **Control Chart**.
-2. In the chart options column, find the **Grid** checkbox and select a preset from the dropdown.
-3. Choose a preset: **Fibonacci** (1,2,3,5; 1,2,3,5,8; 1,2,3,5,8,13) or **Linear** (2-10 steps).
-4. The grid overlay appears on the chart. Drag it to reposition and use the resize handle (bottom-right corner) to adjust its size.
+2. In the chart options column, find the **Grid** checkbox and preset selector.
+
+### What you can configure
+
+- **Enable the grid**: check the **Grid** checkbox.
+- **Choose a preset**: select from **Fibonacci** (1,2,3,5; 1,2,3,5,8; 1,2,3,5,8,13) or **Linear** (2–10 steps).
+- **Reposition**: drag the overlay to reposition it on the chart.
+- **Resize**: use the resize handle (bottom-right corner) to adjust the overlay size.
 
 The grid state is session-only and resets on page reload. This feature is not supported in Firefox.
 

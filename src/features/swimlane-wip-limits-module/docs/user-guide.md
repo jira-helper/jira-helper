@@ -12,13 +12,21 @@ Give each swimlane row its own work-in-progress cap. Lanes like "Expedite" can f
 
 ## How to configure
 
+### How to open settings
+
 1. Open **Board settings**.
 2. Go to the **Swimlanes** tab.
 3. Set Jira's swimlane strategy to **Custom** using the native swimlane strategy control. This feature requires **Custom** strategy.
 4. Click **Configure WIP Limits**.
-5. In the modal, each swimlane on the board has a row: set the **limit** and optionally choose **issue types** to narrow what counts. Click **OK** to save all changes, or **Cancel** to discard.
 
-Board administrators (or users with board configuration access) can save.
+### What you can configure
+
+In the modal, each swimlane on the board has a row where you can:
+
+- **Set a limit**: enter the maximum number of issues allowed in the swimlane.
+- **Choose issue types**: optionally narrow counting to specific issue types (Bug, Task, Story, etc.).
+
+Click **OK** to save all changes, or **Cancel** to discard.
 
 ## How to use
 

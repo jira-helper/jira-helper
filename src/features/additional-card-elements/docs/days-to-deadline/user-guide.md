@@ -12,17 +12,22 @@
 
 ## Как настроить
 
+### How to open settings
+
 1. Откройте доску, затем **Jira Helper** → настройки доски.
 2. Перейдите на вкладку **Additional Card Elements**.
-3. Включите главный переключатель **Enable additional card elements**.
-4. Выберите колонки, в которых должен отображаться бейдж, в секции **Column Selection**.
-5. В секции **Days to Deadline Badge** включите **Show days to deadline badge**.
-6. В выпадающем списке выберите поле, содержащее дату дедлайна (типы `date`, `datetime`, `string`).
-7. Выберите режим отображения:
-   - **Always** — бейдж показывается всегда (если есть дедлайн).
-   - **Less than X days or overdue** — показывается, если осталось ≤ X дней или дедлайн просрочен.
-   - **Overdue only** — показывается только для просроченных задач.
-8. При необходимости задайте **Warning threshold** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
+
+### What you can configure
+
+- **Enable the feature**: включите главный переключатель **Enable additional card elements**.
+- **Choose columns**: выберите колонки, в которых должен отображаться бейдж, в секции **Column Selection**.
+- **Show days to deadline badge**: включите **Show days to deadline badge** в секции **Days to Deadline Badge**.
+- **Select the deadline field**: в выпадающем списке выберите поле, содержащее дату дедлайна (типы `date`, `datetime`, `string`).
+- **Choose display mode**:
+  - **Always** — бейдж показывается всегда (если есть дедлайн).
+  - **Less than X days or overdue** — показывается, если осталось ≤ X дней или дедлайн просрочен.
+  - **Overdue only** — показывается только для просроченных задач.
+- **Set warning threshold**: при необходимости задайте **Warning threshold** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
 
 ## Как использовать
 

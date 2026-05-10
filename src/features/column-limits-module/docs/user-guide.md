@@ -4,7 +4,7 @@
 |---|---|
 | Where configured | Board Settings → Columns → Column group WIP limits<br/>**or** Board toolbar → Jira Helper → Column WIP Limits tab |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`subgroupsJH`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
@@ -12,18 +12,35 @@ Group multiple columns under a single work-in-progress limit, so cards across th
 
 ## How to configure
 
-You can open the column WIP limits dialog either from **Board Settings** or directly from the **board view**:
+### How to open settings
 
-- **Board Settings** (steps 1–3 below): for administrators who want to manage the full board configuration in one place.
-- **Board view**: open the **Jira Helper** panel on the board toolbar and switch to the **Column WIP Limits** tab. This opens the same configuration dialog without leaving the board.
+The column WIP limits dialog opens in two ways:
+
+**Via Board Settings:**
 
 1. Open **Board settings** for your Scrum or Kanban board (requires board configuration permissions).
 2. Go to the **Columns** tab.
 3. Click **Column group WIP limits**.
-4. In the dialog, drag columns into named groups. For each group set the **limit**, and optionally the **color**, **issue types**, and **swimlane** scope.
-5. Click **Save** to store the configuration for everyone on this board, or **Cancel** to discard.
 
-Only board administrators (or users with board configuration access) can save.
+**Via the Jira Helper panel on the board:**
+
+1. On the board toolbar, open the **Jira Helper** panel.
+2. Switch to the **Column WIP Limits** tab.
+
+Both methods open the same dialog.
+
+### What you can configure
+
+In the dialog you can:
+
+- **Create a group**: drag a column into the empty area and name the group. The group gets a shared WIP limit — issues across all group columns are counted together.
+- **Add columns to a group**: drag more columns from the list into a group.
+- **Set a limit**: enter the maximum number of issues allowed across the group's columns.
+- **Choose a color**: pick a color for the group's column headers — helps visually distinguish groups on the board. If skipped, a color is chosen automatically from the group name.
+- **Choose swimlane scope**: restrict the limit to specific swimlanes (e.g., exclude the Expedite lane).
+- **Choose issue types**: specify which issue types (Bug, Task, Story, etc.) count toward the group's limit.
+
+Click **Save** to store the configuration for the entire team on this board.
 
 ## How to use
 

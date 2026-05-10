@@ -12,14 +12,25 @@ Cap how many issues each teammate can have in progress on the board. Each limit 
 
 ## How to configure
 
+### How to open settings
+
 1. Open **Board settings** for the board.
 2. Go to the **Columns** tab.
 3. Click **Manage per-person WIP-limits**.
-4. In the modal, search for a user by name, set the **maximum number of issues**, and optionally narrow the scope by **columns**, **swimlanes**, and **issue types**.
-5. Click **Add limit**. To edit, click **Edit** on an existing row; to remove, click **Delete**.
-6. Click **Save** to apply for everyone on the board, or **Cancel** to discard all unsaved changes.
 
-### Scope configuration
+### What you can configure
+
+In the modal you can:
+
+- **Search for a user**: find a teammate by name to create a limit for them.
+- **Set a maximum**: enter the maximum number of issues the person can have in progress.
+- **Narrow by columns**: restrict the limit to specific columns (e.g., "In Progress" only).
+- **Narrow by swimlanes**: restrict the limit to specific swimlanes (e.g., "Frontend" only).
+- **Narrow by issue types**: count only specific issue types (e.g., Bug, Task).
+- **Add a limit**: click **Add limit** to save the entry. Use **Edit** to modify or **Delete** to remove existing limits.
+- **Create multiple limits per person**: combine different scopes for the same person — each limit is counted and displayed independently.
+
+#### Scope examples
 
 | Desired behavior | How to set |
 |---|---|
@@ -28,11 +39,7 @@ Cap how many issues each teammate can have in progress on the board. Each limit 
 | Max 2 bugs in "Code Review" | Limit: 2, Columns: Code Review, Issue types: Bug |
 | Max 4 issues in the Frontend swimlane | Limit: 4, Swimlanes: Frontend |
 
-### Multiple limits per person
-
-You can create several limits with different scopes for the same person. Each limit is counted and displayed independently.
-
-Only board administrators (or users with board configuration access) can save.
+Click **Save** to apply for everyone on the board, or **Cancel** to discard all unsaved changes.
 
 ## How to use
 

@@ -12,8 +12,14 @@ Hide readable text and blur images across Jira for screen sharing, presentations
 
 ## Как настроить
 
+### How to open settings
+
 1. On any Jira page where the extension is active, **right-click** the page (or use the browser's page context menu).
-2. Find the extension entry **Blur secret data** and toggle it: checked = blur on, unchecked = blur off.
+2. Find the extension entry **Blur secret data**.
+
+### What you can configure
+
+- **Blur secret data**: toggle the checkbox — checked = blur on, unchecked = blur off.
 
 There is no switch in the board settings panel. The setting persists across page loads and new tabs.
 
