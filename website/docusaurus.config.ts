@@ -92,7 +92,7 @@ const config: Config = {
           title: 'Install',
           items: [
             { label: 'Chrome Web Store', href: 'https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl' },
-            { label: 'Firefox Add-ons', href: 'https://addons.mozilla.org/firefox/addon/jira-helper/' },
+            { label: 'Firefox Add-ons', href: 'https://addons.mozilla.org/ru/firefox/addon/jira-helper-for-ff/' },
           ],
         },
       ],

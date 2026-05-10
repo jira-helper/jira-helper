@@ -127,7 +127,7 @@ function CtaSection() {
         <p className="section__subtitle">No setup. No account. Just add to your browser and open Jira.</p>
         <div className="hero__cta">
           <Link className="button button--secondary button--lg" href="https://chrome.google.com/webstore/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl">Chrome Web Store</Link>
-          <Link className="button button--secondary button--lg" href="https://addons.mozilla.org/firefox/addon/jira-helper/">Firefox Add-ons</Link>
+          <Link className="button button--secondary button--lg" href="https://addons.mozilla.org/ru/firefox/addon/jira-helper-for-ff/">Firefox Add-ons</Link>
           <Link className="button button--primary button--lg" href="https://github.com/jira-helper/jira-helper">GitHub</Link>
         </div>
       </div>

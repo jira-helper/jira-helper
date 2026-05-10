@@ -26,7 +26,7 @@ Jira Helper — это браузерное расширение, добавля
 
 ## Firefox
 
-1. Откройте [страницу дополнений Firefox](https://addons.mozilla.org/firefox/addon/jira-helper/)
+1. Откройте [страницу дополнений Firefox](https://addons.mozilla.org/ru/firefox/addon/jira-helper-for-ff/)
 2. Нажмите **Добавить в Firefox**
 3. Нажмите **Добавить** в диалоге подтверждения
 4. Перейдите на свою Jira-доску — расширение активируется автоматически

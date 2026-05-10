@@ -26,7 +26,7 @@ Jira Helper is a browser extension that adds WIP limits, Gantt charts, and other
 
 ## Firefox
 
-1. Open the [Firefox Add-ons page](https://addons.mozilla.org/firefox/addon/jira-helper/)
+1. Open the [Firefox Add-ons page](https://addons.mozilla.org/ru/firefox/addon/jira-helper-for-ff/)
 2. Click **Add to Firefox**
 3. Click **Add** in the confirmation dialog
 4. Navigate to your Jira board — the extension activates automatically
