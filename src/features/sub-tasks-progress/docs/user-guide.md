@@ -23,7 +23,7 @@ Show stacked progress bars and/or compact counters on board cards for child and 
 - **Choose tracked columns**: select which board columns show progress on cards.
 - **Enable counting sources**: pick desired sources — epic children, sub-tasks, linked issues (optionally filtered by link type), and external links.
 - **Configure grouping**: select a default grouping field (project, assignee, issue type, etc.), define ignored groups, and create custom groups with names, rules, bar-vs-counter style, colors, and visibility.
-- **Map statuses to progress categories**: assign Jira statuses to the four categories («To Do», «In Progress», «Done», «Blocked»). Unmapped statuses are excluded from totals.
+- **Map statuses to progress categories**: assign Jira statuses to the four categories («To Do», «In Progress», «Done», «Blocked»).
 - **Enable blocked/flagged handling**: count flagged issues as blocked and show warning hints on cards.
 - **Adjust colors**: choose a preset scheme or a custom palette.
 
