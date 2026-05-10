@@ -8,7 +8,7 @@ sidebar_position: 2
 
 ### What is Jira Helper and is it free?
 
-Jira Helper is a free, open-source browser extension (ISC license) that adds professional Kanban features to Jira: WIP limits, card coloring, Gantt charts, analytics, and more. It works with both Jira Cloud and Jira Server/Data Center. No paid tiers, no subscriptions, no premium features — free to use, modify, and share.
+Jira Helper is a free, open-source browser extension (ISC license) that adds useful Kanban features to Jira: WIP limits, Gantt charts, analytics, and more. It works with Jira Server and Jira Data Center. Jira Cloud is not supported. No paid tiers, no subscriptions — free to use, modify, and share.
 
 ### Which browsers are supported?
 
@@ -18,13 +18,9 @@ Chrome 88+, Firefox 58+, and Edge 88+ (Chromium-based). The extension uses stand
 
 **No.** All data stays in your browser. The extension communicates only with your Jira instance through its existing REST API. No data is sent to third parties, no analytics, no telemetry, no external servers. See [Installation](/docs/getting-started/installation) for the privacy note.
 
-### Does it work with Jira Cloud and Jira Server?
+### Does it work with Jira Cloud?
 
-Yes. Jira Helper works with Jira Cloud, Jira Server, and Jira Data Center.
-
-### Does it work on Jira Service Management (JSM) boards?
-
-No. Jira Helper targets Scrum and Kanban software boards. JSM boards use a different UI structure and are not supported.
+No. Jira Helper works with **Jira Server** and **Jira Data Center** only. Jira Cloud is not supported.
 
 ## Installation & Uninstallation
 
@@ -109,7 +105,6 @@ Settings stored in **board properties** survive browser data clears because they
 ## Known Limitations
 
 - **Mobile Jira** is not supported. Jira Helper targets desktop browsers only.
-- **Service Management (JSM) boards** are not supported (see [Does it work on JSM boards?](#does-it-work-on-jira-service-management-jsm-boards)).
 - **Personal WIP Limits** count only the currently visible board — they don't aggregate across multiple boards.
 - **Gantt Chart** performance may degrade with more than ~200 related issues on a single page.
 - **Data Blurring** is visual only; it does not prevent copying or scraping the underlying text.
@@ -120,7 +115,7 @@ Report bugs and feature requests on [GitHub Issues](https://github.com/anomalyco
 
 Please include:
 - Browser and version (Chrome/Firefox/Edge)
-- Jira type (Cloud or Server/Data Center)
+- Jira type (Server or Data Center)
 - Steps to reproduce
 - Expected vs actual behavior
 - Screenshots if possible

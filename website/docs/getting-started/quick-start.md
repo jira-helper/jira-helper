@@ -12,7 +12,7 @@ Get your first WIP limit running in under 2 minutes.
 
 - [Jira Helper installed](/docs/getting-started/installation) and enabled in your browser
 - **Board administrator** permissions on at least one Jira board
-- A Scrum or Kanban board (not a service desk / JSM board)
+- A Scrum or Kanban board
 
 ## 1. Open a Board
 

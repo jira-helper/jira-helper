@@ -4,14 +4,14 @@ sidebar_position: 1
 
 # Installation
 
-Jira Helper is a browser extension that adds WIP limits, card coloring, Gantt charts, and other professional Kanban features to Jira. It works with Jira Cloud and Jira Server/Data Center.
+Jira Helper is a browser extension that adds WIP limits, Gantt charts, and other useful features to Jira. It works with Jira Server and Jira Data Center. Jira Cloud is not supported.
 
 **Privacy:** No data is ever sent to third parties. The extension communicates only with your Jira instance through its existing API. No analytics, no telemetry, no external servers.
 
 ## Requirements
 
-- **Chrome 88+**, **Firefox 58+**, or **Edge 88+** (Chromium-based)
-- A Jira instance with board access (Cloud or Server/Data Center)
+- **Chrome**, **Edge**, **Yandex** and other Chromium-based browsers, **Firefox** (latest versions)
+- A Jira instance with board access (Server or Data Center)
 - No additional software or accounts required
 
 <!-- SCREENSHOT: Chrome Web Store listing page with "Add to Chrome" button highlighted -->
