@@ -42,7 +42,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/social-card.png',
+    image: 'img/logo.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -50,7 +50,7 @@ const config: Config = {
       title: 'jira-helper',
       logo: {
         alt: 'jira-helper',
-        src: 'img/logo.svg',
+        src: 'img/logo.png',
       },
       items: [
         {
