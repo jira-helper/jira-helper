@@ -74,3 +74,4 @@ See [Board Properties & Local Storage](/docs/settings#board-properties-team-shar
 - **[FAQ](/docs/advanced/faq)** — common questions and troubleshooting
 - **[Board Properties & Local Storage](/docs/settings)** — understand where settings are stored
 
+
