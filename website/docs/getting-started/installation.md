@@ -73,3 +73,4 @@ See [Board Properties & Local Storage](/docs/settings#board-properties-team-shar
 - **[Features Overview](/docs/intro)** — see everything Jira Helper can do
 - **[FAQ](/docs/advanced/faq)** — common questions and troubleshooting
 - **[Board Properties & Local Storage](/docs/settings)** — understand where settings are stored
+
