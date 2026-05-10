@@ -61,7 +61,7 @@ If your organization blocks extension installation:
 
 ### Extension installed but features don't work
 
-Some features require **board administrator** permissions to save configuration. These include Column Group WIP Limits, Swimlane WIP Limits, Personal WIP Limits, Field Value WIP Limits, Cell WIP Limits, Card Colors, Sub-tasks Progress, Days in Column, Days to Deadline, Issue Links Display, Issue Condition Checks, and SLA Line — all features that store settings in Jira board properties.
+Some features require **board administrator** permissions to save configuration. These include Column Group WIP Limits, Swimlane WIP Limits, Personal WIP Limits, Field Value WIP Limits, Cell WIP Limits, Sub-tasks Progress, Days in Column, Days to Deadline, Issue Links Display, Issue Condition Checks, and SLA Line — all features that store settings in Jira board properties.
 
 View-only features (Swimlane Histogram, Flag on Issue Panel, Scale Ruler, Data Blurring) and personal features (Gantt Chart, Comment Templates, Local Settings) work without board admin permissions.
 

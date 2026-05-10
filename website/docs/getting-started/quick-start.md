@@ -22,7 +22,7 @@ Navigate to any Scrum or Kanban board in Jira. The extension activates automatic
 
 ## 2. Open the Jira Helper Panel
 
-Click the **Jira Helper** button in the board toolbar to open the extension's settings panel. Each feature has its own tab: **Columns**, **Swimlanes**, **Card Colors**, **Gantt Chart**, and more.
+Click the **Jira Helper** button in the board toolbar to open the extension's settings panel. Each feature has its own tab: **Columns**, **Swimlanes**, **Gantt Chart**, and more.
 
 <!-- SCREENSHOT: The Jira Helper settings dialog open to the Columns tab, showing the "Column group WIP limits" section -->
 
@@ -56,7 +56,7 @@ The board updates immediately. You'll see a **current / limit** badge on the gro
 
 ### Settings don't save
 
-You need **board administrator** permissions. Ask your Jira admin to grant you board admin access. Features that store settings in board properties (Column Limits, Swimlane Limits, Card Colors, etc.) require edit permissions on the board.
+You need **board administrator** permissions. Ask your Jira admin to grant you board admin access. Features that store settings in board properties (Column Limits, Swimlane Limits, etc.) require edit permissions on the board.
 
 ### Configured limits not showing on the board
 

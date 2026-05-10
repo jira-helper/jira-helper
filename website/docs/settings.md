@@ -8,7 +8,7 @@ Jira Helper stores settings in two places depending on the feature. Knowing the 
 
 ## Board Properties (team-shared)
 
-**Board Properties** are Jira's built-in key-value storage attached to each board. When a feature stores its configuration in board properties, the **setting values** are shared with everyone on the board — your whole team sees the same WIP limits, card colors, and other configuration when they view the board. Each user still sees their own settings UI; the underlying data is what's shared.
+**Board Properties** are Jira's built-in key-value storage attached to each board. When a feature stores its configuration in board properties, the **setting values** are shared with everyone on the board — your whole team sees the same WIP limits and other configuration when they view the board. Each user still sees their own settings UI; the underlying data is what's shared.
 
 <!-- SCREENSHOT: Jira board settings dialog showing the "Column group WIP limits" section with a callout "Settings stored in board properties — visible to all board members" -->
 
@@ -21,7 +21,6 @@ Jira Helper stores settings in two places depending on the feature. Knowing the 
 - **[Personal WIP Limits](/docs/features/wip-limits/personal-limits)**
 - **[Field Value WIP Limits](/docs/features/wip-limits/field-limits)**
 - **[Cell WIP Limits](/docs/features/wip-limits/cell-limits)**
-- **[Card Colors](/docs/features/board-visualization/card-colors)**
 - **[Sub-tasks Progress](/docs/features/sub-tasks-progress)**
 - **[Days in Column](/docs/features/card-information/days-in-column)**
 - **[Days to Deadline](/docs/features/card-information/days-to-deadline)**
@@ -56,13 +55,13 @@ The following features have no configurable settings and work out of the box wit
 
 1. Open any Jira board
 2. Click the **Jira Helper** button in the board toolbar
-3. Each feature that supports configuration has its own tab in the settings panel: **Columns**, **Swimlanes**, **Card Colors**, etc.
+3. Each feature that supports configuration has its own tab in the settings panel: **Columns**, **Swimlanes**, etc.
 
 Additional access paths for specific features:
 - **Gantt Chart** — has its own separate settings gear icon ⚙ in the Gantt chart header bar. Click this gear to open Gantt-specific settings (date mappings, bar colors, exclusion rules).
 - **Comment Templates** — configured via the **Comment Templates** tab in the Jira Helper settings panel, then inserted from a dropdown in Jira's comment editor.
 
-<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Columns, Swimlanes, Card Colors, Gantt Chart — labels pointing to board-property tabs vs local-storage tabs -->
+<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Columns, Swimlanes, Gantt Chart — labels pointing to board-property tabs vs local-storage tabs -->
 
 ## Troubleshooting
 

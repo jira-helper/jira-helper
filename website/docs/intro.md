@@ -30,9 +30,8 @@ Control work-in-progress at multiple levels to prevent team overload and identif
 
 ## Board Visualization
 
-Improve board readability with visual cues that surface priority, distribution, and status.
+Improve board readability with visual cues that surface distribution and status.
 
-- **[Card Colors](/docs/features/board-visualization/card-colors)** — Fill the entire card background with the color defined by Jira's native Card Colors JQL rules. Makes priority and type distinctions immediately obvious on crowded boards, where Jira's default thin left-edge strip is easy to miss.
 - **[Swimlane Histogram](/docs/features/board-visualization/swimlane-histogram)** — Bar chart showing issue distribution across swimlanes. Quickly identify overloaded lanes and uneven work distribution.
 
 ## Card Information
