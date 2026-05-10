@@ -4,11 +4,11 @@
 |---|---|
 | Where configured | Board Settings → Swimlanes → Configure WIP Limits |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`jiraHelperSwimlaneSettings`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
-Give each swimlane row its own work-in-progress cap. Lanes like "Expedite" can follow different WIP rules from the rest of the board. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
+Give each swimlane row its own work-in-progress cap. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
 
 ## How to configure
 
@@ -37,7 +37,7 @@ Click **OK** to save all changes, or **Cancel** to discard.
 
 ## Usage scenarios
 
-- "I want my Expedite lane limited to 3 items, while the main development lanes use column-group limits."
+- "I want to set a separate WIP limit for each swimlane."
 - "I want to count only bugs in a specific swimlane toward its WIP limit."
 - "I want to see at a glance which swimlanes are overloaded."
 

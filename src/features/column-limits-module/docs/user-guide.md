@@ -37,7 +37,7 @@ In the dialog you can:
 - **Add columns to a group**: drag more columns from the list into a group.
 - **Set a limit**: enter the maximum number of issues allowed across the group's columns.
 - **Choose a color**: pick a color for the group's column headers — helps visually distinguish groups on the board. If skipped, a color is chosen automatically from the group name.
-- **Choose swimlane scope**: restrict the limit to specific swimlanes (e.g., exclude the Expedite lane).
+- **Choose swimlane scope**: restrict the limit to specific swimlanes.
 - **Choose issue types**: specify which issue types (Bug, Task, Story, etc.) count toward the group's limit.
 
 Click **Save** to store the configuration for the entire team on this board.
@@ -53,7 +53,6 @@ Click **Save** to store the configuration for the entire team on this board.
 
 - "I want to limit the total work-in-progress across Dev + Code Review + Testing as one shared cap."
 - "I want bugs in the development columns to count separately from feature tasks."
-- "I want my expedite swimlane excluded from certain column group limits."
 
 ## See also
 
