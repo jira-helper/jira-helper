@@ -33,13 +33,6 @@ Board administrators (or users with board configuration access) can save.
 - "I want to count only bugs in a specific swimlane toward its WIP limit."
 - "I want to see at a glance which swimlanes are overloaded."
 
-## Troubleshooting
-
-- **Configure WIP Limits button is missing**: ensure the swimlane strategy is set to **Custom** in Jira's native swimlane configuration.
-- **Badge shows zero**: confirm that issues exist in the swimlane and that issue-type filters are not excluding all issues.
-- **Count mismatch**: the extension respects Jira's board-level issue counting settings (e.g., subtask exclusion). Adjust those in Jira's general board configuration.
-- **Settings not saving**: verify that you have board configuration permissions in Jira.
-
 ## See also
 
 - [Column Group WIP Limits](/docs/features/wip-limits/column-limits)

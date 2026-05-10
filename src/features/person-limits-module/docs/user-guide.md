@@ -48,13 +48,6 @@ Only board administrators (or users with board configuration access) can save.
 - "I want to count only bugs for a particular person's limit."
 - "I want to filter the board to show only items assigned to a specific team member."
 
-## Troubleshooting
-
-- **Avatar badge is missing**: the user must have a Jira avatar set. Without an avatar, the badge cannot render properly.
-- **Duplicate limit error**: you cannot create two limits for the same person with an identical set of filters. Change at least one scope parameter.
-- **Minimum limit cannot be zero**: the minimum limit is 1. Zero is automatically corrected to 1.
-- **Settings not saving**: verify that you have board configuration permissions in Jira.
-
 ## See also
 
 - [Column Group WIP Limits](/docs/features/wip-limits/column-limits)

@@ -40,13 +40,6 @@ Only board administrators (or users with board configuration access) can save.
 - "I want to count only bugs inside a specific cell range."
 - "I want different cell ranges with independent limits for different parts of the board."
 
-## Troubleshooting
-
-- **Cell range outline is not visible**: ensure the range has at least one cell defined and the board has both columns and swimlanes configured.
-- **Badge shows zero**: verify that the cells in the range contain issues and that issue-type filters are not excluding all issues.
-- **Disabled range still shows a red background**: disabled ranges only show the hatched overlay. If you see a WIP alert, check if another active range covers the same cells.
-- **Settings not saving**: verify that you have board configuration permissions in Jira.
-
 ## See also
 
 - [Column Group WIP Limits](/docs/features/wip-limits/column-limits)

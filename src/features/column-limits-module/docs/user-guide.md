@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Columns → Column group WIP limits |
+| Where configured | Board Settings → Columns → Column group WIP limits<br/>**or** Board toolbar → Jira Helper → Column WIP Limits tab |
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |(`subgroupsJH`) |
 
@@ -11,6 +11,11 @@
 Group multiple columns under a single work-in-progress limit, so cards across those columns count toward a shared cap. Optional scope by swimlane and issue type, plus visual per-group coloring and overload alerts.
 
 ## How to configure
+
+You can open the column WIP limits dialog either from **Board Settings** or directly from the **board view**:
+
+- **Board Settings** (steps 1–3 below): for administrators who want to manage the full board configuration in one place.
+- **Board view**: open the **Jira Helper** panel on the board toolbar and switch to the **Column WIP Limits** tab. This opens the same configuration dialog without leaving the board.
 
 1. Open **Board settings** for your Scrum or Kanban board (requires board configuration permissions).
 2. Go to the **Columns** tab.
@@ -32,13 +37,6 @@ Only board administrators (or users with board configuration access) can save.
 - "I want to limit the total work-in-progress across Dev + Code Review + Testing as one shared cap."
 - "I want bugs in the development columns to count separately from feature tasks."
 - "I want my expedite swimlane excluded from certain column group limits."
-
-## Troubleshooting
-
-- **The group badge shows no count**: verify that the columns in the group contain issues, and that swimlane/issue-type filters are not excluding everything.
-- **Color does not appear**: check that a color is set for the group; if left unset, a color is derived from the group name.
-- **Settings not saving**: confirm you have board configuration permissions in Jira.
-- **Sub-task counting seems off**: the extension follows Jira's board-level issue counting settings; adjust those in Jira's general board configuration.
 
 ## See also
 

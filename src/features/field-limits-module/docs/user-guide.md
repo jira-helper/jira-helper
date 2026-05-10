@@ -40,13 +40,6 @@ Only board administrators (or users with board configuration access) can save.
 - "I want to count how many issues have a specific label and cap that number."
 - "I want separate badges for different field values visible at the top of the board."
 
-## Troubleshooting
-
-- **Field is not available in the dropdown**: only fields that appear on the board's card layout can be selected. Go to Board Settings → Card layout and add the field to the card.
-- **Sum mode shows unexpected values**: ensure the field contains valid numeric data. Non-numeric values are ignored.
-- **Badge colors don't match configuration**: update the badge color in the rule settings and re-save.
-- **Settings not saving**: verify that you have board configuration permissions in Jira.
-
 ## See also
 
 - [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
