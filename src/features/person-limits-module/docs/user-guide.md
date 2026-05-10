@@ -10,6 +10,7 @@
 
 Cap how many issues each teammate can have in progress on the board. Each limit has its own maximum and scope (columns, swimlanes, issue types). The board shows avatar badges with counters, highlights overloaded cards, and supports one-click filtering to focus on a person's workload.
 
+
 <div class="feature-mockup">
   <div class="mockup-board">
     <div class="mockup-avatars">

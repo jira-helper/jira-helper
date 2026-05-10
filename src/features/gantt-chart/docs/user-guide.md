@@ -6,9 +6,10 @@
 | Где видно | Issue Page (classic view, below attachments) |
 | Settings apply to | Only for you |(`jh-gantt-settings`) |
 
-## Цель
+## Purpose
 
 Add a horizontal Gantt diagram to the classic issue view that lays out every related task — sub-tasks, epic children, and linked issues — on a shared timeline so you can see when each piece of work runs and how its status has changed over time.
+
 
 <div class="feature-mockup">
   <div class="mockup-board">
@@ -38,7 +39,7 @@ Add a horizontal Gantt diagram to the classic issue view that lays out every rel
   </div>
 </div>
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
@@ -68,7 +69,7 @@ Both methods open the same settings dialog.
 
 Click **«Save»** to persist settings. Settings cascade: project+issue type → project → global. Settings survive browser reload.
 
-## Как использовать
+## How to use
 
 - The Gantt section is **collapsed by default**. Click to expand and load the chart.
 - **Zoom and pan:** Scroll-wheel zoom, +/- buttons, interval selector («hours», «days», «weeks», «months»), drag-to-pan anywhere on the chart.
@@ -79,20 +80,20 @@ Click **«Save»** to persist settings. Settings cascade: project+issue type →
 - **Yellow warnings:** Alert chips appear when the chart is incomplete — "No history for X of Y tasks" or "X tasks not on chart". Hover for details.
 - While typing in Gantt inputs, Jira keyboard shortcuts are suppressed.
 
-## Сценарии использования
+## Usage scenarios
 
 - **Sprint planning:** See all related tasks on a timeline to assess readiness and dependencies.
 - **Status review:** Use the status breakdown to see how long issues spent in each state.
 - **Dependency tracking:** Include linked issues to visualize cross-issue dependencies.
 - **Team sync:** Use the modal view during stand-ups to walk through the timeline.
 
-## Устранение неполадок
+## Troubleshooting
 
 - **Chart not loading:** Check browser console for errors. The chart may fail if Jira API requests are rate-limited.
 - **Tasks missing from chart:** Check exclusion filters and ensure start/end mappings yield dates for those tasks. Look in the "not on chart" section for reasons.
 - **Status breakdown wrong:** Verify the status-to-category mapping in settings or the scope's status progress mapping.
 - **Settings not persisting:** Ensure localStorage is not cleared between sessions and the browser does not block local storage.
 
-## См. также
+## See also
 
 - [Sub-tasks Progress](/docs/features/sub-tasks-progress)

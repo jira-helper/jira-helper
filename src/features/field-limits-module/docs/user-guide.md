@@ -10,6 +10,7 @@
 
 Turn a card field into a capacity-style limit. Count or sum how issues contribute by field value (or by whether the field is present), scoped to columns and swimlanes. Badges beside the board show current-vs-limit, and cards are tinted when a limit is exceeded.
 
+
 <div class="feature-mockup">
   <div class="mockup-board">
     <div class="mockup-avatars">

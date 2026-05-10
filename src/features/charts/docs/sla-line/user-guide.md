@@ -6,9 +6,10 @@
 | Где видно | Reports (Control Chart) |
 | Settings apply to | For the whole team |(`slaConfig3`) |
 
-## Цель
+## Purpose
 
 Add a horizontal SLA reference line to the Control Chart report with a shaded percentile band and legend entry, helping teams assess how much work meets the SLA target.
+
 
 <div class="feature-mockup">
   <div class="mockup-board">
@@ -29,7 +30,7 @@ Add a horizontal SLA reference line to the Control Chart report with a shaded pe
   </div>
 </div>
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
@@ -44,7 +45,7 @@ Click **«Save»** to persist the SLA value for everyone using this board. The v
 
 The SLA line can also be changed temporarily via the URL parameter `sla` without saving — useful for quick "what-if" analysis.
 
-## Как использовать
+## How to use
 
 - A green horizontal line appears at the SLA position on the chart.
 - A translucent green band spans the percentile range of issues at or below the SLA.
@@ -52,20 +53,20 @@ The SLA line can also be changed temporarily via the URL parameter `sla` without
 - An **«SLA»** entry is added to the chart legend for clarity.
 - Changing the input value updates the chart live — use this to explore different SLA targets before committing.
 
-## Сценарии использования
+## Usage scenarios
 
 - **SLA compliance review:** Check what percentage of issues meet the team's SLA target.
 - **What-if analysis:** Temporarily adjust SLA via the URL parameter to explore threshold effects without saving.
 - **Process improvement:** Track how SLA compliance changes over time by revisiting the chart with a fixed SLA baseline.
 - **Reporting:** Use the percentile data to report SLA adherence to stakeholders.
 
-## Устранение неполадок
+## Troubleshooting
 
 - **SLA line not appearing:** Ensure the Control Chart has finished loading (all data points visible). The chart SVG must be fully rendered.
 - **Save button disabled:** You may not have permission to edit the board. The SLA value can still be used temporarily.
 - **Wrong percentile:** The percentile is calculated from visible chart data points. Ensure the chart shows the full dataset.
 - **Input not responding:** Check for browser console errors. The SLA input is injected into the Jira chart options panel.
 
-## См. также
+## See also
 
 - [Scale Ruler](/docs/features/control-chart/scale-ruler)

@@ -10,6 +10,7 @@
 
 Group multiple columns under a single work-in-progress limit, so cards across those columns count toward a shared cap. Optional scope by swimlane and issue type, plus visual per-group coloring and overload alerts.
 
+
 <div class="feature-mockup">
   <div class="mockup-board">
     <div class="mockup-columns">

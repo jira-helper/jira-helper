@@ -6,9 +6,10 @@
 | Где видно | Board (card detail view in tracked columns) |
 | Settings apply to | For the whole team ||
 
-## Цель
+## Purpose
 
 Show stacked progress bars and/or compact counters on board cards for child and linked work — sub-tasks, epic children, linked issues, and optional external links — in «To Do», «In Progress», «Done», and «Blocked» buckets at a glance.
+
 
 <div class="feature-mockup">
   <div class="mockup-board">
@@ -25,7 +26,7 @@ Show stacked progress bars and/or compact counters on board cards for child and 
   </div>
 </div>
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
@@ -44,7 +45,7 @@ Show stacked progress bars and/or compact counters on board cards for child and 
 
 Click **«Save»** to store settings for this board.
 
-## Как использовать
+## How to use
 
 - In tracked board columns, each card displays configured progress bars and/or counters.
 - The progress strip shows stacked segments (green = done, blue = in progress, gray = to do, red = blocked) or a single combined bar.
@@ -52,21 +53,21 @@ Click **«Save»** to store settings for this board.
 - Groups can be configured to hide when all items are complete or to show only incomplete work.
 - If blocked/flagged handling is enabled, warning text appears on the card when related issues are blocked or flagged.
 
-## Сценарии использования
+## Usage scenarios
 
 - **Team lead monitoring:** See progress of epics and stories directly from the board without opening each issue.
 - **Workload distribution:** Group progress by assignee or project to understand task distribution.
 - **Bottleneck detection:** Spot blocked subtasks via warning indicators on the parent card.
 - **Cross-project tracking:** Use linked issues to track progress across projects.
 
-## Устранение неполадок
+## Troubleshooting
 
 - **Progress bar not appearing:** Verify the feature is enabled and the column is in the tracked columns list.
 - **Wrong category for a status:** Check the status-to-progress mapping in settings; ensure the correct status names are assigned.
 - **Issues not counted:** Confirm the relevant source (sub-tasks, epic children, links) is enabled and that statuses are mapped.
 - **Performance concerns:** Limit the number of tracked columns and sources to reduce Jira API load.
 
-## См. также
+## See also
 
 - [Card Colors](/docs/features/board-visualization/card-colors)
 - [Column Limits](/docs/features/wip-limits/column-limits)

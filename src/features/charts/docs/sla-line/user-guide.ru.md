@@ -10,6 +10,7 @@
 
 Добавить на отчёт Control Chart горизонтальную опорную линию SLA с затенённой полосой процентиля и записью в легенде, помогая командам оценивать, сколько работы укладывается в целевой SLA.
 
+
 <div class="feature-mockup">
   <div class="mockup-board">
     <div style="position:relative;height:120px;padding:8px 20px 20px 30px;">

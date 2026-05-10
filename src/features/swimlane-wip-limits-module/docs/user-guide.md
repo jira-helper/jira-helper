@@ -10,6 +10,7 @@
 
 Give each swimlane row its own work-in-progress cap. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
 
+
 <div class="feature-mockup">
   <div class="mockup-board">
     <div class="mockup-swimlane">
