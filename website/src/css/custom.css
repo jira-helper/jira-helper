@@ -197,7 +197,7 @@
 
 .mockup-col-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
   position: relative;
   padding: 2px;
