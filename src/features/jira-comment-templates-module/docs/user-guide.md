@@ -12,7 +12,7 @@ Provide reusable comment templates that can be inserted with one click from the 
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 The comment templates settings can be opened in two ways:
 
@@ -28,7 +28,7 @@ The comment templates settings can be opened in two ways:
 
 Both methods open the same settings panel.
 
-### What you can configure
+### How to configure
 
 - **Add a template**: click **Add template** and set up:
   - **Label** — a short name shown on the toolbar button.

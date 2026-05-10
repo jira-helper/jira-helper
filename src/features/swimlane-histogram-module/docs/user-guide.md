@@ -12,11 +12,11 @@
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 No configuration required. The histogram appears automatically on supported board views (Scrum/Kanban) when swimlanes are enabled.
 
-### What you can configure
+### How to configure
 
 There are no settings to configure for this feature.
 

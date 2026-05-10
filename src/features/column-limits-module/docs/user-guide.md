@@ -12,7 +12,7 @@ Group multiple columns under a single work-in-progress limit, so cards across th
 
 ## How to configure
 
-### How to open settings
+### Where to find settings
 
 The column WIP limits dialog opens in two ways:
 
@@ -29,7 +29,7 @@ The column WIP limits dialog opens in two ways:
 
 Both methods open the same dialog.
 
-### What you can configure
+### How to configure
 
 In the dialog you can:
 

@@ -12,7 +12,7 @@ Add a horizontal Gantt diagram to the classic issue view that lays out every rel
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 The Gantt chart settings can be opened in two ways:
 
@@ -28,7 +28,7 @@ The Gantt chart settings can be opened in two ways:
 
 Both methods open the same settings dialog.
 
-### What you can configure
+### How to configure
 
 - **Select a scope**: choose *Global*, *This project*, or *This project + issue type*. Use **Copy from…** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
 - **Set bar start and end sources**: build a priority list of date fields or status transitions. Use **Add fallback** and the up/down arrows to set order — the first source that yields a date for each task wins.

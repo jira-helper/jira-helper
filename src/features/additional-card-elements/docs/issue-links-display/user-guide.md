@@ -12,12 +12,12 @@
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 1. Откройте доску, затем **Jira Helper** → настройки доски.
 2. Перейдите на вкладку **Additional Card Elements**.
 
-### What you can configure
+### How to configure
 
 - **Enable the feature**: включите главный переключатель **Enable additional card elements**.
 - **Choose columns**: выберите колонки, в которых должны отображаться бейджи связей, в секции **Column Selection**.

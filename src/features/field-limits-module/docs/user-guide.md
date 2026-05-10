@@ -12,13 +12,13 @@ Turn a card field into a capacity-style limit. Count or sum how issues contribut
 
 ## How to configure
 
-### How to open settings
+### Where to find settings
 
 1. Open **Board settings**.
 2. Go to the **Card layout** tab. Ensure the field you want to use is visible on the board cards.
 3. Click **Edit WIP limits by field**.
 
-### What you can configure
+### How to configure
 
 In the dialog you can add, edit, or delete rules. For each rule:
 

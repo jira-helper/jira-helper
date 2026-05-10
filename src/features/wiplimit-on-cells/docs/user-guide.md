@@ -12,13 +12,13 @@ Define a single work-in-progress limit for a custom block of board cells (column
 
 ## How to configure
 
-### How to open settings
+### Where to find settings
 
 1. Open **Board settings**.
 2. Go to the **Columns** tab.
 3. Click **Edit WIP limits by cells**.
 
-### What you can configure
+### How to configure
 
 In the dialog you can add, edit, or delete ranges. For each range:
 

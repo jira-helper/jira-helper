@@ -12,13 +12,13 @@ Cap how many issues each teammate can have in progress on the board. Each limit 
 
 ## How to configure
 
-### How to open settings
+### Where to find settings
 
 1. Open **Board settings** for the board.
 2. Go to the **Columns** tab.
 3. Click **Manage per-person WIP-limits**.
 
-### What you can configure
+### How to configure
 
 In the modal you can:
 

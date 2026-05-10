@@ -12,12 +12,12 @@ Add a horizontal SLA reference line to the Control Chart report with a shaded pe
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 1. Open **Reports** for your board and select the **Control Chart**.
 2. In the chart options column, find the **SLA** input field.
 
-### What you can configure
+### How to configure
 
 - **Set SLA target**: enter a target value in **days**. The chart updates immediately, showing a green reference line and shaded band.
 

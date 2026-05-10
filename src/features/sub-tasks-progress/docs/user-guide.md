@@ -12,12 +12,12 @@ Show stacked progress bars and/or compact counters on board cards for child and 
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 1. Open your Jira board and click **Jira Helper** next to the sidebar.
 2. Open the **Sub-tasks progress** tab.
 
-### What you can configure
+### How to configure
 
 - **Enable the feature**: turn the feature on. Use **Reset all settings** to restore defaults.
 - **Choose tracked columns**: select which board columns show progress on cards.

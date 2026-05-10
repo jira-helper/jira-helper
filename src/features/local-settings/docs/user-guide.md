@@ -12,12 +12,12 @@ Set the language used by the Jira Helper extension for its own interface labels 
 
 ## Как настроить
 
-### How to open settings
+### Where to find settings
 
 1. Open your board and click **Jira Helper** next to the sidebar.
 2. Open the **Local Settings** tab.
 
-### What you can configure
+### How to configure
 
 - **UI language**: select one of:
   - **Auto** — follows the browser's language preference.
