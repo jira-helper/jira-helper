@@ -21,6 +21,7 @@ Jira Helper stores settings in two places depending on the feature. Knowing the 
 - **[Personal WIP Limits](/docs/features/wip-limits/personal-limits)**
 - **[Field Value WIP Limits](/docs/features/wip-limits/field-limits)**
 - **[Cell WIP Limits](/docs/features/wip-limits/cell-limits)**
+- **[Card Colors](/docs/features/board-visualization/card-colors)**
 - **[Sub-tasks Progress](/docs/features/sub-tasks-progress)**
 - **[Days in Column](/docs/features/card-information/days-in-column)**
 - **[Days to Deadline](/docs/features/card-information/days-to-deadline)**
@@ -88,9 +89,3 @@ To resolve:
 ### Settings lost after clearing browser data
 
 Settings stored in **board properties** survive browser data clears because they live on the Jira server. Settings stored in **local storage** are lost if you clear your browser data — you'll need to reconfigure those features. See the [FAQ](/docs/advanced/faq#settings-lost-after-clearing-browser-data) for more details.
-
-## See Also
-
-- [Quick Start](/docs/getting-started/quick-start)
-- [Features Overview](/docs/intro)
-- [FAQ — Permissions](/docs/advanced/faq#permissions)

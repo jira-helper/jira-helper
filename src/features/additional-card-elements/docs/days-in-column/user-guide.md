@@ -2,56 +2,51 @@
 
 | | |
 |---|---|
-| Где настраивается | «Board Settings» → «Additional Card Elements» → «Days in Column Badge» |
-| Где видно | Board (detail view) |
-| Settings apply to | For the whole team ||
+| Where configured | «Board Settings» → «Additional Card Elements» → «Days in Column Badge» |
+| Where visible | Board (detail view) |
+| Settings apply to | For the whole team |
 
-## Цель
+## Purpose
 
-Показать, сколько дней задача находится в текущей колонке, с цветовой индикацией порогов «внимания» для быстрого выявления застоявшихся задач.
+Show how many days an issue has spent in its current column, with colour thresholds so stalled work is easy to spot.
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
-1. Откройте доску, затем **«Jira Helper»** → настройки доски.
-2. Перейдите на вкладку **«Additional Card Elements»**.
+1. Open your board, then **«Jira Helper»** → board settings.
+2. Open the **«Additional Card Elements»** tab.
 
 ### How to configure
 
-- **Enable the feature**: включите главный переключатель **«Enable additional card elements»**.
-- **Choose columns**: выберите колонки, в которых должен отображаться бейдж, в секции **«Column Selection»**.
-- **Show days in column badge**: включите **«Show days in column badge»** в секции **«Days in Column Badge»**.
+- **Enable the feature**: turn on **«Enable additional card elements»**.
+- **Choose columns**: in **«Column Selection»**, pick columns where the badge should appear.
+- **Show days in column badge**: enable **«Show days in column badge»** in the **«Days in Column Badge»** section.
 - **Choose threshold mode**:
-  - **Глобальные пороги** — одинаковые значения для всех колонок.
-  - **Отдельные правила для каждой колонки** — разные пороги для разных этапов (например, тестирование — 3 дня, разработка — 10 дней).
-- **Set warning threshold (жёлтый)**: бейдж станет жёлтым после этого количества дней. Оставьте поле пустым, если подсветка не нужна.
-- **Set danger threshold (красный)**: бейдж станет красным после этого количества дней. Оставьте поле пустым, если подсветка не нужна.
+  - **Global thresholds** — same warning/danger values for every column.
+  - **Per-column rules** — different thresholds per column (for example testing = 3 days, development = 10 days).
+- **Set warning threshold (yellow)**: badge turns yellow after this many days in column. Leave empty to disable yellow for that rule.
+- **Set danger threshold (red)**: badge turns red after this many days in column. Leave empty to disable red for that rule.
 
-Стандартный счётчик дней Jira (`.ghx-days`) автоматически скрывается при включении фичи.
+Jira's built-in day counter (`.ghx-days`) is hidden automatically when this feature is enabled.
 
-## Как использовать
+## How to use
 
-- Бейдж отображается в конце карточки в выбранных колонках.
-- **Формат текста**: `<1 day in column`, `1 day in column`, `X days in column`.
-- **Цвета**: синий (норма), жёлтый (warning), красный (danger) — в зависимости от настроенных порогов.
-- При использовании порогов по колонкам для каждой колонки действуют свои значения.
-- В бэклоге бейдж не отображается.
+- The badge appears at the end of the card in selected columns.
+- **Text format:** `<1 day in column`, `1 day in column`, `X days in column`.
+- **Colours:** blue (normal), yellow (warning), red (danger) according to your thresholds.
+- With per-column thresholds, each column can use its own values.
+- The badge does not appear in the backlog.
 
-## Сценарии использования
+## Usage scenarios
 
-1. **Выявление застоявшихся задач** — красный бейдж сразу привлекает внимание к задачам, которые слишком долго находятся в одной колонке.
-2. **Контроль SLA по этапам** — разные пороги для разных колонок (например, Code Review — 1 день, тестирование — 3 дня).
-3. **Оценка потока** — жёлтые бейджи сигнализируют о задачах, приближающихся к критическому времени пребывания.
+1. **Spot stalled issues** — a red badge highlights issues that sit too long in one column.
+2. **Stage-specific SLAs** — different thresholds per column (for example Code Review = 1 day, testing = 3 days).
+3. **Flow health** — yellow badges flag issues approaching risky dwell time.
 
-## Устранение неполадок
+## Troubleshooting
 
-- **Бейдж не отображается**: проверьте, что фича включена, выбраны нужные колонки и включён сам бейдж дней в колонке.
-- **Цвета не меняются**: проверьте, что пороги заданы корректно (warning < danger) и количество дней достигло порога.
-- **Стандартный счётчик Jira не скрылся**: обновите страницу — скрытие применяется при инициализации фичи.
-- **Устаревшие колонки в настройках**: при использовании порогов по колонкам для колонок, которых больше нет на доске, отображается предупреждение — нажмите **«Remove»** для очистки.
-
-## См. также
-
-- [Days to Deadline](/docs/features/card-information/days-to-deadline)
-- [Issue Condition Checks](/docs/features/card-information/issue-condition-checks)
+- **Badge missing:** Ensure the feature is on, columns are selected, and the days-in-column badge itself is enabled.
+- **Colours not changing:** Check thresholds (warning should be less than danger when both are set) and that dwell time actually crosses them.
+- **Jira counter still visible:** Refresh the page — hiding runs when the feature initialises.
+- **Stale column rows in settings:** If per-column mode lists columns that no longer exist on the board, use **«Remove»** to clean them up.

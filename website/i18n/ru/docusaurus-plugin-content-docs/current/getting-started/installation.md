@@ -18,7 +18,7 @@ Jira Helper — это браузерное расширение, которое
 
 ### Chromium (Chrome, Edge, Yandex и др.)
 
-1. Откройте [страницу в Chrome Web Store](https://chrome.google.com/webstore/detail/jira-helper/egombomekcmpieccamghfgjgnlllgbgdl)
+1. Откройте [страницу в Chrome Web Store](https://chromewebstore.google.com/detail/jira-helper/egmbomekcmpieccamghfgjgnlllgbgdl?hl=ru)
 2. Нажмите **Add to Chrome** → **Add Extension**
 
 ### Firefox

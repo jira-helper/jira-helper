@@ -2,46 +2,41 @@
 
 | | |
 |---|---|
-| Где настраивается | «Board Settings» → «Card Colors» |
-| Где видно | Board (detail view) |
-| Settings apply to | For the whole team |(`card-colors`) |
+| Where configured | «Board Settings» → «Card Colors» |
+| Where visible | Board (detail view) |
+| Settings apply to | For the whole team |
 
-## Цель
+## Purpose
 
-Усилить видимость правил **«Card Colors»** (Jira), применяя мягкий фоновый оттенок цвета ко всей карточке задачи вместо узкой полоски слева.
+Make Jira's built-in **«Card Colors»** rules easier to see by applying a soft background tint across the whole card instead of only the thin strip on the left.
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
-1. Откройте доску и перейдите в **«Board settings»** (шестерёнка).
-2. Откройте вкладку **«Card Colors»** — это стандартный экран Jira для настройки JQL-правил цветов.
+1. Open your board and go to **«Board settings»** (gear icon).
+2. Open the **«Card Colors»** tab — Jira's standard screen for JQL-based colour rules.
 
 ### How to configure
 
-- **«Fill whole card»**: включите опцию, чтобы карточки заливались цветом целиком; выключите — чтобы оставалась только полоска слева (стандартное поведение Jira).
+- **«Fill whole card»**: turn on to fill cards with colour across the whole card; turn off to keep only the left strip (standard Jira behaviour).
 
-Выбор сохраняется как board property вместе с остальными настройками.
+Your choice is saved as a board property together with the rest of the board configuration.
 
-## Как использовать
+## How to use
 
-- При включённой опции каждая карточка получает светлую фоновую заливку в цвет, назначенный ей правилом Card Colors. Левая цветная полоска Jira сохраняется.
-- **Flagged** (помеченные) карточки и карточки с существующей специальной подсветкой (например, предупреждения WIP-лимитов) остаются без изменений, чтобы срочные сигналы не терялись.
-- Настройка применяется глобально для всей доски.
+- When enabled, each card gets a light background tint in the colour from its Card Colors rule. Jira's left colour strip remains.
+- **Flagged** cards and cards that already have special highlighting (for example WIP-limit warnings) are left unchanged so urgent signals stay visible.
+- The setting applies to the entire board.
 
-## Сценарии использования
+## Usage scenarios
 
-1. **Улучшение читаемости** — полная заливка делает цветовую кодировку задач заметнее, особенно на больших досках.
-2. **Совместимость с WIP-лимитами** — карточки с предупреждением о превышении WIP-лимита не перекрашиваются, сохраняя приоритет важных сигналов.
-3. **Быстрое выключение** — если заливка мешает, администратор отключает её в один клик, возвращая стандартный вид (только полоска).
+1. **Readability:** Full-card fill makes colour coding easier to see, especially on large boards.
+2. **Works with WIP limits:** Cards with WIP-limit warning highlighting are not recoloured, so important signals keep priority.
+3. **Quick rollback:** If the fill is distracting, a board admin turns it off in one click and returns to the strip-only look.
 
-## Устранение неполадок
+## Troubleshooting
 
-- **Заливка не применяется**: убедитесь, что для доски заданы правила Card Colors (JQL-правила на вкладке «Card Colors»), и опция **«Fill whole card»** включена.
-- **Flagged-карточки не перекрашиваются**: это ожидаемое поведение — flagged и специально подсвеченные карточки не затрагиваются.
-- **Не видно переключателя**: проверьте права — только администратор доски видит и может менять настройки Card Colors.
-
-## См. также
-
-- [Swimlane Histogram](/docs/features/board-visualization/swimlane-histogram)
-- [Additional Card Elements — Days in Column](/docs/features/card-information/days-in-column)
+- **Fill not applied:** Ensure Card Colors JQL rules exist on the **«Card Colors»** tab and **«Fill whole card»** is enabled.
+- **Flagged cards unchanged:** Expected — flagged and specially highlighted cards are skipped.
+- **Toggle not visible:** Check permissions — only board administrators can see and change Card Colors settings.

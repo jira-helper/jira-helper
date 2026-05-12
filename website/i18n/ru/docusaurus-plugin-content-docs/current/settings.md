@@ -21,7 +21,7 @@ Jira Helper хранит настройки в двух местах в зави
 - **[Personal WIP Limits](/docs/features/wip-limits/personal-limits)**
 - **[Field Value WIP Limits](/docs/features/wip-limits/field-limits)**
 - **[Cell WIP Limits](/docs/features/wip-limits/cell-limits)**
-- **[Card Colors](/docs/features/board-visualization/card-colors)**
+- **[Цвета карточек](/docs/features/board-visualization/card-colors)**
 - **[Sub-tasks Progress](/docs/features/sub-tasks-progress)**
 - **[Days in Column](/docs/features/card-information/days-in-column)**
 - **[Days to Deadline](/docs/features/card-information/days-to-deadline)**
@@ -89,9 +89,3 @@ Jira Helper хранит настройки в двух местах в зави
 ### Настройки потеряны после очистки данных браузера
 
 Настройки, хранящиеся в **свойствах доски**, сохраняются при очистке данных браузера, поскольку они находятся на сервере Jira. Настройки, хранящиеся в **локальном хранилище**, теряются при очистке данных браузера — вам потребуется перенастроить эти функции. Подробнее см. в [FAQ](/docs/advanced/faq#settings-lost-after-clearing-browser-data).
-
-## См. также
-
-- [Быстрый старт](/docs/getting-started/quick-start)
-- [Обзор функций](/docs/intro)
-- [FAQ — Права доступа](/docs/advanced/faq#permissions)

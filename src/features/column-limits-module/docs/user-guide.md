@@ -10,7 +10,6 @@
 
 Group multiple columns under a single work-in-progress limit, so cards across those columns count toward a shared cap. Optional scope by swimlane and issue type, plus visual per-group coloring and overload alerts.
 
-
 <div class="feature-mockup">
 <div class="mockup-board">
 <div class="mockup-columns">
@@ -81,10 +80,3 @@ Click **«Save»** to store the configuration for the entire team on this board.
 
 - "I want to limit the total work-in-progress across Dev + Code Review + Testing as one shared cap."
 - "I want bugs in the development columns to count separately from feature tasks."
-
-## See also
-
-- [Swimlane WIP Limits](/docs/features/wip-limits/swimlane-limits)
-- [Per-person WIP Limits](/docs/features/wip-limits/personal-limits)
-- [WIP Limits by Cells](/docs/features/wip-limits/cell-limits)
-- [General Settings](/docs/settings)

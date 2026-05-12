@@ -182,12 +182,3 @@ priority = Low
 ### Цвета карточек не совпадают
 
 JQL-правила Card Colors оцениваются **сверху вниз**, и **побеждает первое совпадение**. Измените порядок правил в родных настройках Card Colors Jira.
-
-## См. также
-
-- [Документация Atlassian по JQL](https://support.atlassian.com/jira-software-cloud/docs/advanced-search-reference-jql/)
-- [Card Colors](/docs/features/board-visualization/card-colors)
-- [Issue Condition Checks](/docs/features/card-information/issue-condition-checks)
-- [Issue Links Display](/docs/features/card-information/issue-links-display)
-- [Gantt Chart](/docs/features/gantt-chart)
-- [FAQ](/docs/advanced/faq)

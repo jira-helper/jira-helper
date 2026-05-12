@@ -2,56 +2,56 @@
 
 | | |
 |---|---|
-| Где настраивается | Board Settings → Additional Card Elements → Days to Deadline Badge |
-| Где видно | Board (detail view) |
-| Settings apply to | For the whole team ||
+| Where configured | «Board Settings» → «Additional Card Elements» → «Days to Deadline Badge» |
+| Where visible | Board (detail view) |
+| Settings apply to | For the whole team |
 
-## Цель
+## Purpose
 
-Показать, сколько дней осталось до дедлайна задачи, с цветовой индикацией приближающихся и пропущенных сроков. Бейдж отмечен эмодзи ⏰ для визуального отличия от других бейджей на карточке.
+Show how many days remain until the issue deadline with colour cues for approaching and missed dates. The badge uses the ⏰ emoji so it is easy to tell apart from other card badges.
 
-## Как настроить
+## How to configure
 
-1. Откройте доску, затем **Jira Helper** → настройки доски.
-2. Перейдите на вкладку **Additional Card Elements**.
-3. Включите главный переключатель **Enable additional card elements**.
-4. Выберите колонки, в которых должен отображаться бейдж, в секции **Column Selection**.
-5. В секции **Days to Deadline Badge** включите **Show days to deadline badge**.
-6. В выпадающем списке выберите поле, содержащее дату дедлайна (типы `date`, `datetime`, `string`).
-7. Выберите режим отображения:
-   - **Always** — бейдж показывается всегда (если есть дедлайн).
-   - **Less than X days or overdue** — показывается, если осталось ≤ X дней или дедлайн просрочен.
-   - **Overdue only** — показывается только для просроченных задач.
-8. При необходимости задайте **Warning threshold** (жёлтый) — бейдж станет жёлтым, если осталось не больше этого числа дней.
+### Where to find settings
 
-## Как использовать
+1. Open your board, then **«Jira Helper»** → board settings.
+2. Open the **«Additional Card Elements»** tab.
 
-- Бейдж отображается в конце карточки (после бейджа «Дни в колонке», если он включён).
-- **Формат текста**:
-  - Просрочено: `⏰ X days overdue`
-  - Сегодня: `⏰ Due today!` (красный текст на жёлтом фоне)
-  - Завтра: `⏰ Due tomorrow` (жёлтый фон)
-  - Осталось дней: `⏰ X days left`
-- **Цвета**:
-  - Красный — дедлайн просрочен (всегда).
-  - Жёлтый — сегодня (0 дней) или завтра (1 день), либо осталось ≤ warning threshold.
-  - Синий — остальные случаи.
-- В режиме **Overdue only** жёлтый порог не применяется.
-- В бэклоге бейдж не отображается.
+### How to configure
 
-## Сценарии использования
+- **Enable the feature**: turn on **«Enable additional card elements»**.
+- **Choose columns**: in **«Column Selection»**, pick columns where the badge should appear.
+- **Show days to deadline badge**: enable **«Show days to deadline badge»** in the **«Days to Deadline Badge»** section.
+- **Select the deadline field**: choose the field that holds the deadline (`date`, `datetime`, or `string`).
+- **Choose display mode**:
+  - **«Always»** — badge shows whenever a deadline exists.
+  - **«Less than X days or overdue»** — badge shows if ≤ X days remain or the issue is overdue.
+  - **«Overdue only»** — badge shows only for overdue issues.
+- **Set warning threshold**: optional **«Warning threshold»** (yellow) — badge turns yellow when at most this many days remain.
 
-1. **Отслеживание всех дедлайнов** — режим «Always» показывает бейдж для всех задач с установленным дедлайном.
-2. **Фокус на приближающихся сроках** — режим «Less than 5 days or overdue» показывает только те задачи, до дедлайна которых осталось 5 или меньше дней.
-3. **Работа только с просрочкой** — режим «Overdue only» для отслеживания исключительно проблемных задач.
+## How to use
 
-## Устранение неполадок
+- The badge appears at the end of the card (after the «days in column» badge if that feature is on).
+- **Text format:**
+  - Overdue: `⏰ X days overdue`
+  - Due today: `⏰ Due today!` (red text on yellow background)
+  - Due tomorrow: `⏰ Due tomorrow` (yellow background)
+  - Days left: `⏰ X days left`
+- **Colours:**
+  - Red — overdue (always).
+  - Yellow — due today (0 days), tomorrow (1 day), or remaining days ≤ warning threshold.
+  - Blue — all other cases.
+- In **«Overdue only»** mode the yellow warning threshold does not apply.
+- The badge does not appear in the backlog.
 
-- **Бейдж не отображается**: проверьте, что выбрано поле дедлайна и в задаче заполнено значение этого поля.
-- **Выбранное поле не появляется в списке**: список полей загружается из проекта. Убедитесь, что поле существует и имеет тип `date`, `datetime` или `string`.
-- **Цвет не меняется на жёлтый**: «Сегодня» и «Завтра» всегда жёлтые, независимо от warning threshold. Для остальных дней проверьте, что порог задан и осталось дней ≤ порога.
+## Usage scenarios
 
-## См. также
+1. **Track all deadlines** — «Always» shows a badge for every issue that has the deadline field set.
+2. **Focus on soon due** — «Less than 5 days or overdue» shows only items within five days or late.
+3. **Overdue-only triage** — «Overdue only» for a strict overdue list.
 
-- [Days in Column](/docs/features/card-information/days-in-column)
-- [Issue Links Display](/docs/features/card-information/issue-links-display)
+## Troubleshooting
+
+- **Badge missing:** Check that a deadline field is selected and the issue has a value in that field.
+- **Field not in list:** Fields are loaded from the project — the field must exist and be `date`, `datetime`, or `string`.
+- **No yellow for some days:** «Today» and «Tomorrow» are always yellow regardless of the warning threshold; for other dates ensure the threshold is set and remaining days ≤ threshold.

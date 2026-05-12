@@ -2,15 +2,15 @@
 
 | | |
 |---|---|
-| Где настраивается | «Board Settings» → «Comment templates» tab or «Issue Settings» → «Comment templates» tab |
-| Где видно | Issue Page (comment editor toolbar) |
-| Settings apply to | Only for you |(`jira_helper_comment_templates`) |
+| Where configured | «Board Settings» → «Comment templates» tab or «Issue Settings» → «Comment templates» tab |
+| Where visible | Issue Page (comment editor toolbar) |
+| Settings apply to | Only for you |
 
-## Цель
+## Purpose
 
 Provide reusable comment templates that can be inserted with one click from the comment editor toolbar, with optional automatic watcher assignment.
 
-## Как настроить
+## How to configure
 
 ### Where to find settings
 
@@ -41,7 +41,7 @@ Both methods open the same settings panel.
 
 Click **«Save»** to persist changes to browser local storage. Templates are personal and stored in your browser, not on the Jira server.
 
-## Как использовать
+## How to use
 
 - In the **comment editor** on any issue page, a toolbar appears with labeled, color-coded template buttons.
 - Click a template button to **insert** its text into the comment field.
@@ -49,21 +49,17 @@ Click **«Save»** to persist changes to browser local storage. Templates are pe
 - A transient notification confirms insertion success or reports watcher errors.
 - Click **«Manage templates»** in the toolbar to open the settings panel.
 
-## Сценарии использования
+## Usage scenarios
 
 - **Standard responses:** Create templates for common replies (e.g., "Will investigate", "Merged to master", "Needs review").
 - **Onboarding:** Share a JSON export with new team members so they have the same templates.
 - **Watcher automation:** Include watchers in templates to automatically notify relevant people.
 - **Multi-language teams:** Create templates in different languages for cross-team communication.
 
-## Устранение неполадок
+## Troubleshooting
 
 - **Templates not appearing:** Ensure templates are saved (click **«Save»** in settings). The toolbar only appears on issue pages with a comment editor.
 - **Insertion failed:** The comment editor might not be fully loaded. Wait for the page to finish loading and try again.
 - **Watchers not added:** Check that the watcher usernames are valid Jira users. Some watchers may fail if the user doesn't have permission.
 - **Import error:** Ensure the JSON file matches the expected template format. Use **«Export templates»** to see the correct structure.
 - **Templates lost after clearing browser data:** Templates are stored in localStorage. Clearing browser data will remove them — export regularly as backup.
-
-## См. также
-
-- [Local Settings](/docs/features/local-settings)

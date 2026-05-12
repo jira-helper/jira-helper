@@ -2,60 +2,59 @@
 
 | | |
 |---|---|
-| Где настраивается | Board Settings → Additional Card Elements → Issue Condition Checks |
-| Где видно | Board (detail view) |
-| Settings apply to | For the whole team ||
+| Where configured | «Board Settings» → «Additional Card Elements» → «Issue Condition Checks» |
+| Where visible | Board (detail view) |
+| Settings apply to | For the whole team |
 
-## Цель
+## Purpose
 
-Отображать на карточках настраиваемые иконки-бейджи, когда задача (или связанные с ней подзадачи) удовлетворяет заданному JQL-условию. Позволяет быстро замечать важные состояния задач без открытия каждой из них.
+Show configurable icon badges on cards when an issue (or related sub-work) matches a JQL condition, so important states stand out without opening every card.
 
-## Как настроить
+## How to configure
 
-1. Откройте доску, затем **Jira Helper** → настройки доски.
-2. Перейдите на вкладку **Additional Card Elements**.
-3. Включите главный переключатель **Enable additional card elements**.
-4. Выберите колонки для отображения бейджей в секции **Column Selection**.
-5. В секции **Issue Condition Checks** нажмите **Add Condition Check** и настройте правило:
-   - **Name** — название проверки (обязательно).
-   - **Tooltip Text** — текст всплывающей подсказки при наведении на иконку (обязательно).
-   - **Mode** — режим проверки:
-     - **Simple** — проверяется только сама задача по JQL.
-     - **With Subtasks** — задача проверяется по одному JQL, её подзадачи — по другому.
-   - **JQL** — JQL-запрос для проверки задачи (или `issueJql` в режиме withSubtasks).
-   - **Subtask JQL** — JQL-запрос для проверки подзадач (только в режиме withSubtasks).
-   - **Subtask Match Mode** — `any` (хотя бы одна подзадача) или `all` (все подзадачи).
-   - **Subtask Sources** — какие подзадачи учитывать: прямые подзадачи, дочерние задачи эпика, связанные задачи.
-   - **Icon** — выбор иконки из набора (⚠️, ✅, 🔥, 🚀 и др.).
-   - **Color** — цвет фона бейджа (опционально).
-   - **Animation** — анимация иконки (None, Pulse, Breathe, Blink, Blink Fast, Shake).
+### Where to find settings
 
-## Как использовать
+1. Open your board, then **«Jira Helper»** → board settings.
+2. Open the **«Additional Card Elements»** tab.
 
-- Бейджи-иконки отображаются в нижней части карточки в выбранных колонках.
-- При наведении на иконку показывается tooltip с текстом из настроек правила.
-- При включённой анимации иконка привлекает дополнительное внимание (пульсация, мигание, покачивание).
-- Если в настройках указан цвет фона, бейдж отображается на цветной подложке.
-- В режиме **withSubtasks** можно настроить, чтобы условие проверялось не только для самой задачи, но и для её подзадач, дочерних задач эпика или связанных задач.
-- В бэклоге бейджи не отображаются.
+### How to configure
 
-## Сценарии использования
+- **Enable the feature**: turn on **«Enable additional card elements»**.
+- **Choose columns**: in **«Column Selection»**, pick columns where badges appear.
+- **Add a condition check**: in **«Issue Condition Checks»**, click **«Add Condition Check»** and configure:
+  - **«Name»** — rule name (required).
+  - **«Tooltip Text»** — tooltip shown on hover (required).
+  - **«Mode»** — check mode:
+    - **«Simple»** — only the card itself is evaluated with JQL.
+    - **«With Subtasks»** — one JQL for the issue and another for sub-work.
+  - **«JQL»** — query for the issue (or `issueJql` in With Subtasks mode).
+  - **«Subtask JQL»** — query for sub-work (With Subtasks only).
+  - **«Subtask Match Mode»** — **«any»** (at least one match) or **«all»** (all must match).
+  - **«Subtask Sources»** — which sub-work counts: direct sub-tasks, epic children, linked issues.
+  - **«Icon»** — icon from the set (⚠️, ✅, 🔥, 🚀, etc.).
+  - **«Color»** — optional badge background colour.
+  - **«Animation»** — **«None»**, **«Pulse»**, **«Breathe»**, **«Blink»**, **«Blink Fast»**, **«Shake»**.
 
-1. **Блокирующие задачи** — иконка 🛑 с JQL `status = Blocked`, анимация Blink.
-2. **Высокий приоритет** — иконка 🔥 с JQL `priority = Highest`.
-3. **Задачи без исполнителя** — иконка ⚠️ с JQL `assignee is EMPTY`, жёлтый фон.
-4. **Просроченные подзадачи** — режим withSubtasks, `subtaskJql: duedate < now()`, иконка ⏰, match mode `any`.
-5. **Все подзадачи завершены** — режим withSubtasks, `subtaskJql: status = Done`, match mode `all`, иконка ✅.
+## How to use
 
-## Устранение неполадок
+- Icon badges appear at the bottom of cards in selected columns.
+- Hover shows the configured tooltip text.
+- When animation is enabled, the icon draws extra attention (pulse, blink, shake).
+- If a background colour is set, the badge sits on a tinted background.
+- In **«With Subtasks»** mode you can evaluate sub-tasks, epic children, or linked issues together with the parent.
+- Badges do not appear in the backlog.
 
-- **Иконка не отображается**: проверьте, что правило включено (Enabled), JQL корректен, и задача действительно удовлетворяет условию.
-- **JQL не работает**: используйте простые условия для проверки. JQL валидируется при вводе — ошибка подсвечивается в настройках.
-- **Подзадачи не учитываются**: в режиме withSubtasks убедитесь, что выбраны нужные источники (Subtask Sources) и задача действительно имеет подзадачи.
-- **Анимация не видна**: некоторые анимации (например, Breathe) малозаметны — попробуйте Blink или Shake для более явного эффекта.
+## Usage scenarios
 
-## См. также
+1. **Blocked work** — icon 🛑 with JQL `status = Blocked`, Blink animation.
+2. **Highest priority** — icon 🔥 with JQL `priority = Highest`.
+3. **Unassigned** — icon ⚠️ with JQL `assignee is EMPTY`, yellow background.
+4. **Overdue subtasks** — With Subtasks, `subtaskJql: duedate < now()`, icon ⏰, match mode `any`.
+5. **All subtasks done** — With Subtasks, `subtaskJql: status = Done`, match mode `all`, icon ✅.
 
-- [Days in Column](/docs/features/card-information/days-in-column)
-- [Days to Deadline](/docs/features/card-information/days-to-deadline)
-- [Issue Links Display](/docs/features/card-information/issue-links-display)
+## Troubleshooting
+
+- **Icon missing:** Ensure the rule is enabled, JQL is valid, and the issue matches the condition.
+- **JQL errors:** JQL is validated as you type; errors are highlighted in settings.
+- **Subtasks ignored:** In With Subtasks mode, check **«Subtask Sources»** and that the issue actually has matching sub-work.
+- **Animation subtle:** Some animations (e.g. Breathe) are gentle — try Blink or Shake for a stronger effect.

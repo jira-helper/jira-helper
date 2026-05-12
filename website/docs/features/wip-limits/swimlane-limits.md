@@ -2,23 +2,52 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Swimlanes → Configure WIP Limits |
+| Where configured | «Board Settings» → «Swimlanes» → «Configure WIP Limits» |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`jiraHelperSwimlaneSettings`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
-Give each swimlane row its own work-in-progress cap. Lanes like "Expedite" can follow different WIP rules from the rest of the board. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
+Give each swimlane row its own work-in-progress cap. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
+
+<div class="feature-mockup">
+<div class="mockup-board">
+<div class="mockup-swimlane">
+<div class="mockup-swimlane-header">Team Frontend <span class="mockup-wip-badge mockup-wip-badge--green">2/5</span></div>
+<div class="mockup-columns">
+<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
+<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card">TASK-99</div></div>
+<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
+</div>
+</div>
+<div class="mockup-swimlane">
+<div class="mockup-swimlane-header">Team Backend <span class="mockup-wip-badge mockup-wip-badge--red">4/3</span></div>
+<div class="mockup-columns">
+<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-201</div></div>
+<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-199</div><div class="mockup-card mockup-card--warn">TASK-198</div></div>
+<div class="mockup-col"><div class="mockup-col-header">Done</div></div>
+</div>
+</div>
+</div>
+</div>
 
 ## How to configure
 
-1. Open **Board settings**.
-2. Go to the **Swimlanes** tab.
-3. Set Jira's swimlane strategy to **Custom** using the native swimlane strategy control. This feature requires **Custom** strategy.
-4. Click **Configure WIP Limits**.
-5. In the modal, each swimlane on the board has a row: set the **limit** and optionally choose **issue types** to narrow what counts. Click **OK** to save all changes, or **Cancel** to discard.
+### Where to find settings
 
-Board administrators (or users with board configuration access) can save.
+1. Open **«Board settings»**.
+2. Go to the **«Swimlanes»** tab.
+3. Set Jira's swimlane strategy to **«Custom»** using the native swimlane strategy control. This feature requires **«Custom»** strategy.
+4. Click **«Configure WIP Limits»**.
+
+### How to configure
+
+In the modal, each swimlane on the board has a row where you can:
+
+- **Set a limit**: enter the maximum number of issues allowed in the swimlane.
+- **Choose issue types**: optionally narrow counting to specific issue types (Bug, Task, Story, etc.).
+
+Click **«OK»** to save all changes, or **«Cancel»** to discard.
 
 ## How to use
 
@@ -29,13 +58,6 @@ Board administrators (or users with board configuration access) can save.
 
 ## Usage scenarios
 
-- "I want my Expedite lane limited to 3 items, while the main development lanes use column-group limits."
+- "I want to set a separate WIP limit for each swimlane."
 - "I want to count only bugs in a specific swimlane toward its WIP limit."
 - "I want to see at a glance which swimlanes are overloaded."
-
-## See also
-
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
-- [Per-person WIP Limits](/docs/features/wip-limits/personal-limits)
-- [WIP Limits by Field](/docs/features/wip-limits/field-limits)
-- [General Settings](/docs/settings)

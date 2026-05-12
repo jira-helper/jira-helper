@@ -10,7 +10,6 @@
 
 Give each swimlane row its own work-in-progress cap. Optionally narrow counting to specific issue types per lane. Complements column-group limits for layered WIP control.
 
-
 <div class="feature-mockup">
 <div class="mockup-board">
 <div class="mockup-swimlane">
@@ -31,9 +30,6 @@ Give each swimlane row its own work-in-progress cap. Optionally narrow counting 
 </div>
 </div>
 </div>
-
-
-
 
 ## How to configure
 
@@ -65,10 +61,3 @@ Click **«OK»** to save all changes, or **«Cancel»** to discard.
 - "I want to set a separate WIP limit for each swimlane."
 - "I want to count only bugs in a specific swimlane toward its WIP limit."
 - "I want to see at a glance which swimlanes are overloaded."
-
-## See also
-
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
-- [Per-person WIP Limits](/docs/features/wip-limits/personal-limits)
-- [WIP Limits by Field](/docs/features/wip-limits/field-limits)
-- [General Settings](/docs/settings)

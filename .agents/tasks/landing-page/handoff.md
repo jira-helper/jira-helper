@@ -28,7 +28,7 @@ src/features/<module>/docs/
 └── user-guide.ru.md   # RU
 ```
 
-Format: table (Где настраивается | Где видно | Настройки действуют) + fixed sections (Цель, Как настроить, Как использовать, Сценарии использования, См. также).
+Format: EN `user-guide.md` uses table (Where configured | Where visible | Settings apply to) + sections Purpose, How to configure, How to use, Usage scenarios, Troubleshooting; RU `user-guide.ru.md` mirrors in Russian (Где настраивается …).
 
 ### Sync Mechanism
 

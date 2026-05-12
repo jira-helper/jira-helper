@@ -2,43 +2,70 @@
 
 | | |
 |---|---|
-| Where configured | Board Settings → Columns → Manage per-person WIP-limits |
+| Where configured | «Board Settings» → «Columns» → «Manage per-person WIP-limits»<br/>**or** Board toolbar → «Jira Helper» → «Per-person WIP Limits» tab |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`personLimitsSettings`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
 Cap how many issues each teammate can have in progress on the board. Each limit has its own maximum and scope (columns, swimlanes, issue types). The board shows avatar badges with counters, highlights overloaded cards, and supports one-click filtering to focus on a person's workload.
 
+<div class="feature-mockup">
+<div class="mockup-board">
+<div class="mockup-avatars">
+<div class="mockup-avatar mockup-avatar--green">
+<div class="mockup-avatar-face">A</div><span class="mockup-avatar__count">2/3</span>
+</div>
+<div class="mockup-avatar mockup-avatar--red">
+<div class="mockup-avatar-face">B</div><span class="mockup-avatar__count">4/3</span>
+</div>
+</div>
+<div class="mockup-columns">
+<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
+<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card mockup-card--warn">TASK-98</div></div>
+<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
+</div>
+</div>
+</div>
+
 ## How to configure
 
-1. Open **Board settings** for the board.
-2. Go to the **Columns** tab.
-3. Click **Manage per-person WIP-limits**.
-4. In the modal, search for a user by name, set the **maximum number of issues**, and optionally narrow the scope by **columns**, **swimlanes**, and **issue types**.
-5. Click **Add limit**. To edit, click **Edit** on an existing row; to remove, click **Delete**.
-6. Click **Save** to apply for everyone on the board, or **Cancel** to discard all unsaved changes.
+### Where to find settings
 
-### Scope configuration
+The per-person WIP limits dialog opens in two ways:
 
-| Desired behavior | How to set |
-|---|---|
-| Max 5 issues across the entire board | Limit: 5, all filters on "All" |
-| Max 3 issues in "In Progress" | Limit: 3, Columns: In Progress |
-| Max 2 bugs in "Code Review" | Limit: 2, Columns: Code Review, Issue types: Bug |
-| Max 4 issues in the Frontend swimlane | Limit: 4, Swimlanes: Frontend |
+**Via «Board Settings»:**
 
-### Multiple limits per person
+1. Open **«Board settings»**.
+2. Go to the **«Columns»** tab.
+3. Click **«Manage per-person WIP-limits»**.
 
-You can create several limits with different scopes for the same person. Each limit is counted and displayed independently.
+**Via the Jira Helper panel on the board:**
 
-Only board administrators (or users with board configuration access) can save.
+1. On the board toolbar, open the **«Jira Helper»** panel.
+2. Switch to the **«Per-person WIP Limits»** tab.
+
+Both methods open the same dialog.
+
+### How to configure
+
+In the modal you can:
+
+- **Add a limit**: find a user by name, set the **max number of issues**, and optionally narrow the scope by **columns**, **swimlanes**, and **issue types**.
+- **Add multiple people**: include several people in one limit and choose the mode:
+  - «Shared»: the limit applies to everyone combined. Example: limit 5 across 4 people — one shared counter for the group.
+  - «Per-user»: each person gets their own limit. Example: limit 5 across 4 people — each person gets 5.
+- **Edit a limit**: click **«Edit»** on an existing limit row and update the parameters.
+- **Delete a limit**: click **«Delete»** on a limit row to remove it.
+- **Create multiple limits per person**: you can define several limits with different scopes for the same person. Each limit is counted and displayed independently.
+
+Click **«Save»** to apply for everyone on the board, or **«Cancel»** to discard all unsaved changes.
 
 ## How to use
 
 - Avatar badges appear in the toolbar area above the board, showing each person's **current / limit** count.
-- Badge colors: **green** (under limit), **yellow** (at limit), **red** (over limit).
-- When a person exceeds a limit, their cards that contribute to that limit are highlighted in **red**.
+- Badge colors: green (under limit), yellow (at limit), red (over limit).
+- When a person exceeds a limit, their cards that contribute to that limit are highlighted in red.
 - **Click a badge** to filter the board — only cards matching that limit's scope remain visible. Click again to clear the filter.
 
 ## Usage scenarios
@@ -47,10 +74,3 @@ Only board administrators (or users with board configuration access) can save.
 - "I want to limit developers to 3 tasks in progress, regardless of column."
 - "I want to count only bugs for a particular person's limit."
 - "I want to filter the board to show only items assigned to a specific team member."
-
-## See also
-
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
-- [Swimlane WIP Limits](/docs/features/wip-limits/swimlane-limits)
-- [WIP Limits by Field](/docs/features/wip-limits/field-limits)
-- [General Settings](/docs/settings)

@@ -10,7 +10,6 @@
 
 Объединить несколько колонок под одним общим лимитом незавершённой работы, чтобы карточки во всех этих колонках учитывались в едином счётчике. Возможна фильтрация по swimlane и типам задач, плюс наглядное выделение групп цветом и предупреждения о превышении.
 
-
 <div class="feature-mockup">
 <div class="mockup-board">
 <div class="mockup-columns">
@@ -81,10 +80,3 @@
 
 - «Хочу выставить WIP-лимит на всю взятую в работу от To Do до Done.»
 - «Хочу выставить WIP-лимиты на разработку (3 колонки) и тестирование (2 колонки).»
-
-## См. также
-
-- [Лимиты WIP по swimlane](/docs/features/wip-limits/swimlane-limits)
-- [Персональные лимиты WIP](/docs/features/wip-limits/personal-limits)
-- [Лимиты WIP по ячейкам](/docs/features/wip-limits/cell-limits)
-- [Общие настройки](/docs/settings)

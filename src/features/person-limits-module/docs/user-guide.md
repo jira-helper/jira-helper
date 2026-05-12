@@ -10,7 +10,6 @@
 
 Cap how many issues each teammate can have in progress on the board. Each limit has its own maximum and scope (columns, swimlanes, issue types). The board shows avatar badges with counters, highlights overloaded cards, and supports one-click filtering to focus on a person's workload.
 
-
 <div class="feature-mockup">
 <div class="mockup-board">
 <div class="mockup-avatars">
@@ -28,9 +27,6 @@ Cap how many issues each teammate can have in progress on the board. Each limit 
 </div>
 </div>
 </div>
-
-
-
 
 ## How to configure
 
@@ -78,10 +74,3 @@ Click **«Save»** to apply for everyone on the board, or **«Cancel»** to disc
 - "I want to limit developers to 3 tasks in progress, regardless of column."
 - "I want to count only bugs for a particular person's limit."
 - "I want to filter the board to show only items assigned to a specific team member."
-
-## See also
-
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
-- [Swimlane WIP Limits](/docs/features/wip-limits/swimlane-limits)
-- [WIP Limits by Field](/docs/features/wip-limits/field-limits)
-- [General Settings](/docs/settings)

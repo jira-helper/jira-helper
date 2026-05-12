@@ -37,7 +37,7 @@ Settings stored in **board properties** are not deleted when you uninstall — t
 
 ### Can I install it on managed/enterprise Chrome?
 
-Yes, but you may need your IT admin to force-install or allowlist the extension. The extension ID is `egombomekcmpieccamghfgjgnlllgbgdl`. See [Installation troubleshooting](/docs/getting-started/installation#troubleshooting).
+Yes, but you may need your IT admin to force-install or allowlist the extension. The extension ID is `egmbomekcmpieccamghfgjgnlllgbgdl`. See [Installation troubleshooting](/docs/getting-started/installation#troubleshooting).
 
 ## Permissions
 
@@ -119,12 +119,3 @@ Please include:
 - Steps to reproduce
 - Expected vs actual behavior
 - Screenshots if possible
-
-## See Also
-
-- [Installation](/docs/getting-started/installation)
-- [Quick Start](/docs/getting-started/quick-start)
-- [Features Overview](/docs/intro)
-- [Board Properties & Local Storage](/docs/settings)
-- [JQL Reference](/docs/advanced/jql-reference)
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)

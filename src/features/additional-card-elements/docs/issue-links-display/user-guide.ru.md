@@ -50,8 +50,3 @@
 2. **Фильтрация по типу задачи** — показывать только связанные задачи типа «Project» с фильтром по JQL: `issueType = Project`.
 3. **Фильтрация по статусу** — показывать только незавершённые связанные задачи: `status != Done`.
 4. **Комбинированный фильтр** — `(issueType = Project AND status != Done) OR (issueType = Objective AND labels = "Business")`.
-
-## См. также
-
-- [Дни в колонке](/docs/features/card-information/days-in-column)
-- [Дни до дедлайна](/docs/features/card-information/days-to-deadline)

@@ -53,9 +53,3 @@
 3. **Задачи без исполнителя** — иконка ⚠️ с JQL `assignee is EMPTY`, жёлтый фон.
 4. **Просроченные подзадачи** — режим withSubtasks, `subtaskJql: duedate < now()`, иконка ⏰, match mode `any`.
 5. **Все подзадачи завершены** — режим withSubtasks, `subtaskJql: status = Done`, match mode `all`, иконка ✅.
-
-## См. также
-
-- [Дни в колонке](/docs/features/card-information/days-in-column)
-- [Дни до дедлайна](/docs/features/card-information/days-to-deadline)
-- [Отображение связей задач](/docs/features/card-information/issue-links-display)

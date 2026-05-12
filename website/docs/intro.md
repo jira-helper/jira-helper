@@ -13,11 +13,3 @@ The extension works with **Jira Server** and **Jira Data Center**. Jira Cloud is
 All features are optional and configured per board.
 
 > **New to Jira Helper?** Start with the [Quick Start guide](/docs/getting-started/quick-start).
-
-## See Also
-
-- [Quick Start](/docs/getting-started/quick-start)
-- [Installation](/docs/getting-started/installation)
-- [Board Properties & Local Storage](/docs/settings)
-- [JQL Reference](/docs/advanced/jql-reference)
-- [FAQ](/docs/advanced/faq)

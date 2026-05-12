@@ -10,7 +10,6 @@
 
 Turn a card field into a capacity-style limit. Count or sum how issues contribute by field value (or by whether the field is present), scoped to columns and swimlanes. Badges beside the board show current-vs-limit, and cards are tinted when a limit is exceeded.
 
-
 <div class="feature-mockup">
 <div class="mockup-board">
 <div class="mockup-avatars">
@@ -62,10 +61,3 @@ Click **«Save»** to store, or **«Cancel»** to discard.
 - "I want to sum story points in a column to enforce a capacity limit."
 - "I want to count how many issues have a specific label and cap that number."
 - "I want separate badges for different field values visible at the top of the board."
-
-## See also
-
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
-- [Swimlane WIP Limits](/docs/features/wip-limits/swimlane-limits)
-- [Per-person WIP Limits](/docs/features/wip-limits/personal-limits)
-- [General Settings](/docs/settings)

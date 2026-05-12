@@ -41,7 +41,7 @@ Chrome 88+, Firefox 58+ и Edge 88+ (на базе Chromium). Расширени
 
 ### Можно ли установить на управляемый/корпоративный Chrome?
 
-Да, но вам может потребоваться, чтобы IT-администратор принудительно установил или добавил расширение в белый список. ID расширения: `egombomekcmpieccamghfgjgnlllgbgdl`. См. [Устранение неполадок установки](/docs/getting-started/installation#troubleshooting).
+Да, но вам может потребоваться, чтобы IT-администратор принудительно установил или добавил расширение в белый список. ID расширения: `egmbomekcmpieccamghfgjgnlllgbgdl`. См. [Устранение неполадок установки](/docs/getting-started/installation#troubleshooting).
 
 ## Права доступа
 
@@ -131,12 +131,3 @@ Jira периодически обновляет интерфейс, что мо
 - Шаги для воспроизведения
 - Ожидаемое и фактическое поведение
 - Скриншоты, если возможно
-
-## См. также
-
-- [Установка](/docs/getting-started/installation)
-- [Быстрый старт](/docs/getting-started/quick-start)
-- [Обзор функций](/docs/intro)
-- [Board Properties & Local Storage](/docs/settings)
-- [JQL Reference](/docs/advanced/jql-reference)
-- [Column Group WIP Limits](/docs/features/wip-limits/column-limits)
