@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# About
+# Features Overview
 
 Jira Helper is a browser extension that adds useful features to Jira for task management: WIP limits, visualization, Gantt charts, analytics, and more.
 

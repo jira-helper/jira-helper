@@ -48,7 +48,7 @@ sidebar_position: 2
 ## Дальнейшие шаги
 
 - **[Column Group WIP Limits](/docs/features/wip-limits/column-limits)** — полная документация с ограничением по swimlane, фильтрацией по типам задач и настройкой цветов
-- **[Обзор функций](/docs/intro)** — изучите все возможности Jira Helper
+- **[Обзор возможностей](/docs/intro)** — изучите все возможности Jira Helper
 - **[Руководство по настройкам](/docs/settings)** — узнайте, где хранятся настройки (общие для команды и личные)
 - **[Установка](/docs/getting-started/installation)** — установка и поддержка браузеров
 - **[FAQ](/docs/advanced/faq)** — частые вопросы и устранение неполадок
