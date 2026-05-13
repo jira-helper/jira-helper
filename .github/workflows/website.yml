@@ -2,7 +2,7 @@ name: Website Deploy
 
 on:
   push:
-    branches: [main, feature/landing-page]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
