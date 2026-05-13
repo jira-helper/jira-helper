@@ -1,3 +1,8 @@
+---
+---
+
+import {ConwipBoardMockup} from '@site/src/components/ConwipBoardMockup';
+
 # Групповые лимиты WIP по колонкам (CONWIP)
 
 | | |
@@ -10,32 +15,9 @@
 
 Объединить несколько колонок под одним общим лимитом незавершённой работы, чтобы карточки во всех этих колонках учитывались в едином счётчике. Возможна фильтрация по swimlane и типам задач, плюс наглядное выделение групп цветом и предупреждения о превышении.
 
-<div class="feature-mockup">
-<div class="mockup-board">
-<div class="mockup-columns">
-<div class="mockup-col">
-<div class="mockup-col-header">To Do</div>
-<div class="mockup-card">TASK-102</div>
-</div>
-<div class="mockup-col-group mockup-wip">
-<div class="mockup-wip-badge">3 / 5</div>
-<div class="mockup-col mockup-col--group">
-<div class="mockup-col-header">Developing</div>
-<div class="mockup-card">TASK-99</div>
-<div class="mockup-card">TASK-98</div>
-</div>
-<div class="mockup-col mockup-col--group">
-<div class="mockup-col-header">Review</div>
-<div class="mockup-card">TASK-97</div>
-</div>
-</div>
-<div class="mockup-col">
-<div class="mockup-col-header">Testing</div>
-<div class="mockup-card">TASK-95</div>
-</div>
-</div>
-</div>
-</div>
+<ConwipBoardMockup />
+
+*Слева:* группа «Ready to Test + Testing» — 3 задачи, лимит 5 (в пределах). *Справа:* группа «Code review + In progress» — 5 задач, лимит 3 (перегруз).
 
 ## Как настроить
 

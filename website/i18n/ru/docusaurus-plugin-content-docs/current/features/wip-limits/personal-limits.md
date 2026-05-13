@@ -1,3 +1,8 @@
+---
+---
+
+import {PersonalWipMockup} from '@site/src/components/PersonalWipMockup';
+
 # Персональные лимиты WIP
 
 | | |
@@ -10,23 +15,9 @@
 
 Ограничить, сколько задач каждый участник команды может иметь в работе на доске. У каждого лимита — свой потолок и область действия (колонки, swimlane, типы задач). На доске отображаются бейджи с аватарами и счётчиками, подсвечиваются перегруженные карточки, а клик по бейджу фильтрует доску для фокусировки на загрузке конкретного человека.
 
-<div class="feature-mockup">
-<div class="mockup-board">
-<div class="mockup-avatars">
-<div class="mockup-avatar mockup-avatar--green">
-<div class="mockup-avatar-face">A</div><span class="mockup-avatar__count">2/3</span>
-</div>
-<div class="mockup-avatar mockup-avatar--red">
-<div class="mockup-avatar-face">B</div><span class="mockup-avatar__count">4/3</span>
-</div>
-</div>
-<div class="mockup-columns">
-<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
-<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card mockup-card--warn">TASK-98</div></div>
-<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
-</div>
-</div>
-</div>
+<PersonalWipMockup />
+
+*Аватар-бейджи:* сотрудник **A** — 1 из 3 (OK, зелёный). Сотрудник **B** — 4 из 3 (перегруз, красный). Карточки, участвующие в перегрузе, подсвечены красным фоном.
 
 ## Как настроить
 

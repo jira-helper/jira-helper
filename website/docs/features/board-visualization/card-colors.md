@@ -1,3 +1,8 @@
+---
+---
+
+import {CardColorsMockup} from '@site/src/components/CardColorsMockup';
+
 # Card Colors
 
 | | |
@@ -9,6 +14,10 @@
 ## Purpose
 
 Make Jira's built-in **«Card Colors»** rules easier to see by applying a soft background tint across the whole card instead of only the thin strip on the left.
+
+<CardColorsMockup />
+
+Click the **«Fill whole card»** toggle above the board to see the difference: a thin colour strip on the left vs. a soft full-card background tint.
 
 ## How to configure
 

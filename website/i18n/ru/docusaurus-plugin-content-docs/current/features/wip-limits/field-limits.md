@@ -1,3 +1,8 @@
+---
+---
+
+import {FieldWipMockup} from '@site/src/components/FieldWipMockup';
+
 # Лимиты WIP по значениям полей
 
 | | |
@@ -10,20 +15,9 @@
 
 Превратить поле карточки в лимит по принципу ёмкости. Можно считать или суммировать вклад задач по значению поля (или по факту его заполнения), с ограничением области колонками и swimlane. Бейджи над доской показывают соотношение «текущее / лимит», а карточки подсвечиваются при превышении.
 
-<div class="feature-mockup">
-<div class="mockup-board">
-<div class="mockup-avatars">
-<span class="mockup-badge green">Component 4/5</span>
-<span class="mockup-badge red">Priority 7/3</span>
-<span class="mockup-badge blue">Assignee 2/3</span>
-</div>
-<div class="mockup-columns">
-<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
-<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card">TASK-98</div></div>
-<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
-</div>
-</div>
-</div>
+<FieldWipMockup />
+
+*FieldA* лимит 3 — 4 задачи (перегруз, красный фон). *FieldB* лимит 5 — 2 задачи (OK).
 
 ## Как настроить
 

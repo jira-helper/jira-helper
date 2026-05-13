@@ -1,3 +1,8 @@
+---
+---
+
+import {SubTasksProgressMockup} from '@site/src/components/SubTasksProgressMockup';
+
 # Sub-tasks Progress
 
 | | |
@@ -9,6 +14,10 @@
 ## Purpose
 
 Show stacked progress bars and/or compact counters on board cards for child and linked work — sub-tasks, epic children, linked issues, and optional external links — in «To Do», «In Progress», «Done», and «Blocked» buckets at a glance.
+
+<SubTasksProgressMockup />
+
+Green = done, blue = in progress, gray = to do, red = blocked. The counter below each bar shows done/total.
 
 ## How to configure
 

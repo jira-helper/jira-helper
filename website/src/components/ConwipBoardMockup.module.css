@@ -1,0 +1,157 @@
+/**
+ * CONWIP board illustration — Infima / theme variables.
+ */
+
+.board {
+  display: grid;
+  grid-template-columns: 104px 112px 112px 112px 112px 104px;
+  grid-template-rows: 34px 32px auto;
+  min-width: 656px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ifm-background-color);
+  font-size: 12px;
+}
+
+.boardWrap {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.spacerTop {
+  height: 34px;
+  box-sizing: border-box;
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.bannerBase {
+  height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.bannerOk {
+  background: var(--ifm-color-emphasis-100);
+  border-top: 2px solid var(--ifm-color-primary);
+  border-left: 1px solid var(--ifm-color-primary);
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.bannerOverload {
+  background: color-mix(in srgb, var(--ifm-color-danger) 20%, var(--ifm-background-color));
+  border-top: 2px solid var(--ifm-color-danger);
+  border-left: 1px solid var(--ifm-color-emphasis-200);
+  border-right: 1px solid var(--ifm-color-danger);
+}
+
+.bannerLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+}
+
+.badgeOk {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.badgeOverload {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--ifm-color-danger);
+  color: #fff;
+}
+
+.headerBase {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ifm-color-content-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerGroupOk {
+  background: var(--ifm-color-emphasis-100);
+  border-left: 1px solid var(--ifm-color-primary);
+}
+
+.headerGroupOkLast {
+  background: var(--ifm-color-emphasis-100);
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.headerGroupBad {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--ifm-background-color));
+}
+
+.headerGroupBadLast {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--ifm-background-color));
+  border-right: 1px solid var(--ifm-color-danger);
+}
+
+.bodyBase {
+  padding: 4px 0 8px;
+  min-height: 120px;
+  border-right: 1px solid var(--ifm-color-emphasis-300);
+  display: flex;
+  flex-direction: column;
+  background: var(--ifm-background-color);
+}
+
+.bodyGroupOk {
+  background: var(--ifm-color-emphasis-100);
+  border-left: 1px solid var(--ifm-color-primary);
+}
+
+.bodyGroupOkMid {
+  background: var(--ifm-color-emphasis-100);
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.bodyGroupBad {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--ifm-background-color));
+}
+
+.bodyGroupBadLast {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--ifm-background-color));
+  border-right: 1px solid var(--ifm-color-danger);
+}
+
+.bodyPlainLast {
+  border-right: none;
+}
+
+.card {
+  margin: 6px 8px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+}

@@ -1,3 +1,8 @@
+---
+---
+
+import {DaysInColumnMockup} from '@site/src/components/DaysInColumnMockup';
+
 # Days in Column
 
 | | |
@@ -9,6 +14,10 @@
 ## Purpose
 
 Show how many days an issue has spent in its current column, with colour thresholds so stalled work is easy to spot.
+
+<DaysInColumnMockup />
+
+Toggle **«Show days badge»** to switch between a compact dot indicator and a readable day-count badge. Green = fresh (≤3 d), orange = stale (≤7 d), red = old (>7 d).
 
 ## How to configure
 

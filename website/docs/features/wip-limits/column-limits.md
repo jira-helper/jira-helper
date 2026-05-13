@@ -1,3 +1,8 @@
+---
+---
+
+import {ConwipBoardMockup} from '@site/src/components/ConwipBoardMockup';
+
 # Column Group WIP Limits (CONWIP)
 
 | | |
@@ -10,32 +15,9 @@
 
 Group multiple columns under a single work-in-progress limit, so cards across those columns count toward a shared cap. Optional scope by swimlane and issue type, plus visual per-group coloring and overload alerts.
 
-<div class="feature-mockup">
-<div class="mockup-board">
-<div class="mockup-columns">
-<div class="mockup-col">
-<div class="mockup-col-header">To Do</div>
-<div class="mockup-card">TASK-102</div>
-</div>
-<div class="mockup-col-group mockup-wip">
-<div class="mockup-wip-badge">3 / 5</div>
-<div class="mockup-col mockup-col--group">
-<div class="mockup-col-header">Developing</div>
-<div class="mockup-card">TASK-99</div>
-<div class="mockup-card">TASK-98</div>
-</div>
-<div class="mockup-col mockup-col--group">
-<div class="mockup-col-header">Review</div>
-<div class="mockup-card">TASK-97</div>
-</div>
-</div>
-<div class="mockup-col">
-<div class="mockup-col-header">Testing</div>
-<div class="mockup-card">TASK-95</div>
-</div>
-</div>
-</div>
-</div>
+<ConwipBoardMockup />
+
+*Left:* group «Ready to Test + Testing» — 3 tickets, limit 5 (within limit). *Right:* group «Code review + In progress» — 5 tickets, limit 3 (overload).
 
 ## How to configure
 

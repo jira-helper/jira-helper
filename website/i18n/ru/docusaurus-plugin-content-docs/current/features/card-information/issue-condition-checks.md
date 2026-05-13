@@ -1,3 +1,6 @@
+---
+---
+
 # Проверки условий (Issue Condition Checks)
 
 | | |

@@ -1,14 +1,23 @@
+---
+---
+
+import {CellWipMockup} from '@site/src/components/CellWipMockup';
+
 # WIP Limits by Cells
 
 | | |
 |---|---|
 | Where configured | «Board Settings» → «Columns» → «Edit WIP limits by cells» |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`wipLimitCells`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
 Define a single work-in-progress limit for a custom block of board cells (column–swimlane intersections). The covered area is outlined, optional per-cell counters show usage, and overloaded cells are visually highlighted. Ranges can be marked as disabled for visual-only grouping.
+
+<CellWipMockup />
+
+The cell at **Team Backend × In Progress** has a WIP limit of 3 — it currently holds 4 issues (overload, dashed border, red badge **4/3**).
 
 ## How to configure
 

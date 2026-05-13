@@ -1,29 +1,23 @@
+---
+---
+
+import {FieldWipMockup} from '@site/src/components/FieldWipMockup';
+
 # WIP Limits by Field Values
 
 | | |
 |---|---|
 | Where configured | «Board Settings» → «Card layout» → «Edit WIP limits by field» |
 | Where visible | Board (detail view) |
-| Settings apply to | For the whole team |(`fieldLimitsJH`) |
+| Settings apply to | For the whole team |
 
 ## Purpose
 
 Turn a card field into a capacity-style limit. Count or sum how issues contribute by field value (or by whether the field is present), scoped to columns and swimlanes. Badges beside the board show current-vs-limit, and cards are tinted when a limit is exceeded.
 
-<div class="feature-mockup">
-<div class="mockup-board">
-<div class="mockup-avatars">
-<span class="mockup-badge green">Component 4/5</span>
-<span class="mockup-badge red">Priority 7/3</span>
-<span class="mockup-badge blue">Assignee 2/3</span>
-</div>
-<div class="mockup-columns">
-<div class="mockup-col"><div class="mockup-col-header">To Do</div><div class="mockup-card">TASK-101</div></div>
-<div class="mockup-col"><div class="mockup-col-header">In Progress</div><div class="mockup-card mockup-card--warn">TASK-99</div><div class="mockup-card">TASK-98</div></div>
-<div class="mockup-col"><div class="mockup-col-header">Done</div><div class="mockup-card">TASK-90</div></div>
-</div>
-</div>
-</div>
+<FieldWipMockup />
+
+*FieldA* limit is 3 — there are 4 issues (overload, red background). *FieldB* limit is 5 — there are 2 issues (OK).
 
 ## How to configure
 
