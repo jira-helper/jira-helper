@@ -34,3 +34,4 @@ cypress/videos
 
 .playwright/output/
 test-results/
+.playwright-cli

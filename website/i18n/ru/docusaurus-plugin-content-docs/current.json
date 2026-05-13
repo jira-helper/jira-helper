@@ -1,0 +1,46 @@
+{
+  "version.label": {
+    "message": "Текущая",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.Getting Started": {
+    "message": "Начало работы",
+    "description": "The label for category 'Getting Started' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.WIP Limits": {
+    "message": "WIP-лимиты",
+    "description": "The label for category 'WIP Limits' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Board Visualization": {
+    "message": "Визуализация доски",
+    "description": "The label for category 'Board Visualization' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Card Information": {
+    "message": "Информация на карточках",
+    "description": "The label for category 'Card Information' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Board Page": {
+    "message": "Доска",
+    "description": "The label for category 'Board Page' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Issue View": {
+    "message": "Страница задачи",
+    "description": "The label for category 'Issue View' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Reports": {
+    "message": "Отчёты",
+    "description": "The label for category 'Reports' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Other tools": {
+    "message": "Прочие инструменты",
+    "description": "The label for category 'Other tools' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Advanced": {
+    "message": "Дополнительно",
+    "description": "The label for category 'Advanced' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.doc.Features Overview": {
+    "message": "Обзор возможностей",
+    "description": "The label for the doc item 'Features Overview' in sidebar 'docsSidebar', linking to the doc intro"
+  }
+}
