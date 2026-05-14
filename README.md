@@ -6,33 +6,31 @@ _version 2.30.0_
 
 A browser extension that enhances Jira with advanced visualization, WIP-limits, and workflow management tools.
 
-[Full features documentation](./docs/features-summary.md) | [Detailed documentation](./docs/index.md)
+[📖 Documentation site](https://jira-helper.github.io/jira-helper/)
 
 ### WIP-Limits and Flow Management
-- [WIP-limit for several columns (CONWIP)](./docs/index.md#wip-limits-for-several-columns-conwip)
-- [WIP-limit for Swimlanes](./docs/index.md#wip-limits-for-swimlanes)
-- [Personal WIP-limit](./docs/index.md#wip-limits-for-individual-team-members)
-- [WIP-limit by Field Value](./docs/index.md#wip-limit-for-field-value)
-- [WIP-limit on Cells](./docs/index.md#wip-limit-on-cell)
+- [WIP-limit for several columns (CONWIP)](https://jira-helper.github.io/jira-helper/docs/features/wip-limits/column-limits)
+- [WIP-limit for Swimlanes](https://jira-helper.github.io/jira-helper/docs/features/wip-limits/swimlane-limits)
+- [Personal WIP-limit](https://jira-helper.github.io/jira-helper/docs/features/wip-limits/personal-limits)
+- [WIP-limit by Field Value](https://jira-helper.github.io/jira-helper/docs/features/wip-limits/field-limits)
+- [WIP-limit on Cells](https://jira-helper.github.io/jira-helper/docs/features/wip-limits/cell-limits)
 
 ### Board Visualization
-- [Card Colors - full card highlighting](./docs/index.md#card-colors)
-- [Swimlane Chart Bar - issue count visualization](./docs/index.md#swimlane-chart-bar)
-- [Flag on Issue panel](./docs/index.md#flag-on-issue-panel)
-- [Secret data blurring](./docs/index.md#secret-data-blurring)
+- [Card Colors - full card highlighting](https://jira-helper.github.io/jira-helper/docs/features/board-visualization/card-colors)
+- [Swimlane Chart Bar - issue count visualization](https://jira-helper.github.io/jira-helper/docs/features/board-visualization/swimlane-histogram)
+- [Flag on Issue panel](https://jira-helper.github.io/jira-helper/docs/features/flag-issue)
+- [Secret data blurring](https://jira-helper.github.io/jira-helper/docs/features/data-blurring)
 
 ### Task Progress and Relationships
-- [Sub-tasks Progress - progress bar on cards](./docs/index.md#sub-tasks-progress)
-- [Issue Links Display - show related issues on cards](./docs/index.md#issue-links-display)
-- [Days in Column - track time in column](./docs/index.md#days-in-column)
-- [Days to Deadline - deadline tracking](./docs/index.md#days-to-deadline)
+- [Sub-tasks Progress - progress bar on cards](https://jira-helper.github.io/jira-helper/docs/features/sub-tasks-progress)
+- [Issue Links Display - show related issues on cards](https://jira-helper.github.io/jira-helper/docs/features/card-information/issue-links-display)
+- [Days in Column - track time in column](https://jira-helper.github.io/jira-helper/docs/features/card-information/days-in-column)
+- [Days to Deadline - deadline tracking](https://jira-helper.github.io/jira-helper/docs/features/card-information/days-to-deadline)
 
 ### Analytics
-- [SLA-line for Control Chart with percentile](./docs/index.md#sla-line-for-control-chart)
-- [Measurement Ruler on Control Chart](./docs/index.md#control-chart-scale)
+- [SLA-line for Control Chart with percentile](https://jira-helper.github.io/jira-helper/docs/features/control-chart/sla-line)
+- [Measurement Ruler on Control Chart](https://jira-helper.github.io/jira-helper/docs/features/control-chart/scale-ruler)
 
-### Templates
-- [Task Description Template](./docs/index.md#task-description-template)
 
 ## Issuing project tasks
 
