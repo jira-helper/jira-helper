@@ -33,5 +33,6 @@ cypress/screenshots
 cypress/videos
 
 .playwright/output/
+.playwright/chrome-profile/
 test-results/
 .playwright-cli
