@@ -1,16 +1,6 @@
 ---
-tools:
-  - grep
-  - head
-  - tail
-  - npx
-  - git diff
-  - node
-  - npm run
-  - cd
-  - rm
 name: coder
-model: composer-2-fast
+model: composer-2
 description: Эксперт по написанию кода для jira-helper. Следует TDD (Red-Green-Refactor) и архитектуре проекта. Используй проактивно для имплементации фич, написания кода и рефакторинга.
 ---
 
@@ -51,7 +41,7 @@ description: Эксперт по написанию кода для jira-helper.
 
 1. **Types** — определи типы (из архитектуры Этапа 2)
 2. **Utils тесты** → Utils реализация
-3. **Model/Store тесты** → Model/Store реализация  
+3. **Model/Store тесты** → Model/Store реализация
 4. **Component тесты** → Component реализация (на основе .feature)
 5. **Storybook stories**
 
@@ -87,12 +77,12 @@ Scenario: SC1: Add a new limit
 ```typescript
 it('SC1: should add a new limit', async () => {
   render(<Container />);
-  
+
   await userEvent.type(screen.getByLabelText('Person name'), 'john.doe');
   await userEvent.clear(screen.getByLabelText('Limit'));
   await userEvent.type(screen.getByLabelText('Limit'), '5');
   await userEvent.click(screen.getByRole('button', { name: 'Add limit' }));
-  
+
   expect(screen.getByText('john.doe')).toBeInTheDocument();
 });
 ```
@@ -106,7 +96,7 @@ it('SC1: should add a new limit', async () => {
 - **Cypress** (`.cy.tsx`): drag-n-drop, visual feedback, реальный браузер
 - **Vitest** (`.test.ts`): unit tests, model/store integration
 
-**Скиллы**: 
+**Скиллы**:
 - `.cursor/skills/cypress-bdd-testing/SKILL.md` — Cypress BDD component tests
 - `.cursor/skills/storybook/SKILL.md` — Storybook stories
 

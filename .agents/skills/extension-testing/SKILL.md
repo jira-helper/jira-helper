@@ -39,7 +39,7 @@ playwright-cli --version  # ≥ 0.1.5
 
 ### 3. Залогиниться в Jira (один раз)
 
-После первого `playwright-cli -s=jh open --headed` в новом профиле Chrome откроется SSO. Залогиньтесь руками. Профиль персистентный (`~/.cache/jira-helper-chrome-profile`), сессия сохранится между всеми последующими запусками.
+После первого `playwright-cli -s=jh open --headed` в новом профиле Chrome откроется SSO. Залогиньтесь руками. Профиль персистентный (`.playwright/chrome-profile` внутри репозитория), сессия сохранится между всеми последующими запусками.
 
 ---
 
@@ -77,13 +77,13 @@ playwright-cli -s=jh console error
 {
   "browser": {
     "browserName": "chromium",
-    "userDataDir": "/Users/m.sosnov/.cache/jira-helper-chrome-profile",
+    "userDataDir": ".playwright/chrome-profile",
     "launchOptions": {
       "channel": "chrome",
       "headless": false,
       "args": [
         "--enable-unsafe-extension-debugging",
-        "--load-extension=/Users/m.sosnov/projects/personal/jira-helper/dist",
+        "--load-extension=dist",
         "--no-first-run",
         "--no-default-browser-check"
       ],
