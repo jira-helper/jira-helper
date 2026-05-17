@@ -35,13 +35,14 @@ const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const EXT_PATH = path.join(ROOT, 'dist');
 const USER_DATA_DIR =
   process.env.JH_PROFILE ||
-  '/Users/m.sosnov/.cache/jira-helper-chrome-profile';
+  path.join(ROOT, '.playwright', 'chrome-profile');
 const CMD_FILE = '/tmp/jh-cmd.json';
 const RESULT_FILE = '/tmp/jh-result.json';
 const LOG_FILE = '/tmp/jh-runner.log';
 const SCREENSHOT_DIR = '/tmp/jh-shots';
 
 await mkdir(SCREENSHOT_DIR, { recursive: true });
+await mkdir(USER_DATA_DIR, { recursive: true });
 
 const log = async (...args) => {
   const line = `[${new Date().toISOString()}] ${args

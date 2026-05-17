@@ -1,13 +1,13 @@
 {
   "browser": {
     "browserName": "chromium",
-    "userDataDir": "/Users/m.sosnov/.cache/jira-helper-chrome-profile",
+    "userDataDir": ".playwright/chrome-profile",
     "launchOptions": {
       "channel": "chrome",
       "headless": false,
       "args": [
         "--enable-unsafe-extension-debugging",
-        "--load-extension=/Users/m.sosnov/projects/personal/jira-helper/dist",
+        "--load-extension=dist",
         "--no-first-run",
         "--no-default-browser-check"
       ],
