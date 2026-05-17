@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Space } from 'antd';
+import { Button, Space, Switch, Typography } from 'antd';
 import { globalContainer } from 'dioma';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import type { Texts } from 'src/shared/texts';
@@ -11,9 +11,15 @@ import { CopyFromDialog } from './CopyFromDialog';
 import './gantt-ui.css';
 
 const TAB_TEXTS = {
+  title: { en: 'Gantt Chart', ru: 'Диаграмма Ганта' },
+  featureEnabled: { en: 'Feature enabled', ru: 'Функция включена' },
+  featureDisabledHint: {
+    en: 'Gantt is disabled locally in this browser. Your saved Gantt settings are kept and will be used after re-enabling.',
+    ru: 'Gantt локально отключён в этом браузере. Сохранённые настройки Gantt не удаляются и будут применены после включения.',
+  },
   save: { en: 'Save', ru: 'Сохранить' },
   copyFrom: { en: 'Copy from…', ru: 'Копировать из…' },
-} satisfies Texts<'save' | 'copyFrom'>;
+} satisfies Texts<'title' | 'featureEnabled' | 'featureDisabledHint' | 'save' | 'copyFrom'>;
 
 function labelForScopeKey(key: string): string {
   if (key === '_global') return 'Global';
@@ -84,27 +90,56 @@ export const GanttSettingsTab: React.FC = () => {
     },
     [model]
   );
+  const handleFeatureToggle = useCallback(
+    (enabled: boolean) => {
+      model.setFeatureEnabled(enabled);
+    },
+    [model]
+  );
 
   return (
-    <div className="jh-gantt-settings-tab">
-      <GanttSettingsFormContent
-        draft={snap.draftSettings}
-        currentScope={snap.currentScope}
-        onDraftChange={handleDraftChange}
-        onScopeLevelChange={handleScopeLevelChange}
-      />
-      <Space className="jh-gantt-space-mt-16">
-        <Button onClick={() => setCopyFromVisible(true)}>{texts.copyFrom}</Button>
-        <Button type="primary" onClick={handleSave} disabled={!snap.draftSettings}>
-          {texts.save}
-        </Button>
-      </Space>
-      <CopyFromDialog
-        visible={copyFromVisible}
-        availableScopes={availableScopes}
-        onCopy={handleCopyConfirm}
-        onCancel={() => setCopyFromVisible(false)}
-      />
+    <div className="jh-gantt-settings-tab jh-gantt-local-toggle-section">
+      <div className="jh-gantt-local-toggle-header">
+        <Typography.Title level={5} className="jh-gantt-local-toggle-title">
+          {texts.title}
+        </Typography.Title>
+        <label htmlFor="gantt-local-toggle" className="jh-gantt-local-toggle-control">
+          <Typography.Text>{texts.featureEnabled}</Typography.Text>
+          <Switch
+            id="gantt-local-toggle"
+            checked={snap.featureEnabled}
+            onChange={handleFeatureToggle}
+            data-testid="gantt-local-toggle-switch"
+          />
+        </label>
+      </div>
+
+      {snap.featureEnabled ? (
+        <>
+          <GanttSettingsFormContent
+            draft={snap.draftSettings}
+            currentScope={snap.currentScope}
+            onDraftChange={handleDraftChange}
+            onScopeLevelChange={handleScopeLevelChange}
+          />
+          <Space className="jh-gantt-space-mt-16">
+            <Button onClick={() => setCopyFromVisible(true)}>{texts.copyFrom}</Button>
+            <Button type="primary" onClick={handleSave} disabled={!snap.draftSettings}>
+              {texts.save}
+            </Button>
+          </Space>
+          <CopyFromDialog
+            visible={copyFromVisible}
+            availableScopes={availableScopes}
+            onCopy={handleCopyConfirm}
+            onCancel={() => setCopyFromVisible(false)}
+          />
+        </>
+      ) : (
+        <Typography.Text type="secondary" data-testid="gantt-local-toggle-disabled-hint">
+          {texts.featureDisabledHint}
+        </Typography.Text>
+      )}
     </div>
   );
 };

@@ -49,9 +49,8 @@ export class CommentTemplatesPageModification extends PageModification {
     registerSettings({ title: SETTINGS_TITLE, component: SettingsTab });
     registerIssueSettings({ title: SETTINGS_TITLE, component: SettingsTab });
 
-    const attachHandle = container
-      .inject(commentsEditorPageObjectToken)
-      .attachTools(COMMENT_TEMPLATES_ATTACH_TOOLS_KEY, ToolbarTool);
+    const commentsEditorPageObject = container.inject(commentsEditorPageObjectToken);
+    const attachHandle = commentsEditorPageObject.attachTools(COMMENT_TEMPLATES_ATTACH_TOOLS_KEY, ToolbarTool);
 
     this.sideEffects.push(() => {
       attachHandle.detach();

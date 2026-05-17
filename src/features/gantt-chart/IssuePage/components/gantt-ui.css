@@ -34,6 +34,29 @@
   padding: 8px 0;
 }
 
+.jh-gantt-local-toggle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jh-gantt-local-toggle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jh-gantt-local-toggle-title {
+  margin: 0;
+}
+
+.jh-gantt-local-toggle-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .jh-gantt-space-mt-16.ant-space {
   margin-top: 16px;
 }

@@ -159,6 +159,37 @@ describe('GanttSettingsModel', () => {
     expect(parsed.statusBreakdownEnabled).toBe(true);
   });
 
+  it('setFeatureEnabled: persists flag and keeps existing storage payload', () => {
+    const model = createModel();
+    model.storage = {
+      PROJA: scopeSettings({ tooltipFieldIds: ['saved-proj'] }),
+    };
+
+    model.setFeatureEnabled(false);
+
+    expect(model.featureEnabled).toBe(false);
+    const parsed = JSON.parse(localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY) ?? '{}');
+    expect(parsed.featureEnabled).toBe(false);
+    expect(parsed.storage.PROJA.tooltipFieldIds).toEqual(['saved-proj']);
+  });
+
+  it('load: restores featureEnabled from localStorage payload', () => {
+    localStorage.setItem(
+      GANTT_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        storage: { _global: scopeSettings() },
+        statusBreakdownEnabled: false,
+        preferredScopeLevel: 'global',
+        featureEnabled: false,
+      })
+    );
+
+    const model = createModel();
+    model.load();
+
+    expect(model.featureEnabled).toBe(false);
+  });
+
   it('isConfigured: false when storage is empty', () => {
     const model = createModel();
     expect(model.isConfigured).toBe(false);

@@ -270,6 +270,49 @@ describe('TemplatesStorageModel', () => {
     });
   });
 
+  describe('feature toggle persistence', () => {
+    it('setEnabled persists flag and keeps templates payload', async () => {
+      const initialPayload = JSON.stringify({
+        version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+        templates: DEFAULT_COMMENT_TEMPLATES,
+        enabled: true,
+      });
+      const { service, map } = createFakeStorage(new Map([[COMMENT_TEMPLATES_LOCAL_STORAGE_KEY, initialPayload]]));
+      const model = proxy(new TemplatesStorageModel(service));
+      await model.load();
+
+      const result = model.setEnabled(false);
+
+      expect(result.ok).toBe(true);
+      expect(model.enabled).toBe(false);
+      expect(model.getPersistedEnabled()).toBe(false);
+
+      const persisted = JSON.parse(map.get(COMMENT_TEMPLATES_LOCAL_STORAGE_KEY) ?? '{}') as {
+        version: number;
+        templates: CommentTemplate[];
+        enabled: boolean;
+      };
+      expect(persisted.version).toBe(COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION);
+      expect(persisted.templates).toHaveLength(DEFAULT_COMMENT_TEMPLATES.length);
+      expect(persisted.enabled).toBe(false);
+    });
+
+    it('setEnabled does not mutate enabled when storage write fails', async () => {
+      const { service } = createFakeStorage(new Map(), {
+        setItem: () => Err(new Error('toggle write failed')),
+      });
+      const model = proxy(new TemplatesStorageModel(service));
+      await model.load();
+      expect(model.enabled).toBe(true);
+
+      const result = model.setEnabled(false);
+
+      expect(result.err).toBe(true);
+      expect(model.enabled).toBe(true);
+      expect(model.error).toBe('toggle write failed');
+    });
+  });
+
   describe('resetToDefaults', () => {
     it('writes defaults payload and updates state on success', async () => {
       const { service, map } = createFakeStorage(new Map());

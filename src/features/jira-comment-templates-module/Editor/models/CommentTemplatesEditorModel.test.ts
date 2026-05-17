@@ -10,6 +10,7 @@ import { CommentTemplatesEditorModel } from './CommentTemplatesEditorModel';
 function createStorageWithTemplates(templates: CommentTemplate[]): ITemplatesStorageModel {
   return {
     templates,
+    enabled: true,
     loadState: 'loaded',
     error: null,
     get templateSummaries(): CommentTemplateSummary[] {
@@ -19,6 +20,8 @@ function createStorageWithTemplates(templates: CommentTemplate[]): ITemplatesSto
       return templates.length > 0;
     },
     load: vi.fn(async () => Ok(undefined)),
+    getPersistedEnabled: vi.fn(() => true),
+    setEnabled: vi.fn(() => Ok(undefined)),
     saveTemplates: vi.fn(async () => Ok(undefined)),
     resetToDefaults: vi.fn(async () => Ok(undefined)),
     getTemplate: (id: CommentTemplateId) => templates.find(t => t.id === id) ?? null,

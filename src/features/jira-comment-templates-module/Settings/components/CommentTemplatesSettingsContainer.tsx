@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Switch, Typography } from 'antd';
 import { globalContainer, type Container } from 'dioma';
 import { WithDi, useDi } from 'src/infrastructure/di/diContext';
 import { buildAvatarUrlToken, searchUsersToken } from 'src/infrastructure/di/jiraApiTokens';
@@ -9,6 +10,7 @@ import type { JiraCommentTemplatesTextKey } from '../../texts';
 import { JIRA_COMMENT_TEMPLATES_TEXTS } from '../../texts';
 import { CommentTemplatesSettings, type CommentTemplatesSettingsLabels } from './CommentTemplatesSettings';
 import { TemplateImportExportControls, type TemplateImportExportControlsLabels } from './TemplateImportExportControls';
+import styles from './jira-comment-templates-settings.module.css';
 
 export type CommentTemplatesSettingsContainerProps = {
   container?: Container;
@@ -145,35 +147,64 @@ const CommentTemplatesSettingsContainerInner: React.FC = () => {
   const handleResetToDefaults = useCallback(() => settingsEntry.model.resetDraftToDefaults(), [settingsEntry]);
   const handleSave = useCallback(() => void settingsEntry.model.saveDraft(), [settingsEntry]);
   const handleDiscard = useCallback(() => settingsEntry.model.discardDraft(), [settingsEntry]);
+  const handleFeatureToggle = useCallback(
+    (enabled: boolean) => {
+      storageEntry.model.setEnabled(enabled);
+    },
+    [storageEntry]
+  );
 
   return (
-    <CommentTemplatesSettings
-      draftTemplates={settingsSnapshot.draftTemplates}
-      availableColors={buildAvailableColors(texts)}
-      validationErrors={settingsSnapshot.validationErrors}
-      importError={null}
-      saveError={settingsSnapshot.saveError}
-      isSaving={settingsSnapshot.isSaving}
-      isDirty={settingsSnapshot.isDirty}
-      searchUsers={searchUsers}
-      buildAvatarUrl={buildAvatarUrl}
-      labels={buildSettingsLabels(texts)}
-      importExportControls={
-        <TemplateImportExportControls
-          isImporting={settingsSnapshot.isSaving}
-          importError={settingsSnapshot.importError}
-          labels={buildImportExportLabels(texts)}
-          onImportFileSelected={handleImportFileSelected}
-          onExport={handleExport}
+    <section className={styles.localToggleSection} aria-label={texts.settingsTitle}>
+      <div className={styles.localToggleHeader}>
+        <Typography.Title level={5} className={styles.localToggleTitle}>
+          {texts.settingsTitle}
+        </Typography.Title>
+        <label htmlFor="comment-templates-local-toggle" className={styles.localToggleControl}>
+          <Typography.Text>{texts.featureEnabled}</Typography.Text>
+          <Switch
+            id="comment-templates-local-toggle"
+            checked={storageSnapshot.enabled}
+            onChange={handleFeatureToggle}
+            data-testid="comment-templates-local-toggle-switch"
+          />
+        </label>
+      </div>
+
+      {storageSnapshot.enabled ? (
+        <CommentTemplatesSettings
+          draftTemplates={settingsSnapshot.draftTemplates}
+          availableColors={buildAvailableColors(texts)}
+          validationErrors={settingsSnapshot.validationErrors}
+          importError={null}
+          saveError={settingsSnapshot.saveError}
+          isSaving={settingsSnapshot.isSaving}
+          isDirty={settingsSnapshot.isDirty}
+          searchUsers={searchUsers}
+          buildAvatarUrl={buildAvatarUrl}
+          labels={buildSettingsLabels(texts)}
+          importExportControls={
+            <TemplateImportExportControls
+              isImporting={settingsSnapshot.isSaving}
+              importError={settingsSnapshot.importError}
+              labels={buildImportExportLabels(texts)}
+              onImportFileSelected={handleImportFileSelected}
+              onExport={handleExport}
+            />
+          }
+          onAddTemplate={handleAddTemplate}
+          onUpdateTemplate={handleUpdateTemplate}
+          onDeleteTemplate={handleDeleteTemplate}
+          onResetToDefaults={handleResetToDefaults}
+          onSave={handleSave}
+          onDiscard={handleDiscard}
         />
-      }
-      onAddTemplate={handleAddTemplate}
-      onUpdateTemplate={handleUpdateTemplate}
-      onDeleteTemplate={handleDeleteTemplate}
-      onResetToDefaults={handleResetToDefaults}
-      onSave={handleSave}
-      onDiscard={handleDiscard}
-    />
+      ) : (
+        <Typography.Text type="secondary" data-testid="comment-templates-local-toggle-disabled-hint">
+          {texts.featureDisabledHint}
+        </Typography.Text>
+      )}
+    </section>
   );
 };
 

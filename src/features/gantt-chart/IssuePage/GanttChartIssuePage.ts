@@ -10,7 +10,7 @@ import { IssueSettingsComponent } from 'src/issue-settings/IssueSettingsComponen
 import { ganttChartModule } from '../module';
 import { ganttSettingsModelToken, issueViewPageObjectToken } from '../tokens';
 import { applyInitialGanttScopeForIssueView } from '../utils/applyInitialGanttScopeForIssueView';
-import { CollapsibleGanttSection } from './components/CollapsibleGanttSection';
+import { GanttIssueChartRuntimeContainer } from './components/GanttIssueChartRuntimeContainer';
 import { GanttSettingsTab } from './components/GanttSettingsTab';
 
 export type GanttChartIssuePageInitData = {
@@ -78,38 +78,61 @@ export class GanttChartIssuePage extends PageModification<GanttChartIssuePageIni
     registerIssueSettings({ title: 'Gantt Chart', component: GanttSettingsTab });
 
     const pageObject = this.container.inject(issueViewPageObjectToken);
-
-    // Toolbar button → tabbed Issue Settings modal
-    const toolbarHost = pageObject.insertToolbarButton();
-    if (toolbarHost) {
-      const toolbarRoot = createRoot(toolbarHost);
-      flushSync(() => {
-        toolbarRoot.render(React.createElement(IssueSettingsComponent));
-      });
-      this.sideEffects.push(() => {
-        toolbarRoot.unmount();
-        pageObject.removeToolbarButton();
-      });
-    }
-
-    const sectionContent = pageObject.addSectionInMainFlow('gantt-chart');
-    if (!sectionContent) return;
-
     const issueKey = data?.issueKey ?? this.routing.getIssueId() ?? this.getIssueKeyFromDocument() ?? '';
+    let toolbarRoot: ReturnType<typeof createRoot> | null = null;
+    let chartRoot: ReturnType<typeof createRoot> | null = null;
 
-    const chartRoot = createRoot(sectionContent);
-    flushSync(() => {
-      chartRoot.render(
-        React.createElement(WithDi, {
-          container: this.container,
-          children: React.createElement(CollapsibleGanttSection, { issueKey, container: this.container }),
-        })
-      );
-    });
+    const unmountChart = () => {
+      if (chartRoot) {
+        chartRoot.unmount();
+        chartRoot = null;
+      }
+      pageObject.removeSectionInMainFlow('gantt-chart');
+    };
+
+    const unmountRuntime = () => {
+      unmountChart();
+      if (toolbarRoot) {
+        toolbarRoot.unmount();
+        toolbarRoot = null;
+      }
+      pageObject.removeToolbarButton();
+    };
+
+    const mountToolbar = () => {
+      if (toolbarRoot) return;
+
+      const toolbarHost = pageObject.insertToolbarButton();
+      if (toolbarHost) {
+        toolbarRoot = createRoot(toolbarHost);
+        flushSync(() => {
+          toolbarRoot?.render(React.createElement(IssueSettingsComponent));
+        });
+      }
+    };
+
+    const mountChartHost = () => {
+      if (chartRoot) return;
+
+      const sectionContent = pageObject.addSectionInMainFlow('gantt-chart');
+      if (!sectionContent) return;
+
+      chartRoot = createRoot(sectionContent);
+      flushSync(() => {
+        chartRoot?.render(
+          React.createElement(WithDi, {
+            container: this.container,
+            children: React.createElement(GanttIssueChartRuntimeContainer, { issueKey }),
+          })
+        );
+      });
+    };
+
+    mountToolbar();
+    mountChartHost();
 
     this.sideEffects.push(() => {
-      chartRoot.unmount();
-      pageObject.removeSectionInMainFlow('gantt-chart');
+      unmountRuntime();
     });
   }
 }

@@ -5,6 +5,7 @@ import type {
   CommentTemplate,
   CommentTemplateId,
   CommentTemplateSummary,
+  CommentTemplatesStoragePayloadV1,
   ITemplatesStorageModel,
   TemplatesStorageState,
 } from '../../types';
@@ -19,7 +20,7 @@ function cloneDefaultTemplates(): CommentTemplate[] {
   return normalizeTemplates([...DEFAULT_COMMENT_TEMPLATES] as NormalizableCommentTemplateInput[]);
 }
 
-function parseStoredPayload(raw: string): Result<CommentTemplate[], Error> {
+function parseStoredPayload(raw: string): Result<CommentTemplatesStoragePayloadV1, Error> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -49,7 +50,12 @@ function parseStoredPayload(raw: string): Result<CommentTemplate[], Error> {
     }
   }
 
-  return Ok(normalizeTemplates(templatesRaw as NormalizableCommentTemplateInput[]));
+  const enabled = typeof record.enabled === 'boolean' ? record.enabled : true;
+  return Ok({
+    version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+    templates: normalizeTemplates(templatesRaw as NormalizableCommentTemplateInput[]),
+    enabled,
+  });
 }
 
 /**
@@ -62,6 +68,7 @@ function parseStoredPayload(raw: string): Result<CommentTemplate[], Error> {
  */
 export class TemplatesStorageModel implements ITemplatesStorageModel {
   templates: CommentTemplate[] = [];
+  enabled: boolean = true;
 
   loadState: TemplatesStorageState['loadState'] = 'initial';
 
@@ -81,6 +88,21 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
     return this.templates.length > 0;
   }
 
+  private savePersist(): Result<void, Error> {
+    const payload = JSON.stringify({
+      version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+      templates: this.templates,
+      enabled: this.enabled,
+    } satisfies CommentTemplatesStoragePayloadV1);
+    const set = this.storage.setItem(COMMENT_TEMPLATES_LOCAL_STORAGE_KEY, payload);
+    if (set.err) {
+      const err = set.val;
+      this.error = err.message;
+      return Err(err);
+    }
+    return Ok(undefined);
+  }
+
   async load(): Promise<Result<void, Error>> {
     this.loadState = 'loading';
     this.error = null;
@@ -97,6 +119,7 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
     const raw = got.val;
     if (raw === null || raw === '') {
       this.templates = cloneDefaultTemplates();
+      this.enabled = true;
       this.loadState = 'loaded';
       this.error = null;
       return Ok(undefined);
@@ -111,27 +134,48 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
       return Err(err);
     }
 
-    this.templates = parsed.val;
+    this.templates = parsed.val.templates;
+    this.enabled = parsed.val.enabled ?? true;
     this.loadState = 'loaded';
+    this.error = null;
+    return Ok(undefined);
+  }
+
+  getPersistedEnabled(): boolean {
+    const got = this.storage.getItem(COMMENT_TEMPLATES_LOCAL_STORAGE_KEY);
+    if (got.err || got.val === null || got.val === '') {
+      return this.enabled;
+    }
+    const parsed = parseStoredPayload(got.val);
+    if (parsed.err) {
+      return this.enabled;
+    }
+    return parsed.val.enabled ?? true;
+  }
+
+  setEnabled(enabled: boolean): Result<void, Error> {
+    const prevEnabled = this.enabled;
+    this.enabled = enabled;
+    const persisted = this.savePersist();
+    if (persisted.err) {
+      this.enabled = prevEnabled;
+      return persisted;
+    }
     this.error = null;
     return Ok(undefined);
   }
 
   async saveTemplates(templates: CommentTemplate[]): Promise<Result<void, Error>> {
     const normalized = normalizeTemplates(templates as NormalizableCommentTemplateInput[]);
-    const payload = JSON.stringify({
-      version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
-      templates: normalized,
-    } satisfies { version: typeof COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION; templates: CommentTemplate[] });
-
-    const set = this.storage.setItem(COMMENT_TEMPLATES_LOCAL_STORAGE_KEY, payload);
-    if (set.err) {
-      const err = set.val;
-      this.error = err.message;
-      return Err(err);
-    }
-
+    const prevTemplates = this.templates;
+    const prevLoadState = this.loadState;
     this.templates = normalized;
+    const persisted = this.savePersist();
+    if (persisted.err) {
+      this.templates = prevTemplates;
+      this.loadState = prevLoadState;
+      return persisted;
+    }
     this.error = null;
     this.loadState = 'loaded';
     return Ok(undefined);
@@ -139,19 +183,15 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
 
   async resetToDefaults(): Promise<Result<void, Error>> {
     const defaults = cloneDefaultTemplates();
-    const payload = JSON.stringify({
-      version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
-      templates: defaults,
-    } satisfies { version: typeof COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION; templates: CommentTemplate[] });
-
-    const set = this.storage.setItem(COMMENT_TEMPLATES_LOCAL_STORAGE_KEY, payload);
-    if (set.err) {
-      const err = set.val;
-      this.error = err.message;
-      return Err(err);
-    }
-
+    const prevTemplates = this.templates;
+    const prevLoadState = this.loadState;
     this.templates = defaults;
+    const persisted = this.savePersist();
+    if (persisted.err) {
+      this.templates = prevTemplates;
+      this.loadState = prevLoadState;
+      return persisted;
+    }
     this.error = null;
     this.loadState = 'loaded';
     return Ok(undefined);
@@ -163,6 +203,7 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
 
   reset(): void {
     this.templates = [];
+    this.enabled = true;
     this.loadState = 'initial';
     this.error = null;
   }

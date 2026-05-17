@@ -49,6 +49,14 @@ export const JIRA_COMMENT_TEMPLATES_TEXTS = {
     en: 'Comment templates',
     ru: 'Шаблоны комментариев',
   },
+  featureEnabled: {
+    en: 'Feature enabled',
+    ru: 'Функция включена',
+  },
+  featureDisabledHint: {
+    en: 'Comment templates are disabled locally in this browser. Existing templates are kept and will be available after re-enabling.',
+    ru: 'Шаблоны комментариев локально отключены в этом браузере. Существующие шаблоны сохранены и снова будут доступны после включения.',
+  },
   addTemplate: {
     en: 'Add template',
     ru: 'Добавить шаблон',

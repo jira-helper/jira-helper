@@ -11,6 +11,7 @@ type PersistedPayloadV1 = {
   storage: GanttSettingsStorage;
   statusBreakdownEnabled?: boolean;
   preferredScopeLevel?: SettingsScope['level'];
+  featureEnabled?: boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -21,6 +22,7 @@ type ParsedPayload = {
   storage: GanttSettingsStorage;
   statusBreakdownEnabled: boolean;
   preferredScopeLevel: SettingsScope['level'] | null;
+  featureEnabled: boolean;
 };
 
 function isProgressBucket(value: unknown): value is ProgressBucket {
@@ -85,11 +87,11 @@ function migrateScope(settings: Record<string, unknown>): void {
 
 function parseStoredPayload(raw: string | null): ParsedPayload {
   if (!raw || raw.trim() === '') {
-    return { storage: {}, statusBreakdownEnabled: false, preferredScopeLevel: null };
+    return { storage: {}, statusBreakdownEnabled: false, preferredScopeLevel: null, featureEnabled: true };
   }
   const parsed: unknown = JSON.parse(raw);
   if (!isRecord(parsed)) {
-    return { storage: {}, statusBreakdownEnabled: false, preferredScopeLevel: null };
+    return { storage: {}, statusBreakdownEnabled: false, preferredScopeLevel: null, featureEnabled: true };
   }
   if ('storage' in parsed && isRecord(parsed.storage)) {
     const p = parsed as PersistedPayloadV1;
@@ -103,6 +105,7 @@ function parseStoredPayload(raw: string | null): ParsedPayload {
       storage,
       statusBreakdownEnabled: Boolean(p.statusBreakdownEnabled),
       preferredScopeLevel: p.preferredScopeLevel ?? null,
+      featureEnabled: typeof p.featureEnabled === 'boolean' ? p.featureEnabled : true,
     };
   }
   const legacyStorage = parsed as GanttSettingsStorage;
@@ -111,7 +114,7 @@ function parseStoredPayload(raw: string | null): ParsedPayload {
       migrateScope(settings as unknown as Record<string, unknown>);
     }
   }
-  return { storage: legacyStorage, statusBreakdownEnabled: false, preferredScopeLevel: null };
+  return { storage: legacyStorage, statusBreakdownEnabled: false, preferredScopeLevel: null, featureEnabled: true };
 }
 
 function resolveArgsForScope(scope: SettingsScope): { projectKey: string; issueType?: string } {
@@ -180,6 +183,7 @@ export class GanttSettingsModel {
   draftSettings: GanttScopeSettings | null = null;
   statusBreakdownEnabled: boolean = false;
   preferredScopeLevel: SettingsScope['level'] | null = null;
+  featureEnabled: boolean = true;
 
   /** Page-level context — always available regardless of selected scope level. */
   contextProjectKey: string = '';
@@ -232,16 +236,18 @@ export class GanttSettingsModel {
     const log = this.logger.getPrefixedLog('GanttSettingsModel.load');
     try {
       const raw = localStorage.getItem(GANTT_SETTINGS_STORAGE_KEY);
-      const { storage, statusBreakdownEnabled, preferredScopeLevel } = parseStoredPayload(raw);
+      const { storage, statusBreakdownEnabled, preferredScopeLevel, featureEnabled } = parseStoredPayload(raw);
       this.storage = storage;
       this.statusBreakdownEnabled = statusBreakdownEnabled;
       this.preferredScopeLevel = preferredScopeLevel;
+      this.featureEnabled = featureEnabled;
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Unknown error';
       log(`Failed to parse ${GANTT_SETTINGS_STORAGE_KEY}: ${message}`, 'error');
       this.storage = {};
       this.statusBreakdownEnabled = false;
       this.preferredScopeLevel = null;
+      this.featureEnabled = true;
     }
   }
 
@@ -251,8 +257,14 @@ export class GanttSettingsModel {
       storage: this.storage,
       statusBreakdownEnabled: this.statusBreakdownEnabled,
       preferredScopeLevel: this.currentScope.level,
+      featureEnabled: this.featureEnabled,
     };
     localStorage.setItem(GANTT_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  setFeatureEnabled(enabled: boolean): void {
+    this.featureEnabled = enabled;
+    this.save();
   }
 
   /** Direct (non-cascading) settings stored for the current scope, or null. */
@@ -348,5 +360,6 @@ export class GanttSettingsModel {
     this.draftSettings = null;
     this.statusBreakdownEnabled = false;
     this.preferredScopeLevel = null;
+    this.featureEnabled = true;
   }
 }

@@ -85,6 +85,7 @@ export type TemplateColor = {
 export type CommentTemplatesStoragePayloadV1 = {
   version: 1;
   templates: CommentTemplate[];
+  enabled?: boolean;
 };
 
 /** Untyped legacy import shape before validation/normalization. */
@@ -177,11 +178,14 @@ export type TemplatesStorageState = {
 
 export interface ITemplatesStorageModel {
   templates: CommentTemplate[];
+  enabled: boolean;
   loadState: TemplatesStorageState['loadState'];
   error: string | null;
   readonly templateSummaries: CommentTemplateSummary[];
   readonly hasTemplates: boolean;
   load(): Promise<Result<void, Error>>;
+  getPersistedEnabled(): boolean;
+  setEnabled(enabled: boolean): Result<void, Error>;
   saveTemplates(templates: CommentTemplate[]): Promise<Result<void, Error>>;
   resetToDefaults(): Promise<Result<void, Error>>;
   getTemplate(templateId: CommentTemplateId): CommentTemplate | null;

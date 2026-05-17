@@ -27,6 +27,7 @@ function createStorageStub(initial: CommentTemplate[]): {
     get templates() {
       return templatesRef.current;
     },
+    enabled: true,
     loadState: 'loaded',
     error: null,
     get templateSummaries(): CommentTemplateSummary[] {
@@ -36,6 +37,8 @@ function createStorageStub(initial: CommentTemplate[]): {
       return templatesRef.current.length > 0;
     },
     load: vi.fn(async () => Ok(undefined)),
+    getPersistedEnabled: vi.fn(() => true),
+    setEnabled: vi.fn(() => Ok(undefined)),
     saveTemplates: async (templates: CommentTemplate[]) => {
       const result = await saveTemplatesMock(templates);
       if (result.ok) {

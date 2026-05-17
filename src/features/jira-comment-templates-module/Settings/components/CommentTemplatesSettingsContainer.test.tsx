@@ -24,9 +24,15 @@ import { CommentTemplatesSettingsContainer } from './CommentTemplatesSettingsCon
 
 class FakeStorageModel implements ITemplatesStorageModel {
   templates: CommentTemplate[] = [];
+  enabled = true;
   loadState: TemplatesStorageState['loadState'] = 'loaded';
   error: string | null = null;
   load = vi.fn(async (): Promise<Result<void, Error>> => Ok(undefined));
+  getPersistedEnabled = vi.fn(() => this.enabled);
+  setEnabled = vi.fn((enabled: boolean): Result<void, Error> => {
+    this.enabled = enabled;
+    return Ok(undefined);
+  });
   saveTemplates = vi.fn(async () => Ok(undefined));
   resetToDefaults = vi.fn(async () => Ok(undefined));
   reset = vi.fn();

@@ -1,7 +1,8 @@
+import React from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Ok } from 'ts-results';
 import { globalContainer } from 'dioma';
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { GanttChartIssuePage } from './GanttChartIssuePage';
 import type { IRoutingService } from 'src/infrastructure/routing';
 import { routingServiceToken } from 'src/infrastructure/routing';
@@ -12,6 +13,8 @@ import type { GanttScopeSettings } from '../types';
 import { buildScopeKey } from '../utils/resolveSettings';
 import { JiraServiceToken, type IJiraService } from 'src/infrastructure/jira/jiraService';
 import { resetIssueSettings } from 'src/issue-settings/issueSettingsModel';
+import { getIssueSettingsEntry } from 'src/issue-settings/issueSettingsModel';
+import { WithDi } from 'src/infrastructure/di/diContext';
 
 const EN_FIRST_RUN = 'Gantt chart is not configured yet. Please configure start and end date mappings.';
 const EN_EMPTY =
@@ -153,6 +156,38 @@ describe('GanttChartIssuePage', () => {
       await waitFor(() => {
         expect(screen.getByText(EN_EMPTY)).toBeInTheDocument();
       });
+    });
+
+    it('keeps issue settings tab and stable chart host without gantt UI markup when disabled locally', async () => {
+      setupIssueViewDOM();
+      localStorage.setItem(
+        GANTT_SETTINGS_STORAGE_KEY,
+        JSON.stringify({
+          storage: {},
+          statusBreakdownEnabled: false,
+          featureEnabled: false,
+        })
+      );
+
+      const [data, el] = await Promise.all([modification.loadData(), modification.waitForLoading()]);
+      modification.apply(data, el);
+
+      const section = document.querySelector('[data-jh-section="gantt-chart"]');
+      expect(section).not.toBeNull();
+      expect(section?.querySelector('.ant-collapse-header')).toBeNull();
+      expect(within(section as HTMLElement).queryByText('Gantt Chart')).toBeNull();
+
+      const ganttSetting = getIssueSettingsEntry().model.settings.find(s => s.title === 'Gantt Chart');
+      expect(ganttSetting).toBeDefined();
+
+      render(
+        React.createElement(WithDi, {
+          container: globalContainer,
+          children: React.createElement(ganttSetting!.component),
+        })
+      );
+      expect(screen.getByTestId('gantt-local-toggle-switch')).toBeInTheDocument();
+      expect(screen.getByTestId('gantt-local-toggle-disabled-hint')).toBeInTheDocument();
     });
 
     it('uses persisted preferredScopeLevel=projectIssueType when issue type is on page', async () => {
