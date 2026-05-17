@@ -24,9 +24,19 @@ import { CommentTemplatesToolbarContainer } from './CommentTemplatesToolbarConta
 
 class FakeStorageModel implements ITemplatesStorageModel {
   templates: CommentTemplate[] = [];
+  enabled = true;
   loadState: TemplatesStorageState['loadState'] = 'loaded';
   error: string | null = null;
-  load = vi.fn(async () => Ok(undefined));
+  load = vi.fn(async function fakeTemplatesStorageLoad(this: FakeStorageModel) {
+    await Promise.resolve();
+    this.loadState = 'loaded';
+    return Ok(undefined);
+  });
+  getPersistedEnabled = vi.fn(() => this.enabled);
+  setEnabled = vi.fn((enabled: boolean) => {
+    this.enabled = enabled;
+    return Ok(undefined);
+  });
   saveTemplates = vi.fn(async (templates: CommentTemplate[]) => {
     this.templates = templates;
     return Ok(undefined);
@@ -134,6 +144,69 @@ describe('CommentTemplatesToolbarContainer', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('renders nothing while storage loadState is loading (runtime gate)', () => {
+    const container = new Container();
+    registerTestDependencies(container);
+
+    const storage = new FakeStorageModel();
+    storage.templates = [firstTemplate];
+    storage.enabled = true;
+    storage.loadState = 'loading';
+
+    const editor = new FakeEditorModel();
+    editor.insertTemplate.mockResolvedValue(Ok({ templateId: firstTemplate.id, inserted: true }));
+
+    const storageEntry = modelEntry(storage);
+    const editorEntry = modelEntry(editor);
+    container.register({
+      token: templatesStorageModelToken,
+      value: storageEntry as unknown as ModelEntry<TemplatesStorageModel>,
+    });
+    container.register({ token: commentTemplatesEditorModelToken, value: editorEntry });
+
+    render(
+      <CommentTemplatesToolbarContainer
+        container={container}
+        commentEditorId={commentEditorId}
+        onOpenSettings={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('toolbar', { name: 'Comment templates' })).toBeNull();
+  });
+
+  it('renders nothing when feature is disabled in storage snapshot', () => {
+    const container = new Container();
+    registerTestDependencies(container);
+
+    const storage = new FakeStorageModel();
+    storage.templates = [firstTemplate];
+    storage.enabled = false;
+    storage.loadState = 'loaded';
+
+    const editor = new FakeEditorModel();
+    editor.insertTemplate.mockResolvedValue(Ok({ templateId: firstTemplate.id, inserted: true }));
+
+    const storageEntry = modelEntry(storage);
+    const editorEntry = modelEntry(editor);
+    container.register({
+      token: templatesStorageModelToken,
+      value: storageEntry as unknown as ModelEntry<TemplatesStorageModel>,
+    });
+    container.register({ token: commentTemplatesEditorModelToken, value: editorEntry });
+
+    render(
+      <CommentTemplatesToolbarContainer
+        container={container}
+        commentEditorId={commentEditorId}
+        onOpenSettings={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('toolbar', { name: 'Comment templates' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Insert comment template: First template' })).toBeNull();
   });
 
   it('forwards template clicks to editor model with opaque comment editor id', async () => {
@@ -246,9 +319,16 @@ describe('CommentTemplatesToolbarContainer', () => {
     expect(screen.getByRole('button', { name: 'Insert comment template: Second template' })).toBeInTheDocument();
   });
 
-  it('loads templates on mount when storage model is initial', () => {
+  it('does not show toolbar until storage load settles; shows toolbar after load when enabled', async () => {
     const { storage } = setup({ loadState: 'initial' });
 
     expect(storage.load).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('toolbar', { name: 'Comment templates' })).toBeNull();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole('toolbar', { name: 'Comment templates' })).toBeInTheDocument();
   });
 });

@@ -173,6 +173,13 @@ const CommentTemplatesToolbarContainerInner: React.FC<CommentTemplatesToolbarCon
     [clearAutoHideTimer]
   );
 
+  /** Runtime gate (cf. Gantt issue chart): no toolbar until storage load settles — avoids flashing with default `enabled` while `loadState` is still `initial`. */
+  const isStorageSettledForRuntime = storageSnapshot.loadState === 'loaded' || storageSnapshot.loadState === 'error';
+
+  if (!isStorageSettledForRuntime || !storageSnapshot.enabled) {
+    return null;
+  }
+
   const isDisabled = Object.values(editorSnapshot.pendingTemplateIds).some(Boolean);
 
   return (

@@ -17,7 +17,11 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { COMMENT_TEMPLATES_ATTACH_TOOLS_KEY } from './constants';
 import { CommentTemplatesPageModification } from './CommentTemplatesPageModification';
 import { jiraCommentTemplatesModule } from './module';
-import { commentTemplatesEditorModelToken, commentTemplatesSettingsModelToken } from './tokens';
+import {
+  commentTemplatesEditorModelToken,
+  commentTemplatesSettingsModelToken,
+  templatesStorageModelToken,
+} from './tokens';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
   registerSettings: vi.fn(),
@@ -32,11 +36,23 @@ describe('CommentTemplatesPageModification', () => {
   let detach: ReturnType<typeof vi.fn>;
   let attachTools: ReturnType<typeof vi.fn>;
 
-  const fakeLocalStorage: ILocalStorageService = {
-    getItem: vi.fn(() => Ok(null)),
-    setItem: vi.fn(() => Ok(undefined)),
-    removeItem: vi.fn(() => Ok(undefined)),
-  };
+  const storageMap = new Map<string, string>();
+
+  function createFakeLocalStorage(): ILocalStorageService {
+    return {
+      getItem(key: string) {
+        return Ok(storageMap.has(key) ? storageMap.get(key)! : null);
+      },
+      setItem(key: string, value: string) {
+        storageMap.set(key, value);
+        return Ok(undefined);
+      },
+      removeItem(key: string) {
+        storageMap.delete(key);
+        return Ok(undefined);
+      },
+    };
+  }
 
   const fakeJiraService: IJiraService = {
     fetchJiraIssue: vi.fn(),
@@ -50,6 +66,7 @@ describe('CommentTemplatesPageModification', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    storageMap.clear();
 
     detach = vi.fn();
     attachTools = vi.fn(() => ({ detach }));
@@ -61,7 +78,7 @@ describe('CommentTemplatesPageModification', () => {
     };
 
     container = new Container();
-    container.register({ token: localStorageServiceToken, value: fakeLocalStorage });
+    container.register({ token: localStorageServiceToken, value: createFakeLocalStorage() });
     container.register({ token: JiraServiceToken, value: fakeJiraService });
     container.register({ token: commentsEditorPageObjectToken, value: fakeCommentsEditorPageObject });
     container.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
@@ -92,7 +109,7 @@ describe('CommentTemplatesPageModification', () => {
     expect(attachTools).toHaveBeenCalledWith(COMMENT_TEMPLATES_ATTACH_TOOLS_KEY, expect.any(Function));
   });
 
-  it('uses the feature container for registered tab and toolbar components', () => {
+  it('uses the feature container for registered tab and toolbar components', async () => {
     const modification = new CommentTemplatesPageModification({ container });
 
     modification.apply();
@@ -109,8 +126,8 @@ describe('CommentTemplatesPageModification', () => {
 
     expect(container.inject(commentTemplatesSettingsModelToken).model).toBeTruthy();
     expect(container.inject(commentTemplatesEditorModelToken).model).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Comment templates' })).toBeInTheDocument();
-    expect(screen.getByRole('toolbar', { name: 'Comment templates' })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { name: 'Comment templates' }).length).toBeGreaterThan(0);
+    expect(await screen.findByRole('toolbar', { name: 'Comment templates' })).toBeInTheDocument();
   });
 
   it('opens the existing jira-helper settings dialog from toolbar manage button', async () => {
@@ -125,7 +142,7 @@ describe('CommentTemplatesPageModification', () => {
 
     const ToolbarTool = attachTools.mock.calls[0][1];
     render(React.createElement(ToolbarTool, { commentEditorId: toCommentEditorId('editor-1') }));
-    await userEvent.click(screen.getByRole('button', { name: 'Manage templates' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Manage templates' }));
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
   });
@@ -137,5 +154,34 @@ describe('CommentTemplatesPageModification', () => {
     modification.clear();
 
     expect(detach).toHaveBeenCalledTimes(1);
+  });
+
+  it('always attaches toolbar tools; toolbar tool renders no feature markup when disabled locally', () => {
+    const { model: storageModel } = container.inject(templatesStorageModelToken);
+    storageModel.setEnabled(false);
+    const modification = new CommentTemplatesPageModification({ container });
+
+    modification.apply();
+
+    expect(registerSettings).toHaveBeenCalledWith({
+      title: 'Comment templates',
+      component: expect.any(Function),
+    });
+    expect(registerIssueSettings).toHaveBeenCalledWith({
+      title: 'Comment templates',
+      component: expect.any(Function),
+    });
+    const ToolbarTool = attachTools.mock.calls[0][1];
+    const boardSetting = vi.mocked(registerSettings).mock.calls[0][0];
+    render(
+      <>
+        {React.createElement(ToolbarTool, { commentEditorId: toCommentEditorId('editor-1') })}
+        {React.createElement(boardSetting.component)}
+      </>
+    );
+
+    expect(screen.queryByRole('toolbar', { name: 'Comment templates' })).toBeNull();
+    expect(screen.getByTestId('comment-templates-local-toggle-switch')).toBeInTheDocument();
+    expect(screen.getByTestId('comment-templates-local-toggle-disabled-hint')).toBeInTheDocument();
   });
 });
