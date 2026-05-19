@@ -1,6 +1,7 @@
 # Requirements: Улучшение диагностики через DI для сбора данных от фич
 
 **Feature folder**: `.agents/tasks/diagnostic-data-collection/`
+**EPIC**: [EPIC-7-diagnostic-data-collection.md](./EPIC-7-diagnostic-data-collection.md)
 **Связанный request**: [request.md](./request.md)
 **Дата**: 2026-05-14
 **Статус**: agreed
@@ -277,20 +278,100 @@
   - не меняет состояние;
   - не содержит DOM-ссылок (`Element`, `Node` и т.д.).
 
+### 5.3 Рекомендованный shape payload фичи (convention, не enforced type)
+
+TypeScript-контракт callback остаётся гибким (`Record<string, JsonValue>`), но **в v1 каждая фича должна следовать единой convention**, если это применимо:
+
+```js
+{
+  settings: {
+    boardProperty: <snapshot | null>,   // данные из Jira board property, если есть
+    localStorage: <snapshot | null>     // данные из localStorage, если есть
+  },
+  runtime: <snapshot | null>            // runtime-агрегаты; null если runtime-срез не собираем
+}
+```
+
+Правила:
+
+- `settings.boardProperty` и `settings.localStorage` — независимые слои; отсутствующий источник → `null`, не опускаем ключ.
+- `runtime` — `null`, если для фичи в разделе 5 явно указано «Runtime ❌».
+- Внутри каждого блока — domain-specific поля из pseudocode раздела 5 (не выдумываем новую структуру без причины).
+- Отклонение от convention допустимо только с явным обоснованием в PR (редкий случай); BDD/contract tests проверяют соответствие convention, не компилятор.
+
+### 5.4 Canonical `featureName` (ключ в `featureDiagnostics`)
+
+Единое правило именования ключей:
+
+| Тип фичи | Правило | Пример |
+|----------|---------|--------|
+| Папка под `src/features/` | имя папки as-is | `column-limits-module`, `sub-tasks-progress`, `gantt-chart` |
+| Файл в подпапке (нет своей папки) | `{subdir}-{file-base}` в kebab-case | `charts-add-sla-line` |
+
+Без slash, без PascalCase — удобно для JSON keys и grep.
+
+### 5.5 Порядок bootstrap в `content.ts`
+
+`diagnosticModule.ensure(container)` вызывается **первым среди feature-модулей** — сразу после infrastructure DI, **до** `columnLimitsModule.ensure` и остальных. Иначе фичи не смогут inject registry token в своём `register()`.
+
+### 5.6 Регистрация callback в legacy-фичах (без `module.ts`)
+
+Legacy-фичи регистрируют callback **в своей существующей DI/init-функции** (рядом с текущим bootstrap), не в централизованном блоке:
+
+- `registerBlurSensitiveFeatureInDI(container)` → `registerDiagnosticData('blur-for-sensitive', ...)`
+- аналогично для `sub-tasks-progress`, `local-settings`, `bug-template`, `wiplimit-on-cells`, `charts-add-sla-line`, `additional-card-elements`
+
+`content.ts` только обеспечивает порядок: `diagnosticModule.ensure` → infrastructure → init-функции legacy-фич.
+
+### 5.7 Отказоустойчивость сериализации
+
+Callback может вернуть `Ok`, но payload содержит несериализуемые данные (DOM, circular ref). Защита двухфазная:
+
+1. **Per-feature check**: после каждого успешного callback — пробный `JSON.stringify(data)`; при ошибке → `{ error: { message } }` для этой фичи вместо data.
+2. **Export safety net**: финальный `JSON.stringify` всего payload в try/catch; при падении — fallback export **только legacy-полей** (`messages`, `html`, `href`, `pluginVersion`, `jiraVersion`) без `featureDiagnostics`.
+
+### 5.8 State management diagnostic-модуля
+
+`DiagnosticModel` — **Valtio model** через `modelEntry()` → `proxy()` (docs/state-valtio.md). Public reactive field: `registeredFeatures: string[]`. Callbacks хранятся в private `Map` (не для `useSnapshot`).
+
+### 5.9 UI scope v1
+
+Новый UI не добавляем. `registeredFeatures` в модели — для тестов и будущего debug UI; SettingsTab v1 — только кнопка export (без списка зарегистрированных фич). SettingsTab: `useDi()` + `diagnosticModelToken`.
+
+### 5.10 Прочие зафиксированные решения (grill session)
+
+| # | Тема | Решение |
+|---|------|---------|
+| 1 | Незарегистрированная фича | Ключа **нет** в `featureDiagnostics` |
+| 2 | Scope v1 | Строго фичи из §5 |
+| 3 | Регистрация в module | `inject(diagnosticModelToken)` в конце `register()`, callback — closure |
+| 4 | `diagnosticBoardPageToken` | Declare в `diagnostic-module/tokens.ts`; PageModification register в `content.ts` |
+| 5 | SettingsTab DI | `useDi()` |
+| 6 | `getDiagnosticSnapshot()` return | `FeatureDiagnosticData` |
+| 7 | Тесты | Unit-тесты `DiagnosticModel` + **unit-тест diagnostic callback каждой** фичи из §5 |
+| 8 | Export до load property | Текущий snapshot as-is, не `{ error }` |
+| 9 | `html` в export | As-is (legacy), без truncate в v1 |
+| 10 | Onboarding docs | [developer-guide.md](./developer-guide.md) + JSDoc в `types.ts` |
+
 ## 6. Нефункциональные требования
 
 - **Отказоустойчивость**: Диагностика не должна падать при ошибках в callback фич
+- **Сериализация**: если callback вернул `Ok`, но payload не JSON-serializable — ошибка локализуется на эту фичу (см. §5.7); legacy-поля экспорта сохраняются
 - **Тестирование (уровень)**: Vitest
 
 ## 7. Вне scope
 
-- TBD (если есть ограничения, которые явно не делаем в этой итерации)
+- Фичи **не из §5** — не регистрируем в v1: `swimlane-histogram-module`, `board-settings`, issue/page modifications без diagnostic sources и пр.
+- Debug UI списка `registeredFeatures` в SettingsTab
+- Truncate/оптимизация `html` в export
+- Timeout для callbacks
+- Enforced TypeScript type для payload shape (только convention §5.3)
 
 ## 8. Открытые вопросы
 
 - [x] Где именно вызывается механизм сбора диагностических данных? → в существующей точке выгрузки диагностики (расширяем текущий flow)
 - [x] Где хранятся зарегистрированные callbacks? → в локальном реестре в памяти диагностического модуля
-- [ ] Нужна ли обратная совместимость с существующим функционалом диагностики?
+- [x] Нужна ли обратная совместимость с существующим функционалом диагностики? → да: все 5 legacy top-level полей (`messages`, `html`, `href`, `pluginVersion`, `jiraVersion`) сохраняются без изменений; `featureDiagnostics` добавляется как новое additive поле
 - [x] Какой формат итогового отчета? → плоский map `featureName -> data | error` (без отдельного поля status)
 - [x] Какие именно фичи затрагиваются в первой версии? → см. явный список в разделе 5
 - [x] Нужна ли приоритезация/порядок выполнения callbacks? → нет, порядок не важен
@@ -305,7 +386,8 @@
 - [ ] При выгрузке диагностики вызываются все зарегистрированные callbacks
 - [ ] Результаты объединяются в суммарный отчет
 - [ ] Ошибка в callback не падает диагностику, фиксируется в отчете
-- [ ] Все фичи с boardProperty/localStorage зарегистрированы в первой версии
+- [ ] Все фичи из §5 зарегистрированы в первой версии
+- [ ] Unit-тест diagnostic callback для **каждой** фичи из §5
 
 ## 10. UI Wireframe
 
