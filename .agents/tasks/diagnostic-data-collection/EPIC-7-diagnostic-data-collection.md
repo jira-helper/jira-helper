@@ -34,17 +34,17 @@ flowchart TB
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 96 | [TASK-96](./TASK-96-migrate-diagnostic-module-folder.md) | Миграция `diagnostic/` → `diagnostic-module/` | TODO |
-| 97 | [TASK-97](./TASK-97-diagnostic-types-and-tokens.md) | types.ts + tokens.ts | TODO |
-| 98 | [TASK-98](./TASK-98-diagnostic-model.md) | DiagnosticModel + unit tests | TODO |
-| 99 | [TASK-99](./TASK-99-diagnostic-module-di-wiring.md) | module.ts + ensure в content.ts | TODO |
+| 96 | [TASK-96](./TASK-96-migrate-diagnostic-module-folder.md) | Миграция `diagnostic/` → `diagnostic-module/` | DONE |
+| 97 | [TASK-97](./TASK-97-diagnostic-types-and-tokens.md) | types.ts + tokens.ts | DONE |
+| 98 | [TASK-98](./TASK-98-diagnostic-model.md) | DiagnosticModel + unit tests | DONE |
+| 99 | [TASK-99](./TASK-99-diagnostic-module-di-wiring.md) | module.ts + ensure в content.ts | DONE |
 
 ### Phase 2: Export Flow
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 100 | [TASK-100](./TASK-100-settings-tab-export-wiring.md) | SettingsTab → model.saveDiagnosticData() | TODO |
-| 101 | [TASK-101](./TASK-101-export-payload-integration-test.md) | Integration test backward compat export | TODO |
+| 100 | [TASK-100](./TASK-100-settings-tab-export-wiring.md) | SettingsTab → model.saveDiagnosticData() | DONE |
+| 101 | [TASK-101](./TASK-101-export-payload-integration-test.md) | Integration test backward compat export | DONE |
 
 ### Phase 3: Module Features Registration
 

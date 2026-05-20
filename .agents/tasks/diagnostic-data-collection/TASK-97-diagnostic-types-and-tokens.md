@@ -1,6 +1,6 @@
 # TASK-97: Diagnostic types and tokens
 
-**Status**: TODO
+**Status**: DONE
 **Type**: types
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

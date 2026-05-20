@@ -51,6 +51,7 @@ import { registerJiraApiInDI } from './infrastructure/di/jiraApiTokens';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { registerLocalStorageServiceInDI } from './infrastructure/storage/tokens';
+import { diagnosticModule } from './features/diagnostic-module/module';
 import { columnLimitsModule } from './features/column-limits-module/module';
 import { personLimitsModule } from './features/person-limits-module/module';
 import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/module';
@@ -64,7 +65,8 @@ import {
   jiraCommentTemplatesModule,
   jiraCommentTemplatesPageModificationToken,
 } from './features/jira-comment-templates-module';
-import { DiagnosticBoardPage, diagnosticBoardPageToken } from './features/diagnostic/BoardPage';
+import { DiagnosticBoardPage } from './features/diagnostic-module/BoardPage';
+import { diagnosticBoardPageToken } from './features/diagnostic-module/tokens';
 import { LocalSettingsBoardPage, localSettingsBoardPageToken } from './features/local-settings/BoardPage';
 import { LocalSettingsIssuePage, localSettingsIssuePageToken } from './features/local-settings/IssuePage';
 import { loadLocalSettings } from './features/local-settings/actions/loadLocalSettings';
@@ -110,6 +112,7 @@ function initDiContainer() {
     value: new JiraLocaleProvider(),
   });
 
+  diagnosticModule.ensure(container);
   columnLimitsModule.ensure(container);
   personLimitsModule.ensure(container);
   swimlaneWipLimitsModule.ensure(container);

@@ -10,6 +10,7 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import ColumnLimitsBoardPage from './index';
 import { columnLimitsModule } from '../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
@@ -43,6 +44,7 @@ function setupDi(container: Container) {
   registerLogger(container);
   container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
   container.register({ token: boardPagePageObjectToken, value: mockBoardPO });
+  diagnosticModule.ensure(container);
   columnLimitsModule.ensure(container);
   container.register({
     token: localeProviderToken,

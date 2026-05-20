@@ -21,6 +21,7 @@ import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructur
 import { Ok } from 'ts-results';
 import { SettingsButtonContainer } from '../components/SettingsButton/SettingsButtonContainer';
 import { columnLimitsModule } from '../../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 import type { Column } from '../../types';
 
@@ -91,6 +92,7 @@ export const setupBackground = () => {
     value: BoardPagePageObject,
   });
   registerBoardPropertyServiceInDI(globalContainer);
+  diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);
 
   globalContainer.inject(propertyModelToken).model.reset();

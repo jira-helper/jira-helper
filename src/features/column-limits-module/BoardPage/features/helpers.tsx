@@ -6,6 +6,7 @@ import type { BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropert
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { columnLimitsModule } from '../../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { propertyModelToken, boardRuntimeModelToken } from '../../tokens';
 
 // --- Fixtures matching feature Background ---
@@ -123,6 +124,7 @@ export const setupBackground = () => {
     value: BoardPagePageObject,
   });
 
+  diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);
 
   globalContainer.register({

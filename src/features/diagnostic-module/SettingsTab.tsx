@@ -4,12 +4,13 @@ import React from 'react';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { Button } from 'antd';
-import { saveDiagnosticData } from './actions/saveDiagnosticData';
 import { JqlDebugDemo } from './JqlDebugDemo';
+import { diagnosticModelToken } from './tokens';
 
 export const DiagnosticSettingsTabContent = () => {
   const di = useDi();
   const logger = di.inject(loggerToken);
+  const { model } = di.inject(diagnosticModelToken);
   const [messages, setMessages] = React.useState(logger.getMessages());
   const [filterText, setFilterText] = React.useState('');
 
@@ -62,7 +63,7 @@ export const DiagnosticSettingsTabContent = () => {
         </div>
       </div>
       <div style={{ marginTop: '16px' }}>
-        <Button type="primary" onClick={saveDiagnosticData}>
+        <Button type="primary" onClick={() => model.saveDiagnosticData()}>
           save diagnostic data
         </Button>
       </div>

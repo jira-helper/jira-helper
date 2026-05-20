@@ -1,4 +1,3 @@
-import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
@@ -27,5 +26,3 @@ export class DiagnosticBoardPage extends PageModification<void, Element> {
     });
   }
 }
-
-export const diagnosticBoardPageToken = new Token<DiagnosticBoardPage>('DiagnosticBoardPage');

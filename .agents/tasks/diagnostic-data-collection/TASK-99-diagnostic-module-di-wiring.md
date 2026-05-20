@@ -1,6 +1,6 @@
 # TASK-99: Diagnostic module DI wiring
 
-**Status**: TODO
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

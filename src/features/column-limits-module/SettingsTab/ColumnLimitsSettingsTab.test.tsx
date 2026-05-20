@@ -10,6 +10,7 @@ import { boardPagePageObjectToken, type IBoardPagePageObject } from 'src/infrast
 import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { columnLimitsModule } from '../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { settingsUIModelToken, boardRuntimeModelToken, propertyModelToken } from '../tokens';
 import type { SettingsUIModel } from '../SettingsPage/models/SettingsUIModel';
 import type { BoardRuntimeModel } from '../BoardPage/models/BoardRuntimeModel';
@@ -57,6 +58,7 @@ function setupDi() {
   registerLogger(globalContainer);
   globalContainer.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
   globalContainer.register({ token: boardPagePageObjectToken, value: mockBoardPO });
+  diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);
   globalContainer.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
 }

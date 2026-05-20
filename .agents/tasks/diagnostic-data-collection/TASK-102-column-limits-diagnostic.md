@@ -1,6 +1,6 @@
 # TASK-102: column-limits-module diagnostic
 
-**Status**: TODO
+**Status**: IN_PROGRESS
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

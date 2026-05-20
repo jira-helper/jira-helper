@@ -1,6 +1,6 @@
 # TASK-101: Export payload integration test
 
-**Status**: TODO
+**Status**: DONE
 **Type**: other
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

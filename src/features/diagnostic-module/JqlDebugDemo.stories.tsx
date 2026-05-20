@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { JqlDebugDemoPure } from './JqlDebugDemo';
 
 const meta: Meta<typeof JqlDebugDemoPure> = {
-  title: 'Diagnostic/JqlDebugDemo',
+  title: 'DiagnosticModule/JqlDebugDemo',
   component: JqlDebugDemoPure,
 };
 export default meta;

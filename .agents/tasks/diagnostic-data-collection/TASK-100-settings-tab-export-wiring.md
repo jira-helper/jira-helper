@@ -1,6 +1,6 @@
 # TASK-100: SettingsTab export wiring
 
-**Status**: TODO
+**Status**: DONE
 **Type**: container
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

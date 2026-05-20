@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
 import { columnLimitsModule } from './module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
@@ -35,6 +36,7 @@ describe('columnLimitsModule', () => {
     container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
     container.register({ token: loggerToken, value: new Logger() });
     container.register({ token: boardPagePageObjectToken, value: mockBoardPagePageObject });
+    diagnosticModule.ensure(container);
   });
 
   it('should register PropertyModel token', () => {

@@ -1,6 +1,6 @@
 # TASK-98: DiagnosticModel
 
-**Status**: TODO
+**Status**: DONE
 **Type**: model
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)

@@ -8,6 +8,7 @@ import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { columnLimitsModule } from '../../../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { SettingsModalContainer } from './SettingsModalContainer';
 
@@ -55,6 +56,7 @@ const registerColumnLimitsTestDi = () => {
   globalContainer.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
   globalContainer.register({ token: loggerToken, value: new Logger() });
   globalContainer.register({ token: boardPagePageObjectToken, value: mockBoardPagePageObject });
+  diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);
   globalContainer.register({
     token: localeProviderToken,

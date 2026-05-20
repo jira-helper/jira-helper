@@ -24,6 +24,7 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import { ErrorBoundary } from 'src/shared/components/ErrorBoundary';
 import { SettingsButtonContainer } from '../../SettingsPage/components/SettingsButton/SettingsButtonContainer';
 import { columnLimitsModule } from '../../module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { propertyModelToken, settingsUIModelToken } from '../../tokens';
 import { createButtonStubs, columns, type ButtonStubs } from '../../SettingsPage/features/helpers';
 
@@ -182,6 +183,7 @@ export const setupBackground = () => {
     value: createBoardPageMock(),
   });
   registerBoardPropertyServiceInDI(globalContainer);
+  diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);
 
   globalContainer.inject(propertyModelToken).model.reset();
