@@ -1,4 +1,5 @@
 import type { Container } from 'dioma';
+import { Ok, type Result } from 'ts-results';
 import { Module, modelEntry } from 'src/infrastructure/di/Module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
 import { PropertyModel } from './property/PropertyModel';
@@ -7,6 +8,8 @@ import { SettingsUIModel } from './SettingsPage/models/SettingsUIModel';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
 class PersonLimitsModule extends Module {
   register(container: Container): void {
@@ -25,6 +28,26 @@ class PersonLimitsModule extends Module {
       const { model: propertyModel } = c.inject(propertyModelToken);
       return modelEntry(new SettingsUIModel(propertyModel, c.inject(loggerToken)));
     });
+
+    const { model: diagnosticModel } = container.inject(diagnosticModelToken);
+    const { model: propertyModel } = container.inject(propertyModelToken);
+    const { model: boardRuntimeModel } = container.inject(boardRuntimeModelToken);
+
+    diagnosticModel.registerDiagnosticData(
+      'person-limits-module',
+      (): Result<FeatureDiagnosticData, Error> =>
+        Ok({
+          settings: {
+            boardProperty: {
+              state: propertyModel.state,
+              error: propertyModel.error,
+              data: propertyModel.data,
+            },
+            localStorage: null,
+          },
+          runtime: boardRuntimeModel.getDiagnosticSnapshot(),
+        })
+    );
   }
 }
 

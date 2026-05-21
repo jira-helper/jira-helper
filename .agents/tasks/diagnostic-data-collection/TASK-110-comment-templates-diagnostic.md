@@ -1,6 +1,6 @@
 # TASK-110: jira-comment-templates-module diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -28,10 +28,31 @@ src/features/jira-comment-templates-module/
 
 ## Критерии приёмки
 
-- [ ] Без вызова load/save в callback
-- [ ] Unit test diagnostic callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] Без вызова load/save в callback
+- [x] Unit test diagnostic callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- `TemplatesStorageModel.getDiagnosticSnapshot()` — `version`, `templatesCount`, `enabled` (read-only, без I/O)
+- `registerDiagnosticData('jira-comment-templates-module', …)` в `module.ts` (§5.3: `boardProperty: null`, `localStorage.commentTemplates`, `runtime: null`)
+- `module.diagnostic.test.ts` + тесты snapshot в `TemplatesStorageModel.test.ts`
+- В существующих тестах модуля добавлены `loggerToken` + `diagnosticModule.ensure` перед `jiraCommentTemplatesModule.ensure`
+
+**Проблемы и решения**:
+
+- `module.test` / `CommentTemplatesPageModification.test` падали без `diagnosticModelToken` и `loggerToken` — в `beforeEach` добавлены `Logger` и `diagnosticModule.ensure`.
 
 ## Зависимости
 

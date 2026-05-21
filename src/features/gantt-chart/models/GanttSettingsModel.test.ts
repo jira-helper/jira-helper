@@ -816,4 +816,35 @@ describe('GanttSettingsModel', () => {
     expect(resolved?.hideCompletedTasks).toBeUndefined();
     expect(resolved?.quickFilters).toEqual([]);
   });
+
+  describe('getDiagnosticSnapshot', () => {
+    it('returns plain localStorage settings state without calling load', () => {
+      const model = createModel();
+      model.storage = { _global: scopeSettings({ tooltipFieldIds: ['x'] }) };
+      model.statusBreakdownEnabled = true;
+      model.featureEnabled = false;
+      model.currentScope = { level: 'project', projectKey: 'PROJ' };
+      model.contextProjectKey = 'PROJ';
+      model.openDraft();
+
+      const loadSpy = vi.spyOn(model, 'load');
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(loadSpy).not.toHaveBeenCalled();
+      expect(snapshot).toEqual({
+        storageKey: GANTT_SETTINGS_STORAGE_KEY,
+        storage: model.storage,
+        currentScope: { level: 'project', projectKey: 'PROJ' },
+        statusBreakdownEnabled: true,
+        preferredScopeLevel: null,
+        featureEnabled: false,
+        contextProjectKey: 'PROJ',
+        contextIssueType: '',
+        isConfigured: true,
+        hasDraft: true,
+        effectiveScopeLevel: 'global',
+      });
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
+  });
 });

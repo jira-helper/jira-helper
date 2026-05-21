@@ -11,6 +11,7 @@ import { boardPagePageObjectToken, type IBoardPagePageObject } from 'src/infrast
 import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { searchUsersToken } from 'src/infrastructure/di/jiraApiTokens';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { personLimitsModule } from '../module';
 import { settingsUIModelToken, boardRuntimeModelToken, propertyModelToken } from '../tokens';
 import type { SettingsUIModel } from '../SettingsPage/models/SettingsUIModel';
@@ -59,6 +60,7 @@ function setupDi() {
   globalContainer.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
   globalContainer.register({ token: boardPagePageObjectToken, value: mockBoardPO });
   globalContainer.register({ token: searchUsersToken, value: vi.fn(async () => []) });
+  diagnosticModule.ensure(globalContainer);
   personLimitsModule.ensure(globalContainer);
   globalContainer.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
 }

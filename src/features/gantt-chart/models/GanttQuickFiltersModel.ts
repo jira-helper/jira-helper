@@ -9,6 +9,7 @@
  * sessions. The set is stored as an array (not a `Set`) so it stays cleanly serializable for valtio
  * snapshots and React rendering.
  */
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import type { JiraField } from 'src/infrastructure/jira/types';
 import type { GanttBar, QuickFilter } from '../types';
 import type { GanttIssueInput } from '../utils/computeBars';
@@ -83,5 +84,15 @@ export class GanttQuickFiltersModel {
     this.activeIds = [];
     this.searchQuery = '';
     this.searchMode = 'text';
+  }
+
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      activeIds: [...this.activeIds],
+      searchQuery: this.searchQuery,
+      searchMode: this.searchMode,
+      availableFilterIds: this.availableFilters.map(f => f.id),
+      activeFilterIds: this.activeFilters.map(f => f.id),
+    };
   }
 }

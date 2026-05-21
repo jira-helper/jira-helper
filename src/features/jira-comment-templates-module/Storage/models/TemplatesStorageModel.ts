@@ -1,4 +1,5 @@
 import { Err, Ok, Result } from 'ts-results';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import type { ILocalStorageService } from 'src/infrastructure/storage/LocalStorageService';
 import { COMMENT_TEMPLATES_LOCAL_STORAGE_KEY, COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION } from '../../constants';
 import type {
@@ -86,6 +87,17 @@ export class TemplatesStorageModel implements ITemplatesStorageModel {
 
   get hasTemplates(): boolean {
     return this.templates.length > 0;
+  }
+
+  /**
+   * Read-only diagnostic summary of in-memory storage state (no load/save I/O).
+   */
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+      templatesCount: this.templates.length,
+      enabled: this.enabled,
+    };
   }
 
   private savePersist(): Result<void, Error> {

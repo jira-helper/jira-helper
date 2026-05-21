@@ -1,6 +1,6 @@
 # TASK-112: Diagnostic onboarding docs
 
-**Status**: TODO
+**Status**: DONE
 **Type**: other
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -26,11 +26,33 @@ src/features/diagnostic-module/types.ts
 
 ## Критерии приёмки
 
-- [ ] JSDoc на public types в types.ts
-- [ ] developer-guide актуален post-implementation
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] JSDoc на public types в types.ts
+- [x] developer-guide актуален post-implementation
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
 
 ## Зависимости
 
 - Зависит от: TASK-102 … TASK-111 (после всех feature registrations)
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-21
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- JSDoc на `FeatureDiagnosticData`, `FeatureDiagnosticError`, `DiagnosticReport`, `FeatureDiagnosticCallback`, `CollectedDiagnosticPayload` и `DiagnosticModelApi.registerDiagnosticData` с `@see` на developer-guide / requirements §5.3
+- developer-guide: ссылка на EPIC-7, таблица 14 v1 `featureName`, актуализирован legacy-пример (`diagnosticRegistration.ts`), уточнены import paths
+- EPIC-7: статус TASK-112 → VERIFICATION
+
+**Проверка**: `npm test` (170 files / 1743 tests), `lint:eslint --fix`, `lint:typescript` — exit 0.
+
+**Проблемы и решения**:
+
+Нет.

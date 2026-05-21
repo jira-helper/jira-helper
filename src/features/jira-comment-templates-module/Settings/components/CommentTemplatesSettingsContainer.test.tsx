@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Container } from 'dioma';
 import { Err, Ok, type Result } from 'ts-results';
@@ -21,6 +21,9 @@ import type {
 import { toCommentTemplateId } from '../../types';
 import { commentTemplatesSettingsModelToken, templatesStorageModelToken } from '../../tokens';
 import { CommentTemplatesSettingsContainer } from './CommentTemplatesSettingsContainer';
+
+// Popconfirm shell-action test can exceed default 5s under full-suite parallel load.
+vi.setConfig({ testTimeout: 10000 });
 
 class FakeStorageModel implements ITemplatesStorageModel {
   templates: CommentTemplate[] = [];
@@ -196,19 +199,20 @@ describe('CommentTemplatesSettingsContainer', () => {
   });
 
   it('forwards settings commands from shell actions', async () => {
-    const user = userEvent.setup();
     const { settings } = setup({
       beforeRender: ({ settings }) => {
         settings.isDirty = true;
       },
     });
 
-    await user.click(screen.getByRole('button', { name: 'Add template' }));
-    await user.click(screen.getByRole('button', { name: 'Reset to defaults' }));
-    await user.click(screen.getByRole('button', { name: 'Reset' }));
-    await user.click(screen.getByRole('button', { name: 'Discard' }));
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    await user.click(screen.getByRole('button', { name: 'Delete template: Greeting' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add template' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }));
+    // Popconfirm OK is labelled "Reset"; substring match on { name: 'Reset' } also hits
+    // "Reset to defaults" and causes findByRole to retry until timeout when both exist.
+    fireEvent.click(await screen.findByRole('button', { name: /^Reset$/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete template: Greeting' }));
 
     expect(settings.addTemplate).toHaveBeenCalledTimes(1);
     expect(settings.resetDraftToDefaults).toHaveBeenCalledTimes(1);

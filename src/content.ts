@@ -52,6 +52,12 @@ import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { registerLocalStorageServiceInDI } from './infrastructure/storage/tokens';
 import { diagnosticModule } from './features/diagnostic-module/module';
+import { registerSubTasksProgressDiagnosticData } from './features/sub-tasks-progress/diagnosticRegistration';
+import { registerAdditionalCardElementsDiagnosticData } from './features/additional-card-elements/diagnosticRegistration';
+import { registerWiplimitOnCellsDiagnosticData } from './features/wiplimit-on-cells/diagnosticRegistration';
+import { registerChartsAddSlaLineDiagnosticData } from './features/charts/diagnosticRegistration';
+import { registerLocalSettingsDiagnosticData } from './features/local-settings/diagnosticRegistration';
+import { registerBugTemplateDiagnosticData } from './features/bug-template/diagnosticRegistration';
 import { columnLimitsModule } from './features/column-limits-module/module';
 import { personLimitsModule } from './features/person-limits-module/module';
 import { swimlaneWipLimitsModule } from './features/swimlane-wip-limits-module/module';
@@ -95,13 +101,14 @@ const domLoaded = () =>
 function initDiContainer() {
   const container = globalContainer;
   registerExtensionApiServiceInDI(container);
+  registerLogger(container);
+  diagnosticModule.ensure(container);
   registerBlurSensitiveFeatureInDI(container);
   registerBoardPagePageObjectInDI(container);
   registerCommentsEditorPageObjectInDI(container);
   registerSettingsPagePageObjectInDI(container);
   registerBoardPropertyServiceInDI(container);
   registerJiraServiceInDI(container);
-  registerLogger(container);
   registerRoutingServiceInDI(container);
   registerRoutingInDI(container);
   registerJiraApiInDI(container);
@@ -112,7 +119,12 @@ function initDiContainer() {
     value: new JiraLocaleProvider(),
   });
 
-  diagnosticModule.ensure(container);
+  registerSubTasksProgressDiagnosticData(container);
+  registerLocalSettingsDiagnosticData(container);
+  registerAdditionalCardElementsDiagnosticData(container);
+  registerWiplimitOnCellsDiagnosticData(container);
+  registerChartsAddSlaLineDiagnosticData(container);
+  registerBugTemplateDiagnosticData(container);
   columnLimitsModule.ensure(container);
   personLimitsModule.ensure(container);
   swimlaneWipLimitsModule.ensure(container);

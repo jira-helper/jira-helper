@@ -1,4 +1,7 @@
 import type { Container } from 'dioma';
+import { Ok, type Result } from 'ts-results';
+import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import { Module, modelEntry } from 'src/infrastructure/di/Module';
 import {
   ganttDataModelToken,
@@ -28,6 +31,28 @@ class GanttChartModule extends Module {
     this.lazy(container, ganttQuickFiltersModelToken, () => modelEntry(new GanttQuickFiltersModel()));
 
     this.lazy(container, issueViewPageObjectToken, () => new IssueViewPageObject());
+
+    const { model: diagnosticModel } = container.inject(diagnosticModelToken);
+    const { model: settingsModel } = container.inject(ganttSettingsModelToken);
+    const { model: dataModel } = container.inject(ganttDataModelToken);
+    const { model: quickFiltersModel } = container.inject(ganttQuickFiltersModelToken);
+    const { model: viewportModel } = container.inject(ganttViewportModelToken);
+
+    diagnosticModel.registerDiagnosticData(
+      'gantt-chart',
+      (): Result<FeatureDiagnosticData, Error> =>
+        Ok({
+          settings: {
+            boardProperty: null,
+            localStorage: settingsModel.getDiagnosticSnapshot(),
+          },
+          runtime: {
+            dataModel: dataModel.getDiagnosticSnapshot(),
+            quickFilters: quickFiltersModel.getDiagnosticSnapshot(),
+            viewport: viewportModel.getDiagnosticSnapshot(),
+          },
+        })
+    );
   }
 }
 

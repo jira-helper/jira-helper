@@ -1,6 +1,7 @@
 import type { GanttScopeSettings, GanttSettingsStorage, QuickFilter, SettingsScope, ScopeKey } from '../types';
 import { buildScopeKey, resolveSettings } from '../utils/resolveSettings';
 import type { Logger } from 'src/infrastructure/logging/Logger';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import { BUILT_IN_QUICK_FILTERS } from '../quickFilters/builtIns';
 import { PROGRESS_BUCKET_VALUES } from 'src/shared/status-progress-mapping/constants';
 import type { ProgressBucket } from 'src/shared/status-progress-mapping/types';
@@ -361,5 +362,21 @@ export class GanttSettingsModel {
     this.statusBreakdownEnabled = false;
     this.preferredScopeLevel = null;
     this.featureEnabled = true;
+  }
+
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      storageKey: GANTT_SETTINGS_STORAGE_KEY,
+      storage: JSON.parse(JSON.stringify(this.storage)) as GanttSettingsStorage,
+      currentScope: JSON.parse(JSON.stringify(this.currentScope)) as SettingsScope,
+      statusBreakdownEnabled: this.statusBreakdownEnabled,
+      preferredScopeLevel: this.preferredScopeLevel,
+      featureEnabled: this.featureEnabled,
+      contextProjectKey: this.contextProjectKey,
+      contextIssueType: this.contextIssueType,
+      isConfigured: this.isConfigured,
+      hasDraft: this.draftSettings !== null,
+      effectiveScopeLevel: this.effectiveScopeLevel,
+    };
   }
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('src/shared/components/JiraUserSelect', () => ({
@@ -127,6 +126,9 @@ function renderSettings(overrides: Partial<React.ComponentProps<typeof CommentTe
   return props;
 }
 
+// Popconfirm + ColorPicker tests can exceed default 5s under full-suite parallel load.
+vi.setConfig({ testTimeout: 10000 });
+
 describe('CommentTemplatesSettings', () => {
   it('renders an Ant Design ColorPicker for each template accent color', () => {
     renderSettings();
@@ -167,7 +169,6 @@ describe('CommentTemplatesSettings', () => {
   });
 
   it('forwards row and shell action callbacks', async () => {
-    const user = userEvent.setup();
     const onDeleteTemplate = vi.fn();
     const onAddTemplate = vi.fn();
     const onResetToDefaults = vi.fn();
@@ -182,12 +183,13 @@ describe('CommentTemplatesSettings', () => {
       onSave,
     });
 
-    await user.click(screen.getByRole('button', { name: 'Add template' }));
-    await user.click(screen.getByRole('button', { name: 'Reset to defaults' }));
-    await user.click(screen.getByRole('button', { name: 'Reset' }));
-    await user.click(screen.getByRole('button', { name: 'Discard' }));
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    await user.click(screen.getByRole('button', { name: 'Delete template: Greeting' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add template' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset to defaults' }));
+    // Popconfirm OK is "Reset"; substring { name: 'Reset' } also matches "Reset to defaults".
+    fireEvent.click(await screen.findByRole('button', { name: /^Reset$/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete template: Greeting' }));
 
     expect(onAddTemplate).toHaveBeenCalledTimes(1);
     expect(onResetToDefaults).toHaveBeenCalledTimes(1);

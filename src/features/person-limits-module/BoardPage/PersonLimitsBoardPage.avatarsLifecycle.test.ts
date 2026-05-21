@@ -10,6 +10,7 @@ import { buildAvatarUrl } from 'src/shared/utils/avatarUrl';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import PersonLimitsBoardPage from './index';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { personLimitsModule } from '../module';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
@@ -63,6 +64,7 @@ function setupDi(container: Container) {
   container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
   container.register({ token: boardPagePageObjectToken, value: mockBoardPO });
   container.register({ token: buildAvatarUrlToken, value: buildAvatarUrl });
+  diagnosticModule.ensure(container);
   personLimitsModule.ensure(container);
   container.register({
     token: localeProviderToken,

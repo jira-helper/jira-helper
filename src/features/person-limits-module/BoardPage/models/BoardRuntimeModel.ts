@@ -8,6 +8,7 @@ import { ref } from 'valtio';
 import type { PropertyModel } from '../../property/PropertyModel';
 import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import type { Logger } from 'src/infrastructure/logging/Logger';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import type { PersonLimitStats } from './types';
 import { isPersonLimitAppliedToIssue, isPersonsIssue, computeLimitId } from '../utils';
 
@@ -272,6 +273,38 @@ export class BoardRuntimeModel {
 
   setSwimlanesActive(active: boolean): void {
     this.swimlanesActive = active;
+  }
+
+  /**
+   * Read-only diagnostic snapshot: aggregates only, no DOM references.
+   */
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      activePerson: this.activePerson,
+      swimlanesActive: this.swimlanesActive,
+      cssSelectorOfIssues: this.cssSelectorOfIssues,
+      limits: this.stats.map(limit => ({
+        id: limit.id,
+        persons: limit.persons,
+        limit: limit.limit,
+        issuesCount: limit.issues.length,
+        isOverLimit: this.isLimitOverLimit(limit),
+        columns: limit.columns,
+        swimlanes: limit.swimlanes,
+        includedIssueTypes: limit.includedIssueTypes ?? null,
+        showAllPersonIssues: limit.showAllPersonIssues,
+        sharedLimit: limit.sharedLimit,
+      })),
+    };
+  }
+
+  private isLimitOverLimit(personLimit: PersonLimitStats): boolean {
+    if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
+      return personLimit.issues.length > personLimit.limit;
+    }
+    return personLimit.persons.some(
+      person => this.filterIssuesByPerson(personLimit, person.name).length > personLimit.limit
+    );
   }
 
   reset(): void {

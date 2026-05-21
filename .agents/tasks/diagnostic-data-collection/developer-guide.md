@@ -2,7 +2,9 @@
 
 Документ для разработчиков и агентов jira-helper. Описывает, как подключить фичу к механизму сбора диагностики.
 
-Связанные артефакты: [requirements.md](./requirements.md) §5–§5.4, [target-design.md](./target-design.md).
+**Эпик:** [EPIC-7: Diagnostic data collection](./EPIC-7-diagnostic-data-collection.md)
+
+Связанные артефакты: [requirements.md](./requirements.md) §5–§5.4, [target-design.md](./target-design.md). Public API types: `src/features/diagnostic-module/types.ts` (JSDoc + links сюда).
 
 ## Быстрый чеклист
 
@@ -20,6 +22,27 @@
 | Файл в подпапке | `{subdir}-{file-base}` kebab-case | `charts-add-sla-line` |
 
 Ключ попадает в `featureDiagnostics[featureName]` экспортируемого JSON.
+
+### v1: зарегистрированные `featureName` (requirements §5)
+
+| `featureName` | Источники (§5) | Где регистрируется |
+|---------------|------------------|-------------------|
+| `column-limits-module` | boardProperty, runtime | `column-limits-module/module.ts` |
+| `person-limits-module` | boardProperty, runtime | `person-limits-module/module.ts` |
+| `swimlane-wip-limits-module` | boardProperty, runtime | `swimlane-wip-limits-module/module.ts` |
+| `field-limits-module` | boardProperty, runtime | `field-limits-module/module.ts` |
+| `card-colors-module` | boardProperty, runtime | `card-colors-module/module.ts` |
+| `sub-tasks-progress` | boardProperty, localStorage | `sub-tasks-progress/diagnosticRegistration.ts` → `content.ts` |
+| `additional-card-elements` | boardProperty | `additional-card-elements/diagnosticRegistration.ts` → `content.ts` |
+| `wiplimit-on-cells` | boardProperty | `wiplimit-on-cells/diagnosticRegistration.ts` → `content.ts` |
+| `charts-add-sla-line` | boardProperty | `charts/diagnosticRegistration.ts` → `content.ts` |
+| `gantt-chart` | localStorage, runtime | `gantt-chart/module.ts` |
+| `jira-comment-templates-module` | localStorage | `jira-comment-templates-module/module.ts` |
+| `local-settings` | localStorage | `local-settings/diagnosticRegistration.ts` → `content.ts` |
+| `blur-for-sensitive` | localStorage | `blur-for-sensitive/diagnosticRegistration.ts` → `BlurSensitiveFeature.ts` |
+| `bug-template` | localStorage | `bug-template/diagnosticRegistration.ts` → `content.ts` |
+
+Фича без строки в таблице — out of scope v1 (ключа в export не будет).
 
 ## Где регистрировать
 
@@ -61,24 +84,33 @@ Callback — **closure** над моделями, inject'нутыми в том 
 
 ### Legacy-фича (без `module.ts`)
 
-В существующей DI/init-функции, рядом с текущим bootstrap:
+Вынеси сбор snapshot и регистрацию в `diagnosticRegistration.ts` (тестируемый `collect*DiagnosticData` + `register*DiagnosticData(container)`), вызови register-функцию из существующего DI/init **после** inject зависимостей фичи и **после** `diagnosticModule.ensure(container)`.
+
+Пример (`blur-for-sensitive/diagnosticRegistration.ts`):
 
 ```ts
-export function registerBlurSensitiveFeatureInDI(container: Container): void {
-  // ... существующая регистрация
+import type { Container } from 'dioma';
+import { Ok, type Result } from 'ts-results';
+import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
+export function collectBlurForSensitiveDiagnosticData(): Result<FeatureDiagnosticData, Error> {
+  return Ok({
+    settings: {
+      boardProperty: null,
+      localStorage: { blurSensitive: localStorage.getItem('blurSensitive') },
+    },
+    runtime: null,
+  });
+}
+
+export function registerBlurForSensitiveDiagnosticData(container: Container): void {
   const { model: diagnosticModel } = container.inject(diagnosticModelToken);
-  diagnosticModel.registerDiagnosticData('blur-for-sensitive', () =>
-    Ok({
-      settings: {
-        boardProperty: null,
-        localStorage: { blurSensitive: localStorage.getItem('blurSensitive') },
-      },
-      runtime: null,
-    })
-  );
+  diagnosticModel.registerDiagnosticData('blur-for-sensitive', collectBlurForSensitiveDiagnosticData);
 }
 ```
+
+В `BlurSensitiveFeature.ts` / `content.ts` — один вызов `registerBlurForSensitiveDiagnosticData(container)` рядом с остальным bootstrap.
 
 ## Правила callback (обязательно)
 
@@ -105,10 +137,10 @@ export function registerBlurSensitiveFeatureInDI(container: Container): void {
 
 Из других модулей допустимо:
 
-- `diagnosticModelToken` из `src/features/diagnostic-module/tokens`
-- `import type { FeatureDiagnosticCallback, FeatureDiagnosticData } from '.../types'`
+- `diagnosticModelToken` из `src/features/diagnostic-module/tokens` (`createModelToken`, inject → `{ model }`)
+- `import type { FeatureDiagnosticCallback, FeatureDiagnosticData, FeatureDiagnosticError, DiagnosticReport } from 'src/features/diagnostic-module/types'`
 
-Запрещено импортировать реализации (`DiagnosticModel`, internal utils) — см. `docs/module-boundaries.md`.
+Запрещено импортировать реализации (`DiagnosticModel`, `DiagnosticModule`, internal utils) — см. `docs/module-boundaries.md`.
 
 ## Тестирование
 

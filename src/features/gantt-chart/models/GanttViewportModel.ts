@@ -1,3 +1,4 @@
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import type { TimeInterval } from '../types';
 
 /** d3.zoom identity-compatible transform (scale `k`, translate `x`/`y`). */
@@ -70,5 +71,14 @@ export class GanttViewportModel {
     this.panOffset = { x: 0, y: 0 };
     this.interval = 'days';
     this.transform = { k: 1, x: 0, y: 0 };
+  }
+
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      zoomLevel: this.zoomLevel,
+      panOffset: { x: this.panOffset.x, y: this.panOffset.y },
+      interval: this.interval,
+      transform: { k: this.transform.k, x: this.transform.x, y: this.transform.y },
+    };
   }
 }

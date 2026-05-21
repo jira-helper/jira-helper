@@ -1,6 +1,6 @@
 # TASK-109: gantt-chart diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: model
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -33,10 +33,36 @@ src/features/gantt-chart/
 
 ## Критерии приёмки
 
-- [ ] Snapshots без DOM, без load/recompute в getter
-- [ ] Unit test diagnostic callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] Snapshots без DOM, без load/recompute в getter
+- [x] Unit test diagnostic callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- `getDiagnosticSnapshot()` на `GanttSettingsModel`, `GanttDataModel`, `GanttQuickFiltersModel`, `GanttViewportModel`
+- Регистрация `gantt-chart` в `ganttChartModule.register()` (§5.3: `boardProperty: null`, `localStorage` + `runtime` blocks)
+- `module.diagnostic.test.ts` и расширенные unit-тесты snapshot-методов
+
+**Проблемы и решения**:
+
+- `GanttDataModel` snapshot-тест: `tasksWithoutStatusHistoryCount` зависит от changelog — assert через `model.tasksWithoutStatusHistory.length`.
+- `GanttQuickFiltersModel.test.ts`: добавлен импорт `vi` для spy в snapshot-тесте.
+
+**Верификация (2026-05-20)**:
+
+- `npm test`: 166 files, 1729 tests — pass
+- `npm run lint:eslint -- --fix`: pass (удалён неиспользуемый `user` в `GanttSettingsModal.test.tsx`)
 
 ## Зависимости
 

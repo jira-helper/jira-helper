@@ -1,4 +1,7 @@
 import type { Container } from 'dioma';
+import { Ok, type Result } from 'ts-results';
+import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { commentsEditorPageObjectToken } from 'src/infrastructure/page-objects/CommentsEditor';
 import { Module, modelEntry } from 'src/infrastructure/di/Module';
@@ -36,6 +39,23 @@ class JiraCommentTemplatesModule extends Module {
           c.inject(JiraServiceToken)
         )
       )
+    );
+
+    const { model: diagnosticModel } = container.inject(diagnosticModelToken);
+    const { model: storageModel } = container.inject(templatesStorageModelToken);
+
+    diagnosticModel.registerDiagnosticData(
+      'jira-comment-templates-module',
+      (): Result<FeatureDiagnosticData, Error> =>
+        Ok({
+          settings: {
+            boardProperty: null,
+            localStorage: {
+              commentTemplates: storageModel.getDiagnosticSnapshot(),
+            },
+          },
+          runtime: null,
+        })
     );
 
     // TODO(TASK-90): register jiraCommentTemplatesPageModificationToken from content.ts (PageModification lifecycle).

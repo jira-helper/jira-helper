@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Container } from 'dioma';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { personLimitsModule } from './module';
 import { boardRuntimeModelToken, propertyModelToken, settingsUIModelToken } from './tokens';
 import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
@@ -21,6 +22,7 @@ describe('personLimitsModule', () => {
     container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
     container.register({ token: loggerToken, value: new Logger() });
     container.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
+    diagnosticModule.ensure(container);
   });
 
   it('should register PropertyModel token', () => {

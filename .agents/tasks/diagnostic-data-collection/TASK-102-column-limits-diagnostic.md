@@ -1,6 +1,6 @@
 # TASK-102: column-limits-module diagnostic
 
-**Status**: IN_PROGRESS
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -28,11 +28,31 @@ src/features/column-limits-module/
 
 ## Критерии приёмки
 
-- [ ] featureName = `column-limits-module`
-- [ ] Payload convention §5.3
-- [ ] Unit test diagnostic callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] featureName = `column-limits-module`
+- [x] Payload convention §5.3
+- [x] Unit test diagnostic callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: feature-orchestrator (review + QA subagents)
+
+**Статус**: DONE
+
+**Что сделано**:
+
+- `registerDiagnosticData('column-limits-module', …)` в `module.ts`
+- `module.diagnostic.test.ts` — unit-тесты callback
+- REVIEW-TASK-102.md: APPROVED; QA-TASK-102.md: PASS
+
+**Проблемы и решения**:
+
+- REQUIREMENTS_GAP (non-blocking): `cssNotIssueSubTask` в bullets requirements, не в payload — зафиксировано в review.
 
 ## Зависимости
 

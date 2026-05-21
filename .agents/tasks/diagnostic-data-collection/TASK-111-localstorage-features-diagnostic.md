@@ -1,6 +1,6 @@
 # TASK-111: local-settings + blur-for-sensitive + bug-template diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -29,12 +29,34 @@ src/features/bug-template/            # bootstrap hook
 
 ## Критерии приёмки
 
-- [ ] Три featureName по §5.4
-- [ ] Unit test per callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] Три featureName по §5.4
+- [x] Unit test per callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
 
 ## Зависимости
 
 - Зависит от: [TASK-99](./TASK-99-diagnostic-module-di-wiring.md)
 - Референс: requirements §5.6
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-21
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- `local-settings`: `diagnosticRegistration.ts` — snapshot из `useLocalSettingsStore.getState().settings`, регистрация в `content.ts`
+- `blur-for-sensitive`: `diagnosticRegistration.ts` + вызов из `registerBlurSensitiveFeatureInDI`; key `blurSensitive`
+- `bug-template`: `diagnosticRegistration.ts` + регистрация в `content.ts`; key `jira_helper_textarea_bug_template` → `bugTemplate`
+- Unit-тесты по 3 сценария на фичу (регистрация, payload §5.3, collect via DiagnosticModel)
+- `content.ts`: `diagnosticModule.ensure` перенесён сразу после `registerLogger`, до blur DI (чтобы diagnostic inject работал)
+
+**Проблемы и решения**:
+
+- `registerBlurSensitiveFeatureInDI` вызывался до `diagnosticModule.ensure` — перенесли `registerLogger` + `diagnosticModule.ensure` выше blur registration в `content.ts`.

@@ -7,6 +7,7 @@ import {
   ganttViewportModelToken,
   issueViewPageObjectToken,
 } from './tokens';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import { IssueViewPageObject } from 'src/infrastructure/page-objects/IssueViewPageObject';
 import { registerJiraServiceInDI } from 'src/infrastructure/jira/jiraService';
@@ -18,6 +19,7 @@ describe('ganttChartModule', () => {
     container = new Container();
     container.register({ token: loggerToken, value: new Logger() });
     registerJiraServiceInDI(container);
+    diagnosticModule.ensure(container);
   });
 
   it('should resolve ganttSettingsModelToken after ensure', () => {

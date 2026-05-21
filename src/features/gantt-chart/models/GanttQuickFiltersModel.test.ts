@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { GanttQuickFiltersModel } from './GanttQuickFiltersModel';
 import type { GanttBar, QuickFilter } from '../types';
 import type { GanttIssueInput } from '../utils/computeBars';
@@ -143,5 +143,27 @@ describe('GanttQuickFiltersModel', () => {
 
     expect(result.bars.map(b => b.issueKey)).toEqual(['A-1']);
     expect(result.hiddenCount).toBe(2);
+  });
+
+  describe('getDiagnosticSnapshot', () => {
+    it('returns session filter state without mutating selection', () => {
+      const m = new GanttQuickFiltersModel();
+      m.toggle(BUILT_IN_QUICK_FILTER_IDS.hideCompleted);
+      m.setSearch('auth');
+      m.setSearchMode('jql');
+
+      const toggleSpy = vi.spyOn(m, 'toggle');
+      const snapshot = m.getDiagnosticSnapshot();
+
+      expect(toggleSpy).not.toHaveBeenCalled();
+      expect(snapshot).toEqual({
+        activeIds: [BUILT_IN_QUICK_FILTER_IDS.hideCompleted],
+        searchQuery: 'auth',
+        searchMode: 'jql',
+        availableFilterIds: BUILT_IN_QUICK_FILTERS.map(f => f.id),
+        activeFilterIds: [BUILT_IN_QUICK_FILTER_IDS.hideCompleted],
+      });
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
   });
 });

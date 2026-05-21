@@ -3,11 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { JiraUser } from 'src/infrastructure/jira/jiraApi';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/infrastructure/di/diContext';
-import { registerLogger } from 'src/infrastructure/logging/Logger';
-import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
 import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { PersonalWipLimitContainer } from './PersonalWipLimitContainer';
 import type { PersonLimit } from '../../property/types';
 import { personLimitsModule } from '../../module';
@@ -54,8 +54,7 @@ const mockSearchUsers = async (query: string): Promise<JiraUser[]> => {
 
 function initContainerStoryDi(initialLimits: PersonLimit[]) {
   globalContainer.reset();
-  registerLogger(globalContainer);
-  globalContainer.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
+  registerTestDependencies(globalContainer);
   globalContainer.register({
     token: routingServiceToken,
     value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
@@ -72,6 +71,7 @@ function initContainerStoryDi(initialLimits: PersonLimit[]) {
       deleteBoardProperty: () => {},
     } as unknown as BoardPropertyServiceI,
   });
+  globalContainer.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
   personLimitsModule.ensure(globalContainer);
   globalContainer.inject(propertyModelToken).model.setData({ limits: structuredClone(initialLimits) });
   globalContainer.inject(settingsUIModelToken).model.initFromProperty();

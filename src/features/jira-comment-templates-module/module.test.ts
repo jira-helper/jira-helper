@@ -8,6 +8,8 @@ import type { ICommentsEditorPageObject } from 'src/infrastructure/page-objects/
 import { commentsEditorPageObjectToken } from 'src/infrastructure/page-objects/CommentsEditor';
 import type { ILocalStorageService } from 'src/infrastructure/storage/LocalStorageService';
 import { localStorageServiceToken } from 'src/infrastructure/storage/tokens';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import { jiraCommentTemplatesModule } from './module';
 import { CommentTemplatesEditorModel } from './Editor/models/CommentTemplatesEditorModel';
 import { CommentTemplatesSettingsModel } from './Settings/models/CommentTemplatesSettingsModel';
@@ -54,6 +56,8 @@ describe('jiraCommentTemplatesModule', () => {
     container.register({ token: localStorageServiceToken, value: fakeLocalStorage });
     container.register({ token: commentsEditorPageObjectToken, value: fakeCommentsEditorPageObject });
     container.register({ token: JiraServiceToken, value: fakeJiraService });
+    container.register({ token: loggerToken, value: new Logger() });
+    diagnosticModule.ensure(container);
   });
 
   it('ensure registers and resolves templatesStorageModelToken', () => {

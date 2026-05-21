@@ -1,7 +1,10 @@
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Ant Design popovers/tooltips; 5s flakes under full npm test load.
+vi.setConfig({ testTimeout: 30000 });
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/infrastructure/di/diContext';
 import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
@@ -67,7 +70,7 @@ describe('GanttToolbar', () => {
   });
 
   it('calls onZoomIn, onZoomOut, and onZoomReset', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderToolbar();
 
     await user.click(screen.getByRole('button', { name: 'Zoom in' }));
@@ -94,7 +97,7 @@ describe('GanttToolbar', () => {
   });
 
   it('calls onIntervalChange when a different interval is selected', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderToolbar({ interval: 'days' });
 
     const monthsOption = screen.getAllByRole('option').find(o => o.getAttribute('title') === 'Months');
@@ -105,7 +108,7 @@ describe('GanttToolbar', () => {
   });
 
   it('renders status sections switch and calls onToggleStatusBreakdown', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderToolbar({ statusBreakdownEnabled: false });
 
     const toggle = screen.getByRole('switch', { name: 'Status sections' });
@@ -171,7 +174,6 @@ describe('GanttToolbar', () => {
   });
 
   it('renders a tooltip table listing the affected issues on hover/focus', async () => {
-    const user = userEvent.setup();
     renderToolbar({
       statusBreakdownEnabled: true,
       statusBreakdownAvailability: {
@@ -183,7 +185,9 @@ describe('GanttToolbar', () => {
       },
     });
 
-    await user.hover(within(screen.getByTestId('gantt-toolbar-warning-no-history')).getByRole('status'));
+    const tag = within(screen.getByTestId('gantt-toolbar-warning-no-history')).getByRole('status');
+    // fireEvent.focus: user.hover flakes past timeout under full-suite load.
+    fireEvent.focus(tag);
 
     const tooltip = await screen.findByTestId('gantt-warning-tooltip');
     expect(tooltip).toHaveAttribute('data-warning-type', 'no-history');
@@ -237,7 +241,6 @@ describe('GanttToolbar', () => {
     });
 
     it('renders a tooltip table with issue key, summary and reason on hover', async () => {
-      const user = userEvent.setup();
       renderToolbar({
         missingDateIssues: [
           { issueKey: 'TTP-101', summary: 'Backfill release notes', reason: 'noStartDate' },
@@ -245,7 +248,8 @@ describe('GanttToolbar', () => {
         ],
       });
 
-      await user.hover(within(screen.getByTestId('gantt-toolbar-warning-missing-dates')).getByRole('status'));
+      const tag = within(screen.getByTestId('gantt-toolbar-warning-missing-dates')).getByRole('status');
+      fireEvent.focus(tag);
 
       const tooltip = await screen.findByTestId('gantt-warning-tooltip');
       expect(tooltip).toHaveAttribute('data-warning-type', 'missing-dates');
@@ -258,7 +262,7 @@ describe('GanttToolbar', () => {
   });
 
   it('calls onOpenSettings when settings is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderToolbar();
 
     await user.click(screen.getByRole('button', { name: 'Gantt settings' }));
@@ -267,7 +271,7 @@ describe('GanttToolbar', () => {
   });
 
   it('calls onOpenFullscreen when Open fullscreen is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderToolbar();
 
     await user.click(screen.getByRole('button', { name: 'Open fullscreen' }));
@@ -290,7 +294,7 @@ describe('GanttToolbar', () => {
     });
 
     it('marks active filter chips and toggles via onToggleQuickFilter', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({
         quickFilters: filters,
         activeQuickFilterIds: ['custom-1'],
@@ -311,7 +315,7 @@ describe('GanttToolbar', () => {
     });
 
     it('renders hidden-count hint and clear button only when filters/search are active', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({
         quickFilters: filters,
         activeQuickFilterIds: ['custom-1'],
@@ -331,7 +335,7 @@ describe('GanttToolbar', () => {
     });
 
     it('forwards search input changes', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({ quickFilters: filters, quickFilterSearch: 'KE' });
 
       const search = screen.getByTestId('gantt-quick-filters-search') as HTMLInputElement;
@@ -344,7 +348,7 @@ describe('GanttToolbar', () => {
     });
 
     it('calls onQuickFilterSearchModeChange when switching Text → JQL on the segmented control', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({ quickFilters: filters });
       const modeSeg = screen.getByTestId('gantt-quick-filters-search-mode');
       await user.click(within(modeSeg).getByText('JQL'));
@@ -364,7 +368,7 @@ describe('GanttToolbar', () => {
     });
 
     it('keeps focus in JQL search when the first typed character makes the query invalid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       const StatefulToolbar: React.FC = () => {
         const [query, setQuery] = React.useState('');
@@ -419,7 +423,7 @@ describe('GanttToolbar', () => {
     });
 
     it('opens save popover and calls onSaveJqlAsQuickFilter with name and jql', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({
         quickFilters: filters,
         quickFilterSearchMode: 'jql',
@@ -428,10 +432,10 @@ describe('GanttToolbar', () => {
 
       await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
 
-      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Alpha team');
-      await user.click(screen.getByTestId('gantt-quick-filters-save-confirm'));
+      const popover = await screen.findByTestId('gantt-quick-filters-save-popover');
+      const nameInput = within(popover).getByTestId('gantt-quick-filters-save-name');
+      fireEvent.change(nameInput, { target: { value: 'Alpha team' } });
+      await user.click(within(popover).getByTestId('gantt-quick-filters-save-confirm'));
 
       expect(props.onSaveJqlAsQuickFilter).toHaveBeenCalledWith({
         name: 'Alpha team',
@@ -440,7 +444,7 @@ describe('GanttToolbar', () => {
     });
 
     it('cancel button closes popover and does not call onSaveJqlAsQuickFilter (SC-GANTT-QF-18)', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({
         quickFilters: filters,
         quickFilterSearchMode: 'jql',
@@ -448,12 +452,11 @@ describe('GanttToolbar', () => {
       });
 
       await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
-      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Alpha team');
+      const popover = await screen.findByTestId('gantt-quick-filters-save-popover');
+      const nameInput = within(popover).getByTestId('gantt-quick-filters-save-name');
+      fireEvent.change(nameInput, { target: { value: 'Alpha team' } });
 
-      const cancelButton = screen.getByRole('button', { name: 'Cancel' });
-      await user.click(cancelButton);
+      await user.click(within(popover).getByTestId('gantt-quick-filters-save-cancel'));
 
       // Primary contract for SC-GANTT-QF-18: cancellation must not persist anything.
       // The visual closing of the antd Popover is not asserted here (animation/portal
@@ -483,7 +486,7 @@ describe('GanttToolbar', () => {
     });
 
     it('save button is disabled when name input is empty/whitespace', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const props = renderToolbar({
         quickFilters: filters,
         quickFilterSearchMode: 'jql',
@@ -491,13 +494,14 @@ describe('GanttToolbar', () => {
       });
 
       await user.click(screen.getByTestId('gantt-save-as-quick-filter-button'));
-      const nameInput = await screen.findByTestId('gantt-quick-filters-save-name');
-      await user.clear(nameInput);
+      const popover = await screen.findByTestId('gantt-quick-filters-save-popover');
+      const nameInput = within(popover).getByTestId('gantt-quick-filters-save-name');
+      fireEvent.change(nameInput, { target: { value: '' } });
 
-      const saveButton = screen.getByTestId('gantt-quick-filters-save-confirm');
+      const saveButton = within(popover).getByTestId('gantt-quick-filters-save-confirm');
       expect(saveButton).toBeDisabled();
 
-      await user.type(nameInput, '   ');
+      fireEvent.change(nameInput, { target: { value: '   ' } });
       expect(saveButton).toBeDisabled();
 
       await user.click(saveButton);

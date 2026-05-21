@@ -1,7 +1,7 @@
 # Handoff: diagnostic-data-collection
 
-**Date:** 2026-05-19  
-**Branch:** `master` (ahead of origin by 2 commits; **implementation uncommitted**)  
+**Date:** 2026-05-21  
+**Branch:** `feature/diagnostic-data-collection`  
 **Feature slug:** `diagnostic-data-collection`  
 **Folder:** `.agents/tasks/diagnostic-data-collection/`
 
@@ -13,20 +13,19 @@ DI-based mechanism for features to register synchronous read-only diagnostic cal
 
 ---
 
-## Current state (where we stopped)
+## Current state
 
-**Planning:** complete (requirements, target-design, developer-guide, EPIC-7, TASK-96…112).
+**Planning:** complete.
 
-**Implementation:** in progress — **Phase 1–2 done**, **Phase 3 started**, остановились **посередине TASK-102**.
+**Implementation:** **EPIC-7 complete** — TASK-96…112 all **DONE** (coder → review → QA on `composer-2.5`).
 
 | Phase | Tasks | Status |
 |-------|-------|--------|
 | 1 Foundation | 96–99 | **DONE** |
 | 2 Export flow | 100–101 | **DONE** |
-| 3 Module callbacks | 102 | **IN_PROGRESS** (coder done, review/QA **not run**) |
-| 3 Module callbacks | 103–106 | TODO |
-| 4 Legacy callbacks | 107–111 | TODO |
-| 5 Docs | 112 | TODO |
+| 3 Module callbacks | 102–106 | **DONE** |
+| 4 Legacy callbacks | 107–111 | **DONE** |
+| 5 Docs | 112 | **DONE** |
 
 ### Что уже в коде (uncommitted)
 

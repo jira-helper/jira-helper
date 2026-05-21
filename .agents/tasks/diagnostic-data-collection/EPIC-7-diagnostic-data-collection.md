@@ -1,6 +1,6 @@
 # EPIC-7: Diagnostic Data Collection
 
-**Status**: TODO
+**Status**: DONE
 **Created**: 2026-05-19
 
 ---
@@ -50,27 +50,27 @@ flowchart TB
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 102 | [TASK-102](./TASK-102-column-limits-diagnostic.md) | column-limits-module callback + test | TODO |
-| 103 | [TASK-103](./TASK-103-person-limits-diagnostic.md) | person-limits-module + getDiagnosticSnapshot | TODO |
-| 104 | [TASK-104](./TASK-104-swimlane-wip-limits-diagnostic.md) | swimlane-wip-limits-module callback + test | TODO |
-| 105 | [TASK-105](./TASK-105-field-limits-diagnostic.md) | field-limits-module callback + test | TODO |
-| 106 | [TASK-106](./TASK-106-card-colors-diagnostic.md) | card-colors-module + getDiagnosticSnapshot | TODO |
+| 102 | [TASK-102](./TASK-102-column-limits-diagnostic.md) | column-limits-module callback + test | DONE |
+| 103 | [TASK-103](./TASK-103-person-limits-diagnostic.md) | person-limits-module + getDiagnosticSnapshot | DONE |
+| 104 | [TASK-104](./TASK-104-swimlane-wip-limits-diagnostic.md) | swimlane-wip-limits-module callback + test | DONE |
+| 105 | [TASK-105](./TASK-105-field-limits-diagnostic.md) | field-limits-module callback + test | DONE |
+| 106 | [TASK-106](./TASK-106-card-colors-diagnostic.md) | card-colors-module + getDiagnosticSnapshot | DONE |
 
 ### Phase 4: Legacy Features Registration
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 107 | [TASK-107](./TASK-107-sub-tasks-additional-card-diagnostic.md) | sub-tasks-progress + additional-card-elements | TODO |
-| 108 | [TASK-108](./TASK-108-wiplimit-cells-sla-diagnostic.md) | wiplimit-on-cells + charts-add-sla-line | TODO |
-| 109 | [TASK-109](./TASK-109-gantt-chart-diagnostic.md) | gantt-chart snapshots + registration | TODO |
-| 110 | [TASK-110](./TASK-110-comment-templates-diagnostic.md) | jira-comment-templates-module | TODO |
-| 111 | [TASK-111](./TASK-111-localstorage-features-diagnostic.md) | local-settings + blur-for-sensitive + bug-template | TODO |
+| 107 | [TASK-107](./TASK-107-sub-tasks-additional-card-diagnostic.md) | sub-tasks-progress + additional-card-elements | DONE |
+| 108 | [TASK-108](./TASK-108-wiplimit-cells-sla-diagnostic.md) | wiplimit-on-cells + charts-add-sla-line | DONE |
+| 109 | [TASK-109](./TASK-109-gantt-chart-diagnostic.md) | gantt-chart snapshots + registration | DONE |
+| 110 | [TASK-110](./TASK-110-comment-templates-diagnostic.md) | jira-comment-templates-module | DONE |
+| 111 | [TASK-111](./TASK-111-localstorage-features-diagnostic.md) | local-settings + blur-for-sensitive + bug-template | DONE |
 
 ### Phase 5: Documentation
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 112 | [TASK-112](./TASK-112-diagnostic-onboarding-docs.md) | JSDoc в types.ts + финализация developer-guide | TODO |
+| 112 | [TASK-112](./TASK-112-diagnostic-onboarding-docs.md) | JSDoc в types.ts + финализация developer-guide | DONE |
 
 ## Dependencies
 

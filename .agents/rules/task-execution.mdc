@@ -79,7 +79,7 @@ Task(subagent_type: "generalPurpose", readonly: true, prompt: "
 ## 6. QA проверка (5c) — ОБЯЗАТЕЛЬНО после ревью
 
 ```
-Task(subagent_type: "shell", model: "fast", prompt: "
+Task(subagent_type: "shell", model: "composer-2.5", prompt: "
 Прочитай skill .cursor/skills/qa-check/SKILL.md.
 Запусти: npm run lint:eslint -- --fix, npm test, npm run build:dev.
 Сохрани отчёт в .agents/tasks/<FEATURE-SLUG>/QA-TASK-{N}.md

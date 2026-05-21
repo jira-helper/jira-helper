@@ -12,6 +12,7 @@ import type { CardColorsSettings } from '../../types';
 import type { PropertyModel } from '../../property/PropertyModel';
 import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import type { Logger } from 'src/infrastructure/logging/Logger';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
 /**
  * Модель для логики применения цветов карточек на странице доски.
@@ -196,6 +197,17 @@ export class RuntimeModel {
    */
   isEnabled(): boolean {
     return this.propertyModel.isEnabled();
+  }
+
+  /**
+   * Read-only diagnostic snapshot: runtime flags only, no DOM or private fields.
+   */
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      isActive: this.isActive,
+      error: this.error,
+      intervalActive: this.intervalId !== null,
+    };
   }
 
   /**

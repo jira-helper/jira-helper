@@ -1,6 +1,6 @@
 # TASK-103: person-limits-module diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: model
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -30,10 +30,31 @@ src/features/person-limits-module/
 
 ## Критерии приёмки
 
-- [ ] `getDiagnosticSnapshot` не возвращает DOM
-- [ ] Diagnostic callback unit test
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] `getDiagnosticSnapshot` не возвращает DOM
+- [x] Diagnostic callback unit test
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- `BoardRuntimeModel.getDiagnosticSnapshot()` — агрегаты `activePerson`, `swimlanesActive`, `cssSelectorOfIssues`, `limits[]` с `issuesCount`/`isOverLimit` (без `Element[]`)
+- Регистрация `registerDiagnosticData('person-limits-module', …)` в `module.register()` (§5.3 payload)
+- Unit-тесты: `BoardRuntimeModel.test.ts` (snapshot), `module.diagnostic.test.ts` (callback)
+- В тестах DI добавлен `diagnosticModule.ensure` перед `personLimitsModule.ensure` (как в column-limits)
+
+**Проблемы и решения**:
+
+- После регистрации diagnostic callback 23 теста падали с «Token is not registered» — в setup тестов person-limits добавлен `diagnosticModule.ensure(container)` по образцу TASK-102.
 
 ## Зависимости
 

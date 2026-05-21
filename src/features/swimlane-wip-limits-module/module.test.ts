@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { swimlaneWipLimitsModule } from './module';
 import { propertyModelToken, settingsUIModelToken, boardRuntimeModelToken } from './tokens';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
@@ -22,6 +23,8 @@ describe('swimlaneWipLimitsModule', () => {
     container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
     container.register({ token: boardPagePageObjectToken, value: BoardPagePageObjectMock });
     container.register({ token: loggerToken, value: new Logger() });
+
+    diagnosticModule.ensure(container);
   });
 
   it('should register PropertyModel token', () => {

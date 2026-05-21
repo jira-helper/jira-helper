@@ -4,11 +4,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { globalContainer } from 'dioma';
 import { WithDi } from 'src/infrastructure/di/diContext';
-import { registerLogger } from 'src/infrastructure/logging/Logger';
-import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
+import { registerTestDependencies } from 'src/shared/testTools/registerTestDI';
 import { routingServiceToken, type IRoutingService } from 'src/infrastructure/routing';
 import { issueTypeServiceToken, type IIssueTypeService } from 'src/shared/issueType';
 import { BoardPropertyServiceToken, type BoardPropertyServiceI } from 'src/infrastructure/jira/boardPropertyService';
+import { boardPagePageObjectToken, BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { PersonalWipLimitContainer } from './components/PersonalWipLimitContainer';
 import { personLimitsModule } from '../module';
 import { propertyModelToken, settingsUIModelToken } from '../tokens';
@@ -30,8 +30,7 @@ const defaultSwimlanes: Swimlane[] = [
 
 function initPersonLimitsStoryDi(limits: PersonLimit[]) {
   globalContainer.reset();
-  registerLogger(globalContainer);
-  globalContainer.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
+  registerTestDependencies(globalContainer);
   globalContainer.register({
     token: routingServiceToken,
     value: { getProjectKeyFromURL: () => 'TEST' } as unknown as IRoutingService,
@@ -48,6 +47,7 @@ function initPersonLimitsStoryDi(limits: PersonLimit[]) {
       deleteBoardProperty: () => {},
     } as unknown as BoardPropertyServiceI,
   });
+  globalContainer.register({ token: boardPagePageObjectToken, value: BoardPagePageObject });
   personLimitsModule.ensure(globalContainer);
   globalContainer.inject(propertyModelToken).model.setData({ limits: structuredClone(limits) });
   globalContainer.inject(settingsUIModelToken).model.initFromProperty();

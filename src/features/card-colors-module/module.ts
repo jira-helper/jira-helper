@@ -5,7 +5,10 @@
  */
 
 import type { Container } from 'dioma';
+import { Ok, type Result } from 'ts-results';
 import { Module, modelEntry } from 'src/infrastructure/di/Module';
+import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { loggerToken } from 'src/infrastructure/logging/Logger';
@@ -36,6 +39,26 @@ class CardColorsModule extends Module {
       const { model: propertyModel } = c.inject(propertyModelToken);
       return modelEntry(new RuntimeModel(propertyModel, c.inject(boardPagePageObjectToken), c.inject(loggerToken)));
     });
+
+    const { model: diagnosticModel } = container.inject(diagnosticModelToken);
+    const { model: propertyModel } = container.inject(propertyModelToken);
+    const { model: runtimeModel } = container.inject(runtimeModelToken);
+
+    diagnosticModel.registerDiagnosticData(
+      'card-colors-module',
+      (): Result<FeatureDiagnosticData, Error> =>
+        Ok({
+          settings: {
+            boardProperty: {
+              state: propertyModel.state,
+              error: propertyModel.error,
+              settings: propertyModel.settings,
+            },
+            localStorage: null,
+          },
+          runtime: runtimeModel.getDiagnosticSnapshot(),
+        })
+    );
   }
 }
 

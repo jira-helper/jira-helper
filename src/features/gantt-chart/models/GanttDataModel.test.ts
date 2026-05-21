@@ -275,4 +275,29 @@ describe('GanttDataModel', () => {
     expect(model.bars).toEqual([]);
     expect(model.error).toBeNull();
   });
+
+  describe('getDiagnosticSnapshot', () => {
+    it('returns runtime aggregates without DOM or Date objects', async () => {
+      const issue = datedIssue();
+      fetchSubtasks.mockResolvedValue(Ok({ subtasks: [issue], externalLinks: [] }));
+
+      const model = proxy(createModel());
+      await model.loadSubtasks('ROOT-1', scopeSettings());
+
+      const loadSubtasksSpy = vi.spyOn(model, 'loadSubtasks');
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(loadSubtasksSpy).not.toHaveBeenCalled();
+      expect(snapshot).toEqual({
+        loadingState: 'loaded',
+        barsCount: model.bars.length,
+        missingDateIssuesCount: model.missingDateIssues.length,
+        tasksWithoutStatusHistoryCount: model.tasksWithoutStatusHistory.length,
+        issuesByKeyCount: 1,
+        error: null,
+      });
+      expect(snapshot).not.toHaveProperty('bars');
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
+  });
 });

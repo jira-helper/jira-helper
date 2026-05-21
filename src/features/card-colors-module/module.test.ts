@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'dioma';
 import { cardColorsModule } from './module';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { propertyModelToken, settingsUIModelToken, runtimeModelToken } from './tokens';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
@@ -48,6 +49,8 @@ describe('cardColorsModule', () => {
     container.register({ token: BoardPropertyServiceToken, value: mockBoardPropertyService });
     container.register({ token: loggerToken, value: new Logger() });
     container.register({ token: boardPagePageObjectToken, value: mockBoardPagePageObject });
+
+    diagnosticModule.ensure(container);
   });
 
   it('should register PropertyModel token', () => {

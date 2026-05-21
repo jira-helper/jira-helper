@@ -1,6 +1,6 @@
 # TASK-107: sub-tasks-progress + additional-card-elements diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -32,12 +32,32 @@ src/content.ts                      # ensure init вызывает registration
 
 ## Критерии приёмки
 
-- [ ] Оба featureName по §5.4
-- [ ] Unit test per feature callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] Оба featureName по §5.4
+- [x] Unit test per feature callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
 
 ## Зависимости
 
 - Зависит от: [TASK-99](./TASK-99-diagnostic-module-di-wiring.md)
 - Референс: requirements §5.6 legacy init
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- Добавлены `diagnosticRegistration.ts` для `sub-tasks-progress` и `additional-card-elements` с read-only snapshot zustand store + user guide localStorage.
+- Регистрация подключена в `content.ts` сразу после `diagnosticModule.ensure`.
+- Unit-тесты (3 на фичу): регистрация featureName, payload §5.3, отсутствие side effects при collect.
+
+**Проблемы и решения**:
+
+- В тестах `diagnosticModule.ensure` требовал `loggerToken` — добавлен mock Logger в `beforeEach`, как в `diagnostic-module/module.test.ts`.

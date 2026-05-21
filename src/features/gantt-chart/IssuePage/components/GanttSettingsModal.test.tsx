@@ -13,7 +13,8 @@ import type { JiraField, JiraIssueLinkType, JiraStatus } from 'src/infrastructur
 import type { GanttScopeSettings, SettingsScope } from '../../types';
 import { GanttSettingsModal } from './GanttSettingsModal';
 
-vi.setConfig({ testTimeout: 15000 });
+// Heavy Ant Design modal + metadata stores; 15s flakes under full npm test load.
+vi.setConfig({ testTimeout: 30000 });
 
 const mockJiraFields: JiraField[] = [
   {
@@ -174,7 +175,7 @@ async function findAntSelectOption(label: string) {
  * before querying for elements inside it.
  */
 async function activateTab(name: RegExp) {
-  const user = userEvent.setup();
+  const user = userEvent.setup({ delay: null });
   await user.click(screen.getByRole('tab', { name }));
 }
 
@@ -222,7 +223,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onSave when Save is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
@@ -231,7 +232,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onCancel when Cancel is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -240,7 +241,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onCopyFrom when Copy from is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: /copy from/i }));
@@ -249,7 +250,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onDraftChange when a color rule is added', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: /add color rule/i }));
@@ -265,11 +266,14 @@ describe('GanttSettingsModal', () => {
   });
 
   it('persists color rule name from the bar colors section', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: /add color rule/i }));
-    await user.type(screen.getByTestId('gantt-color-rule-name-0'), 'Critical work');
+    // fireEvent.change: user.type is char-by-char and flakes past 15s under full-suite load.
+    fireEvent.change(screen.getByTestId('gantt-color-rule-name-0'), {
+      target: { value: 'Critical work' },
+    });
 
     await waitFor(() => {
       const lastCall = props.onDraftChange.mock.calls.at(-1)?.[0] as Partial<GanttScopeSettings> | undefined;
@@ -281,7 +285,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onScopeLevelChange when scope level changes', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     const globalOption = screen
@@ -294,7 +298,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onDraftChange when tooltip fields change', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     openAntSelect('gantt-settings-tooltip-fields-select');
@@ -316,7 +320,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onDraftChange when Include epic children is toggled', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
     await activateTab(/issues/i);
 
@@ -328,7 +332,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onDraftChange when Include subtasks is toggled off', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
     await activateTab(/issues/i);
 
@@ -350,7 +354,7 @@ describe('GanttSettingsModal', () => {
   // A2: when the user changes a date-mapping `source` (e.g. dateField → statusTransition),
   // the dependent `detail` (fieldId/statusName) must be cleared so we do not save mismatched data.
   it('resets the detail value when start-mapping source changes from dateField to statusTransition', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     const startSection = screen.getByTestId('gantt-settings-start-mappings');
@@ -372,7 +376,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('saves statusTransition mapping with status id and fallback status name', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal({
       draft: {
         ...baseDraft,
@@ -399,7 +403,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('renders legacy statusTransition name as fallback without saving it as status id', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal({
       draft: {
         ...baseDraft,
@@ -434,7 +438,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('patches draft statusProgressMapping when a status mapping row changes', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal({
       draft: {
         ...baseDraft,
@@ -459,7 +463,6 @@ describe('GanttSettingsModal', () => {
   });
 
   it('does not persist arbitrary status search text as a Gantt status mapping row', async () => {
-    const user = userEvent.setup();
     const props = renderModal({
       draft: {
         ...baseDraft,
@@ -470,7 +473,10 @@ describe('GanttSettingsModal', () => {
     });
 
     openAntSelect('status-progress-mapping-status-0');
-    await user.type(screen.getByRole('combobox', { name: 'Jira status' }), 'Missing Status');
+    // fireEvent.change: char-by-char user.type flakes past timeout under full-suite load.
+    fireEvent.change(screen.getByRole('combobox', { name: 'Jira status' }), {
+      target: { value: 'Missing Status' },
+    });
 
     expect(screen.getByText('No status found')).toBeInTheDocument();
     expect(props.onDraftChange).not.toHaveBeenCalledWith(
@@ -483,7 +489,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('clears draft statusProgressMapping when the last valid row is removed and an empty row remains', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal({
       draft: {
         ...baseDraft,
@@ -503,7 +509,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('keeps a new empty status mapping row local until a status is selected', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal();
 
     await user.click(screen.getByRole('button', { name: '+ Add status mapping' }));
@@ -513,7 +519,7 @@ describe('GanttSettingsModal', () => {
   });
 
   it('calls onDraftChange with issueLinkTypesToInclude when row link type is selected', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const props = renderModal({ draft: { ...baseDraft, includeIssueLinks: true } });
     await activateTab(/issues/i);
 
@@ -534,5 +540,5 @@ describe('GanttSettingsModal', () => {
         { id: '10000', direction: 'outward' },
       ]);
     });
-  }, 15000);
-});
+  });
+}, 30000);

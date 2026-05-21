@@ -1,6 +1,6 @@
 # TASK-104: swimlane-wip-limits-module diagnostic
 
-**Status**: TODO
+**Status**: DONE
 **Type**: di-wiring
 
 **Parent**: [EPIC-7](./EPIC-7-diagnostic-data-collection.md)
@@ -29,11 +29,33 @@ src/features/swimlane-wip-limits-module/
 
 ## Критерии приёмки
 
-- [ ] Convention payload §5.3
-- [ ] Unit test diagnostic callback
-- [ ] Тесты проходят: `npm test`
-- [ ] Нет ошибок линтера: `npm run lint:eslint -- --fix`
+- [x] Convention payload §5.3
+- [x] Unit test diagnostic callback
+- [x] Тесты проходят: `npm test`
+- [x] Нет ошибок линтера: `npm run lint:eslint -- --fix`
 
 ## Зависимости
 
 - Зависит от: [TASK-99](./TASK-99-diagnostic-module-di-wiring.md)
+
+---
+
+## Результаты
+
+**Дата**: 2026-05-20
+
+**Агент**: Coder
+
+**Статус**: VERIFICATION
+
+**Что сделано**:
+
+- Зарегистрирован `registerDiagnosticData('swimlane-wip-limits-module', …)` в `module.ts` (closure над `propertyModel` + `boardRuntimeModel`).
+- Payload §5.3: `settings.boardProperty` — `{ state, error, settings }`; `localStorage: null`; `runtime.stats` — read-only snapshot без `render()`/`load()`.
+- Добавлен `module.diagnostic.test.ts` (3 теста: регистрация, loaded state, initial state).
+- В `module.test.ts` добавлен `diagnosticModule.ensure(container)` для DI bootstrap.
+
+**Проблемы и решения**:
+
+- `module.test.ts` падал без `diagnosticModule.ensure` — добавлен ensure в `beforeEach`, по аналогии с column-limits/person-limits.
+- `getDiagnosticSnapshot()` не потребовался: `stats` и `propertyModel.settings` безопасно читаются напрямую.

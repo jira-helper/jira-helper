@@ -11,6 +11,8 @@ import type { ICommentsEditorPageObject } from 'src/infrastructure/page-objects/
 import { commentsEditorPageObjectToken, toCommentEditorId } from 'src/infrastructure/page-objects/CommentsEditor';
 import type { ILocalStorageService } from 'src/infrastructure/storage/LocalStorageService';
 import { localStorageServiceToken } from 'src/infrastructure/storage/tokens';
+import { diagnosticModule } from 'src/features/diagnostic-module/module';
+import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { registerIssueSettings } from 'src/issue-settings/actions/registerIssueSettings';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
@@ -84,6 +86,8 @@ describe('CommentTemplatesPageModification', () => {
     container.register({ token: localeProviderToken, value: new MockLocaleProvider('en') });
     container.register({ token: searchUsersToken, value: vi.fn(async () => []) });
     container.register({ token: buildAvatarUrlToken, value: vi.fn((login: string) => `/avatar/${login}`) });
+    container.register({ token: loggerToken, value: new Logger() });
+    diagnosticModule.ensure(container);
     jiraCommentTemplatesModule.ensure(container);
   });
 

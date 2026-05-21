@@ -1,4 +1,5 @@
 import { ref } from 'valtio';
+import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { IJiraService } from 'src/infrastructure/jira/jiraService';
 import type { JiraField, JiraIssueMapped } from 'src/infrastructure/jira/types';
@@ -146,6 +147,17 @@ export class GanttDataModel {
     this.cachedIssues = null;
     this.lastIssueKey = '';
     this.issueInputByKey = new Map();
+  }
+
+  getDiagnosticSnapshot(): FeatureDiagnosticData {
+    return {
+      loadingState: this.loadingState,
+      barsCount: this.bars.length,
+      missingDateIssuesCount: this.missingDateIssues.length,
+      tasksWithoutStatusHistoryCount: this.tasksWithoutStatusHistory.length,
+      issuesByKeyCount: this.getIssuesByKey().size,
+      error: this.error,
+    };
   }
 
   private applyCompute(settings: GanttScopeSettings): void {

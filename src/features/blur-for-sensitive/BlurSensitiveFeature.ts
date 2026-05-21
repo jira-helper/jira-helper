@@ -2,6 +2,7 @@ import { Container } from 'dioma';
 import type { IExtensionApiService } from '../../infrastructure/extension-api/ExtensionApiService';
 import type { IBlurSensitiveFeature } from './IBlurSensitiveFeature';
 import { extensionApiServiceToken } from '../../infrastructure/extension-api/ExtensionApiService';
+import { registerBlurForSensitiveDiagnosticData } from './diagnosticRegistration';
 import { blurSensitiveFeatureToken } from './tokens';
 import './blurSensitive.css';
 
@@ -56,4 +57,5 @@ export const registerBlurSensitiveFeatureInDI = (container: Container) => {
     token: blurSensitiveFeatureToken,
     value: new BlurSensitiveFeature(extensionApi),
   });
+  registerBlurForSensitiveDiagnosticData(container);
 };

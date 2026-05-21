@@ -1,6 +1,7 @@
 import { Token } from 'dioma';
 import { PageModification } from '../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../shared/constants';
+import { setSlaConfigSnapshot } from './slaConfigSnapshot';
 import { getChartLinePosition, getChartTicks } from './utils';
 
 const SLA_COLOR = 'green';
@@ -360,6 +361,7 @@ export default class AddSlaLine extends PageModification<any[], Element> {
     await this.waitForElement('.tick', chartElement);
 
     let slaValue = Number(value);
+    setSlaConfigSnapshot({ value: slaValue });
 
     window.onpopstate = () => {
       const slaQueryParam = this.getSearchParam(SLA_QUERY_PARAMETER);
@@ -384,6 +386,7 @@ export default class AddSlaLine extends PageModification<any[], Element> {
       },
       onSave: () => {
         slaValue = changingValue;
+        setSlaConfigSnapshot({ value: slaValue });
         this.updateBoardProperty(BOARD_PROPERTIES.SLA_CONFIG, { value: slaValue });
         renderSlaLine(slaValue, chartElement as SVGElement, changingValue);
       },

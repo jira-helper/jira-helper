@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { proxy } from 'valtio';
 import type { TimeInterval } from '../types';
 import { GanttViewportModel } from './GanttViewportModel';
@@ -120,5 +120,25 @@ describe('GanttViewportModel', () => {
     expect(model.panOffset).toEqual({ x: 0, y: 0 });
     expect(model.interval).toBe('days');
     expect(model.transform).toEqual({ k: 1, x: 0, y: 0 });
+  });
+
+  describe('getDiagnosticSnapshot', () => {
+    it('returns viewport state without invoking setters', () => {
+      model.setZoomLevel(2);
+      model.setPanOffset({ x: 10, y: -5 });
+      model.setInterval('weeks');
+
+      const setZoomSpy = vi.spyOn(model, 'setZoomLevel');
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(setZoomSpy).not.toHaveBeenCalled();
+      expect(snapshot).toEqual({
+        zoomLevel: 2,
+        panOffset: { x: 10, y: -5 },
+        interval: 'weeks',
+        transform: { k: 2, x: 10, y: -5 },
+      });
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
   });
 });

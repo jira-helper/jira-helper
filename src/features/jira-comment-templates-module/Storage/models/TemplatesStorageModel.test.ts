@@ -363,6 +363,47 @@ describe('TemplatesStorageModel', () => {
     });
   });
 
+  describe('getDiagnosticSnapshot', () => {
+    it('returns version, templatesCount and enabled from in-memory state', async () => {
+      const { service } = createFakeStorage(new Map());
+      const model = proxy(new TemplatesStorageModel(service));
+      await model.load();
+
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(snapshot).toEqual({
+        version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+        templatesCount: model.templates.length,
+        enabled: model.enabled,
+      });
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
+
+    it('reflects current state without reading or writing storage', () => {
+      const { service, setCalls } = createFakeStorage(new Map());
+      const model = proxy(new TemplatesStorageModel(service));
+
+      model.templates = [
+        {
+          id: toCommentTemplateId('only'),
+          label: 'One',
+          color: '#abc',
+          text: 'body',
+        },
+      ];
+      model.enabled = false;
+
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(snapshot).toEqual({
+        version: COMMENT_TEMPLATES_STORAGE_PAYLOAD_VERSION,
+        templatesCount: 1,
+        enabled: false,
+      });
+      expect(setCalls).toHaveLength(0);
+    });
+  });
+
   describe('reset', () => {
     it('clears in-memory state to initial empty', async () => {
       const { service } = createFakeStorage(new Map());

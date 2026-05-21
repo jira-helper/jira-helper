@@ -752,6 +752,115 @@ describe('BoardRuntimeModel', () => {
     expect(pg.classList.contains('no-visibility')).toBe(true);
   });
 
+  describe('getDiagnosticSnapshot', () => {
+    it('returns runtime aggregates without DOM references', () => {
+      const model = modelWithLimits([]);
+      const issue = document.createElement('motion');
+      model.stats = [
+        {
+          id: 42,
+          persons: [{ name: 'john.doe', displayName: 'John Doe' }],
+          limit: 3,
+          issues: [issue],
+          columns: [{ id: 'col1', name: 'To Do' }],
+          swimlanes: [{ id: 'sw1', name: 'Team A' }],
+          includedIssueTypes: ['Task'],
+          showAllPersonIssues: false,
+          sharedLimit: true,
+        },
+      ];
+      model.activePerson = { limitId: 42, personName: 'john.doe' };
+      model.cssSelectorOfIssues = '.custom-issue';
+      model.setSwimlanesActive(false);
+
+      const snapshot = model.getDiagnosticSnapshot();
+
+      expect(snapshot).toEqual({
+        activePerson: { limitId: 42, personName: 'john.doe' },
+        swimlanesActive: false,
+        cssSelectorOfIssues: '.custom-issue',
+        limits: [
+          {
+            id: 42,
+            persons: [{ name: 'john.doe', displayName: 'John Doe' }],
+            limit: 3,
+            issuesCount: 1,
+            isOverLimit: false,
+            columns: [{ id: 'col1', name: 'To Do' }],
+            swimlanes: [{ id: 'sw1', name: 'Team A' }],
+            includedIssueTypes: ['Task'],
+            showAllPersonIssues: false,
+            sharedLimit: true,
+          },
+        ],
+      });
+      const limits = snapshot.limits as Array<Record<string, unknown>> | null;
+      expect(limits?.[0]).not.toHaveProperty('issues');
+      expect(() => JSON.stringify(snapshot)).not.toThrow();
+    });
+
+    it('marks shared limit over when total issues exceed limit', () => {
+      const model = modelWithLimits([]);
+      model.stats = [
+        {
+          id: 1,
+          persons: [{ name: 'john.doe' }, { name: 'jane.doe' }],
+          limit: 1,
+          issues: [document.createElement('div'), document.createElement('motion')],
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: true,
+        },
+      ];
+
+      const snapshot = model.getDiagnosticSnapshot();
+
+      const limits = snapshot.limits as Array<{ issuesCount: number; isOverLimit: boolean }> | null;
+      expect(limits?.[0]).toMatchObject({
+        issuesCount: 2,
+        isOverLimit: true,
+      });
+    });
+
+    it('marks per-person limit over when any person exceeds their bucket', () => {
+      const johnIssue1 = document.createElement('motion');
+      const johnIssue2 = document.createElement('motion');
+      johnIssue1.setAttribute('data-assignee', 'john.doe');
+      johnIssue2.setAttribute('data-assignee', 'john.doe');
+      const janeIssue = document.createElement('span');
+      janeIssue.setAttribute('data-assignee', 'jane.doe');
+
+      const mockPageObject = {
+        getAssigneeFromIssue: (el: Element) => el.getAttribute('data-assignee'),
+      };
+      const modelWithMock = new BoardRuntimeModel(mockPropertyModel, mockPageObject as never, mockLogger);
+      modelWithMock.stats = [
+        {
+          id: 1,
+          persons: [
+            { name: 'john.doe', displayName: 'John Doe' },
+            { name: 'jane.doe', displayName: 'Jane Doe' },
+          ],
+          limit: 1,
+          issues: [johnIssue1, johnIssue2, janeIssue],
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ];
+
+      const snapshot = modelWithMock.getDiagnosticSnapshot();
+
+      const limits = snapshot.limits as Array<{ issuesCount: number; isOverLimit: boolean }> | null;
+      expect(limits?.[0]).toMatchObject({
+        issuesCount: 3,
+        isOverLimit: true,
+      });
+    });
+  });
+
   it('showOnlyChosen hides swimlane when every issue in it is filtered out', () => {
     document.body.innerHTML = `
       <div class="ghx-swimlane-header" aria-label="custom swimlanes"></div>
