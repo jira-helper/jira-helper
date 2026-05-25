@@ -91,6 +91,7 @@
     "test:storybook": "vitest run --config vitest.storybook.config.ts",
     "cy:open": "cypress open --component",
     "cy:run": "cypress run --component",
+    "jh:cli": "node tools/jh-playwright-cli.mjs",
     "analyze": "node scripts/analyze-modules.mjs",
     "docs:features": "node scripts/generate-features-doc.mjs",
     "docs:changelog": "node scripts/generate-changelog.mjs",

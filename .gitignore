@@ -34,6 +34,7 @@ cypress/videos
 
 .playwright/output/
 .playwright/chrome-profile/
+.playwright/cli.config.resolved.json
 .playwright/daemon-session/
 test-results/
 .playwright-cli

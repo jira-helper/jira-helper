@@ -1,4 +1,5 @@
 {
+  "_comment": "Template for jh-playwright-cli.mjs. Paths are resolved to repo-root absolutes at runtime. Do not pass this file directly to playwright-cli.",
   "browser": {
     "browserName": "chromium",
     "userDataDir": ".playwright/chrome-profile",
