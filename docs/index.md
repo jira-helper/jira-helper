@@ -137,6 +137,86 @@ Result
 ![secret data is blurred](https://raw.githubusercontent.com/pavelpower/jira-helper/images/features/blurred_secret_data.png)
 
 
+## Card Colors
+
+Jira has a built-in feature for highlighting cards on the board with colors based on JQL queries. However, this highlighting is limited to a thin strip on the left edge of the card.
+
+**Jira-helper** enhances this by applying the highlight to the entire card instead of just the left strip, making card categories immediately visible.
+
+![Card Colors Before](https://raw.githubusercontent.com/jira-helper/jira-helper/master/src/assets/card-colors-before.jpg)
+
+With Jira Helper:
+
+![Card Colors After](https://raw.githubusercontent.com/jira-helper/jira-helper/master/src/assets/card-colors-after.jpg)
+
+To enable or disable this feature, go to the board settings screen => Card Colors.
+
+
+## Sub-tasks Progress
+
+The Sub-tasks Progress feature displays a progress bar on Jira issue cards. This progress bar visually reflects the completion status of related issues:
+
+- Tasks and subtasks within an Epic
+- Subtasks of a task
+- Issues linked to the current issue
+
+**Key Features:**
+
+- **Progress Tracking Across Hierarchies**: Visualize progress for Epics, Tasks, and Sub-tasks based on their child or linked issues
+- **Configurable Column Display**: Progress bars can be enabled for specific columns on the Jira board
+- **Flexible Grouping**: Group and calculate progress by fields such as Project, Reporter, Assignee, Issue Type
+- **Status Filtering**: Exclude certain issue statuses from the progress calculation
+- **Dependency Awareness**: Warning indicator if any sub-task is blocked or flagged
+
+Configure in _"Board Settings -> Sub-tasks Progress"_
+
+
+## Additional Card Elements
+
+This feature adds informational badges to Jira cards to improve visibility of task relationships and timing.
+
+### Issue Links Display
+
+Displays related issues on cards based on link types and JQL filters.
+
+**Configuration:**
+- **Link Type**: Select the type of relationship to display (Parent, Blocker, etc.)
+- **Direction**: Choose inward, outward, or both directions
+- **JQL Filter**: Optional JQL query to filter related issues
+- **Columns**: Select which board columns to show the relationships in
+
+**Example Use Cases:**
+- Show all child tasks linked via "is Child of" relationship
+- Display issues that block the current task
+- Show related ideas with specific JQL filter
+
+### Days in Column
+
+Badge showing how many days an issue has been in the current column. Helps identify "stuck" issues quickly.
+
+**Configuration:**
+- Enable/disable the feature
+- Set warning threshold (yellow) - number of days before warning
+- Set danger threshold (red) - number of days before critical warning
+- Configure different thresholds per column
+
+### Days to Deadline
+
+Badge showing remaining days until the due date of an issue.
+
+**Configuration:**
+- Select the date field to use as deadline
+- Display mode: Always, Less than X days, or Overdue only
+- Set warning threshold for approaching deadlines
+
+**Color scheme:**
+- Red: Overdue
+- Yellow: Due today, tomorrow, or within warning threshold
+- Blue: Normal
+
+Configure in _"Board Settings -> Additional Card Elements"_
+
+
 ## How to identify jira-helper requests
 
 Your JIRA administrators can identify **jira-helper** requests

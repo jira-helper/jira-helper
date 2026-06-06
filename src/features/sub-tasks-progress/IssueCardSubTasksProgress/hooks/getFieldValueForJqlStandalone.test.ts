@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { JiraIssueMapped, JiraField } from 'src/shared/jira/types';
-import { JiraTestDataBuilder } from 'src/shared/jira/testData';
+import { JiraIssueMapped, JiraField } from 'src/infrastructure/jira/types';
+import { JiraTestDataBuilder } from 'src/infrastructure/jira/testData';
 import { getFieldValueForJqlStandalone } from './useSubtasksProgress';
 
 describe('getFieldValueForJqlStandalone', () => {

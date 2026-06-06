@@ -1,0 +1,63 @@
+.avatar {
+  cursor: pointer;
+  position: relative;
+  margin-right: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.avatarImage {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  outline: solid 2px transparent;
+  outline-offset: -2px;
+}
+
+.avatarImage.active {
+  outline-color: #0052cc;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: #dfe1e6;
+  color: #42526e;
+  font-size: 14px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  border-radius: 50%;
+  color: white;
+  padding: 5px 2px;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 400;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.under {
+  background: #1b855c;
+}
+
+.at {
+  background: #ffd700;
+}
+
+.over {
+  background: #ff5630;
+}

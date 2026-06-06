@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { CustomGroupSettings } from './CustomGroupSettings';
 import { addCustomGroup, updateCustomGroup, removeCustomGroup } from './actions';

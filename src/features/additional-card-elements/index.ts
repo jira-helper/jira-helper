@@ -1,4 +1,4 @@
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
 
 export const init = () => {

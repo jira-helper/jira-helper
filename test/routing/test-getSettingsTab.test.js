@@ -1,19 +1,44 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getSettingsTab } from '../../src/routing';
+import { globalContainer } from 'dioma';
+import { routingServiceToken } from '../../src/infrastructure/routing';
+import { settingsPagePageObjectToken } from '../../src/infrastructure/page-objects/SettingsPage';
+import { registerExtensionApiServiceInDI } from '../../src/infrastructure/extension-api/ExtensionApiService';
+import { PageModification } from '../../src/infrastructure/page-modification/PageModification';
 
-describe('Routing should', () => {
-  beforeEach(() => {
-    vi.stubGlobal('location', { search: '' });
-  });
+class TestModification extends PageModification {
+  async getTab() {
+    return this.getSettingsTab();
+  }
+}
+
+describe('PageModification.getSettingsTab', () => {
+  let modification;
 
   const cases = [
-    ['tab=settings-tab', 'settings-tab'],
-    ['config=config-tab', 'config-tab'],
+    ['?tab=settings-tab', 'settings-tab'],
+    ['?config=config-tab', 'config-tab'],
   ];
 
   it.each(cases)('when "%s" is given then return "%s"', async (search, tab) => {
-    window.location.search = search;
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+
+    globalContainer.register({
+      token: routingServiceToken,
+      value: {
+        getSearchParam: vi.fn().mockImplementation(param => new URLSearchParams(search).get(param)),
+      },
+    });
+    globalContainer.register({
+      token: settingsPagePageObjectToken,
+      value: {
+        selectors: { settingsContent: '#main', selectedNav: '.aui-nav-selected' },
+        getSelectedTab: vi.fn().mockReturnValue(null),
+      },
+    });
+
+    modification = new TestModification();
     expect.assertions(1);
-    await expect(getSettingsTab()).resolves.toEqual(tab);
+    await expect(modification.getTab()).resolves.toEqual(tab);
   });
 });

@@ -1,18 +1,21 @@
-import { JiraField, JiraIssueMapped } from 'src/shared/jira/types';
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
+import { JiraField, JiraIssueMapped } from 'src/infrastructure/jira/types';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
+import { useJiraExternalIssuesStore } from 'src/infrastructure/jira/stores/jiraExternalIssues';
 import { useGetTextsByLocale } from 'src/shared/texts';
-import { useGetFields } from 'src/shared/jira/fields/useGetFields';
+import { useGetFields } from 'src/infrastructure/jira/fields/useGetFields';
 
 import { parseJql } from 'src/shared/jql/simpleJqlParser';
-import { useGetIssueLinkTypes } from 'src/shared/jira/stores/useGetIssueLinkTypes';
-import { getEpicLinkFieldId } from 'src/shared/jira/fields/loadJiraFields';
+import { useGetIssueLinkTypes } from 'src/infrastructure/jira/stores/useGetIssueLinkTypes';
+import { getEpicLinkFieldId } from 'src/infrastructure/jira/fields/loadJiraFields';
+import { extractFieldValueBySchema, getFieldValueForJql } from 'src/infrastructure/jira/fields/getFieldValueForJql';
 import { ActiveStatuses, IssueLinkTypeSelection, SubTasksProgress } from '../../types';
 import { useGetSettings } from '../../SubTaskProgressSettings/hooks/useGetSettings';
 import { mapStatusCategoryColorToProgressStatus } from '../../colorSchemas';
 import { CustomGroup } from '../../BoardSettings/GroupingSettings/CustomGroups/types';
+import { resolveProgressBucket } from 'src/shared/status-progress-mapping/utils/resolveProgressBucket';
+import type { StatusProgressMapping } from 'src/shared/status-progress-mapping/types';
 
 const getLinkedIssues = (issue: JiraIssueMapped, subtasks: JiraIssueMapped[]) => {
   const issueLinks = issue?.fields.issuelinks || [];
@@ -143,66 +146,18 @@ const TEXTS = {
   },
 };
 
-const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]): any[] => {
+const getFieldValue = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]): string[] => {
   const field = fields.find(f => f.id === cg.fieldId);
   if (!field) return [];
-  const val = issue.fields[field.id];
-  switch (field.schema?.type) {
-    // by value
-    case 'string':
-    case 'option':
-      return val && val.value !== undefined ? [val.value] : [];
-    // by key
-    case 'project':
-      return val && val.key !== undefined ? [val.key] : [];
-    // by name
-    case 'priority':
-    case 'status':
-    case 'issuetype':
-      return val && val.name !== undefined ? [val.name] : [];
-    case 'user': {
-      const arr = [];
-      if (val?.displayName) arr.push(val.displayName);
-      if (val?.emailAddress) arr.push(val.emailAddress);
-      if (val?.name) arr.push(val.name);
-      return arr;
-    }
-    case 'array': {
-      switch (field.schema.items) {
-        case 'component':
-          if (!val) return [];
-          return val.map((v: { name: string }) => v.name);
-        case 'string':
-        case 'option':
-          if (!val) return [];
-          return val.map((v: { value: string }) => v.value);
-        default:
-          return [];
-      }
-    }
-    default:
-      return [];
-  }
+  return extractFieldValueBySchema(issue, field);
 };
 
-// Utility: getFieldValueForJqlStandalone for use in JQL debug/demo
+/**
+ * @deprecated Use {@link getFieldValueForJql} from `infrastructure/jira/fields` directly.
+ * Kept as a thin re-export so existing tests/callers in this module keep working.
+ */
 export function getFieldValueForJqlStandalone(issue: JiraIssueMapped, fields: JiraField[]) {
-  return (fieldName: string) => {
-    const lowerFieldName = fieldName.toLowerCase();
-
-    // jira may have multiple fields with the same name, so we need to filter them
-    // for example: system field Project (type project) and custom field Project (type option)
-    const filteredFields = fields.filter(
-      f =>
-        f.id.toLowerCase() === lowerFieldName ||
-        f.name.toLowerCase() === lowerFieldName ||
-        (f.clauseNames && f.clauseNames.some(cn => cn.toLowerCase() === lowerFieldName))
-    );
-
-    if (!filteredFields.length) return [];
-
-    return filteredFields.flatMap(f => getFieldValue(issue, { fieldId: f.id } as any, fields));
-  };
+  return getFieldValueForJql(issue, fields);
 }
 
 const matchToCustomGroupByField = (issue: JiraIssueMapped, cg: CustomGroup, fields: JiraField[]) => {
@@ -210,21 +165,12 @@ const matchToCustomGroupByField = (issue: JiraIssueMapped, cg: CustomGroup, fiel
   return values.some(v => v === cg.value);
 };
 
-const mapStatusCategeoryToProgressStatus = (statusCategory: JiraIssueMapped['statusCategory']) => {
-  if (statusCategory === 'new') {
-    return 'todo';
-  }
-  if (statusCategory === 'indeterminate') {
-    return 'inProgress';
-  }
-  return 'done';
-};
-
-function calcProgress(
+export function calcProgress(
   subtasks: JiraIssueMapped[],
   settings: {
     flagsAsBlocked: boolean;
     blockedByLinksAsBlocked: boolean;
+    statusProgressMapping?: StatusProgressMapping;
   },
   texts: {
     flaggedIssue: string;
@@ -239,22 +185,23 @@ function calcProgress(
   };
   const comments: string[] = [];
   for (const issue of subtasks) {
-    const status: { name: string; progressStatus: ActiveStatuses } = {
-      name: issue.status,
-      progressStatus: mapStatusCategeoryToProgressStatus(issue.statusCategory),
-    };
+    let progressStatus: ActiveStatuses = resolveProgressBucket(
+      String(issue.statusId),
+      issue.statusCategory,
+      settings.statusProgressMapping
+    );
 
     if (issue.isFlagged && settings.flagsAsBlocked) {
-      status.progressStatus = 'blocked';
+      progressStatus = 'blocked';
       comments.push(`${texts.flaggedIssue}: ${issue.key}`);
     }
 
     if (issue.isBlockedByLinks && settings.blockedByLinksAsBlocked) {
-      status.progressStatus = 'blocked';
+      progressStatus = 'blocked';
       comments.push(`${texts.blockedByLinks}: ${issue.key}`);
     }
 
-    progress[status.progressStatus] += 1;
+    progress[progressStatus] += 1;
   }
 
   return {
@@ -386,7 +333,7 @@ export type SubTasksCounterProgressByGroup = Record<
 export const useSubtasksProgressByCustomGroup = (issueKey: string): SubTasksCounterProgressByGroup => {
   const subtasks = useGetSubtasksToCountProgress(issueKey);
   const {
-    settings: { customGroups, flagsAsBlocked, blockedByLinksAsBlocked },
+    settings: { customGroups, flagsAsBlocked, blockedByLinksAsBlocked, statusProgressMapping },
   } = useGetSettings();
   const { fields } = useGetFields();
   const texts = useGetTextsByLocale(TEXTS);
@@ -413,6 +360,7 @@ export const useSubtasksProgressByCustomGroup = (issueKey: string): SubTasksCoun
       {
         flagsAsBlocked,
         blockedByLinksAsBlocked,
+        statusProgressMapping,
       },
       texts
     );

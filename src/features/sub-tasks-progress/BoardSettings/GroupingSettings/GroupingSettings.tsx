@@ -1,7 +1,8 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React, { useMemo } from 'react';
 import { Card, Checkbox, ColorPicker, Select, Tag, Tooltip } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
-import { useJiraSubtasksStore } from 'src/shared/jira/stores/jiraSubtasks';
+import { useJiraSubtasksStore } from 'src/infrastructure/jira/stores/jiraSubtasks';
 import { useGetSettings } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/hooks/useGetSettings';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { InfoCircleFilled } from '@ant-design/icons';
@@ -220,7 +221,6 @@ export const GroupingSettings = () => {
               <div className={styles.examples}>
                 <h4 className={styles.examplesTitle}>{texts.examples}</h4>
                 <div className={styles.examplesContent}>
-                  {/* eslint-disable-next-line no-nested-ternary */}
                   {settings.showGroupsByFieldAsCounters ? (
                     settings.enableGroupByField ? (
                       <>

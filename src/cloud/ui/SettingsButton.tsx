@@ -5,23 +5,44 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SettingsPanel } from '../PluginSettings/SettingsPanel';
 import styles from './settings.module.css';
 
+const ANT_OVERLAY_SELECTORS = [
+  '.ant-popover',
+  '.ant-select-dropdown',
+  '.ant-color-picker-dropdown',
+  '.ant-picker-dropdown',
+  '.ant-modal-root',
+  '.ant-dropdown',
+  '.ant-tabs',
+  '.ant-message',
+  '.ant-notification',
+  '.ant-tooltip',
+].join(', ');
+
 export const SettingsButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const popupEl = popupRef.current;
+      if (!popupEl) return;
+
+      const path = (event.composedPath?.() ?? []) as EventTarget[];
+      if (path.includes(popupEl)) return;
+
+      const target = event.target as Element | null;
+      if (target?.closest?.(ANT_OVERLAY_SELECTORS)) return;
+
+      setIsOpen(false);
     };
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
+    document.addEventListener('mousedown', handlePointerDown, true);
+    document.addEventListener('touchstart', handlePointerDown, true);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handlePointerDown, true);
+      document.removeEventListener('touchstart', handlePointerDown, true);
     };
   }, [isOpen]);
 

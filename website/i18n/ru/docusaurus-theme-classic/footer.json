@@ -1,0 +1,46 @@
+{
+  "link.title.Docs": {
+    "message": "Документация",
+    "description": "The title of the footer links column with title=Docs in the footer"
+  },
+  "link.title.Community": {
+    "message": "Сообщество",
+    "description": "The title of the footer links column with title=Community in the footer"
+  },
+  "link.title.Install": {
+    "message": "Установка",
+    "description": "The title of the footer links column with title=Install in the footer"
+  },
+  "link.item.label.Getting Started": {
+    "message": "Начало работы",
+    "description": "The label of footer link with label=Getting Started linking to /docs/getting-started/installation"
+  },
+  "link.item.label.Features": {
+    "message": "Возможности",
+    "description": "The label of footer link with label=Features linking to /docs/intro"
+  },
+  "link.item.label.FAQ": {
+    "message": "FAQ",
+    "description": "The label of footer link with label=FAQ linking to /docs/advanced/faq"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "GitHub Issues",
+    "description": "The label of footer link with label=GitHub Issues"
+  },
+  "link.item.label.GitHub Discussions": {
+    "message": "GitHub Discussions",
+    "description": "The label of footer link with label=GitHub Discussions"
+  },
+  "link.item.label.Chrome Web Store": {
+    "message": "Chrome Web Store",
+    "description": "The label of footer link with label=Chrome Web Store"
+  },
+  "link.item.label.Firefox Add-ons": {
+    "message": "Firefox Add-ons",
+    "description": "The label of footer link with label=Firefox Add-ons"
+  },
+  "copyright": {
+    "message": "© 2026 jira-helper. Открытый исходный код (ISC).",
+    "description": "The footer copyright"
+  }
+}

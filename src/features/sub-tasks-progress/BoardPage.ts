@@ -1,7 +1,8 @@
-import { BoardPagePageObject } from 'src/page-objects/BoardPage';
+import { Token } from 'dioma';
+import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
-import { PageModification } from '../../shared/PageModification';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { PageModification } from '../../infrastructure/page-modification/PageModification';
 
 import { loadSubTaskProgressBoardProperty } from './SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
 import { BoardSettingsTabContent } from './BoardSettings/BoardSettingsTabContent';
@@ -38,3 +39,5 @@ export class SubTasksProgressBoardPage extends PageModification<void, Element> {
     });
   }
 }
+
+export const subTasksProgressBoardPageToken = new Token<SubTasksProgressBoardPage>('SubTasksProgressBoardPage');

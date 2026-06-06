@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { globalContainer } from 'dioma';
 import { IssueLink } from '../types';
 import { useAdditionalCardElementsBoardPropertyStore } from './additionalCardElementsBoardProperty';
@@ -124,6 +124,44 @@ describe('Additional Card Elements Store', () => {
 
       // ASSERT
       expect(showInBacklog).toBe(false);
+    });
+  });
+
+  describe('clickable links settings', () => {
+    it('should enable clickable Epic Link and Issue Link by default', () => {
+      const { data } = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      expect(data.clickableEpicLinks).toBe(true);
+      expect(data.clickableIssueLinks).toBe(true);
+    });
+
+    it('should use default clickable settings when board property does not provide them', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setData({
+        enabled: true,
+        issueLinks: [],
+      });
+
+      const { data } = useAdditionalCardElementsBoardPropertyStore.getState();
+      expect(data.clickableEpicLinks).toBe(true);
+      expect(data.clickableIssueLinks).toBe(true);
+    });
+
+    it('should update clickable Epic Link setting', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setClickableEpicLinks(false);
+
+      expect(useAdditionalCardElementsBoardPropertyStore.getState().data.clickableEpicLinks).toBe(false);
+    });
+
+    it('should update clickable Issue Link setting', () => {
+      const store = useAdditionalCardElementsBoardPropertyStore.getState();
+
+      store.actions.setClickableIssueLinks(false);
+
+      expect(useAdditionalCardElementsBoardPropertyStore.getState().data.clickableIssueLinks).toBe(false);
     });
   });
 

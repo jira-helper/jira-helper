@@ -1,9 +1,12 @@
-import { BoardBacklogPagePageObject } from 'src/page-objects/BoardBacklogPage';
-import { PageModification } from 'src/shared/PageModification';
+import { Token } from 'dioma';
+import { BoardBacklogPagePageObject } from 'src/infrastructure/page-objects/BoardBacklogPage';
+import { PageModification } from 'src/infrastructure/page-modification/PageModification';
 
-import { registerSettings } from 'src/board-settings/actions/registerSettings';
+import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { AdditionalCardElementsSettings } from './BoardSettings/AdditionalCardElementsSettings';
 import { loadAdditionalCardElementsBoardProperty } from './BoardSettings/actions/loadAdditionalCardElementsBoardProperty';
+import { useAdditionalCardElementsBoardPropertyStore } from './stores/additionalCardElementsBoardProperty';
+import { linkifyEpicLinkBadges, unlinkifyEpicLinkBadges } from './utils/linkifyEpicLinkBadges';
 
 export class AdditionalCardElementsBoardBacklogPage extends PageModification<void, Element> {
   getModificationId(): string {
@@ -22,8 +25,32 @@ export class AdditionalCardElementsBoardBacklogPage extends PageModification<voi
     const { AdditionalCardElementsBacklogContainer } = await import(
       './AdditionalCardElementsBacklogContainer/AdditionalCardElementsBacklogContainer'
     );
+    let { clickableEpicLinks } = useAdditionalCardElementsBoardPropertyStore.getState().data;
+    const applyEpicLinkClickability = (enabled: boolean) => {
+      document.querySelectorAll(BoardBacklogPagePageObject.selectors.backlogIssueCard).forEach(card => {
+        if (enabled) {
+          linkifyEpicLinkBadges(card);
+        } else {
+          unlinkifyEpicLinkBadges(card);
+        }
+      });
+    };
+    const unsubscribeClickableEpicLinks = useAdditionalCardElementsBoardPropertyStore.subscribe(state => {
+      if (state.data.clickableEpicLinks === clickableEpicLinks) {
+        return;
+      }
+
+      clickableEpicLinks = state.data.clickableEpicLinks;
+      applyEpicLinkClickability(clickableEpicLinks);
+    });
+    this.sideEffects.push(unsubscribeClickableEpicLinks);
+
     const unlisten = BoardBacklogPagePageObject.listenCards(cards => {
       cards.forEach(card => {
+        const currentSettings = useAdditionalCardElementsBoardPropertyStore.getState().data;
+        if (currentSettings.clickableEpicLinks) {
+          linkifyEpicLinkBadges(card.getCardElement());
+        }
         card.attach(AdditionalCardElementsBacklogContainer, 'additional-card-elements-backlog');
       });
     });
@@ -35,3 +62,7 @@ export class AdditionalCardElementsBoardBacklogPage extends PageModification<voi
     });
   }
 }
+
+export const additionalCardElementsBoardBacklogPageToken = new Token<AdditionalCardElementsBoardBacklogPage>(
+  'AdditionalCardElementsBoardBacklogPage'
+);

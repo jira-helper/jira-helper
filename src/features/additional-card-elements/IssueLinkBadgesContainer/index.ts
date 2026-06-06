@@ -1,0 +1,1 @@
+export { IssueLinkBadgesContainer } from './IssueLinkBadgesContainer';

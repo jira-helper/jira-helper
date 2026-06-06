@@ -1,0 +1,101 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  cursor: help;
+}
+
+.badgeWithColor {
+  padding: 2px 4px;
+  border-radius: 4px;
+  /* backgroundColor is set via inline style */
+}
+
+.badgeName {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badgesContainer {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-right: 4px;
+}
+
+/* Animation: Pulse - scales up and down */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+.animationPulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Animation: Breathe - fades in and out */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animationBreathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* Animation: Blink - slow on/off */
+@keyframes blink {
+  0%, 70%, 100% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0;
+  }
+}
+
+.animationBlink {
+  animation: blink 2.5s ease-in-out infinite;
+}
+
+/* Animation: Blink Fast - quick on/off */
+@keyframes blinkFast {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+
+.animationBlinkFast {
+  animation: blinkFast 1.5s step-start infinite;
+}
+
+/* Animation: Shake - horizontal shake */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+.animationShake {
+  animation: shake 0.8s ease-in-out infinite;
+}

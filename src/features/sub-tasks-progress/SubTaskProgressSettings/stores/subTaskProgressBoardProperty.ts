@@ -8,6 +8,7 @@ const initialData: Required<BoardProperty> = {
   enabled: true,
   columnsToTrack: [],
   selectedColorScheme: 'jira',
+  statusProgressMapping: {},
   statusMapping: {},
   newStatusMapping: {},
   countEpicIssues: false,
@@ -69,6 +70,24 @@ export const useSubTaskProgressBoardPropertyStore = create<State>()(set => ({
         produce((state: State) => {
           state.data.groupingField = groupingField;
           state.data.ignoredGroups = [];
+        })
+      ),
+    setStatusProgressMapping: mapping =>
+      set(
+        produce((state: State) => {
+          state.data.statusProgressMapping = mapping;
+        })
+      ),
+    removeStatusProgressMapping: statusId =>
+      set(
+        produce((state: State) => {
+          delete state.data.statusProgressMapping[statusId];
+        })
+      ),
+    clearStatusProgressMapping: () =>
+      set(
+        produce((state: State) => {
+          state.data.statusProgressMapping = {};
         })
       ),
     addIgnoredGroup: (group: string) =>

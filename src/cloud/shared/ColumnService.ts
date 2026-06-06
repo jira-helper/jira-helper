@@ -203,32 +203,31 @@ export class ColumnService {
    * @returns ID колонки или null, если не удалось определить
    */
   getCardColumnId(card: HTMLElement): string | null {
-    const columns = this.getColumns();
-    const cards = this.boardPage.getAllCloudCards();
+    try {
+      const columnEl = this.findParentColumn(card);
+      if (!columnEl) return null;
 
-    if (!cards.length) return null;
+      const columnElements = this.getColumnElements();
+      const index = columnElements.indexOf(columnEl);
+      if (index === -1) return null;
 
-    const cardLeft = card.getBoundingClientRect().left;
-    const allCards = Array.from(cards);
+      return `column-${index}`;
+    } catch (error) {
+      console.error('[ColumnService] getCardColumnId error:', error);
+      return null;
+    }
+  }
 
-    const cardsWithPos = allCards.map(c => ({
-      c,
-      left: c.getBoundingClientRect().left,
-    }));
+  private findParentColumn(card: HTMLElement): Element | null {
+    const selectors = [
+      '[data-testid="platform-board-kit.ui.column.draggable-column"]',
+      '[data-component-selector="platform-board-kit.ui.column.draggable-column"]',
+      '[data-testid*="column"]',
+    ];
 
-    cardsWithPos.sort((a, b) => a.left - b.left);
-
-    let columnIndex = 0;
-    let prevLeft = cardsWithPos[0].left;
-
-    for (let i = 0; i < cardsWithPos.length; i++) {
-      if (Math.abs(cardsWithPos[i].left - prevLeft) > 150) {
-        columnIndex++;
-      }
-      if (cardsWithPos[i].c === card) {
-        return `column-${Math.min(columnIndex, columns.length - 1)}`;
-      }
-      prevLeft = cardsWithPos[i].left;
+    for (const selector of selectors) {
+      const el = card.closest(selector);
+      if (el) return el;
     }
 
     return null;

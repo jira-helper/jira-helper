@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 	"plugins": [{ "name": "typescript-plugin-css-modules" }],
-	  "target": "ES6",                        // Целевая версия JavaScript
-	  "module": "ESNext",                      // Тип модуля
+	  "target": "ES2022",                     // Целевая версия JavaScript (ES2022 для поддержки top-level await)
+	  "module": "ES2022",                     // Тип модуля (ES2022 для поддержки top-level await)
 	  "lib": ["DOM", "ESNext"],                // Библиотеки для браузера и современных возможностей
 	  "allowJs": true,                         // Разрешить импорт файлов .js
 	  "checkJs": false,                        // Проверять файлы .js
@@ -11,15 +11,20 @@
 	  "esModuleInterop": true,                 // Поддержка импорта модулей CommonJS
 	  "skipLibCheck": true,                    // Пропустить проверку типов в зависимостях
 	  "forceConsistentCasingInFileNames": true, // Проверка регистра файлов
-	  "moduleResolution": "node",              // Разрешение модулей в стиле Node.js
+	  "moduleResolution": "bundler",           // Разрешение модулей для Vite/bundler (поддержка package.json exports)
 	  "isolatedModules": true,                 // Убедиться, что каждый файл обрабатывается отдельно
 	  "noEmit": true,                          // Отключить генерацию файлов .js
 	  "resolveJsonModule": true,               // Разрешить импорт JSON
-	  "baseUrl": "./"                         // Базовый путь
+	  "baseUrl": "./",                        // Базовый путь
+	  "paths": {
+	    "src/*": ["src/*"],
+	    "cypress/*": ["cypress/*"]
+	  }
 	},
 	"include": [
 	  "src/**/*",                               // Включить все файлы из папки src
-	  "./test/setup.ts"
+	  "./test/setup.ts",
+	  "./cypress/support/**/*"
 	],
 	"exclude": [
 	  "node_modules",                          // Исключить node_modules

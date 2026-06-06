@@ -1,0 +1,22 @@
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f4f5f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.colorPreview {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid #ccc;
+}

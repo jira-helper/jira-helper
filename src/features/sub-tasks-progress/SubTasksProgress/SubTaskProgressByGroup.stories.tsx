@@ -1,10 +1,11 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SubTaskProgressByGroup } from './SubTaskProgressByGroup';
 import { subTasksProgress } from './testData';
 
 const meta: Meta<typeof SubTaskProgressByGroup> = {
-  title: 'Features/Sub-tasks Progress/SubTaskProgressByGroup',
+  title: 'SubTasksProgress/SubTasksProgress/SubTaskProgressByGroup',
   component: SubTaskProgressByGroup,
   tags: ['autodocs'],
   decorators: [

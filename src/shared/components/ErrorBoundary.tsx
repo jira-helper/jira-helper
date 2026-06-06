@@ -1,6 +1,6 @@
 import { globalContainer } from 'dioma';
 import React from 'react';
-import { loggerToken } from '../Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 
 export class ErrorBoundary extends React.Component<
   { fallback: React.ReactNode; children: React.ReactNode },

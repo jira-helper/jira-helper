@@ -1,11 +1,11 @@
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
-import { useJiraExternalIssuesStore } from 'src/shared/jira/stores/jiraExternalIssues';
-import { useJiraIssuesStore } from 'src/shared/jira/jiraIssues/jiraIssuesStore';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
+import { useJiraExternalIssuesStore } from 'src/infrastructure/jira/stores/jiraExternalIssues';
+import { useJiraIssuesStore } from 'src/infrastructure/jira/jiraIssues/jiraIssuesStore';
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
-import { loadIssue } from 'src/shared/jira/jiraIssues/actions/loadIssue';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
+import { loadIssue } from 'src/infrastructure/jira/jiraIssues/actions/loadIssue';
 import { useSubTaskProgressBoardPropertyStore } from 'src/features/sub-tasks-progress/SubTaskProgressSettings/stores/subTaskProgressBoardProperty';
-import { loadSubtasksForIssue as loadSubtasksForIssueAction } from 'src/shared/jira/stores/jiraSubtasks.actions';
+import { loadSubtasksForIssue as loadSubtasksForIssueAction } from 'src/infrastructure/jira/stores/jiraSubtasks.actions';
 
 const loadExternalIssuesForIssue = createAction({
   name: 'loadExternalIssuesForIssue',

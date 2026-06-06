@@ -1,0 +1,143 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 8px;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  padding: 6px 8px;
+  background: #fafbfc;
+  color: #172b4d;
+}
+
+.toolbarLabel {
+  flex: 0 0 auto;
+  color: #42526e;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.templateList {
+  display: flex;
+  flex: 1 1 220px;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.manageArea {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 8px;
+  border-left: 1px solid #dfe1e6;
+}
+
+.templateButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  cursor: pointer;
+  border: 1px solid
+    color-mix(in srgb, var(--jh-template-accent, #4c9aff) 55%, var(--jh-template-accent-fg, #172b4d));
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--jh-template-accent-bg, var(--jh-template-accent, #deebff));
+  color: var(--jh-template-accent-fg, #172b4d);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: min(260px, 100%);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease;
+}
+
+.templateButton:hover:not(:disabled),
+.templateButton:focus-visible:not(:disabled) {
+  border-color: color-mix(
+    in srgb,
+    var(--jh-template-accent, #deebff) 62%,
+    var(--jh-template-accent-fg, #172b4d)
+  );
+  background: color-mix(in srgb, var(--jh-template-accent-bg, var(--jh-template-accent, #deebff)) 75%, #ffffff);
+  color: var(--jh-template-accent-fg, #172b4d);
+  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.28);
+}
+
+/* Ant Design default link-like hover color — keep template-driven foreground. */
+.templateButton.ant-btn:hover:not(:disabled),
+.templateButton.ant-btn:focus-visible:not(:disabled) {
+  color: var(--jh-template-accent-fg, #172b4d) !important;
+}
+
+.templateButton:focus-visible,
+.manageButton:focus-visible {
+  outline: 2px solid #4c9aff;
+  outline-offset: 2px;
+}
+
+.insertIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(9, 30, 66, 0.16);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.templateButtonLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.templateButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.manageButton {
+  box-sizing: border-box;
+  margin: 0;
+  cursor: pointer;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  padding: 4px 8px;
+  background: #ffffff;
+  color: #172b4d;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.manageButton:hover:not(:disabled) {
+  background: #f4f5f7;
+}
+
+.manageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .templateButton {
+    border-color: #4c9aff;
+  }
+
+  .templateButton:hover:not(:disabled),
+  .templateButton:focus-visible:not(:disabled) {
+    background: #ffffff;
+    color: var(--jh-template-accent-fg, #172b4d);
+  }
+}

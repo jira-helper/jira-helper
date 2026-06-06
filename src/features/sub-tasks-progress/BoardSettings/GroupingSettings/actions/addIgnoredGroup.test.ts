@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { registerLogger } from 'src/shared/Logger';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
 import { globalContainer } from 'dioma';
 import { addIgnoredGroup } from './addIgnoredGroup';
 import { useSubTaskProgressBoardPropertyStore } from '../../../SubTaskProgressSettings/stores/subTaskProgressBoardProperty';

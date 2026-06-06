@@ -29,6 +29,8 @@ export interface WipLimitSettings {
     columnNames: string[];
     limit: number;
     color: string;
+    baseColor?: string;
+    warningColor?: string;
   }>;
 }
 

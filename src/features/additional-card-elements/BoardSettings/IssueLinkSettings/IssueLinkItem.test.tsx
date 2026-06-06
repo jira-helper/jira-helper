@@ -3,9 +3,9 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
 import { globalContainer } from 'dioma';
 import { Ok } from 'ts-results';
-import { JiraServiceToken } from 'src/shared/jira/jiraService';
-import { registerLogger } from 'src/shared/Logger';
-import { useJiraFieldsStore } from 'src/shared/jira/fields/jiraFieldsStore';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
+import { registerLogger } from 'src/infrastructure/logging/Logger';
+import { useJiraFieldsStore } from 'src/infrastructure/jira/fields/jiraFieldsStore';
 import { IssueLinkItem } from './IssueLinkItem';
 import { IssueLink } from '../../types';
 

@@ -1,0 +1,98 @@
+.jh-status-progress-mapping-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jh-status-progress-mapping-section__header h3 {
+  margin: 0;
+}
+
+.jh-status-progress-mapping-section__header p {
+  margin: 4px 0 0;
+  color: var(--ant-color-text-secondary, #6b778c);
+}
+
+.jh-status-progress-mapping-section__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 540px;
+}
+
+.jh-status-progress-mapping-section__columns {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 160px 32px;
+  gap: 8px;
+  color: var(--ant-color-text-tertiary, #97a0af);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.jh-status-progress-mapping-section__row {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 160px 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.jh-status-progress-mapping-section__status-select,
+.jh-status-progress-mapping-section__bucket-select {
+  width: 100%;
+}
+
+.jh-status-progress-mapping-section__add-button {
+  max-width: 540px;
+}
+
+.jh-status-progress-mapping-section__bucket-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.jh-status-progress-mapping-section__bucket-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.jh-status-progress-mapping-section__bucket-marker--todo {
+  background: #8c8c8c;
+}
+
+.jh-status-progress-mapping-section__bucket-marker--inProgress {
+  background: #1677ff;
+}
+
+.jh-status-progress-mapping-section__bucket-marker--done {
+  background: #52c41a;
+}
+
+@media (max-width: 560px) {
+  .jh-status-progress-mapping-section__rows {
+    max-width: none;
+  }
+
+  .jh-status-progress-mapping-section__add-button {
+    max-width: none;
+  }
+
+  .jh-status-progress-mapping-section__columns {
+    display: none;
+  }
+
+  .jh-status-progress-mapping-section__row {
+    grid-template-columns: 1fr 32px;
+  }
+
+  .jh-status-progress-mapping-section__status-select,
+  .jh-status-progress-mapping-section__bucket-select {
+    grid-column: 1;
+  }
+}

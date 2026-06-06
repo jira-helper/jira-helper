@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { IssueSelectorByAttributes } from './IssueSelectorByAttributes';
-import { IssueSelector } from './IssueSelectorByAttributes.types';
 
 // Mock the JQL parser
 vi.mock('src/shared/jql/simpleJqlParser', () => ({

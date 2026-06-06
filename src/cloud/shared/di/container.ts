@@ -1,42 +1,35 @@
 // src/cloud/shared/di/container.ts
-// DI-контейнер для cloud-версии расширения (добавлена подписка на onSettingsChanged)
+// DI-контейнер для cloud-версии расширения
 
 import { Container } from 'dioma';
 import {
- settingsServiceToken,
- columnServiceToken,
- assigneeServiceToken,
- avatarIndicatorServiceToken,
- boardPagePageObjectToken,
- personLimitsApplierToken,
- columnLimitsApplierToken,
- columnGroupLimitPanelToken,
- assigneeHighlighterApplierToken,
- dynamicUpdaterToken,
+  settingsServiceToken,
+  columnServiceToken,
+  assigneeServiceToken,
+  avatarIndicatorServiceToken,
+  assigneeHighlighterApplierToken,
+  dynamicUpdaterToken,
 } from './tokens';
+import { registerJiraApiCloudInDI } from './jiraApiTokens.cloud';
+import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 
 import { SettingsService } from '../SettingsService';
 import { ColumnService } from '../ColumnService';
 import { AssigneeService } from '../AssigneeService';
 import { AvatarIndicatorService } from '../AvatarIndicatorService';
-import { BoardPagePageObject } from '../BoardPagePageObject';
-import { PersonLimitsApplier } from '../../features/person-limits/PersonLimitsApplier';
-import { ColumnLimitsApplier } from '../../features/column-limits/ColumnLimitsApplier';
-import { ColumnGroupLimitPanel } from '../../features/column-limits/ColumnGroupLimitPanel';
+import { BoardPagePageObject as CloudBoardPagePageObject } from '../BoardPagePageObject';
 import { AssigneeHighlighterApplier } from '../../features/assignee-highlighter/AssigneeHighlighterApplier';
 import { DynamicUpdater } from '../DynamicUpdater';
 
-import { registerInContainer as registerPersonLimits } from '../../features/person-limits/register';
-import { registerInContainer as registerColumnLimits } from '../../features/column-limits/register';
 import { registerInContainer as registerAssigneeHighlighter } from '../../features/assignee-highlighter/register';
 
 export const cloudContainer = new Container();
 
 export function registerCloudServices(): void {
- cloudContainer.register({
- token: boardPagePageObjectToken,
- value: BoardPagePageObject,
- });
+  cloudContainer.register({
+    token: boardPagePageObjectToken,
+    value: CloudBoardPagePageObject,
+  });
 
  cloudContainer.register({
  token: settingsServiceToken,
@@ -53,93 +46,42 @@ export function registerCloudServices(): void {
  value: new AssigneeService(cloudContainer.inject(settingsServiceToken)),
  });
 
- cloudContainer.register({
- token: avatarIndicatorServiceToken,
- value: new AvatarIndicatorService(cloudContainer.inject(assigneeServiceToken)),
- });
+  cloudContainer.register({
+    token: avatarIndicatorServiceToken,
+    value: new AvatarIndicatorService(cloudContainer.inject(assigneeServiceToken)),
+  });
 
- cloudContainer.register({
- token: columnGroupLimitPanelToken,
- value: new ColumnGroupLimitPanel(),
- });
+  cloudContainer.register({
+    token: dynamicUpdaterToken,
+    value: new DynamicUpdater(),
+  });
 
- cloudContainer.register({
- token: dynamicUpdaterToken,
- value: new DynamicUpdater(),
- });
+  cloudContainer.register({
+    token: assigneeHighlighterApplierToken,
+    value: (() => {
+      const settingsService = cloudContainer.inject(settingsServiceToken);
+      const updater = cloudContainer.inject(dynamicUpdaterToken);
+      const applier = new AssigneeHighlighterApplier(
+        settingsService,
+        cloudContainer.inject(assigneeServiceToken)
+      );
+      // Подписка на DynamicUpdater
+      updater.onUpdate(() => applier.updateVisualization());
+      // Подписка на изменение настроек
+      settingsService.onSettingsChanged(() => {
+        console.log('[SettingsService] Изменение настроек - обновляем AssigneeHighlighterApplier');
+        applier.updateVisualization();
+      });
+      return applier;
+    })(),
+  });
 
- cloudContainer.register({
- token: personLimitsApplierToken,
- value: (() => {
- const settingsService = cloudContainer.inject(settingsServiceToken);
- const updater = cloudContainer.inject(dynamicUpdaterToken);
- const applier = new PersonLimitsApplier(
- settingsService,
- cloudContainer.inject(columnServiceToken),
- cloudContainer.inject(assigneeServiceToken),
- cloudContainer.inject(avatarIndicatorServiceToken),
- cloudContainer.inject(boardPagePageObjectToken)
- );
- // Подписка на DynamicUpdater
- updater.onUpdate(() => applier.update());
- // Подписка на изменение настроек
- settingsService.onSettingsChanged(() => {
- console.log('[SettingsService] Изменение настроек - обновляем PersonLimitsApplier');
- applier.update();
- });
- return applier;
- })(),
- });
+  registerAssigneeHighlighter(cloudContainer);
 
- cloudContainer.register({
- token: columnLimitsApplierToken,
- value: (() => {
- const settingsService = cloudContainer.inject(settingsServiceToken);
- const updater = cloudContainer.inject(dynamicUpdaterToken);
- const applier = new ColumnLimitsApplier(
- settingsService,
- cloudContainer.inject(columnServiceToken),
- cloudContainer.inject(assigneeServiceToken),
- cloudContainer.inject(avatarIndicatorServiceToken),
- cloudContainer.inject(columnGroupLimitPanelToken),
- cloudContainer.inject(boardPagePageObjectToken)
- );
- // Подписка на DynamicUpdater
- updater.onUpdate(() => applier.update());
- // Подписка на изменение настроек
- settingsService.onSettingsChanged(() => {
- console.log('[SettingsService] Изменение настроек - обновляем ColumnLimitsApplier');
- applier.update();
- });
- return applier;
- })(),
- });
+  // Регистрируем Cloud API адаптеры
+  registerJiraApiCloudInDI(cloudContainer);
 
- cloudContainer.register({
- token: assigneeHighlighterApplierToken,
- value: (() => {
- const settingsService = cloudContainer.inject(settingsServiceToken);
- const updater = cloudContainer.inject(dynamicUpdaterToken);
- const applier = new AssigneeHighlighterApplier(
- settingsService,
- cloudContainer.inject(assigneeServiceToken)
- );
- // Подписка на DynamicUpdater
- updater.onUpdate(() => applier.updateVisualization());
- // Подписка на изменение настроек
- settingsService.onSettingsChanged(() => {
- console.log('[SettingsService] Изменение настроек - обновляем AssigneeHighlighterApplier');
- applier.updateVisualization();
- });
- return applier;
- })(),
- });
-
- registerPersonLimits(cloudContainer);
- registerColumnLimits(cloudContainer);
- registerAssigneeHighlighter(cloudContainer);
-
- console.log('[DI] Cloud services registered');
+  console.log('[DI] Cloud services registered');
 }
 
 export function resolveService<T>(token: any): T {

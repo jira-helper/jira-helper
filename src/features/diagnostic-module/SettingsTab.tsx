@@ -1,0 +1,73 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
+import React from 'react';
+
+import { useDi } from 'src/infrastructure/di/diContext';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
+import { Button } from 'antd';
+import { JqlDebugDemo } from './JqlDebugDemo';
+import { diagnosticModelToken } from './tokens';
+
+export const DiagnosticSettingsTabContent = () => {
+  const di = useDi();
+  const logger = di.inject(loggerToken);
+  const { model } = di.inject(diagnosticModelToken);
+  const [messages, setMessages] = React.useState(logger.getMessages());
+  const [filterText, setFilterText] = React.useState('');
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setMessages(logger.getMessages());
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [logger]);
+
+  const messagesFiltered = messages.filter(message => {
+    return message.message.toLowerCase().includes(filterText);
+  });
+
+  return (
+    <div style={{ padding: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Button type="primary" onClick={() => setMessages(logger.getMessages())}>
+          Force Refresh
+        </Button>
+        <span>auto-refresh every 5 seconds</span>
+      </div>
+      <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="text"
+          placeholder="Filter messages..."
+          style={{ padding: '4px 8px', flex: 1 }}
+          onChange={e => {
+            setFilterText(e.target.value.toLowerCase());
+          }}
+        />
+      </div>
+      <div style={{ marginTop: '16px' }}>
+        <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+          {messagesFiltered.map(message => (
+            <div
+              key={message.timestamp + Date.now() + Math.random()}
+              style={{
+                padding: '8px',
+                borderBottom: '1px solid #ddd',
+                display: 'flex',
+                gap: '16px',
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                {`${new Date(message.timestamp).toLocaleString()} ${message.level.toUpperCase()}: ${message.message}`}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: '16px' }}>
+        <Button type="primary" onClick={() => model.saveDiagnosticData()}>
+          save diagnostic data
+        </Button>
+      </div>
+      <JqlDebugDemo />
+    </div>
+  );
+};

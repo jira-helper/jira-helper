@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CustomGroupSettings } from './CustomGroupSettings';
 
 const meta: Meta<typeof CustomGroupSettings> = {
-  title: 'Features/SubTasksProgress/BoardSettings/GroupingSettings/CustomGroupSettings',
+  title: 'SubTasksProgress/BoardSettings/GroupingSettings/CustomGroups/CustomGroupSettings',
   component: CustomGroupSettings,
   parameters: {
     layout: 'centered',

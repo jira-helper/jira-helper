@@ -1,0 +1,1 @@
+export { HistogramModel } from './HistogramModel';

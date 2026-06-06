@@ -1,0 +1,49 @@
+.limitColumnBadge {
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: white;
+  white-space: nowrap;
+}
+
+.limitGroupLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.limitGroupLabel .groupName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.limitColumnBadge__hint {
+  visibility: hidden;
+  position: absolute;
+  padding: 2px 3px;
+  margin-left: 8px;
+  width: 130px;
+  transition: 0s visibility;
+  cursor: pointer;
+}
+
+.limitColumnBadge:hover .limitColumnBadge__hint {
+  visibility: visible;
+  display: inline;
+  color: black;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  z-index: 100000;
+  transition-delay: 200ms;
+}

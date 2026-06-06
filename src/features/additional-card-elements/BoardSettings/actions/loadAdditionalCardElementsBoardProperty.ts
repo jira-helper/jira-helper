@@ -1,6 +1,6 @@
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
-import { BoardPropertyServiceToken } from 'src/shared/boardPropertyService';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
+import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { AdditionalCardElementsBoardProperty } from '../../types';
 import { useAdditionalCardElementsBoardPropertyStore } from '../../stores/additionalCardElementsBoardProperty';
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /*
 Simple JQL Parser Documentation
 ===============================
@@ -77,9 +78,22 @@ export type JqlAstNode =
 export type JqlAstResult =
   | { type: 'AND' | 'OR'; left: JqlAstResult; right: JqlAstResult; matched: boolean }
   | { type: 'NOT'; expr: JqlAstResult; matched: boolean }
-  | { type: 'condition'; field: string; op: string; value?: string; values?: string[]; matched: boolean };
+  | {
+      type: 'condition';
+      field: string;
+      op: string;
+      value?: string;
+      values?: string[];
+      matched: boolean;
+      actualValue?: unknown; // Actual field value from the issue for debugging
+    };
 
-// Tokenizer that respects quoted strings and tracks if token was quoted
+// Tokenizer that respects quoted strings and tracks if token was quoted.
+// Recognises comparison operators (!=, =, !~, ~) as separate tokens even when not
+// separated by whitespace, so user input like `project=TRPA AND status=Done`
+// (no spaces around `=`) still parses correctly. Real Jira tolerates this; the
+// previous implementation required spaces and would treat `project=TRPA` as a
+// single field token, then choke on the next word as an "Unknown operator".
 function tokenize(jql: string): string[] {
   const tokens: string[] = [];
   let i = 0;
@@ -96,14 +110,31 @@ function tokenize(jql: string): string[] {
       i = j + 1;
       continue;
     }
-    if (jql[i] === '(' || jql[i] === ')') {
+    if (jql[i] === '(' || jql[i] === ')' || jql[i] === ',') {
       tokens.push(jql[i]);
       i++;
       continue;
     }
-    // word
+    // Two-char operators take priority over one-char prefixes.
+    if (jql[i] === '!' && (jql[i + 1] === '=' || jql[i + 1] === '~')) {
+      tokens.push(jql.slice(i, i + 2));
+      i += 2;
+      continue;
+    }
+    if (jql[i] === '=' || jql[i] === '~') {
+      tokens.push(jql[i]);
+      i++;
+      continue;
+    }
+    // word — terminate on whitespace, parentheses, comma, or any operator char
     let j = i;
-    while (j < jql.length && !jql[j].match(/[\s()]/)) j++;
+    while (
+      j < jql.length &&
+      !jql[j].match(/[\s(),=~]/) &&
+      !(jql[j] === '!' && (jql[j + 1] === '=' || jql[j + 1] === '~'))
+    ) {
+      j++;
+    }
     tokens.push(jql.slice(i, j));
     i = j;
   }
@@ -149,7 +180,7 @@ function parseTokens(tokens: string[]): any {
     const condition = parseCondition();
     const currentToken = tokens[pos];
     if (
-      currentToken != undefined &&
+      currentToken !== undefined &&
       !isKeyword(currentToken, 'AND') &&
       !isKeyword(currentToken, 'OR') &&
       !isKeyword(currentToken, ')')
@@ -196,6 +227,7 @@ function parseTokens(tokens: string[]): any {
         pos++;
         op = 'not in';
       }
+      // eslint-disable-next-line no-fallthrough
       case isKeyword(op, 'in') || op.toLowerCase() === 'not in': {
         if (tokens[pos++] !== '(') throw new Error('Expected ( after in');
         const values = [];
@@ -380,25 +412,26 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
   if (ast.type === 'condition') {
     // Always use lowercased field names for case-insensitive matching
     const field = ast.field.toLowerCase();
+    const actualValue = getFieldValue(field);
     let matched = false;
     if (ast.value === 'EMPTY') {
       if (ast.op === '=') {
-        matched = isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = isArrayEmptyOrAll(actualValue, isEmpty);
       } else if (ast.op === '!=') {
-        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
       } else if (ast.op === 'is not') {
-        matched = !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
+        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
       }
     } else if (ast.op === '=') {
-      matched = anyMatch(getFieldValue(field), v => v == ast.value);
+      matched = anyMatch(actualValue, v => v == ast.value);
     } else if (ast.op === '!=') {
-      matched = allMatch(getFieldValue(field), v => v != ast.value);
+      matched = allMatch(actualValue, v => v != ast.value);
     } else if (ast.op === 'in') {
-      matched = anyMatch(getFieldValue(field), v => (ast.values ? ast.values.includes(v) : false));
+      matched = anyMatch(actualValue, v => (ast.values ? ast.values.includes(v) : false));
     } else if (ast.op === 'not in') {
-      matched = allMatch(getFieldValue(field), v => (ast.values ? !ast.values.includes(v) : false));
+      matched = allMatch(actualValue, v => (ast.values ? !ast.values.includes(v) : false));
     } else if (ast.op === '~') {
-      const result = anyMatch(getFieldValue(field), v => {
+      const result = anyMatch(actualValue, v => {
         if (typeof v === 'string' || typeof v === 'number') {
           return v.toString().includes(ast.value ?? '');
         }
@@ -411,7 +444,7 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
       });
       matched = result === undefined ? false : result;
     } else if (ast.op === '!~') {
-      const result = allMatch(getFieldValue(field), v => {
+      const result = allMatch(actualValue, v => {
         if (typeof v === 'string' || typeof v === 'number') {
           return !v.toString().includes(ast.value ?? '');
         }
@@ -424,7 +457,7 @@ export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: strin
       });
       matched = result === undefined ? true : result;
     }
-    return { ...ast, matched, type: 'condition' };
+    return { ...ast, matched, actualValue, type: 'condition' };
   }
   throw new Error(`Unknown node: ${JSON.stringify(ast)}`);
 }

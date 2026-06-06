@@ -1,6 +1,4 @@
 // src/cloud/features/column-limits/index.ts
-// Экспорт модуля групповых WIP-лимитов (Ant Design)
+// Пустой файл - модуль переехал в общую структуру
 
-export { ColumnLimitsApplier, type ColumnGroupWipLimit } from './ColumnLimitsApplier';
-export { ColumnLimitsSettings } from './ColumnLimitsSettings';
-export { ColumnGroupLimitPanel } from './ColumnGroupLimitPanel';
+export {};

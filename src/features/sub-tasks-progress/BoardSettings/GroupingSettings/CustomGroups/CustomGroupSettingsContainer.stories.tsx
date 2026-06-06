@@ -1,9 +1,26 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
+import { Ok } from 'ts-results';
+import { globalContainer } from 'dioma';
+import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { CustomGroupSettingsContainer } from './CustomGroupSettingsContainer';
 
+globalContainer.register({
+  token: JiraServiceToken,
+  value: {
+    fetchJiraIssue: () => Promise.resolve(new Ok({ key: 'MOCK-1', fields: {} } as any)),
+    fetchSubtasks: () => Promise.resolve(new Ok({ subtasks: [], total: 0 } as any)),
+    getExternalIssues: () => Promise.resolve(new Ok([])),
+    getProjectFields: () => Promise.resolve(new Ok([{ id: 'priority', name: 'Priority', schema: { type: 'string' } }])),
+    getIssueLinkTypes: () =>
+      Promise.resolve(new Ok([{ id: '1', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }])),
+    getStatuses: () => Promise.resolve(new Ok([])),
+    addWatcher: () => Promise.resolve(new Ok(undefined)),
+  },
+});
+
 const meta = {
-  title: 'Features/SubTasksProgress/GroupingSettings/CustomGroupSettingsContainer',
+  title: 'SubTasksProgress/BoardSettings/GroupingSettings/CustomGroups/CustomGroupSettingsContainer',
   component: CustomGroupSettingsContainer,
   parameters: {
     layout: 'centered',

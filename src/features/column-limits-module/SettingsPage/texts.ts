@@ -1,0 +1,62 @@
+import type { Texts } from 'src/shared/texts';
+
+export const COLUMN_LIMITS_TEXTS = {
+  modalTitle: {
+    en: 'Limits for groups',
+    ru: 'Лимиты для групп',
+  },
+  limitForGroup: {
+    en: 'Limit for group:',
+    ru: 'Лимит для группы:',
+  },
+  swimlanes: {
+    en: 'Swimlanes',
+    ru: 'Свимлейны',
+  },
+  allSwimlanes: {
+    en: 'All swimlanes',
+    ru: 'Все свимлейны',
+  },
+  withoutGroup: {
+    en: 'Without Group',
+    ru: 'Без группы',
+  },
+  dragColumnToCreateGroup: {
+    en: 'Drag column over here to create group',
+    ru: 'Перетащите колонку сюда для создания группы',
+  },
+  selectColor: {
+    en: 'Select color',
+    ru: 'Выберите цвет',
+  },
+  selectWarningColor: {
+    en: 'Warning color',
+    ru: 'Цвет при превышении',
+  },
+  save: {
+    en: 'Save',
+    ru: 'Сохранить',
+  },
+  cancel: {
+    en: 'Cancel',
+    ru: 'Отмена',
+  },
+  saveConfig: {
+    en: 'Save configuration',
+    ru: 'Сохранить конфигурацию',
+  },
+  discardChanges: {
+    en: 'Discard changes',
+    ru: 'Отменить изменения',
+  },
+  settingsButton: {
+    en: 'Column group WIP limits',
+    ru: 'WIP-лимиты на группы колонок',
+  },
+  tabTitle: {
+    en: 'Column WIP Limits',
+    ru: 'WIP-лимиты по колонкам',
+  },
+} as const satisfies Texts;
+
+export type ColumnLimitsTextKeys = keyof typeof COLUMN_LIMITS_TEXTS;

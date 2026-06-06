@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest';
-import { getCurrentRoute } from '../../src/routing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { globalContainer } from 'dioma';
+import { registerExtensionApiServiceInDI } from '../../src/infrastructure/extension-api/ExtensionApiService';
+import { registerRoutingServiceInDI, routingServiceToken } from '../../src/infrastructure/routing';
+import { registerRoutingInDI } from '../../src/infrastructure/di/routingTokens';
 
 describe('Routing should', () => {
+  beforeEach(() => {
+    globalContainer.reset();
+    registerExtensionApiServiceInDI(globalContainer);
+    registerRoutingServiceInDI(globalContainer);
+    registerRoutingInDI(globalContainer);
+  });
+
   it.each([
     ['https://www.example.com/RapidView.jspa', 'SETTINGS'],
     ['https://www.example.com/RapidBoard.jspa', 'BOARD'],
@@ -14,6 +24,6 @@ describe('Routing should', () => {
   ])('when "%s" is given then return "%s"', (url, route) => {
     delete window.location;
     window.location = new URL(url);
-    expect(getCurrentRoute()).toEqual(route);
+    expect(globalContainer.inject(routingServiceToken).getCurrentRoute()).toEqual(route);
   });
 });

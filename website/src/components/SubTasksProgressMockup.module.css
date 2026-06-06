@@ -1,0 +1,92 @@
+.wrap {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.board {
+  min-width: 420px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ifm-background-color);
+  font-size: 12px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.colHeader {
+  height: 28px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ifm-color-content-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.colHeaderLast {
+  border-right: none;
+}
+
+.cell {
+  padding: 8px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.cellLast {
+  border-right: none;
+}
+
+.card {
+  padding: 8px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 11px;
+}
+
+.progressBar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--ifm-color-emphasis-200);
+  margin-top: 6px;
+}
+
+.progressDone {
+  background: #36b37e;
+}
+
+.progressWip {
+  background: #4c9aff;
+}
+
+.progressTodo {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.progressBlocked {
+  background: var(--ifm-color-danger);
+}
+
+.progressLabel {
+  font-size: 10px;
+  color: var(--ifm-color-content-secondary);
+  margin-top: 3px;
+}

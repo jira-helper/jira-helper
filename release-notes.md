@@ -255,3 +255,143 @@ New feature that allows you to visualize relationships between issues directly o
 - Fixed dupplicated requests to jira api
 
 ---
+
+## Version 2.28.9
+
+## 🇷🇺 RU
+
+### 🐛 Исправления
+
+**Исправлена функция заливки карточек цветом grabber'а**
+- Исправлена проблема, когда карточки с яркими цветами grabber'ов становились полностью белыми и неразличимыми
+
+---
+
+## 🇬🇧 English
+
+### 🐛 Bug Fixes
+
+**Fixed card fill feature with grabber color**
+- Fixed issue where cards with bright grabber colors would become completely white and indistinguishable
+
+---
+
+## Version 2.29.0
+
+## 🇷🇺 RU
+
+### ✨ Новый функционал: Бейджи "Дней в колонке" и "Дней до дедлайна"
+
+#### Что нового:
+
+- ✨ **Бейдж "Дней в колонке"**: Показывает, сколько дней задача находится в текущей колонке доски
+  - Заменяет стандартные точки Jira на понятный бейдж с текстом
+  - Настраиваемые цветовые пороги (желтый и красный) для выделения "застрявших" задач
+  - Поддержка глобальных порогов или отдельных порогов для каждой колонки
+  - Автоматическое скрытие стандартного счетчика дней Jira
+
+- ✨ **Бейдж "Дней до дедлайна"**: Показывает, сколько дней осталось до дедлайна задачи
+  - Выбор поля с датой дедлайна (date, datetime, string поля)
+  - Три режима отображения: всегда, менее X дней или просрочено, только просрочено
+  - Цветовая индикация: красный для просроченных, желтый для приближающихся дедлайнов
+  - Визуальное отличие от бейджа "Дней в колонке" через эмодзи ⏰
+
+#### Основные возможности:
+
+**Бейдж "Дней в колонке"**:
+- Глобальные пороги: одинаковые пороги для всех колонок
+- Пороги по колонкам: разные пороги для разных этапов работы (например, тестирование — 3 дня, разработка — 10 дней)
+- Автоматическое обнаружение и предупреждение о несуществующих колонках в настройках
+- Формат: "<1 day in column" / "1 day in column" / "X days in column"
+
+**Бейдж "Дней до дедлайна"**:
+- Гибкий выбор поля с дедлайном
+- Режим "Всегда": показывать для всех задач с дедлайном
+- Режим "Менее X дней или просрочено": фокус на приближающихся дедлайнах
+- Режим "Только просрочено": показывать только пропущенные дедлайны
+- Специальная обработка "Сегодня" и "Завтра": всегда желтые, "Сегодня" — красный текст на желтом фоне
+
+#### Как использовать:
+
+**Бейдж "Дней в колонке"**:
+1. Откройте настройки доски (Board Settings)
+2. Найдите раздел "Additional Card Elements"
+3. Включите функцию "Показывать бейдж с днями в колонке"
+4. Выберите режим порогов (глобальные или по колонкам)
+5. Настройте пороги желтого и красного цветов
+
+**Бейдж "Дней до дедлайна"**:
+1. Откройте настройки доски (Board Settings)
+2. Найдите раздел "Additional Card Elements"
+3. Включите функцию "Показывать бейдж с днями до дедлайна"
+4. Выберите поле с датой дедлайна
+5. Выберите режим отображения
+6. Настройте порог желтого цвета (опционально)
+
+#### Примеры использования:
+
+- Отслеживание "застрявших" задач: настройте пороги для быстрого визуального определения задач, которые слишком долго находятся в колонке
+- Разные пороги для разных этапов: тестирование — 3 дня, разработка — 10 дней, code review — 1 день
+- Мониторинг приближающихся дедлайнов: показывать бейдж только если до дедлайна осталось 5 дней или меньше
+- Отслеживание просроченных задач: показывать только пропущенные дедлайны
+
+---
+
+## 🇬🇧 English
+
+### ✨ New Feature: "Days in Column" and "Days to Deadline" Badges
+
+#### What's New:
+
+- ✨ **"Days in Column" Badge**: Shows how many days an issue has been in the current board column
+  - Replaces standard Jira dots with a clear badge with text
+  - Configurable color thresholds (yellow and red) to highlight "stuck" issues
+  - Support for global thresholds or separate thresholds for each column
+  - Automatic hiding of standard Jira days counter
+
+- ✨ **"Days to Deadline" Badge**: Shows how many days are left until an issue's deadline
+  - Selection of deadline date field (date, datetime, string fields)
+  - Three display modes: always, less than X days or overdue, overdue only
+  - Color coding: red for overdue, yellow for approaching deadlines
+  - Visual distinction from "Days in Column" badge via ⏰ emoji
+
+#### Key Features:
+
+**"Days in Column" Badge**:
+- Global thresholds: same thresholds for all columns
+- Per-column thresholds: different thresholds for different workflow stages (e.g., testing — 3 days, development — 10 days)
+- Automatic detection and warning about non-existent columns in settings
+- Format: "<1 day in column" / "1 day in column" / "X days in column"
+
+**"Days to Deadline" Badge**:
+- Flexible deadline field selection
+- "Always" mode: show for all issues with deadline
+- "Less than X days or overdue" mode: focus on approaching deadlines
+- "Overdue only" mode: show only missed deadlines
+- Special handling for "Today" and "Tomorrow": always yellow, "Today" — red text on yellow background
+
+#### How to Use:
+
+**"Days in Column" Badge**:
+1. Open Board Settings
+2. Find the "Additional Card Elements" section
+3. Enable "Show days in column badge"
+4. Choose threshold mode (global or per-column)
+5. Configure yellow and red thresholds
+
+**"Days to Deadline" Badge**:
+1. Open Board Settings
+2. Find the "Additional Card Elements" section
+3. Enable "Show days to deadline badge"
+4. Select deadline date field
+5. Choose display mode
+6. Configure yellow threshold (optional)
+
+#### Use Cases:
+
+- Tracking "stuck" issues: configure thresholds for quick visual identification of issues that have been in a column too long
+- Different thresholds for different stages: testing — 3 days, development — 10 days, code review — 1 day
+- Monitoring approaching deadlines: show badge only if 5 days or less remain until deadline
+- Tracking overdue issues: show only missed deadlines
+
+---

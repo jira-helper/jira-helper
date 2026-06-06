@@ -1,5 +1,5 @@
 import { createAction } from 'src/shared/action';
-import { loggerToken } from 'src/shared/Logger';
+import { loggerToken } from 'src/infrastructure/logging/Logger';
 import { useLocalSettingsStore } from '../stores/localSettingsStore';
 
 export const STORAGE_KEY = 'jira-helper-local-settings';
@@ -9,14 +9,15 @@ export const loadLocalSettings = createAction({
   async handler() {
     const newSettings = {};
     try {
-      const settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const settings = JSON.parse(raw || '{}');
       /**
        * guard to avoid unknown properties
        */
 
       LOCAL_SETTINGS_WHITELIST.forEach(key => {
         if (settings[key]) {
-          // @ts-expect-error
+          // @ts-expect-error - legacy
           newSettings[key] = settings[key];
         }
       });

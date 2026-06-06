@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
 import { Card, Space, Button } from 'antd';
 import { IssueSelectorByAttributes } from './IssueSelectorByAttributes';

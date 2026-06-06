@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { Container } from 'dioma';
 import { StoryFn } from '@storybook/react';
-import { useDi } from '../diContext';
+import { useDi } from 'src/infrastructure/di/diContext';
 
 export function withDi(cb: (container: Container) => void) {
   return (Story: StoryFn) => {
     const container = useDi();
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => {
+    const registered = useRef(false);
+    if (!registered.current) {
       cb(container);
-      setIsMounted(true);
-    }, [cb, container]);
-
-    if (!isMounted) {
-      return <div />;
+      registered.current = true;
     }
-
     return <Story />;
   };
 }

@@ -53,4 +53,16 @@ export const BoardSettingsTabContentPageObject = {
     });
     return statusMapping;
   },
+
+  getStatusProgressMappingCard: () => {
+    return screen.getByTestId('subtasks-status-progress-mapping-card');
+  },
+
+  getStatusProgressMappingStatusSelect: (index: number) => {
+    return screen.getByTestId(`status-progress-mapping-status-${index}`);
+  },
+
+  getStatusProgressMappingBucketSelect: (index: number) => {
+    return screen.getByTestId(`status-progress-mapping-bucket-${index}`);
+  },
 };

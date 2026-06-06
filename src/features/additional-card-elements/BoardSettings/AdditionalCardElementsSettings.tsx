@@ -1,9 +1,13 @@
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { Button, Checkbox, Divider, Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { useGetTextsByLocale } from 'src/shared/texts';
 import { ColumnSelectorContainer } from 'src/shared/components';
 import { IssueLinkSettings } from './IssueLinkSettings';
+import { DaysInColumnSettings } from './DaysInColumnSettings';
+import { DaysToDeadlineSettings } from './DaysToDeadlineSettings';
+import { IssueConditionCheckSettings } from './IssueConditionCheckSettings';
 import { useAdditionalCardElementsBoardPropertyStore } from '../stores/additionalCardElementsBoardProperty';
 
 const TEXTS = {
@@ -39,6 +43,14 @@ const TEXTS = {
     en: 'If enabled, issue links will be displayed on cards in the backlog view',
     ru: 'Если включено, связи задач будут отображаться на карточках в беклоге',
   },
+  clickableEpicLinks: {
+    en: 'Make Epic Link clickable',
+    ru: 'Сделать Epic Link кликабельным',
+  },
+  clickableEpicLinksTooltip: {
+    en: 'If enabled, Jira Epic Link badges on cards open the epic in a new tab',
+    ru: 'Если включено, встроенные бейджи Epic Link на карточках открывают эпик в новой вкладке',
+  },
 } as const;
 
 export const AdditionalCardElementsSettings: React.FC = () => {
@@ -54,6 +66,8 @@ export const AdditionalCardElementsSettings: React.FC = () => {
       enabled: false,
       columnsToTrack: [],
       showInBacklog: false,
+      clickableEpicLinks: true,
+      clickableIssueLinks: true,
       issueLinks: [],
     });
   };
@@ -80,6 +94,20 @@ export const AdditionalCardElementsSettings: React.FC = () => {
       >
         {texts.resetButton}
       </Button>
+
+      <div>
+        <Checkbox
+          checked={data.clickableEpicLinks}
+          onChange={() => actions.setClickableEpicLinks(!data.clickableEpicLinks)}
+          data-testid="clickable-epic-links-checkbox"
+          style={{ marginBottom: '16px' }}
+        >
+          {texts.clickableEpicLinks}
+          <Tooltip title={texts.clickableEpicLinksTooltip}>
+            <InfoCircleOutlined style={{ marginLeft: '4px', color: '#1677ff' }} />
+          </Tooltip>
+        </Checkbox>
+      </div>
 
       {data.enabled && (
         <>
@@ -110,11 +138,30 @@ export const AdditionalCardElementsSettings: React.FC = () => {
             />
           </div>
 
-          <Divider />
-
           {/* Issue Link Settings */}
           <div>
             <IssueLinkSettings />
+          </div>
+
+          <Divider />
+
+          {/* Days in Column Settings */}
+          <div>
+            <DaysInColumnSettings />
+          </div>
+
+          <Divider />
+
+          {/* Days to Deadline Settings */}
+          <div>
+            <DaysToDeadlineSettings />
+          </div>
+
+          <Divider />
+
+          {/* Issue Condition Check Settings */}
+          <div>
+            <IssueConditionCheckSettings />
           </div>
         </>
       )}
