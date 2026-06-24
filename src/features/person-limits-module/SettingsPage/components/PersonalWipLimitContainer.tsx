@@ -203,22 +203,22 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
   const isEditMode = editingId !== null;
 
   // Handle form submit
-   const handleSubmit = () => {
-     const currentPersons = currentFormData.persons;
-     const values = form.getFieldsValue();
- 
-     const columnsToSave =
-       values.selectedColumns?.length === availableColumns.length ? [] : values.selectedColumns || [];
- 
-     // Use swimlanes from store (currentFormData) since Form.Item doesn't manage it
-     const swimlanesToSave = currentFormData.swimlanes;
- 
-     const issueTypesToCheck = selectedTypes.length > 0 && !countAllTypes ? selectedTypes : undefined;
- 
-     if (currentPersons.length === 0) {
-       setPersonError(texts.selectAtLeastOnePerson);
-       return;
-     }
+  const handleSubmit = () => {
+    const currentPersons = currentFormData.persons;
+    const values = form.getFieldsValue();
+
+    const columnsToSave =
+      values.selectedColumns?.length === availableColumns.length ? [] : values.selectedColumns || [];
+
+    // Use swimlanes from store (currentFormData) since Form.Item doesn't manage it
+    const swimlanesToSave = currentFormData.swimlanes;
+
+    const issueTypesToCheck = selectedTypes.length > 0 && !countAllTypes ? selectedTypes : undefined;
+
+    if (currentPersons.length === 0) {
+      setPersonError(texts.selectAtLeastOnePerson);
+      return;
+    }
 
     if (
       !isEditMode &&

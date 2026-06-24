@@ -3,7 +3,6 @@
 
 import React from 'react';
 
-
 import { createRoot, Root } from 'react-dom/client';
 
 class CardPageObject {
@@ -155,9 +154,9 @@ export const BoardPagePageObject: IBoardPagePageObject = {
   },
 
   getColumns(): string[] {
-    return Array.from(
-      document.querySelectorAll(this.selectors.columnTitle) || []
-    ).map(column => column.textContent?.trim() || '');
+    return Array.from(document.querySelectorAll(this.selectors.columnTitle) || []).map(
+      column => column.textContent?.trim() || ''
+    );
   },
 
   listenCards(callback: (cards: CardPageObject[]) => void) {
@@ -294,7 +293,9 @@ export const BoardPagePageObject: IBoardPagePageObject = {
       const ids = this._columnsCache.map(c => c.id);
       return ids;
     }
-    const columns = Array.from(document.querySelectorAll('[data-testid="platform-board-kit.ui.column.draggable-column"]'));
+    const columns = Array.from(
+      document.querySelectorAll('[data-testid="platform-board-kit.ui.column.draggable-column"]')
+    );
     return columns.map((_, i) => `column-${i}`);
   },
 
@@ -340,11 +341,20 @@ export const BoardPagePageObject: IBoardPagePageObject = {
       }
     }
     if (this._columnsCache) {
-      const idx = this._columnsCache.findIndex(c => c.id === columnId);
-      if (idx !== -1) {
+      const cached = this._columnsCache.find(c => c.id === columnId);
+      if (cached) {
         for (let s = 0; s < selectors.length; s++) {
-          const sel = selectors[s];
-          const columns = document.querySelectorAll(sel);
+          const columns = document.querySelectorAll(selectors[s]);
+          for (let c = 0; c < columns.length; c++) {
+            const h2 = columns[c].querySelector('h2');
+            if (h2 && h2.textContent && h2.textContent.trim().startsWith(cached.name)) {
+              return columns[c];
+            }
+          }
+        }
+        const idx = this._columnsCache.indexOf(cached);
+        for (let s = 0; s < selectors.length; s++) {
+          const columns = document.querySelectorAll(selectors[s]);
           if (columns[idx]) {
             return columns[idx];
           }
@@ -418,31 +428,32 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     const groupNameSpan = groupLabelDiv?.querySelector('.groupName');
     if (!groupNameSpan) return;
 
+    const hideAll = () => {
+      document.querySelectorAll('[id^="jh-popup-"]').forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+    };
     const popupId = 'jh-popup-' + (wrapper.getAttribute('data-jh-group-label') || '0');
-    const getPopup = (): HTMLElement | null => {
+    const show = () => {
+      hideAll();
       let popup = document.getElementById(popupId);
       if (!popup) {
         popup = document.createElement('span');
         popup.id = popupId;
-        popup.textContent = groupNameSpan.textContent;
-        popup.style.cssText = 'position:fixed;padding:8px 12px;background:#172b4d;color:#fff;font-size:12px;font-weight:600;border-radius:4px;white-space:nowrap;z-index:2147483647;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:none';
+        popup.style.cssText =
+          'position:fixed;padding:8px 12px;background:#172b4d;color:#fff;font-size:12px;font-weight:600;border-radius:4px;white-space:nowrap;z-index:2147483647;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:none';
         document.body.appendChild(popup);
+        popup.addEventListener('mouseleave', hideAll);
       }
-      return popup;
-    };
-
-    wrapper.addEventListener('mouseenter', () => {
-      const popup = getPopup();
-      if (!popup) return;
+      popup.textContent = groupNameSpan.textContent;
       const rect = wrapper.getBoundingClientRect();
-      popup.style.top = (rect.bottom + 4) + 'px';
+      popup.style.top = rect.bottom + 4 + 'px';
       popup.style.left = rect.left + 'px';
       popup.style.display = 'block';
-    });
-    wrapper.addEventListener('mouseleave', () => {
-      const popup = document.getElementById(popupId);
-      if (popup) popup.style.display = 'none';
-    });
+    };
+
+    wrapper.addEventListener('mouseenter', show);
+    wrapper.addEventListener('mouseleave', hideAll);
   },
 
   removeColumnHeaderElements(columnId: string, selector: string): void {

@@ -9,10 +9,7 @@ import { WithDi } from 'src/infrastructure/di/diContext';
 import { useBoardSettingsStore } from 'src/features/board-settings/stores/boardSettings/boardSettings';
 import styles from '../ui/settings.module.css';
 
-class TabErrorBoundary extends Component<
-  { children: ReactNode; tabName: string },
-  { error: Error | null }
-> {
+class TabErrorBoundary extends Component<{ children: ReactNode; tabName: string }, { error: Error | null }> {
   state = { error: null as Error | null };
   static getDerivedStateFromError(error: Error) {
     return { error };
@@ -54,9 +51,7 @@ export const SettingsPanel: React.FC = () => {
   if (tabs.length === 0) {
     return (
       <div className={styles.panel}>
-        <div style={{ padding: 16, color: '#6b778c', fontSize: 13 }}>
-          Нет настроек для отображения
-        </div>
+        <div style={{ padding: 16, color: '#6b778c', fontSize: 13 }}>Нет настроек для отображения</div>
       </div>
     );
   }

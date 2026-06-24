@@ -2,11 +2,7 @@
 // BoardPropertyService для Jira Cloud
 
 import type { IBoardPagePageObject } from './BoardPagePageObject';
-import {
-  getBoardPropertyCloud,
-  updateBoardPropertyCloud,
-  deleteBoardPropertyCloud,
-} from './jiraApi.cloud';
+import { getBoardPropertyCloud, updateBoardPropertyCloud, deleteBoardPropertyCloud } from './jiraApi.cloud';
 
 export interface BoardPropertyServiceI {
   getBoardProperty<T>(property: string): Promise<T | undefined>;
@@ -14,9 +10,7 @@ export interface BoardPropertyServiceI {
   deleteBoardProperty(property: string): Promise<boolean>;
 }
 
-export const createBoardPropertyServiceCloud = (
-  boardPage: IBoardPagePageObject
-): BoardPropertyServiceI => ({
+export const createBoardPropertyServiceCloud = (boardPage: IBoardPagePageObject): BoardPropertyServiceI => ({
   async getBoardProperty<T>(property: string): Promise<T | undefined> {
     return getBoardPropertyCloud<T>(boardPage, property);
   },

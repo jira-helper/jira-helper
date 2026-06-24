@@ -54,3 +54,7 @@ npm run precommit   # Full lint + test (husky hook)
 ## Feature Isolation
 
 Each feature (e.g. `column-limits/`, `card-colors/`) has its own `module.ts`, `tokens.ts`, `BoardPage/`, `SettingsPage/` subdirectories.
+
+## Handoff
+
+См. `HANDOFF.md` — полный контекст проделанной работы по адаптации person-limits под Cloud. Перед началом работы прочитать.

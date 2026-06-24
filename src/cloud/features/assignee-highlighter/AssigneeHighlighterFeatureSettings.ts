@@ -29,7 +29,7 @@ export class AssigneeHighlighterFeatureSettings {
   getState(): AssigneeHighlighterFeatureState {
     const settings = this.settingsService.getSettings();
     const highlight = settings.assigneeHighlight;
-    
+
     return {
       enabled: highlight?.enabled || false,
       visualizationType: highlight?.visualizationType || 'stripe',
@@ -154,7 +154,7 @@ export class AssigneeHighlighterFeatureSettings {
   setAssigneeColor(assigneeId: string, color: string): void {
     const current = this.getState();
     const newCustomColors = { ...current.customColors, [assigneeId]: color };
-    
+
     this.settingsService.updateSettings({
       assigneeHighlight: {
         ...current,
@@ -177,7 +177,7 @@ export class AssigneeHighlighterFeatureSettings {
     const current = this.getState();
     const newCustomColors = { ...current.customColors };
     delete newCustomColors[assigneeId];
-    
+
     this.settingsService.updateSettings({
       assigneeHighlight: {
         ...current,
@@ -192,7 +192,7 @@ export class AssigneeHighlighterFeatureSettings {
   setAssigneeBackgroundColor(assigneeId: string, color: string): void {
     const current = this.getState();
     const newCustomBackgroundColors = { ...current.customBackgroundColors, [assigneeId]: color };
-    
+
     this.settingsService.updateSettings({
       assigneeHighlight: {
         ...current,

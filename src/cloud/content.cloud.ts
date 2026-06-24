@@ -154,10 +154,6 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 
 export { cloudContainer };
 
-export {
-  settingsServiceToken,
-  assigneeHighlighterApplierToken,
-  dynamicUpdaterToken,
-} from './shared/di';
+export { settingsServiceToken, assigneeHighlighterApplierToken, dynamicUpdaterToken } from './shared/di';
 
 export type { Settings, AssigneeHighlightSettings, WipLimitSettings, ColumnGroupWipLimitSettings } from './shared';

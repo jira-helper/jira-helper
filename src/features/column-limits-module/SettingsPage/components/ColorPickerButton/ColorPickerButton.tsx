@@ -35,7 +35,7 @@ export const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({
   selectColorText,
   onColorChange,
 }) => {
-  const handleChange: ColorPickerProps['onChange'] = (color) => {
+  const handleChange: ColorPickerProps['onChange'] = color => {
     onColorChange(color.toHexString());
   };
 

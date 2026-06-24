@@ -5,13 +5,17 @@ import type { Container } from 'dioma';
 import { waitForElement } from '../../shared/utils';
 import { boardPagePageObjectToken } from 'src/shared/di/boardPageObjectToken';
 import { getBoardEditDataCloudToken, searchUsersCloudToken, buildAvatarUrlCloudToken } from './di/jiraApiTokens.cloud';
-import { getBoardPropertyCloudToken, updateBoardPropertyCloudToken, deleteBoardPropertyCloudToken } from './di/jiraApiTokens.cloud';
+import {
+  getBoardPropertyCloudToken,
+  updateBoardPropertyCloudToken,
+  deleteBoardPropertyCloudToken,
+} from './di/jiraApiTokens.cloud';
 
 type SideEffect = () => void;
 
 export abstract class PageModificationCloud<
   InitData = undefined,
-  TargetElement extends Element | undefined = undefined
+  TargetElement extends Element | undefined = undefined,
 > {
   sideEffects: SideEffect[] = [];
 

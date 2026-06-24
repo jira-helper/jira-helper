@@ -131,19 +131,19 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       component: TabComponent,
     });
 
-    if (!effectivePersonLimits.limits.length) return;
-
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
     const runtime = boardRuntimeModel;
     const boardPO = this.container.inject(boardPagePageObjectToken);
-    const cssSelector = typeof (boardPO as any).getIssueCssSelector === 'function'
-      ? (boardPO as any).getIssueCssSelector(editData)
-      : this.getCssSelectorOfIssues(editData);
+    const cssSelector =
+      typeof (boardPO as any).getIssueCssSelector === 'function'
+        ? (boardPO as any).getIssueCssSelector(editData)
+        : this.getCssSelectorOfIssues(editData);
     runtime.setCssSelectorOfIssues(cssSelector);
     runtime.setSwimlanesActive(isCustomSwimlaneStrategy);
-    runtime.apply();
 
     this.destroyed = false;
+
+    runtime.apply();
     this.renderAvatarsContainer();
 
     this.sideEffects.push(() => {
@@ -151,31 +151,31 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       this.unmountAvatarsContainer();
     });
 
-    const pool = document.getElementById('ghx-pool');
-    if (pool) {
+    const boardUpdater = () => {
+      runtime.apply();
+      runtime.showOnlyChosen();
+      this.renderAvatarsContainer();
+    };
+    const poolSelector = '#ghx-pool';
+    const cloudPoolSelector = '[data-testid="software-board.board-area"]';
+    if (document.querySelector(poolSelector)) {
+      this.onDOMChange(poolSelector, boardUpdater, { childList: true, subtree: true });
+    } else if (document.querySelector(cloudPoolSelector)) {
+      this.onDOMChange(cloudPoolSelector, boardUpdater, { childList: true, subtree: true });
+    }
+
+    const viewSelector = document.getElementById('ghx-view-selector') || document.querySelector('[data-testid="software-board.header.controls-bar"]');
+    if (viewSelector) {
       this.onDOMChange(
-        '#ghx-pool',
+        viewSelector === document.getElementById('ghx-view-selector') ? '#ghx-view-selector' : '[data-testid="software-board.header.controls-bar"]',
         () => {
-          runtime.apply();
-          runtime.showOnlyChosen();
           this.renderAvatarsContainer();
         },
         { childList: true, subtree: true }
       );
     }
 
-    // Quick filters / view changes re-render the toolbar around #subnav-title.
-    // Watch the toolbar wrapper so avatars survive those re-renders.
-    const viewSelector = document.getElementById('ghx-view-selector');
-    if (viewSelector) {
-      this.onDOMChange(
-        '#ghx-view-selector',
-        () => {
-          this.renderAvatarsContainer();
-        },
-        { childList: true, subtree: true }
-      );
-    }
+    if (!effectivePersonLimits.limits.length) return;
   }
 
   private renderAvatarsContainer(): void {

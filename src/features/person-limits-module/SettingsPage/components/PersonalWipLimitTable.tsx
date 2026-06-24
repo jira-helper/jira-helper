@@ -1,5 +1,5 @@
 /* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, Button, Space, Tooltip } from 'antd';
 import type { PersonLimit } from '../state/types';
 import type { PersonLimitsTextKeys } from '../texts';
@@ -32,6 +32,36 @@ function readPersons(record: LegacyOrCurrentLimit): PersonLimit['persons'] {
   return [];
 }
 
+const PersonAvatar: React.FC<{ url: string; name: string }> = ({ url, name }) => {
+  const [failed, setFailed] = useState(false);
+  const letter = name ? name.charAt(0).toUpperCase() : '?';
+  if (failed) {
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          background: '#dfe1e6',
+          color: '#42526e',
+          fontSize: 9,
+          fontWeight: 600,
+          lineHeight: '16px',
+          flexShrink: 0,
+        }}
+      >
+        {letter}
+      </span>
+    );
+  }
+  return (
+    <img src={url} alt="" width={16} height={16} style={{ borderRadius: '50%' }} onError={() => setFailed(true)} />
+  );
+};
+
 export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
   texts,
   limits,
@@ -53,9 +83,7 @@ export const PersonalWipLimitTable: React.FC<PersonalWipLimitTableProps> = ({
             {persons.map((p, idx) => (
               <span key={p.name} data-person-name={p.name} className={styles.personRow}>
                 <span className={styles.personToken}>
-                  {buildAvatarUrl && (
-                    <img src={buildAvatarUrl(p.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
-                  )}
+                  {buildAvatarUrl && <PersonAvatar url={buildAvatarUrl(p.name)} name={p.displayName || p.name} />}
                   <span className={styles.personName}>{p.displayName || p.name}</span>
                   {idx < persons.length - 1 && <span style={{ marginRight: 2 }}>,</span>}
                 </span>

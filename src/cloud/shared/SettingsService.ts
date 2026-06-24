@@ -66,14 +66,14 @@ export class SettingsService {
   private useJiraApi = false;
   private initPromise: Promise<void> | null = null;
   private isInitialized = false;
-  
+
   // Callback для уведомления об изменениях настроек
   private onSettingsChangedCallbacks: Array<() => void> = [];
 
   constructor(boardPage: IBoardPagePageObject) {
     this.settings = this.getDefaultSettings();
     this.jiraStorage = new SettingsStorage(boardPage);
-    
+
     this.initPromise = this.init();
     this.initPromise.then(() => {
       this.isInitialized = true;
@@ -210,17 +210,21 @@ export class SettingsService {
     if (!this.jiraStorage) return;
 
     try {
-      const personLimits = await this.jiraStorage.get<{value: WipLimitSettings}>(SETTINGS_KEYS.PERSON_LIMITS);
+      const personLimits = await this.jiraStorage.get<{ value: WipLimitSettings }>(SETTINGS_KEYS.PERSON_LIMITS);
       if (personLimits?.value) {
         this.settings.personalWipLimits = personLimits.value;
       }
 
-      const columnLimits = await this.jiraStorage.get<{value: ColumnGroupWipLimitSettings}>(SETTINGS_KEYS.COLUMN_LIMITS);
+      const columnLimits = await this.jiraStorage.get<{ value: ColumnGroupWipLimitSettings }>(
+        SETTINGS_KEYS.COLUMN_LIMITS
+      );
       if (columnLimits?.value) {
         this.settings.columnGroupWipLimits = columnLimits.value;
       }
 
-      const assigneeHighlight = await this.jiraStorage.get<{value: AssigneeHighlightSettings}>(SETTINGS_KEYS.ASSIGNEE_HIGHLIGHTER);
+      const assigneeHighlight = await this.jiraStorage.get<{ value: AssigneeHighlightSettings }>(
+        SETTINGS_KEYS.ASSIGNEE_HIGHLIGHTER
+      );
       if (assigneeHighlight?.value) {
         this.settings.assigneeHighlight = assigneeHighlight.value;
       }

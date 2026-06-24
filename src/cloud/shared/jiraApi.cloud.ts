@@ -92,17 +92,24 @@ export const getBoardEditDataCloud = async (
     });
 
     if (mappedColumns.length > 0) {
-      console.log('[getBoardEditDataCloud] Cached columns:', mappedColumns.map(c => `${c.id}=${c.name}`));
+      console.log(
+        '[getBoardEditDataCloud] Cached columns:',
+        mappedColumns.map(c => `${c.id}=${c.name}`)
+      );
       boardPage.setCachedColumns?.(mappedColumns);
     }
 
-    const mappedPositions = data.columnConfig?.columns?.map((col: any, index: number) => ({
-      id: `column-${index}`,
-      name: col.name,
-      isKanPlanColumn: false,
-    })) ?? [];
+    const mappedPositions =
+      data.columnConfig?.columns?.map((col: any, index: number) => ({
+        id: `column-${index}`,
+        name: col.name,
+        isKanPlanColumn: false,
+      })) ?? [];
 
-    console.log('[getBoardEditDataCloud] Using positional column IDs:', mappedPositions.map((c: { id: string; name: string }) => `${c.id}=${c.name}`));
+    console.log(
+      '[getBoardEditDataCloud] Using positional column IDs:',
+      mappedPositions.map((c: { id: string; name: string }) => `${c.id}=${c.name}`)
+    );
 
     return {
       canEdit: data.editEnabled ?? true,
@@ -113,10 +120,11 @@ export const getBoardEditDataCloud = async (
         mappedColumns: mappedPositions,
       },
       swimlanesConfig: {
-        swimlanes: data.swimlaneConfig?.swimlanes?.map((sw: any) => ({
-          id: String(sw.id ?? sw.name),
-          name: sw.name,
-        })) ?? [],
+        swimlanes:
+          data.swimlaneConfig?.swimlanes?.map((sw: any) => ({
+            id: String(sw.id ?? sw.name),
+            name: sw.name,
+          })) ?? [],
       },
     };
   } catch (error) {
@@ -129,10 +137,7 @@ export const getBoardEditDataCloud = async (
  * Поиск пользователей в Cloud
  * Использует accountId вместо username
  */
-export const searchUsersCloud = async (
-  query: string,
-  boardPage: IBoardPagePageObject
-): Promise<CloudJiraUser[]> => {
+export const searchUsersCloud = async (query: string, boardPage: IBoardPagePageObject): Promise<CloudJiraUser[]> => {
   if (!query || query.length < 1) {
     return [];
   }
@@ -258,10 +263,7 @@ export const updateBoardPropertyCloud = async (
 /**
  * Удаление данных board properties для Cloud
  */
-export const deleteBoardPropertyCloud = async (
-  boardPage: IBoardPagePageObject,
-  key: string
-): Promise<boolean> => {
+export const deleteBoardPropertyCloud = async (boardPage: IBoardPagePageObject, key: string): Promise<boolean> => {
   const boardId = boardPage.getBoardId();
   if (!boardId) {
     return false;

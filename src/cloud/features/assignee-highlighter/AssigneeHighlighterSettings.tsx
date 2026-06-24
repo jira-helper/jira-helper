@@ -103,10 +103,7 @@ export const AssigneeHighlighterSettings: React.FC = () => {
       {enabled && (
         <>
           <Card title="Тип визуализации" style={{ marginBottom: '20px' }}>
-            <Radio.Group
-              value={visualizationType}
-              onChange={(e) => handleVisualizationTypeChange(e.target.value)}
-            >
+            <Radio.Group value={visualizationType} onChange={e => handleVisualizationTypeChange(e.target.value)}>
               <Space>
                 <Radio value="stripe">Полоска слева</Radio>
                 <Radio value="background">Цвет фона</Radio>
@@ -118,10 +115,7 @@ export const AssigneeHighlighterSettings: React.FC = () => {
           <Card title="Настройки" style={{ marginBottom: '20px' }}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               <div>
-                <Checkbox
-                  checked={autoColors}
-                  onChange={(e) => handleAutoColorsToggle(e.target.checked)}
-                >
+                <Checkbox checked={autoColors} onChange={e => handleAutoColorsToggle(e.target.checked)}>
                   Автоматические цвета
                 </Checkbox>
               </div>
@@ -129,7 +123,7 @@ export const AssigneeHighlighterSettings: React.FC = () => {
               <div>
                 <Checkbox
                   checked={highlightUnassigned}
-                  onChange={(e) => handleHighlightUnassignedToggle(e.target.checked)}
+                  onChange={e => handleHighlightUnassignedToggle(e.target.checked)}
                 >
                   Подсвечивать "Не назначено"
                 </Checkbox>
@@ -160,7 +154,7 @@ export const AssigneeHighlighterSettings: React.FC = () => {
                       <Col span={4}>
                         <ColorPicker
                           value={customColors[assignee.id] || assignee.color || '#808080'}
-                          onChange={(color) => handleCustomColorChange(assignee.id, color)}
+                          onChange={color => handleCustomColorChange(assignee.id, color)}
                           size="small"
                         />
                       </Col>

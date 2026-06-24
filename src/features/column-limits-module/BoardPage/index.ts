@@ -83,29 +83,32 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
       component: TabComponent,
     });
 
-    if (Object.keys(boardGroups).length === 0) return;
-
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
 
     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
     (boardRuntimeModel as BoardRuntimeModel).setCssNotIssueSubTask(cssNotIssueSubTask);
-
-    const headerGroup = document.querySelector<HTMLElement>('#ghx-pool-wrapper');
-    if (headerGroup) {
-      headerGroup.style.paddingTop = '10px';
-    }
 
     const po = this.container.inject(boardPagePageObjectToken);
     (boardRuntimeModel as BoardRuntimeModel).setPageObject(po);
 
     try {
       (boardRuntimeModel as BoardRuntimeModel).apply();
-      this.onDOMChange(po.selectors.pool, () => {
-        (boardRuntimeModel as BoardRuntimeModel).apply();
-      });
+      const poolSelector = document.querySelector(po.selectors.pool)
+        ? po.selectors.pool
+        : '[data-testid="software-board.board-area"]';
+      (this as any)._columnRaf = null;
+      this.onDOMChange(poolSelector, () => {
+        if ((this as any)._columnRaf) return;
+        (this as any)._columnRaf = requestAnimationFrame(() => {
+          (this as any)._columnRaf = null;
+          (boardRuntimeModel as BoardRuntimeModel).apply();
+        });
+      }, { childList: true, subtree: true });
     } catch (error) {
       console.warn('[ColumnLimitsBoardPage] BoardRuntimeModel не поддерживается на этой версии Jira:', error);
     }
+
+    if (Object.keys(boardGroups).length === 0) return;
   }
 }
 

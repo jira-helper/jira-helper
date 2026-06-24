@@ -31,20 +31,20 @@ export function registerCloudServices(): void {
     value: CloudBoardPagePageObject,
   });
 
- cloudContainer.register({
- token: settingsServiceToken,
- value: new SettingsService(cloudContainer.inject(boardPagePageObjectToken)),
- });
+  cloudContainer.register({
+    token: settingsServiceToken,
+    value: new SettingsService(cloudContainer.inject(boardPagePageObjectToken)),
+  });
 
- cloudContainer.register({
- token: columnServiceToken,
- value: new ColumnService(cloudContainer.inject(boardPagePageObjectToken)),
- });
+  cloudContainer.register({
+    token: columnServiceToken,
+    value: new ColumnService(cloudContainer.inject(boardPagePageObjectToken)),
+  });
 
- cloudContainer.register({
- token: assigneeServiceToken,
- value: new AssigneeService(cloudContainer.inject(settingsServiceToken)),
- });
+  cloudContainer.register({
+    token: assigneeServiceToken,
+    value: new AssigneeService(cloudContainer.inject(settingsServiceToken)),
+  });
 
   cloudContainer.register({
     token: avatarIndicatorServiceToken,
@@ -61,10 +61,7 @@ export function registerCloudServices(): void {
     value: (() => {
       const settingsService = cloudContainer.inject(settingsServiceToken);
       const updater = cloudContainer.inject(dynamicUpdaterToken);
-      const applier = new AssigneeHighlighterApplier(
-        settingsService,
-        cloudContainer.inject(assigneeServiceToken)
-      );
+      const applier = new AssigneeHighlighterApplier(settingsService, cloudContainer.inject(assigneeServiceToken));
       // Подписка на DynamicUpdater
       updater.onUpdate(() => applier.updateVisualization());
       // Подписка на изменение настроек
@@ -85,5 +82,5 @@ export function registerCloudServices(): void {
 }
 
 export function resolveService<T>(token: any): T {
- return cloudContainer.inject(token);
+  return cloudContainer.inject(token);
 }

@@ -53,9 +53,7 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
           }
         }}
       >
-        <span className={cn(styles.fallback, { [styles.active]: isActive })}>
-          {letter}
-        </span>
+        <span className={cn(styles.fallback, { [styles.active]: isActive })}>{letter}</span>
         <img
           src={avatar}
           alt={personName}
