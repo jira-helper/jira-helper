@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { Container } from 'dioma';
 import { Token } from 'dioma';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
 import { WithDi } from '../../../infrastructure/di/diContext';
@@ -129,6 +130,7 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const TabComponent = () => React.createElement(PersonLimitsSettingsTab, { columns, swimlanes });
 
     registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.PERSON_WIP_LIMITS,
       title: getPersonLimitsSettingsTabTitle(this.container),
       component: TabComponent,
     });

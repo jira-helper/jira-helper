@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Container } from 'dioma';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { PageModification } from 'src/infrastructure/page-modification/PageModification';
 import {
   commentsEditorPageObjectToken,
@@ -46,7 +47,11 @@ export class CommentTemplatesPageModification extends PageModification {
       />
     );
 
-    registerSettings({ title: SETTINGS_TITLE, component: SettingsTab });
+    registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.COMMENT_TEMPLATES,
+      title: SETTINGS_TITLE,
+      component: SettingsTab,
+    });
     registerIssueSettings({ title: SETTINGS_TITLE, component: SettingsTab });
 
     const commentsEditorPageObject = container.inject(commentsEditorPageObjectToken);

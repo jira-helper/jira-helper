@@ -6,6 +6,7 @@ import { globalContainer } from 'dioma';
 import { Given, When, Then } from 'cypress/support/bdd-runner';
 import type { DataTableRows } from 'cypress/support/bdd-runner';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { propertyModelToken } from '../../../tokens';
 import { COLUMN_LIMITS_TEXTS } from '../../../SettingsPage/texts';
 import { ColumnLimitsSettingsTab } from '../../ColumnLimitsSettingsTab';
@@ -46,6 +47,7 @@ Given('column groups were configured via Board Settings modal:', (table: DataTab
 
 When('I open the Jira Helper panel', () => {
   registerSettings({
+    id: BOARD_SETTINGS_TAB_IDS.COLUMN_WIP_LIMITS,
     title: COLUMN_LIMITS_TEXTS.tabTitle.en,
     component: () => React.createElement(ColumnLimitsSettingsTab, { swimlanes: [] }),
   });

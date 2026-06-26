@@ -2,6 +2,7 @@ import type { Container } from 'dioma';
 import { Token } from 'dioma';
 import React from 'react';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
 import { PageModification } from '../../../infrastructure/page-modification/PageModification';
@@ -77,6 +78,7 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     const TabComponent = () => React.createElement(ColumnLimitsSettingsTab, { swimlanes });
 
     registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.COLUMN_WIP_LIMITS,
       title: getColumnLimitsSettingsTabTitle(this.container),
       component: TabComponent,
     });

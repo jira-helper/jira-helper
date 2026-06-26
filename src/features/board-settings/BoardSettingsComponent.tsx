@@ -39,9 +39,9 @@ const BoardSettingsModalInner = () => {
           },
         }}
       >
-        <Tabs defaultActiveKey="1">
+        <Tabs defaultActiveKey={settings[0]?.id}>
           {settings.map(setting => (
-            <Tabs.TabPane tab={setting.title} key={setting.title}>
+            <Tabs.TabPane tab={setting.title} key={setting.id}>
               <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
                 <setting.component />
               </ErrorBoundary>

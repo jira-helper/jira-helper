@@ -2,6 +2,7 @@ import { Token } from 'dioma';
 import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { PageModification } from '../../infrastructure/page-modification/PageModification';
 
 import { loadSubTaskProgressBoardProperty } from './SubTaskProgressSettings/actions/loadSubTaskProgressBoardProperty';
@@ -34,6 +35,7 @@ export class SubTasksProgressBoardPage extends PageModification<void, Element> {
     this.sideEffects.push(unlisten);
 
     registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.SUB_TASKS_PROGRESS,
       title: 'Sub-tasks progress',
       component: BoardSettingsTabContent,
     });
