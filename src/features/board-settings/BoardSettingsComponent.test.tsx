@@ -58,8 +58,10 @@ describe('BoardSettingsComponent', () => {
     await userEvent.click(screen.getByRole('img'));
 
     const tabs = document.querySelector('[data-jh-component="boardSettingsTabs"]');
+    const tabsNavigation = document.querySelector('[data-jh-component="boardSettingsTabs"] .ant-tabs-nav');
 
     expect(tabs).toBeInTheDocument();
     expect(tabs).toHaveClass('jh-board-settings-tabs');
+    expect(tabsNavigation).toHaveStyle({ position: 'sticky', top: '0px' });
   });
 });

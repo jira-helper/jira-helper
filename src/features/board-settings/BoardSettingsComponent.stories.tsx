@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
+import { expect, waitFor } from 'storybook/test';
 import {
   extensionApiServiceToken,
   type IExtensionApiService,
@@ -87,4 +88,30 @@ const meta: Meta<typeof StoryShell> = {
 export default meta;
 type Story = StoryObj<typeof StoryShell>;
 
-export const StickyTabsInScrollableModal: Story = {};
+export const StickyTabsInScrollableModal: Story = {
+  play: async ({ canvasElement }) => {
+    const settingsButton = canvasElement.querySelector('[data-jh-component="boardSettingsComponent"]') as HTMLElement;
+
+    settingsButton.click();
+
+    await waitFor(() => {
+      expect(canvasElement.querySelector('.ant-modal-body')).toBeTruthy();
+    });
+
+    const modalBody = canvasElement.querySelector('.ant-modal-body') as HTMLElement | null;
+    const tabsNavigation = canvasElement.querySelector(
+      '[data-jh-component="boardSettingsTabs"] .ant-tabs-nav'
+    ) as HTMLElement | null;
+
+    expect(modalBody).toBeTruthy();
+    expect(tabsNavigation).toBeTruthy();
+
+    modalBody!.scrollTop = 520;
+
+    const modalBodyRect = modalBody!.getBoundingClientRect();
+    const tabsNavigationRect = tabsNavigation!.getBoundingClientRect();
+
+    await expect(tabsNavigation).toHaveStyle({ position: 'sticky', top: '0px' });
+    expect(Math.round(tabsNavigationRect.top)).toBe(Math.round(modalBodyRect.top));
+  },
+};

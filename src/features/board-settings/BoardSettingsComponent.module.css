@@ -4,11 +4,3 @@
   justify-content: center;
   cursor: pointer;
 }
-
-.settingsTabs :global(.ant-tabs-nav) {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--ant-color-bg-elevated, #fff);
-  box-shadow: 0 1px 0 var(--ant-color-split, rgba(0, 0, 0, 0.06));
-}
