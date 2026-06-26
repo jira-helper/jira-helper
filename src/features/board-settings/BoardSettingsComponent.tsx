@@ -32,6 +32,11 @@ const BoardSettingsModalInner = () => {
         okText={texts.ok}
         cancelText={texts.cancel}
         styles={{
+          body: {
+            maxHeight: 'calc(100vh - 160px)',
+            overflowY: 'auto',
+            paddingTop: 0,
+          },
           footer: {
             borderTop: '1px solid var(--ant-color-split, rgba(0, 0, 0, 0.06))',
             marginTop: 0,
@@ -39,7 +44,11 @@ const BoardSettingsModalInner = () => {
           },
         }}
       >
-        <Tabs defaultActiveKey={settings[0]?.id}>
+        <Tabs
+          className={`${styles.settingsTabs} jh-board-settings-tabs`}
+          data-jh-component="boardSettingsTabs"
+          defaultActiveKey={settings[0]?.id}
+        >
           {settings.map(setting => (
             <Tabs.TabPane tab={setting.title} key={setting.id}>
               <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
