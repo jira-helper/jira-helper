@@ -95,7 +95,7 @@ describe('ColumnLimitsSettingsTab', () => {
     const { model: uiModel } = globalContainer.inject(settingsUIModelToken);
     const saveSpy = vi.spyOn(uiModel as SettingsUIModel, 'save').mockResolvedValue(undefined);
     const { model: runtimeModel } = globalContainer.inject(boardRuntimeModelToken);
-    const applySpy = vi.spyOn(runtimeModel as BoardRuntimeModel, 'apply');
+    const applySpy = vi.spyOn(runtimeModel as BoardRuntimeModel, 'apply').mockImplementation(() => undefined);
 
     render(
       <WithDi container={globalContainer}>
