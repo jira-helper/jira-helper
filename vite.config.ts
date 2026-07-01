@@ -24,6 +24,7 @@ if (targetBrowser === 'firefox') {
   manifest.name = 'jira-helper-for-ff';
 }
 export default defineConfig({
+  base: './',
   build: {
     outDir: targetBrowser === 'chrome' ? 'dist' : 'dist-firefox',
     commonjsOptions: {

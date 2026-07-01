@@ -36,7 +36,8 @@
         {
             "resources": [
                 "img/*",
-                "jira-helper-comment-insert-bridge.js"
+                "jira-helper-comment-insert-bridge.js",
+                "assets/*.css"
             ],
             "matches": [
                 "*://*/*"
@@ -52,15 +53,9 @@
             "matches": [
                 "*://*/*"
             ],
-            "exclude_matches": ["*://*.atlassian.net/*"],
+            "run_at": "document_start",
             "js": [
-                "src/content.ts"
-            ]
-        },
-        {
-            "matches": ["*://*.atlassian.net/*"],
-            "js": [
-                "src/cloud/content.cloud.ts"
+                "src/content-loader.ts"
             ]
         }
     ],

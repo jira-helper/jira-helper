@@ -36,6 +36,7 @@ import { registerBoardPropertyServiceInDI } from '../infrastructure/jira/boardPr
 import { registerJiraApiInDI } from '../infrastructure/di/jiraApiTokens';
 import { registerServerApiCloudAdapters } from './shared/di/serverApiAdapters.cloud';
 import { jiraEnvironmentToken } from '../infrastructure/di/jiraEnvironmentToken';
+import { startCloudExtension } from './startCloudExtension';
 
 function initCloudDiContainer() {
   registerLogger(globalContainer);
@@ -143,13 +144,7 @@ export async function initializeCloudExtension(): Promise<void> {
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      initializeCloudExtension();
-    });
-  } else {
-    initializeCloudExtension();
-  }
+  startCloudExtension(initializeCloudExtension);
 }
 
 export { cloudContainer };
