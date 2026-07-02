@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Runtime loader reports unknown Jira environments and load failures to the page console. */
 export type JiraRuntime = 'cloud' | 'server' | 'none';
 
 type LoaderDocument = Pick<Document, 'body' | 'addEventListener'>;

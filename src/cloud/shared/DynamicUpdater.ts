@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud updater logs mutation-cycle diagnostics for live-board support. */
 // src/cloud/shared/DynamicUpdater.ts
 // Динамический обновлятель с исправленными селекторами для Jira Cloud
 

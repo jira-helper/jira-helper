@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, local/no-inline-styles -- Legacy Jira Cloud settings UI predates current shared settings modal styling rules. */
 // src/cloud/features/assignee-highlighter/AssigneeHighlighterSettings.tsx
 // React-компонент настроек подсветки исполнителей (Ant Design)
 

@@ -15,8 +15,6 @@ import {
   assigneeHighlighterApplierToken,
   dynamicUpdaterToken,
 } from './shared/di';
-import { boardSettingsBoardPageToken } from '../features/board-settings/BoardPage';
-import { localSettingsBoardPageToken } from '../features/local-settings/BoardPage';
 import { BoardSettingsBoardPage } from '../features/board-settings/BoardPage';
 import { LocalSettingsBoardPage } from '../features/local-settings/BoardPage';
 import { boardPagePageObjectToken } from '../infrastructure/page-objects/BoardPage';
@@ -24,9 +22,9 @@ import runModifications from '../infrastructure/page-modification/runModificatio
 import { loadLocalSettings } from '../features/local-settings/actions/loadLocalSettings';
 import { diagnosticModule } from '../features/diagnostic-module/module';
 import { columnLimitsModule } from '../features/column-limits-module/module';
-import ColumnLimitsBoardPage, { columnLimitsBoardPageToken } from '../features/column-limits-module/BoardPage';
+import ColumnLimitsBoardPage from '../features/column-limits-module/BoardPage';
 import { personLimitsModule } from '../features/person-limits-module/module';
-import PersonLimitsBoardPage, { personLimitsBoardPageToken } from '../features/person-limits-module/BoardPage';
+import PersonLimitsBoardPage from '../features/person-limits-module/BoardPage';
 import { registerBoardPropertyServiceInDI } from '../infrastructure/jira/boardPropertyService';
 import { registerJiraApiInDI } from '../infrastructure/di/jiraApiTokens';
 import { registerServerApiCloudAdapters } from './shared/di/serverApiAdapters.cloud';

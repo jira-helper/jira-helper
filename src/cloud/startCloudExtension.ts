@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Cloud bootstrap reports initialization failures to the page console. */
 type CloudStartupDocument = Pick<Document, 'readyState' | 'addEventListener'> & {
   body: HTMLElement | null;
 };
@@ -9,7 +10,7 @@ type CloudStartupScheduler = {
 export function startCloudExtension(
   initialize: () => Promise<void>,
   documentRef: CloudStartupDocument = document,
-  scheduler: CloudStartupScheduler = globalThis,
+  scheduler: CloudStartupScheduler = globalThis
 ): void {
   let started = false;
 
@@ -19,7 +20,7 @@ export function startCloudExtension(
     }
 
     started = true;
-    void initialize().catch((error) => {
+    void initialize().catch(error => {
       console.error('[JiraHelperCloud] Failed to initialize Cloud extension', error);
     });
     return true;

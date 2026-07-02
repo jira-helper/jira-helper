@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud storage adapter logs board-property diagnostics. */
 // src/cloud/shared/SettingsStorage.ts
 // Сервис для хранения настроек в Jira Board Properties (исправлен парсинг пустого ответа)
 

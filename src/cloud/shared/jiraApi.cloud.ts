@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-unused-vars -- Legacy Jira Cloud API adapter logs network and DOM fallback diagnostics. */
 // src/cloud/shared/jiraApi.cloud.ts
 // Cloud API адаптеры для Jira Cloud
 

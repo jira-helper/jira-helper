@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud column service logs DOM/API fallback diagnostics. */
 // src/cloud/shared/ColumnService.ts
 // Сервис для работы с колонками доски Jira Cloud
 

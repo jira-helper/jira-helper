@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud settings service logs storage/API diagnostics. */
 // src/cloud/shared/SettingsService.ts
 // Сервис настроек для Jira Cloud (добавлен onSettingsChanged callback)
 

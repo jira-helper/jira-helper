@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars -- Cloud PageObject implements shared interface methods that are no-ops on Jira Cloud. */
 // src/cloud/shared/BoardPagePageObject.ts
 // Page Object для работы с доской Jira Cloud
 
@@ -353,7 +354,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement {
     const header =
       column.querySelector<HTMLElement>('[data-testid*="column-header"]:not([data-testid*="content"])') ||
-      column.querySelector<HTMLElement>(this.selectors.columnTitle)?.closest<HTMLElement>('[data-testid*="column-header"]') ||
+      column
+        .querySelector<HTMLElement>(this.selectors.columnTitle)
+        ?.closest<HTMLElement>('[data-testid*="column-header"]') ||
       column.querySelector<HTMLElement>(this.selectors.columnTitle) ||
       column.querySelector<HTMLElement>('h2, h3');
 

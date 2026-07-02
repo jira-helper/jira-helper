@@ -11,4 +11,3 @@ export * from './shared';
 export * from './features/person-limits';
 export * from './features/column-limits';
 export * from './features/assignee-highlighter';
-

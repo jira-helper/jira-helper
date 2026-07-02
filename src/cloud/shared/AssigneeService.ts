@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-unused-vars -- Legacy Jira Cloud service keeps diagnostic branches for live-board API fallbacks. */
 // src/cloud/shared/AssigneeService.ts
 // Сервис для работы с исполнителями на доске Jira Cloud
 

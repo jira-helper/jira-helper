@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud adapter logs help diagnose live-board integration. */
 // src/cloud/features/assignee-highlighter/AssigneeHighlighterApplier.ts
 // Applier для подсветки исполнителей на доске Jira Cloud
 

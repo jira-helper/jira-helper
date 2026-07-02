@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud avatar cleanup intentionally ignores best-effort DOM failures. */
 // src/cloud/shared/AvatarIndicatorService.ts
 // Сервис для отображения индикаторов на аватарах пользователей
 

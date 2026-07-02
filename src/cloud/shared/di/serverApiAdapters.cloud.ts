@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud server API adapter logs fallback paths and ignores best-effort DOM misses. */
 import type { Container } from 'dioma';
 import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import {
@@ -125,11 +126,20 @@ export function registerServerApiCloudAdapters(container: Container): void {
           const avatarImg = card.querySelector<HTMLImageElement>(
             '[data-testid="software-board.common.fields.assignee-field-static.avatar-wrapper"] img'
           );
-          if (avatarImg?.src) { foundUrl = avatarImg.src; break; }
+          if (avatarImg?.src) {
+            foundUrl = avatarImg.src;
+            break;
+          }
           const gravatar = card.querySelector<HTMLImageElement>('img[src*="gravatar.com"]');
-          if (gravatar?.src) { foundUrl = gravatar.src; break; }
+          if (gravatar?.src) {
+            foundUrl = gravatar.src;
+            break;
+          }
           const anyAvatar = card.querySelector<HTMLImageElement>('img[src*="avatar"]');
-          if (anyAvatar?.src) { foundUrl = anyAvatar.src; break; }
+          if (anyAvatar?.src) {
+            foundUrl = anyAvatar.src;
+            break;
+          }
         }
       } catch {}
 

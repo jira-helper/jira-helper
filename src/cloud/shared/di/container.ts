@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- Legacy Jira Cloud DI bootstrap logs registration diagnostics. */
 // src/cloud/shared/di/container.ts
 // DI-контейнер для cloud-версии расширения
 
