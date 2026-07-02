@@ -57,8 +57,8 @@ const AVATARS_WRAPPER_ATTR = 'data-jh-person-limits';
 const AVATARS_WRAPPER_KEY = 'avatars';
 
 function getAvatarsMountSelector(po: IBoardPagePageObject): string {
-  const selectors = po.selectors as typeof po.selectors & { boardHeaderTarget?: string };
-  return selectors.boardHeaderTarget ?? '#subnav-title';
+  const selectors = po.selectors as (typeof po.selectors & { boardHeaderTarget?: string }) | undefined;
+  return selectors?.boardHeaderTarget ?? '#subnav-title';
 }
 
 export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {
@@ -160,10 +160,11 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       this.unmountAvatarsContainer();
     });
 
-    const pool = document.querySelector(po.selectors.pool);
+    const poolSelector = po.selectors?.pool ?? '#ghx-pool';
+    const pool = document.querySelector(poolSelector);
     if (pool) {
       this.onDOMChange(
-        po.selectors.pool,
+        poolSelector,
         () => {
           runtime.apply();
           runtime.showOnlyChosen();
