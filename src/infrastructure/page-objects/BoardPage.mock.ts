@@ -2,6 +2,8 @@ import { vi } from 'vitest';
 import { IBoardPagePageObject, SwimlaneElement } from './BoardPage';
 
 export const BoardPagePageObjectMock: IBoardPagePageObject = {
+  columnHeaderRenderMode: 'server',
+
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',

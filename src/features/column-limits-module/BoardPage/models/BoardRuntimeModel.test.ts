@@ -276,7 +276,7 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('applyColumnHeaderStyles', () => {
-    it('draws only top group border with rounded outer edges for a multi-column group', () => {
+    it('preserves server column header rendering by default', () => {
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3', 'col4']);
       const model = modelWithData({});
       model.groupStats = [
@@ -297,6 +297,7 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
         'col1',
         expect.objectContaining({
+          backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
           borderTopLeftRadius: '10px',
         })
@@ -304,24 +305,59 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
         'col2',
         expect.objectContaining({
+          backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
-          position: 'relative',
         })
       );
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
         'col3',
         expect.objectContaining({
+          backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
           borderTopRightRadius: '10px',
         })
       );
 
       const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ paddingTop: '18px' })]));
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ position: 'relative' })]));
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopLeftRadius');
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopRightRadius');
+    });
+
+    it('uses Cloud-specific column header rendering without server background fill', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2', 'col3'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
+
+      expect(styledHeaders).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            borderTop: '4px solid #abc',
+            paddingTop: '18px',
+            position: 'relative',
+          }),
+        ])
+      );
       expect(styledHeaders).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ backgroundColor: expect.any(String) })])
       );
-      expect(styledHeaders[1]).not.toHaveProperty('borderTopLeftRadius');
-      expect(styledHeaders[1]).not.toHaveProperty('borderTopRightRadius');
     });
 
     it('should style column headers for grouped columns via pageObject', () => {
@@ -387,11 +423,13 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('applyLimitIndicators', () => {
-    it('positions the header badge without moving it outside the visible header area', () => {
+    it('keeps separate badge placement styles for server and Cloud renderers', () => {
       const css = readFileSync(resolve(__dirname, '../styles.module.css'), 'utf8');
 
+      expect(css).toContain('.limitColumnBadge {');
+      expect(css).toContain('top: -24%');
+      expect(css).toContain('.limitColumnBadgeCloud {');
       expect(css).toContain('top: 0');
-      expect(css).not.toContain('top: -11px');
     });
 
     it('should reset cells and badges, then highlight and insert badge for over-limit group', () => {
@@ -426,6 +464,32 @@ describe('BoardRuntimeModel', () => {
       expect(htmlCall).toBeDefined();
       expect(htmlCall![1]).toContain('10/5');
       expect(htmlCall![1]).toContain('data-column-limits-badge="true"');
+    });
+
+    it('uses Cloud-specific badge class and color style only on Cloud boards', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 10,
+          limit: 5,
+          isOverLimit: false,
+          color: '#f00',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyLimitIndicators();
+
+      const htmlCall = vi.mocked(mockPageObject.insertColumnHeaderHtml).mock.calls.find(([id]) => id === 'col1');
+
+      expect(htmlCall?.[1]).toContain('data-column-limits-badge="true"');
+      expect(htmlCall?.[1]).toContain('--column-limit-color: #f00');
+      expect(htmlCall?.[1]).toContain('Cloud');
     });
   });
 

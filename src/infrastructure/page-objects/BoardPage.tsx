@@ -31,6 +31,8 @@ export type ColumnIssueCountOptions = {
   cssFilter?: string;
 };
 
+export type ColumnHeaderRenderMode = 'server' | 'cloud';
+
 const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
 
 type BoardSelectors = Pick<
@@ -146,6 +148,8 @@ class CardPageObject {
 }
 
 export interface IBoardPagePageObject {
+  columnHeaderRenderMode: ColumnHeaderRenderMode;
+
   selectors: {
     pool: string;
     issue: string;
@@ -298,6 +302,8 @@ export interface IBoardPagePageObject {
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
+  columnHeaderRenderMode: 'server',
+
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',
@@ -637,8 +643,6 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     style.removeProperty('border-top');
     style.removeProperty('border-top-left-radius');
     style.removeProperty('border-top-right-radius');
-    style.removeProperty('padding-top');
-    style.removeProperty('position');
   },
 
   insertColumnHeaderHtml(columnId: string, html: string): void {

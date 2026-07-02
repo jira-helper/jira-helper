@@ -14,6 +14,8 @@ import React from 'react';
 
 // Mock BoardPagePageObject
 const mockBoardPagePageObject: IBoardPagePageObject = {
+  columnHeaderRenderMode: 'server',
+
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',

@@ -84,6 +84,8 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
 };
 
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
+  columnHeaderRenderMode: 'cloud',
+
   _columnsCache: null as Array<{ id: string; name: string }> | null,
 
   setCachedColumns(columns: Array<{ id: string; name: string }>) {

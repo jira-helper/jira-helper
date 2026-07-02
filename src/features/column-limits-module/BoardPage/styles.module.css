@@ -1,5 +1,17 @@
 .limitColumnBadge {
   position: absolute;
+  top: -24%;
+  left: 4%;
+  padding: 2px 4px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  margin: 0 10px;
+  color: white;
+  background-color: #1b855c;
+}
+
+.limitColumnBadgeCloud {
+  position: absolute;
   top: 0;
   left: 12px;
   z-index: 1;
@@ -23,7 +35,8 @@
   cursor: pointer;
 }
 
-.limitColumnBadge:hover .limitColumnBadge__hint {
+.limitColumnBadge:hover .limitColumnBadge__hint,
+.limitColumnBadgeCloud:hover .limitColumnBadge__hint {
   visibility: visible;
   display: inline;
   color: black;

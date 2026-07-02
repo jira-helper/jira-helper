@@ -54,6 +54,8 @@ describe('DaysInColumnSettings', () => {
 
     // Register mock boardPagePageObject (still needed for DI context)
     const mockBoardPagePageObject: IBoardPagePageObject = {
+      columnHeaderRenderMode: 'server',
+
       selectors: {
         pool: '#ghx-pool',
         issue: '.ghx-issue',
