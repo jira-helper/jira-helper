@@ -1,95 +1,67 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { BoardPagePageObject } from '../BoardPagePageObject';
 
 describe('BoardPagePageObject', () => {
-  function createWrapper(groupId = '1', groupName = 'test'): HTMLElement {
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('data-jh-group-label', groupId);
-    const innerDiv = document.createElement('div');
-    innerDiv.style.position = 'relative';
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'groupName';
-    nameSpan.textContent = groupName;
-    innerDiv.appendChild(nameSpan);
-    wrapper.appendChild(innerDiv);
-    return wrapper;
+  function renderColumn(): { column: HTMLElement; header: HTMLElement } {
+    document.body.innerHTML = `
+      <div data-testid="software-board.board-container.board">
+        <div data-testid="platform-board-kit.ui.column.draggable-column">
+          <div data-testid="platform-board-kit.ui.column-header">
+            <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+          </div>
+          <div data-testid="platform-board-kit.ui.card.card">KAN-1</div>
+        </div>
+      </div>
+    `;
+
+    const column = document.querySelector<HTMLElement>('[data-testid*="draggable-column"]');
+    const header = document.querySelector<HTMLElement>('[data-testid="platform-board-kit.ui.column-header"]');
+
+    if (!column || !header) {
+      throw new Error('Expected test column DOM');
+    }
+
+    BoardPagePageObject.setCachedColumns([{ id: 'column-0', name: 'To Do' }]);
+    return { column, header };
   }
 
   beforeEach(() => {
     document.body.innerHTML = '';
+    BoardPagePageObject.setCachedColumns([]);
   });
 
-  it('creates popup in body with correct content on mouseenter', async () => {
-    const mod = await import('../BoardPagePageObject');
-    const wrapper = createWrapper('42', 'my-group');
-    document.body.appendChild(wrapper);
+  it('resolves the per-column header instead of the whole column', () => {
+    const { header } = renderColumn();
 
-    mod.BoardPagePageObject._attachPopupListener(wrapper);
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-
-    const popup = document.getElementById('jh-popup-42');
-    expect(popup).toBeTruthy();
-    expect(popup!.tagName).toBe('SPAN');
-    expect(popup!.textContent).toBe('my-group');
+    expect(BoardPagePageObject.getColumnHeaderElement('column-0')).toBe(header);
   });
 
-  it('popup hidden by default', async () => {
-    const mod = await import('../BoardPagePageObject');
-    const wrapper = createWrapper('7', 'hidden-group');
-    document.body.appendChild(wrapper);
+  it('inserts and removes limit badge inside the column header', () => {
+    const { column, header } = renderColumn();
 
-    mod.BoardPagePageObject._attachPopupListener(wrapper);
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    BoardPagePageObject.insertColumnHeaderHtml(
+      'column-0',
+      '<span data-column-limits-badge="true">2/1</span>'
+    );
 
-    const popup = document.getElementById('jh-popup-7')!;
-    expect(popup.style.display).toBe('block');
+    expect(header.querySelector('[data-column-limits-badge]')?.textContent).toBe('2/1');
+    expect(column.querySelector('[data-jh-group-label]')).toBeNull();
+
+    BoardPagePageObject.removeColumnHeaderElements('column-0', '[data-column-limits-badge]');
+
+    expect(header.querySelector('[data-column-limits-badge]')).toBeNull();
   });
 
-  it('shows and positions popup on mouseenter', async () => {
-    const mod = await import('../BoardPagePageObject');
-    const wrapper = createWrapper('5', 'pos-group');
-    document.body.appendChild(wrapper);
-    const origRect = wrapper.getBoundingClientRect;
-    wrapper.getBoundingClientRect = () => ({ bottom: 120, left: 60, top: 90, right: 300, width: 240, height: 30 } as DOMRect);
+  it('styles only the column header for group decoration', () => {
+    const { column, header } = renderColumn();
 
-    mod.BoardPagePageObject._attachPopupListener(wrapper);
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    BoardPagePageObject.styleColumnHeader('column-0', {
+      backgroundColor: 'rgb(222, 235, 255)',
+      borderTop: '4px solid rgb(255, 0, 0)',
+    });
 
-    const popup = document.getElementById('jh-popup-5')!;
-    expect(popup.style.display).toBe('block');
-    expect(popup.style.top).toBe('124px');
-    expect(popup.style.left).toBe('60px');
-
-    wrapper.getBoundingClientRect = origRect;
-  });
-
-  it('hides popup on mouseleave', async () => {
-    const mod = await import('../BoardPagePageObject');
-    const wrapper = createWrapper('9', 'hide-group');
-    document.body.appendChild(wrapper);
-
-    mod.BoardPagePageObject._attachPopupListener(wrapper);
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-
-    expect(document.getElementById('jh-popup-9')!.style.display).toBe('block');
-
-    wrapper.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
-    expect(document.getElementById('jh-popup-9')!.style.display).toBe('none');
-  });
-
-  it('recreates popup if removed from DOM', async () => {
-    const mod = await import('../BoardPagePageObject');
-    const wrapper = createWrapper('3', 'recreate');
-    document.body.appendChild(wrapper);
-
-    mod.BoardPagePageObject._attachPopupListener(wrapper);
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-    const popup = document.getElementById('jh-popup-3')!;
-    popup.remove();
-
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-
-    const newPopup = document.getElementById('jh-popup-3');
-    expect(newPopup).toBeTruthy();
-    expect(newPopup!.style.display).toBe('block');
+    expect(header.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
+    expect(column.style.borderTop).toBe('');
   });
 });

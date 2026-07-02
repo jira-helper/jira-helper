@@ -30,7 +30,6 @@ export interface WipLimitSettings {
     limit: number;
     color: string;
     baseColor?: string;
-    warningColor?: string;
   }>;
 }
 
@@ -43,7 +42,6 @@ export interface ColumnGroupWipLimitSettings {
     columnNames: string[];
     limit: number;
     baseColor: string;
-    warningColor?: string;
   }>;
 }
 

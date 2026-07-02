@@ -1,4 +1,6 @@
-type CloudStartupDocument = Pick<Document, 'readyState' | 'body' | 'addEventListener'>;
+type CloudStartupDocument = Pick<Document, 'readyState' | 'addEventListener'> & {
+  body: HTMLElement | null;
+};
 
 type CloudStartupScheduler = {
   setTimeout(callback: () => void, delay: number): unknown;

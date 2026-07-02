@@ -1,9 +1,14 @@
 import React from 'react';
 import { Token } from 'dioma';
-import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
+import { boardPagePageObjectToken, type IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { createRoot } from 'react-dom/client';
 import { PageModification } from '../../infrastructure/page-modification/PageModification';
 import { BoardSettingsComponent } from './BoardSettingsComponent';
+
+function getBoardSettingsMountSelector(po: IBoardPagePageObject): string {
+  const selectors = po.selectors as typeof po.selectors & { boardHeaderTarget?: string };
+  return selectors.boardHeaderTarget ?? selectors.sidebar;
+}
 
 export class BoardSettingsBoardPage extends PageModification<undefined, Element> {
   getModificationId(): string {
@@ -12,12 +17,13 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
 
   waitForLoading(): Promise<Element> {
     const po = this.container.inject(boardPagePageObjectToken);
-    const controlsBar = document.querySelector(po.selectors.boardHeaderTarget);
+    const mountSelector = getBoardSettingsMountSelector(po);
+    const controlsBar = document.querySelector(mountSelector);
     if (controlsBar) {
       return Promise.resolve(controlsBar);
     }
 
-    return this.waitForElement(po.selectors.boardHeaderTarget);
+    return this.waitForElement(mountSelector);
   }
 
   loadData() {
@@ -26,7 +32,7 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
 
   async apply(): Promise<void> {
     const po = this.container.inject(boardPagePageObjectToken);
-    const controlsBar = document.querySelector(po.selectors.boardHeaderTarget);
+    const controlsBar = document.querySelector(getBoardSettingsMountSelector(po));
     if (!controlsBar) {
       // eslint-disable-next-line no-console
       console.error('[BoardSettingsBoardPage] Controls bar not found');

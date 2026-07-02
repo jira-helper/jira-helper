@@ -9,9 +9,6 @@ export {
   assigneeServiceToken,
   avatarIndicatorServiceToken,
   boardPagePageObjectToken,
-  personLimitsApplierToken,
-  columnLimitsApplierToken,
-  columnGroupLimitPanelToken,
   assigneeHighlighterApplierToken,
   dynamicUpdaterToken,
 } from './di';

@@ -4,6 +4,10 @@
 import React from 'react';
 
 import { createRoot, Root } from 'react-dom/client';
+import type {
+  IBoardPagePageObject as ServerBoardPagePageObject,
+  IssueCountOptions,
+} from 'src/infrastructure/page-objects/BoardPage';
 
 class CardPageObject {
   selectors = {
@@ -14,6 +18,10 @@ class CardPageObject {
 
   getIssueId() {
     return this.card.querySelector(this.selectors.issueKey)?.textContent?.trim() as string;
+  }
+
+  getCardElement() {
+    return this.card;
   }
 
   attach(
@@ -51,75 +59,30 @@ class CardPageObject {
   }
 }
 
-export interface IBoardPagePageObject {
-  selectors: {
-    pool: string;
-    issue: string;
-    flagged: string;
-    grabber: string;
-    grabberTransparent: string;
-    sidebar: string;
-    column: string;
-    columnHeader: string;
-    columnTitle: string;
-    daysInColumn: string;
-    swimlaneHeader: string;
-    swimlaneRow: string;
-    avatarImg: string;
-    issueType: string;
-    parentGroup: string;
-    boardHeaderTarget: string;
-    issueCardCloud: string;
-    boardHeaderCloud: string;
-    boardContainerCloud: string;
-    boardColumnContainerCloud: string;
-  };
+type CloudSelectors = ServerBoardPagePageObject['selectors'] & {
+  boardHeaderTarget: string;
+  issueCardCloud: string;
+  boardHeaderCloud: string;
+  boardContainerCloud: string;
+  boardColumnContainerCloud: string;
+};
 
-  classlist: {
-    flagged: string;
-  };
-
-  getSwimlaneIds(): string[];
-  getColumns(): string[];
+export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 'selectors' | 'listenCards'> {
+  selectors: CloudSelectors;
   listenCards(callback: (cards: CardPageObject[]) => void): () => void;
-  getColumnOfIssue(issueId: string): string;
-  getHtml(): string;
   getAllCloudCards(): HTMLElement[];
   getBoardId(): number | null;
   getIssueCssSelector(editData: any): string;
-  getSwimlanes(): Array<{ id: string; element: Element; header: Element }>;
-  hasCustomSwimlanes(): boolean;
-  getColumnElements(): Element[];
-  getColumnsInSwimlane(swimlane: Element): Element[];
   setCachedColumns(columns: Array<{ id: string; name: string }>): void;
-  getOrderedColumnIds(): string[];
-  getOrderedColumns(): Array<{ id: string; name: string }>;
-  getColumnHeaderElement(columnId: string): HTMLElement | null;
-  getIssueCountInColumn(columnId: string, options?: any): number;
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void;
-  resetColumnHeaderStyles(columnId: string): void;
-  insertColumnHeaderHtml(columnId: string, html: string): void;
-  insertBeforeColumn(columnId: string, html: string): void;
-  removeColumnHeaderElements(columnId: string, selector: string): void;
-  highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void;
-  resetColumnCellStyles(columnId: string): void;
-
-  // Person-limits methods
-  getAssigneeFromIssue(issue: Element): string | null;
-  getIssueTypeFromIssue(issue: Element): string | null;
-  getColumnIdOfIssue(issue: Element): string | null;
-  getColumnIdFromColumn(column: Element): string | null;
-  getSwimlaneIdOfIssue(issue: Element): string | null;
-  getParentGroups(): Element[];
-  countIssueVisibility(element: Element, cssSelector: string): { total: number; hidden: number };
-  setIssueBackgroundColor(issue: Element, color: string): void;
-  resetIssueBackgroundColor(issue: Element): void;
-  setIssueVisibility(issue: Element, visible: boolean): void;
-  setSwimlaneVisibility(swimlane: Element, visible: boolean): void;
-  setParentGroupVisibility(group: Element, visible: boolean): void;
 }
 
-export const BoardPagePageObject: IBoardPagePageObject = {
+type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
+  _columnsCache: Array<{ id: string; name: string }> | null;
+  _findColumnElement(columnId: string): Element | null;
+  _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
+};
+
+export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   _columnsCache: null as Array<{ id: string; name: string }> | null,
 
   setCachedColumns(columns: Array<{ id: string; name: string }>) {
@@ -194,6 +157,16 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     return column?.querySelector(this.selectors.columnTitle)?.textContent?.trim() || '';
   },
 
+  getDaysInColumn(_issueId: string): number | null {
+    return null;
+  },
+
+  hideDaysInColumn(): void {
+    document.querySelectorAll<HTMLElement>(this.selectors.daysInColumn).forEach(element => {
+      element.style.display = 'none';
+    });
+  },
+
   getHtml(): string {
     return document.body.innerHTML;
   },
@@ -245,6 +218,41 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     return [];
   },
 
+  getSwimlaneHeader(_swimlaneId: string): Element | null {
+    return null;
+  },
+
+  getIssueCountInSwimlane(_swimlaneId: string, _options?: IssueCountOptions): number {
+    return this.getAllCloudCards().length;
+  },
+
+  getIssueCountByColumn(_swimlaneId: string, options?: IssueCountOptions): number[] {
+    return this.getOrderedColumnIds().map(columnId => this.getIssueCountInColumn(columnId, options));
+  },
+
+  getIssueCountForColumns(_swimlaneId: string, columns: string[], options?: IssueCountOptions): number {
+    return columns.reduce((total, columnId) => total + this.getIssueCountInColumn(columnId, options), 0);
+  },
+
+  insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void {
+    let container = header.querySelector(`[data-jh-swimlane-component="${key}"]`);
+    if (!container) {
+      container = document.createElement('span');
+      container.setAttribute('data-jh-swimlane-component', key);
+      header.appendChild(container);
+    }
+
+    createRoot(container).render(<>{component}</>);
+  },
+
+  removeSwimlaneComponent(header: Element, key: string): void {
+    header.querySelector(`[data-jh-swimlane-component="${key}"]`)?.remove();
+  },
+
+  highlightSwimlane(header: Element, exceeded: boolean): void {
+    (header as HTMLElement).style.backgroundColor = exceeded ? '#ffebe6' : '';
+  },
+
   hasCustomSwimlanes(): boolean {
     return false;
   },
@@ -258,34 +266,12 @@ export const BoardPagePageObject: IBoardPagePageObject = {
   },
 
   getColumnHeaderElement(columnId: string): HTMLElement | null {
-    const columns = Array.from(document.querySelectorAll<HTMLElement>(this.selectors.column));
-    for (let i = 0; i < columns.length; i++) {
-      if (columns[i].getAttribute('data-column-id') === columnId || columns[i].getAttribute('data-id') === columnId) {
-        return columns[i];
-      }
+    const column = this._findColumnElement(columnId);
+    if (!column) {
+      return null;
     }
-    const draggableColumns = document.querySelectorAll<HTMLElement>(
-      '[data-testid^="platform-board-kit.ui.column.draggable-column"]'
-    );
-    for (let i = 0; i < draggableColumns.length; i++) {
-      const col = draggableColumns[i];
-      if (col.getAttribute('data-column-id') === columnId || col.getAttribute('data-id') === columnId) {
-        return col;
-      }
-    }
-    if (this._columnsCache) {
-      const cachedCol = this._columnsCache.find(c => c.id === columnId);
-      if (cachedCol) {
-        const allCols = columns.length > 0 ? columns : draggableColumns;
-        const idx = this._columnsCache.indexOf(cachedCol);
-        if (allCols[idx]) {
-          return allCols[idx];
-        }
-      }
-    }
-    const header = document.querySelector(this.selectors.columnHeader);
-    if (!header) return null;
-    return header.querySelector<HTMLElement>(`[data-id="${columnId}"]`);
+
+    return this._findHeaderElementInColumn(column as HTMLElement);
   },
 
   getOrderedColumnIds(): string[] {
@@ -364,6 +350,16 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     return null;
   },
 
+  _findHeaderElementInColumn(column: HTMLElement): HTMLElement {
+    const header =
+      column.querySelector<HTMLElement>('[data-testid*="column-header"]:not([data-testid*="content"])') ||
+      column.querySelector<HTMLElement>(this.selectors.columnTitle)?.closest<HTMLElement>('[data-testid*="column-header"]') ||
+      column.querySelector<HTMLElement>(this.selectors.columnTitle) ||
+      column.querySelector<HTMLElement>('h2, h3');
+
+    return header ?? column;
+  },
+
   getIssueCountInColumn(columnId: string, _options?: any): number {
     const col = this._findColumnElement(columnId);
     if (!col) {
@@ -401,63 +397,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     el.insertAdjacentHTML('beforeend', html);
   },
 
-  insertBeforeColumn(columnId: string, html: string): void {
-    const el = this._findColumnElement(columnId);
-    if (!el) {
-      return;
-    }
-    const attrName = 'data-jh-group-label';
-    const existingLabel = el.querySelector(`[${attrName}]`);
-    if (existingLabel) {
-      existingLabel.innerHTML = html;
-      this._attachPopupListener(existingLabel);
-      return;
-    }
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute(attrName, columnId);
-    wrapper.innerHTML = html;
-    wrapper.style.width = '100%';
-    wrapper.style.overflow = 'hidden';
-    wrapper.style.zIndex = '1';
-    el.insertBefore(wrapper, el.firstChild);
-    this._attachPopupListener(wrapper);
-  },
-
-  _attachPopupListener(wrapper: HTMLElement): void {
-    const groupLabelDiv = wrapper.firstElementChild as HTMLElement | null;
-    const groupNameSpan = groupLabelDiv?.querySelector('.groupName');
-    if (!groupNameSpan) return;
-
-    const hideAll = () => {
-      document.querySelectorAll('[id^="jh-popup-"]').forEach(el => {
-        (el as HTMLElement).style.display = 'none';
-      });
-    };
-    const popupId = 'jh-popup-' + (wrapper.getAttribute('data-jh-group-label') || '0');
-    const show = () => {
-      hideAll();
-      let popup = document.getElementById(popupId);
-      if (!popup) {
-        popup = document.createElement('span');
-        popup.id = popupId;
-        popup.style.cssText =
-          'position:fixed;padding:8px 12px;background:#172b4d;color:#fff;font-size:12px;font-weight:600;border-radius:4px;white-space:nowrap;z-index:2147483647;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:none';
-        document.body.appendChild(popup);
-        popup.addEventListener('mouseleave', hideAll);
-      }
-      popup.textContent = groupNameSpan.textContent;
-      const rect = wrapper.getBoundingClientRect();
-      popup.style.top = rect.bottom + 4 + 'px';
-      popup.style.left = rect.left + 'px';
-      popup.style.display = 'block';
-    };
-
-    wrapper.addEventListener('mouseenter', show);
-    wrapper.addEventListener('mouseleave', hideAll);
-  },
-
   removeColumnHeaderElements(columnId: string, selector: string): void {
-    const el = this._findColumnElement(columnId);
+    const el = this.getColumnHeaderElement(columnId);
     if (!el) return;
     const elements = el.querySelectorAll(selector);
     elements.forEach(e => e.remove());

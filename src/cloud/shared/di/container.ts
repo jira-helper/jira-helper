@@ -11,13 +11,19 @@ import {
   dynamicUpdaterToken,
 } from './tokens';
 import { registerJiraApiCloudInDI } from './jiraApiTokens.cloud';
-import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
+import {
+  boardPagePageObjectToken,
+  type IBoardPagePageObject as ServerIBoardPagePageObject,
+} from '../../../infrastructure/page-objects/BoardPage';
 
 import { SettingsService } from '../SettingsService';
 import { ColumnService } from '../ColumnService';
 import { AssigneeService } from '../AssigneeService';
 import { AvatarIndicatorService } from '../AvatarIndicatorService';
-import { BoardPagePageObject as CloudBoardPagePageObject } from '../BoardPagePageObject';
+import {
+  BoardPagePageObject as CloudBoardPagePageObject,
+  type IBoardPagePageObject as CloudIBoardPagePageObject,
+} from '../BoardPagePageObject';
 import { AssigneeHighlighterApplier } from '../../features/assignee-highlighter/AssigneeHighlighterApplier';
 import { DynamicUpdater } from '../DynamicUpdater';
 
@@ -26,19 +32,21 @@ import { registerInContainer as registerAssigneeHighlighter } from '../../featur
 export const cloudContainer = new Container();
 
 export function registerCloudServices(): void {
+  const cloudBoardPagePageObject = CloudBoardPagePageObject as CloudIBoardPagePageObject;
+
   cloudContainer.register({
     token: boardPagePageObjectToken,
-    value: CloudBoardPagePageObject,
+    value: CloudBoardPagePageObject as unknown as ServerIBoardPagePageObject,
   });
 
   cloudContainer.register({
     token: settingsServiceToken,
-    value: new SettingsService(cloudContainer.inject(boardPagePageObjectToken)),
+    value: new SettingsService(cloudBoardPagePageObject),
   });
 
   cloudContainer.register({
     token: columnServiceToken,
-    value: new ColumnService(cloudContainer.inject(boardPagePageObjectToken)),
+    value: new ColumnService(cloudBoardPagePageObject),
   });
 
   cloudContainer.register({

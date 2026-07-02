@@ -6,26 +6,6 @@
   white-space: nowrap;
 }
 
-.limitGroupLabel {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 4px;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.limitGroupLabel .groupName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
 .limitColumnBadge__hint {
   visibility: hidden;
   position: absolute;
