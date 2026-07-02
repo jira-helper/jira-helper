@@ -3,8 +3,6 @@
 
 import 'antd/dist/reset.css';
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { globalContainer } from 'dioma';
 import { Routes, registerRoutingServiceInDI, routingServiceToken } from '../infrastructure/routing';
 import { registerExtensionApiServiceInDI } from '../infrastructure/extension-api/ExtensionApiService';
@@ -23,10 +21,7 @@ import { BoardSettingsBoardPage } from '../features/board-settings/BoardPage';
 import { LocalSettingsBoardPage } from '../features/local-settings/BoardPage';
 import { boardPagePageObjectToken } from '../infrastructure/page-objects/BoardPage';
 import runModifications from '../infrastructure/page-modification/runModifications';
-import { SettingsButton } from './ui';
-import { registerSettings } from '../features/board-settings/actions/registerSettings';
 import { loadLocalSettings } from '../features/local-settings/actions/loadLocalSettings';
-import { LocalSettingsTab } from '../features/local-settings/components/LocalSettingsTab';
 import { diagnosticModule } from '../features/diagnostic-module/module';
 import { columnLimitsModule } from '../features/column-limits-module/module';
 import ColumnLimitsBoardPage, { columnLimitsBoardPageToken } from '../features/column-limits-module/BoardPage';
@@ -52,49 +47,10 @@ function initCloudDiContainer() {
   });
 }
 
-function mountSettingsButton(): boolean {
-  const controlsBar = document.querySelector('[data-testid="software-board.header.controls-bar"]');
-
-  if (controlsBar && !controlsBar.querySelector('[data-jh-settings-button]')) {
-    const container = document.createElement('div');
-    container.setAttribute('data-jh-settings-button', '');
-    container.style.display = 'inline-block';
-    container.style.marginLeft = '8px';
-    container.style.position = 'relative';
-    controlsBar.appendChild(container);
-
-    const root = createRoot(container);
-    root.render(React.createElement(SettingsButton));
-
-    return true;
-  }
-
-  return false;
-}
-
-function waitForMount(): void {
-  if (mountSettingsButton()) {
-    return;
-  }
-
-  const observer = new MutationObserver(() => {
-    if (mountSettingsButton()) {
-      observer.disconnect();
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  setTimeout(() => {
-    observer.disconnect();
-  }, 10000);
-}
-
 // Инициализация всех модулей (async)
 export async function initializeCloudExtension(): Promise<void> {
   initCloudDiContainer();
   registerCloudServices();
-  waitForMount();
 
   const routingService = globalContainer.inject(routingServiceToken);
 
@@ -140,7 +96,6 @@ export async function initializeCloudExtension(): Promise<void> {
   runModifications(modificationsMap, routingService);
 
   loadLocalSettings();
-  registerSettings({ title: 'Local Settings', component: LocalSettingsTab });
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {

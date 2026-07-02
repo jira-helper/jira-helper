@@ -1,5 +1,5 @@
 import { Token } from 'dioma';
-import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
 import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
@@ -13,7 +13,8 @@ export class LocalSettingsBoardPage extends PageModification<void, Element> {
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement(BoardPagePageObject.selectors.pool);
+    const po = this.container.inject(boardPagePageObjectToken);
+    return this.waitForElement(po.selectors.pool);
   }
 
   loadData() {
