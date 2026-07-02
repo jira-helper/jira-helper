@@ -6,6 +6,7 @@ import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabI
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
 import { PageModification } from '../../../infrastructure/page-modification/PageModification';
+import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import type { WipLimitsProperty } from '../types';
 import { boardRuntimeModelToken, propertyModelToken } from '../tokens';
@@ -51,7 +52,8 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement('.ghx-column-header-group');
+    const po = this.container.inject(boardPagePageObjectToken);
+    return this.waitForElement(po.selectors.pool);
   }
 
   async loadData(): Promise<[EditData, WipLimitsProperty]> {

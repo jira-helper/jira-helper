@@ -91,7 +91,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   selectors: {
-    pool: '[data-testid="software-board.board-container.board"]',
+    pool: '[data-testid^="software-board.board-container.board"]',
     issue: '[data-testid="platform-board-kit.ui.card.card"]',
     flagged: '.ghx-flagged',
     grabber: '.ghx-grabber',
@@ -110,7 +110,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     issueCardCloud: '[data-testid="platform-board-kit.ui.card.card"]',
     boardHeaderCloud: '[data-testid="software-board.header.controls-bar"]',
     boardContainerCloud: '[data-testid^="software-board.board-container"]',
-    boardColumnContainerCloud: '[data-testid="software-board.board-container.board"]',
+    boardColumnContainerCloud: '[data-testid^="software-board.board-container.board"]',
   },
 
   classlist: {

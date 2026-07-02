@@ -15,6 +15,7 @@ import type { PersonWipLimitsProperty_2_29 } from '../property';
 import { PersonLimitsSettingsTab } from '../SettingsTab';
 import { PERSON_LIMITS_TEXTS } from '../SettingsPage/texts';
 import type { Column, Swimlane } from '../SettingsPage/state/types';
+import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 
 type PersonLimitData = PersonWipLimitsProperty_2_29;
 
@@ -91,7 +92,8 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   }
 
   waitForLoading(): Promise<Element> {
-    return this.waitForElement('.ghx-column, .ghx-swimlane');
+    const po = this.container.inject(boardPagePageObjectToken);
+    return this.waitForElement(po.selectors.pool);
   }
 
   loadData(): Promise<[any, PersonLimitData | null]> {
