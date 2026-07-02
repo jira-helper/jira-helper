@@ -11,7 +11,6 @@ import type { Logger } from 'src/infrastructure/logging/Logger';
 import { findGroupByColumnId, generateColorByFirstChars } from '../../shared/utils';
 import styles from '../styles.module.css';
 
-const HEADER_GROUP_BG = '#deebff';
 const OVER_LIMIT_CELL_BG = '#ff5630';
 
 export class BoardRuntimeModel {
@@ -101,8 +100,8 @@ export class BoardRuntimeModel {
       if (!groupColor) return;
 
       const headerStyles: Partial<CSSStyleDeclaration> = {
-        backgroundColor: HEADER_GROUP_BG,
         borderTop: `4px solid ${groupColor}`,
+        position: 'relative',
       };
 
       if (columnByLeft.name !== name) {
@@ -142,7 +141,7 @@ export class BoardRuntimeModel {
       const badgeClass = styles.limitColumnBadge ?? 'limitColumnBadge';
       const hintClass = styles.limitColumnBadge__hint ?? 'limitColumnBadge__hint';
       const badgeHtml = `
-          <span class="${badgeClass}" data-column-limits-badge="true">
+          <span class="${badgeClass}" data-column-limits-badge="true" style="--column-limit-color: ${stat.color}">
             ${stat.currentCount}/${stat.limit}
             <span class="${hintClass}">Issues per group / Max number of issues per group</span>
           </span>`;

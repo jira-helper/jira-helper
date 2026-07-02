@@ -48,6 +48,7 @@ const BoardSettingsModalInner = () => {
           body: {
             maxHeight: 'calc(100vh - 160px)',
             overflowY: 'auto',
+            overflowX: 'hidden',
             paddingTop: 0,
           },
           footer: {

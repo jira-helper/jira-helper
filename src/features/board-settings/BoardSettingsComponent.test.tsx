@@ -64,4 +64,14 @@ describe('BoardSettingsComponent', () => {
     expect(tabs).toHaveClass('jh-board-settings-tabs');
     expect(tabsNavigation).toHaveStyle({ position: 'sticky', top: '0px' });
   });
+
+  it('keeps modal content from creating horizontal scroll', async () => {
+    render(<BoardSettingsComponent />);
+
+    await userEvent.click(screen.getByRole('img'));
+
+    const modalBody = document.querySelector('.ant-modal-body');
+
+    expect(modalBody).toHaveStyle({ overflowX: 'hidden' });
+  });
 });

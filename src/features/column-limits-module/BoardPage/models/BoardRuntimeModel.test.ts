@@ -274,6 +274,54 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('applyColumnHeaderStyles', () => {
+    it('draws only top group border with rounded outer edges for a multi-column group', () => {
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3', 'col4']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2', 'col3'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          borderTop: '4px solid #abc',
+          borderTopLeftRadius: '10px',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({
+          borderTop: '4px solid #abc',
+          position: 'relative',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col3',
+        expect.objectContaining({
+          borderTop: '4px solid #abc',
+          borderTopRightRadius: '10px',
+        })
+      );
+
+      const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ backgroundColor: expect.any(String) })])
+      );
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopLeftRadius');
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopRightRadius');
+    });
+
     it('should style column headers for grouped columns via pageObject', () => {
       const model = modelWithData({
         G1: {

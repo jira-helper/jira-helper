@@ -1,9 +1,16 @@
 .limitColumnBadge {
-  padding: 2px 4px;
-  border-radius: 3px;
+  position: absolute;
+  top: -11px;
+  left: 12px;
+  z-index: 1;
+  padding: 1px 6px;
+  border-radius: 999px;
   font-size: 11px;
+  line-height: 16px;
+  background: var(--column-limit-color, #44546f);
   color: white;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.25);
 }
 
 .limitColumnBadge__hint {
