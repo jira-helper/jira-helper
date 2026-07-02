@@ -64,4 +64,24 @@ describe('BoardPagePageObject', () => {
     expect(header.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
     expect(column.style.borderTop).toBe('');
   });
+
+  it('reads assignee from Jira Cloud avatar label text', () => {
+    document.body.innerHTML = `
+      <div data-testid="platform-board-kit.ui.card.card">
+        <div data-testid="software-board.common.fields.assignee-field-static.avatar-wrapper">
+          <div data-testid="board.common.fields.assignee-field-static.avatar" role="img" aria-labelledby="assignee-label">
+            <span data-testid="board.common.fields.assignee-field-static.avatar--inner"></span>
+            <img data-testid="board.common.fields.assignee-field-static.avatar--image" alt="" aria-hidden="true" />
+            <span data-testid="board.common.fields.assignee-field-static.avatar--label" id="assignee-label" hidden>
+              Исполнитель: xCredo
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const issue = document.querySelector('[data-testid="platform-board-kit.ui.card.card"]');
+
+    expect(BoardPagePageObject.getAssigneeFromIssue(issue!)).toBe('xCredo');
+  });
 });

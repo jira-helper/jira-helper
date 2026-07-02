@@ -15,7 +15,7 @@ import type { PersonWipLimitsProperty_2_29 } from '../property';
 import { PersonLimitsSettingsTab } from '../SettingsTab';
 import { PERSON_LIMITS_TEXTS } from '../SettingsPage/texts';
 import type { Column, Swimlane } from '../SettingsPage/state/types';
-import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
+import { boardPagePageObjectToken, type IBoardPagePageObject } from '../../../infrastructure/page-objects/BoardPage';
 
 type PersonLimitData = PersonWipLimitsProperty_2_29;
 
@@ -55,6 +55,11 @@ function getPersonLimitsSettingsTabTitle(container: Container): string {
  */
 const AVATARS_WRAPPER_ATTR = 'data-jh-person-limits';
 const AVATARS_WRAPPER_KEY = 'avatars';
+
+function getAvatarsMountSelector(po: IBoardPagePageObject): string {
+  const selectors = po.selectors as typeof po.selectors & { boardHeaderTarget?: string };
+  return selectors.boardHeaderTarget ?? '#subnav-title';
+}
 
 export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {
   private avatarsRoot: Root | null = null;
@@ -139,9 +144,10 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
 
     if (!effectivePersonLimits.limits.length) return;
 
+    const po = this.container.inject(boardPagePageObjectToken);
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
     const runtime = boardRuntimeModel;
-    const cssSelector = this.getCssSelectorOfIssues(editData);
+    const cssSelector = po.getIssueCssSelector?.(editData) ?? this.getCssSelectorOfIssues(editData);
     runtime.setCssSelectorOfIssues(cssSelector);
     runtime.setSwimlanesActive(isCustomSwimlaneStrategy);
     runtime.apply();
@@ -154,14 +160,14 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       this.unmountAvatarsContainer();
     });
 
-    const pool = document.getElementById('ghx-pool');
+    const pool = document.querySelector(po.selectors.pool);
     if (pool) {
       this.onDOMChange(
-        '#ghx-pool',
+        po.selectors.pool,
         () => {
           runtime.apply();
           runtime.showOnlyChosen();
-          // Jira sometimes wipes #subnav-title together with the toolbar
+          // Jira sometimes wipes the board toolbar together with our wrapper
           // when cards/columns mutate; re-mount avatars if our wrapper is gone.
           this.renderAvatarsContainer();
         },
@@ -169,12 +175,13 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       );
     }
 
-    // Quick filters / view changes re-render the toolbar around #subnav-title.
-    // Watch the toolbar wrapper so avatars survive those re-renders.
-    const viewSelector = document.getElementById('ghx-view-selector');
-    if (viewSelector) {
+    const mountSelector = getAvatarsMountSelector(po);
+    // Quick filters / view changes re-render the toolbar. Watch the toolbar wrapper
+    // so avatars survive those re-renders on both Jira Server and Jira Cloud.
+    const toolbarObserverSelector = document.getElementById('ghx-view-selector') ? '#ghx-view-selector' : mountSelector;
+    if (document.querySelector(toolbarObserverSelector)) {
       this.onDOMChange(
-        '#ghx-view-selector',
+        toolbarObserverSelector,
         () => {
           this.renderAvatarsContainer();
         },
@@ -186,8 +193,9 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   private renderAvatarsContainer(): void {
     if (this.destroyed) return;
 
-    const subnav = document.querySelector('#subnav-title');
-    if (!subnav) return;
+    const po = this.container.inject(boardPagePageObjectToken);
+    const mount = document.querySelector(getAvatarsMountSelector(po));
+    if (!mount) return;
 
     // Idempotent: skip if our wrapper is still attached to the live DOM.
     if (this.avatarsWrapper && this.avatarsWrapper.isConnected) return;
@@ -199,7 +207,7 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const wrapper = document.createElement('div');
     wrapper.setAttribute(AVATARS_WRAPPER_ATTR, AVATARS_WRAPPER_KEY);
     wrapper.style.display = 'contents';
-    subnav.appendChild(wrapper);
+    mount.appendChild(wrapper);
 
     const root = createRoot(wrapper);
     root.render(

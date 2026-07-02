@@ -432,6 +432,14 @@ describe('BoardRuntimeModel', () => {
       expect(css).toContain('top: 0');
     });
 
+    it('allows the column limit tooltip text to wrap in Cloud', () => {
+      const css = readFileSync(resolve(__dirname, '../styles.module.css'), 'utf8');
+
+      expect(css).toContain('width: 240px');
+      expect(css).toContain('white-space: normal');
+      expect(css).toContain('overflow-wrap: anywhere');
+    });
+
     it('should reset cells and badges, then highlight and insert badge for over-limit group', () => {
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
 

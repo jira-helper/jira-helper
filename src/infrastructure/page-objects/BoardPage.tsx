@@ -299,6 +299,12 @@ export interface IBoardPagePageObject {
    * Optional on the interface so existing mocks do not require the method until they opt in.
    */
   getSelectedIssueKey?(): string | null;
+
+  /**
+   * Runtime issue selector for board features. Jira Server uses `.ghx-issue`;
+   * Jira Cloud adapters can provide their card selector.
+   */
+  getIssueCssSelector?(editData: any): string;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {

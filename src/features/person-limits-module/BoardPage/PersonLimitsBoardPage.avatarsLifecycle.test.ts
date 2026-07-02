@@ -12,12 +12,16 @@ import { useLocalSettingsStore } from 'src/features/local-settings/stores/localS
 import PersonLimitsBoardPage from './index';
 import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { personLimitsModule } from '../module';
+import { boardRuntimeModelToken } from '../tokens';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
   registerSettings: vi.fn(),
 }));
 
 const mockBoardPO = {
+  selectors: {
+    pool: '#ghx-pool',
+  },
   hasCustomSwimlanes: vi.fn(() => false),
   getColumnElements: vi.fn(() => []),
   getColumnsInSwimlane: vi.fn(() => []),
@@ -36,6 +40,7 @@ const mockBoardPO = {
   setParentGroupVisibility: vi.fn(),
   getColumnIdOfIssue: vi.fn(() => null),
   getSwimlaneIdOfIssue: vi.fn(() => null),
+  getIssueCssSelector: vi.fn(() => '[data-testid="platform-board-kit.ui.card.card"]'),
 } as unknown as IBoardPagePageObject;
 
 const mockBoardPropertyService: BoardPropertyServiceI = {
@@ -87,6 +92,8 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
 
   beforeEach(() => {
     useLocalSettingsStore.getState().updateSettings({ locale: 'auto' });
+    delete (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget;
+    vi.mocked(mockBoardPO.getIssueCssSelector!).mockClear();
     document.body.innerHTML =
       '<div id="ghx-view-selector"><div id="subnav-title"></div></div>' + '<div id="ghx-pool"></div>';
     setupDi(globalContainer);
@@ -108,6 +115,23 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     await flush();
 
     expect(document.querySelector('#subnav-title [data-jh-person-limits="avatars"]')).not.toBeNull();
+  });
+
+  it('renders avatars into the Cloud board header and uses the Cloud issue selector', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = '<div data-testid="software-board.header.controls-bar"></div>';
+    const page = createPage();
+
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    const runtime = globalContainer.inject(boardRuntimeModelToken).model;
+    expect(
+      document.querySelector('[data-testid="software-board.header.controls-bar"] [data-jh-person-limits="avatars"]')
+    ).not.toBeNull();
+    expect(mockBoardPO.getIssueCssSelector).toHaveBeenCalled();
+    expect(runtime.cssSelectorOfIssues).toBe('[data-testid="platform-board-kit.ui.card.card"]');
   });
 
   it('re-renders avatars when Jira wipes #subnav-title (regression: 2.30 disappear after board action)', async () => {

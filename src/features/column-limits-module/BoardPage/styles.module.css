@@ -30,9 +30,11 @@
   position: absolute;
   padding: 2px 3px;
   margin-left: 8px;
-  width: 130px;
+  width: 240px;
   transition: 0s visibility;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .limitColumnBadge:hover .limitColumnBadge__hint,
