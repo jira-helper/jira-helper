@@ -29,6 +29,7 @@ export function updatePersonLimit({
           name: p.name,
           displayName: p.displayName,
           self: p.self,
+          ...(p.avatar ? { avatar: p.avatar } : {}),
         }))
       : existingLimit.persons;
 

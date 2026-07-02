@@ -114,7 +114,7 @@ export class BoardRuntimeModel {
     const { limits } = this.propertyModel.data;
     const stats: PersonLimitStats[] = limits.map(limit => ({
       id: computeLimitId(limit),
-      persons: limit.persons.map(p => ({ name: p.name, displayName: p.displayName })),
+      persons: limit.persons.map(p => ({ name: p.name, displayName: p.displayName, avatar: p.avatar })),
       limit: limit.limit,
       issues: ref([]) as unknown as Element[],
       columns: limit.columns,

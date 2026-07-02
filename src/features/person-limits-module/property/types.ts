@@ -43,8 +43,15 @@ export type PersonLimit_2_30 = PersonLimit_2_29 & {
   showAllPersonIssues: boolean;
 };
 
+export type PersonLimitPerson = {
+  name: string;
+  displayName?: string;
+  self: string;
+  avatar?: string;
+};
+
 export type PersonLimit_2_31 = Omit<PersonLimit_2_30, 'person'> & {
-  persons: Array<{ name: string; displayName?: string; self: string }>;
+  persons: PersonLimitPerson[];
 };
 
 export type PersonWipLimitsProperty_2_31 = {

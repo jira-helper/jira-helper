@@ -55,6 +55,23 @@ describe('createPersonLimit', () => {
     });
   });
 
+  it('preserves selected person avatar URL', () => {
+    const personWithAvatar = {
+      ...johnDoe,
+      avatar: 'https://avatar.example/john.png',
+    };
+
+    const result = createPersonLimit({
+      formData: { ...mockFormData, persons: [personWithAvatar] },
+      persons: [personWithAvatar],
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+      id: 1,
+    });
+
+    expect(result.persons[0].avatar).toBe('https://avatar.example/john.png');
+  });
+
   describe('sharedLimit', () => {
     it('defaults sharedLimit to false', () => {
       const result = createPersonLimit({

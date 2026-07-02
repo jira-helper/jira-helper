@@ -69,6 +69,24 @@ describe('updatePersonLimit', () => {
     });
   });
 
+  it('preserves selected person avatar URL when replacing persons from form data', () => {
+    const personWithAvatar: SelectedPerson = {
+      name: '712020:account-id',
+      displayName: 'xCredo',
+      self: '',
+      avatar: 'https://avatar.example/xcredo.png',
+    };
+
+    const result = updatePersonLimit({
+      existingLimit,
+      formData: { ...mockFormData, persons: [personWithAvatar] },
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.persons[0].avatar).toBe('https://avatar.example/xcredo.png');
+  });
+
   describe('sharedLimit', () => {
     const johnDoe: SelectedPerson = {
       name: 'john.doe',

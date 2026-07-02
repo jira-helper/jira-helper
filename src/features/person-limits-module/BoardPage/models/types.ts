@@ -7,6 +7,7 @@ export type PersonLimitStats = {
   persons: Array<{
     name: string;
     displayName?: string;
+    avatar?: string;
   }>;
   limit: number;
   /** Issues that match this person's limit criteria */
