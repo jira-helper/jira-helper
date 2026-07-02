@@ -48,7 +48,6 @@ import { registerLogger } from './infrastructure/logging/Logger';
 import { registerRoutingInDI } from './infrastructure/di/routingTokens';
 import { registerRoutingServiceInDI } from './infrastructure/routing';
 import { registerJiraApiInDI } from './infrastructure/di/jiraApiTokens';
-import { jiraEnvironmentToken } from './infrastructure/di/jiraEnvironmentToken';
 import { registerIssueTypeServiceInDI } from './shared/issueType';
 import { localeProviderToken, JiraLocaleProvider } from './shared/locale';
 import { registerLocalStorageServiceInDI } from './infrastructure/storage/tokens';
@@ -115,10 +114,6 @@ function initDiContainer() {
   registerJiraApiInDI(container);
   registerIssueTypeServiceInDI(container);
   registerLocalStorageServiceInDI(container);
-  container.register({
-    token: jiraEnvironmentToken,
-    value: { type: 'server' },
-  });
   container.register({
     token: localeProviderToken,
     value: new JiraLocaleProvider(),

@@ -87,6 +87,8 @@ export class BoardRuntimeModel {
    */
   private countIssuesInColumn(column: Element, stats: PersonLimitStats[]): void {
     const columnId = this.pageObject.getColumnIdFromColumn(column);
+    if (!columnId) return;
+
     const issues = this.pageObject.getIssueElementsInColumn(column, this.cssSelectorOfIssues);
     issues.forEach(issue => {
       const assignee = this.pageObject.getAssigneeFromIssue(issue);
@@ -120,7 +122,6 @@ export class BoardRuntimeModel {
       includedIssueTypes: limit.includedIssueTypes,
       showAllPersonIssues: limit.showAllPersonIssues,
       sharedLimit: limit.sharedLimit ?? false,
-      warningColor: limit.warningColor,
     }));
 
     const columns = this.pageObject.getColumnElements();
@@ -228,11 +229,10 @@ export class BoardRuntimeModel {
     const allIssues = this.pageObject.getIssueElements(this.cssSelectorOfIssues);
     allIssues.forEach(issue => this.pageObject.resetIssueBackgroundColor(issue));
     this.stats.forEach(personLimit => {
-      const bgColor = personLimit.warningColor || OVER_LIMIT_BG;
       if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
         if (personLimit.issues.length > personLimit.limit) {
           personLimit.issues.forEach(issue => {
-            this.pageObject.setIssueBackgroundColor(issue, bgColor);
+            this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
           });
         }
         return;
@@ -241,7 +241,7 @@ export class BoardRuntimeModel {
         const issuesForPerson = this.filterIssuesByPerson(personLimit, person.name);
         if (issuesForPerson.length > personLimit.limit) {
           issuesForPerson.forEach(issue => {
-            this.pageObject.setIssueBackgroundColor(issue, bgColor);
+            this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
           });
         }
       });

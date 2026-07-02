@@ -54,7 +54,6 @@ export class SettingsUIModel {
         columns: columnIds,
         max: group.max,
         customHexColor: group.customHexColor,
-        warningColor: group.warningColor,
         swimlanes: group.swimlanes?.length ? group.swimlanes : undefined,
       };
 
@@ -67,7 +66,7 @@ export class SettingsUIModel {
         }
       }
 
-      wipLimits[group.name || group.id] = groupData;
+      wipLimits[group.id] = groupData;
     }
 
     this.propertyModel.setData(wipLimits);
@@ -117,25 +116,6 @@ export class SettingsUIModel {
   setGroupColor(groupId: string, customHexColor: string): void {
     const group = this.groups.find(g => g.id === groupId);
     if (group) group.customHexColor = customHexColor;
-  }
-
-  removeGroup(groupId: string): void {
-    const group = this.groups.find(g => g.id === groupId);
-    if (group) {
-      this.withoutGroupColumns.push(...group.columns);
-      this.groups = this.groups.filter(g => g.id !== groupId);
-      delete this.issueTypeSelectorStates[groupId];
-    }
-  }
-
-  setGroupWarningColor(groupId: string, warningColor: string): void {
-    const group = this.groups.find(g => g.id === groupId);
-    if (group) group.warningColor = warningColor;
-  }
-
-  setGroupName(groupId: string, name: string): void {
-    const group = this.groups.find(g => g.id === groupId);
-    if (group) group.name = name;
   }
 
   setGroupSwimlanes(groupId: string, swimlanes: Array<{ id: string; name: string }>): void {

@@ -39,17 +39,6 @@ function baseTemplate(overrides: Partial<CommentTemplate> = {}): CommentTemplate
   };
 }
 
-function deferred<T>() {
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-
-  return { promise, resolve, reject };
-}
-
 describe('CommentTemplatesEditorModel', () => {
   it('inserts text and skips watchers when list is empty; clears pending', async () => {
     const tpl = baseTemplate({ watchers: undefined });
@@ -391,7 +380,7 @@ describe('CommentTemplatesEditorModel', () => {
       insertText,
     };
 
-    const { promise: gate, resolve: openGate } = deferred<void>();
+    const { promise: gate, resolve: openGate } = Promise.withResolvers<void>();
     const addWatcher = vi.fn(async () => {
       await gate;
       return Ok(undefined);
@@ -430,8 +419,8 @@ describe('CommentTemplatesEditorModel', () => {
       insertText,
     };
 
-    const { promise: gate1, resolve: resolve1 } = deferred<void>();
-    const { promise: gate2, resolve: resolve2 } = deferred<void>();
+    const { promise: gate1, resolve: resolve1 } = Promise.withResolvers<void>();
+    const { promise: gate2, resolve: resolve2 } = Promise.withResolvers<void>();
     let watcherCall = 0;
     const addWatcher = vi.fn(async () => {
       watcherCall += 1;

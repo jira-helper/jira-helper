@@ -145,10 +145,6 @@ export const PERSON_LIMITS_TEXTS = {
     en: 'shared',
     ru: 'общий',
   },
-  warningColor: {
-    en: 'Warning color',
-    ru: 'Цвет превышения',
-  },
 } as const satisfies Texts;
 
 export type PersonLimitsTextKeys = keyof typeof PERSON_LIMITS_TEXTS;

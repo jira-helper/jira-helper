@@ -2,13 +2,13 @@ import type { Container } from 'dioma';
 import { Token } from 'dioma';
 import React from 'react';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
 import { PageModification } from '../../../infrastructure/page-modification/PageModification';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import type { WipLimitsProperty } from '../types';
 import { boardRuntimeModelToken, propertyModelToken } from '../tokens';
-import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 import type { PropertyModel } from '../property/PropertyModel';
 import { ColumnLimitsSettingsTab } from '../SettingsTab';
@@ -51,8 +51,7 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
   }
 
   waitForLoading(): Promise<Element> {
-    const po = this.container.inject(boardPagePageObjectToken);
-    return this.waitForElement(po.selectors.columnHeader);
+    return this.waitForElement('.ghx-column-header-group');
   }
 
   async loadData(): Promise<[EditData, WipLimitsProperty]> {
@@ -79,36 +78,28 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     const TabComponent = () => React.createElement(ColumnLimitsSettingsTab, { swimlanes });
 
     registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.COLUMN_WIP_LIMITS,
       title: getColumnLimitsSettingsTabTitle(this.container),
       component: TabComponent,
     });
+
+    if (Object.keys(boardGroups).length === 0) return;
 
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
 
     const cssNotIssueSubTask = this.getCssSelectorNotIssueSubTask(editData);
     (boardRuntimeModel as BoardRuntimeModel).setCssNotIssueSubTask(cssNotIssueSubTask);
 
-    const po = this.container.inject(boardPagePageObjectToken);
-    (boardRuntimeModel as BoardRuntimeModel).setPageObject(po);
-
-    try {
-      (boardRuntimeModel as BoardRuntimeModel).apply();
-      const poolSelector = document.querySelector(po.selectors.pool)
-        ? po.selectors.pool
-        : '[data-testid="software-board.board-area"]';
-      (this as any)._columnRaf = null;
-      this.onDOMChange(poolSelector, () => {
-        if ((this as any)._columnRaf) return;
-        (this as any)._columnRaf = requestAnimationFrame(() => {
-          (this as any)._columnRaf = null;
-          (boardRuntimeModel as BoardRuntimeModel).apply();
-        });
-      }, { childList: true, subtree: true });
-    } catch (error) {
-      console.warn('[ColumnLimitsBoardPage] BoardRuntimeModel не поддерживается на этой версии Jira:', error);
+    const headerGroup = document.querySelector<HTMLElement>('#ghx-pool-wrapper');
+    if (headerGroup) {
+      headerGroup.style.paddingTop = '10px';
     }
 
-    if (Object.keys(boardGroups).length === 0) return;
+    (boardRuntimeModel as BoardRuntimeModel).apply();
+
+    this.onDOMChange('#ghx-pool', () => {
+      (boardRuntimeModel as BoardRuntimeModel).apply();
+    });
   }
 }
 

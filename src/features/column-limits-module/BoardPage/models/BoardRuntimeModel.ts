@@ -19,22 +19,11 @@ export class BoardRuntimeModel {
 
   cssNotIssueSubTask: string = '';
 
-  private _pageObject: IBoardPagePageObject | null = null;
-
   constructor(
     private propertyModel: PropertyModel,
+    private pageObject: IBoardPagePageObject,
     private logger: Logger
-  ) {
-    this._pageObject = null;
-  }
-
-  setPageObject(po: IBoardPagePageObject): void {
-    this._pageObject = po;
-  }
-
-  private get po(): IBoardPagePageObject {
-    return this._pageObject!;
-  }
+  ) {}
 
   apply(): void {
     const log = this.logger.getPrefixedLog('BoardRuntimeModel.apply');
@@ -46,11 +35,11 @@ export class BoardRuntimeModel {
 
   calculateStats(): GroupStats[] {
     const propertyData = this.propertyModel.data;
-    const allSwimlaneIds = this.po.getSwimlaneIds();
+    const allSwimlaneIds = this.pageObject.getSwimlaneIds();
     const stats: GroupStats[] = [];
 
     Object.entries(propertyData).forEach(([groupName, group]) => {
-      const { columns, max, customHexColor, warningColor, includedIssueTypes, swimlanes } = group;
+      const { columns, max, customHexColor, includedIssueTypes, swimlanes } = group;
       if (!columns || columns.length === 0 || !max) return;
 
       const groupSwimlaneIds = swimlanes?.map(s => s.id) ?? [];
@@ -60,7 +49,7 @@ export class BoardRuntimeModel {
       const currentCount = columns.reduce(
         (acc, columnId) =>
           acc +
-          this.po.getIssueCountInColumn(columnId, {
+          this.pageObject.getIssueCountInColumn(columnId, {
             ignoredSwimlanes,
             includedIssueTypes,
             cssFilter: this.cssNotIssueSubTask,
@@ -76,7 +65,6 @@ export class BoardRuntimeModel {
         limit: max,
         isOverLimit: currentCount > max,
         color: customHexColor || generateColorByFirstChars(groupName),
-        warningColor,
         ignoredSwimlanes,
       });
     });
@@ -94,10 +82,10 @@ export class BoardRuntimeModel {
       };
     });
 
-    const columnsInOrder = this.po.getOrderedColumnIds();
+    const columnsInOrder = this.pageObject.getOrderedColumnIds();
 
     columnsInOrder.forEach(columnId => {
-      this.po.resetColumnHeaderStyles(columnId);
+      this.pageObject.resetColumnHeaderStyles(columnId);
     });
 
     columnsInOrder.forEach((columnId, index) => {
@@ -124,23 +112,22 @@ export class BoardRuntimeModel {
         headerStyles.borderTopRightRadius = '10px';
       }
 
-      this.po.styleColumnHeader(columnId, headerStyles);
+      this.pageObject.styleColumnHeader(columnId, headerStyles);
     });
   }
 
   applyLimitIndicators(): void {
-    const columnsInOrder = this.po.getOrderedColumnIds();
+    const columnsInOrder = this.pageObject.getOrderedColumnIds();
 
     columnsInOrder.forEach(columnId => {
-      this.po.removeColumnHeaderElements(columnId, '[data-column-limits-badge]');
-      this.po.removeColumnHeaderElements(columnId, '[data-jh-group-label]');
-      this.po.resetColumnCellStyles(columnId);
+      this.pageObject.removeColumnHeaderElements(columnId, '[data-column-limits-badge]');
+      this.pageObject.resetColumnCellStyles(columnId);
     });
 
     this.groupStats.forEach(stat => {
       if (stat.isOverLimit) {
         stat.columns.forEach(columnId => {
-          this.po.highlightColumnCells(columnId, stat.warningColor || OVER_LIMIT_CELL_BG, stat.ignoredSwimlanes);
+          this.pageObject.highlightColumnCells(columnId, OVER_LIMIT_CELL_BG, stat.ignoredSwimlanes);
         });
       }
 
@@ -153,14 +140,13 @@ export class BoardRuntimeModel {
       if (!leftTailColumnId) return;
 
       const badgeClass = styles.limitColumnBadge ?? 'limitColumnBadge';
-      const groupLabelClass = styles.limitGroupLabel ?? 'limitGroupLabel';
-      const labelBg = stat.isOverLimit && stat.warningColor ? stat.warningColor : stat.color;
-      const groupLabelHtml = `
-          <div class="${groupLabelClass}" data-column-limits-label="${stat.groupId}" title="${stat.groupName}" style="position:relative;display:flex;align-items:center;gap:4px;padding:2px 8px;font-size:12px;font-weight:600;color:#172b4d;background:${labelBg};color:#fff;border-radius:4px 4px 0 0">
-            <span class="groupName" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${stat.groupName}</span>
-            <span class="${badgeClass}" style="position:static;margin:0;padding:0 4px;font-size:11px;background:rgba(0,0,0,0.2);border-radius:3px">${stat.currentCount}/${stat.limit}</span>
-          </div>`;
-      this.po.insertBeforeColumn(leftTailColumnId, groupLabelHtml);
+      const hintClass = styles.limitColumnBadge__hint ?? 'limitColumnBadge__hint';
+      const badgeHtml = `
+          <span class="${badgeClass}" data-column-limits-badge="true">
+            ${stat.currentCount}/${stat.limit}
+            <span class="${hintClass}">Issues per group / Max number of issues per group</span>
+          </span>`;
+      this.pageObject.insertColumnHeaderHtml(leftTailColumnId, badgeHtml);
     });
   }
 

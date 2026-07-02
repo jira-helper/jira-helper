@@ -45,7 +45,6 @@ export function createPersonLimit({
     // sharedLimit only meaningful for ≥2 persons; the form should hide the
     // checkbox when persons.length < 2, but we still normalize defensively here.
     sharedLimit: persons.length >= 2 ? (formData.sharedLimit ?? false) : false,
-    warningColor: formData.warningColor,
   };
 
   if (formData.includedIssueTypes && formData.includedIssueTypes.length > 0) {

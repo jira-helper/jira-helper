@@ -7,6 +7,7 @@ import { BoardRuntimeModel } from './BoardPage/models/BoardRuntimeModel';
 import { SettingsUIModel } from './SettingsPage/models/SettingsUIModel';
 import { BoardPropertyServiceToken } from 'src/infrastructure/jira/boardPropertyService';
 import { loggerToken } from 'src/infrastructure/logging/Logger';
+import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { diagnosticModelToken } from 'src/features/diagnostic-module/tokens';
 import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
@@ -18,7 +19,9 @@ class ColumnLimitsModule extends Module {
 
     this.lazy(container, boardRuntimeModelToken, c => {
       const { model: propertyModel } = c.inject(propertyModelToken);
-      return modelEntry(new BoardRuntimeModel(propertyModel, c.inject(loggerToken)));
+      return modelEntry(
+        new BoardRuntimeModel(propertyModel, c.inject(boardPagePageObjectToken), c.inject(loggerToken))
+      );
     });
 
     this.lazy(container, settingsUIModelToken, c => {

@@ -26,5 +26,4 @@ export type PersonLimitStats = {
    * has its own per-person counter and click highlight.
    */
   sharedLimit: boolean;
-  warningColor?: string;
 };

@@ -1,0 +1,29 @@
+{
+  "_comment": "Template for jh-playwright-cli.mjs. Paths are resolved to repo-root absolutes at runtime. Do not pass this file directly to playwright-cli.",
+  "browser": {
+    "browserName": "chromium",
+    "userDataDir": ".playwright/chrome-profile",
+    "launchOptions": {
+      "channel": "chrome",
+      "headless": false,
+      "args": [
+        "--enable-unsafe-extension-debugging",
+        "--load-extension=dist",
+        "--no-first-run",
+        "--no-default-browser-check"
+      ],
+      "ignoreDefaultArgs": [
+        "--disable-extensions",
+        "--disable-component-extensions-with-background-pages"
+      ]
+    },
+    "contextOptions": {
+      "viewport": null
+    }
+  },
+  "outputDir": ".playwright/output",
+  "outputMode": "stdout",
+  "console": {
+    "level": "info"
+  }
+}

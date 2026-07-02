@@ -1,0 +1,115 @@
+---
+description: Автоматический подхват workflow при выполнении задачи. Применяется при запросах "сделай задачу", "выполни таску", "реализуй".
+globs:
+alwaysApply: false
+---
+
+# Выполнение задач
+
+При запросе пользователя выполнить задачу (task file из `.agents/tasks/<FEATURE-SLUG>/` или legacy из корня `.agents/tasks/`) следуй этому workflow.
+
+## 1. Прочитай задачу
+
+Прочитай `.md` файл задачи целиком. Определи:
+- **Тип**: bugfix / feature / refactoring / testing / storybook
+- **Файлы**: что создать / изменить
+- **Зависимости**: от чего зависит задача
+- **Критерии приёмки**: что проверить
+
+## 2. Определи workflow по типу
+
+| Тип | Агент | Скиллы |
+|-----|-------|--------|
+| Bugfix | `coder` | `tdd/SKILL.md`, `testing/SKILL.md` |
+| Feature | `coder` | `tdd/SKILL.md`, `testing/SKILL.md` |
+| Refactoring | `coder` | `tdd/SKILL.md` |
+| Testing (cypress) | `coder` | `cypress-bdd-testing/SKILL.md`, `testing/SKILL.md` |
+| Storybook | `coder` | `storybook/SKILL.md` |
+
+## 3. Подготовь промпт для саб-агента
+
+Промпт должен включать:
+1. **Полное описание задачи** из task file
+2. **Конкретные файлы** для создания/изменения
+3. **Референсы** — аналогичные реализации в проекте
+4. **Скиллы** — какие SKILL.md прочитать
+5. **Acceptance criteria** — что проверить после реализации
+
+### Шаблон промпта
+
+```
+## Задача: {название}
+
+{Описание из task file}
+
+## Скиллы для изучения
+- Прочитай `.cursor/skills/{skill}/SKILL.md`
+
+## Файлы для создания/изменения
+- {список файлов}
+
+## Референсы
+- {аналогичные файлы в проекте}
+
+## Критерии приёмки
+- {чекбоксы из task file}
+- Тесты проходят: {команда}
+- ESLint: `npm run lint:eslint -- --fix`
+```
+
+## 4. Запусти coder саб-агента (5a)
+
+Обнови статус: `TODO` → `IN_PROGRESS` (в файле задачи и EPIC).
+
+```
+Task(subagent_type: "coder", prompt: "...")
+```
+
+## 5. Код-ревью (5b) — ОБЯЗАТЕЛЬНО после каждой реализации
+
+```
+Task(subagent_type: "generalPurpose", readonly: true, prompt: "
+Прочитай skill .cursor/skills/code-review/SKILL.md.
+Проведи ревью задачи: .agents/tasks/<FEATURE-SLUG>/TASK-{N}-*.md
+Также прочитай requirements.md, target-design.md, docs/architecture_guideline.md.
+Сохрани отчёт в .agents/tasks/<FEATURE-SLUG>/REVIEW-TASK-{N}.md
+")
+```
+
+## 6. QA проверка (5c) — ОБЯЗАТЕЛЬНО после ревью
+
+```
+Task(subagent_type: "shell", model: "composer-2.5", prompt: "
+Прочитай skill .cursor/skills/qa-check/SKILL.md.
+Запусти: npm run lint:eslint -- --fix, npm test, npm run build:dev.
+Сохрани отчёт в .agents/tasks/<FEATURE-SLUG>/QA-TASK-{N}.md
+")
+```
+
+## 7. Цикл фиксов (5d) — если ревью CHANGES_REQUESTED или QA FAIL
+
+1. Собери findings из REVIEW и QA.
+2. Запусти `Task(subagent_type: "coder")` с описанием проблем.
+3. Повтори 5b → 5c после исправлений.
+4. Максимум 3 итерации. Если после 3 остаются critical — эскалируй пользователю.
+
+## 8. Завершение
+
+Когда ревью `APPROVED` + QA `PASS`:
+1. Обнови статус: `IN_PROGRESS` → `VERIFICATION`
+2. Обнови EPIC таблицу
+3. Заполни раздел "Результаты" в файле задачи
+4. Сообщи пользователю результат
+
+## Пример
+
+Пользователь: "Выполни TASK-20"
+
+1. Читаю путь к задаче, например `.agents/tasks/wiplimit-cells/TASK-20-add-tests-coverage.md`
+2. Тип: testing (cypress)
+3. Скиллы: `cypress-bdd-testing/SKILL.md`, `testing/SKILL.md`
+4. Запускаю coder → обновляю статус `IN_PROGRESS`
+5. Запускаю код-ревью → сохраняю REVIEW-TASK-20.md
+6. Запускаю QA → сохраняю QA-TASK-20.md
+7. Если CHANGES_REQUESTED / FAIL → фикс → повторное ревью/QA
+8. Когда APPROVED + PASS → статус `VERIFICATION`, обновляю EPIC

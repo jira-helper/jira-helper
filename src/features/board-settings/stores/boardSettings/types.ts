@@ -8,6 +8,7 @@ export type BoardSettingsState = {
 };
 
 export type BoardSetting = {
+  id: string;
   title: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType;
 };

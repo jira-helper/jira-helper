@@ -1,0 +1,11 @@
+{
+  "_comment": "Workspace overrides for global ~/.cursor/mcp.json. Cursor merges global+workspace and workspace wins by name. We replace browser MCPs with no-op commands to disable them in this repo (we use playwright-cli instead). NOTE: built-in cursor-ide-browser cannot be disabled per-workspace — toggle it off manually in Cursor Settings (Cmd+Shift+J → Tools & MCP) for this workspace.",
+  "mcpServers": {
+    "playwright": {
+      "command": "true"
+    },
+    "chrome-devtools": {
+      "command": "true"
+    }
+  }
+}

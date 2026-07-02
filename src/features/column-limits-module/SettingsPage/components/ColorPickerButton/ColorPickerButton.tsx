@@ -1,12 +1,26 @@
-import React from 'react';
-import { ColorPicker } from 'antd';
-import type { ColorPickerProps } from 'antd/es/color-picker';
+/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './ColorPickerButton.module.css';
 
+/**
+ * ColorPickerButtonProps - props for ColorPickerButton.
+ */
 export type ColorPickerButtonProps = {
+  /**
+   * Group ID for which the color is being picked.
+   */
   groupId: string;
+  /**
+   * Current hex color string (e.g., '#ffffff').
+   */
   currentColor?: string;
+  /**
+   * Localized "Select color" text for aria-label.
+   */
   selectColorText: string;
+  /**
+   * Callback called when color is changed.
+   */
   onColorChange: (color: string) => void;
 };
 
@@ -29,29 +43,70 @@ const PRESET_COLORS = [
   '#795548',
 ];
 
+/**
+ * ColorPickerButton - a button that opens a color picker popover.
+ * Used in ColumnLimitsForm to change group colors.
+ */
 export const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({
   groupId,
   currentColor = '#ffffff',
   selectColorText,
   onColorChange,
 }) => {
-  const handleChange: ColorPickerProps['onChange'] = color => {
-    onColorChange(color.toHexString());
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleColorSelect = (color: string) => {
+    onColorChange(color);
+    setIsOpen(false);
   };
 
   return (
-    <div className={styles.container} data-group-id={groupId}>
-      <ColorPicker
-        value={currentColor}
-        onChange={handleChange}
-        presets={[{ label: selectColorText, colors: PRESET_COLORS }]}
-        disabledAlpha
-      >
-        <span className={styles.button} aria-label={selectColorText}>
-          <span className={styles.colorPreview} style={{ backgroundColor: currentColor }} />
-          Change color
-        </span>
-      </ColorPicker>
+    <div className={styles.container} ref={containerRef}>
+      <button type="button" className={styles.button} onClick={() => setIsOpen(!isOpen)} data-group-id={groupId}>
+        <span className={styles.colorPreview} style={{ backgroundColor: currentColor }} />
+        Change color
+      </button>
+
+      {isOpen && (
+        <div className={styles.popover}>
+          <div className={styles.colorGrid}>
+            {PRESET_COLORS.map(color => (
+              <button
+                key={color}
+                type="button"
+                className={styles.colorOption}
+                style={{ backgroundColor: color }}
+                onClick={() => handleColorSelect(color)}
+                aria-label={`${selectColorText} ${color}`}
+              />
+            ))}
+          </div>
+          <div className={styles.customColor}>
+            <label>
+              Custom:
+              <input type="color" value={currentColor} onChange={e => handleColorSelect(e.target.value)} />
+            </label>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

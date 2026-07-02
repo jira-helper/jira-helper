@@ -34,7 +34,6 @@ export function buildInitDataFromColumns(columns: Column[], wipLimits: WipLimits
       columns: cols,
       max: wipLimit.max,
       customHexColor: wipLimit.customHexColor,
-      warningColor: wipLimit.warningColor,
       includedIssueTypes: wipLimit.includedIssueTypes,
       swimlanes: wipLimit.swimlanes,
     };
@@ -84,7 +83,6 @@ export function buildInitDataFromGroupMap(
           columns: [],
           max: wipLimit.max,
           customHexColor: wipLimit.customHexColor,
-          warningColor: wipLimit.warningColor,
           includedIssueTypes: wipLimit.includedIssueTypes,
           swimlanes: wipLimit.swimlanes,
         };
@@ -98,7 +96,6 @@ export function buildInitDataFromGroupMap(
         }),
         max: wipLimit.max,
         customHexColor: wipLimit.customHexColor,
-        warningColor: wipLimit.warningColor,
         includedIssueTypes: wipLimit.includedIssueTypes,
         swimlanes: wipLimit.swimlanes, // pass through (undefined = all)
       };

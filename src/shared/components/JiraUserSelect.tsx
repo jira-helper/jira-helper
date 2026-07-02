@@ -1,35 +1,6 @@
 /* eslint-disable local/no-inline-styles -- AntD Select option/tag composition needs small dynamic layout styles. */
 import React, { useCallback, useRef, useState } from 'react';
 import { Select, Spin, Tag } from 'antd';
-
-const TagAvatar: React.FC<{ url: string; name: string }> = ({ url, name }) => {
-  const [failed, setFailed] = useState(false);
-  const letter = name ? name.charAt(0).toUpperCase() : '?';
-  if (failed || !url) {
-    return (
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          background: '#dfe1e6',
-          color: '#42526e',
-          fontSize: 9,
-          fontWeight: 600,
-          flexShrink: 0,
-        }}
-      >
-        {letter}
-      </span>
-    );
-  }
-  return (
-    <img src={url} alt="" width={16} height={16} style={{ borderRadius: '50%' }} onError={() => setFailed(true)} />
-  );
-};
 import type { JiraUser } from 'src/infrastructure/jira/jiraApi';
 
 const DEBOUNCE_MS = 300;
@@ -96,13 +67,8 @@ export const JiraUserSelect: React.FC<JiraUserSelectProps> = ({
   );
 
   const handleSelect = useCallback(
-    (value: unknown, option: Record<string, unknown>) => {
-      const userName = (option?.key ||
-        option?.value ||
-        (option?.props as Record<string, unknown> | undefined)?.key ||
-        (option?.props as Record<string, unknown> | undefined)?.value ||
-        value) as string | undefined;
-      const user = typeof userName === 'string' ? options.find(u => u.name === userName) : undefined;
+    (_: unknown, option: { key: string }) => {
+      const user = options.find(u => u.name === option.key);
       if (user && onChange) {
         onChange({
           name: user.name,
@@ -149,12 +115,19 @@ export const JiraUserSelect: React.FC<JiraUserSelectProps> = ({
       {options.map(user => (
         <Select.Option key={user.name} value={user.name}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TagAvatar url={user.avatarUrls?.['16x16'] || user.avatarUrls?.['32x32'] || ''} name={user.displayName} />
-              <span>{user.displayName}</span>
-            </div>
-          </Select.Option>
-        ))}
-      </Select>
+            <img
+              src={user.avatarUrls?.['16x16'] || user.avatarUrls?.['32x32'] || ''}
+              alt=""
+              width={16}
+              height={16}
+              style={{ borderRadius: '50%' }}
+            />
+            <span>{user.displayName}</span>
+            <span style={{ color: '#999', fontSize: '0.85em' }}>{user.name}</span>
+          </div>
+        </Select.Option>
+      ))}
+    </Select>
   );
 };
 
@@ -232,32 +205,9 @@ export const MultiJiraUserSelect: React.FC<MultiJiraUserSelectProps> = ({
     [searchUsers]
   );
 
-  function extractDisplayName(option: Record<string, unknown>): string | undefined {
-    const children = option?.children;
-    if (children && typeof children === 'object' && 'props' in (children as any)) {
-      const { props } = children as any;
-      if (props?.children && Array.isArray(props.children)) {
-        for (const child of props.children) {
-          if (child?.type === 'span' && child?.props?.children) {
-            return String(child.props.children);
-          }
-        }
-      }
-      if (typeof props?.children === 'string') return props.children;
-    }
-    return undefined;
-  }
-
   const handleSelect = useCallback(
-    (_value: unknown, _option: Record<string, unknown>) => {
-      const displayName = extractDisplayName(_option);
-      let user: JiraUser | undefined;
-      if (displayName) {
-        user = options.find(u => u.displayName === displayName || u.name === displayName);
-      }
-      if (!user && options.length === 1) {
-        user = options[0];
-      }
+    (_: unknown, option: { key: string }) => {
+      const user = options.find(u => u.name === option.key);
       if (user && onChange) {
         const newPerson: SelectedJiraUser = {
           name: user.name,
@@ -307,8 +257,15 @@ export const MultiJiraUserSelect: React.FC<MultiJiraUserSelectProps> = ({
         {options.map(user => (
           <Select.Option key={user.name} value={user.name}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TagAvatar url={user.avatarUrls?.['16x16'] || user.avatarUrls?.['32x32'] || ''} name={user.displayName} />
+              <img
+                src={user.avatarUrls?.['16x16'] || user.avatarUrls?.['32x32'] || ''}
+                alt=""
+                width={16}
+                height={16}
+                style={{ borderRadius: '50%' }}
+              />
               <span>{user.displayName}</span>
+              <span style={{ color: '#999', fontSize: '0.85em' }}>{user.name}</span>
             </div>
           </Select.Option>
         ))}
@@ -324,7 +281,7 @@ export const MultiJiraUserSelect: React.FC<MultiJiraUserSelectProps> = ({
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingInlineStart: 4 }}
             >
               {buildAvatarUrl && (
-                <TagAvatar url={buildAvatarUrl(person.name)} name={person.displayName || person.name} />
+                <img src={buildAvatarUrl(person.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
               )}
               <span>{person.displayName || person.name}</span>
             </Tag>

@@ -10,7 +10,6 @@ export type GroupStats = {
   limit: number;
   isOverLimit: boolean;
   color: string;
-  warningColor?: string;
   /** Swimlane IDs to ignore when counting/styling for this group */
   ignoredSwimlanes: string[];
 };

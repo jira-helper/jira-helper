@@ -3,11 +3,11 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { Container } from 'dioma';
 import { Token } from 'dioma';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import { localeProviderToken } from 'src/shared/locale';
 import { WithDi } from '../../../infrastructure/di/diContext';
 import { PageModification } from '../../../infrastructure/page-modification/PageModification';
-import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import { propertyModelToken, boardRuntimeModelToken } from '../tokens';
 import { AvatarsContainer } from './components';
@@ -73,11 +73,9 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   }
 
   appendStyles(): string {
-    const issueSelector = '[data-testid="platform-board-kit.ui.card.card"]';
-    const poolSelector = '[data-testid="software-board.board-container.board"]';
     return `
     <style type="text/css">
-        .ghx-issue.no-visibility, ${issueSelector}.no-visibility {
+        .ghx-issue.no-visibility {
             display: none!important;
         }
 
@@ -92,9 +90,7 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     `;
   }
 
-  waitForLoading(): Promise<Element | undefined> {
-    const controlsBar = document.querySelector('[data-testid="software-board.header.controls-bar"]');
-    if (controlsBar) return Promise.resolve(undefined);
+  waitForLoading(): Promise<Element> {
     return this.waitForElement('.ghx-column, .ghx-swimlane');
   }
 
@@ -111,8 +107,15 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     propertyModel.setData(effectivePersonLimits);
 
     const boardEditData = editData as EditData;
+    // Saved query swimlanes are only meaningful when the board's strategy is "custom".
+    // For other strategies (none/parentChild/assignee/epic/project) Jira still returns the
+    // historical query list, but it doesn't render — so we treat it as "no swimlanes".
     const isCustomSwimlaneStrategy = boardEditData.swimlanesConfig?.swimlaneStrategy === 'custom';
 
+    // Settings tab is intentionally registered regardless of `canEdit`:
+    // viewers should also be able to inspect the existing config and tweak
+    // it locally (changes apply to the live board until reload, even if
+    // persistence to Jira fails due to missing edit permissions).
     const rawColumns = boardEditData.rapidListConfig?.mappedColumns ?? [];
     const columns: Column[] = rawColumns
       .filter((col: MappedColumn) => !col.isKanPlanColumn)
@@ -127,23 +130,21 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const TabComponent = () => React.createElement(PersonLimitsSettingsTab, { columns, swimlanes });
 
     registerSettings({
+      id: BOARD_SETTINGS_TAB_IDS.PERSON_WIP_LIMITS,
       title: getPersonLimitsSettingsTabTitle(this.container),
       component: TabComponent,
     });
 
+    if (!effectivePersonLimits.limits.length) return;
+
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
     const runtime = boardRuntimeModel;
-    const boardPO = this.container.inject(boardPagePageObjectToken);
-    const cssSelector =
-      typeof (boardPO as any).getIssueCssSelector === 'function'
-        ? (boardPO as any).getIssueCssSelector(editData)
-        : this.getCssSelectorOfIssues(editData);
+    const cssSelector = this.getCssSelectorOfIssues(editData);
     runtime.setCssSelectorOfIssues(cssSelector);
     runtime.setSwimlanesActive(isCustomSwimlaneStrategy);
+    runtime.apply();
 
     this.destroyed = false;
-
-    runtime.apply();
     this.renderAvatarsContainer();
 
     this.sideEffects.push(() => {
@@ -151,35 +152,40 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       this.unmountAvatarsContainer();
     });
 
-    const boardUpdater = () => {
-      runtime.apply();
-      runtime.showOnlyChosen();
-      this.renderAvatarsContainer();
-    };
-    const poolSelector = '#ghx-pool';
-    const cloudPoolSelector = '[data-testid="software-board.board-area"]';
-    if (document.querySelector(poolSelector)) {
-      this.onDOMChange(poolSelector, boardUpdater, { childList: true, subtree: true });
-    } else if (document.querySelector(cloudPoolSelector)) {
-      this.onDOMChange(cloudPoolSelector, boardUpdater, { childList: true, subtree: true });
-    }
-
-    const viewSelector = document.getElementById('ghx-view-selector') || document.querySelector('[data-testid="software-board.header.controls-bar"]');
-    if (viewSelector) {
+    const pool = document.getElementById('ghx-pool');
+    if (pool) {
       this.onDOMChange(
-        viewSelector === document.getElementById('ghx-view-selector') ? '#ghx-view-selector' : '[data-testid="software-board.header.controls-bar"]',
+        '#ghx-pool',
         () => {
+          runtime.apply();
+          runtime.showOnlyChosen();
+          // Jira sometimes wipes #subnav-title together with the toolbar
+          // when cards/columns mutate; re-mount avatars if our wrapper is gone.
           this.renderAvatarsContainer();
         },
         { childList: true, subtree: true }
       );
     }
 
-    if (!effectivePersonLimits.limits.length) return;
+    // Quick filters / view changes re-render the toolbar around #subnav-title.
+    // Watch the toolbar wrapper so avatars survive those re-renders.
+    const viewSelector = document.getElementById('ghx-view-selector');
+    if (viewSelector) {
+      this.onDOMChange(
+        '#ghx-view-selector',
+        () => {
+          this.renderAvatarsContainer();
+        },
+        { childList: true, subtree: true }
+      );
+    }
   }
 
   private renderAvatarsContainer(): void {
     if (this.destroyed) return;
+
+    const subnav = document.querySelector('#subnav-title');
+    if (!subnav) return;
 
     // Idempotent: skip if our wrapper is still attached to the live DOM.
     if (this.avatarsWrapper && this.avatarsWrapper.isConnected) return;
@@ -188,22 +194,10 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     // creating a new one to avoid leaking the renderer.
     this.unmountAvatarsContainer();
 
-    // Server: mount in #subnav-title; Cloud: mount in the header controls bar
-    const subnav = document.querySelector('#subnav-title');
-    const controlsBar = document.querySelector('[data-testid="software-board.header.controls-bar"]');
-    const mount = subnav || controlsBar;
-    if (!mount) return;
-
     const wrapper = document.createElement('div');
     wrapper.setAttribute(AVATARS_WRAPPER_ATTR, AVATARS_WRAPPER_KEY);
-    if (subnav) {
-      wrapper.style.display = 'contents';
-    } else {
-      wrapper.style.display = 'inline-flex';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.marginLeft = '8px';
-    }
-    mount.appendChild(wrapper);
+    wrapper.style.display = 'contents';
+    subnav.appendChild(wrapper);
 
     const root = createRoot(wrapper);
     root.render(

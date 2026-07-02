@@ -28,7 +28,6 @@ describe('BoardRuntimeModel', () => {
       styleColumnHeader: vi.fn(),
       resetColumnHeaderStyles: vi.fn(),
       insertColumnHeaderHtml: vi.fn(),
-      insertBeforeColumn: vi.fn(),
       removeColumnHeaderElements: vi.fn(),
       highlightColumnCells: vi.fn(),
       resetColumnCellStyles: vi.fn(),
@@ -41,9 +40,7 @@ describe('BoardRuntimeModel', () => {
 
   const modelWithData = (data: WipLimitsProperty) => {
     (mockPropertyModel as { data: WipLimitsProperty }).data = data;
-    const model = new BoardRuntimeModel(mockPropertyModel, mockLogger);
-    model.setPageObject(mockPageObject);
-    return model;
+    return new BoardRuntimeModel(mockPropertyModel, mockPageObject, mockLogger);
   };
 
   describe('calculateStats', () => {
@@ -367,37 +364,11 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#ff5630', ['sw-skip']);
       expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col2', '#ff5630', ['sw-skip']);
 
-      expect(mockPageObject.insertBeforeColumn).toHaveBeenCalled();
-      const htmlCall = vi.mocked(mockPageObject.insertBeforeColumn).mock.calls.find(([id]) => id === 'col1');
+      expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalled();
+      const htmlCall = vi.mocked(mockPageObject.insertColumnHeaderHtml).mock.calls.find(([id]) => id === 'col1');
       expect(htmlCall).toBeDefined();
       expect(htmlCall![1]).toContain('10/5');
-      expect(htmlCall![1]).toContain('data-column-limits-label');
-    });
-
-    it('should use warningColor for cell highlight and label background when set and over-limit', () => {
-      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1']);
-
-      const model = modelWithData({});
-      model.groupStats = [
-        {
-          groupId: 'G1',
-          groupName: 'G1',
-          columns: ['col1'],
-          currentCount: 10,
-          limit: 5,
-          isOverLimit: true,
-          color: '#f00',
-          warningColor: '#ff0',
-          ignoredSwimlanes: [],
-        },
-      ];
-
-      model.applyLimitIndicators();
-
-      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#ff0', []);
-      const htmlCall = vi.mocked(mockPageObject.insertBeforeColumn).mock.calls.find(([id]) => id === 'col1');
-      expect(htmlCall).toBeDefined();
-      expect(htmlCall![1]).toContain('background:#ff0');
+      expect(htmlCall![1]).toContain('data-column-limits-badge="true"');
     });
   });
 

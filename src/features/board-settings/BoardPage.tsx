@@ -10,12 +10,14 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
     return `board-settings-board-${this.getBoardId()}`;
   }
 
-  waitForLoading(): Promise<Element | undefined> {
-    const controlsBar = document.querySelector('[data-testid="software-board.header.controls-bar"]');
-    if (controlsBar) return Promise.resolve(undefined);
-
+  waitForLoading(): Promise<Element> {
     const po = this.container.inject(boardPagePageObjectToken);
-    return this.waitForElement(po.selectors.sidebar);
+    const controlsBar = document.querySelector(po.selectors.boardHeaderTarget);
+    if (controlsBar) {
+      return Promise.resolve(controlsBar);
+    }
+
+    return this.waitForElement(po.selectors.boardHeaderTarget);
   }
 
   loadData() {
@@ -26,6 +28,7 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
     const po = this.container.inject(boardPagePageObjectToken);
     const controlsBar = document.querySelector(po.selectors.boardHeaderTarget);
     if (!controlsBar) {
+      // eslint-disable-next-line no-console
       console.error('[BoardSettingsBoardPage] Controls bar not found');
       return;
     }
@@ -40,7 +43,6 @@ export class BoardSettingsBoardPage extends PageModification<undefined, Element>
     div.style.display = 'inline-block';
     div.style.marginLeft = '8px';
     controlsBar.appendChild(div);
-
     createRoot(div).render(<BoardSettingsComponent />);
   }
 }

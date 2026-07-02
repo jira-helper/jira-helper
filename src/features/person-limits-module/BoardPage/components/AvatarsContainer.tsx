@@ -35,12 +35,11 @@ export const AvatarsContainer: React.FC = () => {
           const handleClick = (limitId: number) => {
             model.toggleActivePerson(limitId, isShared ? null : person.name);
           };
-          const pName = person.displayName || person.name || '';
           return (
             <AvatarBadge
               key={`${stat.id}-${person.name}`}
-              avatar={buildAvatarUrl(pName)}
-              personName={pName}
+              avatar={buildAvatarUrl(person.name)}
+              personName={person.name}
               limitId={stat.id}
               currentCount={currentCount}
               limit={stat.limit}

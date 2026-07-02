@@ -39,5 +39,4 @@ export type FormData = {
    * Defaults to `false` (per-person counters and highlighting).
    */
   sharedLimit?: boolean;
-  warningColor?: string;
 };

@@ -44,7 +44,6 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   styleColumnHeader: () => {},
   resetColumnHeaderStyles: () => {},
   insertColumnHeaderHtml: () => {},
-  insertBeforeColumn: () => {},
   removeColumnHeaderElements: () => {},
   highlightColumnCells: () => {},
   resetColumnCellStyles: () => {},

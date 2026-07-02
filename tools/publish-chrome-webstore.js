@@ -27,7 +27,7 @@ function makeRequest(options, description, postData = null) {
             const jsonData = JSON.parse(data);
             console.log('✅ Успешно:', JSON.stringify(jsonData, null, 2));
             resolve(jsonData);
-          } catch (error) {
+          } catch {
             console.log('📄 Ответ (не JSON):', data);
             resolve(data);
           }
@@ -37,7 +37,7 @@ function makeRequest(options, description, postData = null) {
             const errorData = JSON.parse(data);
             console.log('Детали ошибки:', JSON.stringify(errorData, null, 2));
             reject(new Error(`HTTP ${res.statusCode}: ${JSON.stringify(errorData)}`));
-          } catch (e) {
+          } catch {
             reject(new Error(`HTTP ${res.statusCode}: ${data}`));
           }
         }

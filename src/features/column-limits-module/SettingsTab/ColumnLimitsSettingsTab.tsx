@@ -12,7 +12,6 @@ import type { Column } from '../types';
 import type { SettingsUIModel } from '../SettingsPage/models/SettingsUIModel';
 import type { BoardRuntimeModel } from '../BoardPage/models/BoardRuntimeModel';
 import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
-import { jiraEnvironmentToken } from 'src/infrastructure/di/jiraEnvironmentToken';
 import styles from '../SettingsPage/styles.module.css';
 
 export type ColumnLimitsSettingsTabProps = {
@@ -71,27 +70,6 @@ export const ColumnLimitsSettingsTab: React.FC<ColumnLimitsSettingsTabProps> = (
   const handleColorChange = useCallback(
     (groupId: string, color: string) => {
       settingsUi.setGroupColor(groupId, color);
-    },
-    [settingsUi]
-  );
-
-  const handleWarningColorChange = useCallback(
-    (groupId: string, color: string) => {
-      settingsUi.setGroupWarningColor(groupId, color);
-    },
-    [settingsUi]
-  );
-
-  const handleDeleteGroup = useCallback(
-    (groupId: string) => {
-      settingsUi.removeGroup(groupId);
-    },
-    [settingsUi]
-  );
-
-  const handleNameChange = useCallback(
-    (groupId: string, name: string) => {
-      settingsUi.setGroupName(groupId, name);
     },
     [settingsUi]
   );
@@ -163,9 +141,6 @@ export const ColumnLimitsSettingsTab: React.FC<ColumnLimitsSettingsTabProps> = (
     target.classList.remove(styles.addGroupDropzoneActiveJH);
   }, []);
 
-  const env = useDi().inject(jiraEnvironmentToken);
-  const isCloud = env?.type === 'cloud';
-
   return (
     <div>
       <ColumnLimitsForm
@@ -175,9 +150,6 @@ export const ColumnLimitsSettingsTab: React.FC<ColumnLimitsSettingsTabProps> = (
         swimlanes={swimlanes}
         onLimitChange={handleLimitChange}
         onColorChange={handleColorChange}
-        onNameChange={handleNameChange}
-        onWarningColorChange={handleWarningColorChange}
-        onDeleteGroup={handleDeleteGroup}
         onSwimlanesChange={handleSwimlanesChange}
         onIssueTypesChange={handleIssueTypesChange}
         onColumnDragStart={handleColumnDragStart}
@@ -188,7 +160,6 @@ export const ColumnLimitsSettingsTab: React.FC<ColumnLimitsSettingsTabProps> = (
         formId="jh-wip-limits-tab-form"
         allGroupsId="jh-tab-all-groups"
         createGroupDropzoneId="jh-tab-column-dropzone"
-        hideIssueTypes={isCloud}
       />
       <Space style={{ marginTop: 16, width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
         <Button type="primary" onClick={handleSave} loading={isSaving}>

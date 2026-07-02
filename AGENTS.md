@@ -42,19 +42,6 @@ npm run precommit   # Full lint + test (husky hook)
 
 `BOARD`, `BOARD_BACKLOG`, `SETTINGS`, `ISSUE`, `SEARCH`, `REPORTS`, `ALL` — used to determine which PageModifications to run.
 
-## Browser Launch (user-facing)
-
-Когда нужно открыть браузер для пользователя:
-1. Убить все процессы Edge: `ps aux | grep msedge | ... | awk '{print $2}' | xargs kill -9`
-2. Запустить с реальным профилем: `nohup /usr/bin/microsoft-edge --user-data-dir="$HOME/.config/microsoft-edge" "https://crazymax101.atlassian.net" > /dev/null 2>&1 &`
-3. Не открывать конкретные board-страницы (404), только `atlassian.net`
-4. Не закрывать браузер, не трогать его после запуска
-5. Не использовать agent-browser для открытия окон пользователю
-
 ## Feature Isolation
 
 Each feature (e.g. `column-limits/`, `card-colors/`) has its own `module.ts`, `tokens.ts`, `BoardPage/`, `SettingsPage/` subdirectories.
-
-## Handoff
-
-См. `HANDOFF.md` — полный контекст проделанной работы по адаптации person-limits под Cloud. Перед началом работы прочитать.

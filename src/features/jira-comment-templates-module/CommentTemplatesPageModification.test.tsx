@@ -14,6 +14,7 @@ import { localStorageServiceToken } from 'src/infrastructure/storage/tokens';
 import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { loggerToken, Logger } from 'src/infrastructure/logging/Logger';
 import { registerSettings } from 'src/features/board-settings/actions/registerSettings';
+import { BOARD_SETTINGS_TAB_IDS } from 'src/features/board-settings/settingsTabIds';
 import { registerIssueSettings } from 'src/issue-settings/actions/registerIssueSettings';
 import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { COMMENT_TEMPLATES_ATTACH_TOOLS_KEY } from './constants';
@@ -103,6 +104,7 @@ describe('CommentTemplatesPageModification', () => {
     modification.apply();
 
     expect(registerSettings).toHaveBeenCalledWith({
+      id: BOARD_SETTINGS_TAB_IDS.COMMENT_TEMPLATES,
       title: 'Comment templates',
       component: expect.any(Function),
     });
@@ -168,6 +170,7 @@ describe('CommentTemplatesPageModification', () => {
     modification.apply();
 
     expect(registerSettings).toHaveBeenCalledWith({
+      id: BOARD_SETTINGS_TAB_IDS.COMMENT_TEMPLATES,
       title: 'Comment templates',
       component: expect.any(Function),
     });

@@ -6,10 +6,8 @@ import { useGetTextsByLocale } from 'src/shared/texts';
 import type { SearchUsers } from 'src/infrastructure/di/jiraApiTokens';
 import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
 import { useDi } from 'src/infrastructure/di/diContext';
-import { jiraEnvironmentToken } from 'src/infrastructure/di/jiraEnvironmentToken';
 import { IssueTypeSelector } from '../../../../shared/components/IssueTypeSelector';
 import { SwimlaneSelector } from 'src/shared/components/SwimlaneSelector';
-import { ColorPickerButton } from 'src/features/column-limits-module/SettingsPage/components/ColorPickerButton';
 import { PersonalWipLimitTable } from './PersonalWipLimitTable';
 import { MultiPersonSelect } from './PersonNameSelect';
 import { settingsUIModelToken } from '../../tokens';
@@ -39,8 +37,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       return undefined;
     }
   })();
-  const env = container.inject(jiraEnvironmentToken);
-  const isCloud = env?.type === 'cloud';
   const snap = useModel();
   const { limits, editingId, formData } = snap;
   const texts = useGetTextsByLocale(PERSON_LIMITS_TEXTS);
@@ -243,7 +239,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
       showAllPersonIssues: currentFormData.showAllPersonIssues ?? true,
       // Only meaningful when ≥2 persons are selected — normalize to false otherwise.
       sharedLimit: currentPersons.length >= 2 ? (currentFormData.sharedLimit ?? false) : false,
-      warningColor: currentFormData.warningColor,
       ...(selectedTypes.length > 0 && !countAllTypes ? { includedIssueTypes: selectedTypes } : {}),
     };
 
@@ -291,15 +286,6 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               />
             </Form.Item>
 
-            <Form.Item label={texts.warningColor}>
-              <ColorPickerButton
-                groupId={String(editingId ?? 'new')}
-                currentColor={currentFormData.warningColor}
-                selectColorText={texts.warningColor}
-                onColorChange={color => handleFormChange('warningColor', color)}
-              />
-            </Form.Item>
-
             {currentFormData.persons.length >= 2 && (
               <Form.Item style={{ marginTop: -8 }}>
                 <span data-testid="shared-limit-checkbox">
@@ -316,21 +302,19 @@ export const PersonalWipLimitContainer: React.FC<PersonalWipLimitContainerProps>
               </Form.Item>
             )}
 
-            {!isCloud && (
-              <Form.Item style={{ marginTop: 16 }}>
-                <IssueTypeSelector
-                  key={`issue-type-selector-${editingId ?? 'new'}-${resetCounter}`}
-                  groupId="person-limit-form"
-                  selectedTypes={selectedTypes}
-                  initialCountAllTypes={countAllTypes}
-                  onSelectionChange={(types, countAll) => {
-                    setSelectedTypes(types);
-                    setCountAllTypes(countAll);
-                    handleFormChange('includedIssueTypes', countAll ? undefined : types);
-                  }}
-                />
-              </Form.Item>
-            )}
+            <Form.Item style={{ marginTop: 16 }}>
+              <IssueTypeSelector
+                key={`issue-type-selector-${editingId ?? 'new'}-${resetCounter}`}
+                groupId="person-limit-form"
+                selectedTypes={selectedTypes}
+                initialCountAllTypes={countAllTypes}
+                onSelectionChange={(types, countAll) => {
+                  setSelectedTypes(types);
+                  setCountAllTypes(countAll);
+                  handleFormChange('includedIssueTypes', countAll ? undefined : types);
+                }}
+              />
+            </Form.Item>
           </Col>
           <Col span={12} style={{ paddingLeft: 8 }}>
             <Form.Item label={texts.columns} name="selectedColumns">

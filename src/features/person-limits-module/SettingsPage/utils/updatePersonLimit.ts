@@ -42,7 +42,6 @@ export function updatePersonLimit({
     // Reset sharedLimit when reduced to a single person; otherwise apply form value
     // (or fall back to the previous setting).
     sharedLimit: persons.length < 2 ? false : (formData.sharedLimit ?? existingLimit.sharedLimit ?? false),
-    warningColor: formData.warningColor ?? existingLimit.warningColor,
   };
 
   // Update or remove includedIssueTypes

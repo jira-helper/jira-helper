@@ -17,6 +17,7 @@ import { registerBoardPropertyServiceInDI } from 'src/infrastructure/jira/boardP
 import { boardPagePageObjectToken, type IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
 import { Ok } from 'ts-results';
 import logoUrl from 'src/assets/jira_helper_512x512.png';
+import { renderStickySettingsTabBar } from 'src/features/board-settings/BoardSettingsComponent';
 import boardSettingsStyles from 'src/features/board-settings/BoardSettingsComponent.module.css';
 import { useBoardSettingsStore } from 'src/features/board-settings/stores/boardSettings/boardSettings';
 import { BOARD_SETTINGS_TEXTS } from 'src/features/board-settings/texts';
@@ -109,6 +110,11 @@ const JiraHelperPanelInner: React.FC = () => {
         okText={texts.ok}
         cancelText={texts.cancel}
         styles={{
+          body: {
+            maxHeight: 'calc(100vh - 160px)',
+            overflowY: 'auto',
+            paddingTop: 0,
+          },
           footer: {
             borderTop: '1px solid var(--ant-color-split, rgba(0, 0, 0, 0.06))',
             marginTop: 0,
@@ -116,9 +122,14 @@ const JiraHelperPanelInner: React.FC = () => {
           },
         }}
       >
-        <Tabs defaultActiveKey="1">
+        <Tabs
+          className="jh-board-settings-tabs"
+          data-jh-component="boardSettingsTabs"
+          defaultActiveKey={settings[0]?.id}
+          renderTabBar={renderStickySettingsTabBar}
+        >
           {settings.map(setting => (
-            <Tabs.TabPane tab={setting.title} key={setting.title}>
+            <Tabs.TabPane tab={setting.title} key={setting.id}>
               <ErrorBoundary fallback={<div>Failed to render tab content</div>}>
                 <setting.component />
               </ErrorBoundary>

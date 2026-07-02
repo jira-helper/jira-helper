@@ -65,7 +65,6 @@ export type PersonWipLimitsProperty_2_31 = {
  */
 export type PersonLimit_2_32 = PersonLimit_2_31 & {
   sharedLimit?: boolean;
-  warningColor?: string;
 };
 
 export type PersonWipLimitsProperty_2_32 = {

@@ -1,9 +1,14 @@
 import React from 'react';
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react-vite';
 import { globalContainer } from 'dioma';
-import { BoardPropertyServiceToken } from '../src/shared/boardPropertyService';
-import { registerLogger } from '../src/shared/Logger';
-import { WithDi } from '../src/shared/diContext';
+import { BoardPropertyServiceToken } from '../src/infrastructure/jira/boardPropertyService';
+import { registerExtensionApiServiceInDI } from '../src/infrastructure/extension-api/ExtensionApiService';
+import { registerRoutingServiceInDI } from '../src/infrastructure/routing';
+import { registerJiraApiInDI } from '../src/infrastructure/di/jiraApiTokens';
+import { registerIssueTypeServiceInDI } from '../src/shared/issueType';
+import { registerLogger } from '../src/infrastructure/logging/Logger';
+import { WithDi } from '../src/infrastructure/di/diContext';
+import { localeProviderToken, MockLocaleProvider } from '../src/shared/locale';
 const preview: Preview = {
   parameters: {
     controls: {
@@ -14,12 +19,19 @@ const preview: Preview = {
     },
     actions: { argTypesRegex: '^on.*' },
   },
-  decorators: (Story) => {
-    return <WithDi container={globalContainer}>
-      <Story />
-    </WithDi>
-  }
+  decorators: Story => {
+    return (
+      <WithDi container={globalContainer}>
+        <Story />
+      </WithDi>
+    );
+  },
 };
+
+registerExtensionApiServiceInDI(globalContainer);
+registerRoutingServiceInDI(globalContainer);
+registerJiraApiInDI(globalContainer);
+registerIssueTypeServiceInDI(globalContainer);
 
 globalContainer.register({
   token: BoardPropertyServiceToken,
@@ -29,6 +41,10 @@ globalContainer.register({
     deleteBoardProperty: () => {},
   },
 });
-registerLogger(globalContainer)
+globalContainer.register({
+  token: localeProviderToken,
+  value: new MockLocaleProvider('en'),
+});
+registerLogger(globalContainer);
 
 export default preview;

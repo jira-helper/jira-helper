@@ -1,0 +1,85 @@
+name: Publish to Chrome Web Store
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and test
+        run: |
+          npm run lint
+          npm test
+        env:
+          CI: true
+
+      - name: Build extension
+        run: npm run prod
+        env:
+          CI: true
+
+      - name: Verify zip file exists
+        run: |
+          if [ ! -f jira-helper.zip ]; then
+            echo "❌ jira-helper.zip not found!"
+            exit 1
+          fi
+          echo "✅ jira-helper.zip found ($(du -h jira-helper.zip | cut -f1))"
+
+      - name: Build Firefox extension
+        run: npm run prod:firefox
+        env:
+          CI: true
+
+      - name: Verify Firefox zip file exists
+        run: |
+          if [ ! -f jira-helper-firefox.zip ]; then
+            echo "❌ jira-helper-firefox.zip not found!"
+            exit 1
+          fi
+          echo "✅ jira-helper-firefox.zip found ($(du -h jira-helper-firefox.zip | cut -f1))"
+
+      - name: Upload zips to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VER="${TAG#v}"
+          cp jira-helper.zip "jira-helper-${VER}-chrome.zip"
+          cp jira-helper-firefox.zip "jira-helper-${VER}-firefox.zip"
+          gh release upload "$TAG" \
+            "jira-helper-${VER}-chrome.zip" "jira-helper-${VER}-firefox.zip" --clobber
+
+      - name: Publish to Chrome Web Store
+        run: node tools/publish-chrome-webstore.js
+        env:
+          CHROME_WEBSTORE_CREDENTIALS: ${{ secrets.CHROME_WEBSTORE_CREDENTIALS }}
+          EXTENSION_ZIP_PATH: ./jira-helper.zip
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: jira-helper-${{ github.event.release.tag_name }}
+          path: |
+            jira-helper.zip
+            jira-helper-firefox.zip
+          retention-days: 30
