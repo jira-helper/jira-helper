@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
 import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
@@ -385,6 +387,13 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('applyLimitIndicators', () => {
+    it('positions the header badge without moving it outside the visible header area', () => {
+      const css = readFileSync(resolve(__dirname, '../styles.module.css'), 'utf8');
+
+      expect(css).toContain('top: 0');
+      expect(css).not.toContain('top: -11px');
+    });
+
     it('should reset cells and badges, then highlight and insert badge for over-limit group', () => {
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
 

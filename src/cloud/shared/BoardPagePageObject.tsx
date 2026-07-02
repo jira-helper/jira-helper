@@ -390,6 +390,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     style.removeProperty('border-top');
     style.removeProperty('border-top-left-radius');
     style.removeProperty('border-top-right-radius');
+    style.removeProperty('padding-top');
     style.removeProperty('position');
   },
 

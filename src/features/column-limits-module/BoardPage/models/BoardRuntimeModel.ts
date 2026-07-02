@@ -101,6 +101,7 @@ export class BoardRuntimeModel {
 
       const headerStyles: Partial<CSSStyleDeclaration> = {
         borderTop: `4px solid ${groupColor}`,
+        paddingTop: '18px',
         position: 'relative',
       };
 
