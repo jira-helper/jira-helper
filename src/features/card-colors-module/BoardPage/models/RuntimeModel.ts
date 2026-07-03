@@ -92,11 +92,11 @@ export class RuntimeModel {
       this.error = null;
 
       // Запускаем обработку
-      this.processCards();
+      this.safeProcessCards('activate');
 
       // Устанавливаем интервал для периодической обработки
       this.intervalId = window.setInterval(() => {
-        this.processCards();
+        this.safeProcessCards('interval');
       }, REPAINT_DEBOUNCE_MS);
 
       this.addCleanup(() => {
@@ -105,6 +105,11 @@ export class RuntimeModel {
           this.intervalId = null;
         }
       });
+
+      const diagnosticsTimeoutId = window.setTimeout(() => {
+        this.ensureStyleDiagnostics();
+      }, 0);
+      this.addCleanup(() => window.clearTimeout(diagnosticsTimeoutId));
 
       log('Activated card colors processing');
       return Ok(undefined);
@@ -140,8 +145,6 @@ export class RuntimeModel {
     if (!this.isActive) {
       return;
     }
-
-    this.ensureStyleDiagnostics();
 
     // Берём карточки в двух случаях:
     //   1) ещё не обработаны — `:not([processedAttribute])`;
@@ -197,7 +200,7 @@ export class RuntimeModel {
     this.repaintTimeoutId = window.setTimeout(() => {
       this.repaintTimeoutId = null;
       this.debugLog('run-scheduled-process-cards');
-      this.processCards();
+      this.safeProcessCards('scheduled');
     }, REPAINT_DEBOUNCE_MS);
   }
 
@@ -241,6 +244,18 @@ export class RuntimeModel {
 
     window.clearTimeout(this.repaintTimeoutId);
     this.repaintTimeoutId = null;
+  }
+
+  private safeProcessCards(reason: string): void {
+    try {
+      this.processCards();
+    } catch (error) {
+      this.debugFailure('process-cards-failed', error, { reason });
+      this.logger.getPrefixedLog('RuntimeModel.processCards')(
+        `Synchronous processCards failure: ${error instanceof Error ? error.message : String(error)}`,
+        'error'
+      );
+    }
   }
 
   private ensureStyleDiagnostics(): void {
@@ -341,7 +356,7 @@ export class RuntimeModel {
     }
   }
 
-  private debugFailure(event: string, error: unknown): void {
+  private debugFailure(event: string, error: unknown, payload: Record<string, unknown> = {}): void {
     try {
       if (!this.isDebugEnabled()) {
         return;
@@ -351,6 +366,7 @@ export class RuntimeModel {
       console.warn.call(console, DEBUG_PREFIX, {
         event,
         message: error instanceof Error ? error.message : String(error),
+        ...payload,
       });
     } catch {
       // Diagnostics must never break card colors runtime.
