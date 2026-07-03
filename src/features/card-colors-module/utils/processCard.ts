@@ -121,6 +121,11 @@ export function paintCard(
   const finalColor = `hsl(${h}, ${s * 100}%, ${finalL * 100}%)`;
   const colorClassName = `${COLOR_CLASS_PREFIX}${r}-${g}-${b}`;
 
+  if (card.classList.contains(colorClassName)) {
+    ensureColorRule(colorClassName, finalColor);
+    return;
+  }
+
   removePreviousColorClasses(card);
   ensureColorRule(colorClassName, finalColor);
   card.classList.add(colorClassName);
