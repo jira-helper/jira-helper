@@ -1,0 +1,61 @@
+name: Build Extension Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - '.github/workflows/build-extension-artifacts.yml'
+      - 'src/**'
+      - 'public/**'
+      - 'manifest.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tools/**'
+
+jobs:
+  build-artifacts:
+    name: Build extension artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Chrome extension zip
+        run: npm run prod
+        env:
+          CI: true
+
+      - name: Build Firefox extension zip
+        run: npm run prod:firefox
+        env:
+          CI: true
+
+      - name: Verify zip files
+        run: |
+          test -f jira-helper.zip
+          test -f jira-helper-firefox.zip
+          ls -lh jira-helper.zip jira-helper-firefox.zip
+
+      - name: Upload extension artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: jira-helper-extension-${{ github.ref_name }}-${{ github.sha }}
+          path: |
+            jira-helper.zip
+            jira-helper-firefox.zip
+          retention-days: 14
