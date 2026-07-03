@@ -23,7 +23,7 @@ describe('processCard', () => {
 
     expect(card.hasAttribute('jh-card-colors-processed')).toBe(true);
     expect(card.style.backgroundColor).toBe('');
-    expect([...card.classList]).toContain('jh-card-color-232-21-21');
+    expect(Array.from(card.classList)).toContain('jh-card-color-232-21-21');
     expect(document.getElementById('jh-card-colors-style')?.textContent).toContain(
       '.jh-card-color-232-21-21{background-color:hsl(0, 100%, 80%) !important;}'
     );
