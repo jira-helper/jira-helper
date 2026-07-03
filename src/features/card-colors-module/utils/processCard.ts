@@ -21,6 +21,9 @@ const COLOR_CONFIG = {
   minLightness: 0.95,
 } as const;
 
+const STYLE_ELEMENT_ID = 'jh-card-colors-style';
+const COLOR_CLASS_PREFIX = 'jh-card-color-';
+
 /**
  * Опции для обработки карточки.
  */
@@ -49,6 +52,35 @@ export function isAlreadyColoredByOtherTools(card: HTMLElement): boolean {
  */
 export function isFlagged(card: HTMLElement, flaggedClass: string): boolean {
   return card.classList.contains(flaggedClass);
+}
+
+function removePreviousColorClasses(card: HTMLElement): void {
+  Array.from(card.classList)
+    .filter(className => className.startsWith(COLOR_CLASS_PREFIX))
+    .forEach(className => card.classList.remove(className));
+}
+
+function getOrCreateStyleElement(): HTMLStyleElement {
+  const existingElement = document.getElementById(STYLE_ELEMENT_ID);
+  if (existingElement instanceof HTMLStyleElement) {
+    return existingElement;
+  }
+
+  const styleElement = document.createElement('style');
+  styleElement.id = STYLE_ELEMENT_ID;
+  document.head.append(styleElement);
+  return styleElement;
+}
+
+function ensureColorRule(className: string, color: string): void {
+  const styleElement = getOrCreateStyleElement();
+  const rule = `.${className}{background-color:${color} !important;}`;
+
+  if (styleElement.textContent?.includes(rule)) {
+    return;
+  }
+
+  styleElement.append(`${rule}\n`);
 }
 
 /**
@@ -87,13 +119,11 @@ export function paintCard(
   }
 
   const finalColor = `hsl(${h}, ${s * 100}%, ${finalL * 100}%)`;
+  const colorClassName = `${COLOR_CLASS_PREFIX}${r}-${g}-${b}`;
 
-  // Сохраняем оригинальный цвет только при первой покраске. При перепокраске после
-  // Jira-перезатирания `style` `backgroundColor` уже пустой, и сохранять его не нужно.
-  if (!card.hasAttribute('current-color')) {
-    card.setAttribute('current-color', card.style.backgroundColor);
-  }
-  card.style.backgroundColor = finalColor;
+  removePreviousColorClasses(card);
+  ensureColorRule(colorClassName, finalColor);
+  card.classList.add(colorClassName);
 }
 
 /**
