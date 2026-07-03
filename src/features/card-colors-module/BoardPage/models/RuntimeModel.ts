@@ -15,6 +15,8 @@ import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
 const REPAINT_DEBOUNCE_MS = 1000;
+const DEBUG_FLAG = 'jh-card-colors-debug';
+const DEBUG_PREFIX = '[JH_CARD_COLORS_DEBUG]';
 
 /**
  * Модель для логики применения цветов карточек на странице доски.
@@ -35,6 +37,8 @@ export class RuntimeModel {
    * ID отложенной обработки карточек после DOM-мутаций.
    */
   private repaintTimeoutId: number | null = null;
+
+  private styleDiagnosticsObserver: MutationObserver | null = null;
 
   /**
    * Функция для очистки side effects.
@@ -120,6 +124,7 @@ export class RuntimeModel {
 
     this.isActive = false;
     this.clearScheduledRepaint();
+    this.stopStyleDiagnostics();
 
     // Выполняем cleanup
     this.cleanupCallbacks.forEach(callback => callback());
@@ -136,6 +141,8 @@ export class RuntimeModel {
       return;
     }
 
+    this.ensureStyleDiagnostics();
+
     // Берём карточки в двух случаях:
     //   1) ещё не обработаны — `:not([processedAttribute])`;
     //   2) уже обработаны, но Jira перезатёрла `style` (например, при ленивой гидратации карточки,
@@ -149,18 +156,25 @@ export class RuntimeModel {
         `${baseSelector}[${this.processedAttribute}][style=""]`
     );
 
+    this.debugLog('process-cards', {
+      count: cards.length,
+      reason: 'interval-or-scheduled-repaint',
+    });
+
     // Импортируем функцию преобразования цвета
     import('src/shared/utils')
       .then(({ hslFromRGB }) => {
         // Импортируем утилиты обработки карточек
         import('../../utils/processCard').then(({ processCard }) => {
           cards.forEach(card => {
+            this.debugLogCard('before-paint', card as HTMLElement);
             processCard(
               { card: card as HTMLElement, processedAttribute: this.processedAttribute },
               this.boardPage.selectors,
               this.boardPage.classlist.flagged,
               hslFromRGB
             );
+            this.debugLogCard('after-paint', card as HTMLElement);
           });
         });
       })
@@ -178,9 +192,11 @@ export class RuntimeModel {
     }
 
     this.clearScheduledRepaint();
+    this.debugLog('schedule-process-cards', { delayMs: REPAINT_DEBOUNCE_MS });
 
     this.repaintTimeoutId = window.setTimeout(() => {
       this.repaintTimeoutId = null;
+      this.debugLog('run-scheduled-process-cards');
       this.processCards();
     }, REPAINT_DEBOUNCE_MS);
   }
@@ -196,12 +212,14 @@ export class RuntimeModel {
     import('src/shared/utils')
       .then(({ hslFromRGB }) => {
         import('../../utils/processCard').then(({ processCard }) => {
+          this.debugLogCard('before-single-card-paint', card);
           processCard(
             { card, processedAttribute: this.processedAttribute },
             this.boardPage.selectors,
             this.boardPage.classlist.flagged,
             hslFromRGB
           );
+          this.debugLogCard('after-single-card-paint', card);
         });
       })
       .catch(error => {
@@ -223,6 +241,83 @@ export class RuntimeModel {
 
     window.clearTimeout(this.repaintTimeoutId);
     this.repaintTimeoutId = null;
+  }
+
+  private ensureStyleDiagnostics(): void {
+    if (this.styleDiagnosticsObserver || !this.isDebugEnabled()) {
+      return;
+    }
+
+    const pool = document.querySelector(this.boardPage.selectors.pool);
+    if (!pool) {
+      return;
+    }
+
+    this.debugLog('style-diagnostics-started');
+
+    this.styleDiagnosticsObserver = new MutationObserver(records => {
+      records.forEach(record => {
+        const card = (record.target as Element).closest(this.boardPage.selectors.issue) as HTMLElement | null;
+        if (!card) {
+          return;
+        }
+
+        this.debugLog('card-style-mutated', {
+          issueKey: this.getIssueKey(card),
+          processed: card.hasAttribute(this.processedAttribute),
+          oldStyle: record.oldValue,
+          newStyle: card.getAttribute('style'),
+          backgroundColor: card.style.backgroundColor,
+          className: card.className,
+        });
+      });
+    });
+
+    this.styleDiagnosticsObserver.observe(pool, {
+      attributes: true,
+      attributeFilter: ['style'],
+      attributeOldValue: true,
+      subtree: true,
+    });
+  }
+
+  private stopStyleDiagnostics(): void {
+    this.styleDiagnosticsObserver?.disconnect();
+    this.styleDiagnosticsObserver = null;
+  }
+
+  private isDebugEnabled(): boolean {
+    return window.localStorage.getItem(DEBUG_FLAG) === '1';
+  }
+
+  private debugLog(event: string, payload: Record<string, unknown> = {}): void {
+    if (!this.isDebugEnabled()) {
+      return;
+    }
+
+    // eslint-disable-next-line no-console
+    console.info(DEBUG_PREFIX, {
+      event,
+      time: new Date().toISOString(),
+      now: Math.round(performance.now()),
+      ...payload,
+    });
+  }
+
+  private debugLogCard(event: string, card: HTMLElement): void {
+    this.debugLog(event, {
+      issueKey: this.getIssueKey(card),
+      processed: card.hasAttribute(this.processedAttribute),
+      style: card.getAttribute('style'),
+      backgroundColor: card.style.backgroundColor,
+      grabberBackgroundColor: (card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null)?.style
+        .backgroundColor,
+      className: card.className,
+    });
+  }
+
+  private getIssueKey(card: HTMLElement): string | null {
+    return card.getAttribute('data-issue-key') ?? card.querySelector('.ghx-key')?.textContent?.trim() ?? null;
   }
 
   /**
