@@ -14,6 +14,8 @@ import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/Board
 import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { FeatureDiagnosticData } from 'src/features/diagnostic-module/types';
 
+const REPAINT_DEBOUNCE_MS = 1000;
+
 /**
  * Модель для логики применения цветов карточек на странице доски.
  * Управляет обработкой карточек, интервалами обновления и DOM изменениями.
@@ -28,6 +30,11 @@ export class RuntimeModel {
    * ID интервала для периодической обработки.
    */
   private intervalId: number | null = null;
+
+  /**
+   * ID отложенной обработки карточек после DOM-мутаций.
+   */
+  private repaintTimeoutId: number | null = null;
 
   /**
    * Функция для очистки side effects.
@@ -86,7 +93,7 @@ export class RuntimeModel {
       // Устанавливаем интервал для периодической обработки
       this.intervalId = window.setInterval(() => {
         this.processCards();
-      }, 200);
+      }, REPAINT_DEBOUNCE_MS);
 
       this.addCleanup(() => {
         if (this.intervalId) {
@@ -112,6 +119,7 @@ export class RuntimeModel {
     const log = this.logger.getPrefixedLog('RuntimeModel.deactivate');
 
     this.isActive = false;
+    this.clearScheduledRepaint();
 
     // Выполняем cleanup
     this.cleanupCallbacks.forEach(callback => callback());
@@ -162,6 +170,22 @@ export class RuntimeModel {
   }
 
   /**
+   * Запланировать обработку карточек после серии DOM-мутаций.
+   */
+  scheduleProcessCards(): void {
+    if (!this.isActive) {
+      return;
+    }
+
+    this.clearScheduledRepaint();
+
+    this.repaintTimeoutId = window.setTimeout(() => {
+      this.repaintTimeoutId = null;
+      this.processCards();
+    }, REPAINT_DEBOUNCE_MS);
+  }
+
+  /**
    * Обработать конкретную карточку.
    */
   processCard(card: HTMLElement): void {
@@ -190,6 +214,15 @@ export class RuntimeModel {
    */
   private addCleanup(callback: () => void): void {
     this.cleanupCallbacks.push(callback);
+  }
+
+  private clearScheduledRepaint(): void {
+    if (this.repaintTimeoutId === null) {
+      return;
+    }
+
+    window.clearTimeout(this.repaintTimeoutId);
+    this.repaintTimeoutId = null;
   }
 
   /**
