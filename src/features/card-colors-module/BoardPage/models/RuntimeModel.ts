@@ -244,41 +244,46 @@ export class RuntimeModel {
   }
 
   private ensureStyleDiagnostics(): void {
-    if (this.styleDiagnosticsObserver || !this.isDebugEnabled()) {
-      return;
-    }
+    try {
+      if (this.styleDiagnosticsObserver || !this.isDebugEnabled()) {
+        return;
+      }
 
-    const pool = document.querySelector(this.boardPage.selectors.pool);
-    if (!pool) {
-      return;
-    }
+      const pool = document.querySelector(this.boardPage.selectors.pool);
+      if (!pool) {
+        return;
+      }
 
-    this.debugLog('style-diagnostics-started');
+      this.debugLog('style-diagnostics-started');
 
-    this.styleDiagnosticsObserver = new MutationObserver(records => {
-      records.forEach(record => {
-        const card = (record.target as Element).closest(this.boardPage.selectors.issue) as HTMLElement | null;
-        if (!card) {
-          return;
-        }
+      this.styleDiagnosticsObserver = new MutationObserver(records => {
+        records.forEach(record => {
+          const card = (record.target as Element).closest(this.boardPage.selectors.issue) as HTMLElement | null;
+          if (!card) {
+            return;
+          }
 
-        this.debugLog('card-style-mutated', {
-          issueKey: this.getIssueKey(card),
-          processed: card.hasAttribute(this.processedAttribute),
-          oldStyle: record.oldValue,
-          newStyle: card.getAttribute('style'),
-          backgroundColor: card.style.backgroundColor,
-          className: card.className,
+          this.debugLog('card-style-mutated', {
+            issueKey: this.getIssueKey(card),
+            processed: card.hasAttribute(this.processedAttribute),
+            oldStyle: record.oldValue,
+            newStyle: card.getAttribute('style'),
+            backgroundColor: card.style.backgroundColor,
+            className: card.className,
+          });
         });
       });
-    });
 
-    this.styleDiagnosticsObserver.observe(pool, {
-      attributes: true,
-      attributeFilter: ['style'],
-      attributeOldValue: true,
-      subtree: true,
-    });
+      this.styleDiagnosticsObserver.observe(pool, {
+        attributes: true,
+        attributeFilter: ['style'],
+        attributeOldValue: true,
+        subtree: true,
+      });
+    } catch (error) {
+      this.stopStyleDiagnostics();
+      this.debugFailure('style-diagnostics-failed', error);
+    }
   }
 
   private stopStyleDiagnostics(): void {
@@ -287,37 +292,69 @@ export class RuntimeModel {
   }
 
   private isDebugEnabled(): boolean {
-    return window.localStorage.getItem(DEBUG_FLAG) === '1';
+    try {
+      return window.localStorage.getItem(DEBUG_FLAG) === '1';
+    } catch {
+      return false;
+    }
   }
 
   private debugLog(event: string, payload: Record<string, unknown> = {}): void {
-    if (!this.isDebugEnabled()) {
-      return;
-    }
+    try {
+      if (!this.isDebugEnabled()) {
+        return;
+      }
 
-    // eslint-disable-next-line no-console
-    console.info(DEBUG_PREFIX, {
-      event,
-      time: new Date().toISOString(),
-      now: Math.round(performance.now()),
-      ...payload,
-    });
+      // eslint-disable-next-line no-console
+      console.info.call(console, DEBUG_PREFIX, {
+        event,
+        time: new Date().toISOString(),
+        now: Math.round(performance.now.call(performance)),
+        ...payload,
+      });
+    } catch (error) {
+      this.debugFailure('debug-log-failed', error);
+    }
   }
 
   private debugLogCard(event: string, card: HTMLElement): void {
-    this.debugLog(event, {
-      issueKey: this.getIssueKey(card),
-      processed: card.hasAttribute(this.processedAttribute),
-      style: card.getAttribute('style'),
-      backgroundColor: card.style.backgroundColor,
-      grabberBackgroundColor: (card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null)?.style
-        .backgroundColor,
-      className: card.className,
-    });
+    try {
+      this.debugLog(event, {
+        issueKey: this.getIssueKey(card),
+        processed: card.hasAttribute(this.processedAttribute),
+        style: card.getAttribute('style'),
+        backgroundColor: card.style.backgroundColor,
+        grabberBackgroundColor: (card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null)?.style
+          .backgroundColor,
+        className: card.className,
+      });
+    } catch (error) {
+      this.debugFailure('debug-log-card-failed', error);
+    }
   }
 
   private getIssueKey(card: HTMLElement): string | null {
-    return card.getAttribute('data-issue-key') ?? card.querySelector('.ghx-key')?.textContent?.trim() ?? null;
+    try {
+      return card.getAttribute('data-issue-key') ?? card.querySelector('.ghx-key')?.textContent?.trim() ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private debugFailure(event: string, error: unknown): void {
+    try {
+      if (!this.isDebugEnabled()) {
+        return;
+      }
+
+      // eslint-disable-next-line no-console
+      console.warn.call(console, DEBUG_PREFIX, {
+        event,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } catch {
+      // Diagnostics must never break card colors runtime.
+    }
   }
 
   /**
