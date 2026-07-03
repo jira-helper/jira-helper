@@ -280,10 +280,13 @@ export class RuntimeModel {
 
           this.debugLog('card-style-mutated', {
             issueKey: this.getIssueKey(card),
+            attributeName: record.attributeName,
             processed: card.hasAttribute(this.processedAttribute),
-            oldStyle: record.oldValue,
+            oldValue: record.oldValue,
             newStyle: card.getAttribute('style'),
-            backgroundColor: card.style.backgroundColor,
+            newClass: card.getAttribute('class'),
+            inlineBackgroundColor: card.style.backgroundColor,
+            computedBackgroundColor: window.getComputedStyle(card).backgroundColor,
             className: card.className,
           });
         });
@@ -291,7 +294,7 @@ export class RuntimeModel {
 
       this.styleDiagnosticsObserver.observe(pool, {
         attributes: true,
-        attributeFilter: ['style'],
+        attributeFilter: ['style', 'class'],
         attributeOldValue: true,
         subtree: true,
       });
@@ -321,12 +324,16 @@ export class RuntimeModel {
       }
 
       // eslint-disable-next-line no-console
-      console.info.call(console, DEBUG_PREFIX, {
-        event,
-        time: new Date().toISOString(),
-        now: Math.round(performance.now.call(performance)),
-        ...payload,
-      });
+      console.info.call(
+        console,
+        DEBUG_PREFIX,
+        JSON.stringify({
+          event,
+          time: new Date().toISOString(),
+          now: Math.round(performance.now.call(performance)),
+          ...payload,
+        })
+      );
     } catch (error) {
       this.debugFailure('debug-log-failed', error);
     }
@@ -338,9 +345,11 @@ export class RuntimeModel {
         issueKey: this.getIssueKey(card),
         processed: card.hasAttribute(this.processedAttribute),
         style: card.getAttribute('style'),
-        backgroundColor: card.style.backgroundColor,
-        grabberBackgroundColor: (card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null)?.style
-          .backgroundColor,
+        inlineBackgroundColor: card.style.backgroundColor,
+        computedBackgroundColor: window.getComputedStyle(card).backgroundColor,
+        grabberInlineBackgroundColor: (card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null)
+          ?.style.backgroundColor,
+        grabberComputedBackgroundColor: this.getGrabberComputedBackgroundColor(card),
         className: card.className,
       });
     } catch (error) {
@@ -363,13 +372,26 @@ export class RuntimeModel {
       }
 
       // eslint-disable-next-line no-console
-      console.warn.call(console, DEBUG_PREFIX, {
-        event,
-        message: error instanceof Error ? error.message : String(error),
-        ...payload,
-      });
+      console.warn.call(
+        console,
+        DEBUG_PREFIX,
+        JSON.stringify({
+          event,
+          message: error instanceof Error ? error.message : String(error),
+          ...payload,
+        })
+      );
     } catch {
       // Diagnostics must never break card colors runtime.
+    }
+  }
+
+  private getGrabberComputedBackgroundColor(card: HTMLElement): string | null {
+    try {
+      const grabber = card.querySelector(this.boardPage.selectors.grabber) as HTMLElement | null;
+      return grabber ? window.getComputedStyle(grabber).backgroundColor : null;
+    } catch {
+      return null;
     }
   }
 
