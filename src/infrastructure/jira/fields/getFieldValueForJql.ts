@@ -53,7 +53,17 @@ export function extractFieldValueBySchema(issue: IssueLikeForJql, field: JiraFie
       switch (field.schema.items) {
         case 'component':
           return (val as Array<{ name?: unknown }>).map(v => String(v?.name ?? '')).filter(Boolean);
-        case 'string':
+        case 'string': {
+          // Labels и подобные поля могут быть как массивом строк ['bug', 'feature'],
+          // так и массивом объектов [{ value: 'bug' }]
+          const firstItem = val[0];
+          if (typeof firstItem === 'string') {
+            // Массив строк (как labels)
+            return val as string[];
+          }
+          // Массив объектов { value: string }
+          return (val as Array<{ value?: unknown }>).map(v => String(v?.value ?? '')).filter(Boolean);
+        }
         case 'option':
           return (val as Array<{ value?: unknown }>).map(v => String(v?.value ?? '')).filter(Boolean);
         default:

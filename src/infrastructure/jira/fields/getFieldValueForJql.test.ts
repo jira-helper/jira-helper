@@ -115,5 +115,45 @@ describe('getFieldValueForJql', () => {
       expect(getFieldValueForJql({ fields: { components: [] } }, fields)('Components')).toEqual([]);
       expect(getFieldValueForJql({ fields: {} }, fields)('Components')).toEqual([]);
     });
+
+    it('handles labels field as array of strings (not objects)', () => {
+      // В Jira labels возвращаются как ['bug', 'feature'], а не [{ value: 'bug' }]
+      const issue = {
+        fields: {
+          labels: ['bug', 'feature', 'urgent'],
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'labels',
+          name: 'Labels',
+          clauseNames: ['labels'],
+          schema: { type: 'array', items: 'string' },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('labels')).toEqual(['bug', 'feature', 'urgent']);
+      expect(get('LABELS')).toEqual(['bug', 'feature', 'urgent']);
+    });
+
+    it('still handles array of string objects for backward compatibility', () => {
+      // Некоторые поля типа multi-select могут быть [{ value: 'A' }]
+      const issue = {
+        fields: {
+          customfield_10001: [{ value: 'Value 1' }, { value: 'Value 2' }],
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'customfield_10001',
+          name: 'Multi Select',
+          schema: { type: 'array', items: 'string' },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('Multi Select')).toEqual(['Value 1', 'Value 2']);
+    });
   });
 });
