@@ -8,6 +8,7 @@ import {
   getProjectFields,
   getStatuses,
   renderRemoteLink,
+  sanitizeJson,
   searchIssues,
 } from './jiraApi';
 import { ExternalIssueMapped, JiraField, JiraIssue, JiraIssueMapped, JiraStatus, RemoteLink } from './types';
@@ -424,7 +425,7 @@ export class JiraService implements IJiraService {
       return Err(allSubtasksResponse.val);
     }
 
-    const allSubtasksData = await allSubtasksResponse.val.json();
+    const allSubtasksData = sanitizeJson(await allSubtasksResponse.val.json());
     const allSubtasks = allSubtasksData.issues.map((issue: JiraIssue) => this.mapJiraIssue(issue));
     this.subtasksService.updateSubtasks(issueId, {
       subtasks: allSubtasks,
