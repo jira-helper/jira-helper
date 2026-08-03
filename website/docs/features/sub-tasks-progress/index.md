@@ -32,8 +32,8 @@ Green = done, blue = in progress, gray = to do, red = blocked. The counter below
 - **Choose tracked columns**: select which board columns show progress on cards.
 - **Enable counting sources**: pick desired sources — epic children, sub-tasks, linked issues (optionally filtered by link type), and external links.
 - **Configure grouping**: select a default grouping field (project, assignee, issue type, etc.), define ignored groups, and create custom groups with names, rules, bar-vs-counter style, colors, and visibility.
-- **Map statuses to progress categories**: assign Jira statuses to the four categories («To Do», «In Progress», «Done», «Blocked»).
-- **Enable blocked/flagged handling**: count flagged issues as blocked and show warning hints on cards.
+- **Status progress mapping**: click **«+ Add status mapping»**, pick a Jira status, and assign it to one of three buckets («To Do», «In Progress», «Done»). Unmapped statuses are left out of the totals. **Blocked** is not a mapping bucket — use the blocked/flagged options below.
+- **Enable blocked/flagged handling**: count flagged issues (and blocked-by style links) as blocked and show warning hints on cards.
 - **Adjust colors**: choose a preset scheme or a custom palette.
 
 Click **«Save»** to store settings for this board.
@@ -56,6 +56,6 @@ Click **«Save»** to store settings for this board.
 ## Troubleshooting
 
 - **Progress bar not appearing:** Verify the feature is enabled and the column is in the tracked columns list.
-- **Wrong category for a status:** Check the status-to-progress mapping in settings; ensure the correct status names are assigned.
-- **Issues not counted:** Confirm the relevant source (sub-tasks, epic children, links) is enabled and that statuses are mapped.
+- **Wrong category for a status:** Open **«Status progress mapping»** and check that the status is mapped to the intended bucket («To Do» / «In Progress» / «Done»).
+- **Issues not counted:** Confirm the relevant source (sub-tasks, epic children, links) is enabled and that statuses are mapped. Blocked counts come from flag/link settings, not from status mapping.
 - **Performance concerns:** Limit the number of tracked columns and sources to reduce Jira API load.

@@ -15,8 +15,8 @@ sidebar_position: 1
 | Функция | Место ввода JQL |
 |---------|-----------------|
 | Card Colors | **Настройки доски Jira → Card Colors** — родная таблица цветовых правил Jira (не диалог Jira Helper) |
-| Issue Condition Checks | **Настройки доски → Информация на карточках → Issue Condition Checks** — у каждого условия своё поле JQL |
-| Issue Links Display | **Настройки доски → Информация на карточках → Issue Links** — JQL для фильтрации исходных и связанных задач |
+| Issue Condition Checks | **Jira Helper → Additional Card Elements → Issue Condition Checks** — у каждого условия своё поле JQL |
+| Issue Links Display | **Jira Helper → Additional Card Elements → Issue Links** — JQL для фильтрации исходных и связанных задач |
 | Gantt Chart | **Настройки диаграммы Ганта → Bar Colour Rules** (для цветовых правил) или **Quick Filters** (для фильтрации) |
 
 <!-- SCREENSHOT: The Issue Condition Checks settings dialog with a JQL input field highlighted, showing the query "assignee = currentUser() AND status != Done" -->

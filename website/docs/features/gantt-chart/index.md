@@ -33,8 +33,10 @@ Both methods open the same settings dialog.
 
 ### How to configure
 
+- **Feature enabled**: use the **«Feature enabled»** switch at the top of the tab. When off, the chart is hidden in this browser; saved settings are kept and apply again after re-enabling.
 - **Select a scope**: choose «Global», «This project», or «This project + issue type». Use **«Copy from…»** to seed a new scope from an existing one. The most specific scope with settings wins at view time.
 - **Set bar start and end sources**: build a priority list of date fields or status transitions. Use **«Add fallback»** and the up/down arrows to set order — the first source that yields a date for each task wins.
+- **Status progress mapping**: click **«+ Add status mapping»**, pick a Jira status, and assign it to «To Do», «In Progress», or «Done». This mapping drives status-breakdown segments on bars.
 - **Choose issue categories**: include sub-tasks, epic children, linked issues. For links, optionally restrict by link type and direction.
 - **Add exclusion filters**: drop tasks you never want on the chart — a task is excluded if any filter matches.
 - **Add bar colour rules**: highlight work by field value or JQL expression. Rules are evaluated top to bottom; first match wins.
@@ -63,7 +65,7 @@ Click **«Save»** to persist settings. Settings cascade: project+issue type →
 
 ## Troubleshooting
 
-- **Chart not loading:** Check browser console for errors. The chart may fail if Jira API requests are rate-limited.
+- **Chart not loading / missing entirely:** Confirm **«Feature enabled»** is on. Check browser console for errors; the chart may fail if Jira API requests are rate-limited.
 - **Tasks missing from chart:** Check exclusion filters and ensure start/end mappings yield dates for those tasks. Look in the "not on chart" section for reasons.
-- **Status breakdown wrong:** Verify the status-to-category mapping in settings or the scope's status progress mapping.
+- **Status breakdown wrong:** Open **«Status progress mapping»** for the active scope and map each relevant Jira status to «To Do» / «In Progress» / «Done».
 - **Settings not persisting:** Ensure localStorage is not cleared between sessions and the browser does not block local storage.

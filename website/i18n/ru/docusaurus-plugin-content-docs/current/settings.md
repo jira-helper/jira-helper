@@ -39,8 +39,9 @@ Jira Helper хранит настройки в двух местах в зави
 
 ### Функции, использующие локальное хранилище
 
-- **[Gantt Chart](/docs/features/gantt-chart)** — сопоставление дат, цвета полос, правила исключения
-- **[Comment Templates](/docs/features/issue-templates/comment-templates)**
+- **[Gantt Chart](/docs/features/gantt-chart)** — сопоставление дат, цвета полос, правила исключения, локальный переключатель **Функция включена**
+- **[Comment Templates](/docs/features/issue-templates/comment-templates)** — шаблоны плюс локальный переключатель **Функция включена**
+- **[Шаблон описания](/docs/features/issue-templates/description-template)** — личный каркас в диалоге создания
 - **[Data Blurring](/docs/features/data-blurring)** — состояние переключателя размытия
 - **[Local Settings](/docs/features/local-settings)** — языковые настройки
 
@@ -56,13 +57,14 @@ Jira Helper хранит настройки в двух местах в зави
 
 1. Откройте любую Jira-доску
 2. Нажмите кнопку **Jira Helper** на панели инструментов доски
-3. Каждая функция, поддерживающая настройку, имеет свою вкладку в панели настроек: **Columns**, **Swimlanes**, **Card Colors** и т.д.
+3. Вкладки панели: **Column WIP Limits**, **Per-person WIP Limits**, **Sub-tasks progress**, **Additional Card Elements**, **Comment templates**, **Local Settings**, **Diagnostic**
 
 Дополнительные пути доступа для отдельных функций:
-- **Gantt Chart** — имеет собственную отдельную кнопку настроек ⚙ в заголовке диаграммы Ганта. Нажмите эту шестерёнку, чтобы открыть настройки Ганта (сопоставление дат, цвета полос, правила исключения).
-- **Comment Templates** — настраиваются через вкладку **Comment Templates** в панели настроек Jira Helper, затем вставляются из выпадающего списка в редакторе комментариев Jira.
+- **Gantt Chart** — на странице задачи через **Helper → Gantt Chart** или шестерёнку ⚙ в заголовке диаграммы (личное local storage; есть переключатель **Функция включена**).
+- **Comment Templates** — вкладка **Comment templates** в панели Jira Helper или диалоге **Helper** на задаче; вставка из тулбара редактора комментариев.
+- **Swimlane / Field / Cell WIP limits** и **Card Colors** — в родных **настройках доски Jira**, не в ленте вкладок Jira Helper.
 
-<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Columns, Swimlanes, Card Colors, Gantt Chart — labels pointing to board-property tabs vs local-storage tabs -->
+<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Column WIP Limits, Per-person WIP Limits, Sub-tasks progress, Additional Card Elements, Comment templates, Local Settings -->
 
 ## Устранение неполадок
 
