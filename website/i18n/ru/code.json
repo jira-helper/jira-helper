@@ -325,5 +325,149 @@
   "theme.tags.tagsPageTitle": {
     "message": "Теги",
     "description": "The title of the tag list page"
+  },
+  "homepage.meta.title": {
+    "message": "Превратите Jira в настоящую Kanban-систему",
+    "description": "Homepage document title"
+  },
+  "homepage.meta.description": {
+    "message": "Браузерное расширение с WIP-лимитами, диаграммами Ганта и визуализацией доски для Jira.",
+    "description": "Homepage meta description"
+  },
+  "homepage.hero.title": {
+    "message": "Превратите Jira в настоящую Kanban-систему",
+    "description": "Homepage hero title"
+  },
+  "homepage.hero.subtitle": {
+    "message": "Браузерное расширение с открытым исходным кодом. Без серверов, без аккаунтов, без телеметрии. Просто профессиональный Kanban — внутри вашей Jira.",
+    "description": "Homepage hero subtitle"
+  },
+  "homepage.hero.ctaChrome": {
+    "message": "Добавить в Chrome — бесплатно",
+    "description": "Homepage Chrome CTA button"
+  },
+  "homepage.hero.ctaDocs": {
+    "message": "Документация →",
+    "description": "Homepage documentation CTA"
+  },
+  "homepage.mockup.header": {
+    "message": "Доска Jira — с jira-helper",
+    "description": "Homepage mockup board header"
+  },
+  "homepage.mockup.swimlane": {
+    "message": "Команда Backend",
+    "description": "Homepage mockup swimlane name"
+  },
+  "homepage.mockup.colTodo": {
+    "message": "To Do",
+    "description": "Homepage mockup column To Do"
+  },
+  "homepage.mockup.colInProgress": {
+    "message": "In Progress",
+    "description": "Homepage mockup column In Progress"
+  },
+  "homepage.mockup.colReview": {
+    "message": "Review",
+    "description": "Homepage mockup column Review"
+  },
+  "homepage.mockup.colDone": {
+    "message": "Done",
+    "description": "Homepage mockup column Done"
+  },
+  "homepage.features.title": {
+    "message": "Возможности",
+    "description": "Homepage features section title"
+  },
+  "homepage.features.subtitle": {
+    "message": "Всё необходимое для профессионального Kanban в Jira",
+    "description": "Homepage features section subtitle"
+  },
+  "homepage.features.columnWip.title": {
+    "message": "WIP-лимиты колонок",
+    "description": "Feature card title"
+  },
+  "homepage.features.columnWip.description": {
+    "message": "Группируйте колонки под общим лимитом. Визуальные предупреждения при превышении.",
+    "description": "Feature card description"
+  },
+  "homepage.features.personalWip.title": {
+    "message": "Персональные WIP-лимиты",
+    "description": "Feature card title"
+  },
+  "homepage.features.personalWip.description": {
+    "message": "Баланс нагрузки по людям с бейджами на аватарах.",
+    "description": "Feature card description"
+  },
+  "homepage.features.gantt.title": {
+    "message": "Диаграмма Ганта",
+    "description": "Feature card title"
+  },
+  "homepage.features.gantt.description": {
+    "message": "Интерактивная временная шкала на страницах задач. Масштаб, панорама, фильтры.",
+    "description": "Feature card description"
+  },
+  "homepage.features.cardColors.title": {
+    "message": "Цвета карточек",
+    "description": "Feature card title"
+  },
+  "homepage.features.cardColors.description": {
+    "message": "Полная заливка карточки по JQL — не только тонкая полоска слева.",
+    "description": "Feature card description"
+  },
+  "homepage.features.daysInColumn.title": {
+    "message": "Дни в колонке",
+    "description": "Feature card title"
+  },
+  "homepage.features.daysInColumn.description": {
+    "message": "Смотрите, как долго каждая задача находится в текущей колонке.",
+    "description": "Feature card description"
+  },
+  "homepage.features.subtasks.title": {
+    "message": "Прогресс подзадач",
+    "description": "Feature card title"
+  },
+  "homepage.features.subtasks.description": {
+    "message": "Полосы прогресса на родительских карточках для подзадач и эпиков.",
+    "description": "Feature card description"
+  },
+  "homepage.features.sla.title": {
+    "message": "SLA на Control Chart",
+    "description": "Feature card title"
+  },
+  "homepage.features.sla.description": {
+    "message": "Референсная линия SLA с процентилем на Control Chart.",
+    "description": "Feature card description"
+  },
+  "homepage.features.issueLinks.title": {
+    "message": "Связи на карточках",
+    "description": "Feature card title"
+  },
+  "homepage.features.issueLinks.description": {
+    "message": "Показывайте blockers, parents и связанные задачи прямо на карточках.",
+    "description": "Feature card description"
+  },
+  "homepage.stats.features": {
+    "message": "функций",
+    "description": "Homepage stats label"
+  },
+  "homepage.stats.releases": {
+    "message": "релизов",
+    "description": "Homepage stats label"
+  },
+  "homepage.stats.languages": {
+    "message": "языка",
+    "description": "Homepage stats label"
+  },
+  "homepage.stats.openSource": {
+    "message": "открытый код",
+    "description": "Homepage stats label"
+  },
+  "homepage.cta.title": {
+    "message": "Установите и пользуйтесь",
+    "description": "Homepage CTA section title"
+  },
+  "homepage.cta.subtitle": {
+    "message": "Без настройки. Без аккаунта. Просто добавьте в браузер и откройте Jira.",
+    "description": "Homepage CTA section subtitle"
   }
 }
