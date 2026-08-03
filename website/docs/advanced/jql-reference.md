@@ -12,8 +12,8 @@ sidebar_position: 1
 
 | Feature | JQL Input Location |
 |---------|-------------------|
-| Issue Condition Checks | **Board Settings → Card Information → «Issue Condition Checks»** tab — each condition gets its own JQL field |
-| Issue Links Display | **Board Settings → Card Information → «Issue Links»** tab — JQL to filter source issues and linked tasks |
+| Issue Condition Checks | **Jira Helper → Additional Card Elements → «Issue Condition Checks»** — each condition gets its own JQL field |
+| Issue Links Display | **Jira Helper → Additional Card Elements → «Issue Links»** — JQL to filter source issues and linked tasks |
 | Gantt Chart | **Gantt Chart settings → «Bar colors»** (for color rules) or **«Quick filters»** (for filtering) |
 
 ---

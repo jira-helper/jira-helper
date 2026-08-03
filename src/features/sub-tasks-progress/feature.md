@@ -4,7 +4,7 @@ Shows stacked progress bars and/or compact counters on board cards for child and
 
 ## What it does
 
-- Splits work into **four buckets**: to do, in progress, done, and blocked, based on how you map Jira **statuses** into those buckets (and you can leave some statuses out of the totals).
+- Splits work into **to do / in progress / done** via **Status progress mapping** (Jira status → bucket; unmapped statuses are omitted). **Blocked** comes from optional flag / blocked-by link handling, not from status mapping.
 - Lets you choose **what to count**: for example epic children, sub-tasks, linked issues (with optional restriction by **link type**), and optional “external” linked items—each can be turned on or off.
 - Supports **grouping**—for example by project, assignee, or issue type—or custom groupings using a field or a filter, with separate styling for bars vs simple counters.
 - Can show **multi-segment bars**, a **single** combined bar, and/or **numeric counters**; you can hide groups when everything is complete or show only incomplete work.
@@ -19,7 +19,7 @@ Shows stacked progress bars and/or compact counters on board cards for child and
 4. Under **columns** (or the equivalent multi-select for tracked columns), choose **which columns show progress on cards**.
 5. In the counting section, enable the **sources** you want (epic children, sub-tasks, links, external links, etc.) and link-type filters if offered.
 6. Configure **grouping**: default grouping field, any ignored groups, and custom groups (names, what defines the group, bar vs counter, colors, when to hide or show).
-7. Map **statuses** to the four progress categories; adjust **colors** if you use custom schemes.
+7. Under **Status progress mapping**, add rows with **+ Add status mapping** and assign each status to To Do / In Progress / Done; adjust **colors** if you use custom schemes.
 8. Optionally turn on **blocked / flagged** handling and related warnings.
 
 Settings are **per board** in Jira Helper. People who can change Jira Helper settings for that board can save these options.

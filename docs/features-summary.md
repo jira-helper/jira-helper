@@ -15,7 +15,7 @@ Set shared WIP limits across multiple columns to visualize Kanban-style combined
 Exclude specific swimlanes (like Expedite) from column WIP calculations. Tasks in special swimlanes have their own limits.
 
 ### Personal WIP-Limits
-Set per-person work-in-progress limits to balance workload across team members.
+Set per-person work-in-progress limits to balance workload across team members. Supports multi-person limits with shared or per-user modes.
 
 ### Field Value WIP-Limits
 Limit work by field values for Capacity Allocation. Count cards by specific field values or sum numeric fields like Story Points.
@@ -44,7 +44,7 @@ Hide sensitive data when presenting your board to colleagues. Enable via context
 ## Task Progress and Relationships
 
 ### Sub-tasks Progress
-Progress bar on cards showing completion status of child tasks, subtasks within epics, or linked issues. Supports grouping by fields (Assignee, Project, etc.).
+Progress bar on cards showing completion status of child tasks, subtasks within epics, or linked issues. Supports grouping by fields (Assignee, Project, etc.) and status progress mapping to To Do / In Progress / Done buckets.
 
 ### Issue Links Display
 Show related issues directly on cards based on link types (Parent, Blocker, etc.) with optional JQL filtering.
@@ -67,10 +67,23 @@ Overlay measurement scales (Fibonacci, linear, etc.) to analyze if estimation sc
 
 ---
 
+## Issue Page
+
+### Gantt Chart
+Horizontal timeline on the classic issue view for related tasks, with date/status mappings, status progress mapping, bar colors, quick filters, and a local Feature enabled toggle.
+
+### Comment Templates
+Reusable comment snippets from the comment editor toolbar, with optional watchers and a local Feature enabled toggle.
+
 ## Templates
 
 ### Description Template
 Save and reuse issue description templates. Stored locally in your browser for quick access during issue creation.
+
+## Other
+
+### Local Settings
+Choose the extension UI language (Auto / English / Russian). Stored in your browser.
 
 ---
 
@@ -84,6 +97,8 @@ All extension requests include a special header `browser-plugin: jira-helper/{ve
 ## Compatibility
 
 - Chrome 88+
-- Firefox (with temporary add-on)
-- Jira Server 7.x, 8.x
-- Jira Cloud
+- Firefox 58+
+- Edge 88+ (Chromium)
+- Jira Server / Data Center (Jira Cloud is not supported)
+
+Full user docs: https://jira-helper.github.io/jira-helper/

@@ -498,6 +498,63 @@ describe('IssueConditionCheck utils', () => {
       expect(results[0].matched).toBe(true); // status = Open
       expect(results[1].matched).toBe(false); // labels = bug
     });
+
+    it('should match labels field with array of strings (not objects)', () => {
+      // Regression test: labels в Jira API приходят как ['bug', 'feature'],
+      // а не [{ value: 'bug' }]. Проверяем, что JQL работает корректно.
+      const checks: IssueConditionCheck[] = [
+        {
+          id: '1',
+          name: 'Bug Label Check',
+          enabled: true,
+          mode: 'simple',
+          icon: 'warning',
+          color: 'red',
+          tooltipText: 'Has bug label',
+          jql: 'labels = bug',
+        },
+        {
+          id: '2',
+          name: 'Urgent Label Check',
+          enabled: true,
+          mode: 'simple',
+          icon: 'fire',
+          color: 'orange',
+          tooltipText: 'Has urgent label',
+          jql: 'labels in (urgent, critical)',
+        },
+      ];
+
+      // Issue с labels как массив строк (реальная структура из Jira API)
+      const issueWithBugLabel: IssueData = {
+        key: 'TEST-1',
+        fields: { labels: ['bug', 'frontend'] },
+      };
+
+      const issueWithUrgentLabel: IssueData = {
+        key: 'TEST-2',
+        fields: { labels: ['urgent', 'backend'] },
+      };
+
+      const issueWithoutMatchingLabels: IssueData = {
+        key: 'TEST-3',
+        fields: { labels: ['feature', 'enhancement'] },
+      };
+
+      // Check 1: labels = bug
+      const results1 = checkIssueCondition(issueWithBugLabel, checks[0]);
+      expect(results1.matched).toBe(true);
+
+      const results2 = checkIssueCondition(issueWithUrgentLabel, checks[0]);
+      expect(results2.matched).toBe(false);
+
+      // Check 2: labels in (urgent, critical)
+      const results3 = checkIssueCondition(issueWithUrgentLabel, checks[1]);
+      expect(results3.matched).toBe(true);
+
+      const results4 = checkIssueCondition(issueWithoutMatchingLabels, checks[1]);
+      expect(results4.matched).toBe(false);
+    });
   });
 
   describe('getMatchingConditions', () => {

@@ -33,6 +33,7 @@ Both methods open the same settings panel.
 
 ### How to configure
 
+- **Feature enabled**: use the **«Feature enabled»** switch. When off, template buttons are hidden in this browser; existing templates are kept and return after re-enabling.
 - **Add a template**: click **«Add template»** and set up:
   - **«Label»** — a short name shown on the toolbar button.
   - **«Color»** — a preset or custom hex color for the button.
@@ -61,7 +62,7 @@ Click **«Save»** to persist changes to browser local storage. Templates are pe
 
 ## Troubleshooting
 
-- **Templates not appearing:** Ensure templates are saved (click **«Save»** in settings). The toolbar only appears on issue pages with a comment editor.
+- **Templates not appearing:** Confirm **«Feature enabled»** is on and templates are saved (click **«Save»**). The toolbar only appears on issue pages with a comment editor.
 - **Insertion failed:** The comment editor might not be fully loaded. Wait for the page to finish loading and try again.
 - **Watchers not added:** Check that the watcher usernames are valid Jira users. Some watchers may fail if the user doesn't have permission.
 - **Import error:** Ensure the JSON file matches the expected template format. Use **«Export templates»** to see the correct structure.

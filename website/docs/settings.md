@@ -39,8 +39,9 @@ Jira Helper stores settings in two places depending on the feature. Knowing the 
 
 ### Features using Local Storage
 
-- **[Gantt Chart](/docs/features/gantt-chart)** — date mappings, bar colors, exclusion rules
-- **[Comment Templates](/docs/features/issue-templates/comment-templates)**
+- **[Gantt Chart](/docs/features/gantt-chart)** — date mappings, bar colors, exclusion rules, local **Feature enabled** toggle
+- **[Comment Templates](/docs/features/issue-templates/comment-templates)** — templates plus local **Feature enabled** toggle
+- **[Description Template](/docs/features/issue-templates/description-template)** — personal create-dialog outline
 - **[Data Blurring](/docs/features/data-blurring)** — blur toggle state
 - **[Local Settings](/docs/features/local-settings)** — language preference
 
@@ -56,13 +57,14 @@ The following features have no configurable settings and work out of the box wit
 
 1. Open any Jira board
 2. Click the **Jira Helper** button in the board toolbar
-3. Each feature that supports configuration has its own tab in the settings panel: **Columns**, **Swimlanes**, etc.
+3. Tabs in the panel include **Column WIP Limits**, **Per-person WIP Limits**, **Sub-tasks progress**, **Additional Card Elements**, **Comment templates**, **Local Settings**, and **Diagnostic**
 
 Additional access paths for specific features:
-- **Gantt Chart** — has its own separate settings gear icon ⚙ in the Gantt chart header bar. Click this gear to open Gantt-specific settings (date mappings, bar colors, exclusion rules).
-- **Comment Templates** — configured via the **Comment Templates** tab in the Jira Helper settings panel, then inserted from a dropdown in Jira's comment editor.
+- **Gantt Chart** — open from the issue page via **Helper → Gantt Chart**, or the gear icon ⚙ in the Gantt header bar (personal local storage; includes a **Feature enabled** switch).
+- **Comment Templates** — **Comment templates** tab in the Jira Helper panel or issue **Helper** dialog; inserted from the comment editor toolbar.
+- **Swimlane / Field / Cell WIP limits** and **Card Colors** — configured in native **Jira Board Settings**, not in the Jira Helper tab strip.
 
-<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Columns, Swimlanes, Gantt Chart — labels pointing to board-property tabs vs local-storage tabs -->
+<!-- SCREENSHOT: Jira Helper settings dialog with tabs: Column WIP Limits, Per-person WIP Limits, Sub-tasks progress, Additional Card Elements, Comment templates, Local Settings -->
 
 ## Troubleshooting
 

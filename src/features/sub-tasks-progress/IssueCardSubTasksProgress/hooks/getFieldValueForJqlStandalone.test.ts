@@ -588,5 +588,29 @@ describe('getFieldValueForJqlStandalone', () => {
       const getValue = getFieldValueForJqlStandalone(issue, fields);
       expect(getValue('Custom Field')).toEqual([]);
     });
+
+    it('should handle labels field as array of strings (not objects)', () => {
+      // В Jira labels возвращаются как ['bug', 'feature'], а не [{ value: 'bug' }]
+      const issue = createMockIssue({
+        labels: ['bug', 'feature', 'urgent'],
+      });
+
+      const fields: JiraField[] = [
+        {
+          id: 'labels',
+          name: 'Labels',
+          custom: false,
+          orderable: true,
+          navigable: true,
+          searchable: true,
+          clauseNames: ['labels'],
+          schema: { type: 'array', items: 'string' },
+        },
+      ];
+
+      const getValue = getFieldValueForJqlStandalone(issue, fields);
+      // Сейчас возвращается [] из-за бага в extractFieldValueBySchema
+      expect(getValue('labels')).toEqual(['bug', 'feature', 'urgent']);
+    });
   });
 });
