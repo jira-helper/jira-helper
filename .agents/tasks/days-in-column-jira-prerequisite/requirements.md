@@ -8,13 +8,13 @@
 
 ## 1. Цель и мотивация
 
-Фича «Days in Column» / «Дни в колонке» в jira-helper зависит от встроенной настройки доски Jira: на доске должно быть включено «Show days in column» / «Показывать дни в колонке». Без этого бейдж расширения не работает корректно.
+Фича «Days in Column» / «Дни в колонке» в jira-helper зависит от встроенной настройки доски Jira: на доске должно быть включено «Days in column» / «Дни в колонке». Без этого бейдж расширения не работает корректно.
 
 В UI настроек расширения уже есть `Alert` (`data-testid="days-in-column-jira-settings-required"`, текст `jiraSettingsRequired`), который показывается при включённом бейдже. Этого достаточно — **UI не меняем**.
 
 Проблема: в пользовательской документации (`website/docs/.../days-in-column.md` и RU-локаль) это prerequisite **не выделено явно**. Пользователь может включить фичу в jira-helper и не понять, почему бейдж не появляется или не работает.
 
-Критерий успеха: в EN и RU доке фичи явно указано, что фича работает **только если** в настройках доски Jira включено «Show days in column» / «Показывать дни в колонке»; сайт с документацией обновлён через существующий CI (`website.yml` → GitHub Pages).
+Критерий успеха: в EN и RU доке фичи явно указано, что фича работает **только если** в настройках доски Jira включено «Days in column» / «Дни в колонке»; сайт с документацией обновлён через существующий CI (`website.yml` → GitHub Pages).
 
 ## 2. Пользователи и контекст
 
@@ -24,10 +24,10 @@
 
 ## 3. Функциональные требования
 
-1. **FR-1**: В английской документации фичи (`website/docs/features/card-information/days-in-column.md`) явно указать prerequisite: фича работает **только если** в настройках доски Jira включено **«Show days in column»**.
-2. **FR-2**: В русской документации фичи (`website/i18n/ru/docusaurus-plugin-content-docs/current/features/card-information/days-in-column.md`) явно указать тот же prerequisite с формулировкой **«Показывать дни в колонке»**.
+1. **FR-1**: В английской документации фичи (`website/docs/features/card-information/days-in-column.md`) явно указать prerequisite: фича работает **только если** в настройках доски Jira включено **«Days in column»**.
+2. **FR-2**: В русской документации фичи (`website/i18n/ru/docusaurus-plugin-content-docs/current/features/card-information/days-in-column.md`) явно указать тот же prerequisite с формулировкой **«Дни в колонке»**.
 3. **FR-3**: Формулировка заметная: отдельный блок **Prerequisites / Требования** сразу после таблицы метаданных (до Purpose), плюс шаг в How to configure / Как настроить, плюс пункт в Troubleshooting.
-4. **FR-4**: Путь в UI Jira (как в Alert расширения): Board configuration → Card layout → Show days in column / Настройки доски → Макет карточки → Показывать дни в колонке.
+4. **FR-4**: Путь в UI Jira (как в Alert расширения): Board Settings → Columns → Days in column / Настройки доски → Колонки → Дни в колонке.
 5. **FR-5**: После мержа в `master` сайт с докой обновляется через CI `website.yml` → GitHub Pages (`https://jira-helper.github.io/jira-helper/`).
 
 ## 4. Сценарии (happy path + важные края)
@@ -35,18 +35,18 @@
 ### S1: Читатель EN-доки узнаёт про prerequisite Jira
 - Given пользователь открыл страницу Days in Column на сайте документации (EN)
 - When он читает раздел Prerequisites
-- Then он видит явное указание, что в настройках доски Jira должно быть включено «Show days in column»
-- And понимает путь: Board configuration → Card layout → Show days in column
+- Then он видит явное указание, что в настройках доски Jira должно быть включено «Days in column»
+- And понимает путь: Board Settings → Columns → Days in column
 
 ### S2: Читатель RU-доки узнаёт про prerequisite Jira
 - Given пользователь открыл страницу «Дни в колонке» на сайте документации (RU)
 - When он читает раздел «Требования»
-- Then он видит явное указание про «Показывать дни в колонке» и путь «Настройки доски → Макет карточки → …»
+- Then он видит явное указание про «Дни в колонке» и путь «Настройки доски → Колонки → …»
 
 ### S3: Troubleshooting
 - Given в EN-доке есть Troubleshooting; в RU — добавить аналогичный раздел при необходимости
 - When документация обновлена
-- Then пункт про отсутствующий бейдж упоминает выключенную настройку Jira «Show days in column» / «Показывать дни в колонке»
+- Then пункт про отсутствующий бейдж упоминает выключенную настройку Jira «Days in column» / «Дни в колонке»
 
 ### S4: Деплой документации
 - Given изменения EN + RU docs смержены в `master`
@@ -75,14 +75,14 @@
 ## 8. Открытые вопросы
 
 - [x] Секция: **Prerequisites / Требования** + шаг в configure + Troubleshooting.
-- [x] Путь UI Jira: как в Alert — Board configuration → Card layout → Show days in column.
+- [x] Путь UI Jira: как в Alert — Board Settings → Columns → Days in column.
 - [x] Troubleshooting дополняем.
 - [x] Отдельный markdown-lint не обязателен; достаточно `website` build + CI deploy.
 
 ## 9. Черновик критериев приёмки (для EPIC / BDD)
 
-- [ ] В EN `days-in-column.md` есть блок Prerequisites про «Show days in column».
-- [ ] В RU `days-in-column.md` есть блок «Требования» про «Показывать дни в колонке».
+- [ ] В EN `days-in-column.md` есть блок Prerequisites про «Days in column».
+- [ ] В RU `days-in-column.md` есть блок «Требования» про «Дни в колонке».
 - [ ] Troubleshooting (EN + RU) упоминает эту настройку Jira при missing badge.
 - [ ] UI расширения не изменён.
 - [ ] После мержа в `master` сайт обновлён через `website.yml`.
@@ -94,3 +94,6 @@
 ## Changelog
 
 - **2026-08-04** — scope сужен до docs-only (триггер: пользователь в чате «UI уже ок»). Статус → agreed. Закрыты open questions.
+- **2026-08-04** — путь UI Jira исправлен: Card layout / Макет карточки → **Columns / Колонки** (триггер: пользователь). Категория: requirements change. Затронуто: docs EN/RU + Alert `jiraSettingsRequired`.
+
+- **2026-08-04** — точный путь EN: Board Settings → Columns → Days in column (триггер: пользователь, AskForm).

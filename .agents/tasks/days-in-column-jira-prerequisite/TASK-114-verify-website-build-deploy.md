@@ -1,6 +1,6 @@
 # TASK-114: Verify website build & deploy checklist
 
-**Status**: VERIFICATION
+**Status**: DONE
 **Type**: other
 
 **Parent**: [EPIC-8](./EPIC-8-days-in-column-jira-prerequisite.md)

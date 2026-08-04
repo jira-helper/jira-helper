@@ -54,8 +54,8 @@ const TEXTS = {
     ru: 'Опасность',
   },
   jiraSettingsRequired: {
-    en: 'Important: This feature works ONLY if "Show days in column" is enabled in your board settings. Please check your board configuration → Card layout → Show days in column.',
-    ru: 'Важно: Эта функция работает ТОЛЬКО если в настройках доски включено "Показывать дни в колонке". Проверьте настройки доски → Макет карточки → Показывать дни в колонке.',
+    en: 'Important: This feature works ONLY if "Days in column" is enabled in your board settings. Please check Board Settings → Columns → Days in column.',
+    ru: 'Важно: Эта функция работает ТОЛЬКО если в настройках доски включено "Дни в колонке". Проверьте Настройки доски → Колонки → Дни в колонке.',
   },
 } as const;
 

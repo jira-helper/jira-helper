@@ -1,6 +1,6 @@
 # EPIC-8: Days in Column — Jira prerequisite в документации
 
-**Status**: TODO
+**Status**: DONE
 **Created**: 2026-08-04
 
 ---
@@ -51,13 +51,13 @@ flowchart TB
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 113 | [TASK-113](./TASK-113-days-in-column-docs-en-ru.md) | EN + RU: Prerequisites, configure step, Troubleshooting | VERIFICATION |
+| 113 | [TASK-113](./TASK-113-days-in-column-docs-en-ru.md) | EN + RU: Prerequisites, configure step, Troubleshooting | DONE |
 
 ### Phase 2: Verification & deploy
 
 | # | Task | Описание | Status |
 |---|------|----------|--------|
-| 114 | [TASK-114](./TASK-114-verify-website-build-deploy.md) | `website` build + checklist по .feature + deploy notes | VERIFICATION |
+| 114 | [TASK-114](./TASK-114-verify-website-build-deploy.md) | `website` build + checklist по .feature + deploy notes | DONE |
 
 ## Dependencies
 
