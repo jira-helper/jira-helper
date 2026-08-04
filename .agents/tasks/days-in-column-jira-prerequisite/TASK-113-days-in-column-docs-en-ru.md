@@ -1,6 +1,6 @@
 # TASK-113: Days in Column — EN + RU docs (Jira prerequisite)
 
-**Status**: VERIFICATION
+**Status**: DONE
 **Type**: other
 
 **Parent**: [EPIC-8](./EPIC-8-days-in-column-jira-prerequisite.md)

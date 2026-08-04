@@ -196,6 +196,26 @@ describe('DaysInColumnSettings', () => {
     expect(screen.getByTestId('days-in-column-danger-threshold')).toBeInTheDocument();
   });
 
+  it('should show Jira Columns prerequisite alert when enabled', () => {
+    vi.mocked(useDaysInColumnSettingsModule.useDaysInColumnSettings).mockReturnValue({
+      ...defaultHookReturn,
+      daysInColumn: {
+        ...defaultHookReturn.daysInColumn,
+        enabled: true,
+      },
+    });
+
+    render(
+      <WithDi container={container}>
+        <DaysInColumnSettings />
+      </WithDi>
+    );
+
+    const alert = screen.getByTestId('days-in-column-jira-settings-required');
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(/Board Settings → Columns → Days in column/i);
+  });
+
   it('should show per-column toggle when enabled', () => {
     vi.mocked(useDaysInColumnSettingsModule.useDaysInColumnSettings).mockReturnValue({
       ...defaultHookReturn,

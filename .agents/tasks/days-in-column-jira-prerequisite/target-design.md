@@ -117,8 +117,8 @@ website/
 
 Источник формулировок — `TEXTS.jiraSettingsRequired` в `DaysInColumnSettings.tsx`:
 
-- EN: *This feature works ONLY if "Show days in column" is enabled… board configuration → Card layout → Show days in column.*
-- RU: *Эта функция работает ТОЛЬКО если… "Показывать дни в колонке"… настройки доски → Макет карточки → Показывать дни в колонке.*
+- EN: *This feature works ONLY if "Days in column" is enabled… board configuration → Columns → Days in column.*
+- RU: *Эта функция работает ТОЛЬКО если… "Дни в колонке"… настройки доски → Колонки → Дни в колонке.*
 
 ### EN — `website/docs/features/card-information/days-in-column.md`
 
@@ -127,21 +127,21 @@ website/
 ```markdown
 ## Prerequisites
 
-This feature works **only if** Jira’s built-in **«Show days in column»** is enabled for the board.
+This feature works **only if** Jira’s built-in **«Days in column»** is enabled for the board.
 
-Path in Jira: **Board configuration → Card layout → Show days in column**.
+Path in Jira: **Board Settings → Columns → Days in column**.
 ```
 
 **В секции How to configure (дополнительный bullet, после включения бейджа в jira-helper или рядом с ним):**
 
 ```markdown
-- **Jira board setting**: ensure **«Show days in column»** is enabled under **Board configuration → Card layout**. Without this, the jira-helper badge cannot work correctly.
+- **Jira board setting**: ensure **«Days in column»** is enabled under **Board Settings → Columns**. Without this, the jira-helper badge cannot work correctly.
 ```
 
 **Troubleshooting — заменить / расширить пункт Badge missing:**
 
 ```markdown
-- **Badge missing:** Ensure the feature is on, columns are selected, and the days-in-column badge itself is enabled. Also confirm Jira **«Show days in column»** is enabled (**Board configuration → Card layout**).
+- **Badge missing:** Ensure the feature is on, columns are selected, and the days-in-column badge itself is enabled. Also confirm Jira **«Days in column»** is enabled (**Board Settings → Columns**).
 ```
 
 ### RU — `website/i18n/ru/.../days-in-column.md`
@@ -151,15 +151,15 @@ Path in Jira: **Board configuration → Card layout → Show days in column**.
 ```markdown
 ## Требования
 
-Фича работает **только если** на доске Jira включена встроенная настройка **«Показывать дни в колонке»**.
+Фича работает **только если** на доске Jira включена встроенная настройка **«Дни в колонке»**.
 
-Путь в Jira: **Настройки доски → Макет карточки → Показывать дни в колонке**.
+Путь в Jira: **Настройки доски → Колонки → Дни в колонке**.
 ```
 
 **В секции «Как настроить» (дополнительный bullet):**
 
 ```markdown
-- **Настройка доски Jira**: убедитесь, что включено **«Показывать дни в колонке»** по пути **Настройки доски → Макет карточки**. Без этого бейдж jira-helper не будет работать корректно.
+- **Настройка доски Jira**: убедитесь, что включено **«Дни в колонке»** по пути **Настройки доски → Колонки**. Без этого бейдж jira-helper не будет работать корректно.
 ```
 
 **Troubleshooting (новый раздел в конце файла — в RU сейчас отсутствует):**
@@ -167,7 +167,7 @@ Path in Jira: **Board configuration → Card layout → Show days in column**.
 ```markdown
 ## Troubleshooting
 
-- **Бейдж не отображается:** проверьте, что фича включена, выбраны колонки и включён бейдж «Дней в колонке». Также убедитесь, что в Jira включено **«Показывать дни в колонке»** (**Настройки доски → Макет карточки**).
+- **Бейдж не отображается:** проверьте, что фича включена, выбраны колонки и включён бейдж «Дней в колонке». Также убедитесь, что в Jira включено **«Дни в колонке»** (**Настройки доски → Колонки**).
 - **Цвета не меняются:** проверьте пороги (warning меньше danger, если заданы оба) и что время в колонке действительно их пересекает.
 - **Счётчик Jira всё ещё виден:** обновите страницу — скрытие выполняется при инициализации фичи.
 - **Устаревшие колонки в настройках:** в режиме порогов по колонкам удалите строки для колонок, которых больше нет на доске, кнопкой **«Remove»** / удалить.
@@ -183,10 +183,10 @@ Path in Jira: **Board configuration → Card layout → Show days in column**.
 
 | Поле | Значение |
 |------|----------|
-| EN setting label | `Show days in column` |
-| RU setting label | `Показывать дни в колонке` |
-| EN path | Board configuration → Card layout → Show days in column |
-| RU path | Настройки доски → Макет карточки → Показывать дни в колонке |
+| EN setting label | `Days in column` |
+| RU setting label | `Дни в колонке` |
+| EN path | Board Settings → Columns → Days in column |
+| RU path | Настройки доски → Колонки → Дни в колонке |
 | UI reference | `data-testid="days-in-column-jira-settings-required"`, `TEXTS.jiraSettingsRequired` |
 
 ## Migration Plan
@@ -212,3 +212,8 @@ Path in Jira: **Board configuration → Card layout → Show days in column**.
 - Пользователь узнаёт о зависимости от настройки Jira **до** включения бейджа в jira-helper.
 - Формулировки совпадают с уже показанным Alert — нет расхождения docs ↔ UI.
 - Нулевой риск для runtime; деплой уже автоматизирован через `website.yml`.
+
+## Changelog
+
+- **2026-08-04** — путь Card layout → Columns / Колонки (триггер: пользователь).
+- **2026-08-04** — точный путь/лейбл: Board Settings → Columns → Days in column / Настройки доски → Колонки → Дни в колонке.
