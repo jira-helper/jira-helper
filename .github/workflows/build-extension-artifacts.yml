@@ -51,10 +51,20 @@ jobs:
           test -f jira-helper-firefox.zip
           ls -lh jira-helper.zip jira-helper-firefox.zip
 
+      # Artifact names cannot contain / \ : " < > | * ? or newlines (NTFS-safe).
+      - name: Sanitize artifact name
+        id: artifact
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          SAFE_REF=$(printf '%s' "$REF_NAME" | tr '/\\:"<>|*?' '-' | tr -d '\r\n')
+          echo "name=jira-helper-extension-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Upload extension artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: jira-helper-extension-${{ github.ref_name }}-${{ github.sha }}
+          name: ${{ steps.artifact.outputs.name }}
           path: |
             jira-helper.zip
             jira-helper-firefox.zip
