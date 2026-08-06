@@ -74,4 +74,16 @@ describe('BoardSettingsComponent', () => {
 
     expect(modalBody).toHaveStyle({ overflowX: 'hidden' });
   });
+
+  it('portals the settings modal to document.body instead of the board header host', async () => {
+    const { container } = render(<BoardSettingsComponent />);
+
+    await userEvent.click(screen.getByRole('img'));
+
+    const modalRoot = document.querySelector('.ant-modal-root');
+    expect(modalRoot).toBeTruthy();
+    expect(document.body.contains(modalRoot)).toBe(true);
+    expect(container.contains(modalRoot)).toBe(false);
+    expect(screen.getByText('Settings content')).toBeInTheDocument();
+  });
 });

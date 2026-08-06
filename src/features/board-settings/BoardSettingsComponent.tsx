@@ -41,7 +41,7 @@ const BoardSettingsModalInner = () => {
         onOk={() => setIsModalOpen(false)}
         destroyOnClose
         width="auto"
-        getContainer={false}
+        getContainer={() => document.body}
         okText={texts.ok}
         cancelText={texts.cancel}
         styles={{
