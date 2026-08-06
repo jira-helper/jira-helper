@@ -87,8 +87,10 @@ export async function initializeCloudExtension(): Promise<void> {
   const localSettingsBoardPage = new LocalSettingsBoardPage(globalContainer);
 
   const modificationsMap = {
-    [Routes.BOARD]: [boardSettingsBoardPage, localSettingsBoardPage, columnLimitsBoardPage, personLimitsBoardPage],
-    [Routes.ALL]: [],
+    // Board settings may mount into the persistent project header on Cloud SPA.
+    // Keep it on ALL and toggle visibility by URL (see BoardSettingsBoardPage).
+    [Routes.BOARD]: [localSettingsBoardPage, columnLimitsBoardPage, personLimitsBoardPage],
+    [Routes.ALL]: [boardSettingsBoardPage],
   };
 
   runModifications(modificationsMap, routingService);
