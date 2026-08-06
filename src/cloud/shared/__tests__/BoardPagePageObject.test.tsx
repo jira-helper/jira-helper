@@ -84,4 +84,23 @@ describe('BoardPagePageObject', () => {
 
     expect(BoardPagePageObject.getAssigneeFromIssue(issue!)).toBe('xCredo');
   });
+
+  it('resolves the new board.content.* Cloud board DOM', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.cell">
+          <div data-testid="board.content.cell.column-header">
+            <div data-testid="board.content.cell.column-header.name">To Do</div>
+          </div>
+          <div data-testid="board.content.cell.card">KAN-1</div>
+        </div>
+      </div>
+    `;
+
+    expect(document.querySelector(BoardPagePageObject.selectors.pool)).toBeTruthy();
+    expect(BoardPagePageObject.getColumnElements()).toHaveLength(1);
+    expect(BoardPagePageObject.getOrderedColumns()[0]?.name).toBe('To Do');
+    expect(BoardPagePageObject.getAllCloudCards()).toHaveLength(1);
+  });
 });
+
