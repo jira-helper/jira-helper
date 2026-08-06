@@ -93,26 +93,32 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   selectors: {
-    pool: '[data-testid^="software-board.board-container.board"]',
-    issue: '[data-testid="platform-board-kit.ui.card.card"]',
+    // Prefer current Cloud DOM (board.content.*); keep legacy software-board.* as fallback.
+    pool: '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container.board"]',
+    issue: '[data-testid="board.content.cell.card"], [data-testid="platform-board-kit.ui.card.card"]',
     flagged: '.ghx-flagged',
     grabber: '.ghx-grabber',
     grabberTransparent: '.ghx-grabber-transparent',
     sidebar: '[data-testid="software-board.layout.sidebar"]',
-    column: '[data-testid*="draggable-column"]',
-    columnHeader: '[data-testid="software-board.header.controls-bar"]',
-    columnTitle: '[data-testid="platform-board-kit.ui.column-header-content"]',
+    column: '[data-testid="board.content.cell"], [data-testid*="draggable-column"]',
+    columnHeader:
+      '[data-testid="board.content.cell.column-header"], [data-testid="platform-board-kit.ui.column-header"]',
+    columnTitle:
+      '[data-testid="board.content.cell.column-header.name"], [data-testid="platform-board-kit.ui.column-header-content"]',
     daysInColumn: '.ghx-days',
     swimlaneHeader: '',
     swimlaneRow: '',
     avatarImg: '[data-testid="platform-board-kit.ui.avatar"]',
     issueType: '[data-testid="platform-board-kit.ui.type-badge"]',
     parentGroup: '',
+    // Keep primary header target as legacy controls-bar; BoardSettings falls back to
+    // horizontal-nav-header.ui.project-header.header when this is absent.
     boardHeaderTarget: '[data-testid="software-board.header.controls-bar"]',
-    issueCardCloud: '[data-testid="platform-board-kit.ui.card.card"]',
+    issueCardCloud: '[data-testid="board.content.cell.card"], [data-testid="platform-board-kit.ui.card.card"]',
     boardHeaderCloud: '[data-testid="software-board.header.controls-bar"]',
-    boardContainerCloud: '[data-testid^="software-board.board-container"]',
-    boardColumnContainerCloud: '[data-testid^="software-board.board-container.board"]',
+    boardContainerCloud: '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container"]',
+    boardColumnContainerCloud:
+      '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container.board"]',
   },
 
   classlist: {
@@ -282,9 +288,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       const ids = this._columnsCache.map(c => c.id);
       return ids;
     }
-    const columns = Array.from(
-      document.querySelectorAll('[data-testid="platform-board-kit.ui.column.draggable-column"]')
-    );
+    const columns = this.getColumnElements();
     return columns.map((_, i) => `column-${i}`);
   },
 
@@ -292,7 +296,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     if (this._columnsCache && this._columnsCache.length > 0) {
       return this._columnsCache;
     }
-    const columns = Array.from(document.querySelectorAll('[data-testid*="draggable-column"]'));
+    const columns = this.getColumnElements();
     return columns.map((col, index) => {
       const heading = col.querySelector('h2, h3, [title]');
       let name = heading?.getAttribute('title') || heading?.textContent?.replace(/\s*\d+\s*$/, '').trim() || '';
@@ -311,11 +315,12 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   _findColumnElement(columnId: string): Element | null {
     const match = columnId.match(/^column-(\d+)$/);
     if (match) {
-      const columns = document.querySelectorAll('[data-testid*="draggable-column"]');
+      const columns = this.getColumnElements();
       return columns[parseInt(match[1], 10)] || null;
     }
     const selectors = [
       this.selectors.column,
+      '[data-testid="board.content.cell"]',
       '[data-testid^="platform-board-kit.ui.column.draggable-column"]',
       '[data-testid^="platform-board-kit.ui.column.column-container"]',
     ];

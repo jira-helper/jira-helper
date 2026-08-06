@@ -63,6 +63,7 @@ export class DynamicUpdater {
   private findBoardContainerAndObserve() {
     // Обновлённые селекторы для Jira Cloud
     const boardSelectors = [
+      '[data-testid="board.content.board-wrapper"]',
       '[data-testid="software-board.board-container.board"]',
       '[data-testid^="software-board.board-container"]',
       '[data-component-selector*="board"]',
