@@ -121,4 +121,46 @@ describe('BoardSettingsBoardPage', () => {
     onUrlChangeCb?.('https://x.atlassian.net/jira/software/projects/KAN/issues');
     expect(button.style.display).toBe('none');
   });
+
+  it('remounts when Jira wipes the host from the header', async () => {
+    document.body.innerHTML = `
+      <div data-testid="horizontal-nav-header.ui.project-header.header">
+        <span id="existing">nav</span>
+      </div>
+    `;
+    vi.stubGlobal('location', new URL('https://x.atlassian.net/jira/software/projects/KAN/boards/1'));
+
+    await page.apply();
+
+    const header = document.querySelector('[data-testid="horizontal-nav-header.ui.project-header.header"]')!;
+    const first = header.querySelector('[data-jh-component="boardSettingsComponent"]') as HTMLElement;
+    expect(first).toBeTruthy();
+
+    // Simulate Cloud SPA re-render wiping our host (same race as blocked/slow property fetches).
+    first.remove();
+    expect(header.querySelector('[data-jh-component="boardSettingsComponent"]')).toBeNull();
+
+    await vi.waitFor(() => {
+      expect(header.querySelector('[data-jh-component="boardSettingsComponent"]')).toBeTruthy();
+    });
+  });
+
+  it('does not remount after clear()', async () => {
+    document.body.innerHTML = '<div data-testid="horizontal-nav-header.ui.project-header.header"></div>';
+    vi.stubGlobal('location', new URL('https://x.atlassian.net/jira/software/projects/KAN/boards/1'));
+
+    await page.apply();
+    const header = document.querySelector('[data-testid="horizontal-nav-header.ui.project-header.header"]')!;
+    expect(header.querySelector('[data-jh-component="boardSettingsComponent"]')).toBeTruthy();
+
+    page.clear();
+    expect(header.querySelector('[data-jh-component="boardSettingsComponent"]')).toBeNull();
+
+    // Trigger a DOM mutation that would otherwise remount.
+    header.appendChild(document.createElement('span'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(header.querySelector('[data-jh-component="boardSettingsComponent"]')).toBeNull();
+  });
 });
