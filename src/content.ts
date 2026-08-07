@@ -18,6 +18,7 @@ import {
   HistogramModification as SwimlaneHistogramBoardPage,
   histogramModificationToken,
 } from './features/swimlane-histogram-module';
+import { SwimlaneStickyModification, swimlaneStickyModificationToken } from './features/swimlane-sticky-module';
 import WIPLimitsSettingsPage, { columnLimitsSettingsPageToken } from './features/column-limits-module/SettingsPage';
 import WIPLimitsBoardPage, { columnLimitsBoardPageToken } from './features/column-limits-module/BoardPage';
 import BugTemplate, { bugTemplateToken } from './features/bug-template/BugTemplate';
@@ -141,6 +142,10 @@ function initDiContainer() {
   container.register({ token: wipLimitOnCellsBoardPageToken, value: new WiplimitOnCells(container) });
   container.register({ token: swimlaneWipLimitsBoardPageToken, value: new SwimlaneLimitsBoardPage(container) });
   container.register({ token: histogramModificationToken, value: new SwimlaneHistogramBoardPage(container) });
+  container.register({
+    token: swimlaneStickyModificationToken,
+    value: new SwimlaneStickyModification(container),
+  });
   container.register({ token: fieldLimitsBoardPageToken, value: new FieldLimitsBoardPage(container) });
   container.register({ token: subTasksProgressBoardPageToken, value: new SubTasksProgressBoardPage(container) });
   container.register({
@@ -199,6 +204,7 @@ async function start() {
   const modificationsMap = {
     [Routes.BOARD]: [
       container.inject(histogramModificationToken),
+      container.inject(swimlaneStickyModificationToken),
       container.inject(personLimitsBoardPageToken),
       container.inject(columnLimitsBoardPageToken),
       container.inject(swimlaneWipLimitsBoardPageToken),
