@@ -6,6 +6,7 @@ import React from 'react';
 
 import { createRoot, Root } from 'react-dom/client';
 import type {
+  ColumnIssueCountOptions,
   IBoardPagePageObject as ServerBoardPagePageObject,
   IssueCountOptions,
 } from 'src/infrastructure/page-objects/BoardPage';
@@ -80,7 +81,13 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
 type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _columnsCache: Array<{ id: string; name: string }> | null;
   _findColumnElement(columnId: string): Element | null;
+  _findAllColumnElements(columnId: string): Element[];
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
+  _getSwimlaneScrollContainers(): Element[];
+  _resolveColumnIndex(columnId: string): number | null;
+  _getRepresentativeColumnElements(): Element[];
+  _getSwimlaneRoot(scrollContainer: Element): Element;
+  _getSwimlaneName(swimlaneRoot: Element, index: number): string;
 };
 
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
@@ -106,8 +113,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     columnTitle:
       '[data-testid="board.content.cell.column-header.name"], [data-testid="platform-board-kit.ui.column-header-content"]',
     daysInColumn: '.ghx-days',
-    swimlaneHeader: '',
-    swimlaneRow: '',
+    // Team-managed Group by rows use swimlane.scroll-container; header is the collapse control in the listitem.
+    swimlaneHeader: '[data-testid="board.content.swimlane.scroll-container"]',
+    swimlaneRow: '[data-testid="board.content.swimlane.scroll-container"]',
     avatarImg: '[data-testid="platform-board-kit.ui.avatar"]',
     issueType: '[data-testid="platform-board-kit.ui.type-badge"]',
     parentGroup: '',
@@ -223,24 +231,72 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return this.selectors.issue;
   },
 
+  _getSwimlaneScrollContainers(): Element[] {
+    return Array.from(document.querySelectorAll('[data-testid="board.content.swimlane.scroll-container"]'));
+  },
+
+  _getSwimlaneRoot(scrollContainer: Element): Element {
+    return scrollContainer.closest('[role="listitem"]') ?? scrollContainer;
+  },
+
+  _getSwimlaneName(swimlaneRoot: Element, index: number): string {
+    const labeled = swimlaneRoot.querySelector('[aria-label*="группе"], [aria-label*="group"]');
+    const aria = labeled?.getAttribute('aria-label') ?? '';
+    const ariaMatch = aria.match(/[«"](.+?)[»"]/);
+    if (ariaMatch?.[1]) return ariaMatch[1].trim();
+
+    const buttons = Array.from(swimlaneRoot.querySelectorAll('button'));
+    for (const button of buttons) {
+      const text = button.textContent?.trim() ?? '';
+      const match = text.match(/[«"](.+?)[»"]/);
+      if (match?.[1]) return match[1].trim();
+    }
+    return `swimlane-${index}`;
+  },
+
   getSwimlanes(): Array<{ id: string; element: Element; header: Element }> {
-    return [];
+    return this._getSwimlaneScrollContainers().map((scroll, index) => {
+      const element = this._getSwimlaneRoot(scroll);
+      const name = this._getSwimlaneName(element, index);
+      const header =
+        Array.from(element.querySelectorAll('button')).find(btn => /[«"]/.test(btn.textContent ?? '')) ??
+        element.querySelector('button') ??
+        element;
+      return { id: `swimlane-${index}`, element, header };
+    });
   },
 
-  getSwimlaneHeader(_swimlaneId: string): Element | null {
-    return null;
+  getSwimlaneHeader(swimlaneId: string): Element | null {
+    return this.getSwimlanes().find(sw => sw.id === swimlaneId)?.header ?? null;
   },
 
-  getIssueCountInSwimlane(_swimlaneId: string, _options?: IssueCountOptions): number {
-    return this.getAllCloudCards().length;
+  getIssueCountInSwimlane(swimlaneId: string, _options?: IssueCountOptions): number {
+    const swimlane = this.getSwimlanes().find(sw => sw.id === swimlaneId);
+    if (!swimlane) return 0;
+    return swimlane.element.querySelectorAll(this.selectors.issue).length;
   },
 
-  getIssueCountByColumn(_swimlaneId: string, options?: IssueCountOptions): number[] {
-    return this.getOrderedColumnIds().map(columnId => this.getIssueCountInColumn(columnId, options));
+  getIssueCountByColumn(swimlaneId: string, _options?: IssueCountOptions): number[] {
+    const swimlane = this.getSwimlanes().find(sw => sw.id === swimlaneId);
+    if (!swimlane) {
+      return this.getOrderedColumnIds().map(columnId => this.getIssueCountInColumn(columnId));
+    }
+    return this.getColumnsInSwimlane(swimlane.element).map(
+      column => column.querySelectorAll(this.selectors.issue).length
+    );
   },
 
-  getIssueCountForColumns(_swimlaneId: string, columns: string[], options?: IssueCountOptions): number {
-    return columns.reduce((total, columnId) => total + this.getIssueCountInColumn(columnId, options), 0);
+  getIssueCountForColumns(swimlaneId: string, columns: string[], _options?: IssueCountOptions): number {
+    const swimlane = this.getSwimlanes().find(sw => sw.id === swimlaneId);
+    if (!swimlane) {
+      return columns.reduce((total, columnId) => total + this.getIssueCountInColumn(columnId), 0);
+    }
+    return columns.reduce((total, columnId) => {
+      const index = this._resolveColumnIndex(columnId);
+      if (index == null) return total;
+      const col = this.getColumnsInSwimlane(swimlane.element)[index];
+      return total + (col ? col.querySelectorAll(this.selectors.issue).length : 0);
+    }, 0);
   },
 
   insertSwimlaneComponent(header: Element, component: React.ReactNode, key: string): void {
@@ -263,15 +319,19 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   hasCustomSwimlanes(): boolean {
-    return false;
+    return this._getSwimlaneScrollContainers().length > 0;
   },
 
   getColumnElements(): Element[] {
     return Array.from(document.querySelectorAll(this.selectors.column));
   },
 
-  getColumnsInSwimlane(_swimlane: Element): Element[] {
-    return [];
+  getColumnsInSwimlane(swimlane: Element): Element[] {
+    const scroll = swimlane.matches?.('[data-testid="board.content.swimlane.scroll-container"]')
+      ? swimlane
+      : swimlane.querySelector('[data-testid="board.content.swimlane.scroll-container"]');
+    const root = scroll ?? swimlane;
+    return Array.from(root.querySelectorAll(this.selectors.column));
   },
 
   getColumnHeaderElement(columnId: string): HTMLElement | null {
@@ -283,78 +343,85 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return this._findHeaderElementInColumn(column as HTMLElement);
   },
 
+  _getRepresentativeColumnElements(): Element[] {
+    const swimlaneScrolls = this._getSwimlaneScrollContainers();
+    if (swimlaneScrolls.length > 0) {
+      return Array.from(swimlaneScrolls[0].querySelectorAll(this.selectors.column));
+    }
+    return Array.from(document.querySelectorAll(this.selectors.column));
+  },
+
   getOrderedColumnIds(): string[] {
     if (this._columnsCache && this._columnsCache.length > 0) {
-      const ids = this._columnsCache.map(c => c.id);
-      return ids;
+      return this._columnsCache.map(c => c.id);
     }
-    const columns = this.getColumnElements();
-    return columns.map((_, i) => `column-${i}`);
+    return this._getRepresentativeColumnElements().map((_, i) => `column-${i}`);
   },
 
   getOrderedColumns(): Array<{ id: string; name: string }> {
     if (this._columnsCache && this._columnsCache.length > 0) {
       return this._columnsCache;
     }
-    const columns = this.getColumnElements();
-    return columns.map((col, index) => {
+    return this._getRepresentativeColumnElements().map((col, index) => {
       const heading = col.querySelector('h2, h3, [title]');
       let name = heading?.getAttribute('title') || heading?.textContent?.replace(/\s*\d+\s*$/, '').trim() || '';
       if (!name) {
         const titleEl = col.querySelector(this.selectors.columnTitle);
-        name = titleEl?.textContent?.trim() ?? '';
+        name = titleEl?.textContent?.trim().split('\n')[0]?.trim() ?? '';
       }
       return { id: `column-${index}`, name: name || `Column ${index + 1}` };
     });
   },
 
   getSwimlaneIds(): string[] {
-    return [];
+    return this.getSwimlanes().map(s => s.id);
+  },
+
+  _resolveColumnIndex(columnId: string): number | null {
+    const match = columnId.match(/^column-(\d+)$/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    if (this._columnsCache) {
+      const idx = this._columnsCache.findIndex(c => c.id === columnId);
+      if (idx >= 0) return idx;
+    }
+    const representatives = this._getRepresentativeColumnElements();
+    for (let i = 0; i < representatives.length; i++) {
+      const titleEl =
+        representatives[i].querySelector(this.selectors.columnTitle) || representatives[i].querySelector('h2, h3');
+      const title = titleEl?.textContent?.trim().split('\n')[0]?.trim() ?? '';
+      if (title === columnId) return i;
+    }
+    return null;
+  },
+
+  _findAllColumnElements(columnId: string): Element[] {
+    const byAttr = Array.from(document.querySelectorAll(this.selectors.column)).filter(
+      col => col.getAttribute('data-column-id') === columnId || col.getAttribute('data-id') === columnId
+    );
+    if (byAttr.length > 0) {
+      return byAttr;
+    }
+
+    const index = this._resolveColumnIndex(columnId);
+    if (index == null) {
+      return [];
+    }
+
+    const swimlaneScrolls = this._getSwimlaneScrollContainers();
+    if (swimlaneScrolls.length > 0) {
+      return swimlaneScrolls
+        .map(scroll => scroll.querySelectorAll(this.selectors.column)[index])
+        .filter((col): col is Element => Boolean(col));
+    }
+
+    const flat = document.querySelectorAll(this.selectors.column)[index];
+    return flat ? [flat] : [];
   },
 
   _findColumnElement(columnId: string): Element | null {
-    const match = columnId.match(/^column-(\d+)$/);
-    if (match) {
-      const columns = this.getColumnElements();
-      return columns[parseInt(match[1], 10)] || null;
-    }
-    const selectors = [
-      this.selectors.column,
-      '[data-testid="board.content.cell"]',
-      '[data-testid^="platform-board-kit.ui.column.draggable-column"]',
-      '[data-testid^="platform-board-kit.ui.column.column-container"]',
-    ];
-    for (let s = 0; s < selectors.length; s++) {
-      const sel = selectors[s];
-      const columns = document.querySelectorAll(sel);
-      for (let c = 0; c < columns.length; c++) {
-        const col = columns[c];
-        if (col.getAttribute('data-column-id') === columnId || col.getAttribute('data-id') === columnId) {
-          return col;
-        }
-      }
-    }
-    if (this._columnsCache) {
-      const cached = this._columnsCache.find(c => c.id === columnId);
-      if (cached) {
-        for (let s = 0; s < selectors.length; s++) {
-          const columns = document.querySelectorAll(selectors[s]);
-          for (let c = 0; c < columns.length; c++) {
-            const titleEl = columns[c].querySelector(this.selectors.columnTitle) || columns[c].querySelector('h2, h3');
-            const title = titleEl?.textContent?.trim().split('\n')[0]?.trim() ?? '';
-            if (title === cached.name || title.startsWith(cached.name)) {
-              return columns[c];
-            }
-          }
-        }
-        const idx = this._columnsCache.indexOf(cached);
-        const positional = this.getColumnElements()[idx];
-        if (positional) {
-          return positional;
-        }
-      }
-    }
-    return null;
+    return this._findAllColumnElements(columnId)[0] ?? null;
   },
 
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement {
@@ -369,13 +436,18 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return header ?? column;
   },
 
-  getIssueCountInColumn(columnId: string, _options?: any): number {
-    const col = this._findColumnElement(columnId);
-    if (!col) {
-      return 0;
-    }
-    const cards = col.querySelectorAll(this.selectors.issue);
-    return cards.length;
+  getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
+    const ignoredSwimlanes = new Set<string>(options?.ignoredSwimlanes ?? []);
+    const columns = this._findAllColumnElements(columnId);
+    return columns.reduce((total, col) => {
+      if (ignoredSwimlanes.size > 0) {
+        const swimlaneId = this.getSwimlaneIdOfIssue(col);
+        if (swimlaneId && ignoredSwimlanes.has(swimlaneId)) {
+          return total;
+        }
+      }
+      return total + col.querySelectorAll(this.selectors.issue).length;
+    }, 0);
   },
 
   styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
@@ -415,18 +487,21 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     elements.forEach(e => e.remove());
   },
 
-  highlightColumnCells(columnId: string, color: string, _excludedSwimlaneIds?: string[]): void {
-    const col = this._findColumnElement(columnId);
-    if (col) {
+  highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void {
+    const excluded = new Set(excludedSwimlaneIds ?? []);
+    this._findAllColumnElements(columnId).forEach(col => {
+      if (excluded.size > 0) {
+        const swimlaneId = this.getSwimlaneIdOfIssue(col);
+        if (swimlaneId && excluded.has(swimlaneId)) return;
+      }
       (col as HTMLElement).style.backgroundColor = color;
-    }
+    });
   },
 
   resetColumnCellStyles(columnId: string): void {
-    const col = this._findColumnElement(columnId);
-    if (col) {
+    this._findAllColumnElements(columnId).forEach(col => {
       (col as HTMLElement).style.backgroundColor = '';
-    }
+    });
   },
 
   getIssueElements(cssSelector: string): Element[] {
@@ -474,15 +549,22 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getColumnIdFromColumn(column: Element): string | null {
-    const columnElements = this.getColumnElements();
-    const index = columnElements.indexOf(column);
+    const scroll = column.closest('[data-testid="board.content.swimlane.scroll-container"]');
+    const siblings = scroll
+      ? Array.from(scroll.querySelectorAll(this.selectors.column))
+      : this._getRepresentativeColumnElements();
+    const index = siblings.indexOf(column);
     if (index < 0) return null;
     // Prefer positional ids — person-limits settings store column-N from editData.
     return `column-${index}`;
   },
 
-  getSwimlaneIdOfIssue(_issue: Element): string | null {
-    return null;
+  getSwimlaneIdOfIssue(issue: Element): string | null {
+    const scroll = issue.closest('[data-testid="board.content.swimlane.scroll-container"]');
+    if (!scroll) return null;
+    const scrolls = this._getSwimlaneScrollContainers();
+    const index = scrolls.indexOf(scroll);
+    return index >= 0 ? `swimlane-${index}` : null;
   },
 
   getParentGroups(): Element[] {
