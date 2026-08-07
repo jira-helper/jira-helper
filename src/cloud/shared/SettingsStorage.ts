@@ -38,6 +38,10 @@ export class SettingsStorage {
       const response = await fetch(url, options);
 
       if (!response.ok) {
+        // GET 404 = property not set yet — expected empty state, not a hard failure.
+        if (method === 'GET' && response.status === 404) {
+          return null;
+        }
         console.error(`[SettingsStorage] ${method} failed:`, response.status, response.statusText);
         return null;
       }
@@ -57,6 +61,11 @@ export class SettingsStorage {
       const data = JSON.parse(text);
       return data.value as T;
     } catch (error) {
+      // Network / DevTools block / offline — treat as empty for GET; still warn.
+      if (method === 'GET') {
+        console.warn(`[SettingsStorage] GET unavailable for ${key}:`, error);
+        return null;
+      }
       console.error(`[SettingsStorage] ${method} error:`, error);
       return null;
     }
