@@ -174,5 +174,99 @@ describe('BoardPagePageObject', () => {
 
     expect(BoardPagePageObject.getAssigneeFromIssue(card!)).toBe('xCredo');
   });
+
+  function renderAssigneeSwimlanes() {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper" role="list">
+        <div role="listitem">
+          <button type="button">Свернуть группу «Maxim Sosnov»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-M1"></div>
+            </div>
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">In Progress</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="listitem">
+          <button type="button">Свернуть группу «xCredo»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-X1"></div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-X2"></div>
+            </div>
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">In Progress</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-X3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([
+      { id: '10000', name: 'To Do' },
+      { id: '10001', name: 'In Progress' },
+    ]);
+  }
+
+  it('discovers Cloud Group-by swimlanes from board.content.swimlane.scroll-container', () => {
+    renderAssigneeSwimlanes();
+
+    const swimlanes = BoardPagePageObject.getSwimlanes();
+    expect(swimlanes).toHaveLength(2);
+    expect(BoardPagePageObject.getSwimlaneIds()).toEqual(['swimlane-0', 'swimlane-1']);
+    expect(swimlanes[0]?.header.textContent).toContain('Maxim Sosnov');
+    expect(BoardPagePageObject.getColumnsInSwimlane(swimlanes[0]!.element)).toHaveLength(2);
+  });
+
+  it('counts column WIP across all assignee swimlane cells (not only the first row)', () => {
+    renderAssigneeSwimlanes();
+
+    // Maxim To Do (1) + xCredo To Do (2) = 3; In Progress: 0 + 1 = 1
+    expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(3);
+    expect(BoardPagePageObject.getIssueCountInColumn('column-1')).toBe(1);
+    expect(BoardPagePageObject.getIssueCountInColumn('10000')).toBe(3);
+    expect(BoardPagePageObject.getIssueCountInColumn('10001')).toBe(1);
+    expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['10000', '10001']);
+  });
+
+  it('resolves column-N inside each swimlane for person-limits', () => {
+    renderAssigneeSwimlanes();
+    const swimlanes = BoardPagePageObject.getSwimlanes();
+    const maximTodo = BoardPagePageObject.getColumnsInSwimlane(swimlanes[0]!.element)[0]!;
+    const xcredoTodo = BoardPagePageObject.getColumnsInSwimlane(swimlanes[1]!.element)[0]!;
+    const xcredoCard = document.querySelector('[aria-label="KAN-X1"]');
+
+    expect(BoardPagePageObject.getColumnIdFromColumn(maximTodo)).toBe('column-0');
+    expect(BoardPagePageObject.getColumnIdFromColumn(xcredoTodo)).toBe('column-0');
+    expect(BoardPagePageObject.getColumnIdOfIssue(xcredoCard!)).toBe('column-0');
+    expect(BoardPagePageObject.getSwimlaneIdOfIssue(xcredoCard!)).toBe('swimlane-1');
+  });
+
+  it('highlights every swimlane cell for an over-limit column', () => {
+    renderAssigneeSwimlanes();
+    BoardPagePageObject.highlightColumnCells('10000', 'rgb(255, 86, 48)');
+
+    const todoCells = BoardPagePageObject.getSwimlanes().flatMap(sw =>
+      BoardPagePageObject.getColumnsInSwimlane(sw.element).filter(
+        col => BoardPagePageObject.getColumnIdFromColumn(col) === 'column-0'
+      )
+    );
+    expect(todoCells).toHaveLength(2);
+    todoCells.forEach(cell => {
+      expect((cell as HTMLElement).style.backgroundColor).toBe('rgb(255, 86, 48)');
+    });
+  });
 });
 
