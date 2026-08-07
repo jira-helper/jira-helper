@@ -340,18 +340,17 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
         for (let s = 0; s < selectors.length; s++) {
           const columns = document.querySelectorAll(selectors[s]);
           for (let c = 0; c < columns.length; c++) {
-            const h2 = columns[c].querySelector('h2');
-            if (h2 && h2.textContent && h2.textContent.trim().startsWith(cached.name)) {
+            const titleEl = columns[c].querySelector(this.selectors.columnTitle) || columns[c].querySelector('h2, h3');
+            const title = titleEl?.textContent?.trim().split('\n')[0]?.trim() ?? '';
+            if (title === cached.name || title.startsWith(cached.name)) {
               return columns[c];
             }
           }
         }
         const idx = this._columnsCache.indexOf(cached);
-        for (let s = 0; s < selectors.length; s++) {
-          const columns = document.querySelectorAll(selectors[s]);
-          if (columns[idx]) {
-            return columns[idx];
-          }
+        const positional = this.getColumnElements()[idx];
+        if (positional) {
+          return positional;
         }
       }
     }
@@ -469,17 +468,17 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getColumnIdOfIssue(issue: Element): string | null {
-    const columnEl = issue.closest('[data-testid*="draggable-column"]');
+    const columnEl = issue.closest(this.selectors.column);
     if (!columnEl) return null;
-    const columnElements = Array.from(document.querySelectorAll('[data-testid*="draggable-column"]'));
-    const index = columnElements.indexOf(columnEl);
-    return index >= 0 ? `column-${index}` : null;
+    return this.getColumnIdFromColumn(columnEl);
   },
 
   getColumnIdFromColumn(column: Element): string | null {
-    const columnElements = Array.from(document.querySelectorAll('[data-testid*="draggable-column"]'));
+    const columnElements = this.getColumnElements();
     const index = columnElements.indexOf(column);
-    return index >= 0 ? `column-${index}` : null;
+    if (index < 0) return null;
+    // Prefer positional ids — person-limits settings store column-N from editData.
+    return `column-${index}`;
   },
 
   getSwimlaneIdOfIssue(_issue: Element): string | null {
@@ -498,6 +497,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   setIssueBackgroundColor(issue: Element, color: string): void {
     const el = issue as HTMLElement;
+    // Marker so AssigneeHighlighterApplier does not wipe person-limits coloring.
+    el.setAttribute('data-jh-wip-overloaded', 'true');
+    el.classList.add('jh-wip-overloaded');
     el.style.setProperty('background-color', color, 'important');
     const styled = el.querySelector('[style*="card-background"]') as HTMLElement | null;
     if (styled) {
@@ -510,6 +512,8 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   resetIssueBackgroundColor(issue: Element): void {
     const el = issue as HTMLElement;
+    el.removeAttribute('data-jh-wip-overloaded');
+    el.classList.remove('jh-wip-overloaded');
     el.style.removeProperty('background-color');
     const styled = el.querySelector('[style*="card-background"]') as HTMLElement | null;
     if (styled) {

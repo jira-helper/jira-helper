@@ -102,5 +102,77 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getOrderedColumns()[0]?.name).toBe('To Do');
     expect(BoardPagePageObject.getAllCloudCards()).toHaveLength(1);
   });
+
+  function renderBoardContentCells() {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.cell">
+          <div data-testid="board.content.cell.column-header">
+            <div data-testid="board.content.cell.column-header.name">To Do</div>
+          </div>
+          <div data-testid="board.content.cell.card" aria-label="KAN-1">
+            <span aria-label="Исполнитель: xCredo"></span>
+          </div>
+          <div data-testid="board.content.cell.card" aria-label="KAN-2">
+            <span aria-label="Исполнитель: xCredo"></span>
+          </div>
+        </div>
+        <div data-testid="board.content.cell">
+          <div data-testid="board.content.cell.column-header">
+            <div data-testid="board.content.cell.column-header.name">In Progress</div>
+          </div>
+          <div data-testid="board.content.cell.card" aria-label="KAN-3">
+            <span aria-label="Исполнитель: Maxim"></span>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([
+      { id: '10000', name: 'To Do' },
+      { id: '10001', name: 'In Progress' },
+    ]);
+  }
+
+  it('resolves column id from board.content.cell for person-limits matching', () => {
+    renderBoardContentCells();
+    const columns = BoardPagePageObject.getColumnElements();
+    const todoCard = document.querySelector('[aria-label="KAN-1"]');
+
+    expect(BoardPagePageObject.getColumnIdFromColumn(columns[0]!)).toBe('column-0');
+    expect(BoardPagePageObject.getColumnIdFromColumn(columns[1]!)).toBe('column-1');
+    expect(BoardPagePageObject.getColumnIdOfIssue(todoCard!)).toBe('column-0');
+  });
+
+  it('counts all cards in a board.content.cell by positional and status column ids', () => {
+    renderBoardContentCells();
+
+    expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(2);
+    expect(BoardPagePageObject.getIssueCountInColumn('column-1')).toBe(1);
+    expect(BoardPagePageObject.getIssueCountInColumn('10000')).toBe(2);
+    expect(BoardPagePageObject.getIssueCountInColumn('10001')).toBe(1);
+  });
+
+  it('marks overloaded cards so assignee highlighter does not wipe the color', () => {
+    renderBoardContentCells();
+    const card = document.querySelector<HTMLElement>('[aria-label="KAN-1"]');
+
+    BoardPagePageObject.setIssueBackgroundColor(card!, '#ff5630');
+
+    expect(card!.getAttribute('data-jh-wip-overloaded')).toBe('true');
+    expect(card!.classList.contains('jh-wip-overloaded')).toBe(true);
+    expect(card!.style.backgroundColor).toBe('#ff5630');
+
+    BoardPagePageObject.resetIssueBackgroundColor(card!);
+
+    expect(card!.hasAttribute('data-jh-wip-overloaded')).toBe(false);
+    expect(card!.classList.contains('jh-wip-overloaded')).toBe(false);
+  });
+
+  it('reads assignee from aria-label on board.content.cell.card', () => {
+    renderBoardContentCells();
+    const card = document.querySelector('[aria-label="KAN-1"]');
+
+    expect(BoardPagePageObject.getAssigneeFromIssue(card!)).toBe('xCredo');
+  });
 });
 

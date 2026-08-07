@@ -51,9 +51,20 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     return `add-wip-limits-${this.getBoardId()}`;
   }
 
-  waitForLoading(): Promise<Element> {
+  async waitForLoading(): Promise<Element> {
     const po = this.container.inject(boardPagePageObjectToken);
-    return this.waitForElement(po.selectors.pool);
+    const pool = await this.waitForElement(po.selectors.pool);
+    // Cloud hydrates cards after the board wrapper. Cap the wait so an empty board
+    // (Server or Cloud) does not block the modification forever.
+    if (po.columnHeaderRenderMode === 'cloud') {
+      await Promise.race([
+        this.waitForElement(po.selectors.issue, pool),
+        new Promise<void>(resolve => {
+          this.setTimeout(resolve, 2000);
+        }),
+      ]);
+    }
+    return pool;
   }
 
   async loadData(): Promise<[EditData, WipLimitsProperty]> {
@@ -97,11 +108,51 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
       headerGroup.style.paddingTop = '10px';
     }
 
-    (boardRuntimeModel as BoardRuntimeModel).apply();
-
-    this.onDOMChange('#ghx-pool', () => {
+    const applyRuntime = () => {
       (boardRuntimeModel as BoardRuntimeModel).apply();
-    });
+    };
+    applyRuntime();
+
+    // Cloud board pool is board.content.board-wrapper (not #ghx-pool).
+    const po = this.container.inject(boardPagePageObjectToken);
+    const poolSelector = po.selectors?.pool ?? '#ghx-pool';
+    if (document.querySelector(poolSelector)) {
+      // Debounce + ignore our own badge DOM writes (apply inserts/removes the badge and
+      // would otherwise recurse forever with subtree:true).
+      let applyTimer: ReturnType<typeof setTimeout> | null = null;
+      this.sideEffects.push(() => {
+        if (applyTimer) clearTimeout(applyTimer);
+      });
+
+      const isOwnBadgeMutation = (mutations: MutationRecord[]) =>
+        mutations.length > 0 &&
+        mutations.every(mutation => {
+          const nodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)];
+          if (nodes.length === 0) return true;
+          return nodes.every(node => {
+            if (!(node instanceof Element)) {
+              return node.parentElement?.closest('[data-column-limits-badge]') != null;
+            }
+            return (
+              node.matches('[data-column-limits-badge]') ||
+              node.querySelector('[data-column-limits-badge]') != null ||
+              node.closest('[data-column-limits-badge]') != null
+            );
+          });
+        });
+
+      this.onDOMChange(
+        poolSelector,
+        mutations => {
+          if (isOwnBadgeMutation(mutations)) return;
+          if (applyTimer) clearTimeout(applyTimer);
+          applyTimer = setTimeout(applyRuntime, 150);
+        },
+        { childList: true, subtree: true }
+      );
+    }
+    // Cards can keep streaming in after the first issue appears — refresh once more.
+    this.setTimeout(applyRuntime, 1500);
   }
 }
 

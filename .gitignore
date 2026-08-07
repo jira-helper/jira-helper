@@ -38,3 +38,4 @@ cypress/videos
 .playwright/daemon-session/
 test-results/
 .playwright-cli
+.playwright/cloud-qa-mailbox.json
