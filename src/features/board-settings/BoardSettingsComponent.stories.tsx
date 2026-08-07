@@ -94,12 +94,13 @@ export const StickyTabsInScrollableModal: Story = {
 
     settingsButton.click();
 
+    // Modal is portaled to document.body (Cloud-safe), not into the story canvas.
     await waitFor(() => {
-      expect(canvasElement.querySelector('.ant-modal-body')).toBeTruthy();
+      expect(document.body.querySelector('.ant-modal-body')).toBeTruthy();
     });
 
-    const modalBody = canvasElement.querySelector('.ant-modal-body') as HTMLElement | null;
-    const tabsNavigation = canvasElement.querySelector(
+    const modalBody = document.body.querySelector('.ant-modal-body') as HTMLElement | null;
+    const tabsNavigation = document.body.querySelector(
       '[data-jh-component="boardSettingsTabs"] .ant-tabs-nav'
     ) as HTMLElement | null;
 

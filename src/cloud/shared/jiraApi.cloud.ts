@@ -72,10 +72,11 @@ export const getBoardEditDataCloud = async (
     const data = await response.json();
 
     const apiColumns = data.columnConfig?.columns ?? [];
+    // Prefer real column cells only — broad *[column]* matches headers and breaks indexing.
     const domColumnSelectors = [
+      '[data-testid="board.content.cell"]',
       '[data-testid="platform-board-kit.ui.column.draggable-column"]',
       '[data-testid="platform-board-kit.ui.column.column-container"]',
-      '[data-testid*="column"]',
     ];
 
     let domColumnElements: Element[] = [];
@@ -84,11 +85,13 @@ export const getBoardEditDataCloud = async (
       if (domColumnElements.length > 0) break;
     }
 
+    // Cache status/DOM ids so column-limits properties saved as status ids still resolve.
+    // Also keep positional aliases via getColumnElements index in BoardPagePageObject.
     const mappedColumns: Array<{ id: string; name: string }> = apiColumns.map((col: any, index: number) => {
       const domEl = domColumnElements[index];
       const domId = domEl?.getAttribute('data-column-id') || domEl?.getAttribute('data-id');
       const statusId = col.statuses?.[0]?.id;
-      const id = domId || String(statusId ?? col.name);
+      const id = domId || String(statusId ?? `column-${index}`);
       return { id, name: col.name };
     });
 
