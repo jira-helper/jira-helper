@@ -14,6 +14,8 @@ export type IssueLikeForJql = { fields: Record<string, unknown> };
  * - `priority` / `status` / `issuetype` → `[name]`
  * - `user` → `[displayName, emailAddress, name]` (any of them satisfies `=`)
  * - `option` / `string` → `[value]`
+ * - `date` / `datetime` → `[ISO string]`
+ * - `number` → `[String(n)]`
  * - `array` of `option` / `string` → `[value, ...]`
  * - `array` of `component` → `[name, ...]`
  *
@@ -48,6 +50,15 @@ export function extractFieldValueBySchema(issue: IssueLikeForJql, field: JiraFie
       if (typeof u.name === 'string') arr.push(u.name);
       return arr;
     }
+    case 'date':
+    case 'datetime':
+      return typeof val === 'string' && val !== '' ? [val] : [];
+    case 'number':
+      return typeof val === 'number' && Number.isFinite(val)
+        ? [String(val)]
+        : typeof val === 'string' && val !== ''
+          ? [val]
+          : [];
     case 'array': {
       if (!Array.isArray(val)) return [];
       switch (field.schema.items) {

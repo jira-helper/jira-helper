@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import {
+  compareOrdered,
+  evaluateJqlDateFunction,
+  isSupportedJqlDateFunction,
+  parseComparable,
+} from './jqlDateFunctions';
+
 /*
 Simple JQL Parser Documentation
 ===============================
@@ -14,19 +21,19 @@ How it works:
 
 Supported Syntax:
 -----------------
-- Comparison operators: =, !=, in, not in, ~ (contains), !~ (not contains)
+- Comparison operators: =, !=, in, not in, ~ (contains), !~ (not contains), <, >, <=, >=
 - Logical operators: AND, OR, NOT
 - Parentheses for grouping: (...)
 - Quoted field names and values (e.g., "Issue Size" = "Some Value")
 - Special keywords: EMPTY, is, is not
 - Array values for fields (e.g., labels in (bug, urgent))
+- Date functions: now(), startOfDay/Week/Month/Year([inc]), endOfDay/Week/Month/Year([inc])
 - Case-insensitive field names and operators
 
 Not Supported:
 --------------
-- Functions (e.g., currentUser(), startOfDay())
+- User/group/server functions (e.g., currentUser(), membersOf(), openSprints())
 - ORDER BY, sorting, or subqueries
-- Complex field types (dates, numbers, custom Jira functions)
 - Wildcards, LIKE, regex matching
 - Nested property access (e.g., parent.field)
 - Comments or multiline queries
@@ -47,11 +54,14 @@ Examples of Supported JQL:
 - summary ~ win
 - summary !~ run
 - description ~ "full screen"
+- duedate < now()
+- created >= startOfDay("-7d")
+- "Story Points" > 13
 
 Examples of NOT Supported JQL:
 ------------------------------
-- assignee in (currentUser())           // Functions not supported
-- created >= startOfDay(-7d)            // Functions and operators not supported
+- assignee = currentUser()              // User functions not supported
+- sprint in openSprints()               // Server-side functions not supported
 - ORDER BY created DESC                 // Sorting not supported
 - parent.status = Done                  // Nested property access not supported
 - Field1 = value with spaces            // Value with spaces must be quoted
@@ -65,15 +75,29 @@ Error Handling:
 
 */
 // Simple JQL parser for basic expressions
-// Supported: =, !=, in, not in, AND, OR, NOT, EMPTY, is, parentheses
+// Supported: =, !=, <, >, <=, >=, in, not in, AND, OR, NOT, EMPTY, is, date functions, parentheses
 
 export type JqlMatchFn = (getFieldValue: (fieldName: string) => any) => boolean;
+
+export type ParseJqlOptions = {
+  /** Clock for now() and startOf/endOf period functions. Defaults to `() => new Date()`. Inject in tests. */
+  now?: () => Date;
+};
+
+export type JqlFunctionRef = { name: string; args: string[] };
 
 // Exported types for AST and evaluation result
 export type JqlAstNode =
   | { type: 'AND' | 'OR'; left: JqlAstNode; right: JqlAstNode }
   | { type: 'NOT'; expr: JqlAstNode }
-  | { type: 'condition'; field: string; op: string; value?: string; values?: string[] };
+  | {
+      type: 'condition';
+      field: string;
+      op: string;
+      value?: string;
+      values?: string[];
+      fn?: JqlFunctionRef;
+    };
 
 export type JqlAstResult =
   | { type: 'AND' | 'OR'; left: JqlAstResult; right: JqlAstResult; matched: boolean }
@@ -84,9 +108,12 @@ export type JqlAstResult =
       op: string;
       value?: string;
       values?: string[];
+      fn?: JqlFunctionRef;
       matched: boolean;
       actualValue?: unknown; // Actual field value from the issue for debugging
     };
+
+const ORDERED_OPS = new Set(['<', '<=', '>', '>=']);
 
 // Tokenizer that respects quoted strings and tracks if token was quoted.
 // Recognises comparison operators (!=, =, !~, ~) as separate tokens even when not
@@ -116,12 +143,16 @@ function tokenize(jql: string): string[] {
       continue;
     }
     // Two-char operators take priority over one-char prefixes.
-    if (jql[i] === '!' && (jql[i + 1] === '=' || jql[i + 1] === '~')) {
+    if (
+      (jql[i] === '!' && (jql[i + 1] === '=' || jql[i + 1] === '~')) ||
+      (jql[i] === '<' && jql[i + 1] === '=') ||
+      (jql[i] === '>' && jql[i + 1] === '=')
+    ) {
       tokens.push(jql.slice(i, i + 2));
       i += 2;
       continue;
     }
-    if (jql[i] === '=' || jql[i] === '~') {
+    if (jql[i] === '=' || jql[i] === '~' || jql[i] === '<' || jql[i] === '>') {
       tokens.push(jql[i]);
       i++;
       continue;
@@ -130,7 +161,7 @@ function tokenize(jql: string): string[] {
     let j = i;
     while (
       j < jql.length &&
-      !jql[j].match(/[\s(),=~]/) &&
+      !jql[j].match(/[\s(),=~<>]/) &&
       !(jql[j] === '!' && (jql[j + 1] === '=' || jql[j + 1] === '~'))
     ) {
       j++;
@@ -192,6 +223,39 @@ function parseTokens(tokens: string[]): any {
     return condition;
   }
 
+  function parseRhs(): { value?: string; fn?: JqlFunctionRef } {
+    const token = tokens[pos];
+    if (typeof token === 'undefined') throw new Error('Expecting value, but got END');
+
+    // functionCall(...)
+    if (tokens[pos + 1] === '(') {
+      const name = token.toLowerCase();
+      pos += 2; // name + '('
+      const args: string[] = [];
+      if (tokens[pos] !== ')') {
+        while (true) {
+          const argTok = tokens[pos++];
+          if (typeof argTok === 'undefined') throw new Error('Expecting function argument or ), but got END');
+          args.push(stripQuotes(argTok));
+          if (tokens[pos] === ',') {
+            pos++;
+            continue;
+          }
+          break;
+        }
+      }
+      if (tokens[pos] !== ')') throw new Error('Expected ) after function arguments');
+      pos++;
+      if (!isSupportedJqlDateFunction(name)) {
+        throw new Error(`Unsupported function: ${name}()`);
+      }
+      return { fn: { name, args } };
+    }
+
+    pos++;
+    return { value: stripQuotes(token) };
+  }
+
   function parseCondition(): any {
     let field = tokens[pos++];
     if (!field) throw new Error('Expecting field name, but got END');
@@ -250,12 +314,15 @@ function parseTokens(tokens: string[]): any {
         return { type: 'condition', field, op, value };
       }
       case isKeyword(op, '='):
-      case isKeyword(op, '!='): {
-        // Enforce quoting for value with spaces
-        let value = tokens[pos++];
-        if (typeof value === 'undefined') throw new Error('Expecting value, but got END');
-        value = stripQuotes(value);
-        return { type: 'condition', field, op: op.toLowerCase(), value };
+      case isKeyword(op, '!='):
+      case op === '<' || op === '<=' || op === '>' || op === '>=': {
+        const rhs = parseRhs();
+        return {
+          type: 'condition',
+          field,
+          op: op.toLowerCase(),
+          ...(rhs.fn ? { fn: rhs.fn } : { value: rhs.value }),
+        };
       }
       default: {
         throw new Error(`Unknown operator: "${op}". Did you forget to quote the field name?`);
@@ -277,6 +344,18 @@ function isEmpty(val: any): boolean {
     (typeof val === 'string' && val.trim() === '') ||
     (Array.isArray(val) && val.length === 0)
   );
+}
+
+/** Case-insensitive for strings; otherwise loose equality (preserves number/string coercion). */
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return a == b;
+}
+
+function valueInList(value: unknown, list: string[]): boolean {
+  return list.some(expected => valuesEqual(value, expected));
 }
 
 // Helper to handle array or single value
@@ -301,94 +380,144 @@ function isArrayEmptyOrAll(val: any, predicate: (v: any) => boolean): boolean {
   return predicate(val);
 }
 
+function resolveRhs(node: { value?: string; fn?: JqlFunctionRef }, getNow: () => Date): number | string | undefined {
+  if (node.fn) {
+    return evaluateJqlDateFunction(node.fn.name, node.fn.args, getNow());
+  }
+  return node.value;
+}
+
+function matchCondition(
+  node: { field: string; op: string; value?: string; values?: string[]; fn?: JqlFunctionRef },
+  getFieldValue: (fieldName: string) => any,
+  getNow: () => Date
+): boolean {
+  const field = node.field.toLowerCase();
+  const actual = getFieldValue(field);
+
+  if (node.value === 'EMPTY') {
+    if (node.op === '=') return isArrayEmptyOrAll(actual, isEmpty);
+    if (node.op === '!=') return !isArrayEmptyOrAll(actual, isEmpty);
+    if (node.op === 'is not') return !isArrayEmptyOrAll(actual, isEmpty);
+  }
+
+  if (ORDERED_OPS.has(node.op) || node.fn) {
+    const rhs = resolveRhs(node, getNow);
+    if (rhs === undefined) return false;
+    if (ORDERED_OPS.has(node.op)) {
+      return anyMatch(actual, v => compareOrdered(v, node.op as '<' | '<=' | '>' | '>=', rhs));
+    }
+    if (node.op === '=') {
+      return anyMatch(actual, v => {
+        const l = parseComparable(v);
+        const r = typeof rhs === 'number' ? rhs : parseComparable(rhs);
+        return l !== null && r !== null && l === r;
+      });
+    }
+    if (node.op === '!=') {
+      return allMatch(actual, v => {
+        const l = parseComparable(v);
+        const r = typeof rhs === 'number' ? rhs : parseComparable(rhs);
+        return l === null || r === null || l !== r;
+      });
+    }
+  }
+
+  if (node.op === '=') {
+    return anyMatch(actual, v => valuesEqual(v, node.value));
+  }
+  if (node.op === '!=') {
+    return allMatch(actual, v => !valuesEqual(v, node.value));
+  }
+  if (node.op === 'in') {
+    return anyMatch(actual, v => valueInList(v, node.values!));
+  }
+  if (node.op === 'not in') {
+    return allMatch(actual, v => !valueInList(v, node.values!));
+  }
+  if (node.op === '~') {
+    const result = anyMatch(actual, v => {
+      if (typeof v === 'string' || typeof v === 'number') {
+        return v.toString().includes(node.value ?? '');
+      }
+      if (Array.isArray(v)) {
+        return v.some(item =>
+          typeof item === 'string' || typeof item === 'number' ? item.toString().includes(node.value ?? '') : false
+        );
+      }
+      return false;
+    });
+    return result === undefined ? false : result;
+  }
+  if (node.op === '!~') {
+    const result = allMatch(actual, v => {
+      if (typeof v === 'string' || typeof v === 'number') {
+        return !v.toString().includes(node.value ?? '');
+      }
+      if (Array.isArray(v)) {
+        return v.every(item =>
+          typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(node.value ?? '') : true
+        );
+      }
+      return true;
+    });
+    return result === undefined ? true : result;
+  }
+  throw new Error(`Unknown operator in condition: ${node.op}`);
+}
+
 // Compiler
-function compile(node: any): JqlMatchFn {
+function compile(node: any, getNow: () => Date): JqlMatchFn {
   if (!node) return () => true;
 
   if (node.type === 'AND') {
-    const l = compile(node.left);
-    const r = compile(node.right);
+    const l = compile(node.left, getNow);
+    const r = compile(node.right, getNow);
     return getFieldValue => l(getFieldValue) && r(getFieldValue);
   }
   if (node.type === 'OR') {
-    const l = compile(node.left);
-    const r = compile(node.right);
+    const l = compile(node.left, getNow);
+    const r = compile(node.right, getNow);
     return getFieldValue => l(getFieldValue) || r(getFieldValue);
   }
   if (node.type === 'NOT') {
-    const expr = compile(node.expr);
+    const expr = compile(node.expr, getNow);
     return getFieldValue => !expr(getFieldValue);
   }
   if (node.type === 'condition') {
-    const field = node.field.toLowerCase();
-    if (node.value === 'EMPTY') {
-      if (node.op === '=') {
-        return getFieldValue => isArrayEmptyOrAll(getFieldValue(field), isEmpty);
-      }
-      if (node.op === '!=') {
-        return getFieldValue => !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
-      }
-      if (node.op === 'is not') {
-        return getFieldValue => !isArrayEmptyOrAll(getFieldValue(field), isEmpty);
-      }
-    }
-    if (node.op === '=') {
-      return getFieldValue => anyMatch(getFieldValue(field), v => v == node.value);
-    }
-    if (node.op === '!=') {
-      return getFieldValue => allMatch(getFieldValue(field), v => v != node.value);
-    }
-    if (node.op === 'in') {
-      return getFieldValue => anyMatch(getFieldValue(field), v => node.values.includes(v));
-    }
-    if (node.op === 'not in') {
-      return getFieldValue => allMatch(getFieldValue(field), v => !node.values.includes(v));
-    }
-    if (node.op === '~') {
-      return getFieldValue => {
-        const result = anyMatch(getFieldValue(field), v => {
-          if (typeof v === 'string' || typeof v === 'number') {
-            return v.toString().includes(node.value ?? '');
-          }
-          if (Array.isArray(v)) {
-            return v.some(item =>
-              typeof item === 'string' || typeof item === 'number' ? item.toString().includes(node.value ?? '') : false
-            );
-          }
-          return false;
-        });
-        return result === undefined ? false : result;
-      };
-    }
-    if (node.op === '!~') {
-      return getFieldValue => {
-        const result = allMatch(getFieldValue(field), v => {
-          if (typeof v === 'string' || typeof v === 'number') {
-            return !v.toString().includes(node.value ?? '');
-          }
-          if (Array.isArray(v)) {
-            return v.every(item =>
-              typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(node.value ?? '') : true
-            );
-          }
-          return true;
-        });
-        return result === undefined ? true : result;
-      };
-    }
+    return getFieldValue => matchCondition(node, getFieldValue, getNow);
   }
   throw new Error(`Unknown node: ${JSON.stringify(node)}`);
 }
 
-export function parseJql(jql: string): JqlMatchFn {
+export function parseJql(jql: string, options?: ParseJqlOptions): JqlMatchFn {
   const tokens = tokenize(jql);
   const ast = parseTokens(tokens);
+  const getNow = options?.now ?? (() => new Date());
 
-  return compile(ast);
+  return compile(ast, getNow);
 }
 
 // Export tokenizer
 export { tokenize };
+
+/** Human-readable RHS for debug UI (literals, lists, or function calls like now()). */
+export function formatJqlConditionLabel(node: {
+  field: string;
+  op: string;
+  value?: string;
+  values?: string[];
+  fn?: JqlFunctionRef;
+}): string {
+  if (node.fn) {
+    const args = node.fn.args.map(a => (/[\s,]/.test(a) || a === '' ? `"${a}"` : a)).join(', ');
+    return `${node.field} ${node.op} ${node.fn.name}(${args})`;
+  }
+  if (node.values) {
+    return `${node.field} ${node.op} (${node.values.join(', ')})`;
+  }
+  return `${node.field} ${node.op} ${node.value ?? ''}`;
+}
 
 // Export AST parser
 export function parseJqlAst(jql: string): JqlAstNode {
@@ -397,66 +526,27 @@ export function parseJqlAst(jql: string): JqlAstNode {
 }
 
 // Evaluate AST and return result tree
-export function evaluateJqlAst(ast: JqlAstNode, getFieldValue: (fieldName: string) => any): JqlAstResult {
+export function evaluateJqlAst(
+  ast: JqlAstNode,
+  getFieldValue: (fieldName: string) => any,
+  options?: ParseJqlOptions
+): JqlAstResult {
+  const getNow = options?.now ?? (() => new Date());
   if (!ast) return { type: 'condition', field: '', op: '', matched: true };
   if (ast.type === 'AND' || ast.type === 'OR') {
-    const left = evaluateJqlAst(ast.left, getFieldValue);
-    const right = evaluateJqlAst(ast.right, getFieldValue);
+    const left = evaluateJqlAst(ast.left, getFieldValue, options);
+    const right = evaluateJqlAst(ast.right, getFieldValue, options);
     const matched = ast.type === 'AND' ? left.matched && right.matched : left.matched || right.matched;
     return { type: ast.type, left, right, matched };
   }
   if (ast.type === 'NOT') {
-    const expr = evaluateJqlAst(ast.expr, getFieldValue);
+    const expr = evaluateJqlAst(ast.expr, getFieldValue, options);
     return { type: 'NOT', expr, matched: !expr.matched };
   }
   if (ast.type === 'condition') {
-    // Always use lowercased field names for case-insensitive matching
     const field = ast.field.toLowerCase();
     const actualValue = getFieldValue(field);
-    let matched = false;
-    if (ast.value === 'EMPTY') {
-      if (ast.op === '=') {
-        matched = isArrayEmptyOrAll(actualValue, isEmpty);
-      } else if (ast.op === '!=') {
-        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
-      } else if (ast.op === 'is not') {
-        matched = !isArrayEmptyOrAll(actualValue, isEmpty);
-      }
-    } else if (ast.op === '=') {
-      matched = anyMatch(actualValue, v => v == ast.value);
-    } else if (ast.op === '!=') {
-      matched = allMatch(actualValue, v => v != ast.value);
-    } else if (ast.op === 'in') {
-      matched = anyMatch(actualValue, v => (ast.values ? ast.values.includes(v) : false));
-    } else if (ast.op === 'not in') {
-      matched = allMatch(actualValue, v => (ast.values ? !ast.values.includes(v) : false));
-    } else if (ast.op === '~') {
-      const result = anyMatch(actualValue, v => {
-        if (typeof v === 'string' || typeof v === 'number') {
-          return v.toString().includes(ast.value ?? '');
-        }
-        if (Array.isArray(v)) {
-          return v.some(item =>
-            typeof item === 'string' || typeof item === 'number' ? item.toString().includes(ast.value ?? '') : false
-          );
-        }
-        return false;
-      });
-      matched = result === undefined ? false : result;
-    } else if (ast.op === '!~') {
-      const result = allMatch(actualValue, v => {
-        if (typeof v === 'string' || typeof v === 'number') {
-          return !v.toString().includes(ast.value ?? '');
-        }
-        if (Array.isArray(v)) {
-          return v.every(item =>
-            typeof item === 'string' || typeof item === 'number' ? !item.toString().includes(ast.value ?? '') : true
-          );
-        }
-        return true;
-      });
-      matched = result === undefined ? true : result;
-    }
+    const matched = matchCondition(ast, getFieldValue, getNow);
     return { ...ast, matched, actualValue, type: 'condition' };
   }
   throw new Error(`Unknown node: ${JSON.stringify(ast)}`);

@@ -2,7 +2,14 @@
 import React, { useState } from 'react';
 import { Input, Button, Alert, Spin, List, Typography } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
-import { parseJqlAst, tokenize, evaluateJqlAst, JqlAstNode, JqlAstResult } from 'src/shared/jql/simpleJqlParser';
+import {
+  parseJqlAst,
+  tokenize,
+  evaluateJqlAst,
+  formatJqlConditionLabel,
+  JqlAstNode,
+  JqlAstResult,
+} from 'src/shared/jql/simpleJqlParser';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { JiraServiceToken } from 'src/infrastructure/jira/jiraService';
 import { getFieldValueForJqlStandalone } from 'src/features/sub-tasks-progress/IssueCardSubTasksProgress/hooks/useSubtasksProgress';
@@ -123,11 +130,7 @@ export const JqlDebugDemoPure: React.FC<JqlDebugDemoPureProps> = ({
     } else if (node.type === 'NOT') {
       label = 'NOT';
     } else if (node.type === 'condition') {
-      if ('values' in node && node.values) {
-        label = `${node.field} ${node.op} (${node.values.join(', ')})`;
-      } else {
-        label = `${node.field} ${node.op} ${node.value}`;
-      }
+      label = formatJqlConditionLabel(node);
       // Show actual value for conditions
       const formattedActual = formatActualValue(node.actualValue);
       actualValueDisplay = (
