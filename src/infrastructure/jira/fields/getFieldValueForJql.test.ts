@@ -155,5 +155,58 @@ describe('getFieldValueForJql', () => {
       const get = getFieldValueForJql(issue, fields);
       expect(get('Multi Select')).toEqual(['Value 1', 'Value 2']);
     });
+
+    it('resolves date and datetime fields as ISO strings (not empty when filled)', () => {
+      const issue = {
+        fields: {
+          duedate: '2020-01-15',
+          customfield_123: '2020-01-15',
+          customfield_456: '2020-01-15T10:30:00.000+0000',
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'duedate',
+          name: 'Due date',
+          clauseNames: ['duedate', 'Due date'],
+          schema: { type: 'date' },
+        }),
+        field({
+          id: 'customfield_123',
+          name: 'End date',
+          custom: true,
+          clauseNames: ['cf[123]', 'End date'],
+          schema: { type: 'date', custom: 'datepicker', customId: 123 },
+        }),
+        field({
+          id: 'customfield_456',
+          name: 'End datetime',
+          custom: true,
+          clauseNames: ['cf[456]'],
+          schema: { type: 'datetime', custom: 'datetime', customId: 456 },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('duedate')).toEqual(['2020-01-15']);
+      expect(get('End date')).toEqual(['2020-01-15']);
+      expect(get('cf[123]')).toEqual(['2020-01-15']);
+      expect(get('End datetime')).toEqual(['2020-01-15T10:30:00.000+0000']);
+      expect(getFieldValueForJql({ fields: { customfield_123: null } }, fields)('End date')).toEqual([]);
+    });
+
+    it('resolves number fields as string tokens for numeric JQL comparisons', () => {
+      const fields: JiraField[] = [
+        field({
+          id: 'customfield_10016',
+          name: 'Story Points',
+          custom: true,
+          clauseNames: ['cf[10016]', 'Story Points'],
+          schema: { type: 'number', custom: 'float', customId: 10016 },
+        }),
+      ];
+      expect(getFieldValueForJql({ fields: { customfield_10016: 13 } }, fields)('Story Points')).toEqual(['13']);
+      expect(getFieldValueForJql({ fields: { customfield_10016: 0 } }, fields)('Story Points')).toEqual(['0']);
+    });
   });
 });

@@ -192,4 +192,125 @@ describe('simpleJqlParser', () => {
     expect(parseJql('summary~win')(wrap({ summary: 'winter' }))).toBe(true);
     expect(parseJql('summary!~win')(wrap({ summary: 'summer' }))).toBe(true);
   });
+
+  describe('comparison operators < > <= >=', () => {
+    it('compares numbers', () => {
+      expect(parseJql('"Story Points" > 13')(wrap({ 'story points': '14' }))).toBe(true);
+      expect(parseJql('"Story Points" > 13')(wrap({ 'story points': '13' }))).toBe(false);
+      expect(parseJql('"Story Points" >= 13')(wrap({ 'story points': '13' }))).toBe(true);
+      expect(parseJql('"Story Points" < 5')(wrap({ 'story points': '3' }))).toBe(true);
+      expect(parseJql('"Story Points" <= 5')(wrap({ 'story points': '5' }))).toBe(true);
+      expect(parseJql('"Story Points" <= 5')(wrap({ 'story points': '6' }))).toBe(false);
+    });
+
+    it('compares date literals (YYYY-MM-DD)', () => {
+      expect(parseJql('duedate < 2020-06-01')(wrap({ duedate: '2020-05-01' }))).toBe(true);
+      expect(parseJql('duedate < 2020-06-01')(wrap({ duedate: '2020-07-01' }))).toBe(false);
+      expect(parseJql('duedate >= "2020-06-01"')(wrap({ duedate: '2020-06-01' }))).toBe(true);
+      expect(parseJql('duedate > "2020-06-01"')(wrap({ duedate: '2020-06-01' }))).toBe(false);
+    });
+
+    it('does not match when field is empty', () => {
+      expect(parseJql('duedate < 2020-06-01')(wrap({ duedate: undefined }))).toBe(false);
+      expect(parseJql('duedate < 2020-06-01')(wrap({ duedate: null }))).toBe(false);
+      expect(parseJql('duedate < 2020-06-01')(wrap({ duedate: [] }))).toBe(false);
+    });
+
+    it('parses comparison ops without surrounding whitespace', () => {
+      expect(parseJql('points>10')(wrap({ points: '11' }))).toBe(true);
+      expect(parseJql('points<=10')(wrap({ points: '10' }))).toBe(true);
+      expect(parseJql('duedate<"2020-06-01"')(wrap({ duedate: '2020-05-01' }))).toBe(true);
+    });
+  });
+
+  describe('date functions', () => {
+    const fixedNow = new Date('2026-08-10T15:30:00.000Z');
+    const opts = { now: () => fixedNow };
+
+    it('supports now()', () => {
+      expect(parseJql('duedate < now()', opts)(wrap({ duedate: '2026-08-09' }))).toBe(true);
+      // Far-future date-only so local-midnight parsing stays after fixedNow in any TZ
+      expect(parseJql('duedate < now()', opts)(wrap({ duedate: '2026-08-20' }))).toBe(false);
+      expect(parseJql('created > now()', opts)(wrap({ created: '2026-08-10T16:00:00.000Z' }))).toBe(true);
+      expect(parseJql('created > now()', opts)(wrap({ created: '2026-08-10T14:00:00.000Z' }))).toBe(false);
+    });
+
+    it('supports startOfDay / endOfDay with optional increment', () => {
+      // date-only fields use local calendar day — safe across TZ when far from boundary
+      expect(parseJql('duedate < startOfDay()', opts)(wrap({ duedate: '2026-08-09' }))).toBe(true);
+      expect(parseJql('duedate >= startOfDay()', opts)(wrap({ duedate: '2026-08-10' }))).toBe(true);
+      expect(parseJql('duedate < startOfDay("-1d")', opts)(wrap({ duedate: '2026-08-08' }))).toBe(true);
+      expect(parseJql('duedate < startOfDay(-1d)', opts)(wrap({ duedate: '2026-08-08' }))).toBe(true);
+      expect(parseJql('duedate <= endOfDay()', opts)(wrap({ duedate: '2026-08-10' }))).toBe(true);
+      expect(parseJql('duedate > endOfDay()', opts)(wrap({ duedate: '2026-08-11' }))).toBe(true);
+    });
+
+    it('supports startOfWeek/Month/Year and endOfWeek/Month/Year', () => {
+      // 2026-08-10 is a Monday — ISO week start (Monday)
+      expect(parseJql('duedate >= startOfWeek()', opts)(wrap({ duedate: '2026-08-10' }))).toBe(true);
+      expect(parseJql('duedate < startOfWeek()', opts)(wrap({ duedate: '2026-08-09' }))).toBe(true);
+      expect(parseJql('duedate <= endOfWeek()', opts)(wrap({ duedate: '2026-08-16' }))).toBe(true);
+      expect(parseJql('duedate > endOfWeek()', opts)(wrap({ duedate: '2026-08-17' }))).toBe(true);
+      expect(parseJql('duedate >= startOfMonth()', opts)(wrap({ duedate: '2026-08-01' }))).toBe(true);
+      expect(parseJql('duedate < startOfMonth()', opts)(wrap({ duedate: '2026-07-31' }))).toBe(true);
+      expect(parseJql('duedate >= startOfYear()', opts)(wrap({ duedate: '2026-01-01' }))).toBe(true);
+      expect(parseJql('duedate < startOfYear()', opts)(wrap({ duedate: '2025-12-31' }))).toBe(true);
+      expect(parseJql('duedate <= endOfMonth()', opts)(wrap({ duedate: '2026-08-31' }))).toBe(true);
+      expect(parseJql('duedate > endOfMonth()', opts)(wrap({ duedate: '2026-09-01' }))).toBe(true);
+      expect(parseJql('duedate <= endOfYear()', opts)(wrap({ duedate: '2026-12-31' }))).toBe(true);
+    });
+
+    it('throws on unknown function', () => {
+      expect(() => parseJql('assignee = currentUser()')).toThrow(/Unsupported function/i);
+      expect(() => parseJql('duedate < foo()')).toThrow(/Unsupported function/i);
+    });
+  });
+
+  it('matches epic overdue / missing end-date style query', () => {
+    const opts = { now: () => new Date('2026-08-10T12:00:00.000Z') };
+    const jql =
+      'issueType = Epic and status in ("To Do", developing, "Technical Specification", "Ready to Develop", "ready to release") and ("End date" is EMPTY OR "End date" < now())';
+
+    const match = parseJql(jql, opts);
+
+    expect(
+      match(
+        wrap({
+          issuetype: 'Epic',
+          status: 'developing',
+          'end date': undefined,
+        })
+      )
+    ).toBe(true);
+
+    expect(
+      match(
+        wrap({
+          issuetype: 'Epic',
+          status: 'Ready to Develop',
+          'end date': '2026-08-01',
+        })
+      )
+    ).toBe(true);
+
+    expect(
+      match(
+        wrap({
+          issuetype: 'Epic',
+          status: 'Ready to Develop',
+          'end date': '2026-08-20',
+        })
+      )
+    ).toBe(false);
+
+    expect(
+      match(
+        wrap({
+          issuetype: 'Story',
+          status: 'developing',
+          'end date': undefined,
+        })
+      )
+    ).toBe(false);
+  });
 });
