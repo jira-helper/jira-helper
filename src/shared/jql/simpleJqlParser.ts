@@ -346,6 +346,18 @@ function isEmpty(val: any): boolean {
   );
 }
 
+/** Case-insensitive for strings; otherwise loose equality (preserves number/string coercion). */
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return a == b;
+}
+
+function valueInList(value: unknown, list: string[]): boolean {
+  return list.some(expected => valuesEqual(value, expected));
+}
+
 // Helper to handle array or single value
 function anyMatch(val: any, predicate: (v: any) => boolean): boolean {
   if (Array.isArray(val)) {
@@ -412,16 +424,16 @@ function matchCondition(
   }
 
   if (node.op === '=') {
-    return anyMatch(actual, v => v == node.value);
+    return anyMatch(actual, v => valuesEqual(v, node.value));
   }
   if (node.op === '!=') {
-    return allMatch(actual, v => v != node.value);
+    return allMatch(actual, v => !valuesEqual(v, node.value));
   }
   if (node.op === 'in') {
-    return anyMatch(actual, v => node.values!.includes(v));
+    return anyMatch(actual, v => valueInList(v, node.values!));
   }
   if (node.op === 'not in') {
-    return allMatch(actual, v => !node.values!.includes(v));
+    return allMatch(actual, v => !valueInList(v, node.values!));
   }
   if (node.op === '~') {
     const result = anyMatch(actual, v => {
@@ -488,6 +500,24 @@ export function parseJql(jql: string, options?: ParseJqlOptions): JqlMatchFn {
 
 // Export tokenizer
 export { tokenize };
+
+/** Human-readable RHS for debug UI (literals, lists, or function calls like now()). */
+export function formatJqlConditionLabel(node: {
+  field: string;
+  op: string;
+  value?: string;
+  values?: string[];
+  fn?: JqlFunctionRef;
+}): string {
+  if (node.fn) {
+    const args = node.fn.args.map(a => (/[\s,]/.test(a) || a === '' ? `"${a}"` : a)).join(', ');
+    return `${node.field} ${node.op} ${node.fn.name}(${args})`;
+  }
+  if (node.values) {
+    return `${node.field} ${node.op} (${node.values.join(', ')})`;
+  }
+  return `${node.field} ${node.op} ${node.value ?? ''}`;
+}
 
 // Export AST parser
 export function parseJqlAst(jql: string): JqlAstNode {

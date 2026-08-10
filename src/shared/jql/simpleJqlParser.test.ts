@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseJql } from './simpleJqlParser';
+import { formatJqlConditionLabel, parseJql, parseJqlAst } from './simpleJqlParser';
 
 describe('simpleJqlParser', () => {
   // Case-insensitive getFieldValue
@@ -193,6 +193,32 @@ describe('simpleJqlParser', () => {
     expect(parseJql('summary!~win')(wrap({ summary: 'summer' }))).toBe(true);
   });
 
+  describe('case-insensitive equality and membership', () => {
+    it('matches = / != / in / not in ignoring case', () => {
+      expect(parseJql('status = developing')(wrap({ status: 'Developing' }))).toBe(true);
+      expect(parseJql('status = Developing')(wrap({ status: 'developing' }))).toBe(true);
+      expect(parseJql('status != developing')(wrap({ status: 'Developing' }))).toBe(false);
+      expect(parseJql('status in ("To Do", developing)')(wrap({ status: 'Developing' }))).toBe(true);
+      expect(parseJql('status not in (developing)')(wrap({ status: 'Developing' }))).toBe(false);
+      expect(parseJql('status not in (done)')(wrap({ status: 'Developing' }))).toBe(true);
+    });
+  });
+
+  it('formats condition labels with function RHS for debug UI', () => {
+    const ast = parseJqlAst('"End date" < now()');
+    expect(ast.type).toBe('condition');
+    if (ast.type === 'condition') {
+      expect(formatJqlConditionLabel(ast)).toBe('end date < now()');
+    }
+    expect(
+      formatJqlConditionLabel({
+        field: 'duedate',
+        op: '>=',
+        fn: { name: 'startofday', args: ['-1d'] },
+      })
+    ).toBe('duedate >= startofday(-1d)');
+  });
+
   describe('comparison operators < > <= >=', () => {
     it('compares numbers', () => {
       expect(parseJql('"Story Points" > 13')(wrap({ 'story points': '14' }))).toBe(true);
@@ -277,7 +303,7 @@ describe('simpleJqlParser', () => {
       match(
         wrap({
           issuetype: 'Epic',
-          status: 'developing',
+          status: 'Developing', // case differs from JQL token `developing`
           'end date': undefined,
         })
       )

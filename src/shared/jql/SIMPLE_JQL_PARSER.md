@@ -17,7 +17,7 @@ This document describes the implementation and usage of the simple JQL parser fo
 - **Special keywords:** `EMPTY`, `is`, `is not`
 - **Array values for fields:** e.g., `labels in (bug, urgent)`
 - **Date functions:** `now()`, `startOfDay/Week/Month/Year([inc])`, `endOfDay/Week/Month/Year([inc])`
-- **Case-insensitive** field names and operators
+- **Case-insensitive** field names, operators, and string value matching for `=`, `!=`, `in`, `not in`
 
 ### Date / number comparisons
 - Ordered operators compare numeric literals and date/datetime values.
