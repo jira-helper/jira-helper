@@ -163,7 +163,8 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     swimlaneHeader: '[data-testid="board.content.swimlane.scroll-container"]',
     swimlaneRow: '[data-testid="board.content.swimlane.scroll-container"]',
     avatarImg: '[data-testid="platform-board-kit.ui.avatar"]',
-    issueType: '[data-testid="platform-board-kit.ui.type-badge"]',
+    // Newer kit uses type-badge; classic Cloud often only has the issuetype icon <img alt="…">.
+    issueType: '[data-testid="platform-board-kit.ui.type-badge"], img[src*="issuetypes/"]',
     parentGroup: '',
     // Keep primary header target as legacy controls-bar; BoardSettings falls back to
     // horizontal-nav-header.ui.project-header.header when this is absent.
@@ -801,7 +802,13 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   getIssueTypeFromIssue(issue: Element): string | null {
     const typeEl = issue.querySelector(this.selectors.issueType) as HTMLElement | null;
     if (!typeEl) return null;
-    return typeEl.getAttribute('title') ?? typeEl.textContent ?? null;
+    if (typeEl instanceof HTMLImageElement) {
+      const alt = typeEl.getAttribute('alt')?.trim();
+      if (alt) return alt;
+    }
+    const labeled =
+      typeEl.getAttribute('title')?.trim() || typeEl.getAttribute('aria-label')?.trim() || typeEl.textContent?.trim();
+    return labeled || null;
   },
 
   getColumnIdOfIssue(issue: Element): string | null {

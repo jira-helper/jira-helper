@@ -149,6 +149,17 @@ describe('BoardPagePageObject', () => {
     );
   });
 
+  it('reads issue type from classic Cloud issuetype icon alt text', () => {
+    document.body.innerHTML = `
+      <div data-testid="platform-board-kit.ui.card.card">
+        <img alt="Эпик" src="https://crazymax101.atlassian.net/images/icons/issuetypes/epic.svg" />
+        <img alt="Приоритет Medium" src="https://crazymax101.atlassian.net/images/icons/priorities/medium_new.svg" />
+      </div>
+    `;
+    const card = document.querySelector('[data-testid="platform-board-kit.ui.card.card"]')!;
+    expect(BoardPagePageObject.getIssueTypeFromIssue(card)).toBe('Эпик');
+  });
+
   function renderBoardContentCells() {
     document.body.innerHTML = `
       <div data-testid="board.content.board-wrapper">
