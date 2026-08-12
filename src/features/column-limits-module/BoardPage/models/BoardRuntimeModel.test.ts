@@ -352,10 +352,11 @@ describe('BoardRuntimeModel', () => {
             backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
             borderTop: '4px solid #abc',
             paddingTop: '18px',
-            position: 'relative',
+            boxSizing: 'border-box',
           }),
         ])
       );
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ position: 'relative' })]));
       expect(styledHeaders).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ backgroundColor: '#deebff' })])
       );
