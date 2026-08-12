@@ -25,12 +25,18 @@ function createEditModelResponse() {
 describe('getBoardEditDataCloud', () => {
   let boardPage: IBoardPagePageObject;
   let setCachedColumns: ReturnType<typeof vi.fn>;
+  let setBoardWorkData: ReturnType<typeof vi.fn>;
+  let setSwimlanesCache: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     setCachedColumns = vi.fn();
+    setBoardWorkData = vi.fn();
+    setSwimlanesCache = vi.fn();
     boardPage = {
       getBoardId: vi.fn(() => 35),
       setCachedColumns,
+      setBoardWorkData,
+      setSwimlanesCache,
     } as unknown as IBoardPagePageObject;
   });
 
@@ -59,11 +65,103 @@ describe('getBoardEditDataCloud', () => {
     ]);
     expect(result.rapidListConfig?.mappedColumns?.every(col => col.isKanPlanColumn !== true)).toBe(true);
     expect(setCachedColumns).toHaveBeenCalledWith([
-      { id: '115', name: 'К выполнению' },
-      { id: '116', name: 'В работе' },
-      { id: '117', name: 'Готово' },
+      { id: '115', name: 'К выполнению', statusIds: ['10074'] },
+      { id: '116', name: 'В работе', statusIds: ['10075'] },
+      { id: '117', name: 'Готово', statusIds: ['10076'] },
     ]);
     expect(result.swimlanesConfig?.swimlanes).toEqual([{ id: 'sw1', name: 'Default' }]);
+  });
+
+  it('fetches allData and calls setBoardWorkData with swimlane issue counts', async () => {
+    const allDataResponse = {
+      columnsData: {
+        columns: [
+          { id: '115', name: 'To Do', statusIds: ['10074'] },
+          { id: '116', name: 'In Progress', statusIds: ['10075'] },
+        ],
+      },
+      swimlanesData: {
+        customSwimlanesData: {
+          swimlanes: [
+            { id: '9', name: 'pri', issueIds: [1, 2, 3] },
+            { id: '6', name: 'Expedite', issueIds: [4, 5] },
+          ],
+        },
+      },
+      issuesData: {
+        issues: [
+          { id: 1, statusId: '10074', typeName: 'Story' },
+          { id: 2, statusId: '10074', typeName: 'Story' },
+          { id: 3, statusId: '10074', typeName: 'Story' },
+          { id: 4, statusId: '10074', typeName: 'Story' },
+          { id: 5, statusId: '10074', typeName: 'Story' },
+        ],
+      },
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        if (url.includes('editmodel.json')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => createEditModelResponse(),
+          });
+        }
+        if (url.includes('allData.json')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => allDataResponse,
+          });
+        }
+        return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+      })
+    );
+
+    await getBoardEditDataCloud(boardPage);
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/rest/greenhopper/1.0/xboard/work/allData.json?rapidViewId=35',
+      expect.objectContaining({ credentials: 'same-origin' })
+    );
+    expect(setBoardWorkData).toHaveBeenCalledWith({
+      columns: [
+        { id: '115', name: 'К выполнению', statusIds: ['10074'] },
+        { id: '116', name: 'В работе', statusIds: ['10075'] },
+        { id: '117', name: 'Готово', statusIds: ['10076'] },
+      ],
+      swimlanes: [
+        { id: '9', name: 'pri', issueIds: [1, 2, 3] },
+        { id: '6', name: 'Expedite', issueIds: [4, 5] },
+      ],
+      issues: allDataResponse.issuesData.issues,
+    });
+    expect(setSwimlanesCache).toHaveBeenCalledWith([{ id: 'sw1', name: 'Default' }]);
+  });
+
+  it('continues without work data when allData fetch fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        if (url.includes('editmodel.json')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => createEditModelResponse(),
+          });
+        }
+        if (url.includes('allData.json')) {
+          return Promise.resolve({ ok: false, status: 500 });
+        }
+        return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+      })
+    );
+
+    const result = await getBoardEditDataCloud(boardPage);
+
+    expect(result.canEdit).toBe(true);
+    expect(setCachedColumns).toHaveBeenCalled();
+    expect(setBoardWorkData).not.toHaveBeenCalled();
+    expect(setSwimlanesCache).toHaveBeenCalledWith([{ id: 'sw1', name: 'Default' }]);
   });
 
   it('returns canEdit false when fetch response is not ok', async () => {
