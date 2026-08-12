@@ -220,6 +220,42 @@ export const getBoardEditDataCloud = async (
  * Поиск пользователей в Cloud
  * Использует accountId вместо username
  */
+export type CloudProjectIssueType = {
+  id: string;
+  name: string;
+  subtask: boolean;
+};
+
+/**
+ * Issue types for a project key — used by person/column limit settings pickers.
+ * Cloud REST: GET /rest/api/2/project/{projectKey}
+ */
+export const getProjectIssueTypesCloud = async (projectKey: string): Promise<CloudProjectIssueType[]> => {
+  const key = projectKey.trim();
+  if (!key) return [];
+
+  const url = `/rest/api/2/project/${encodeURIComponent(key)}`;
+  try {
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) {
+      console.warn('[getProjectIssueTypesCloud] Failed:', response.status, key);
+      return [];
+    }
+    const data = (await response.json()) as { issueTypes?: Array<{ id?: string; name?: string; subtask?: boolean }> };
+    return (data.issueTypes ?? []).map(type => ({
+      id: String(type.id ?? ''),
+      name: type.name ?? '',
+      subtask: Boolean(type.subtask),
+    }));
+  } catch (error) {
+    console.error('[getProjectIssueTypesCloud] Error:', error);
+    return [];
+  }
+};
+
 export const searchUsersCloud = async (query: string, boardPage: IBoardPagePageObject): Promise<CloudJiraUser[]> => {
   if (!query || query.length < 1) {
     return [];

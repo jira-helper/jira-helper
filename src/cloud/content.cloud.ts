@@ -28,6 +28,7 @@ import PersonLimitsBoardPage from '../features/person-limits-module/BoardPage';
 import { registerBoardPropertyServiceInDI } from '../infrastructure/jira/boardPropertyService';
 import { registerJiraApiInDI } from '../infrastructure/di/jiraApiTokens';
 import { registerServerApiCloudAdapters } from './shared/di/serverApiAdapters.cloud';
+import { registerIssueTypeServiceInDI } from '../shared/issueType';
 import { jiraEnvironmentToken } from '../infrastructure/di/jiraEnvironmentToken';
 import { startCloudExtension } from './startCloudExtension';
 
@@ -75,6 +76,8 @@ export async function initializeCloudExtension(): Promise<void> {
 
   registerJiraApiInDI(globalContainer);
   registerServerApiCloudAdapters(globalContainer);
+  // Project → issue-types picker (person/column limits) needs this; Server registers it in content.ts.
+  registerIssueTypeServiceInDI(globalContainer);
   registerBoardPropertyServiceInDI(globalContainer);
   diagnosticModule.ensure(globalContainer);
   columnLimitsModule.ensure(globalContainer);

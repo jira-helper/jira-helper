@@ -138,6 +138,17 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getAllCloudCards()).toHaveLength(1);
   });
 
+  it('resolves pool on classic software-board.board Cloud DOM', () => {
+    document.body.innerHTML = `
+      <div data-testid="software-board.board">
+        <div data-testid="platform-board-kit.ui.card.card">TRB3-1</div>
+      </div>
+    `;
+    expect(document.querySelector(BoardPagePageObject.selectors.pool)?.getAttribute('data-testid')).toBe(
+      'software-board.board'
+    );
+  });
+
   function renderBoardContentCells() {
     document.body.innerHTML = `
       <div data-testid="board.content.board-wrapper">
