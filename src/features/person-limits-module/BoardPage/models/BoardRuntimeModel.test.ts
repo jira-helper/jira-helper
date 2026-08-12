@@ -187,6 +187,41 @@ describe('BoardRuntimeModel', () => {
     expect(issue.classList.contains('no-visibility')).toBe(false);
   });
 
+  it('applyVisibilityToIssues filters only the provided freshly mounted cards', () => {
+    document.body.innerHTML = `
+      <div id="ghx-pool">
+        <div class="ghx-column" data-column-id="col1">
+          <div class="ghx-issue" id="i1">
+            <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+          </div>
+          <div class="ghx-issue" id="i2">
+            <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+          </div>
+        </div>
+      </div>
+    `;
+
+    const model = modelWithLimits([
+      {
+        id: 1,
+        persons: [personJohn],
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+        showAllPersonIssues: true,
+      },
+    ]);
+    model.cssSelectorOfIssues = '.ghx-issue';
+    model.calculateStats();
+    model.activePerson = { limitId: model.stats[0].id, personName: 'john.doe' };
+
+    const jane = document.getElementById('i2')!;
+    model.applyVisibilityToIssues([jane]);
+
+    expect(document.getElementById('i1')!.classList.contains('no-visibility')).toBe(false);
+    expect(jane.classList.contains('no-visibility')).toBe(true);
+  });
+
   it('showOnlyChosen with active limit and showAllPersonIssues shows only assignee matches', () => {
     document.body.innerHTML = `
       <div id="ghx-pool">

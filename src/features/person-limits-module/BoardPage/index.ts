@@ -209,10 +209,34 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
         }
       };
 
+      const issueSelector = po.selectors?.issue ?? '.ghx-issue';
+
       this.onDOMChange(
         poolSelector,
         mutations => {
-          if (applying || isOwnPersonLimitsMutation(mutations)) return;
+          if (applying) return;
+
+          // Virtualized boards remount cards on scroll. Hide/show them synchronously
+          // while a filter is active so mismatched cards do not flash before debounce.
+          if (runtime.activePerson != null) {
+            const freshCards: Element[] = [];
+            for (const mutation of mutations) {
+              if (mutation.type !== 'childList') continue;
+              for (const node of Array.from(mutation.addedNodes)) {
+                if (!(node instanceof Element)) continue;
+                if (node.matches(issueSelector)) {
+                  freshCards.push(node);
+                } else {
+                  freshCards.push(...Array.from(node.querySelectorAll(issueSelector)));
+                }
+              }
+            }
+            if (freshCards.length > 0) {
+              runtime.applyVisibilityToIssues(freshCards);
+            }
+          }
+
+          if (isOwnPersonLimitsMutation(mutations)) return;
           if (applyTimer) clearTimeout(applyTimer);
           applyTimer = setTimeout(applyRuntime, 200);
         },

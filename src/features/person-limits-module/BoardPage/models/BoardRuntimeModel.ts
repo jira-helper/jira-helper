@@ -148,6 +148,51 @@ export class BoardRuntimeModel {
     });
   }
 
+  private shouldShowIssueForActiveFilter(issue: Element): boolean {
+    if (this.activePerson == null) return true;
+
+    const personLimit = this.stats.find(s => s.id === this.activePerson!.limitId);
+    if (!personLimit) return true;
+
+    const targetPerson = this.activePerson.personName;
+    const assignee = this.pageObject.getAssigneeFromIssue(issue);
+    let shouldShow: boolean;
+    if (personLimit.showAllPersonIssues) {
+      shouldShow = isPersonsIssue(personLimit, assignee);
+    } else {
+      const columnId = this.pageObject.getColumnIdOfIssue(issue) ?? '';
+      const swimlaneId = this.pageObject.getSwimlaneIdOfIssue(issue);
+      const issueType = this.pageObject.getIssueTypeFromIssue(issue);
+      shouldShow = isPersonLimitAppliedToIssue(
+        this.effectiveLimit(personLimit),
+        assignee,
+        columnId,
+        swimlaneId,
+        issueType
+      );
+    }
+    // Per-person narrowing: when a specific person inside the limit is targeted,
+    // additionally require the issue's assignee to equal that person.
+    if (shouldShow && targetPerson != null && assignee !== targetPerson) {
+      const matchByDisplay = personLimit.persons.find(p => p.name === targetPerson);
+      if (!(matchByDisplay && matchByDisplay.displayName === assignee)) {
+        shouldShow = false;
+      }
+    }
+    return shouldShow;
+  }
+
+  /**
+   * Apply the active avatar filter to a set of issue nodes immediately.
+   * Used when Cloud virtualization mounts fresh cards during scroll — waiting for a
+   * debounced full apply lets mismatched cards flash visible.
+   */
+  applyVisibilityToIssues(issues: Element[]): void {
+    issues.forEach(issue => {
+      this.pageObject.setIssueVisibility(issue, this.shouldShowIssueForActiveFilter(issue));
+    });
+  }
+
   /**
    * Show only issues matching the active selection, or all if none selected.
    *
@@ -157,48 +202,11 @@ export class BoardRuntimeModel {
    *   assignee (used for per-person limits with sharedLimit=false).
    */
   showOnlyChosen(): void {
-    const issues = this.pageObject.getIssueElements(this.cssSelectorOfIssues);
-
-    if (this.activePerson == null) {
-      issues.forEach(issue => this.pageObject.setIssueVisibility(issue, true));
-      this.showOrHideTaskAggregations();
+    if (this.activePerson != null && !this.stats.some(s => s.id === this.activePerson!.limitId)) {
       return;
     }
-
-    const personLimit = this.stats.find(s => s.id === this.activePerson!.limitId);
-    if (!personLimit) return;
-
-    const targetPerson = this.activePerson.personName;
-
-    issues.forEach(issue => {
-      const assignee = this.pageObject.getAssigneeFromIssue(issue);
-      let shouldShow: boolean;
-      if (personLimit.showAllPersonIssues) {
-        shouldShow = isPersonsIssue(personLimit, assignee);
-      } else {
-        const columnId = this.pageObject.getColumnIdOfIssue(issue) ?? '';
-        const swimlaneId = this.pageObject.getSwimlaneIdOfIssue(issue);
-        const issueType = this.pageObject.getIssueTypeFromIssue(issue);
-        shouldShow = isPersonLimitAppliedToIssue(
-          this.effectiveLimit(personLimit),
-          assignee,
-          columnId,
-          swimlaneId,
-          issueType
-        );
-      }
-      // Per-person narrowing: when a specific person inside the limit is targeted,
-      // additionally require the issue's assignee to equal that person.
-      if (shouldShow && targetPerson != null && assignee !== targetPerson) {
-        // Allow legacy displayName-based assignees too.
-        const matchByDisplay = personLimit.persons.find(p => p.name === targetPerson);
-        if (!(matchByDisplay && matchByDisplay.displayName === assignee)) {
-          shouldShow = false;
-        }
-      }
-      this.pageObject.setIssueVisibility(issue, shouldShow);
-    });
-
+    const issues = this.pageObject.getIssueElements(this.cssSelectorOfIssues);
+    this.applyVisibilityToIssues(issues);
     this.showOrHideTaskAggregations();
   }
 
