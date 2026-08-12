@@ -1,7 +1,7 @@
 // src/cloud/content.cloud.ts
 // Cloud entry point for Jira Cloud (atlassian.net)
-
-import 'antd/dist/reset.css';
+// Do not import antd/dist/reset.css here — it lands in the host page and resets
+// every *.atlassian.net surface (Jira/Confluence/…), not just our mounts.
 
 import { globalContainer } from 'dioma';
 import { Routes, registerRoutingServiceInDI, routingServiceToken } from '../infrastructure/routing';
