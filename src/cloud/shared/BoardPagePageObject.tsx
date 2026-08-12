@@ -236,14 +236,32 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   _getSwimlaneScrollContainers(): Element[] {
-    return Array.from(document.querySelectorAll('[data-testid="board.content.swimlane.scroll-container"]'));
+    // Team-managed Group-by rows
+    const teamManaged = Array.from(
+      document.querySelectorAll('[data-testid="board.content.swimlane.scroll-container"]')
+    );
+    if (teamManaged.length > 0) {
+      return teamManaged;
+    }
+    // Company-managed classic swimlanes (Expedite / Everything Else / …)
+    return Array.from(document.querySelectorAll('[data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]'));
   },
 
   _getSwimlaneRoot(scrollContainer: Element): Element {
-    return scrollContainer.closest('[role="listitem"]') ?? scrollContainer;
+    return (
+      scrollContainer.closest('[data-testid="platform-board-kit.ui.swimlane.swimlane-wrapper"]') ??
+      scrollContainer.closest('[role="listitem"]') ??
+      scrollContainer
+    );
   },
 
   _getSwimlaneName(swimlaneRoot: Element, index: number): string {
+    const summary = swimlaneRoot.querySelector('[data-testid="platform-board-kit.ui.swimlane.summary-section"]');
+    const summaryText = summary?.textContent?.trim();
+    if (summaryText) {
+      return summaryText;
+    }
+
     const labeled = swimlaneRoot.querySelector('[aria-label*="группе"], [aria-label*="group"]');
     const aria = labeled?.getAttribute('aria-label') ?? '';
     const ariaMatch = aria.match(/[«"](.+?)[»"]/);
@@ -263,6 +281,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       const element = this._getSwimlaneRoot(scroll);
       const name = this._getSwimlaneName(element, index);
       const header =
+        element.querySelector('[data-testid="platform-board-kit.ui.swimlane.summary-section"]') ??
         Array.from(element.querySelectorAll('button')).find(btn => /[«"]/.test(btn.textContent ?? '')) ??
         element.querySelector('button') ??
         element;
@@ -331,9 +350,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getColumnsInSwimlane(swimlane: Element): Element[] {
-    const scroll = swimlane.matches?.('[data-testid="board.content.swimlane.scroll-container"]')
-      ? swimlane
-      : swimlane.querySelector('[data-testid="board.content.swimlane.scroll-container"]');
+    const scrollSelector =
+      '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]';
+    const scroll = swimlane.matches?.(scrollSelector) ? swimlane : swimlane.querySelector(scrollSelector);
     const root = scroll ?? swimlane;
     return Array.from(root.querySelectorAll(this.selectors.column));
   },
@@ -352,9 +371,8 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   /**
-   * Cloud sometimes mounts several copies of the same column set (windowed DOM)
-   * without swimlane.scroll-container. When that happens, only the first set is
-   * "representative" for ordering / index mapping.
+   * Fallback when swimlane roots are not detected yet: multiple flat copies of the
+   * same column set (one per swimlane). Prefer `_getSwimlaneScrollContainers()`.
    */
   _getColumnSetSize(allColumns: Element[]): number | null {
     const cached = this._columnsCache?.length ?? 0;
@@ -593,7 +611,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getColumnIdFromColumn(column: Element): string | null {
-    const scroll = column.closest('[data-testid="board.content.swimlane.scroll-container"]');
+    const scroll = column.closest(
+      '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]'
+    );
     if (scroll) {
       const siblings = Array.from(scroll.querySelectorAll(this.selectors.column));
       const index = siblings.indexOf(column);
@@ -616,7 +636,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getSwimlaneIdOfIssue(issue: Element): string | null {
-    const scroll = issue.closest('[data-testid="board.content.swimlane.scroll-container"]');
+    const scroll = issue.closest(
+      '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]'
+    );
     if (!scroll) return null;
     const scrolls = this._getSwimlaneScrollContainers();
     const index = scrolls.indexOf(scroll);
