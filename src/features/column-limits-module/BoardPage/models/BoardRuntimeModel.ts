@@ -111,7 +111,8 @@ export class BoardRuntimeModel {
       // Do not set position: relative (breaks Jira sticky wrappers; sticky is already a containing block).
       const headerStyles: Partial<CSSStyleDeclaration> = isCloudHeader
         ? {
-            backgroundColor: CLOUD_HEADER_BG,
+            // Opaque sticky fill + light group tint (readable without padding/border growth).
+            backgroundColor: `color-mix(in srgb, ${groupColor} 28%, ${CLOUD_HEADER_BG})`,
             // Above neighboring board chrome so badge tooltips are not covered.
             zIndex: '20',
           }

@@ -97,6 +97,7 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _findColumnElement(columnId: string): Element | null;
   _findAllColumnElements(columnId: string): Element[];
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
+  _findInnerColumnHeaderSurfaces(column: HTMLElement, paintedRoot: HTMLElement): HTMLElement[];
   _getSwimlaneScrollContainers(): Element[];
   _resolveColumnIndex(columnId: string): number | null;
   _getAllColumnElementsFlat(): Element[];
@@ -578,6 +579,26 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return target;
   },
 
+  _findInnerColumnHeaderSurfaces(column: HTMLElement, paintedRoot: HTMLElement): HTMLElement[] {
+    const surfaces = new Set<HTMLElement>();
+    const directHeader =
+      column.querySelector<HTMLElement>('[data-testid*="column-header"]:not([data-testid*="content"])') ||
+      column
+        .querySelector<HTMLElement>(this.selectors.columnTitle)
+        ?.closest<HTMLElement>('[data-testid*="column-header"]');
+    if (directHeader && directHeader !== paintedRoot) {
+      surfaces.add(directHeader);
+    }
+    paintedRoot
+      .querySelectorAll<HTMLElement>(
+        '[data-testid*="column-header-container"], [data-testid*="column-header"]:not([data-testid*="content"])'
+      )
+      .forEach(el => {
+        if (el !== paintedRoot) surfaces.add(el);
+      });
+    return [...surfaces];
+  },
+
   _resolveStatusIdsForColumn(columnId: string): string[] | null {
     const cached = this._columnsCache?.find(c => c.id === columnId);
     if (cached?.statusIds?.length) {
@@ -672,26 +693,37 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
         const swimlaneId = this.getSwimlaneIdOfIssue(col);
         if (swimlaneId && excluded.has(swimlaneId)) return;
       }
-      const el = this._findHeaderElementInColumn(col as HTMLElement);
+      const column = col as HTMLElement;
+      const el = this._findHeaderElementInColumn(column);
       Object.assign(el.style, styles);
+      // Sticky wrapper tint is covered by Jira's opaque header container — paint that too.
+      this._findInnerColumnHeaderSurfaces(column, el).forEach(surface => {
+        if (styles.backgroundColor != null) {
+          surface.style.backgroundColor = styles.backgroundColor;
+        }
+      });
     });
   },
 
   resetColumnHeaderStyles(columnId: string): void {
     this._findAllColumnElements(columnId).forEach(col => {
-      const el = this._findHeaderElementInColumn(col as HTMLElement);
-      const { style } = el;
-      style.removeProperty('background-color');
-      style.removeProperty('border-top');
-      style.removeProperty('border-top-left-radius');
-      style.removeProperty('border-top-right-radius');
-      style.removeProperty('padding-top');
-      style.removeProperty('box-sizing');
-      style.removeProperty('box-shadow');
-      style.removeProperty('outline');
-      style.removeProperty('outline-offset');
-      style.removeProperty('z-index');
-      style.removeProperty('position');
+      const column = col as HTMLElement;
+      const el = this._findHeaderElementInColumn(column);
+      const clearHeaderDecoration = (style: CSSStyleDeclaration) => {
+        style.removeProperty('background-color');
+        style.removeProperty('border-top');
+        style.removeProperty('border-top-left-radius');
+        style.removeProperty('border-top-right-radius');
+        style.removeProperty('padding-top');
+        style.removeProperty('box-sizing');
+        style.removeProperty('box-shadow');
+        style.removeProperty('outline');
+        style.removeProperty('outline-offset');
+        style.removeProperty('z-index');
+        style.removeProperty('position');
+      };
+      clearHeaderDecoration(el.style);
+      this._findInnerColumnHeaderSurfaces(column, el).forEach(surface => clearHeaderDecoration(surface.style));
       el.querySelectorAll('[data-column-limits-stripe]').forEach(stripe => stripe.remove());
     });
   },

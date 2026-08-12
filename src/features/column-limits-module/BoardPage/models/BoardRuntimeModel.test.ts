@@ -352,7 +352,7 @@ describe('BoardRuntimeModel', () => {
       expect(styledHeaders).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+            backgroundColor: 'color-mix(in srgb, #abc 28%, var(--ds-surface-raised, var(--ds-surface, #ffffff)))',
             zIndex: '20',
           }),
         ])
@@ -483,7 +483,7 @@ describe('BoardRuntimeModel', () => {
       expect(css).toContain('.limitColumnBadge {');
       expect(css).toContain('top: -24%');
       expect(css).toContain('.limitColumnBadgeCloud {');
-      expect(css).toContain('top: 0');
+      expect(css).toContain('top: 8px');
       expect(css).toContain('right: 12px');
       expect(css).toContain('z-index: 1000000');
       expect(css).toContain('.limitColumnBadgeCloud .limitColumnBadge__hint');
