@@ -300,14 +300,16 @@ describe('BoardRuntimeModel', () => {
           backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
           borderTopLeftRadius: '10px',
-        })
+        }),
+        []
       );
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
         'col2',
         expect.objectContaining({
           backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
-        })
+        }),
+        []
       );
       expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
         'col3',
@@ -315,7 +317,8 @@ describe('BoardRuntimeModel', () => {
           backgroundColor: '#deebff',
           borderTop: '4px solid #abc',
           borderTopRightRadius: '10px',
-        })
+        }),
+        []
       );
 
       const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
@@ -422,6 +425,36 @@ describe('BoardRuntimeModel', () => {
       const firstStyleOrder = vi.mocked(mockPageObject.styleColumnHeader).mock.invocationCallOrder[0];
       expect(firstResetOrder).toBeLessThan(firstStyleOrder);
     });
+
+    it('passes ignoredSwimlanes as excluded ids to styleColumnHeader', () => {
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: ['sw-skip', 'sw-other'],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({ borderTop: '4px solid #abc' }),
+        ['sw-skip', 'sw-other']
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({ borderTop: '4px solid #abc' }),
+        ['sw-skip', 'sw-other']
+      );
+    });
   });
 
   describe('applyLimitIndicators', () => {
@@ -474,6 +507,7 @@ describe('BoardRuntimeModel', () => {
       expect(htmlCall).toBeDefined();
       expect(htmlCall![1]).toContain('10/5');
       expect(htmlCall![1]).toContain('data-column-limits-badge="true"');
+      expect(htmlCall![2]).toEqual(['sw-skip']);
     });
 
     it('uses Cloud-specific badge class and color style only on Cloud boards', () => {

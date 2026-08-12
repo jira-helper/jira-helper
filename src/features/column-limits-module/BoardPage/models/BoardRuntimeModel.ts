@@ -75,11 +75,12 @@ export class BoardRuntimeModel {
   }
 
   applyColumnHeaderStyles(): void {
-    const boardGroups: Record<string, { columns: string[]; customHexColor?: string }> = {};
+    const boardGroups: Record<string, { columns: string[]; customHexColor?: string; ignoredSwimlanes: string[] }> = {};
     this.groupStats.forEach(stat => {
       boardGroups[stat.groupId] = {
         columns: stat.columns,
         customHexColor: stat.color,
+        ignoredSwimlanes: stat.ignoredSwimlanes,
       };
     });
 
@@ -99,6 +100,7 @@ export class BoardRuntimeModel {
       const columnByRight = rightCol !== undefined ? findGroupByColumnId(rightCol, boardGroups) : {};
 
       const groupColor = boardGroups[name].customHexColor;
+      const excludedSwimlaneIds = boardGroups[name].ignoredSwimlanes;
       if (!groupColor) return;
 
       const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
@@ -123,7 +125,7 @@ export class BoardRuntimeModel {
         headerStyles.borderTopRightRadius = '10px';
       }
 
-      this.pageObject.styleColumnHeader(columnId, headerStyles);
+      this.pageObject.styleColumnHeader(columnId, headerStyles, excludedSwimlaneIds);
     });
   }
 
@@ -161,7 +163,7 @@ export class BoardRuntimeModel {
             ${stat.currentCount}/${stat.limit}
             <span class="${hintClass}">Issues per group / Max number of issues per group</span>
           </span>`;
-      this.pageObject.insertColumnHeaderHtml(leftTailColumnId, badgeHtml);
+      this.pageObject.insertColumnHeaderHtml(leftTailColumnId, badgeHtml, stat.ignoredSwimlanes);
     });
   }
 

@@ -78,6 +78,7 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   setCachedColumns(columns: Array<{ id: string; name: string; statusIds?: string[] }>): void;
   setBoardWorkData(data: CloudBoardWorkData | null): void;
   setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null): void;
+  getCachedSwimlanes?(): Array<{ id: string; name: string }>;
 }
 
 export type CloudBoardWorkData = {
@@ -135,6 +136,10 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null) {
     this._swimlanesCache = swimlanes;
+  },
+
+  getCachedSwimlanes(): Array<{ id: string; name: string }> {
+    return this._swimlanesCache ?? [];
   },
 
   selectors: {
@@ -660,8 +665,13 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     }, 0);
   },
 
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>, excludedSwimlaneIds?: string[]): void {
+    const excluded = new Set(excludedSwimlaneIds ?? []);
     this._findAllColumnElements(columnId).forEach(col => {
+      if (excluded.size > 0) {
+        const swimlaneId = this.getSwimlaneIdOfIssue(col);
+        if (swimlaneId && excluded.has(swimlaneId)) return;
+      }
       const el = this._findHeaderElementInColumn(col as HTMLElement);
       Object.assign(el.style, styles);
     });
@@ -681,8 +691,13 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     });
   },
 
-  insertColumnHeaderHtml(columnId: string, html: string): void {
+  insertColumnHeaderHtml(columnId: string, html: string, excludedSwimlaneIds?: string[]): void {
+    const excluded = new Set(excludedSwimlaneIds ?? []);
     this._findAllColumnElements(columnId).forEach(col => {
+      if (excluded.size > 0) {
+        const swimlaneId = this.getSwimlaneIdOfIssue(col);
+        if (swimlaneId && excluded.has(swimlaneId)) return;
+      }
       const el = this._findHeaderElementInColumn(col as HTMLElement);
       el.insertAdjacentHTML('beforeend', html);
     });
