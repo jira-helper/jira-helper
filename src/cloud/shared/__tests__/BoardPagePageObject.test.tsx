@@ -294,6 +294,93 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getIssueCountInColumn('116')).toBe(1);
   });
 
+  function renderCompanyManagedSwimlanes() {
+    // Classic company-managed swimlanes use platform-board-kit.ui.swimlane.*,
+    // not board.content.swimlane.scroll-container (team-managed Group-by).
+    document.body.innerHTML = `
+      <div data-testid="software-board.board-area">
+        <div data-testid="platform-board-kit.ui.swimlane.swimlane-wrapper">
+          <div data-testid="platform-board-kit.ui.swimlane.summary-section">Expedite</div>
+          <div data-testid="platform-board-kit.ui.swimlane.swimlane-columns">
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+              </div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-1"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-2"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-3"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-4"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-5"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-6"></div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">In Progress</div>
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">Done</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-testid="platform-board-kit.ui.swimlane.swimlane-wrapper">
+          <div data-testid="platform-board-kit.ui.swimlane.summary-section">Everything Else</div>
+          <div data-testid="platform-board-kit.ui.swimlane.swimlane-columns">
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+              </div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-7"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-8"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-9"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-10"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-11"></div>
+              <div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-12"></div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">In Progress</div>
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">Done</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([
+      { id: '115', name: 'To Do' },
+      { id: '116', name: 'In Progress' },
+      { id: '117', name: 'Done' },
+    ]);
+  }
+
+  it('counts WIP across company-managed Cloud swimlanes (swimlane-columns)', () => {
+    renderCompanyManagedSwimlanes();
+
+    const swimlanes = BoardPagePageObject.getSwimlanes();
+    expect(swimlanes).toHaveLength(2);
+    expect(swimlanes[0]?.header.textContent).toContain('Expedite');
+    expect(swimlanes[1]?.header.textContent).toContain('Everything Else');
+    expect(BoardPagePageObject.hasCustomSwimlanes()).toBe(true);
+
+    expect(BoardPagePageObject.getColumnElements()).toHaveLength(6);
+    expect(BoardPagePageObject.getIssueCountInColumn('115')).toBe(12);
+    expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(12);
+    expect(BoardPagePageObject.getIssueCountInColumn('116')).toBe(0);
+
+    const secondTodo = BoardPagePageObject.getColumnsInSwimlane(swimlanes[1]!.element)[0]!;
+    const lateCard = document.querySelector('[aria-label="TRB3-12"]');
+    expect(BoardPagePageObject.getColumnIdFromColumn(secondTodo)).toBe('115');
+    expect(BoardPagePageObject.getColumnIdOfIssue(lateCard!)).toBe('115');
+    expect(BoardPagePageObject.getSwimlaneIdOfIssue(lateCard!)).toBe('swimlane-1');
+  });
+
   it('highlights every swimlane cell for an over-limit column', () => {
     renderAssigneeSwimlanes();
     BoardPagePageObject.highlightColumnCells('115', 'rgb(255, 86, 48)');
