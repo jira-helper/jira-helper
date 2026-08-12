@@ -353,13 +353,15 @@ describe('BoardRuntimeModel', () => {
         expect.arrayContaining([
           expect.objectContaining({
             backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
-            borderTop: '4px solid #abc',
-            paddingTop: '18px',
-            boxSizing: 'border-box',
+            boxShadow: 'inset 0 4px 0 0 #abc',
           }),
         ])
       );
       expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ position: 'relative' })]));
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ paddingTop: '18px' })]));
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ borderTop: expect.any(String) })])
+      );
       expect(styledHeaders).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ backgroundColor: '#deebff' })])
       );
@@ -465,6 +467,7 @@ describe('BoardRuntimeModel', () => {
       expect(css).toContain('top: -24%');
       expect(css).toContain('.limitColumnBadgeCloud {');
       expect(css).toContain('top: 0');
+      expect(css).toContain('right: 12px');
     });
 
     it('allows the column limit tooltip text to wrap in Cloud', () => {
