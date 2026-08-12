@@ -435,7 +435,17 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       column.querySelector<HTMLElement>(this.selectors.columnTitle) ||
       column.querySelector<HTMLElement>('h2, h3');
 
-    return header ?? column;
+    const target = header ?? column;
+    // Cloud sticky overlay is often a parent of the header container; painting only the
+    // inner node leaves Jira's translucent sticky wrapper (cards show through).
+    let ancestor: HTMLElement | null = target.parentElement;
+    while (ancestor && column.contains(ancestor)) {
+      if (ancestor.style.position === 'sticky' || getComputedStyle(ancestor).position === 'sticky') {
+        return ancestor;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return target;
   },
 
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
@@ -471,6 +481,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     style.removeProperty('border-top-left-radius');
     style.removeProperty('border-top-right-radius');
     style.removeProperty('padding-top');
+    style.removeProperty('box-sizing');
     style.removeProperty('position');
   },
 

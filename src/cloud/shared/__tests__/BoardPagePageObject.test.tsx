@@ -65,6 +65,38 @@ describe('BoardPagePageObject', () => {
     expect(column.style.borderTop).toBe('');
   });
 
+  it('styles the sticky header wrapper so translucent Cloud overlay is opaque', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="platform-board-kit.ui.column.draggable-column">
+          <div data-jh-sticky-header style="position: sticky; top: 40px; background: rgba(5, 21, 36, 0.06);">
+            <div data-testid="platform-board-kit.ui.column-header">
+              <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+            </div>
+          </div>
+          <div data-testid="platform-board-kit.ui.card.card">KAN-1</div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+
+    const sticky = document.querySelector<HTMLElement>('[data-jh-sticky-header]');
+    const inner = document.querySelector<HTMLElement>('[data-testid="platform-board-kit.ui.column-header"]');
+
+    expect(BoardPagePageObject.getColumnHeaderElement('115')).toBe(sticky);
+
+    BoardPagePageObject.styleColumnHeader('115', {
+      backgroundColor: 'rgb(255, 255, 255)',
+      borderTop: '4px solid rgb(255, 0, 0)',
+      paddingTop: '18px',
+    });
+
+    expect(sticky!.style.backgroundColor).toBe('rgb(255, 255, 255)');
+    expect(sticky!.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
+    expect(sticky!.style.paddingTop).toBe('18px');
+    expect(inner!.style.backgroundColor).toBe('');
+  });
+
   it('reads assignee from Jira Cloud avatar label text', () => {
     document.body.innerHTML = `
       <div data-testid="platform-board-kit.ui.card.card">
