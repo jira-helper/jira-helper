@@ -1,4 +1,3 @@
-/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
@@ -7,6 +6,7 @@ import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardP
 import { AvatarBadge } from './AvatarBadge';
 import type { ColumnHeaderRenderMode } from 'src/infrastructure/page-objects/BoardPage';
 import type { PersonLimitStats } from '../models/types';
+import styles from './AvatarsContainer.module.css';
 
 type PersonStats = PersonLimitStats['persons'][number];
 
@@ -33,7 +33,7 @@ export const AvatarsContainer: React.FC = () => {
   }
 
   return (
-    <div id="avatars-limits" style={{ display: 'inline-flex', marginLeft: 30 }}>
+    <div id="avatars-limits" className={styles.container}>
       {stats.flatMap(stat =>
         stat.persons.map(person => {
           const personMatches = stat.matches.filter(
