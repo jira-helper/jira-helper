@@ -87,7 +87,7 @@ export interface IBoardPagePageObject {
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number;
 
   /** Apply inline styles to the column header element. */
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void;
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>, excludedSwimlaneIds?: string[]): void;
 
   /**
    * Clear group-limit inline styles on the column header (background, top border, radii).
@@ -96,7 +96,7 @@ export interface IBoardPagePageObject {
   resetColumnHeaderStyles(columnId: string): void;
 
   /** Insert HTML at the end of the column header (`insertAdjacentHTML` `beforeend`). */
-  insertColumnHeaderHtml(columnId: string, html: string): void;
+  insertColumnHeaderHtml(columnId: string, html: string, excludedSwimlaneIds?: string[]): void;
 
   /** Remove descendants of the column header matching `selector`. */
   removeColumnHeaderElements(columnId: string, selector: string): void;

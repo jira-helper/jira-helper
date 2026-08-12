@@ -541,6 +541,30 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getSwimlaneIdOfIssue(card!)).toBe('2');
   });
 
+  it('styleColumnHeader skips excluded swimlane ids on company-managed boards', () => {
+    renderCompanyManagedSwimlanes();
+    BoardPagePageObject.setSwimlanesCache([
+      { id: '6', name: 'Expedite' },
+      { id: '2', name: 'Everything Else' },
+    ]);
+
+    BoardPagePageObject.styleColumnHeader('115', { borderTop: '4px solid rgb(255, 0, 0)' }, ['2']);
+
+    const todoHeaders = BoardPagePageObject.getSwimlanes().flatMap(sw =>
+      BoardPagePageObject.getColumnsInSwimlane(sw.element)
+        .filter(col => BoardPagePageObject.getColumnIdFromColumn(col) === '115')
+        .map(
+          col =>
+            col.querySelector<HTMLElement>('[data-testid="platform-board-kit.ui.column-header"]') ??
+            col.querySelector<HTMLElement>('h2, h3')
+        )
+    );
+
+    expect(todoHeaders).toHaveLength(2);
+    expect(todoHeaders[0]!.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
+    expect(todoHeaders[1]!.style.borderTop).toBe('');
+  });
+
   it('applies column header styles and badges to every mounted swimlane copy', () => {
     renderCompanyManagedSwimlanes();
     BoardPagePageObject.setSwimlanesCache([

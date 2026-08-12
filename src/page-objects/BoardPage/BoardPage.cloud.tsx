@@ -480,7 +480,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     }).length;
   },
 
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>, excludedSwimlaneIds?: string[]): void {
+    void excludedSwimlaneIds;
     const columnElement = this.getColumnHeaderElement(columnId);
     if (!columnElement) return;
     Object.assign(columnElement.style, styles);
@@ -496,7 +497,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     style.removeProperty('border-top-right-radius');
   },
 
-  insertColumnHeaderHtml(columnId: string, html: string): void {
+  insertColumnHeaderHtml(columnId: string, html: string, excludedSwimlaneIds?: string[]): void {
+    void excludedSwimlaneIds;
     const columnElement = this.getColumnHeaderElement(columnId);
     if (!columnElement) return;
     columnElement.insertAdjacentHTML('beforeend', html);

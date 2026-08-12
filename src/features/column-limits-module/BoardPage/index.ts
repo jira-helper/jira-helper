@@ -27,6 +27,7 @@ interface EditData {
     }>;
   };
   swimlanesConfig?: {
+    swimlaneStrategy?: string;
     swimlanes?: Array<{ id?: string; name: string }>;
   };
 }
@@ -90,8 +91,12 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
 
     // Settings tab is registered regardless of `canEdit`: viewers can inspect and
     // tweak locally (same pattern as person-limits); persistence may fail without edit rights.
+    const po = this.container.inject(boardPagePageObjectToken);
     const rawSwimlanes = (editData as EditData).swimlanesConfig?.swimlanes ?? [];
-    const swimlanes = rawSwimlanes.map((swim, index) => ({
+    const cachedSwimlanes: Array<{ id?: string; name: string }> =
+      'getCachedSwimlanes' in po && typeof po.getCachedSwimlanes === 'function' ? po.getCachedSwimlanes() : [];
+    const swimlanesSource = rawSwimlanes.length > 0 ? rawSwimlanes : cachedSwimlanes;
+    const swimlanes = swimlanesSource.map((swim: { id?: string; name: string }, index: number) => ({
       id: String(swim.id ?? swim.name ?? `swimlane-${index}`),
       name: swim.name,
     }));
@@ -122,7 +127,6 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     applyRuntime();
 
     // Cloud board pool is board.content.board-wrapper (not #ghx-pool).
-    const po = this.container.inject(boardPagePageObjectToken);
     const poolSelector = po.selectors?.pool ?? '#ghx-pool';
     if (document.querySelector(poolSelector)) {
       // Debounce + ignore our own badge DOM writes (apply inserts/removes the badge and
