@@ -1,4 +1,5 @@
 import keys from '@tinkoff/utils/object/keys';
+import type { WipLimitsProperty } from '../types';
 
 type GroupData = {
   columns?: string[];
@@ -9,6 +10,39 @@ type GroupsFromAPI = Record<string, GroupData>;
 interface GroupResult {
   name?: string;
   value?: string[];
+}
+
+/** Drop column ids absent from the current board; remove groups left with no columns. */
+export function stripUnknownWipColumnIds(
+  property: WipLimitsProperty,
+  knownColumnIds: Iterable<string>
+): { cleaned: WipLimitsProperty; changed: boolean } {
+  const known = new Set(knownColumnIds);
+  let changed = false;
+  const cleaned: WipLimitsProperty = {};
+
+  for (const [groupId, group] of Object.entries(property)) {
+    const columns = (group.columns ?? []).filter(columnId => {
+      if (known.has(columnId)) return true;
+      changed = true;
+      return false;
+    });
+
+    if (columns.length === 0) {
+      if ((group.columns ?? []).length > 0) {
+        changed = true;
+      }
+      continue;
+    }
+
+    if (columns.length !== (group.columns ?? []).length) {
+      changed = true;
+    }
+
+    cleaned[groupId] = { ...group, columns };
+  }
+
+  return { cleaned, changed };
 }
 
 // Function to find a group by column ID

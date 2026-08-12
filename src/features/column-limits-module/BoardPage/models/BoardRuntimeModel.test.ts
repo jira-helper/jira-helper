@@ -325,7 +325,7 @@ describe('BoardRuntimeModel', () => {
       expect(styledHeaders[1]).not.toHaveProperty('borderTopRightRadius');
     });
 
-    it('uses Cloud-specific column header rendering without server background fill', () => {
+    it('uses Cloud-specific column header rendering with opaque theme-aware background', () => {
       mockPageObject.columnHeaderRenderMode = 'cloud';
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3']);
       const model = modelWithData({});
@@ -349,6 +349,7 @@ describe('BoardRuntimeModel', () => {
       expect(styledHeaders).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
+            backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
             borderTop: '4px solid #abc',
             paddingTop: '18px',
             position: 'relative',
@@ -356,7 +357,7 @@ describe('BoardRuntimeModel', () => {
         ])
       );
       expect(styledHeaders).toEqual(
-        expect.not.arrayContaining([expect.objectContaining({ backgroundColor: expect.any(String) })])
+        expect.not.arrayContaining([expect.objectContaining({ backgroundColor: '#deebff' })])
       );
     });
 
