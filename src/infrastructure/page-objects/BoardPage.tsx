@@ -247,6 +247,20 @@ export interface IBoardPagePageObject {
   /** Parse assignee name from issue card's avatar tooltip / alt. */
   getAssigneeFromIssue(issue: Element): string | null;
 
+  /**
+   * Person-WIP matches from board work data (Cloud allData).
+   * Returns `null` when unavailable — callers must fall back to DOM counting.
+   */
+  getPersonWipMatchesFromWorkData?(criteria: {
+    persons: Array<{ name: string; displayName?: string }>;
+    columns: Array<{ id: string; name?: string }>;
+    swimlanes: Array<{ id: string; name?: string }>;
+    includedIssueTypes?: string[];
+  }): Array<{ key: string; assignee: string }> | null;
+
+  /** Issue key from a mounted card (`data-issue-key`, aria-label, or key link). */
+  getIssueKeyFromIssue?(issue: Element): string | null;
+
   /** Issue type from `.ghx-type` title or textContent (person-limits semantics). */
   getIssueTypeFromIssue(issue: Element): string | null;
 
@@ -698,6 +712,14 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     if (!label) return null;
 
     return getNameFromTooltip(label);
+  },
+
+  getPersonWipMatchesFromWorkData() {
+    return null;
+  },
+
+  getIssueKeyFromIssue(issue: Element): string | null {
+    return issue.getAttribute('data-issue-key') ?? issue.querySelector('.ghx-key')?.textContent?.trim() ?? null;
   },
 
   getIssueTypeFromIssue(issue: Element): string | null {

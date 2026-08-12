@@ -536,6 +536,66 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(19);
   });
 
+  it('matches person WIP from allData including issues not mounted in DOM', () => {
+    renderPartialCompanyManagedSwimlanes();
+    BoardPagePageObject.setBoardWorkData({
+      columns: [
+        { id: '115', name: 'To Do', statusIds: ['10074'] },
+        { id: '116', name: 'In Progress', statusIds: ['10075'] },
+      ],
+      swimlanes: [
+        { id: '1', name: 'Expedite', issueIds: [101, 102] },
+        { id: '2', name: 'Everything Else', issueIds: [103] },
+      ],
+      issues: [
+        {
+          id: 101,
+          key: 'TRB3-7',
+          statusId: '10074',
+          typeName: 'Эпик',
+          assigneeAccountId: 'acct-maxim',
+          assigneeName: 'Maxim Sosnov',
+        },
+        {
+          id: 102,
+          key: 'TRB3-8',
+          statusId: '10074',
+          typeName: 'Эпик',
+          assigneeAccountId: 'acct-maxim',
+          assigneeName: 'Maxim Sosnov',
+        },
+        {
+          id: 103,
+          key: 'TRB3-1',
+          statusId: '10074',
+          typeName: 'Эпик',
+          assigneeAccountId: 'acct-maxim',
+          assigneeName: 'Maxim Sosnov',
+        },
+        {
+          id: 104,
+          key: 'TRB3-99',
+          statusId: '10074',
+          typeName: 'Задача',
+          assigneeAccountId: 'acct-maxim',
+          assigneeName: 'Maxim Sosnov',
+        },
+      ],
+    });
+
+    const matches = BoardPagePageObject.getPersonWipMatchesFromWorkData({
+      persons: [{ name: 'acct-maxim', displayName: 'Maxim Sosnov' }],
+      columns: [],
+      swimlanes: [{ id: '1', name: 'Expedite' }],
+      includedIssueTypes: ['Эпик'],
+    });
+
+    expect(matches).toEqual([
+      { key: 'TRB3-7', assignee: 'acct-maxim' },
+      { key: 'TRB3-8', assignee: 'acct-maxim' },
+    ]);
+  });
+
   it('filters API column count by ignoredSwimlanes ids', () => {
     renderPartialCompanyManagedSwimlanes();
     setTrb3WorkData();

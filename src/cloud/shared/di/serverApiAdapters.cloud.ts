@@ -1,4 +1,4 @@
-/* eslint-disable no-console, @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud server API adapter logs fallback paths and ignores best-effort DOM misses. */
+/* eslint-disable @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud server API adapter logs fallback paths and ignores best-effort DOM misses. */
 import type { Container } from 'dioma';
 import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import { Ok, Err } from 'ts-results';
@@ -15,8 +15,7 @@ import type { JiraUser } from '../../../infrastructure/jira/jiraApi';
 import { getBoardEditDataCloud, getProjectIssueTypesCloud, searchUsersCloud } from '../jiraApi.cloud';
 import type { CloudJiraUser } from '../jiraApi.cloud';
 import { SettingsStorage } from '../SettingsStorage';
-
-const LS_PREFIX = 'jh-prop-';
+import { getBoardPropertyFromApi } from './boardPropertyApi.cloud';
 
 export function registerServerApiCloudAdapters(container: Container): void {
   const boardPage = container.inject(boardPagePageObjectToken);
@@ -24,47 +23,11 @@ export function registerServerApiCloudAdapters(container: Container): void {
 
   container.register({
     token: getBoardPropertyToken,
-    value: async <T>(_boardId: string, property: string, _options?: any): Promise<T | undefined> => {
-      console.log(`[CloudAdapter:getBoardProperty] property="${property}"`);
-
-      const local = localStorage.getItem(`${LS_PREFIX}${property}`);
-      if (local) {
-        try {
-          const parsed = JSON.parse(local) as T;
-          const isEmpty =
-            typeof parsed === 'object' &&
-            !Array.isArray(parsed) &&
-            parsed !== null &&
-            Object.keys(parsed as object).length === 0;
-          if (!isEmpty) {
-            console.log('[CloudAdapter:getBoardProperty] from localStorage cache');
-            return parsed;
-          }
-          console.log('[CloudAdapter:getBoardProperty] localStorage cache is empty, proceeding to API');
-        } catch {
-          console.log('[CloudAdapter:getBoardProperty] localStorage cache parse failed');
-        }
-      }
-
-      let api = await storage.get<any>(property);
-      console.log('[CloudAdapter:getBoardProperty] storage.get returned:', api === null ? 'null' : typeof api);
-
-      if (api !== null) {
-        if (typeof api === 'object' && 'value' in api) {
-          console.log('[CloudAdapter:getBoardProperty] unwrapping value wrapper');
-          api = api.value as T;
-        }
-        localStorage.setItem(`${LS_PREFIX}${property}`, JSON.stringify(api));
-        console.log('[CloudAdapter:getBoardProperty] cached in localStorage');
-      }
-
-      const result = api ?? undefined;
-      console.log(
-        '[CloudAdapter:getBoardProperty] returning:',
-        result === undefined ? 'undefined' : JSON.stringify(result).substring(0, 100)
-      );
-      return result;
-    },
+    value: async <T>(_boardId: string, property: string, _options?: any): Promise<T | undefined> =>
+      getBoardPropertyFromApi<T>({
+        property,
+        fetchFromApi: () => storage.get<any>(property),
+      }),
   });
 
   container.register({
@@ -76,7 +39,6 @@ export function registerServerApiCloudAdapters(container: Container): void {
   container.register({
     token: updateBoardPropertyToken,
     value: async (_boardId: string, property: string, value: any, _options?: any) => {
-      localStorage.setItem(`${LS_PREFIX}${property}`, JSON.stringify(value));
       await storage.set(property, value);
     },
   });
@@ -84,7 +46,6 @@ export function registerServerApiCloudAdapters(container: Container): void {
   container.register({
     token: deleteBoardPropertyToken,
     value: async (_boardId: string, property: string, _options?: any) => {
-      localStorage.removeItem(`${LS_PREFIX}${property}`);
       await storage.delete(property);
     },
   });

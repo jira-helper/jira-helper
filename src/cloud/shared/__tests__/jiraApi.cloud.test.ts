@@ -90,7 +90,14 @@ describe('getBoardEditDataCloud', () => {
       },
       issuesData: {
         issues: [
-          { id: 1, statusId: '10074', typeName: 'Story' },
+          {
+            id: 1,
+            key: 'TRB3-1',
+            statusId: '10074',
+            typeName: 'Story',
+            assigneeAccountId: 'acct-1',
+            assigneeName: 'Alice',
+          },
           { id: 2, statusId: '10074', typeName: 'Story' },
           { id: 3, statusId: '10074', typeName: 'Story' },
           { id: 4, statusId: '10074', typeName: 'Story' },
@@ -134,7 +141,20 @@ describe('getBoardEditDataCloud', () => {
         { id: '9', name: 'pri', issueIds: [1, 2, 3] },
         { id: '6', name: 'Expedite', issueIds: [4, 5] },
       ],
-      issues: allDataResponse.issuesData.issues,
+      issues: [
+        {
+          id: 1,
+          key: 'TRB3-1',
+          statusId: '10074',
+          typeName: 'Story',
+          assigneeAccountId: 'acct-1',
+          assigneeName: 'Alice',
+        },
+        { id: 2, statusId: '10074', typeName: 'Story' },
+        { id: 3, statusId: '10074', typeName: 'Story' },
+        { id: 4, statusId: '10074', typeName: 'Story' },
+        { id: 5, statusId: '10074', typeName: 'Story' },
+      ],
     });
     expect(setSwimlanesCache).toHaveBeenCalledWith([{ id: 'sw1', name: 'Default' }]);
   });

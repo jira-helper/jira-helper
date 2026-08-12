@@ -79,12 +79,36 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   setBoardWorkData(data: CloudBoardWorkData | null): void;
   setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null): void;
   getCachedSwimlanes?(): Array<{ id: string; name: string }>;
+  /** Person-WIP matches from allData; `null` when work data is unavailable (use DOM). */
+  getPersonWipMatchesFromWorkData(criteria: PersonWipWorkDataCriteria): PersonWipWorkDataMatch[] | null;
+  getIssueKeyFromIssue(issue: Element): string | null;
 }
+
+export type CloudBoardWorkIssue = {
+  id: number;
+  statusId: string;
+  typeName?: string;
+  key?: string;
+  assigneeAccountId?: string;
+  assigneeName?: string;
+};
+
+export type PersonWipWorkDataMatch = {
+  key: string;
+  assignee: string;
+};
+
+export type PersonWipWorkDataCriteria = {
+  persons: Array<{ name: string; displayName?: string }>;
+  columns: Array<{ id: string; name?: string }>;
+  swimlanes: Array<{ id: string; name?: string }>;
+  includedIssueTypes?: string[];
+};
 
 export type CloudBoardWorkData = {
   columns: Array<{ id: string; name: string; statusIds: string[] }>;
   swimlanes: Array<{ id: string; name: string; issueIds: number[] }>;
-  issues: Array<{ id: number; statusId: string; typeName?: string }>;
+  issues: CloudBoardWorkIssue[];
 };
 
 type CachedColumn = { id: string; name: string; statusIds?: string[] };
@@ -109,6 +133,8 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _resolveSwimlaneIdByName(name: string, index: number): string;
   _resolveStatusIdsForColumn(columnId: string): string[] | null;
   _getIssueCountFromWorkData(columnId: string, options?: ColumnIssueCountOptions): number | null;
+  _resolveColumnIdForStatus(statusId: string): string | null;
+  _resolveSwimlaneIdForIssue(issueId: number): string | null;
 };
 
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
@@ -654,6 +680,92 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     }
 
     return matchingIssues.length;
+  },
+
+  _resolveColumnIdForStatus(statusId: string): string | null {
+    const columns = this._boardWorkData?.columns ?? this._columnsCache ?? [];
+    const found = columns.find(col => col.statusIds?.includes(statusId));
+    return found?.id ?? null;
+  },
+
+  _resolveSwimlaneIdForIssue(issueId: number): string | null {
+    if (!this._boardWorkData?.swimlanes?.length) return null;
+    for (const swimlane of this._boardWorkData.swimlanes) {
+      if (swimlane.issueIds.includes(issueId)) {
+        return swimlane.id;
+      }
+    }
+    return null;
+  },
+
+  getPersonWipMatchesFromWorkData(criteria: PersonWipWorkDataCriteria): PersonWipWorkDataMatch[] | null {
+    if (!this._boardWorkData?.issues?.length) {
+      return null;
+    }
+
+    const columnIds = new Set(criteria.columns.map(c => c.id));
+    const swimlaneIds = new Set(criteria.swimlanes.map(s => s.id));
+    const typeFilter =
+      criteria.includedIssueTypes?.length && criteria.includedIssueTypes.length > 0
+        ? new Set(criteria.includedIssueTypes)
+        : null;
+
+    const matches: PersonWipWorkDataMatch[] = [];
+    for (const issue of this._boardWorkData.issues) {
+      const assignee = issue.assigneeAccountId ?? issue.assigneeName ?? null;
+      if (!assignee) continue;
+
+      const columnId = this._resolveColumnIdForStatus(issue.statusId) ?? '';
+      const swimlaneId = this._resolveSwimlaneIdForIssue(issue.id);
+      const issueType = issue.typeName ?? null;
+
+      const isAssigneeMatch = criteria.persons.some(
+        person =>
+          person.name === issue.assigneeAccountId ||
+          person.name === assignee ||
+          (person.displayName != null && (person.displayName === assignee || person.displayName === issue.assigneeName))
+      );
+      if (!isAssigneeMatch) continue;
+
+      let isColumnMatch = columnIds.size === 0 || columnIds.has(columnId);
+      if (!isColumnMatch) {
+        const ordered = this._columnsCache?.length ? this._columnsCache : this._boardWorkData.columns;
+        isColumnMatch = [...columnIds].some(id => {
+          const m = /^column-(\d+)$/.exec(id);
+          if (!m) return false;
+          const idx = Number(m[1]);
+          return ordered[idx]?.id === columnId;
+        });
+      }
+      if (!isColumnMatch) continue;
+
+      const isSwimlaneMatch = swimlaneIds.size === 0 || (swimlaneId != null && swimlaneIds.has(swimlaneId));
+      if (!isSwimlaneMatch) continue;
+
+      const isTypeMatch = typeFilter == null || (issueType != null && typeFilter.has(issueType));
+      if (!isTypeMatch) continue;
+
+      const key = issue.key ?? String(issue.id);
+      matches.push({ key, assignee: issue.assigneeAccountId ?? assignee });
+    }
+
+    return matches;
+  },
+
+  getIssueKeyFromIssue(issue: Element): string | null {
+    if (issue == null || typeof (issue as Element).getAttribute !== 'function') {
+      return null;
+    }
+    try {
+      const dataKey = issue.getAttribute('data-issue-key');
+      if (dataKey) return dataKey;
+      const aria = issue.getAttribute('aria-label')?.trim();
+      if (aria && /^[A-Z][A-Z0-9]+-\d+$/i.test(aria)) return aria;
+      const hrefKey = issue.querySelector('a[href*="/browse/"]')?.textContent?.trim();
+      return hrefKey || null;
+    } catch {
+      return null;
+    }
   },
 
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
