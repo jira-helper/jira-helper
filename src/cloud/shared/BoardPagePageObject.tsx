@@ -75,32 +75,66 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   getAllCloudCards(): HTMLElement[];
   getBoardId(): number | null;
   getIssueCssSelector(editData: any): string;
-  setCachedColumns(columns: Array<{ id: string; name: string }>): void;
+  setCachedColumns(columns: Array<{ id: string; name: string; statusIds?: string[] }>): void;
+  setBoardWorkData(data: CloudBoardWorkData | null): void;
+  setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null): void;
 }
 
-type CachedColumn = { id: string; name: string };
+export type CloudBoardWorkData = {
+  columns: Array<{ id: string; name: string; statusIds: string[] }>;
+  swimlanes: Array<{ id: string; name: string; issueIds: number[] }>;
+  issues: Array<{ id: number; statusId: string; typeName?: string }>;
+};
+
+type CachedColumn = { id: string; name: string; statusIds?: string[] };
+type CachedSwimlane = { id: string; name: string };
 
 type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _columnsCache: CachedColumn[] | null;
+  _boardWorkData: CloudBoardWorkData | null;
+  _swimlanesCache: CachedSwimlane[] | null;
   _findColumnElement(columnId: string): Element | null;
   _findAllColumnElements(columnId: string): Element[];
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
   _getSwimlaneScrollContainers(): Element[];
   _resolveColumnIndex(columnId: string): number | null;
   _getAllColumnElementsFlat(): Element[];
+  _getUniqueColumnElementsInRoot(root: Element): Element[];
   _getColumnSetSize(allColumns: Element[]): number | null;
   _getRepresentativeColumnElements(): Element[];
   _getSwimlaneRoot(scrollContainer: Element): Element;
   _getSwimlaneName(swimlaneRoot: Element, index: number): string;
+  _resolveSwimlaneIdByName(name: string, index: number): string;
+  _resolveStatusIdsForColumn(columnId: string): string[] | null;
+  _getIssueCountFromWorkData(columnId: string, options?: ColumnIssueCountOptions): number | null;
 };
 
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   columnHeaderRenderMode: 'cloud',
 
   _columnsCache: null as CachedColumn[] | null,
+  _boardWorkData: null as CloudBoardWorkData | null,
+  _swimlanesCache: null as CachedSwimlane[] | null,
 
-  setCachedColumns(columns: Array<{ id: string; name: string }>) {
+  setCachedColumns(columns: Array<{ id: string; name: string; statusIds?: string[] }>) {
     this._columnsCache = columns;
+  },
+
+  setBoardWorkData(data: CloudBoardWorkData | null) {
+    this._boardWorkData = data;
+    if (data?.swimlanes?.length) {
+      this._swimlanesCache = data.swimlanes.map(sw => ({ id: sw.id, name: sw.name }));
+    }
+    if (data?.columns?.length && this._columnsCache) {
+      this._columnsCache = this._columnsCache.map(col => {
+        const fromWork = data.columns.find(c => c.id === col.id);
+        return fromWork?.statusIds?.length ? { ...col, statusIds: fromWork.statusIds } : col;
+      });
+    }
+  },
+
+  setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null) {
+    this._swimlanesCache = swimlanes;
   },
 
   selectors: {
@@ -111,7 +145,8 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     grabber: '.ghx-grabber',
     grabberTransparent: '.ghx-grabber-transparent',
     sidebar: '[data-testid="software-board.layout.sidebar"]',
-    column: '[data-testid="board.content.cell"], [data-testid*="draggable-column"]',
+    column:
+      '[data-testid="board.content.cell"], [data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"], [data-testid="platform-board-kit.ui.column.draggable-column"]',
     columnHeader:
       '[data-testid="board.content.cell.column-header"], [data-testid="platform-board-kit.ui.column-header"]',
     columnTitle:
@@ -276,16 +311,26 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return `swimlane-${index}`;
   },
 
+  _resolveSwimlaneIdByName(name: string, index: number): string {
+    if (this._swimlanesCache?.length) {
+      const byName = this._swimlanesCache.find(sw => sw.name === name);
+      if (byName) return byName.id;
+      if (this._swimlanesCache[index]) return this._swimlanesCache[index].id;
+    }
+    return `swimlane-${index}`;
+  },
+
   getSwimlanes(): Array<{ id: string; element: Element; header: Element }> {
     return this._getSwimlaneScrollContainers().map((scroll, index) => {
       const element = this._getSwimlaneRoot(scroll);
       const name = this._getSwimlaneName(element, index);
+      const id = this._resolveSwimlaneIdByName(name, index);
       const header =
         element.querySelector('[data-testid="platform-board-kit.ui.swimlane.summary-section"]') ??
         Array.from(element.querySelectorAll('button')).find(btn => /[«"]/.test(btn.textContent ?? '')) ??
         element.querySelector('button') ??
         element;
-      return { id: `swimlane-${index}`, element, header };
+      return { id, element, header };
     });
   },
 
@@ -354,7 +399,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]';
     const scroll = swimlane.matches?.(scrollSelector) ? swimlane : swimlane.querySelector(scrollSelector);
     const root = scroll ?? swimlane;
-    return Array.from(root.querySelectorAll(this.selectors.column));
+    return this._getUniqueColumnElementsInRoot(root);
   },
 
   getColumnHeaderElement(columnId: string): HTMLElement | null {
@@ -367,7 +412,35 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   _getAllColumnElementsFlat(): Element[] {
-    return Array.from(document.querySelectorAll(this.selectors.column));
+    const all = Array.from(document.querySelectorAll(this.selectors.column));
+    return all.filter(el => {
+      const styledParent = el.closest('[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]');
+      if (styledParent && styledParent !== el) {
+        return false;
+      }
+      return true;
+    });
+  },
+
+  _getUniqueColumnElementsInRoot(root: Element): Element[] {
+    const styledWrappers = Array.from(
+      root.querySelectorAll('[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]')
+    );
+    if (styledWrappers.length > 0) {
+      return styledWrappers;
+    }
+
+    const cells = Array.from(root.querySelectorAll('[data-testid="board.content.cell"]'));
+    if (cells.length > 0) {
+      return cells;
+    }
+
+    return Array.from(root.querySelectorAll('[data-testid="platform-board-kit.ui.column.draggable-column"]')).filter(
+      el => {
+        const styledParent = el.closest('[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]');
+        return !styledParent || styledParent === el;
+      }
+    );
   },
 
   /**
@@ -385,7 +458,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   _getRepresentativeColumnElements(): Element[] {
     const swimlaneScrolls = this._getSwimlaneScrollContainers();
     if (swimlaneScrolls.length > 0) {
-      return Array.from(swimlaneScrolls[0].querySelectorAll(this.selectors.column));
+      return this._getUniqueColumnElementsInRoot(swimlaneScrolls[0]);
     }
     const all = this._getAllColumnElementsFlat();
     const setSize = this._getColumnSetSize(all);
@@ -415,6 +488,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getSwimlaneIds(): string[] {
+    if (this._swimlanesCache?.length) {
+      return this._swimlanesCache.map(s => s.id);
+    }
     return this.getSwimlanes().map(s => s.id);
   },
 
@@ -453,7 +529,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     const swimlaneScrolls = this._getSwimlaneScrollContainers();
     if (swimlaneScrolls.length > 0) {
       return swimlaneScrolls
-        .map(scroll => scroll.querySelectorAll(this.selectors.column)[index])
+        .map(scroll => this._getUniqueColumnElementsInRoot(scroll)[index])
         .filter((col): col is Element => Boolean(col));
     }
 
@@ -497,8 +573,70 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return target;
   },
 
+  _resolveStatusIdsForColumn(columnId: string): string[] | null {
+    const cached = this._columnsCache?.find(c => c.id === columnId);
+    if (cached?.statusIds?.length) {
+      return cached.statusIds;
+    }
+
+    const fromWork = this._boardWorkData?.columns.find(c => c.id === columnId);
+    if (fromWork?.statusIds?.length) {
+      return fromWork.statusIds;
+    }
+
+    const index = this._resolveColumnIndex(columnId);
+    if (index != null) {
+      const byIndex = this._columnsCache?.[index];
+      if (byIndex?.statusIds?.length) return byIndex.statusIds;
+      const workByIndex = this._boardWorkData?.columns[index];
+      if (workByIndex?.statusIds?.length) return workByIndex.statusIds;
+    }
+
+    return null;
+  },
+
+  _getIssueCountFromWorkData(columnId: string, options?: ColumnIssueCountOptions): number | null {
+    if (!this._boardWorkData) {
+      return null;
+    }
+
+    const statusIds = this._resolveStatusIdsForColumn(columnId);
+    if (!statusIds?.length) {
+      return null;
+    }
+
+    const statusSet = new Set(statusIds);
+    let matchingIssues = this._boardWorkData.issues.filter(issue => statusSet.has(issue.statusId));
+
+    const ignoredSwimlanes = new Set(options?.ignoredSwimlanes ?? []);
+    if (ignoredSwimlanes.size > 0) {
+      const excludedIssueIds = new Set<number>();
+      for (const swimlane of this._boardWorkData.swimlanes) {
+        if (ignoredSwimlanes.has(swimlane.id)) {
+          swimlane.issueIds.forEach(id => excludedIssueIds.add(id));
+        }
+      }
+      matchingIssues = matchingIssues.filter(issue => !excludedIssueIds.has(issue.id));
+    }
+
+    if (options?.includedIssueTypes?.length) {
+      const types = new Set(options.includedIssueTypes);
+      matchingIssues = matchingIssues.filter(issue => issue.typeName != null && types.has(issue.typeName));
+    }
+
+    return matchingIssues.length;
+  },
+
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {
+    const fromApi = this._getIssueCountFromWorkData(columnId, options);
+    if (fromApi != null) {
+      return fromApi;
+    }
+
     const ignoredSwimlanes = new Set<string>(options?.ignoredSwimlanes ?? []);
+    const cssFilter = options?.cssFilter;
+    const includedTypes = options?.includedIssueTypes?.length ? new Set(options.includedIssueTypes) : null;
+
     const columns = this._findAllColumnElements(columnId);
     return columns.reduce((total, col) => {
       if (ignoredSwimlanes.size > 0) {
@@ -507,46 +645,54 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
           return total;
         }
       }
-      return total + col.querySelectorAll(this.selectors.issue).length;
+
+      let issues = Array.from(col.querySelectorAll(this.selectors.issue));
+      if (cssFilter) {
+        issues = issues.filter(issue => issue.matches(cssFilter));
+      }
+      if (includedTypes) {
+        issues = issues.filter(issue => {
+          const typeName = this.getIssueTypeFromIssue(issue);
+          return typeName != null && includedTypes.has(typeName);
+        });
+      }
+      return total + issues.length;
     }, 0);
   },
 
   styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
-    const el = this.getColumnHeaderElement(columnId);
-    if (!el) {
-      return;
-    }
-    Object.assign(el.style, styles);
+    this._findAllColumnElements(columnId).forEach(col => {
+      const el = this._findHeaderElementInColumn(col as HTMLElement);
+      Object.assign(el.style, styles);
+    });
   },
 
   resetColumnHeaderStyles(columnId: string): void {
-    const el = this.getColumnHeaderElement(columnId);
-    if (!el) {
-      return;
-    }
-    const { style } = el;
-    style.removeProperty('background-color');
-    style.removeProperty('border-top');
-    style.removeProperty('border-top-left-radius');
-    style.removeProperty('border-top-right-radius');
-    style.removeProperty('padding-top');
-    style.removeProperty('box-sizing');
-    style.removeProperty('position');
+    this._findAllColumnElements(columnId).forEach(col => {
+      const el = this._findHeaderElementInColumn(col as HTMLElement);
+      const { style } = el;
+      style.removeProperty('background-color');
+      style.removeProperty('border-top');
+      style.removeProperty('border-top-left-radius');
+      style.removeProperty('border-top-right-radius');
+      style.removeProperty('padding-top');
+      style.removeProperty('box-sizing');
+      style.removeProperty('position');
+    });
   },
 
   insertColumnHeaderHtml(columnId: string, html: string): void {
-    const el = this.getColumnHeaderElement(columnId);
-    if (!el) {
-      return;
-    }
-    el.insertAdjacentHTML('beforeend', html);
+    this._findAllColumnElements(columnId).forEach(col => {
+      const el = this._findHeaderElementInColumn(col as HTMLElement);
+      el.insertAdjacentHTML('beforeend', html);
+    });
   },
 
   removeColumnHeaderElements(columnId: string, selector: string): void {
-    const el = this.getColumnHeaderElement(columnId);
-    if (!el) return;
-    const elements = el.querySelectorAll(selector);
-    elements.forEach(e => e.remove());
+    this._findAllColumnElements(columnId).forEach(col => {
+      const el = this._findHeaderElementInColumn(col as HTMLElement);
+      el.querySelectorAll(selector).forEach(e => e.remove());
+    });
   },
 
   highlightColumnCells(columnId: string, color: string, excludedSwimlaneIds?: string[]): void {
@@ -615,7 +761,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]'
     );
     if (scroll) {
-      const siblings = Array.from(scroll.querySelectorAll(this.selectors.column));
+      const siblings = this._getUniqueColumnElementsInRoot(scroll);
       const index = siblings.indexOf(column);
       if (index < 0) return null;
       if (this._columnsCache?.[index]) {
@@ -640,9 +786,12 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       '[data-testid="board.content.swimlane.scroll-container"], [data-testid="platform-board-kit.ui.swimlane.swimlane-columns"]'
     );
     if (!scroll) return null;
+    const swimlaneRoot = this._getSwimlaneRoot(scroll);
     const scrolls = this._getSwimlaneScrollContainers();
     const index = scrolls.indexOf(scroll);
-    return index >= 0 ? `swimlane-${index}` : null;
+    if (index < 0) return null;
+    const name = this._getSwimlaneName(swimlaneRoot, index);
+    return this._resolveSwimlaneIdByName(name, index);
   },
 
   getParentGroups(): Element[] {

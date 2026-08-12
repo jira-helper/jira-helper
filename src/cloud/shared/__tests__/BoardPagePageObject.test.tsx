@@ -29,6 +29,8 @@ describe('BoardPagePageObject', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     BoardPagePageObject.setCachedColumns([]);
+    BoardPagePageObject.setBoardWorkData(null);
+    BoardPagePageObject.setSwimlanesCache(null);
   });
 
   it('resolves the per-column header instead of the whole column', () => {
@@ -394,6 +396,190 @@ describe('BoardPagePageObject', () => {
     todoCells.forEach(cell => {
       expect((cell as HTMLElement).style.backgroundColor).toBe('rgb(255, 86, 48)');
     });
+  });
+
+  function renderPartialCompanyManagedSwimlanes() {
+    // Only 2 of 3 swimlanes mounted (vertical virtualization) — DOM count would be 13, not 19.
+    document.body.innerHTML = `
+      <div data-testid="software-board.board-area">
+        <div data-testid="platform-board-kit.ui.swimlane.swimlane-wrapper">
+          <div data-testid="platform-board-kit.ui.swimlane.summary-section">Expedite</div>
+          <div data-testid="platform-board-kit.ui.swimlane.swimlane-columns">
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+                </div>
+                ${Array.from({ length: 6 }, (_, i) => `<div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-E${i + 1}"></div>`).join('')}
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">In Progress</div>
+                </div>
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">Done</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-testid="platform-board-kit.ui.swimlane.swimlane-wrapper">
+          <div data-testid="platform-board-kit.ui.swimlane.summary-section">Everything Else</div>
+          <div data-testid="platform-board-kit.ui.swimlane.swimlane-columns">
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+                </div>
+                ${Array.from({ length: 4 }, (_, i) => `<div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-EE${i + 1}"></div>`).join('')}
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">In Progress</div>
+                </div>
+              </div>
+            </div>
+            <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+              <div data-testid="platform-board-kit.ui.column.draggable-column">
+                <div data-testid="platform-board-kit.ui.column-header">
+                  <div data-testid="platform-board-kit.ui.column-header-content">Done</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([
+      { id: '115', name: 'To Do', statusIds: ['10074'] },
+      { id: '116', name: 'In Progress', statusIds: ['10075'] },
+      { id: '117', name: 'Done', statusIds: ['10076'] },
+    ]);
+  }
+
+  function setTrb3WorkData() {
+    const priIssues = Array.from({ length: 9 }, (_, i) => ({
+      id: 1000 + i,
+      statusId: '10074',
+      typeName: 'Story',
+    }));
+    const expediteIssues = Array.from({ length: 6 }, (_, i) => ({
+      id: 2000 + i,
+      statusId: '10074',
+      typeName: 'Story',
+    }));
+    const everythingElseIssues = Array.from({ length: 4 }, (_, i) => ({
+      id: 3000 + i,
+      statusId: '10074',
+      typeName: 'Story',
+    }));
+
+    BoardPagePageObject.setBoardWorkData({
+      columns: [
+        { id: '115', name: 'To Do', statusIds: ['10074'] },
+        { id: '116', name: 'In Progress', statusIds: ['10075'] },
+        { id: '117', name: 'Done', statusIds: ['10076'] },
+      ],
+      swimlanes: [
+        { id: '9', name: 'pri', issueIds: priIssues.map(i => i.id) },
+        { id: '6', name: 'Expedite', issueIds: expediteIssues.map(i => i.id) },
+        { id: '2', name: 'Everything Else', issueIds: everythingElseIssues.map(i => i.id) },
+      ],
+      issues: [...priIssues, ...expediteIssues, ...everythingElseIssues],
+    });
+    BoardPagePageObject.setSwimlanesCache([
+      { id: '9', name: 'pri' },
+      { id: '6', name: 'Expedite' },
+      { id: '2', name: 'Everything Else' },
+    ]);
+  }
+
+  it('counts column WIP from allData even when DOM mounts fewer swimlanes', () => {
+    renderPartialCompanyManagedSwimlanes();
+    setTrb3WorkData();
+
+    // DOM-only count: 6 + 4 = 10 (missing unmounted pri swimlane)
+    expect(BoardPagePageObject.getIssueCountInColumn('115', { ignoredSwimlanes: ['9'] })).toBe(10);
+
+    expect(BoardPagePageObject.getIssueCountInColumn('115')).toBe(19);
+    expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(19);
+  });
+
+  it('filters API column count by ignoredSwimlanes ids', () => {
+    renderPartialCompanyManagedSwimlanes();
+    setTrb3WorkData();
+
+    // Ignore Everything Else (id 2): 19 - 4 = 15
+    expect(BoardPagePageObject.getIssueCountInColumn('115', { ignoredSwimlanes: ['2'] })).toBe(15);
+  });
+
+  it('returns API swimlane ids from cache (not swimlane-N aliases)', () => {
+    renderPartialCompanyManagedSwimlanes();
+    setTrb3WorkData();
+
+    expect(BoardPagePageObject.getSwimlaneIds()).toEqual(['9', '6', '2']);
+  });
+
+  it('maps DOM-mounted swimlanes to API ids by summary name', () => {
+    renderPartialCompanyManagedSwimlanes();
+    setTrb3WorkData();
+
+    const swimlanes = BoardPagePageObject.getSwimlanes();
+    expect(swimlanes).toHaveLength(2);
+    expect(swimlanes[0]?.id).toBe('6');
+    expect(swimlanes[1]?.id).toBe('2');
+
+    const card = document.querySelector('[aria-label="TRB3-EE1"]');
+    expect(BoardPagePageObject.getSwimlaneIdOfIssue(card!)).toBe('2');
+  });
+
+  it('applies column header styles and badges to every mounted swimlane copy', () => {
+    renderCompanyManagedSwimlanes();
+    BoardPagePageObject.setSwimlanesCache([
+      { id: '6', name: 'Expedite' },
+      { id: '2', name: 'Everything Else' },
+    ]);
+
+    BoardPagePageObject.styleColumnHeader('115', { borderTop: '4px solid rgb(255, 0, 0)' });
+    BoardPagePageObject.insertColumnHeaderHtml('115', '<span data-column-limits-badge="true">12/5</span>');
+
+    const todoHeaders = BoardPagePageObject.getSwimlanes().flatMap(sw =>
+      BoardPagePageObject.getColumnsInSwimlane(sw.element)
+        .filter(col => BoardPagePageObject.getColumnIdFromColumn(col) === '115')
+        .map(
+          col =>
+            col.querySelector<HTMLElement>('[data-testid="platform-board-kit.ui.column-header"]') ??
+            col.querySelector<HTMLElement>('h2, h3')
+        )
+    );
+
+    expect(todoHeaders).toHaveLength(2);
+    todoHeaders.forEach(header => {
+      expect(header!.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
+      expect(header!.querySelector('[data-column-limits-badge]')?.textContent).toBe('12/5');
+    });
+
+    BoardPagePageObject.removeColumnHeaderElements('115', '[data-column-limits-badge]');
+    todoHeaders.forEach(header => {
+      expect(header!.querySelector('[data-column-limits-badge]')).toBeNull();
+    });
+  });
+
+  it('returns three unique columns per company-managed swimlane (no nested double-match)', () => {
+    renderCompanyManagedSwimlanes();
+
+    BoardPagePageObject.getSwimlanes().forEach(sw => {
+      expect(BoardPagePageObject.getColumnsInSwimlane(sw.element)).toHaveLength(3);
+    });
+    expect(BoardPagePageObject.getColumnElements()).toHaveLength(6);
   });
 });
 

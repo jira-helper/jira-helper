@@ -17,11 +17,57 @@ export interface CloudBoardEditData {
     }>;
   };
   swimlanesConfig?: {
+    swimlaneStrategy?: string;
     swimlanes?: Array<{
       id?: string;
       name: string;
     }>;
   };
+}
+
+type AllDataResponse = {
+  columnsData?: {
+    columns?: Array<{ id: string | number; name: string; statusIds?: string[] }>;
+  };
+  swimlanesData?: {
+    customSwimlanesData?: {
+      swimlanes?: Array<{ id: string | number; name: string; issueIds?: number[] }>;
+    };
+    swimlanes?: Array<{ id: string | number; name: string; issueIds?: number[] }>;
+  };
+  issuesData?: {
+    issues?: Array<{ id: number; statusId: string; typeName?: string }>;
+  };
+};
+
+function parseAllDataWorkData(data: AllDataResponse) {
+  const columns =
+    data.columnsData?.columns?.map(col => ({
+      id: String(col.id),
+      name: col.name,
+      statusIds: (col.statusIds ?? []).map(String),
+    })) ?? [];
+
+  const rawSwimlanes = data.swimlanesData?.customSwimlanesData?.swimlanes ?? data.swimlanesData?.swimlanes ?? [];
+
+  const swimlanes = rawSwimlanes.map(sw => ({
+    id: String(sw.id),
+    name: sw.name,
+    issueIds: sw.issueIds ?? [],
+  }));
+
+  const issues =
+    data.issuesData?.issues?.map(issue => ({
+      id: issue.id,
+      statusId: String(issue.statusId),
+      typeName: issue.typeName,
+    })) ?? [];
+
+  if (columns.length === 0 && swimlanes.length === 0 && issues.length === 0) {
+    return null;
+  }
+
+  return { columns, swimlanes, issues };
 }
 
 export interface CloudJiraUser {
@@ -73,7 +119,7 @@ export const getBoardEditDataCloud = async (
     const rawColumns = data.rapidListConfig?.mappedColumns ?? [];
 
     const visibleColumns = rawColumns.filter(
-      (col: { isKanPlanColumn?: boolean; mappedStatuses?: unknown[] }) =>
+      (col: { isKanPlanColumn?: boolean; mappedStatuses?: Array<{ id: string | number }> }) =>
         col.isKanPlanColumn !== true && (col.mappedStatuses?.length ?? 0) > 0
     );
 
@@ -85,10 +131,19 @@ export const getBoardEditDataCloud = async (
       })
     );
 
-    const cacheColumns = visibleColumns.map((col: { id: number | string; name: string }) => ({
-      id: String(col.id),
-      name: col.name,
-    }));
+    const cacheColumns = visibleColumns.map(
+      (col: { id: number | string; name: string; mappedStatuses?: Array<{ id: string | number }> }) => ({
+        id: String(col.id),
+        name: col.name,
+        statusIds: (col.mappedStatuses ?? []).map((s: { id: string | number }) => String(s.id)),
+      })
+    );
+
+    const editmodelSwimlanes =
+      data.swimlanesConfig?.swimlanes?.map((sw: { id?: string | number; name: string }) => ({
+        id: String(sw.id ?? sw.name),
+        name: sw.name,
+      })) ?? [];
 
     if (cacheColumns.length > 0) {
       console.log(
@@ -96,6 +151,50 @@ export const getBoardEditDataCloud = async (
         cacheColumns.map((c: { id: string; name: string }) => `${c.id}=${c.name}`)
       );
       boardPage.setCachedColumns?.(cacheColumns);
+    }
+
+    if (editmodelSwimlanes.length > 0) {
+      boardPage.setSwimlanesCache?.(editmodelSwimlanes);
+    }
+
+    const allDataUrl = `/rest/greenhopper/1.0/xboard/work/allData.json?rapidViewId=${boardId}`;
+    try {
+      const allDataFetch = fetch(allDataUrl, {
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const allDataResponse = abortPromise
+        ? await Promise.race([allDataFetch, abortPromise.then(() => null as Response | null)])
+        : await allDataFetch;
+
+      if (allDataResponse?.ok) {
+        const allData = (await allDataResponse.json()) as AllDataResponse;
+        const workData = parseAllDataWorkData(allData);
+        if (workData) {
+          const mergedColumns = cacheColumns.length > 0 ? cacheColumns : workData.columns;
+          const columnsWithStatusIds = mergedColumns.map((col: { id: string; name: string; statusIds?: string[] }) => {
+            const fromAllData = workData.columns.find(c => c.id === col.id);
+            const statusIds = col.statusIds?.length
+              ? col.statusIds
+              : fromAllData?.statusIds?.length
+                ? fromAllData.statusIds
+                : [];
+            return { ...col, statusIds };
+          });
+
+          boardPage.setBoardWorkData?.({
+            columns: columnsWithStatusIds,
+            swimlanes: workData.swimlanes,
+            issues: workData.issues,
+          });
+        }
+      } else if (allDataResponse) {
+        console.warn('[getBoardEditDataCloud] Failed to fetch allData:', allDataResponse.status);
+      }
+    } catch (allDataError) {
+      console.warn('[getBoardEditDataCloud] allData fetch error:', allDataError);
     }
 
     return {
@@ -106,11 +205,8 @@ export const getBoardEditDataCloud = async (
       },
       swimlanesConfig: data.swimlanesConfig
         ? {
-            swimlanes:
-              data.swimlanesConfig.swimlanes?.map((sw: { id?: string | number; name: string }) => ({
-                id: String(sw.id ?? sw.name),
-                name: sw.name,
-              })) ?? [],
+            swimlaneStrategy: data.swimlanesConfig.swimlaneStrategy,
+            swimlanes: editmodelSwimlanes,
           }
         : undefined,
     };
