@@ -101,7 +101,7 @@ export class BoardRuntimeModel {
             isPersonLimitAppliedToIssue(this.effectiveLimit(personLimit), assignee, columnId, swimlaneId, issueType)
           ) {
             personLimit.issues.push(issue);
-            const key = this.pageObject.getIssueKeyFromIssue?.(issue) ?? `dom-${personLimit.issues.length}-${assignee}`;
+            const key = this.readIssueKey(issue) ?? `dom-${personLimit.issues.length}-${assignee}`;
             personLimit.matches.push({ key, assignee });
           }
         });
@@ -109,13 +109,20 @@ export class BoardRuntimeModel {
     });
   }
 
+  /** Avoid `pageObject.method?.(…)` — optional-call can Illegal-invocation on DI proxies. */
+  private readIssueKey(issue: Element): string | null {
+    const reader = this.pageObject.getIssueKeyFromIssue;
+    if (typeof reader !== 'function') return null;
+    return reader.call(this.pageObject, issue);
+  }
+
   private countIssuesFromWorkData(stats: PersonLimitStats[]): boolean {
-    const getMatches = this.pageObject.getPersonWipMatchesFromWorkData;
-    if (!getMatches) return false;
+    const listMatches = this.pageObject.getPersonWipMatchesFromWorkData;
+    if (typeof listMatches !== 'function') return false;
 
     let usedWorkData = false;
     stats.forEach(personLimit => {
-      const matches = getMatches.call(this.pageObject, {
+      const matches = listMatches.call(this.pageObject, {
         persons: personLimit.persons,
         columns: this.effectiveLimit(personLimit).columns,
         swimlanes: this.effectiveLimit(personLimit).swimlanes,
@@ -127,10 +134,12 @@ export class BoardRuntimeModel {
       personLimit.matches = matches;
       const matchKeys = new Set(matches.map(m => m.key));
       const mounted = this.pageObject.getIssueElements(this.cssSelectorOfIssues).filter(issue => {
-        const key = this.pageObject.getIssueKeyFromIssue?.(issue);
+        const key = this.readIssueKey(issue);
         return key != null && matchKeys.has(key);
       });
-      personLimit.issues = mounted;
+      // Keep Elements inside valtio `ref()` — a plain array gets deep-proxied and
+      // native DOM calls then throw Illegal invocation.
+      personLimit.issues = ref(mounted) as unknown as Element[];
     });
     return usedWorkData;
   }
@@ -256,14 +265,9 @@ export class BoardRuntimeModel {
 
   private highlightMountedIssuesByKeys(keys: Set<string>): void {
     this.pageObject.getIssueElements(this.cssSelectorOfIssues).forEach(issue => {
-      const key = this.pageObject.getIssueKeyFromIssue?.(issue);
+      const key = this.readIssueKey(issue);
       if (key != null && keys.has(key)) {
         this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
-        return;
-      }
-      // DOM-only fallback when keys are unavailable (Server cards without data-issue-key).
-      if (key == null) {
-        // no-op here; shared path below may still paint via issues[]
       }
     });
   }
@@ -289,7 +293,7 @@ export class BoardRuntimeModel {
           this.highlightMountedIssuesByKeys(keys);
           // Legacy DOM path: paint counted issue nodes when keys cannot be resolved.
           personLimit.issues.forEach(issue => {
-            if (this.pageObject.getIssueKeyFromIssue?.(issue) == null) {
+            if (this.readIssueKey(issue) == null) {
               this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
             }
           });
@@ -301,7 +305,7 @@ export class BoardRuntimeModel {
         if (matchesForPerson.length > personLimit.limit) {
           this.highlightMountedIssuesByKeys(new Set(matchesForPerson.map(m => m.key)));
           personLimit.issues.forEach(issue => {
-            if (this.pageObject.getIssueKeyFromIssue?.(issue) != null) return;
+            if (this.readIssueKey(issue) != null) return;
             const assignee = this.pageObject.getAssigneeFromIssue(issue);
             if (assignee === person.name || (person.displayName != null && assignee === person.displayName)) {
               this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);

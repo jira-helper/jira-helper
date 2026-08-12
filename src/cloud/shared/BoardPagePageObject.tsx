@@ -753,12 +753,19 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getIssueKeyFromIssue(issue: Element): string | null {
-    const dataKey = issue.getAttribute('data-issue-key');
-    if (dataKey) return dataKey;
-    const aria = issue.getAttribute('aria-label')?.trim();
-    if (aria && /^[A-Z][A-Z0-9]+-\d+$/i.test(aria)) return aria;
-    const hrefKey = issue.querySelector('a[href*="/browse/"]')?.textContent?.trim();
-    return hrefKey || null;
+    if (issue == null || typeof (issue as Element).getAttribute !== 'function') {
+      return null;
+    }
+    try {
+      const dataKey = issue.getAttribute('data-issue-key');
+      if (dataKey) return dataKey;
+      const aria = issue.getAttribute('aria-label')?.trim();
+      if (aria && /^[A-Z][A-Z0-9]+-\d+$/i.test(aria)) return aria;
+      const hrefKey = issue.querySelector('a[href*="/browse/"]')?.textContent?.trim();
+      return hrefKey || null;
+    } catch {
+      return null;
+    }
   },
 
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number {

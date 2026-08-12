@@ -111,3 +111,43 @@ export const MultipleAvatars: Story = {
     </div>
   ),
 };
+
+/**
+ * Dense header row: 14 badges from column × swimlane × type-ish counters.
+ * Use this to eyeball overflow / wrapping of personal WIP avatars.
+ */
+export const FourteenComboAvatars: Story = {
+  parameters: { layout: 'padded' },
+  render: () => {
+    const columns = ['all', 'To Do', 'In Progress', 'Done'];
+    const swimlanes = ['all', 'pri', 'Expedite', 'Everything Else'];
+    const badges = columns.flatMap((col, ci) =>
+      swimlanes.map((sw, si) => ({
+        personName: `maxim.${col}.${sw}`.replace(/\s+/g, '-'),
+        displayName: `Maxim · ${col} · ${sw}`,
+        currentCount: (ci + si) % 6,
+        limit: 1 + ((ci * swimlanes.length + si) % 5),
+        limitId: ci * 10 + si + 1,
+        isActive: ci === 1 && si === 2,
+      }))
+    );
+    // 4×4 = 16; keep first 14 for the requested density check
+    return (
+      <div id="avatars-limits" style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, maxWidth: 720 }}>
+        {badges.slice(0, 14).map(b => (
+          <AvatarBadge
+            key={b.limitId}
+            avatar={defaultAvatar}
+            personName={b.personName}
+            displayName={b.displayName}
+            currentCount={b.currentCount}
+            limit={b.limit}
+            isActive={b.isActive}
+            onClick={() => {}}
+            limitId={b.limitId}
+          />
+        ))}
+      </div>
+    );
+  },
+};
