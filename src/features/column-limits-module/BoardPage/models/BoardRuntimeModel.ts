@@ -104,14 +104,12 @@ export class BoardRuntimeModel {
       if (!groupColor) return;
 
       const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
-      // Cloud: do not set position — the painted node is often Jira's sticky wrapper;
-      // forcing relative would break sticky and let cards show through again.
+      // Cloud: inset stripe + opaque fill only — no padding/border that grow sticky height.
+      // Do not set position: relative (breaks Jira sticky wrappers).
       const headerStyles: Partial<CSSStyleDeclaration> = isCloudHeader
         ? {
             backgroundColor: CLOUD_HEADER_BG,
-            borderTop: `4px solid ${groupColor}`,
-            paddingTop: '18px',
-            boxSizing: 'border-box',
+            boxShadow: `inset 0 4px 0 0 ${groupColor}`,
           }
         : {
             backgroundColor: HEADER_GROUP_BG,
