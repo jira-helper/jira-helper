@@ -12,6 +12,7 @@ import { findGroupByColumnId, generateColorByFirstChars } from '../../shared/uti
 import styles from '../styles.module.css';
 
 const HEADER_GROUP_BG = '#deebff';
+const CLOUD_HEADER_BG = 'var(--ds-surface-raised, var(--ds-surface, #ffffff))';
 const OVER_LIMIT_CELL_BG = '#ff5630';
 
 export class BoardRuntimeModel {
@@ -103,6 +104,7 @@ export class BoardRuntimeModel {
       const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
       const headerStyles: Partial<CSSStyleDeclaration> = isCloudHeader
         ? {
+            backgroundColor: CLOUD_HEADER_BG,
             borderTop: `4px solid ${groupColor}`,
             paddingTop: '18px',
             position: 'relative',

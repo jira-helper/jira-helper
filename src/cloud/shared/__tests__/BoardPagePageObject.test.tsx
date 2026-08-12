@@ -128,28 +128,28 @@ describe('BoardPagePageObject', () => {
       </div>
     `;
     BoardPagePageObject.setCachedColumns([
-      { id: '10000', name: 'To Do' },
-      { id: '10001', name: 'In Progress' },
+      { id: '115', name: 'To Do' },
+      { id: '116', name: 'In Progress' },
     ]);
   }
 
-  it('resolves column id from board.content.cell for person-limits matching', () => {
+  it('resolves column id from board.content.cell using editmodel cache ids', () => {
     renderBoardContentCells();
     const columns = BoardPagePageObject.getColumnElements();
     const todoCard = document.querySelector('[aria-label="KAN-1"]');
 
-    expect(BoardPagePageObject.getColumnIdFromColumn(columns[0]!)).toBe('column-0');
-    expect(BoardPagePageObject.getColumnIdFromColumn(columns[1]!)).toBe('column-1');
-    expect(BoardPagePageObject.getColumnIdOfIssue(todoCard!)).toBe('column-0');
+    expect(BoardPagePageObject.getColumnIdFromColumn(columns[0]!)).toBe('115');
+    expect(BoardPagePageObject.getColumnIdFromColumn(columns[1]!)).toBe('116');
+    expect(BoardPagePageObject.getColumnIdOfIssue(todoCard!)).toBe('115');
   });
 
-  it('counts all cards in a board.content.cell by positional and status column ids', () => {
+  it('counts all cards in a board.content.cell by positional and column ids', () => {
     renderBoardContentCells();
 
     expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(2);
     expect(BoardPagePageObject.getIssueCountInColumn('column-1')).toBe(1);
-    expect(BoardPagePageObject.getIssueCountInColumn('10000')).toBe(2);
-    expect(BoardPagePageObject.getIssueCountInColumn('10001')).toBe(1);
+    expect(BoardPagePageObject.getIssueCountInColumn('115')).toBe(2);
+    expect(BoardPagePageObject.getIssueCountInColumn('116')).toBe(1);
   });
 
   it('marks overloaded cards so assignee highlighter does not wipe the color', () => {
@@ -215,8 +215,8 @@ describe('BoardPagePageObject', () => {
       </div>
     `;
     BoardPagePageObject.setCachedColumns([
-      { id: '10000', name: 'To Do' },
-      { id: '10001', name: 'In Progress' },
+      { id: '115', name: 'To Do' },
+      { id: '116', name: 'In Progress' },
     ]);
   }
 
@@ -236,31 +236,39 @@ describe('BoardPagePageObject', () => {
     // Maxim To Do (1) + xCredo To Do (2) = 3; In Progress: 0 + 1 = 1
     expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(3);
     expect(BoardPagePageObject.getIssueCountInColumn('column-1')).toBe(1);
-    expect(BoardPagePageObject.getIssueCountInColumn('10000')).toBe(3);
-    expect(BoardPagePageObject.getIssueCountInColumn('10001')).toBe(1);
-    expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['10000', '10001']);
+    expect(BoardPagePageObject.getIssueCountInColumn('115')).toBe(3);
+    expect(BoardPagePageObject.getOrderedColumnIds()).toEqual(['115', '116']);
   });
 
-  it('resolves column-N inside each swimlane for person-limits', () => {
+  it('resolves editmodel cache ids inside each swimlane for person-limits', () => {
     renderAssigneeSwimlanes();
     const swimlanes = BoardPagePageObject.getSwimlanes();
     const maximTodo = BoardPagePageObject.getColumnsInSwimlane(swimlanes[0]!.element)[0]!;
     const xcredoTodo = BoardPagePageObject.getColumnsInSwimlane(swimlanes[1]!.element)[0]!;
     const xcredoCard = document.querySelector('[aria-label="KAN-X1"]');
 
-    expect(BoardPagePageObject.getColumnIdFromColumn(maximTodo)).toBe('column-0');
-    expect(BoardPagePageObject.getColumnIdFromColumn(xcredoTodo)).toBe('column-0');
-    expect(BoardPagePageObject.getColumnIdOfIssue(xcredoCard!)).toBe('column-0');
+    expect(BoardPagePageObject.getColumnIdFromColumn(maximTodo)).toBe('115');
+    expect(BoardPagePageObject.getColumnIdFromColumn(xcredoTodo)).toBe('115');
+    expect(BoardPagePageObject.getColumnIdOfIssue(xcredoCard!)).toBe('115');
     expect(BoardPagePageObject.getSwimlaneIdOfIssue(xcredoCard!)).toBe('swimlane-1');
+  });
+
+  it('keeps column-N aliases for counts when editmodel cache ids are present', () => {
+    renderBoardContentCells();
+
+    expect(BoardPagePageObject.getIssueCountInColumn('column-0')).toBe(2);
+    expect(BoardPagePageObject.getIssueCountInColumn('115')).toBe(2);
+    expect(BoardPagePageObject.getIssueCountInColumn('column-1')).toBe(1);
+    expect(BoardPagePageObject.getIssueCountInColumn('116')).toBe(1);
   });
 
   it('highlights every swimlane cell for an over-limit column', () => {
     renderAssigneeSwimlanes();
-    BoardPagePageObject.highlightColumnCells('10000', 'rgb(255, 86, 48)');
+    BoardPagePageObject.highlightColumnCells('115', 'rgb(255, 86, 48)');
 
     const todoCells = BoardPagePageObject.getSwimlanes().flatMap(sw =>
       BoardPagePageObject.getColumnsInSwimlane(sw.element).filter(
-        col => BoardPagePageObject.getColumnIdFromColumn(col) === 'column-0'
+        col => BoardPagePageObject.getColumnIdFromColumn(col) === '115'
       )
     );
     expect(todoCells).toHaveLength(2);

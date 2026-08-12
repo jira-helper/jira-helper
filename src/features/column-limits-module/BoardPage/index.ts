@@ -9,6 +9,7 @@ import { PageModification } from '../../../infrastructure/page-modification/Page
 import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import { BOARD_PROPERTIES } from '../../../shared/constants';
 import type { WipLimitsProperty } from '../types';
+import { stripUnknownWipColumnIds } from '../shared/utils';
 import { boardRuntimeModelToken, propertyModelToken } from '../tokens';
 import type { BoardRuntimeModel } from './models/BoardRuntimeModel';
 import type { PropertyModel } from '../property/PropertyModel';
@@ -78,7 +79,14 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     const [editData = { rapidListConfig: { mappedColumns: [] } }, boardGroups = {}] = data;
 
     const { model: propertyModel } = this.container.inject(propertyModelToken);
-    (propertyModel as PropertyModel).setData(boardGroups);
+    const knownColumnIds = editData.rapidListConfig.mappedColumns
+      .filter(col => col.isKanPlanColumn !== true)
+      .map(col => col.id);
+    const { cleaned, changed } = stripUnknownWipColumnIds(boardGroups, knownColumnIds);
+    (propertyModel as PropertyModel).setData(cleaned);
+    if (changed) {
+      void (propertyModel as PropertyModel).persist();
+    }
 
     // Settings tab is registered regardless of `canEdit`: viewers can inspect and
     // tweak locally (same pattern as person-limits); persistence may fail without edit rights.
@@ -96,7 +104,7 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
       component: TabComponent,
     });
 
-    if (Object.keys(boardGroups).length === 0) return;
+    if (Object.keys(cleaned).length === 0) return;
 
     const { model: boardRuntimeModel } = this.container.inject(boardRuntimeModelToken);
 

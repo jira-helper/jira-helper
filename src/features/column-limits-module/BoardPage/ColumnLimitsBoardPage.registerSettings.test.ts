@@ -10,6 +10,7 @@ import { localeProviderToken, MockLocaleProvider } from 'src/shared/locale';
 import { useLocalSettingsStore } from 'src/features/local-settings/stores/localSettingsStore';
 import ColumnLimitsBoardPage from './index';
 import { columnLimitsModule } from '../module';
+import { propertyModelToken } from '../tokens';
 import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { COLUMN_LIMITS_TEXTS } from '../SettingsPage/texts';
 
@@ -134,6 +135,37 @@ describe('ColumnLimitsBoardPage — registerSettings', () => {
   it('registers when canEdit is false and WIP property is empty', () => {
     const page = new ColumnLimitsBoardPage(globalContainer);
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, {}]);
+    expect(registerSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('strips unknown column ids on apply and persists cleaned property', () => {
+    const { model: propertyModel } = globalContainer.inject(propertyModelToken);
+    const persistSpy = vi.spyOn(propertyModel, 'persist').mockResolvedValue({ ok: true, val: undefined } as never);
+
+    const page = new ColumnLimitsBoardPage(globalContainer);
+    const editData = {
+      canEdit: true,
+      rapidListConfig: {
+        mappedColumns: [
+          { id: '115', isKanPlanColumn: false },
+          { id: '116', isKanPlanColumn: false },
+          { id: '118', isKanPlanColumn: true },
+        ],
+      },
+    };
+    const boardGroups = {
+      G1: { columns: ['115', '999'], max: 5 },
+      G2: { columns: ['888'], max: 3 },
+      G3: { columns: ['116'], max: 2 },
+    };
+
+    page.apply([editData, boardGroups]);
+
+    expect(propertyModel.data).toEqual({
+      G1: { columns: ['115'], max: 5 },
+      G3: { columns: ['116'], max: 2 },
+    });
+    expect(persistSpy).toHaveBeenCalledTimes(1);
     expect(registerSettings).toHaveBeenCalledTimes(1);
   });
 });

@@ -36,8 +36,8 @@ export interface CloudJiraUser {
 }
 
 /**
- * Получает данные доски для Cloud
- * Использует agile/1.0/board/{id}/configuration вместо greenhopper endpoint
+ * Получает данные доски для Cloud через greenhopper editmodel (как Server).
+ * Исключает KanPlan-колонки и колонки без mappedStatuses — они не рендерятся на борде.
  */
 export const getBoardEditDataCloud = async (
   boardPage: IBoardPagePageObject,
@@ -48,7 +48,7 @@ export const getBoardEditDataCloud = async (
     return {};
   }
 
-  const url = `/rest/agile/1.0/board/${boardId}/configuration`;
+  const url = `/rest/greenhopper/1.0/rapidviewconfig/editmodel.json?rapidViewId=${boardId}`;
 
   try {
     const fetchPromise = fetch(url, {
@@ -64,72 +64,55 @@ export const getBoardEditDataCloud = async (
 
     if (!response || !response.ok) {
       if (response) {
-        console.warn('[getBoardEditDataCloud] Failed to fetch board config:', response.status);
+        console.warn('[getBoardEditDataCloud] Failed to fetch board editmodel:', response.status);
       }
       return { canEdit: false };
     }
 
     const data = await response.json();
+    const rawColumns = data.rapidListConfig?.mappedColumns ?? [];
 
-    const apiColumns = data.columnConfig?.columns ?? [];
-    // Prefer real column cells only — broad *[column]* matches headers and breaks indexing.
-    const domColumnSelectors = [
-      '[data-testid="board.content.cell"]',
-      '[data-testid="platform-board-kit.ui.column.draggable-column"]',
-      '[data-testid="platform-board-kit.ui.column.column-container"]',
-    ];
-
-    let domColumnElements: Element[] = [];
-    for (const sel of domColumnSelectors) {
-      domColumnElements = Array.from(document.querySelectorAll(sel));
-      if (domColumnElements.length > 0) break;
-    }
-
-    // Cache status/DOM ids so column-limits properties saved as status ids still resolve.
-    // Also keep positional aliases via getColumnElements index in BoardPagePageObject.
-    const mappedColumns: Array<{ id: string; name: string }> = apiColumns.map((col: any, index: number) => {
-      const domEl = domColumnElements[index];
-      const domId = domEl?.getAttribute('data-column-id') || domEl?.getAttribute('data-id');
-      const statusId = col.statuses?.[0]?.id;
-      const id = domId || String(statusId ?? `column-${index}`);
-      return { id, name: col.name };
-    });
-
-    if (mappedColumns.length > 0) {
-      console.log(
-        '[getBoardEditDataCloud] Cached columns:',
-        mappedColumns.map(c => `${c.id}=${c.name}`)
-      );
-      boardPage.setCachedColumns?.(mappedColumns);
-    }
-
-    const mappedPositions =
-      data.columnConfig?.columns?.map((col: any, index: number) => ({
-        id: `column-${index}`,
-        name: col.name,
-        isKanPlanColumn: false,
-      })) ?? [];
-
-    console.log(
-      '[getBoardEditDataCloud] Using positional column IDs:',
-      mappedPositions.map((c: { id: string; name: string }) => `${c.id}=${c.name}`)
+    const visibleColumns = rawColumns.filter(
+      (col: { isKanPlanColumn?: boolean; mappedStatuses?: unknown[] }) =>
+        col.isKanPlanColumn !== true && (col.mappedStatuses?.length ?? 0) > 0
     );
 
+    const mappedColumns = visibleColumns.map(
+      (col: { id: number | string; name: string; isKanPlanColumn?: boolean }) => ({
+        id: String(col.id),
+        name: col.name,
+        isKanPlanColumn: col.isKanPlanColumn ?? false,
+      })
+    );
+
+    const cacheColumns = visibleColumns.map((col: { id: number | string; name: string }) => ({
+      id: String(col.id),
+      name: col.name,
+    }));
+
+    if (cacheColumns.length > 0) {
+      console.log(
+        '[getBoardEditDataCloud] Cached visible columns:',
+        cacheColumns.map((c: { id: string; name: string }) => `${c.id}=${c.name}`)
+      );
+      boardPage.setCachedColumns?.(cacheColumns);
+    }
+
     return {
-      canEdit: data.editEnabled ?? true,
+      canEdit: data.canEdit ?? true,
       rapidListConfig: {
-        currentStatisticsField: {
-          typeId: data.statistics?.typeId ?? 'none',
-        },
-        mappedColumns: mappedPositions,
+        currentStatisticsField: data.rapidListConfig?.currentStatisticsField,
+        mappedColumns,
       },
-      swimlanesConfig: {
-        swimlanes:
-          data.swimlaneConfig?.swimlanes?.map((sw: any) => ({
-            id: String(sw.id ?? sw.name),
-            name: sw.name,
-          })) ?? [],
-      },
+      swimlanesConfig: data.swimlanesConfig
+        ? {
+            swimlanes:
+              data.swimlanesConfig.swimlanes?.map((sw: { id?: string | number; name: string }) => ({
+                id: String(sw.id ?? sw.name),
+                name: sw.name,
+              })) ?? [],
+          }
+        : undefined,
     };
   } catch (error) {
     console.error('[getBoardEditDataCloud] Error:', error);

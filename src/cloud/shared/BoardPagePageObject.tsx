@@ -78,8 +78,10 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   setCachedColumns(columns: Array<{ id: string; name: string }>): void;
 }
 
+type CachedColumn = { id: string; name: string };
+
 type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
-  _columnsCache: Array<{ id: string; name: string }> | null;
+  _columnsCache: CachedColumn[] | null;
   _findColumnElement(columnId: string): Element | null;
   _findAllColumnElements(columnId: string): Element[];
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
@@ -93,7 +95,7 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   columnHeaderRenderMode: 'cloud',
 
-  _columnsCache: null as Array<{ id: string; name: string }> | null,
+  _columnsCache: null as CachedColumn[] | null,
 
   setCachedColumns(columns: Array<{ id: string; name: string }>) {
     this._columnsCache = columns;
@@ -555,7 +557,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       : this._getRepresentativeColumnElements();
     const index = siblings.indexOf(column);
     if (index < 0) return null;
-    // Prefer positional ids — person-limits settings store column-N from editData.
+    if (this._columnsCache?.[index]) {
+      return this._columnsCache[index].id;
+    }
     return `column-${index}`;
   },
 
