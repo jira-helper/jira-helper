@@ -87,6 +87,8 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
   _getSwimlaneScrollContainers(): Element[];
   _resolveColumnIndex(columnId: string): number | null;
+  _getAllColumnElementsFlat(): Element[];
+  _getColumnSetSize(allColumns: Element[]): number | null;
   _getRepresentativeColumnElements(): Element[];
   _getSwimlaneRoot(scrollContainer: Element): Element;
   _getSwimlaneName(swimlaneRoot: Element, index: number): string;
@@ -345,12 +347,31 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return this._findHeaderElementInColumn(column as HTMLElement);
   },
 
+  _getAllColumnElementsFlat(): Element[] {
+    return Array.from(document.querySelectorAll(this.selectors.column));
+  },
+
+  /**
+   * Cloud sometimes mounts several copies of the same column set (windowed DOM)
+   * without swimlane.scroll-container. When that happens, only the first set is
+   * "representative" for ordering / index mapping.
+   */
+  _getColumnSetSize(allColumns: Element[]): number | null {
+    const cached = this._columnsCache?.length ?? 0;
+    if (cached > 0 && allColumns.length > cached && allColumns.length % cached === 0) {
+      return cached;
+    }
+    return null;
+  },
+
   _getRepresentativeColumnElements(): Element[] {
     const swimlaneScrolls = this._getSwimlaneScrollContainers();
     if (swimlaneScrolls.length > 0) {
       return Array.from(swimlaneScrolls[0].querySelectorAll(this.selectors.column));
     }
-    return Array.from(document.querySelectorAll(this.selectors.column));
+    const all = this._getAllColumnElementsFlat();
+    const setSize = this._getColumnSetSize(all);
+    return setSize != null ? all.slice(0, setSize) : all;
   },
 
   getOrderedColumnIds(): string[] {
@@ -399,7 +420,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   _findAllColumnElements(columnId: string): Element[] {
-    const byAttr = Array.from(document.querySelectorAll(this.selectors.column)).filter(
+    const byAttr = this._getAllColumnElementsFlat().filter(
       col => col.getAttribute('data-column-id') === columnId || col.getAttribute('data-id') === columnId
     );
     if (byAttr.length > 0) {
@@ -418,7 +439,17 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
         .filter((col): col is Element => Boolean(col));
     }
 
-    const flat = document.querySelectorAll(this.selectors.column)[index];
+    const all = this._getAllColumnElementsFlat();
+    const setSize = this._getColumnSetSize(all);
+    if (setSize != null) {
+      const copies: Element[] = [];
+      for (let i = index; i < all.length; i += setSize) {
+        copies.push(all[i]);
+      }
+      return copies;
+    }
+
+    const flat = all[index];
     return flat ? [flat] : [];
   },
 
@@ -563,11 +594,21 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   getColumnIdFromColumn(column: Element): string | null {
     const scroll = column.closest('[data-testid="board.content.swimlane.scroll-container"]');
-    const siblings = scroll
-      ? Array.from(scroll.querySelectorAll(this.selectors.column))
-      : this._getRepresentativeColumnElements();
-    const index = siblings.indexOf(column);
-    if (index < 0) return null;
+    if (scroll) {
+      const siblings = Array.from(scroll.querySelectorAll(this.selectors.column));
+      const index = siblings.indexOf(column);
+      if (index < 0) return null;
+      if (this._columnsCache?.[index]) {
+        return this._columnsCache[index].id;
+      }
+      return `column-${index}`;
+    }
+
+    const all = this._getAllColumnElementsFlat();
+    const absoluteIndex = all.indexOf(column);
+    if (absoluteIndex < 0) return null;
+    const setSize = this._getColumnSetSize(all);
+    const index = setSize != null ? absoluteIndex % setSize : absoluteIndex;
     if (this._columnsCache?.[index]) {
       return this._columnsCache[index].id;
     }
