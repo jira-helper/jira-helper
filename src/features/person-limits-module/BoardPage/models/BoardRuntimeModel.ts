@@ -101,14 +101,43 @@ export class BoardRuntimeModel {
             isPersonLimitAppliedToIssue(this.effectiveLimit(personLimit), assignee, columnId, swimlaneId, issueType)
           ) {
             personLimit.issues.push(issue);
+            const key = this.pageObject.getIssueKeyFromIssue?.(issue) ?? `dom-${personLimit.issues.length}-${assignee}`;
+            personLimit.matches.push({ key, assignee });
           }
         });
       }
     });
   }
 
+  private countIssuesFromWorkData(stats: PersonLimitStats[]): boolean {
+    const getMatches = this.pageObject.getPersonWipMatchesFromWorkData;
+    if (!getMatches) return false;
+
+    let usedWorkData = false;
+    stats.forEach(personLimit => {
+      const matches = getMatches.call(this.pageObject, {
+        persons: personLimit.persons,
+        columns: this.effectiveLimit(personLimit).columns,
+        swimlanes: this.effectiveLimit(personLimit).swimlanes,
+        includedIssueTypes: personLimit.includedIssueTypes,
+      });
+      if (matches == null) return;
+
+      usedWorkData = true;
+      personLimit.matches = matches;
+      const matchKeys = new Set(matches.map(m => m.key));
+      const mounted = this.pageObject.getIssueElements(this.cssSelectorOfIssues).filter(issue => {
+        const key = this.pageObject.getIssueKeyFromIssue?.(issue);
+        return key != null && matchKeys.has(key);
+      });
+      personLimit.issues = mounted;
+    });
+    return usedWorkData;
+  }
+
   /**
    * Count issues for each person limit on the board.
+   * Prefers Cloud allData work-data matches when available (virtualized boards).
    */
   calculateStats(): PersonLimitStats[] {
     const { limits } = this.propertyModel.data;
@@ -116,6 +145,7 @@ export class BoardRuntimeModel {
       id: computeLimitId(limit),
       persons: limit.persons.map(p => ({ name: p.name, displayName: p.displayName, avatar: p.avatar })),
       limit: limit.limit,
+      matches: [],
       issues: ref([]) as unknown as Element[],
       columns: limit.columns,
       swimlanes: limit.swimlanes,
@@ -124,8 +154,10 @@ export class BoardRuntimeModel {
       sharedLimit: limit.sharedLimit ?? false,
     }));
 
-    const columns = this.pageObject.getColumnElements();
-    columns.forEach(column => this.countIssuesInColumn(column, stats));
+    if (!this.countIssuesFromWorkData(stats)) {
+      const columns = this.pageObject.getColumnElements();
+      columns.forEach(column => this.countIssuesInColumn(column, stats));
+    }
 
     this.stats = stats;
     return stats;
@@ -210,15 +242,29 @@ export class BoardRuntimeModel {
     this.showOrHideTaskAggregations();
   }
 
-  /**
-   * Returns the issues from `personLimit.issues` matching the given assignee.
-   * Used by the apply() per-person overflow check.
-   */
-  private filterIssuesByPerson(personLimit: PersonLimitStats, personName: string): Element[] {
+  private filterMatchesByPerson(
+    personLimit: PersonLimitStats,
+    personName: string
+  ): Array<{ key: string; assignee: string }> {
     const personEntry = personLimit.persons.find(p => p.name === personName);
-    return personLimit.issues.filter(issue => {
-      const assignee = this.pageObject.getAssigneeFromIssue(issue);
-      return assignee === personName || (personEntry?.displayName != null && assignee === personEntry.displayName);
+    return personLimit.matches.filter(
+      match =>
+        match.assignee === personName ||
+        (personEntry?.displayName != null && match.assignee === personEntry.displayName)
+    );
+  }
+
+  private highlightMountedIssuesByKeys(keys: Set<string>): void {
+    this.pageObject.getIssueElements(this.cssSelectorOfIssues).forEach(issue => {
+      const key = this.pageObject.getIssueKeyFromIssue?.(issue);
+      if (key != null && keys.has(key)) {
+        this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+        return;
+      }
+      // DOM-only fallback when keys are unavailable (Server cards without data-issue-key).
+      if (key == null) {
+        // no-op here; shared path below may still paint via issues[]
+      }
     });
   }
 
@@ -238,18 +284,28 @@ export class BoardRuntimeModel {
     allIssues.forEach(issue => this.pageObject.resetIssueBackgroundColor(issue));
     this.stats.forEach(personLimit => {
       if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
-        if (personLimit.issues.length > personLimit.limit) {
+        if (personLimit.matches.length > personLimit.limit) {
+          const keys = new Set(personLimit.matches.map(m => m.key));
+          this.highlightMountedIssuesByKeys(keys);
+          // Legacy DOM path: paint counted issue nodes when keys cannot be resolved.
           personLimit.issues.forEach(issue => {
-            this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+            if (this.pageObject.getIssueKeyFromIssue?.(issue) == null) {
+              this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+            }
           });
         }
         return;
       }
       personLimit.persons.forEach(person => {
-        const issuesForPerson = this.filterIssuesByPerson(personLimit, person.name);
-        if (issuesForPerson.length > personLimit.limit) {
-          issuesForPerson.forEach(issue => {
-            this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+        const matchesForPerson = this.filterMatchesByPerson(personLimit, person.name);
+        if (matchesForPerson.length > personLimit.limit) {
+          this.highlightMountedIssuesByKeys(new Set(matchesForPerson.map(m => m.key)));
+          personLimit.issues.forEach(issue => {
+            if (this.pageObject.getIssueKeyFromIssue?.(issue) != null) return;
+            const assignee = this.pageObject.getAssigneeFromIssue(issue);
+            if (assignee === person.name || (person.displayName != null && assignee === person.displayName)) {
+              this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+            }
           });
         }
       });
@@ -295,7 +351,7 @@ export class BoardRuntimeModel {
         id: limit.id,
         persons: limit.persons,
         limit: limit.limit,
-        issuesCount: limit.issues.length,
+        issuesCount: limit.matches.length,
         isOverLimit: this.isLimitOverLimit(limit),
         columns: limit.columns,
         swimlanes: limit.swimlanes,
@@ -308,10 +364,10 @@ export class BoardRuntimeModel {
 
   private isLimitOverLimit(personLimit: PersonLimitStats): boolean {
     if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
-      return personLimit.issues.length > personLimit.limit;
+      return personLimit.matches.length > personLimit.limit;
     }
     return personLimit.persons.some(
-      person => this.filterIssuesByPerson(personLimit, person.name).length > personLimit.limit
+      person => this.filterMatchesByPerson(personLimit, person.name).length > personLimit.limit
     );
   }
 

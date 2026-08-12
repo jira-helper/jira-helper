@@ -10,7 +10,12 @@ export type PersonLimitStats = {
     avatar?: string;
   }>;
   limit: number;
-  /** Issues that match this person's limit criteria */
+  /**
+   * Full match list used for counters (Cloud: from allData; Server: derived from DOM).
+   * Prefer this over `issues.length` — virtualized boards may omit cards from the DOM.
+   */
+  matches: Array<{ key: string; assignee: string }>;
+  /** Mounted DOM issue cards for highlight/filter (may be a subset under virtualization) */
   issues: Element[];
   /** Columns this limit applies to (empty = all columns) */
   columns: Array<{ id: string; name: string }>;

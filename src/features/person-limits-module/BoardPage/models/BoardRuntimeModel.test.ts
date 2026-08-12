@@ -75,7 +75,54 @@ describe('BoardRuntimeModel', () => {
 
     expect(stats).toHaveLength(1);
     expect(stats[0].issues.length).toBe(3);
+    expect(stats[0].matches).toHaveLength(3);
     expect(stats[0].limit).toBe(5);
+  });
+
+  it('should prefer allData matches over DOM when work-data API is available', () => {
+    document.body.innerHTML = `
+      <div id="ghx-pool">
+        <div class="ghx-column" data-column-id="col1">
+          <div class="ghx-issue" aria-label="TRB3-7">
+            <img class="ghx-avatar-img" alt="Assignee: Maxim Sosnov" />
+            <div class="ghx-type" title="Эпик"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const pageObject = {
+      ...BoardPagePageObject,
+      getPersonWipMatchesFromWorkData: vi.fn(() => [
+        { key: 'TRB3-7', assignee: 'acct-maxim' },
+        { key: 'TRB3-8', assignee: 'acct-maxim' },
+        { key: 'TRB3-9', assignee: 'acct-maxim' },
+      ]),
+      getIssueKeyFromIssue: (issue: Element) => issue.getAttribute('aria-label'),
+    };
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'acct-maxim', displayName: 'Maxim Sosnov', self: '', avatar: '' }],
+          limit: 3,
+          columns: [],
+          swimlanes: [{ id: '1', name: 'Expedite' }],
+          includedIssueTypes: ['Эпик'],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(mockPropertyModel, pageObject, mockLogger);
+    model.cssSelectorOfIssues = '.ghx-issue';
+
+    const stats = model.calculateStats();
+
+    expect(stats[0].matches).toHaveLength(3);
+    // Only mounted card is kept as a DOM issue for highlight/filter.
+    expect(stats[0].issues).toHaveLength(1);
+    expect(pageObject.getPersonWipMatchesFromWorkData).toHaveBeenCalled();
   });
 
   it('should filter by column', () => {
@@ -796,6 +843,7 @@ describe('BoardRuntimeModel', () => {
           id: 42,
           persons: [{ name: 'john.doe', displayName: 'John Doe' }],
           limit: 3,
+          matches: [{ key: 'ISSUE-1', assignee: 'john.doe' }],
           issues: [issue],
           columns: [{ id: 'col1', name: 'To Do' }],
           swimlanes: [{ id: 'sw1', name: 'Team A' }],
@@ -841,6 +889,10 @@ describe('BoardRuntimeModel', () => {
           id: 1,
           persons: [{ name: 'john.doe' }, { name: 'jane.doe' }],
           limit: 1,
+          matches: [
+            { key: 'A-1', assignee: 'john.doe' },
+            { key: 'A-2', assignee: 'jane.doe' },
+          ],
           issues: [document.createElement('div'), document.createElement('motion')],
           columns: [],
           swimlanes: [],
@@ -878,6 +930,11 @@ describe('BoardRuntimeModel', () => {
             { name: 'jane.doe', displayName: 'Jane Doe' },
           ],
           limit: 1,
+          matches: [
+            { key: 'J-1', assignee: 'john.doe' },
+            { key: 'J-2', assignee: 'john.doe' },
+            { key: 'J-3', assignee: 'jane.doe' },
+          ],
           issues: [johnIssue1, johnIssue2, janeIssue],
           columns: [],
           swimlanes: [],

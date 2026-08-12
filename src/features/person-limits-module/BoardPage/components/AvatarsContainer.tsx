@@ -36,14 +36,13 @@ export const AvatarsContainer: React.FC = () => {
     <div id="avatars-limits" style={{ display: 'inline-flex', marginLeft: 30 }}>
       {stats.flatMap(stat =>
         stat.persons.map(person => {
-          const personIssues = stat.issues.filter(issue => {
-            const assignee = pageObject.getAssigneeFromIssue(issue);
-            return assignee === person.name || assignee === person.displayName;
-          });
+          const personMatches = stat.matches.filter(
+            match => match.assignee === person.name || match.assignee === person.displayName
+          );
           // Shared limits: all avatars share the bucket and click highlights the whole limit.
           // Per-person limits: each avatar carries its own counter and highlight target.
           const isShared = stat.sharedLimit;
-          const currentCount = isShared ? stat.issues.length : personIssues.length;
+          const currentCount = isShared ? stat.matches.length : personMatches.length;
           const isActive = isShared
             ? activePerson?.limitId === stat.id
             : activePerson?.limitId === stat.id && activePerson?.personName === person.name;

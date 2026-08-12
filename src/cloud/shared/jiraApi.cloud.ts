@@ -36,7 +36,14 @@ type AllDataResponse = {
     swimlanes?: Array<{ id: string | number; name: string; issueIds?: number[] }>;
   };
   issuesData?: {
-    issues?: Array<{ id: number; statusId: string; typeName?: string }>;
+    issues?: Array<{
+      id: number;
+      key?: string;
+      statusId: string;
+      typeName?: string;
+      assigneeAccountId?: string;
+      assigneeName?: string;
+    }>;
   };
 };
 
@@ -57,11 +64,24 @@ function parseAllDataWorkData(data: AllDataResponse) {
   }));
 
   const issues =
-    data.issuesData?.issues?.map(issue => ({
-      id: issue.id,
-      statusId: String(issue.statusId),
-      typeName: issue.typeName,
-    })) ?? [];
+    data.issuesData?.issues?.map(issue => {
+      const parsed: {
+        id: number;
+        statusId: string;
+        typeName?: string;
+        key?: string;
+        assigneeAccountId?: string;
+        assigneeName?: string;
+      } = {
+        id: issue.id,
+        statusId: String(issue.statusId),
+        typeName: issue.typeName,
+      };
+      if (issue.key) parsed.key = issue.key;
+      if (issue.assigneeAccountId) parsed.assigneeAccountId = issue.assigneeAccountId;
+      if (issue.assigneeName) parsed.assigneeName = issue.assigneeName;
+      return parsed;
+    }) ?? [];
 
   if (columns.length === 0 && swimlanes.length === 0 && issues.length === 0) {
     return null;
