@@ -688,7 +688,11 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
       style.removeProperty('padding-top');
       style.removeProperty('box-sizing');
       style.removeProperty('box-shadow');
+      style.removeProperty('outline');
+      style.removeProperty('outline-offset');
+      style.removeProperty('z-index');
       style.removeProperty('position');
+      el.querySelectorAll('[data-column-limits-stripe]').forEach(stripe => stripe.remove());
     });
   },
 
