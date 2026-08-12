@@ -352,8 +352,8 @@ describe('BoardRuntimeModel', () => {
       expect(styledHeaders).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
-            boxShadow: 'inset 0 4px 0 0 #abc',
+            backgroundColor: 'color-mix(in srgb, #abc 28%, var(--ds-surface-raised, var(--ds-surface, #ffffff)))',
+            zIndex: '20',
           }),
         ])
       );
@@ -363,8 +363,25 @@ describe('BoardRuntimeModel', () => {
         expect.not.arrayContaining([expect.objectContaining({ borderTop: expect.any(String) })])
       );
       expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ boxShadow: expect.any(String) })])
+      );
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ outline: expect.any(String) })])
+      );
+      expect(styledHeaders).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ backgroundColor: '#deebff' })])
       );
+      expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalledWith(
+        'col1',
+        expect.stringContaining('data-column-limits-stripe'),
+        []
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalledWith(
+        'col1',
+        expect.stringContaining('background:#abc'),
+        []
+      );
+      expect(mockPageObject.removeColumnHeaderElements).toHaveBeenCalledWith('col1', '[data-column-limits-stripe]');
     });
 
     it('should style column headers for grouped columns via pageObject', () => {
@@ -466,8 +483,12 @@ describe('BoardRuntimeModel', () => {
       expect(css).toContain('.limitColumnBadge {');
       expect(css).toContain('top: -24%');
       expect(css).toContain('.limitColumnBadgeCloud {');
-      expect(css).toContain('top: 0');
+      expect(css).toContain('top: 8px');
       expect(css).toContain('right: 12px');
+      expect(css).toContain('z-index: 1000000');
+      expect(css).toContain('.limitColumnBadgeCloud .limitColumnBadge__hint');
+      expect(css).toContain('top: calc(100% + 6px)');
+      expect(css).toContain('z-index: 2147483647');
     });
 
     it('allows the column limit tooltip text to wrap in Cloud', () => {

@@ -96,7 +96,8 @@ describe('BoardPagePageObject', () => {
     expect(sticky!.style.backgroundColor).toBe('rgb(255, 255, 255)');
     expect(sticky!.style.borderTop).toBe('4px solid rgb(255, 0, 0)');
     expect(sticky!.style.paddingTop).toBe('18px');
-    expect(inner!.style.backgroundColor).toBe('');
+    // Inner opaque Cloud header must get the same fill, otherwise sticky tint is hidden.
+    expect(inner!.style.backgroundColor).toBe('rgb(255, 255, 255)');
   });
 
   it('reads assignee from Jira Cloud avatar label text', () => {

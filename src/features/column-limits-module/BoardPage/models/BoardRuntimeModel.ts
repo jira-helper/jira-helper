@@ -88,6 +88,7 @@ export class BoardRuntimeModel {
 
     columnsInOrder.forEach(columnId => {
       this.pageObject.resetColumnHeaderStyles(columnId);
+      this.pageObject.removeColumnHeaderElements(columnId, '[data-column-limits-stripe]');
     });
 
     columnsInOrder.forEach((columnId, index) => {
@@ -104,26 +105,37 @@ export class BoardRuntimeModel {
       if (!groupColor) return;
 
       const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
-      // Cloud: inset stripe + opaque fill only — no padding/border that grow sticky height.
-      // Do not set position: relative (breaks Jira sticky wrappers).
+      const isGroupStart = columnByLeft.name !== name;
+      const isGroupEnd = columnByRight.name !== name;
+      // Cloud: opaque fill + absolute top stripe (paints above header children, no layout growth).
+      // Do not set position: relative (breaks Jira sticky wrappers; sticky is already a containing block).
       const headerStyles: Partial<CSSStyleDeclaration> = isCloudHeader
         ? {
-            backgroundColor: CLOUD_HEADER_BG,
-            boxShadow: `inset 0 4px 0 0 ${groupColor}`,
+            // Opaque sticky fill + light group tint (readable without padding/border growth).
+            backgroundColor: `color-mix(in srgb, ${groupColor} 28%, ${CLOUD_HEADER_BG})`,
+            // Above neighboring board chrome so badge tooltips are not covered.
+            zIndex: '20',
           }
         : {
             backgroundColor: HEADER_GROUP_BG,
             borderTop: `4px solid ${groupColor}`,
           };
 
-      if (columnByLeft.name !== name) {
+      if (!isCloudHeader && isGroupStart) {
         headerStyles.borderTopLeftRadius = '10px';
       }
-      if (columnByRight.name !== name) {
+      if (!isCloudHeader && isGroupEnd) {
         headerStyles.borderTopRightRadius = '10px';
       }
 
       this.pageObject.styleColumnHeader(columnId, headerStyles, excludedSwimlaneIds);
+
+      if (isCloudHeader) {
+        const radiusLeft = isGroupStart ? '10px' : '0';
+        const radiusRight = isGroupEnd ? '10px' : '0';
+        const stripeHtml = `<div data-column-limits-stripe="true" style="position:absolute;top:0;left:0;right:0;height:4px;background:${groupColor};z-index:999999;pointer-events:none;border-top-left-radius:${radiusLeft};border-top-right-radius:${radiusRight}"></div>`;
+        this.pageObject.insertColumnHeaderHtml(columnId, stripeHtml, excludedSwimlaneIds);
+      }
     });
   }
 
