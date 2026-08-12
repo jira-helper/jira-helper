@@ -145,7 +145,8 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   selectors: {
     // Prefer current Cloud DOM (board.content.*); keep legacy software-board.* as fallback.
-    pool: '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container.board"]',
+    // Company-managed classic Cloud boards use software-board.board; newer kit uses board.content.*.
+    pool: '[data-testid="board.content.board-wrapper"], [data-testid="software-board.board"], [data-testid^="software-board.board-container"]',
     issue: '[data-testid="board.content.cell.card"], [data-testid="platform-board-kit.ui.card.card"]',
     flagged: '.ghx-flagged',
     grabber: '.ghx-grabber',
@@ -169,9 +170,10 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     boardHeaderTarget: '[data-testid="software-board.header.controls-bar"]',
     issueCardCloud: '[data-testid="board.content.cell.card"], [data-testid="platform-board-kit.ui.card.card"]',
     boardHeaderCloud: '[data-testid="software-board.header.controls-bar"]',
-    boardContainerCloud: '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container"]',
+    boardContainerCloud:
+      '[data-testid="board.content.board-wrapper"], [data-testid="software-board.board"], [data-testid^="software-board.board-container"]',
     boardColumnContainerCloud:
-      '[data-testid="board.content.board-wrapper"], [data-testid^="software-board.board-container.board"]',
+      '[data-testid="board.content.board-wrapper"], [data-testid="software-board.board"], [data-testid^="software-board.board-container"]',
   },
 
   classlist: {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { IBoardPagePageObject } from '../BoardPagePageObject';
-import { getBoardEditDataCloud } from '../jiraApi.cloud';
+import { getBoardEditDataCloud, getProjectIssueTypesCloud } from '../jiraApi.cloud';
 
 function createEditModelResponse() {
   return {
@@ -218,5 +218,43 @@ describe('getBoardEditDataCloud', () => {
 
     expect(result).toEqual({});
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('getProjectIssueTypesCloud', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('loads issue types from Cloud project REST', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          issueTypes: [
+            { id: '10047', name: 'Задача', subtask: false },
+            { id: '10046', name: 'Подзадача', subtask: true },
+          ],
+        }),
+      })
+    );
+
+    const types = await getProjectIssueTypesCloud('TRB3');
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/rest/api/2/project/TRB3',
+      expect.objectContaining({ credentials: 'same-origin' })
+    );
+    expect(types).toEqual([
+      { id: '10047', name: 'Задача', subtask: false },
+      { id: '10046', name: 'Подзадача', subtask: true },
+    ]);
+  });
+
+  it('returns empty list when project key is blank or API fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }));
+    expect(await getProjectIssueTypesCloud('   ')).toEqual([]);
+    expect(await getProjectIssueTypesCloud('MISSING')).toEqual([]);
   });
 });

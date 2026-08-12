@@ -1,6 +1,7 @@
 /* eslint-disable no-console, @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud server API adapter logs fallback paths and ignores best-effort DOM misses. */
 import type { Container } from 'dioma';
 import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
+import { Ok, Err } from 'ts-results';
 import {
   getBoardPropertyToken,
   getBoardEditDataToken,
@@ -8,9 +9,10 @@ import {
   deleteBoardPropertyToken,
   searchUsersToken,
   buildAvatarUrlToken,
+  getProjectIssueTypesToken,
 } from '../../../infrastructure/di/jiraApiTokens';
 import type { JiraUser } from '../../../infrastructure/jira/jiraApi';
-import { getBoardEditDataCloud, searchUsersCloud } from '../jiraApi.cloud';
+import { getBoardEditDataCloud, getProjectIssueTypesCloud, searchUsersCloud } from '../jiraApi.cloud';
 import type { CloudJiraUser } from '../jiraApi.cloud';
 import { SettingsStorage } from '../SettingsStorage';
 
@@ -97,6 +99,18 @@ export function registerServerApiCloudAdapters(container: Container): void {
         avatarUrls: u.avatarUrls ?? {},
         self: '',
       }));
+    },
+  });
+
+  container.register({
+    token: getProjectIssueTypesToken,
+    value: async (projectKey: string) => {
+      try {
+        const types = await getProjectIssueTypesCloud(projectKey);
+        return Ok(types);
+      } catch (error) {
+        return Err(error instanceof Error ? error : new Error(String(error)));
+      }
     },
   });
 

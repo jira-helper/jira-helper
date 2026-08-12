@@ -79,18 +79,11 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
   }
 
   appendStyles(): string {
+    // Generic class: Cloud cards/swimlanes are not `.ghx-*`, but still use `no-visibility`.
     return `
     <style type="text/css">
-        .ghx-issue.no-visibility {
-            display: none!important;
-        }
-
-        .ghx-swimlane.no-visibility {
-            display: none!important;
-        }
-
-        .ghx-parent-group.no-visibility {
-            display: none!important;
+        .no-visibility {
+            display: none !important;
         }
     </style>
     `;
@@ -163,17 +156,77 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const poolSelector = po.selectors?.pool ?? '#ghx-pool';
     const pool = document.querySelector(poolSelector);
     if (pool) {
-      this.onDOMChange(
-        poolSelector,
-        () => {
+      // Cloud reassigns cards via attribute/text updates as often as remounts.
+      // Debounce + ignore our own paint/filter writes so we do not loop.
+      let applyTimer: ReturnType<typeof setTimeout> | null = null;
+      let applying = false;
+      this.sideEffects.push(() => {
+        if (applyTimer) clearTimeout(applyTimer);
+      });
+
+      const isOwnPersonLimitsMutation = (mutations: MutationRecord[]) =>
+        mutations.length > 0 &&
+        mutations.every(mutation => {
+          if (mutation.type === 'attributes') {
+            const name = mutation.attributeName;
+            if (name === 'data-jh-wip-overloaded' || name === 'style') return true;
+            if (name === 'class') {
+              const el = mutation.target as Element;
+              return el.classList.contains('no-visibility') || el.classList.contains('jh-wip-overloaded');
+            }
+            return false;
+          }
+          if (mutation.type === 'childList') {
+            const nodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)];
+            if (nodes.length === 0) return true;
+            return nodes.every(node => {
+              if (!(node instanceof Element)) {
+                return node.parentElement?.closest('[data-jh-person-limits], #avatars-limits') != null;
+              }
+              return (
+                node.matches('[data-jh-person-limits], #avatars-limits') ||
+                node.querySelector('[data-jh-person-limits], #avatars-limits') != null ||
+                node.closest('[data-jh-person-limits], #avatars-limits') != null
+              );
+            });
+          }
+          return false;
+        });
+
+      const applyRuntime = () => {
+        if (applying) return;
+        applying = true;
+        try {
           runtime.apply();
           runtime.showOnlyChosen();
           // Jira sometimes wipes the board toolbar together with our wrapper
           // when cards/columns mutate; re-mount avatars if our wrapper is gone.
           this.renderAvatarsContainer();
+        } finally {
+          this.setTimeout(() => {
+            applying = false;
+          }, 0);
+        }
+      };
+
+      this.onDOMChange(
+        poolSelector,
+        mutations => {
+          if (applying || isOwnPersonLimitsMutation(mutations)) return;
+          if (applyTimer) clearTimeout(applyTimer);
+          applyTimer = setTimeout(applyRuntime, 200);
         },
-        { childList: true, subtree: true }
+        {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          characterData: true,
+          attributeFilter: ['aria-label', 'alt', 'class', 'data-testid', 'hidden', 'style'],
+        }
       );
+
+      // Cards / assignees can hydrate after first paint.
+      this.setTimeout(applyRuntime, 1500);
     }
 
     const mountSelector = getAvatarsMountSelector(po);
