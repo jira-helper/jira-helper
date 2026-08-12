@@ -1,7 +1,8 @@
-/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
+/* eslint-disable local/no-inline-styles -- Story host mimics Jira controls bar; badges use CSS modules. */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AvatarBadge } from './AvatarBadge';
+import containerStyles from './AvatarsContainer.module.css';
 
 const meta: Meta<typeof AvatarBadge> = {
   title: 'PersonLimitsModule/BoardPage/AvatarBadge',
@@ -113,8 +114,8 @@ export const MultipleAvatars: Story = {
 };
 
 /**
- * Dense header row: 14 badges from column × swimlane × type-ish counters.
- * Use this to eyeball overflow / wrapping of personal WIP avatars.
+ * Dense strip: 14 badges. Constrained width mimics Cloud's single-row controls bar
+ * so we can verify wrap instead of horizontal clip.
  */
 export const FourteenComboAvatars: Story = {
   parameters: { layout: 'padded' },
@@ -131,22 +132,34 @@ export const FourteenComboAvatars: Story = {
         isActive: ci === 1 && si === 2,
       }))
     );
-    // 4×4 = 16; keep first 14 for the requested density check
     return (
-      <div id="avatars-limits" style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, maxWidth: 720 }}>
-        {badges.slice(0, 14).map(b => (
-          <AvatarBadge
-            key={b.limitId}
-            avatar={defaultAvatar}
-            personName={b.personName}
-            displayName={b.displayName}
-            currentCount={b.currentCount}
-            limit={b.limit}
-            isActive={b.isActive}
-            onClick={() => {}}
-            limitId={b.limitId}
-          />
-        ))}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          overflow: 'hidden',
+          maxWidth: 1100,
+          alignItems: 'center',
+          border: '1px dashed #ccc',
+          padding: 8,
+        }}
+      >
+        <span style={{ marginRight: 12, whiteSpace: 'nowrap' }}>filters…</span>
+        <div id="avatars-limits" className={containerStyles.container}>
+          {badges.slice(0, 14).map(b => (
+            <AvatarBadge
+              key={b.limitId}
+              avatar={defaultAvatar}
+              personName={b.personName}
+              displayName={b.displayName}
+              currentCount={b.currentCount}
+              limit={b.limit}
+              isActive={b.isActive}
+              onClick={() => {}}
+              limitId={b.limitId}
+            />
+          ))}
+        </div>
       </div>
     );
   },
