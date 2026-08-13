@@ -24,6 +24,9 @@ export const renderStickySettingsTabBar: TabsProps['renderTabBar'] = (props, Def
   <DefaultTabBar {...props} style={{ ...props.style, ...stickyTabsNavigationStyle }} />
 );
 
+/** Above Jira 11 Rapid Board sticky headers / pool stacking; in AUI dialog range. */
+const BOARD_SETTINGS_MODAL_Z_INDEX = 3000;
+
 const BoardSettingsModalInner = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const texts = useGetTextsByLocale(BOARD_SETTINGS_TEXTS);
@@ -41,7 +44,8 @@ const BoardSettingsModalInner = () => {
         onOk={() => setIsModalOpen(false)}
         destroyOnClose
         width="auto"
-        getContainer={false}
+        wrapClassName="jh-board-settings-modal"
+        zIndex={BOARD_SETTINGS_MODAL_Z_INDEX}
         okText={texts.ok}
         cancelText={texts.cancel}
         styles={{

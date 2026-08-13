@@ -95,11 +95,11 @@ export const StickyTabsInScrollableModal: Story = {
     settingsButton.click();
 
     await waitFor(() => {
-      expect(canvasElement.querySelector('.ant-modal-body')).toBeTruthy();
+      expect(document.querySelector('.jh-board-settings-modal .ant-modal-body')).toBeTruthy();
     });
 
-    const modalBody = canvasElement.querySelector('.ant-modal-body') as HTMLElement | null;
-    const tabsNavigation = canvasElement.querySelector(
+    const modalBody = document.querySelector('.jh-board-settings-modal .ant-modal-body') as HTMLElement | null;
+    const tabsNavigation = document.querySelector(
       '[data-jh-component="boardSettingsTabs"] .ant-tabs-nav'
     ) as HTMLElement | null;
 
