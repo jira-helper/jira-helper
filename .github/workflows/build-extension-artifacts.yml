@@ -55,8 +55,6 @@ jobs:
           ls -lh jira-helper-chrome.zip jira-helper-firefox.zip
 
       # Artifact names cannot contain / \ : " < > | * ? or newlines (NTFS-safe).
-      # GitHub wraps each artifact in an extra zip for download; inside are the
-      # ready extension packages (unzip once → jira-helper-chrome.zip / firefox).
       - name: Sanitize artifact name
         id: artifact
         env:
@@ -65,6 +63,16 @@ jobs:
         run: |
           SAFE_REF=$(printf '%s' "$REF_NAME" | tr '/\\:"<>|*?' '-' | tr -d '\r\n')
           echo "prefix=jira-helper-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload combined extension zips
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact.outputs.prefix }}
+          path: |
+            jira-helper-chrome.zip
+            jira-helper-firefox.zip
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload Chrome extension zip
         uses: actions/upload-artifact@v7
