@@ -45,17 +45,18 @@ jobs:
         env:
           CI: true
 
-      - name: Verify unpacked builds
+      - name: Prepare named extension zips
         run: |
-          test -f dist/manifest.json
-          test -f dist-firefox/manifest.json
-          test -f jira-helper.zip
+          mv jira-helper.zip jira-helper-chrome.zip
+          test -f jira-helper-chrome.zip
           test -f jira-helper-firefox.zip
-          ls -lh dist/manifest.json dist-firefox/manifest.json jira-helper.zip jira-helper-firefox.zip
+          unzip -l jira-helper-chrome.zip | grep -q 'manifest.json'
+          unzip -l jira-helper-firefox.zip | grep -q 'manifest.json'
+          ls -lh jira-helper-chrome.zip jira-helper-firefox.zip
 
       # Artifact names cannot contain / \ : " < > | * ? or newlines (NTFS-safe).
-      # GitHub always wraps artifacts in a zip; upload dist/ so one unzip yields
-      # manifest.json at the root (Load unpacked), not a zip-in-zip.
+      # GitHub wraps each artifact in an extra zip for download; inside are the
+      # ready extension packages (unzip once → jira-helper-chrome.zip / firefox).
       - name: Sanitize artifact name
         id: artifact
         env:
@@ -65,16 +66,18 @@ jobs:
           SAFE_REF=$(printf '%s' "$REF_NAME" | tr '/\\:"<>|*?' '-' | tr -d '\r\n')
           echo "prefix=jira-helper-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Chrome unpacked extension
+      - name: Upload Chrome extension zip
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.prefix }}-chrome
-          path: dist/
+          path: jira-helper-chrome.zip
+          if-no-files-found: error
           retention-days: 14
 
-      - name: Upload Firefox unpacked extension
+      - name: Upload Firefox extension zip
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.prefix }}-firefox
-          path: dist-firefox/
+          path: jira-helper-firefox.zip
+          if-no-files-found: error
           retention-days: 14
