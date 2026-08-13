@@ -45,13 +45,17 @@ jobs:
         env:
           CI: true
 
-      - name: Verify zip files
+      - name: Verify unpacked builds
         run: |
+          test -f dist/manifest.json
+          test -f dist-firefox/manifest.json
           test -f jira-helper.zip
           test -f jira-helper-firefox.zip
-          ls -lh jira-helper.zip jira-helper-firefox.zip
+          ls -lh dist/manifest.json dist-firefox/manifest.json jira-helper.zip jira-helper-firefox.zip
 
       # Artifact names cannot contain / \ : " < > | * ? or newlines (NTFS-safe).
+      # GitHub always wraps artifacts in a zip; upload dist/ so one unzip yields
+      # manifest.json at the root (Load unpacked), not a zip-in-zip.
       - name: Sanitize artifact name
         id: artifact
         env:
@@ -59,13 +63,18 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           SAFE_REF=$(printf '%s' "$REF_NAME" | tr '/\\:"<>|*?' '-' | tr -d '\r\n')
-          echo "name=jira-helper-extension-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
+          echo "prefix=jira-helper-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload extension artifacts
+      - name: Upload Chrome unpacked extension
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.artifact.outputs.name }}
-          path: |
-            jira-helper.zip
-            jira-helper-firefox.zip
+          name: ${{ steps.artifact.outputs.prefix }}-chrome
+          path: dist/
+          retention-days: 14
+
+      - name: Upload Firefox unpacked extension
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact.outputs.prefix }}-firefox
+          path: dist-firefox/
           retention-days: 14
