@@ -45,27 +45,38 @@ jobs:
         env:
           CI: true
 
-      - name: Verify zip files
+      - name: Prepare named extension zips
         run: |
-          test -f jira-helper.zip
+          mv jira-helper.zip jira-helper-chrome.zip
+          test -f dist/manifest.json
+          test -f dist-firefox/manifest.json
+          test -f jira-helper-chrome.zip
           test -f jira-helper-firefox.zip
-          ls -lh jira-helper.zip jira-helper-firefox.zip
 
-      # Artifact names cannot contain / \ : " < > | * ? or newlines (NTFS-safe).
-      - name: Sanitize artifact name
-        id: artifact
-        env:
-          REF_NAME: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
-        run: |
-          SAFE_REF=$(printf '%s' "$REF_NAME" | tr '/\\:"<>|*?' '-' | tr -d '\r\n')
-          echo "name=jira-helper-extension-${SAFE_REF}-${SHA}" >> "$GITHUB_OUTPUT"
-
-      - name: Upload extension artifacts
+      - name: Upload combined extension zips
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.artifact.outputs.name }}
+          name: jira-helper
           path: |
-            jira-helper.zip
+            jira-helper-chrome.zip
             jira-helper-firefox.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      # GitHub re-zips whatever we upload. Upload dist/ so the downloaded
+      # artifact zip has manifest.json at the root and Chrome can install it.
+      - name: Upload Chrome extension
+        uses: actions/upload-artifact@v7
+        with:
+          name: jira-helper-chrome
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Firefox extension
+        uses: actions/upload-artifact@v7
+        with:
+          name: jira-helper-firefox
+          path: dist-firefox/
+          if-no-files-found: error
           retention-days: 14
