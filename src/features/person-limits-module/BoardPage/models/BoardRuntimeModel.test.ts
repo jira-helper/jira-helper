@@ -451,6 +451,45 @@ describe('BoardRuntimeModel', () => {
       expect(model.activePerson).toBeNull();
     });
 
+    it('applyHighlightToIssues paints freshly mounted over-limit cards without a full apply', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="o1" data-issue-key="TRB3-7">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn],
+          limit: 0,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.apply();
+      expect((document.getElementById('o1') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+
+      const fresh = document.createElement('div');
+      fresh.className = 'ghx-issue';
+      fresh.id = 'fresh';
+      fresh.setAttribute('data-issue-key', 'TRB3-7');
+      fresh.innerHTML = '<img class="ghx-avatar-img" alt="Assignee: John Doe" />';
+      document.querySelector('.ghx-column')!.appendChild(fresh);
+      (fresh as HTMLElement).style.backgroundColor = '';
+
+      model.applyHighlightToIssues([fresh]);
+
+      expect((fresh as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+    });
+
     it('apply highlights only the offending person in a per-person limit', () => {
       document.body.innerHTML = `
         <div id="ghx-pool">
