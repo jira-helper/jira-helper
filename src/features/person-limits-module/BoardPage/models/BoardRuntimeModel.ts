@@ -235,6 +235,41 @@ export class BoardRuntimeModel {
   }
 
   /**
+   * Paint over-limit highlighting on freshly mounted cards using current stats.
+   * Virtualized boards remount cards on scroll; a debounced full apply is too late.
+   */
+  applyHighlightToIssues(issues: Element[]): void {
+    if (issues.length === 0) return;
+    const keys = this.overLimitIssueKeys();
+    if (keys.size === 0) return;
+    issues.forEach(issue => {
+      const key = this.readIssueKey(issue);
+      if (key != null && keys.has(key)) {
+        this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
+      }
+    });
+  }
+
+  private overLimitIssueKeys(): Set<string> {
+    const keys = new Set<string>();
+    this.stats.forEach(personLimit => {
+      if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
+        if (personLimit.matches.length > personLimit.limit) {
+          personLimit.matches.forEach(match => keys.add(match.key));
+        }
+        return;
+      }
+      personLimit.persons.forEach(person => {
+        const matchesForPerson = this.filterMatchesByPerson(personLimit, person.name);
+        if (matchesForPerson.length > personLimit.limit) {
+          matchesForPerson.forEach(match => keys.add(match.key));
+        }
+      });
+    });
+    return keys;
+  }
+
+  /**
    * Show only issues matching the active selection, or all if none selected.
    *
    * Selection semantics:
@@ -286,12 +321,11 @@ export class BoardRuntimeModel {
     this.calculateStats();
     const allIssues = this.pageObject.getIssueElements(this.cssSelectorOfIssues);
     allIssues.forEach(issue => this.pageObject.resetIssueBackgroundColor(issue));
+    const overLimitKeys = this.overLimitIssueKeys();
+    this.highlightMountedIssuesByKeys(overLimitKeys);
     this.stats.forEach(personLimit => {
       if (personLimit.sharedLimit || personLimit.persons.length <= 1) {
         if (personLimit.matches.length > personLimit.limit) {
-          const keys = new Set(personLimit.matches.map(m => m.key));
-          this.highlightMountedIssuesByKeys(keys);
-          // Legacy DOM path: paint counted issue nodes when keys cannot be resolved.
           personLimit.issues.forEach(issue => {
             if (this.readIssueKey(issue) == null) {
               this.pageObject.setIssueBackgroundColor(issue, OVER_LIMIT_BG);
@@ -303,7 +337,6 @@ export class BoardRuntimeModel {
       personLimit.persons.forEach(person => {
         const matchesForPerson = this.filterMatchesByPerson(personLimit, person.name);
         if (matchesForPerson.length > personLimit.limit) {
-          this.highlightMountedIssuesByKeys(new Set(matchesForPerson.map(m => m.key)));
           personLimit.issues.forEach(issue => {
             if (this.readIssueKey(issue) != null) return;
             const assignee = this.pageObject.getAssigneeFromIssue(issue);

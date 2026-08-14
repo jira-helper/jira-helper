@@ -169,7 +169,15 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
         mutations.every(mutation => {
           if (mutation.type === 'attributes') {
             const name = mutation.attributeName;
-            if (name === 'data-jh-wip-overloaded' || name === 'style') return true;
+            if (name === 'data-jh-wip-overloaded') return true;
+            if (name === 'style') {
+              const el = mutation.target as Element;
+              return (
+                el.hasAttribute('data-jh-wip-overloaded') ||
+                el.classList.contains('jh-wip-overloaded') ||
+                el.closest('[data-jh-person-limits], #avatars-limits') != null
+              );
+            }
             if (name === 'class') {
               const el = mutation.target as Element;
               return el.classList.contains('no-visibility') || el.classList.contains('jh-wip-overloaded');
@@ -216,22 +224,23 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
         mutations => {
           if (applying) return;
 
-          // Virtualized boards remount cards on scroll. Hide/show them synchronously
-          // while a filter is active so mismatched cards do not flash before debounce.
-          if (runtime.activePerson != null) {
-            const freshCards: Element[] = [];
-            for (const mutation of mutations) {
-              if (mutation.type !== 'childList') continue;
-              for (const node of Array.from(mutation.addedNodes)) {
-                if (!(node instanceof Element)) continue;
-                if (node.matches(issueSelector)) {
-                  freshCards.push(node);
-                } else {
-                  freshCards.push(...Array.from(node.querySelectorAll(issueSelector)));
-                }
+          // Virtualized boards remount cards on scroll. Paint/filter them
+          // synchronously — a debounced full apply lets over-limit cards flash unstyled.
+          const freshCards: Element[] = [];
+          for (const mutation of mutations) {
+            if (mutation.type !== 'childList') continue;
+            for (const node of Array.from(mutation.addedNodes)) {
+              if (!(node instanceof Element)) continue;
+              if (node.matches(issueSelector)) {
+                freshCards.push(node);
+              } else {
+                freshCards.push(...Array.from(node.querySelectorAll(issueSelector)));
               }
             }
-            if (freshCards.length > 0) {
+          }
+          if (freshCards.length > 0) {
+            runtime.applyHighlightToIssues(freshCards);
+            if (runtime.activePerson != null) {
               runtime.applyVisibilityToIssues(freshCards);
             }
           }
