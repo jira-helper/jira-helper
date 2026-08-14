@@ -94,16 +94,16 @@ export class BoardRuntimeModel {
     columnsInOrder.forEach((columnId, index) => {
       const { name, value } = findGroupByColumnId(columnId, boardGroups);
       const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
+      // Reset cleared every header, then group paint skips ignored swimlanes.
+      // Restore an opaque Cloud surface on all columns first so excluded
+      // swimlanes (and columns without a group) are not left translucent.
+      if (isCloudHeader) {
+        this.pageObject.styleColumnHeader(columnId, {
+          backgroundColor: CLOUD_HEADER_BG,
+          zIndex: '20',
+        });
+      }
       if (!name || !value?.length) {
-        // Reset clears inline bg on every column. Cloud sticky headers are
-        // translucent by default — restore an opaque surface so ungrouped
-        // columns do not show cards through the title.
-        if (isCloudHeader) {
-          this.pageObject.styleColumnHeader(columnId, {
-            backgroundColor: CLOUD_HEADER_BG,
-            zIndex: '20',
-          });
-        }
         return;
       }
 

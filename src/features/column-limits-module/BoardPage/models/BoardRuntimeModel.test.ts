@@ -490,6 +490,41 @@ describe('BoardRuntimeModel', () => {
       expect(firstResetOrder).toBeLessThan(firstStyleOrder);
     });
 
+    it('paints Cloud opaque base on grouped columns so ignored swimlanes are not left translucent after reset', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 1,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: ['sw-skip'],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          backgroundColor: expect.stringContaining('color-mix'),
+        }),
+        ['sw-skip']
+      );
+    });
+
     it('passes ignoredSwimlanes as excluded ids to styleColumnHeader', () => {
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
       const model = modelWithData({});
