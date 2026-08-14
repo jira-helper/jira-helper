@@ -384,6 +384,51 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.removeColumnHeaderElements).toHaveBeenCalledWith('col1', '[data-column-limits-stripe]');
     });
 
+    it('paints Cloud headers without a WIP group opaque so Jira sticky overlay does not stay translucent', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 1,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col3',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).not.toHaveBeenCalledWith(
+        'col2',
+        expect.stringContaining('data-column-limits-stripe'),
+        expect.anything()
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).not.toHaveBeenCalledWith(
+        'col3',
+        expect.stringContaining('data-column-limits-stripe'),
+        expect.anything()
+      );
+    });
+
     it('should style column headers for grouped columns via pageObject', () => {
       const model = modelWithData({
         G1: {
