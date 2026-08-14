@@ -93,7 +93,19 @@ export class BoardRuntimeModel {
 
     columnsInOrder.forEach((columnId, index) => {
       const { name, value } = findGroupByColumnId(columnId, boardGroups);
-      if (!name || !value?.length) return;
+      const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
+      if (!name || !value?.length) {
+        // Reset clears inline bg on every column. Cloud sticky headers are
+        // translucent by default — restore an opaque surface so ungrouped
+        // columns do not show cards through the title.
+        if (isCloudHeader) {
+          this.pageObject.styleColumnHeader(columnId, {
+            backgroundColor: CLOUD_HEADER_BG,
+            zIndex: '20',
+          });
+        }
+        return;
+      }
 
       const leftCol = index > 0 ? columnsInOrder[index - 1] : undefined;
       const rightCol = index < columnsInOrder.length - 1 ? columnsInOrder[index + 1] : undefined;
@@ -104,7 +116,6 @@ export class BoardRuntimeModel {
       const excludedSwimlaneIds = boardGroups[name].ignoredSwimlanes;
       if (!groupColor) return;
 
-      const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
       const isGroupStart = columnByLeft.name !== name;
       const isGroupEnd = columnByRight.name !== name;
       // Cloud: opaque fill + absolute top stripe (paints above header children, no layout growth).
