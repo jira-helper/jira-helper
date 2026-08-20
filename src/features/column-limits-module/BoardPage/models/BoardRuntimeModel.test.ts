@@ -603,8 +603,8 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.resetColumnCellStyles).toHaveBeenCalledWith('col1');
       expect(mockPageObject.resetColumnCellStyles).toHaveBeenCalledWith('col2');
 
-      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#ff5630', ['sw-skip']);
-      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col2', '#ff5630', ['sw-skip']);
+      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#de350b', ['sw-skip']);
+      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col2', '#de350b', ['sw-skip']);
 
       expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalled();
       const htmlCall = vi.mocked(mockPageObject.insertColumnHeaderHtml).mock.calls.find(([id]) => id === 'col1');
