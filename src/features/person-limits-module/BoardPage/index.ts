@@ -59,7 +59,7 @@ const AVATARS_WRAPPER_KEY = 'avatars';
 const TEAM_MANAGED_BOARD_SELECTOR = '[data-testid="board.content.board-wrapper"]';
 const TEAM_MANAGED_FILTER_BAR_SELECTOR = '[data-testid="filter-refinement.ui.search-field-container"]';
 
-function resolveTeamManagedAvatarsMount(): Element | null {
+function resolveTeamManagedAvatarsLayout(): { layout: HTMLElement; mount: Element } | null {
   const search = document.querySelector(TEAM_MANAGED_FILTER_BAR_SELECTOR);
   const board = document.querySelector(TEAM_MANAGED_BOARD_SELECTOR);
   if (!search || !board) return null;
@@ -74,13 +74,17 @@ function resolveTeamManagedAvatarsMount(): Element | null {
       parent.children[1].contains(board)
     ) {
       const toolbar = parent.children[0];
-      if (toolbar.children.length >= 2) {
-        return toolbar.lastElementChild;
+      if (toolbar.children.length >= 2 && toolbar.lastElementChild) {
+        return { layout: parent, mount: toolbar.lastElementChild };
       }
     }
     node = parent;
   }
   return null;
+}
+
+function resolveTeamManagedAvatarsMount(): Element | null {
+  return resolveTeamManagedAvatarsLayout()?.mount ?? null;
 }
 
 function resolveAvatarsMount(po: IBoardPagePageObject): Element | null {
@@ -304,8 +308,9 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     if (document.getElementById('ghx-view-selector')) {
       this.onDOMChange('#ghx-view-selector', () => this.renderAvatarsContainer(), { childList: true, subtree: true });
     } else {
+      const teamLayout = resolveTeamManagedAvatarsLayout()?.layout;
       const mount = resolveAvatarsMount(po);
-      const observeEl = mount?.parentElement ?? mount;
+      const observeEl = teamLayout ?? mount?.parentElement ?? mount;
       if (observeEl) {
         const observer = new MutationObserver(() => this.renderAvatarsContainer());
         observer.observe(observeEl, { childList: true, subtree: true });
@@ -333,8 +338,19 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
 
     const wrapper = document.createElement('div');
     wrapper.setAttribute(AVATARS_WRAPPER_ATTR, AVATARS_WRAPPER_KEY);
-    wrapper.style.display = 'contents';
     const teamManaged = resolveTeamManagedAvatarsMount();
+    if (mount === teamManaged) {
+      // Icon cluster is a tight flex row. `display:contents` + shrink wraps
+      // avatars into a pile (names leak as img alt). Keep a real flex item.
+      wrapper.setAttribute('data-jh-avatars-host', 'team-managed');
+      wrapper.style.display = 'flex';
+      wrapper.style.flex = '0 0 auto';
+      wrapper.style.flexShrink = '0';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.marginRight = '8px';
+    } else {
+      wrapper.style.display = 'contents';
+    }
     if (mount === teamManaged && mount.firstChild) {
       mount.insertBefore(wrapper, mount.firstChild);
     } else {

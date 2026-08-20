@@ -4,6 +4,7 @@
   margin-right: 4px;
   width: 32px;
   height: 32px;
+  flex: 0 0 auto;
 }
 
 .avatarImage {

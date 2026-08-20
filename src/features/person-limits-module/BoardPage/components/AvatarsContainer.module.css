@@ -17,3 +17,11 @@
   padding-top: 10px;
   margin-left: 30px;
 }
+
+:global([data-jh-avatars-host='team-managed']) .container {
+  flex: 0 0 auto;
+  min-width: auto;
+  max-width: none;
+  flex-wrap: nowrap;
+  margin-left: 0;
+}

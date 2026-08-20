@@ -82,6 +82,7 @@ export class SettingsUIModel {
             name: p.name,
             displayName: p.displayName || p.name,
             self: p.self,
+            ...(p.avatar ? { avatar: p.avatar } : {}),
           })),
           limit: limit.limit,
           selectedColumns,

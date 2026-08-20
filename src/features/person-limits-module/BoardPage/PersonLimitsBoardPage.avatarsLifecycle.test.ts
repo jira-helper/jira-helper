@@ -159,8 +159,11 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     await flush();
 
     const insights = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent === 'Board insights');
-    expect(insights?.parentElement?.querySelector('[data-jh-person-limits="avatars"]')).not.toBeNull();
-    expect(insights?.parentElement?.firstElementChild?.getAttribute('data-jh-person-limits')).toBe('avatars');
+    const host = insights?.parentElement?.firstElementChild as HTMLElement | undefined;
+    expect(host?.getAttribute('data-jh-person-limits')).toBe('avatars');
+    expect(host?.getAttribute('data-jh-avatars-host')).toBe('team-managed');
+    expect(host?.style.display).toBe('flex');
+    expect(host?.style.flexShrink).toBe('0');
     expect(
       document.querySelector(
         '[data-testid="filter-refinement.ui.search-field-container"] [data-jh-person-limits="avatars"]'
@@ -171,6 +174,41 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
         '[data-testid="horizontal-nav-header.ui.project-header.header"] [data-jh-person-limits="avatars"]'
       )
     ).toBeNull();
+  });
+
+  it('re-renders team-managed avatars when Jira replaces the toolbar row', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = `
+      <div>
+        <div>
+          <div>
+            <div data-testid="filter-refinement.ui.search-field-container"></div>
+          </div>
+          <div>
+            <button type="button">Board insights</button>
+          </div>
+        </div>
+        <div>
+          <div data-testid="board.content.board-wrapper"></div>
+        </div>
+      </div>
+    `;
+    const page = createPage();
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    const board = document.querySelector('[data-testid="board.content.board-wrapper"]')!;
+    const layout = board.parentElement!.parentElement!;
+    const oldToolbar = layout.children[0];
+    const replacement = oldToolbar.cloneNode(true) as HTMLElement;
+    replacement.querySelector('[data-jh-person-limits]')?.remove();
+    expect(replacement.querySelector('[data-jh-person-limits]')).toBeNull();
+    oldToolbar.replaceWith(replacement);
+    expect(document.querySelector('[data-jh-person-limits]')).toBeNull();
+    await flush();
+
+    expect(replacement.querySelector('[data-jh-person-limits="avatars"]')).not.toBeNull();
   });
 
   it('re-renders avatars when Jira wipes #subnav-title (regression: 2.30 disappear after board action)', async () => {
