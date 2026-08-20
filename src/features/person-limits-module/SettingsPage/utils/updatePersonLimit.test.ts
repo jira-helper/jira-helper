@@ -87,6 +87,29 @@ describe('updatePersonLimit', () => {
     expect(result.persons[0].avatar).toBe('https://avatar.example/xcredo.png');
   });
 
+  it('keeps the existing avatar when form data omits it', () => {
+    const existingWithAvatar: PersonLimit = {
+      ...existingLimit,
+      persons: [
+        {
+          name: 'john.doe',
+          displayName: 'John Doe',
+          self: existingLimit.persons[0].self,
+          avatar: 'https://avatar.example/john.png',
+        },
+      ],
+    };
+
+    const result = updatePersonLimit({
+      existingLimit: existingWithAvatar,
+      formData: mockFormData,
+      columns: mockColumns,
+      swimlanes: mockSwimlanes,
+    });
+
+    expect(result.persons[0].avatar).toBe('https://avatar.example/john.png');
+  });
+
   describe('sharedLimit', () => {
     const johnDoe: SelectedPerson = {
       name: 'john.doe',
