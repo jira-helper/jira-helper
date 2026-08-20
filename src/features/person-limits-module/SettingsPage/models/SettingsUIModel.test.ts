@@ -199,6 +199,32 @@ describe('SettingsUIModel', () => {
         { name: 'bob', displayName: 'Bob', self: 'http://jira/b' },
       ]);
     });
+
+    it('copies person avatar URLs into formData so save does not drop Cloud avatars', () => {
+      model.limits = [
+        sampleLimit({
+          persons: [
+            {
+              name: '557058:acct',
+              displayName: 'Maxim Sosnov',
+              self: '',
+              avatar: 'https://avatar.example/maxim.png',
+            },
+          ],
+        }),
+      ];
+
+      model.setEditingId(1);
+
+      expect(model.formData?.persons).toEqual([
+        {
+          name: '557058:acct',
+          displayName: 'Maxim Sosnov',
+          self: '',
+          avatar: 'https://avatar.example/maxim.png',
+        },
+      ]);
+    });
   });
 
   describe('setLimits', () => {

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-empty -- Legacy Jira Cloud server API adapter logs fallback paths and ignores best-effort DOM misses. */
+/* eslint-disable @typescript-eslint/no-unused-vars -- Legacy Jira Cloud server API adapter logs fallback paths. */
 import type { Container } from 'dioma';
 import { boardPagePageObjectToken } from '../../../infrastructure/page-objects/BoardPage';
 import { Ok, Err } from 'ts-results';
@@ -16,6 +16,7 @@ import { getBoardEditDataCloud, getProjectIssueTypesCloud, searchUsersCloud } fr
 import type { CloudJiraUser } from '../jiraApi.cloud';
 import { SettingsStorage } from '../SettingsStorage';
 import { getBoardPropertyFromApi } from './boardPropertyApi.cloud';
+import { findCloudAvatarUrlFromDom } from './findCloudAvatarUrlFromDom';
 
 export function registerServerApiCloudAdapters(container: Container): void {
   const boardPage = container.inject(boardPagePageObjectToken);
@@ -83,49 +84,14 @@ export function registerServerApiCloudAdapters(container: Container): void {
       const cached = avatarCache.get(username);
       if (cached) return cached;
 
-      let foundUrl: string | null = null;
-      try {
-        const cards = document.querySelectorAll<HTMLElement>('[data-testid="platform-board-kit.ui.card.card"]');
-        for (const card of Array.from(cards)) {
-          const hidden = card.querySelectorAll('[hidden], [aria-hidden="true"]');
-          let found = false;
-          for (const el of Array.from(hidden)) {
-            const text = el.textContent?.trim() || '';
-            const match = text.match(/^(?:Исполнитель|Assignee):\s*(.+)$/i);
-            if (match && match[1].trim().toLowerCase() === username.toLowerCase()) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) continue;
-          const avatarImg = card.querySelector<HTMLImageElement>(
-            '[data-testid="software-board.common.fields.assignee-field-static.avatar-wrapper"] img'
-          );
-          if (avatarImg?.src) {
-            foundUrl = avatarImg.src;
-            break;
-          }
-          const gravatar = card.querySelector<HTMLImageElement>('img[src*="gravatar.com"]');
-          if (gravatar?.src) {
-            foundUrl = gravatar.src;
-            break;
-          }
-          const anyAvatar = card.querySelector<HTMLImageElement>('img[src*="avatar"]');
-          if (anyAvatar?.src) {
-            foundUrl = anyAvatar.src;
-            break;
-          }
-        }
-      } catch {}
+      const foundUrl = findCloudAvatarUrlFromDom(username);
 
       if (foundUrl) {
         avatarCache.set(username, foundUrl);
         return foundUrl;
       }
 
-      const fallbackUrl = serverBuildAvatarUrl(username);
-      if (fallbackUrl) avatarCache.set(username, fallbackUrl);
-      return fallbackUrl;
+      return serverBuildAvatarUrl(username);
     },
   });
 }
