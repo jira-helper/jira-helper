@@ -287,6 +287,17 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getColumnsInSwimlane(swimlanes[0]!.element)).toHaveLength(2);
   });
 
+  it('countIssueVisibility does not treat comma Cloud card selectors as all-hidden', () => {
+    renderAssigneeSwimlanes();
+    const maxim = BoardPagePageObject.getSwimlanes()[0]!.element;
+    const selector = BoardPagePageObject.selectors.issue;
+
+    expect(BoardPagePageObject.countIssueVisibility(maxim, selector)).toEqual({ total: 1, hidden: 0 });
+
+    document.querySelector('[aria-label="KAN-M1"]')!.classList.add('no-visibility');
+    expect(BoardPagePageObject.countIssueVisibility(maxim, selector)).toEqual({ total: 1, hidden: 1 });
+  });
+
   it('counts column WIP across all assignee swimlane cells (not only the first row)', () => {
     renderAssigneeSwimlanes();
 
