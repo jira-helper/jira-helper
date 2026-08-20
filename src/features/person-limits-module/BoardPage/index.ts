@@ -15,6 +15,7 @@ import type { PersonWipLimitsProperty_2_29 } from '../property';
 import { PersonLimitsSettingsTab } from '../SettingsTab';
 import { PERSON_LIMITS_TEXTS } from '../SettingsPage/texts';
 import type { Column, Swimlane } from '../SettingsPage/state/types';
+import { PROJECT_HEADER_MOUNT_SELECTOR } from 'src/features/board-settings/resolveBoardSettingsMount';
 import { boardPagePageObjectToken, type IBoardPagePageObject } from '../../../infrastructure/page-objects/BoardPage';
 
 type PersonLimitData = PersonWipLimitsProperty_2_29;
@@ -55,10 +56,18 @@ function getPersonLimitsSettingsTabTitle(container: Container): string {
  */
 const AVATARS_WRAPPER_ATTR = 'data-jh-person-limits';
 const AVATARS_WRAPPER_KEY = 'avatars';
+const TEAM_MANAGED_FILTER_BAR_SELECTOR = '[data-testid="filter-refinement.ui.search-field-container"]';
 
 function getAvatarsMountSelector(po: IBoardPagePageObject): string {
   const selectors = po.selectors as (typeof po.selectors & { boardHeaderTarget?: string }) | undefined;
-  return selectors?.boardHeaderTarget ?? '#subnav-title';
+  const primary = selectors?.boardHeaderTarget ?? '#subnav-title';
+  // Resolve in document-existence order, not querySelector comma order.
+  // Team-managed Cloud has no controls-bar; the filter bar sits next to Jira chips.
+  const candidates = [primary, TEAM_MANAGED_FILTER_BAR_SELECTOR, PROJECT_HEADER_MOUNT_SELECTOR];
+  for (const sel of candidates) {
+    if (document.querySelector(sel)) return sel;
+  }
+  return primary;
 }
 
 export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {

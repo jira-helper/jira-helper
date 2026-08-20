@@ -134,6 +134,31 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     expect(runtime.cssSelectorOfIssues).toBe('[data-testid="platform-board-kit.ui.card.card"]');
   });
 
+  it('renders avatars into the team-managed filter bar when Cloud controls-bar is absent', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = `
+      <div data-testid="horizontal-nav-header.ui.project-header.header"></div>
+      <div data-testid="filter-refinement.ui.search-field-container"></div>
+      <div data-testid="board.content.board-wrapper"></div>
+    `;
+    const page = createPage();
+
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    expect(
+      document.querySelector(
+        '[data-testid="filter-refinement.ui.search-field-container"] [data-jh-person-limits="avatars"]'
+      )
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-testid="horizontal-nav-header.ui.project-header.header"] [data-jh-person-limits="avatars"]'
+      )
+    ).toBeNull();
+  });
+
   it('re-renders avatars when Jira wipes #subnav-title (regression: 2.30 disappear after board action)', async () => {
     const page = createPage();
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
