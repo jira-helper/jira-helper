@@ -165,7 +165,7 @@ Then('{string} column cells should have red background', (columnName: string) =>
   const columnId = columnNameToId[columnName] || columnName;
   cy.get(`.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`)
     .first()
-    .should('have.css', 'background-color', 'rgb(255, 86, 48)');
+    .should('have.css', 'background-color', 'rgb(222, 53, 11)');
 });
 
 /**
@@ -175,21 +175,21 @@ Then('{string} column cells should have normal background', (columnName: string)
   const columnId = columnNameToId[columnName] || columnName;
   cy.get(`.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`)
     .first()
-    .should('not.have.css', 'background-color', 'rgb(255, 86, 48)');
+    .should('not.have.css', 'background-color', 'rgb(222, 53, 11)');
 });
 
 /**
  * Then the limit should be exceeded
  */
 Then('the limit should be exceeded', () => {
-  cy.get('.ghx-swimlane .ghx-column').first().should('have.css', 'background-color', 'rgb(255, 86, 48)');
+  cy.get('.ghx-swimlane .ghx-column').first().should('have.css', 'background-color', 'rgb(222, 53, 11)');
 });
 
 /**
  * Then the limit should not be exceeded
  */
 Then('the limit should not be exceeded', () => {
-  cy.get('.ghx-swimlane .ghx-column').first().should('not.have.css', 'background-color', 'rgb(255, 86, 48)');
+  cy.get('.ghx-swimlane .ghx-column').first().should('not.have.css', 'background-color', 'rgb(222, 53, 11)');
 });
 
 /**
@@ -234,7 +234,7 @@ Then('{string} cells should have red background', (columnName: string) => {
   const columnId = columnNameToId[columnName] || columnName;
   cy.get(`.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`)
     .first()
-    .should('have.css', 'background-color', 'rgb(255, 86, 48)');
+    .should('have.css', 'background-color', 'rgb(222, 53, 11)');
 });
 
 /**
@@ -244,5 +244,5 @@ Then('{string} cells should have normal background', (columnName: string) => {
   const columnId = columnNameToId[columnName] || columnName;
   cy.get(`.ghx-swimlane .ghx-column[data-column-id="${columnId}"]`)
     .first()
-    .should('not.have.css', 'background-color', 'rgb(255, 86, 48)');
+    .should('not.have.css', 'background-color', 'rgb(222, 53, 11)');
 });

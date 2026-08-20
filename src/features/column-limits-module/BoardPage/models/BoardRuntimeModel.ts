@@ -13,7 +13,7 @@ import styles from '../styles.module.css';
 
 const HEADER_GROUP_BG = '#deebff';
 const CLOUD_HEADER_BG = 'var(--ds-surface-raised, var(--ds-surface, #ffffff))';
-const OVER_LIMIT_CELL_BG = '#ff5630';
+const OVER_LIMIT_CELL_BG = '#de350b'; // darker than person-WIP card `#ff5630` so column vs card stay distinct
 
 export class BoardRuntimeModel {
   groupStats: GroupStats[] = [];
