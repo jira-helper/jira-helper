@@ -56,18 +56,46 @@ function getPersonLimitsSettingsTabTitle(container: Container): string {
  */
 const AVATARS_WRAPPER_ATTR = 'data-jh-person-limits';
 const AVATARS_WRAPPER_KEY = 'avatars';
+const TEAM_MANAGED_BOARD_SELECTOR = '[data-testid="board.content.board-wrapper"]';
 const TEAM_MANAGED_FILTER_BAR_SELECTOR = '[data-testid="filter-refinement.ui.search-field-container"]';
 
-function getAvatarsMountSelector(po: IBoardPagePageObject): string {
-  const selectors = po.selectors as (typeof po.selectors & { boardHeaderTarget?: string }) | undefined;
-  const primary = selectors?.boardHeaderTarget ?? '#subnav-title';
-  // Resolve in document-existence order, not querySelector comma order.
-  // Team-managed Cloud has no controls-bar; the filter bar sits next to Jira chips.
-  const candidates = [primary, TEAM_MANAGED_FILTER_BAR_SELECTOR, PROJECT_HEADER_MOUNT_SELECTOR];
-  for (const sel of candidates) {
-    if (document.querySelector(sel)) return sel;
+function resolveTeamManagedAvatarsMount(): Element | null {
+  const search = document.querySelector(TEAM_MANAGED_FILTER_BAR_SELECTOR);
+  const board = document.querySelector(TEAM_MANAGED_BOARD_SELECTOR);
+  if (!search || !board) return null;
+
+  let node: Element | null = search;
+  while (node && node !== document.body) {
+    const parent: HTMLElement | null = node.parentElement;
+    if (
+      parent &&
+      parent.children.length === 2 &&
+      parent.children[0].contains(search) &&
+      parent.children[1].contains(board)
+    ) {
+      const toolbar = parent.children[0];
+      if (toolbar.children.length >= 2) {
+        return toolbar.lastElementChild;
+      }
+    }
+    node = parent;
   }
-  return primary;
+  return null;
+}
+
+function resolveAvatarsMount(po: IBoardPagePageObject): Element | null {
+  const selectors = po.selectors as (typeof po.selectors & { boardHeaderTarget?: string }) | undefined;
+  const primary = document.querySelector(selectors?.boardHeaderTarget ?? '#subnav-title');
+  if (primary) return primary;
+
+  // Team-managed Cloud: the search field is on the left; view actions sit in the
+  // last child of the toolbar row immediately above the board.
+  const teamManaged = resolveTeamManagedAvatarsMount();
+  if (teamManaged) return teamManaged;
+
+  return (
+    document.querySelector(TEAM_MANAGED_FILTER_BAR_SELECTOR) ?? document.querySelector(PROJECT_HEADER_MOUNT_SELECTOR)
+  );
 }
 
 export default class PersonLimitsBoardPage extends PageModification<[any, PersonLimitData | null], Element> {
@@ -271,18 +299,18 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       this.setTimeout(applyRuntime, 1500);
     }
 
-    const mountSelector = getAvatarsMountSelector(po);
     // Quick filters / view changes re-render the toolbar. Watch the toolbar wrapper
     // so avatars survive those re-renders on both Jira Server and Jira Cloud.
-    const toolbarObserverSelector = document.getElementById('ghx-view-selector') ? '#ghx-view-selector' : mountSelector;
-    if (document.querySelector(toolbarObserverSelector)) {
-      this.onDOMChange(
-        toolbarObserverSelector,
-        () => {
-          this.renderAvatarsContainer();
-        },
-        { childList: true, subtree: true }
-      );
+    if (document.getElementById('ghx-view-selector')) {
+      this.onDOMChange('#ghx-view-selector', () => this.renderAvatarsContainer(), { childList: true, subtree: true });
+    } else {
+      const mount = resolveAvatarsMount(po);
+      const observeEl = mount?.parentElement ?? mount;
+      if (observeEl) {
+        const observer = new MutationObserver(() => this.renderAvatarsContainer());
+        observer.observe(observeEl, { childList: true, subtree: true });
+        this.sideEffects.push(() => observer.disconnect());
+      }
     }
   }
 
@@ -290,11 +318,14 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     if (this.destroyed) return;
 
     const po = this.container.inject(boardPagePageObjectToken);
-    const mount = document.querySelector(getAvatarsMountSelector(po));
+    const mount = resolveAvatarsMount(po);
     if (!mount) return;
 
-    // Idempotent: skip if our wrapper is still attached to the live DOM.
-    if (this.avatarsWrapper && this.avatarsWrapper.isConnected) return;
+    // Idempotent only when still attached to the chosen mount. A first paint
+    // can land in the search-field fallback before the board toolbar exists.
+    if (this.avatarsWrapper && this.avatarsWrapper.isConnected && mount.contains(this.avatarsWrapper)) {
+      return;
+    }
 
     // Wrapper is gone (Jira wiped subnav) — drop the stale React root before
     // creating a new one to avoid leaking the renderer.
@@ -303,7 +334,12 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
     const wrapper = document.createElement('div');
     wrapper.setAttribute(AVATARS_WRAPPER_ATTR, AVATARS_WRAPPER_KEY);
     wrapper.style.display = 'contents';
-    mount.appendChild(wrapper);
+    const teamManaged = resolveTeamManagedAvatarsMount();
+    if (mount === teamManaged && mount.firstChild) {
+      mount.insertBefore(wrapper, mount.firstChild);
+    } else {
+      mount.appendChild(wrapper);
+    }
 
     const root = createRoot(wrapper);
     root.render(
