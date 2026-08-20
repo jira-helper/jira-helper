@@ -139,6 +139,15 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _resolveSwimlaneIdForIssue(issueId: number): string | null;
 };
 
+function readIssueKeyToken(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  if (/^[A-Z][A-Z0-9]+-\d+$/i.test(trimmed)) return trimmed;
+  const prefix = trimmed.match(/^([A-Z][A-Z0-9]+-\d+)/i);
+  return prefix?.[1] ?? null;
+}
+
 export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   columnHeaderRenderMode: 'cloud',
 
@@ -788,10 +797,19 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     try {
       const dataKey = issue.getAttribute('data-issue-key');
       if (dataKey) return dataKey;
-      const aria = issue.getAttribute('aria-label')?.trim();
-      if (aria && /^[A-Z][A-Z0-9]+-\d+$/i.test(aria)) return aria;
-      const hrefKey = issue.querySelector('a[href*="/browse/"]')?.textContent?.trim();
-      return hrefKey || null;
+      const fromRootAria = readIssueKeyToken(issue.getAttribute('aria-label'));
+      if (fromRootAria) return fromRootAria;
+      const links = issue.querySelectorAll('a[href*="/browse/"]');
+      for (const link of Array.from(links)) {
+        const href = link.getAttribute('href') ?? '';
+        const fromHref = href.match(/\/browse\/([A-Z][A-Z0-9]+-\d+)/i);
+        if (fromHref?.[1]) return fromHref[1];
+        const fromText = readIssueKeyToken(link.textContent);
+        if (fromText) return fromText;
+        const fromAria = readIssueKeyToken(link.getAttribute('aria-label'));
+        if (fromAria) return fromAria;
+      }
+      return null;
     } catch {
       return null;
     }
