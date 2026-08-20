@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
-import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObject, type IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObject as CloudBoardPagePageObject } from 'src/cloud/shared/BoardPagePageObject';
 import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { PersonLimit } from '../../property/types';
 
@@ -1024,5 +1025,66 @@ describe('BoardRuntimeModel', () => {
     model.showOnlyChosen();
 
     expect(document.getElementById('sw-el')!.classList.contains('no-visibility')).toBe(true);
+  });
+
+  it('showOnlyChosen without an active filter does not hide Cloud assignee groups', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper" role="list">
+        <div role="listitem" id="group-maxim">
+          <button type="button">Свернуть группу «Maxim Sosnov»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-M1">
+                <span aria-label="Исполнитель: Maxim Sosnov"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="listitem" id="group-xcredo">
+          <button type="button">Свернуть группу «xCredo»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-X1">
+                <span aria-label="Исполнитель: xCredo"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    CloudBoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+    CloudBoardPagePageObject.setBoardWorkData(null);
+    CloudBoardPagePageObject.setSwimlanesCache(null);
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'xcredo', displayName: 'xCredo', self: '', avatar: '' }],
+          limit: 1,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(
+      mockPropertyModel,
+      CloudBoardPagePageObject as unknown as IBoardPagePageObject,
+      mockLogger
+    );
+    model.setCssSelectorOfIssues(CloudBoardPagePageObject.selectors.issue);
+    model.calculateStats();
+
+    model.showOnlyChosen();
+
+    expect(document.getElementById('group-maxim')!.classList.contains('no-visibility')).toBe(false);
+    expect(document.getElementById('group-xcredo')!.classList.contains('no-visibility')).toBe(false);
   });
 });

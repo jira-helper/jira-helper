@@ -1011,9 +1011,9 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   countIssueVisibility(element: Element, cssSelector: string) {
-    const total = element.querySelectorAll(cssSelector).length;
-    const hidden = element.querySelectorAll(`${cssSelector}.no-visibility`).length;
-    return { total, hidden };
+    const issues = Array.from(element.querySelectorAll(cssSelector));
+    const hidden = issues.filter(issue => issue.classList.contains('no-visibility')).length;
+    return { total: issues.length, hidden };
   },
 
   setIssueBackgroundColor(issue: Element, color: string): void {
