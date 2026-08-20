@@ -120,6 +120,17 @@ describe('BoardPagePageObject', () => {
     expect(BoardPagePageObject.getAssigneeFromIssue(issue!)).toBe('xCredo');
   });
 
+  it('reads issue key from nested browse href when the overlay link has no text', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.cell.card">
+        <a href="/browse/KAN-4" aria-label="KAN-4 Задача. Нажмите клавишу Enter, чтобы загрузить задачу."></a>
+        <a href="/browse/KAN-4">KAN-4</a>
+      </div>
+    `;
+    const card = document.querySelector('[data-testid="board.content.cell.card"]')!;
+    expect(BoardPagePageObject.getIssueKeyFromIssue(card)).toBe('KAN-4');
+  });
+
   it('resolves the new board.content.* Cloud board DOM', () => {
     document.body.innerHTML = `
       <div data-testid="board.content.board-wrapper">
