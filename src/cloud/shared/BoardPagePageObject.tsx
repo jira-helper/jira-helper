@@ -122,6 +122,8 @@ type CloudBoardPagePageObjectInternal = IBoardPagePageObject & {
   _findAllColumnElements(columnId: string): Element[];
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement;
   _findInnerColumnHeaderSurfaces(column: HTMLElement, paintedRoot: HTMLElement): HTMLElement[];
+  _columnCellPaintTarget(column: HTMLElement): HTMLElement;
+  _columnCellPaintTargets(column: HTMLElement): HTMLElement[];
   _getSwimlaneScrollContainers(): Element[];
   _resolveColumnIndex(columnId: string): number | null;
   _getAllColumnElementsFlat(): Element[];
@@ -586,6 +588,33 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     return this._findAllColumnElements(columnId)[0] ?? null;
   },
 
+  /**
+   * Cloud paints an opaque inner surface two descendants below the column
+   * wrapper. Painting the wrapper itself is hidden by that inner fill.
+   * Fall back to the wrapper when the nested node is a header/card.
+   */
+  _columnCellPaintTarget(column: HTMLElement): HTMLElement {
+    const nested = column.firstElementChild?.firstElementChild;
+    if (!(nested instanceof HTMLElement)) {
+      return column;
+    }
+    const testid = nested.getAttribute('data-testid') ?? '';
+    if (testid.includes('column-header') || testid.includes('card')) {
+      return column;
+    }
+    return nested;
+  },
+
+  _columnCellPaintTargets(column: HTMLElement): HTMLElement[] {
+    const surface = this._columnCellPaintTarget(column);
+    const targets = [surface];
+    const list = surface.querySelector<HTMLElement>('[data-testid*="fast-virtual-list-wrapper"]');
+    if (list && list !== surface) {
+      targets.push(list);
+    }
+    return targets;
+  },
+
   _findHeaderElementInColumn(column: HTMLElement): HTMLElement {
     const header =
       column.querySelector<HTMLElement>('[data-testid*="column-header"]:not([data-testid*="content"])') ||
@@ -869,13 +898,23 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
         const swimlaneId = this.getSwimlaneIdOfIssue(col);
         if (swimlaneId && excluded.has(swimlaneId)) return;
       }
-      (col as HTMLElement).style.backgroundColor = color;
+      this._columnCellPaintTargets(col as HTMLElement).forEach(target => {
+        target.style.backgroundColor = color;
+      });
     });
   },
 
   resetColumnCellStyles(columnId: string): void {
     this._findAllColumnElements(columnId).forEach(col => {
-      (col as HTMLElement).style.backgroundColor = '';
+      const el = col as HTMLElement;
+      el.style.backgroundColor = '';
+      const first = el.firstElementChild as HTMLElement | null;
+      const second = first?.firstElementChild as HTMLElement | null;
+      if (first) first.style.backgroundColor = '';
+      if (second) second.style.backgroundColor = '';
+      this._columnCellPaintTargets(el).forEach(target => {
+        target.style.backgroundColor = '';
+      });
     });
   },
 

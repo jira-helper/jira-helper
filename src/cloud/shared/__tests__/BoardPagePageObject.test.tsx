@@ -421,6 +421,68 @@ describe('BoardPagePageObject', () => {
     });
   });
 
+  it('paints the nested Cloud column surface two descendants below the wrapper', () => {
+    document.body.innerHTML = `
+      <div data-testid="software-board.board">
+        <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper">
+          <div>
+            <div data-jh-column-surface="true">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+              </div>
+              <ul data-testid="software-board.board-container.board.virtual-board.fast-virtual-list.fast-virtual-list-wrapper">
+                <li><div data-testid="platform-board-kit.ui.card.card" aria-label="TRB3-1"></div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+
+    BoardPagePageObject.highlightColumnCells('115', 'rgb(222, 53, 11)');
+
+    const wrapper = document.querySelector<HTMLElement>(
+      '[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]'
+    );
+    const surface = document.querySelector<HTMLElement>('[data-jh-column-surface]');
+    expect(wrapper?.style.backgroundColor).toBe('');
+    expect(surface?.style.backgroundColor).toBe('rgb(222, 53, 11)');
+    expect(document.querySelector<HTMLElement>('[data-testid*="fast-virtual-list-wrapper"]')?.style.backgroundColor).toBe(
+      'rgb(222, 53, 11)'
+    );
+
+    BoardPagePageObject.resetColumnCellStyles('115');
+
+    expect(surface?.style.backgroundColor).toBe('');
+  });
+
+  it('clears leftover over-limit paint on both the wrapper and nested surface', () => {
+    document.body.innerHTML = `
+      <div data-testid="software-board.board">
+        <div data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper" style="background-color: rgb(255, 86, 48);">
+          <div>
+            <div data-jh-column-surface="true" style="background-color: rgb(222, 53, 11);">
+              <div data-testid="platform-board-kit.ui.column-header">
+                <div data-testid="platform-board-kit.ui.column-header-content">To Do</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    BoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+
+    BoardPagePageObject.resetColumnCellStyles('115');
+
+    const wrapper = document.querySelector<HTMLElement>(
+      '[data-testid="platform-board-kit.ui.column.draggable-column.styled-wrapper"]'
+    );
+    const surface = document.querySelector<HTMLElement>('[data-jh-column-surface]');
+    expect(wrapper?.style.backgroundColor).toBe('');
+    expect(surface?.style.backgroundColor).toBe('');
+  });
+
   function renderPartialCompanyManagedSwimlanes() {
     // Only 2 of 3 swimlanes mounted (vertical virtualization) — DOM count would be 13, not 19.
     document.body.innerHTML = `
