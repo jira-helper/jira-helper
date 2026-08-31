@@ -33,8 +33,24 @@ const EXTENSION_HEADERS = {
 };
 const BASE_URL = `${getJiraWebBaseUrl()}/rest/`;
 
+/**
+ * Firefox content-scripts receive fetch/XHR JSON as cross-compartment XrayWrapper
+ * objects. Storing such an object as a property of a content-script object (cache,
+ * store, immer draft) throws `Not allowed to define cross-origin object as property`.
+ * Re-parsing the value rebuilds the whole graph inside the content-script compartment,
+ * so nothing downstream ever touches a wrapper. Jira JSON has no Date/undefined/function
+ * values, so JSON round-trip is lossless here.
+ */
+export const sanitizeJson = <T>(value: T): T => {
+  try {
+    return JSON.parse(JSON.stringify(value)) as T;
+  } catch {
+    return value;
+  }
+};
+
 // Configure the Jira request with base plugins
-const requestJira = request([
+const requestJiraRaw = request([
   defaultHeaders(EXTENSION_HEADERS),
   transformUrl({
     baseUrl: BASE_URL,
@@ -43,6 +59,10 @@ const requestJira = request([
   memoryCache({ allowStale: true }),
   http(),
 ]);
+
+// Wrap so callers never receive a raw XrayWrapper (see sanitizeJson).
+const requestJira = (...args: Parameters<typeof requestJiraRaw>): Promise<any> =>
+  requestJiraRaw(...args).then(sanitizeJson);
 
 const requestJiraViaFetch = async (
   url: string,
@@ -88,7 +108,7 @@ const requestJsonViaFetch = async <T>(
   }
 
   const jsonResult = await responseResult.val.json().then(
-    r => Ok(r as T),
+    r => Ok(sanitizeJson(r as T)),
     e => Err(e)
   );
 
@@ -373,7 +393,7 @@ export const getStatuses = async (options: RequestInit = {}): Promise<Result<Jir
   }
 
   const jsonDataResult = await result.val.json().then(
-    r => Ok(r),
+    r => Ok(sanitizeJson(r)),
     e => Err(e)
   );
 

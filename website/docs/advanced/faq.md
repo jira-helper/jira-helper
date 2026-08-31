@@ -37,7 +37,7 @@ Settings stored in **board properties** are not deleted when you uninstall — t
 
 ### Can I install it on managed/enterprise Chrome?
 
-Yes, but you may need your IT admin to force-install or allowlist the extension. The extension ID is `egmbomekcmpieccamghfgjgnlllgbgdl`. See [Installation troubleshooting](/docs/getting-started/installation#troubleshooting).
+Yes, but you may need your IT admin to force-install or allowlist the extension. The extension ID is `egmbomekcmpieccamghfgjgnlllgbgdl`. See the [Installation guide](/docs/getting-started/installation).
 
 ## Permissions
 
@@ -85,6 +85,13 @@ No. Each feature is optional. Some work out of the box without configuration (Sw
 3. Review **exclusion filters** — a single matching filter removes the task from the chart
 4. Ensure status-based date sources match your actual workflow status names exactly
 
+### Card colors not applying / whole card not colored {#card-colors-not-applying--whole-card-not-colored}
+
+1. Configure native Jira **Card Colors** rules first (Board Settings → Card Colors)
+2. Confirm **Fill whole card** is enabled in the Jira Helper card-colors settings
+3. Flagged/blocked cards keep their original style — that is intentional
+4. Cards with no matching rule stay uncolored
+
 ### Feature not working after Jira UI update
 
 Jira occasionally updates their UI, which may temporarily break extension features. The team monitors Jira changes and releases fixes. Report issues via GitHub (see [Reporting Bugs](#how-do-i-report-a-bug) below).
@@ -111,7 +118,7 @@ Settings stored in **board properties** survive browser data clears because they
 
 ## How do I report a bug?
 
-Report bugs and feature requests on [GitHub Issues](https://github.com/anomalyco/jira-helper/issues).
+Report bugs and feature requests on [GitHub Issues](https://github.com/jira-helper/jira-helper/issues).
 
 Please include:
 - Browser and version (Chrome/Firefox/Edge)

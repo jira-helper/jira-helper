@@ -14,6 +14,8 @@ export type IssueLikeForJql = { fields: Record<string, unknown> };
  * - `priority` / `status` / `issuetype` → `[name]`
  * - `user` → `[displayName, emailAddress, name]` (any of them satisfies `=`)
  * - `option` / `string` → `[value]`
+ * - `date` / `datetime` → `[ISO string]`
+ * - `number` → `[String(n)]`
  * - `array` of `option` / `string` → `[value, ...]`
  * - `array` of `component` → `[name, ...]`
  *
@@ -48,12 +50,31 @@ export function extractFieldValueBySchema(issue: IssueLikeForJql, field: JiraFie
       if (typeof u.name === 'string') arr.push(u.name);
       return arr;
     }
+    case 'date':
+    case 'datetime':
+      return typeof val === 'string' && val !== '' ? [val] : [];
+    case 'number':
+      return typeof val === 'number' && Number.isFinite(val)
+        ? [String(val)]
+        : typeof val === 'string' && val !== ''
+          ? [val]
+          : [];
     case 'array': {
       if (!Array.isArray(val)) return [];
       switch (field.schema.items) {
         case 'component':
           return (val as Array<{ name?: unknown }>).map(v => String(v?.name ?? '')).filter(Boolean);
-        case 'string':
+        case 'string': {
+          // Labels и подобные поля могут быть как массивом строк ['bug', 'feature'],
+          // так и массивом объектов [{ value: 'bug' }]
+          const firstItem = val[0];
+          if (typeof firstItem === 'string') {
+            // Массив строк (как labels)
+            return val as string[];
+          }
+          // Массив объектов { value: string }
+          return (val as Array<{ value?: unknown }>).map(v => String(v?.value ?? '')).filter(Boolean);
+        }
         case 'option':
           return (val as Array<{ value?: unknown }>).map(v => String(v?.value ?? '')).filter(Boolean);
         default:

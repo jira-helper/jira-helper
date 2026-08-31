@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { globalContainer } from 'dioma';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   extensionApiServiceToken,
   type IExtensionApiService,
@@ -75,15 +75,41 @@ describe('BoardSettingsComponent', () => {
     expect(modalBody).toHaveStyle({ overflowX: 'hidden' });
   });
 
-  it('portals the settings modal to document.body instead of the board header host', async () => {
-    const { container } = render(<BoardSettingsComponent />);
+  describe('Jira 11 board stacking (#32)', () => {
+    let host: HTMLElement;
+    let boardLayer: HTMLElement;
 
-    await userEvent.click(screen.getByRole('img'));
+    beforeEach(() => {
+      host = document.createElement('div');
+      host.setAttribute('data-testid', 'jira-sidebar-host');
+      host.style.position = 'relative';
+      host.style.zIndex = '1';
+      document.body.appendChild(host);
 
-    const modalRoot = document.querySelector('.ant-modal-root');
-    expect(modalRoot).toBeTruthy();
-    expect(document.body.contains(modalRoot)).toBe(true);
-    expect(container.contains(modalRoot)).toBe(false);
-    expect(screen.getByText('Settings content')).toBeInTheDocument();
+      boardLayer = document.createElement('div');
+      boardLayer.setAttribute('data-testid', 'jira-board-layer');
+      boardLayer.style.position = 'relative';
+      boardLayer.style.zIndex = '20';
+      document.body.appendChild(boardLayer);
+    });
+
+    afterEach(() => {
+      host.remove();
+      boardLayer.remove();
+    });
+
+    it('portals the settings modal to document.body so Rapid Board layers cannot paint over it', async () => {
+      render(<BoardSettingsComponent />, { container: host });
+
+      await userEvent.click(screen.getByRole('img'));
+
+      const modalRoot = document.querySelector('.jh-board-settings-modal');
+      expect(modalRoot).toBeTruthy();
+      expect(host.contains(modalRoot)).toBe(false);
+      expect(document.body.contains(modalRoot)).toBe(true);
+      expect(Number.parseInt(getComputedStyle(modalRoot as HTMLElement).zIndex, 10)).toBeGreaterThan(
+        Number.parseInt(boardLayer.style.zIndex, 10)
+      );
+    });
   });
 });

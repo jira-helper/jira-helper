@@ -39,6 +39,7 @@ sidebar_position: 3
 
 - **[Диаграмма Ганта](/docs/features/gantt-chart)** — временная шкала на странице задачи (классический вид)
 - **[Шаблоны комментариев](/docs/features/issue-templates/comment-templates)** — готовые фрагменты текста из тулбара редактора комментария
+- **[Шаблон описания](/docs/features/issue-templates/description-template)** — вставка/сохранение каркаса описания в диалоге создания
 
 ## Отчёты
 
@@ -49,3 +50,10 @@ sidebar_position: 3
 
 - **[Флаг на панели задачи](/docs/features/flag-issue)** — подсветка помеченных флагом задач в иерархии и панелях (без настроек)
 - **[Размытие данных](/docs/features/data-blurring)** — размытие заголовков и изображений для демонстрации экрана (контекстное меню)
+
+## Дополнительно
+
+- **[Локальные настройки](/docs/features/local-settings)** — язык интерфейса расширения (Auto / English / Russian)
+- **[Руководство по настройкам](/docs/settings)** — board properties vs local storage
+- **[JQL reference](/docs/advanced/jql-reference)** — поддерживаемое подмножество JQL для бейджей, связей и Gantt
+- **[FAQ](/docs/advanced/faq)** — частые вопросы и устранение неполадок

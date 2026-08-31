@@ -38,6 +38,7 @@ describe('RuntimeModel', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     model.reset();
+    vi.useRealTimers();
   });
 
   describe('getDiagnosticSnapshot', () => {
@@ -108,6 +109,40 @@ describe('RuntimeModel', () => {
         error: null,
         intervalActive: false,
       });
+    });
+  });
+
+  describe('repaint scheduling', () => {
+    it('repaints active cards once per second instead of every 200ms', async () => {
+      vi.useFakeTimers();
+      vi.mocked(mockPropertyModel.load).mockResolvedValue(Ok({ enabled: true }));
+      const processCards = vi.spyOn(model, 'processCards').mockImplementation(() => undefined);
+
+      await model.activate();
+
+      expect(processCards).toHaveBeenCalledTimes(1);
+
+      vi.advanceTimersByTime(999);
+      expect(processCards).toHaveBeenCalledTimes(1);
+
+      vi.advanceTimersByTime(1);
+      expect(processCards).toHaveBeenCalledTimes(2);
+    });
+
+    it('debounces repaint requests into one repaint after one second', async () => {
+      vi.useFakeTimers();
+      const processCards = vi.spyOn(model, 'processCards').mockImplementation(() => undefined);
+
+      model.isActive = true;
+      model.scheduleProcessCards();
+      vi.advanceTimersByTime(500);
+      model.scheduleProcessCards();
+
+      vi.advanceTimersByTime(999);
+      expect(processCards).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(1);
+      expect(processCards).toHaveBeenCalledTimes(1);
     });
   });
 });

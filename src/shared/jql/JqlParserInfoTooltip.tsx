@@ -18,8 +18,8 @@ const TEXTS = {
     ru: 'AND, OR, NOT',
   },
   eqNeqInNotIn: {
-    en: '=, !=, in, not in',
-    ru: '=, !=, in, not in',
+    en: '=, !=, in, not in, <, >, <=, >=',
+    ru: '=, !=, in, not in, <, >, <=, >=',
   },
   containsOps: {
     en: '~ (contains), !~ (not contains)',
@@ -28,6 +28,10 @@ const TEXTS = {
   containsDesc: {
     en: 'The ~ and !~ operators check if a field contains (or does not contain) a substring. Works for strings, numbers, arrays. LIKE/regex are not supported.',
     ru: 'Операторы ~ и !~ проверяют, содержит ли поле подстроку (или не содержит). Работает для строк, чисел, массивов. LIKE/регулярные выражения не поддерживаются.',
+  },
+  dateFns: {
+    en: 'Date functions: now(), startOf/endOf Day|Week|Month|Year',
+    ru: 'Date-функции: now(), startOf/endOf Day|Week|Month|Year',
   },
   emptyIsParens: {
     en: 'EMPTY, is, parentheses',
@@ -42,8 +46,8 @@ const TEXTS = {
     ru: 'Не поддерживается:',
   },
   functions: {
-    en: 'Functions (e.g., currentUser())',
-    ru: 'Функции (например, currentUser())',
+    en: 'User/server functions (e.g., currentUser(), openSprints())',
+    ru: 'User/server функции (например, currentUser(), openSprints())',
   },
   orderBy: {
     en: 'ORDER BY, sorting',
@@ -73,6 +77,7 @@ export const JqlParserInfoTooltip: React.FC = () => {
               <li>{texts.eqNeqInNotIn}</li>
               <li>{texts.containsOps}</li>
               <li style={{ fontSize: 12, color: '#888' }}>{texts.containsDesc}</li>
+              <li>{texts.dateFns}</li>
               <li>{texts.emptyIsParens}</li>
               <li>{texts.quoted}</li>
             </ul>
