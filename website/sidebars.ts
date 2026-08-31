@@ -8,6 +8,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'getting-started/installation',
         'getting-started/quick-start',
+        'settings',
       ],
     },
     {
@@ -57,6 +58,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'features/gantt-chart/index',
         'features/issue-templates/comment-templates',
+        'features/issue-templates/description-template',
       ],
     },
     {

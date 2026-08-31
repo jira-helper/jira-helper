@@ -115,5 +115,98 @@ describe('getFieldValueForJql', () => {
       expect(getFieldValueForJql({ fields: { components: [] } }, fields)('Components')).toEqual([]);
       expect(getFieldValueForJql({ fields: {} }, fields)('Components')).toEqual([]);
     });
+
+    it('handles labels field as array of strings (not objects)', () => {
+      // В Jira labels возвращаются как ['bug', 'feature'], а не [{ value: 'bug' }]
+      const issue = {
+        fields: {
+          labels: ['bug', 'feature', 'urgent'],
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'labels',
+          name: 'Labels',
+          clauseNames: ['labels'],
+          schema: { type: 'array', items: 'string' },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('labels')).toEqual(['bug', 'feature', 'urgent']);
+      expect(get('LABELS')).toEqual(['bug', 'feature', 'urgent']);
+    });
+
+    it('still handles array of string objects for backward compatibility', () => {
+      // Некоторые поля типа multi-select могут быть [{ value: 'A' }]
+      const issue = {
+        fields: {
+          customfield_10001: [{ value: 'Value 1' }, { value: 'Value 2' }],
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'customfield_10001',
+          name: 'Multi Select',
+          schema: { type: 'array', items: 'string' },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('Multi Select')).toEqual(['Value 1', 'Value 2']);
+    });
+
+    it('resolves date and datetime fields as ISO strings (not empty when filled)', () => {
+      const issue = {
+        fields: {
+          duedate: '2020-01-15',
+          customfield_123: '2020-01-15',
+          customfield_456: '2020-01-15T10:30:00.000+0000',
+        },
+      };
+      const fields: JiraField[] = [
+        field({
+          id: 'duedate',
+          name: 'Due date',
+          clauseNames: ['duedate', 'Due date'],
+          schema: { type: 'date' },
+        }),
+        field({
+          id: 'customfield_123',
+          name: 'End date',
+          custom: true,
+          clauseNames: ['cf[123]', 'End date'],
+          schema: { type: 'date', custom: 'datepicker', customId: 123 },
+        }),
+        field({
+          id: 'customfield_456',
+          name: 'End datetime',
+          custom: true,
+          clauseNames: ['cf[456]'],
+          schema: { type: 'datetime', custom: 'datetime', customId: 456 },
+        }),
+      ];
+
+      const get = getFieldValueForJql(issue, fields);
+      expect(get('duedate')).toEqual(['2020-01-15']);
+      expect(get('End date')).toEqual(['2020-01-15']);
+      expect(get('cf[123]')).toEqual(['2020-01-15']);
+      expect(get('End datetime')).toEqual(['2020-01-15T10:30:00.000+0000']);
+      expect(getFieldValueForJql({ fields: { customfield_123: null } }, fields)('End date')).toEqual([]);
+    });
+
+    it('resolves number fields as string tokens for numeric JQL comparisons', () => {
+      const fields: JiraField[] = [
+        field({
+          id: 'customfield_10016',
+          name: 'Story Points',
+          custom: true,
+          clauseNames: ['cf[10016]', 'Story Points'],
+          schema: { type: 'number', custom: 'float', customId: 10016 },
+        }),
+      ];
+      expect(getFieldValueForJql({ fields: { customfield_10016: 13 } }, fields)('Story Points')).toEqual(['13']);
+      expect(getFieldValueForJql({ fields: { customfield_10016: 0 } }, fields)('Story Points')).toEqual(['0']);
+    });
   });
 });

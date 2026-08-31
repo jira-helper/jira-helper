@@ -39,6 +39,7 @@ Extra badges and context on cards
 
 - **[Gantt chart](/docs/features/gantt-chart)** — timeline on the issue page (classic view)
 - **[Comment templates](/docs/features/issue-templates/comment-templates)** — reusable comment snippets from the editor toolbar
+- **[Description template](/docs/features/issue-templates/description-template)** — insert/save a description outline in the create dialog
 
 ## Reports
 
@@ -49,3 +50,10 @@ Extra badges and context on cards
 
 - **[Flag on issue](/docs/features/flag-issue)** — highlights flagged issues in hierarchy and panels (no config)
 - **[Data blurring](/docs/features/data-blurring)** — blur titles and images for screen sharing (context menu)
+
+## Advanced
+
+- **[Local settings](/docs/features/local-settings)** — extension UI language (Auto / English / Russian)
+- **[Settings guide](/docs/settings)** — board properties vs local storage
+- **[JQL reference](/docs/advanced/jql-reference)** — supported JQL subset for badges, links, and Gantt
+- **[FAQ](/docs/advanced/faq)** — common questions and troubleshooting

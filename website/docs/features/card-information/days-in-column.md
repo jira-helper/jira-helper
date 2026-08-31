@@ -11,6 +11,12 @@ import {DaysInColumnMockup} from '@site/src/components/DaysInColumnMockup';
 | Where visible | Board (detail view) |
 | Settings apply to | For the whole team |
 
+## Prerequisites
+
+This feature works **only if** Jira’s built-in **«Days in column»** is enabled for the board.
+
+Path in Jira: **Board Settings → Columns → Days in column**.
+
 ## Purpose
 
 Show how many days an issue has spent in its current column, with colour thresholds so stalled work is easy to spot.
@@ -31,6 +37,7 @@ Toggle **«Show days badge»** to switch between a compact dot indicator and a r
 - **Enable the feature**: turn on **«Enable additional card elements»**.
 - **Choose columns**: in **«Column Selection»**, pick columns where the badge should appear.
 - **Show days in column badge**: enable **«Show days in column badge»** in the **«Days in Column Badge»** section.
+- **Jira board setting**: ensure **«Days in column»** is enabled under **Board Settings → Columns**. Without this, the jira-helper badge cannot work correctly.
 - **Choose threshold mode**:
   - **Global thresholds** — same warning/danger values for every column.
   - **Per-column rules** — different thresholds per column (for example testing = 3 days, development = 10 days).
@@ -55,7 +62,7 @@ Jira's built-in day counter (`.ghx-days`) is hidden automatically when this feat
 
 ## Troubleshooting
 
-- **Badge missing:** Ensure the feature is on, columns are selected, and the days-in-column badge itself is enabled.
+- **Badge missing:** Ensure the feature is on, columns are selected, and the days-in-column badge itself is enabled. Also confirm Jira **«Days in column»** is enabled (**Board Settings → Columns**).
 - **Colours not changing:** Check thresholds (warning should be less than danger when both are set) and that dwell time actually crosses them.
 - **Jira counter still visible:** Refresh the page — hiding runs when the feature initialises.
 - **Stale column rows in settings:** If per-column mode lists columns that no longer exist on the board, use **«Remove»** to clean them up.

@@ -75,7 +75,7 @@ export class CardColorsBoardPage extends PageModification<undefined, Element> {
     const boardPage = this.container.inject(boardPagePageObjectToken);
 
     this.onDOMChange(boardPage.selectors.pool, () => {
-      runtimeModel.processCards();
+      runtimeModel.scheduleProcessCards();
     });
 
     // Добавляем cleanup для деактивации модели

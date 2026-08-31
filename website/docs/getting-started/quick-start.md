@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Get your first WIP limit running in under 2 minutes.
 
-> **TL;DR** — Install the extension → open any Jira board → click the **Jira Helper** button in the board toolbar (a square button labeled "Jira Helper", to the right of Jira's gear icon) → **Columns** tab → scroll to **Column group WIP limits** → drag columns from the panel into a group slot, set a limit, save. Done.
+> **TL;DR** — Install the extension → open any Jira board → click the **Jira Helper** button in the board toolbar (a square button labeled "Jira Helper", to the right of Jira's gear icon) → **Column WIP Limits** tab → drag columns into a group slot, set a limit, save. Done.
 
 ## Prerequisites
 
@@ -22,19 +22,18 @@ Navigate to any Scrum or Kanban board in Jira. The extension activates automatic
 
 ## 2. Open the Jira Helper Panel
 
-Click the **Jira Helper** button in the board toolbar to open the extension's settings panel. Each feature has its own tab: **Columns**, **Swimlanes**, **Gantt Chart**, and more.
+Click the **Jira Helper** button in the board toolbar to open the extension's settings panel. Tabs include **Column WIP Limits**, **Per-person WIP Limits**, **Sub-tasks progress**, **Additional Card Elements**, **Comment templates**, **Local Settings**, and more. Some features (swimlane / field / cell WIP limits, card colors) are configured in native **Jira Board Settings**. Gantt chart settings live on the **issue page**.
 
-<!-- SCREENSHOT: The Jira Helper settings dialog open to the Columns tab, showing the "Column group WIP limits" section -->
+<!-- SCREENSHOT: The Jira Helper settings dialog open to the Column WIP Limits tab -->
 
 ## 3. Configure Your First Feature
 
 ### Example: Column Group WIP Limits
 
-1. In the settings panel, switch to the **Columns** tab
-2. Scroll to the **Column group WIP limits** section
-3. Drag columns from the right-side panel into a group slot (e.g., drop "In Progress" and "Review" together into one group)
-4. Set the **Max issues** number (e.g., `5`)
-5. Click **Save**
+1. In the settings panel, switch to the **Column WIP Limits** tab
+2. Drag columns from the right-side panel into a group slot (e.g., drop "In Progress" and "Review" together into one group)
+3. Set the **Max issues** number (e.g., `5`)
+4. Click **Save**
 
 The board updates immediately. You'll see a **current / limit** badge on the group's first column header.
 
