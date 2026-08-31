@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
 import type { IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
@@ -274,6 +276,159 @@ describe('BoardRuntimeModel', () => {
   });
 
   describe('applyColumnHeaderStyles', () => {
+    it('preserves server column header rendering by default', () => {
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3', 'col4']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2', 'col3'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          backgroundColor: '#deebff',
+          borderTop: '4px solid #abc',
+          borderTopLeftRadius: '10px',
+        }),
+        []
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({
+          backgroundColor: '#deebff',
+          borderTop: '4px solid #abc',
+        }),
+        []
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col3',
+        expect.objectContaining({
+          backgroundColor: '#deebff',
+          borderTop: '4px solid #abc',
+          borderTopRightRadius: '10px',
+        }),
+        []
+      );
+
+      const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ paddingTop: '18px' })]));
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ position: 'relative' })]));
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopLeftRadius');
+      expect(styledHeaders[1]).not.toHaveProperty('borderTopRightRadius');
+    });
+
+    it('uses Cloud-specific column header rendering with opaque theme-aware background', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2', 'col3'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      const styledHeaders = vi.mocked(mockPageObject.styleColumnHeader).mock.calls.map(([, styles]) => styles);
+
+      expect(styledHeaders).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            backgroundColor: 'color-mix(in srgb, #abc 28%, var(--ds-surface-raised, var(--ds-surface, #ffffff)))',
+            zIndex: '20',
+          }),
+        ])
+      );
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ position: 'relative' })]));
+      expect(styledHeaders).toEqual(expect.not.arrayContaining([expect.objectContaining({ paddingTop: '18px' })]));
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ borderTop: expect.any(String) })])
+      );
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ boxShadow: expect.any(String) })])
+      );
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ outline: expect.any(String) })])
+      );
+      expect(styledHeaders).toEqual(
+        expect.not.arrayContaining([expect.objectContaining({ backgroundColor: '#deebff' })])
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalledWith(
+        'col1',
+        expect.stringContaining('data-column-limits-stripe'),
+        []
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalledWith(
+        'col1',
+        expect.stringContaining('background:#abc'),
+        []
+      );
+      expect(mockPageObject.removeColumnHeaderElements).toHaveBeenCalledWith('col1', '[data-column-limits-stripe]');
+    });
+
+    it('paints Cloud headers without a WIP group opaque so Jira sticky overlay does not stay translucent', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2', 'col3']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 1,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col3',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).not.toHaveBeenCalledWith(
+        'col2',
+        expect.stringContaining('data-column-limits-stripe'),
+        expect.anything()
+      );
+      expect(mockPageObject.insertColumnHeaderHtml).not.toHaveBeenCalledWith(
+        'col3',
+        expect.stringContaining('data-column-limits-stripe'),
+        expect.anything()
+      );
+    });
+
     it('should style column headers for grouped columns via pageObject', () => {
       const model = modelWithData({
         G1: {
@@ -334,9 +489,96 @@ describe('BoardRuntimeModel', () => {
       const firstStyleOrder = vi.mocked(mockPageObject.styleColumnHeader).mock.invocationCallOrder[0];
       expect(firstResetOrder).toBeLessThan(firstStyleOrder);
     });
+
+    it('paints Cloud opaque base on grouped columns so ignored swimlanes are not left translucent after reset', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 1,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: ['sw-skip'],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          backgroundColor: 'var(--ds-surface-raised, var(--ds-surface, #ffffff))',
+          zIndex: '20',
+        })
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({
+          backgroundColor: expect.stringContaining('color-mix'),
+        }),
+        ['sw-skip']
+      );
+    });
+
+    it('passes ignoredSwimlanes as excluded ids to styleColumnHeader', () => {
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1', 'col2'],
+          currentCount: 3,
+          limit: 5,
+          isOverLimit: false,
+          color: '#abc',
+          ignoredSwimlanes: ['sw-skip', 'sw-other'],
+        },
+      ];
+
+      model.applyColumnHeaderStyles();
+
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col1',
+        expect.objectContaining({ borderTop: '4px solid #abc' }),
+        ['sw-skip', 'sw-other']
+      );
+      expect(mockPageObject.styleColumnHeader).toHaveBeenCalledWith(
+        'col2',
+        expect.objectContaining({ borderTop: '4px solid #abc' }),
+        ['sw-skip', 'sw-other']
+      );
+    });
   });
 
   describe('applyLimitIndicators', () => {
+    it('keeps separate badge placement styles for server and Cloud renderers', () => {
+      const css = readFileSync(resolve(__dirname, '../styles.module.css'), 'utf8');
+
+      expect(css).toContain('.limitColumnBadge {');
+      expect(css).toContain('top: -24%');
+      expect(css).toContain('.limitColumnBadgeCloud {');
+      expect(css).toContain('top: 8px');
+      expect(css).toContain('right: 12px');
+      expect(css).toContain('z-index: 1000000');
+      expect(css).toContain('.limitColumnBadgeCloud .limitColumnBadge__hint');
+      expect(css).toContain('top: calc(100% + 6px)');
+      expect(css).toContain('z-index: 2147483647');
+    });
+
+    it('allows the column limit tooltip text to wrap in Cloud', () => {
+      const css = readFileSync(resolve(__dirname, '../styles.module.css'), 'utf8');
+
+      expect(css).toContain('width: 240px');
+      expect(css).toContain('white-space: normal');
+      expect(css).toContain('overflow-wrap: anywhere');
+    });
+
     it('should reset cells and badges, then highlight and insert badge for over-limit group', () => {
       vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1', 'col2']);
 
@@ -361,14 +603,41 @@ describe('BoardRuntimeModel', () => {
       expect(mockPageObject.resetColumnCellStyles).toHaveBeenCalledWith('col1');
       expect(mockPageObject.resetColumnCellStyles).toHaveBeenCalledWith('col2');
 
-      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#ff5630', ['sw-skip']);
-      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col2', '#ff5630', ['sw-skip']);
+      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col1', '#de350b', ['sw-skip']);
+      expect(mockPageObject.highlightColumnCells).toHaveBeenCalledWith('col2', '#de350b', ['sw-skip']);
 
       expect(mockPageObject.insertColumnHeaderHtml).toHaveBeenCalled();
       const htmlCall = vi.mocked(mockPageObject.insertColumnHeaderHtml).mock.calls.find(([id]) => id === 'col1');
       expect(htmlCall).toBeDefined();
       expect(htmlCall![1]).toContain('10/5');
       expect(htmlCall![1]).toContain('data-column-limits-badge="true"');
+      expect(htmlCall![2]).toEqual(['sw-skip']);
+    });
+
+    it('uses Cloud-specific badge class and color style only on Cloud boards', () => {
+      mockPageObject.columnHeaderRenderMode = 'cloud';
+      vi.mocked(mockPageObject.getOrderedColumnIds).mockReturnValue(['col1']);
+      const model = modelWithData({});
+      model.groupStats = [
+        {
+          groupId: 'G1',
+          groupName: 'G1',
+          columns: ['col1'],
+          currentCount: 10,
+          limit: 5,
+          isOverLimit: false,
+          color: '#f00',
+          ignoredSwimlanes: [],
+        },
+      ];
+
+      model.applyLimitIndicators();
+
+      const htmlCall = vi.mocked(mockPageObject.insertColumnHeaderHtml).mock.calls.find(([id]) => id === 'col1');
+
+      expect(htmlCall?.[1]).toContain('data-column-limits-badge="true"');
+      expect(htmlCall?.[1]).toContain('--column-limit-color: #f00');
+      expect(htmlCall?.[1]).toContain('Cloud');
     });
   });
 

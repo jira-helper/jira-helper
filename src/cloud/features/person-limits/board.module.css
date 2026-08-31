@@ -1,0 +1,34 @@
+/* Person Limits - Board Styles */
+
+.wipOverloaded {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.wipOverloadedActive {
+  position: relative !important;
+  z-index: 1000 !important;
+  isolation: isolate !important;
+}
+
+.wipOverloadedCard[data-jh-wip-overloaded="true"] {
+  --wip-color: var(--wip-custom-color, #808080) !important;
+  border-left: 10px solid var(--wip-color) !important;
+  padding-left: 10px !important;
+  background-color: rgba(var(--wip-r, 128), var(--wip-g, 128), var(--wip-b, 128), 0.4) !important;
+  border: 5px solid var(--wip-color) !important;
+  border-radius: 6px !important;
+  box-shadow: 
+    0 0 0 3px rgba(var(--wip-r, 128), var(--wip-g, 128), var(--wip-b, 128), 0.3),
+    0 0 15px rgba(var(--wip-r, 128), var(--wip-g, 128), var(--wip-b, 128), 0.2) !important;
+}
+
+.warningIcon {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  font-size: 16px !important;
+  z-index: 10000 !important;
+  pointer-events: none !important;
+  opacity: 0.9 !important;
+}

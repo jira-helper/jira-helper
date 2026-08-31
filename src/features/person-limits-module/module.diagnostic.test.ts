@@ -79,6 +79,7 @@ describe('personLimitsModule diagnostic callback', () => {
         id: 1,
         persons: [{ name: 'john.doe', displayName: 'John Doe' }],
         limit: 5,
+        matches: [],
         issues: [],
         columns: [],
         swimlanes: [],

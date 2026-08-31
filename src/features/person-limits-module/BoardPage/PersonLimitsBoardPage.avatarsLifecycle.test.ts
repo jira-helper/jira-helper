@@ -12,12 +12,16 @@ import { useLocalSettingsStore } from 'src/features/local-settings/stores/localS
 import PersonLimitsBoardPage from './index';
 import { diagnosticModule } from 'src/features/diagnostic-module/module';
 import { personLimitsModule } from '../module';
+import { boardRuntimeModelToken } from '../tokens';
 
 vi.mock('src/features/board-settings/actions/registerSettings', () => ({
   registerSettings: vi.fn(),
 }));
 
 const mockBoardPO = {
+  selectors: {
+    pool: '#ghx-pool',
+  },
   hasCustomSwimlanes: vi.fn(() => false),
   getColumnElements: vi.fn(() => []),
   getColumnsInSwimlane: vi.fn(() => []),
@@ -36,6 +40,7 @@ const mockBoardPO = {
   setParentGroupVisibility: vi.fn(),
   getColumnIdOfIssue: vi.fn(() => null),
   getSwimlaneIdOfIssue: vi.fn(() => null),
+  getIssueCssSelector: vi.fn(() => '[data-testid="platform-board-kit.ui.card.card"]'),
 } as unknown as IBoardPagePageObject;
 
 const mockBoardPropertyService: BoardPropertyServiceI = {
@@ -87,6 +92,8 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
 
   beforeEach(() => {
     useLocalSettingsStore.getState().updateSettings({ locale: 'auto' });
+    delete (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget;
+    vi.mocked(mockBoardPO.getIssueCssSelector!).mockClear();
     document.body.innerHTML =
       '<div id="ghx-view-selector"><div id="subnav-title"></div></div>' + '<div id="ghx-pool"></div>';
     setupDi(globalContainer);
@@ -108,6 +115,100 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     await flush();
 
     expect(document.querySelector('#subnav-title [data-jh-person-limits="avatars"]')).not.toBeNull();
+  });
+
+  it('renders avatars into the Cloud board header and uses the Cloud issue selector', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = '<div data-testid="software-board.header.controls-bar"></div>';
+    const page = createPage();
+
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    const runtime = globalContainer.inject(boardRuntimeModelToken).model;
+    expect(
+      document.querySelector('[data-testid="software-board.header.controls-bar"] [data-jh-person-limits="avatars"]')
+    ).not.toBeNull();
+    expect(mockBoardPO.getIssueCssSelector).toHaveBeenCalled();
+    expect(runtime.cssSelectorOfIssues).toBe('[data-testid="platform-board-kit.ui.card.card"]');
+  });
+
+  it('renders avatars into the team-managed right toolbar, not the search field', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = `
+      <div data-testid="horizontal-nav-header.ui.project-header.header"></div>
+      <div>
+        <div>
+          <div>
+            <div data-testid="filter-refinement.ui.search-field-container"></div>
+          </div>
+          <div>
+            <button type="button">Board insights</button>
+          </div>
+        </div>
+        <div>
+          <div data-testid="board.content.board-wrapper"></div>
+        </div>
+      </div>
+    `;
+    const page = createPage();
+
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    const insights = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent === 'Board insights');
+    const host = insights?.parentElement?.firstElementChild as HTMLElement | undefined;
+    expect(host?.getAttribute('data-jh-person-limits')).toBe('avatars');
+    expect(host?.getAttribute('data-jh-avatars-host')).toBe('team-managed');
+    expect(host?.style.display).toBe('flex');
+    expect(host?.style.flexShrink).toBe('0');
+    expect(
+      document.querySelector(
+        '[data-testid="filter-refinement.ui.search-field-container"] [data-jh-person-limits="avatars"]'
+      )
+    ).toBeNull();
+    expect(
+      document.querySelector(
+        '[data-testid="horizontal-nav-header.ui.project-header.header"] [data-jh-person-limits="avatars"]'
+      )
+    ).toBeNull();
+  });
+
+  it('re-renders team-managed avatars when Jira replaces the toolbar row', async () => {
+    (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
+      '[data-testid="software-board.header.controls-bar"]';
+    document.body.innerHTML = `
+      <div>
+        <div>
+          <div>
+            <div data-testid="filter-refinement.ui.search-field-container"></div>
+          </div>
+          <div>
+            <button type="button">Board insights</button>
+          </div>
+        </div>
+        <div>
+          <div data-testid="board.content.board-wrapper"></div>
+        </div>
+      </div>
+    `;
+    const page = createPage();
+    page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
+    await flush();
+
+    const board = document.querySelector('[data-testid="board.content.board-wrapper"]')!;
+    const layout = board.parentElement!.parentElement!;
+    const oldToolbar = layout.children[0];
+    const replacement = oldToolbar.cloneNode(true) as HTMLElement;
+    replacement.querySelector('[data-jh-person-limits]')?.remove();
+    expect(replacement.querySelector('[data-jh-person-limits]')).toBeNull();
+    oldToolbar.replaceWith(replacement);
+    expect(document.querySelector('[data-jh-person-limits]')).toBeNull();
+    await flush();
+
+    expect(replacement.querySelector('[data-jh-person-limits="avatars"]')).not.toBeNull();
   });
 
   it('re-renders avatars when Jira wipes #subnav-title (regression: 2.30 disappear after board action)', async () => {

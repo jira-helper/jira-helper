@@ -44,6 +44,7 @@ const BoardSettingsModalInner = () => {
         onOk={() => setIsModalOpen(false)}
         destroyOnClose
         width="auto"
+        getContainer={() => document.body}
         wrapClassName="jh-board-settings-modal"
         zIndex={BOARD_SETTINGS_MODAL_Z_INDEX}
         okText={texts.ok}
@@ -52,6 +53,7 @@ const BoardSettingsModalInner = () => {
           body: {
             maxHeight: 'calc(100vh - 160px)',
             overflowY: 'auto',
+            overflowX: 'hidden',
             paddingTop: 0,
           },
           footer: {

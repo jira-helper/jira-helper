@@ -7,7 +7,7 @@ export type AvatarBadgeStatus = 'under' | 'at' | 'over';
 export type AvatarBadgeProps = {
   /** URL of the avatar image */
   avatar: string;
-  /** @deprecated Use personName for tooltip. Kept for backward compat. */
+  /** Human-readable name for tooltip and accessibility text. */
   displayName?: string;
   /** Person's login name (used for identification) */
   personName: string;
@@ -43,6 +43,7 @@ export const getStatus = (currentCount: number, limit: number): AvatarBadgeStatu
  */
 export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
   avatar,
+  displayName,
   personName,
   limitId,
   currentCount,
@@ -51,6 +52,7 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
   onClick,
 }) => {
   const status = getStatus(currentCount, limit);
+  const label = displayName || personName;
 
   const handleClick = () => {
     onClick(limitId);
@@ -71,8 +73,8 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
     >
       <img
         src={avatar}
-        title={personName}
-        alt={personName}
+        title={label}
+        alt={label}
         className={cn(styles.avatarImage, 'jira-tooltip', { [styles.active]: isActive })}
       />
       <div className={cn(styles.badge, styles[status])} data-status={status}>

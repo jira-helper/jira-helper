@@ -1,10 +1,25 @@
-/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
 import React from 'react';
 import { useDi } from 'src/infrastructure/di/diContext';
 import { buildAvatarUrlToken } from 'src/infrastructure/di/jiraApiTokens';
 import { boardRuntimeModelToken } from '../../tokens';
 import { boardPagePageObjectToken } from 'src/infrastructure/page-objects/BoardPage';
 import { AvatarBadge } from './AvatarBadge';
+import type { ColumnHeaderRenderMode } from 'src/infrastructure/page-objects/BoardPage';
+import type { PersonLimitStats } from '../models/types';
+import styles from './AvatarsContainer.module.css';
+
+type PersonStats = PersonLimitStats['persons'][number];
+
+export function getAvatarUrlForPerson(
+  person: PersonStats,
+  renderMode: ColumnHeaderRenderMode,
+  buildAvatarUrl: (name: string) => string
+): string {
+  if (person.avatar) return person.avatar;
+
+  const avatarLookupName = renderMode === 'cloud' ? (person.displayName ?? person.name) : person.name;
+  return buildAvatarUrl(avatarLookupName);
+}
 
 export const AvatarsContainer: React.FC = () => {
   const container = useDi();
@@ -18,17 +33,16 @@ export const AvatarsContainer: React.FC = () => {
   }
 
   return (
-    <div id="avatars-limits" style={{ display: 'inline-flex', marginLeft: 30 }}>
+    <div id="avatars-limits" className={styles.container}>
       {stats.flatMap(stat =>
         stat.persons.map(person => {
-          const personIssues = stat.issues.filter(issue => {
-            const assignee = pageObject.getAssigneeFromIssue(issue);
-            return assignee === person.name || assignee === person.displayName;
-          });
+          const personMatches = stat.matches.filter(
+            match => match.assignee === person.name || match.assignee === person.displayName
+          );
           // Shared limits: all avatars share the bucket and click highlights the whole limit.
           // Per-person limits: each avatar carries its own counter and highlight target.
           const isShared = stat.sharedLimit;
-          const currentCount = isShared ? stat.issues.length : personIssues.length;
+          const currentCount = isShared ? stat.matches.length : personMatches.length;
           const isActive = isShared
             ? activePerson?.limitId === stat.id
             : activePerson?.limitId === stat.id && activePerson?.personName === person.name;
@@ -38,8 +52,9 @@ export const AvatarsContainer: React.FC = () => {
           return (
             <AvatarBadge
               key={`${stat.id}-${person.name}`}
-              avatar={buildAvatarUrl(person.name)}
+              avatar={getAvatarUrlForPerson(person, pageObject.columnHeaderRenderMode, buildAvatarUrl)}
               personName={person.name}
+              displayName={person.displayName}
               limitId={stat.id}
               currentCount={currentCount}
               limit={stat.limit}

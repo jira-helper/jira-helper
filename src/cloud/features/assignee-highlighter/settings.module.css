@@ -1,0 +1,105 @@
+/* Assignee Highlighter - Settings Styles */
+
+.container {
+  padding: 20px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #172b4d;
+}
+
+.toggleSection {
+  margin-bottom: 20px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.formSection {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.formSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #172b4d;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.radioItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.checkboxRow {
+  margin-top: 10px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.colorRow {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorRow label {
+  font-size: 14px;
+}
+
+.customColorsSection {
+  margin-bottom: 20px;
+}
+
+.customColorsList {
+  margin-top: 10px;
+}
+
+.assigneeColorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.assigneeName {
+  width: 150px;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyText {
+  color: #6b778c;
+  font-style: italic;
+  font-size: 13px;
+}

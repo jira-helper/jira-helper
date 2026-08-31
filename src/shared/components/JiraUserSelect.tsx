@@ -10,7 +10,14 @@ export type SelectedJiraUser = {
   name: string;
   displayName: string;
   self: string;
+  avatar?: string;
 };
+
+function getPreferredAvatarUrl(user: JiraUser): string | undefined {
+  return (
+    user.avatarUrls?.['32x32'] || user.avatarUrls?.['48x48'] || user.avatarUrls?.['24x24'] || user.avatarUrls?.['16x16']
+  );
+}
 
 export interface JiraUserSelectProps {
   value?: SelectedJiraUser | null;
@@ -74,6 +81,7 @@ export const JiraUserSelect: React.FC<JiraUserSelectProps> = ({
           name: user.name,
           displayName: user.displayName,
           self: user.self,
+          avatar: getPreferredAvatarUrl(user),
         });
       }
     },
@@ -213,6 +221,7 @@ export const MultiJiraUserSelect: React.FC<MultiJiraUserSelectProps> = ({
           name: user.name,
           displayName: user.displayName,
           self: user.self,
+          avatar: getPreferredAvatarUrl(user),
         };
         if (!values.some(v => v.name === newPerson.name)) {
           onChange([...values, newPerson]);
@@ -281,7 +290,13 @@ export const MultiJiraUserSelect: React.FC<MultiJiraUserSelectProps> = ({
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingInlineStart: 4 }}
             >
               {buildAvatarUrl && (
-                <img src={buildAvatarUrl(person.name)} alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+                <img
+                  src={person.avatar || buildAvatarUrl(person.name)}
+                  alt=""
+                  width={16}
+                  height={16}
+                  style={{ borderRadius: '50%' }}
+                />
               )}
               <span>{person.displayName || person.name}</span>
             </Tag>

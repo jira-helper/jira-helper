@@ -2,6 +2,8 @@ import { vi } from 'vitest';
 import { IBoardPagePageObject, SwimlaneElement } from './BoardPage';
 
 export const BoardPagePageObjectMock: IBoardPagePageObject = {
+  columnHeaderRenderMode: 'server',
+
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',
@@ -50,6 +52,8 @@ export const BoardPagePageObjectMock: IBoardPagePageObject = {
   getIssueElements: () => [],
   getIssueElementsInColumn: () => [],
   getAssigneeFromIssue: () => null,
+  getPersonWipMatchesFromWorkData: () => null,
+  getIssueKeyFromIssue: () => null,
   getIssueTypeFromIssue: () => null,
   getColumnIdOfIssue: () => null,
   getColumnIdFromColumn: () => null,

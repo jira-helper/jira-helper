@@ -129,6 +129,14 @@ describe('PersonLimitsBoardPage — registerSettings', () => {
     );
   });
 
+  it('hides filtered cards with a Cloud-safe .no-visibility rule (not only .ghx-issue)', () => {
+    const page = createPage();
+    const css = page.appendStyles();
+    expect(css).toContain('.no-visibility');
+    expect(css).toContain('display: none');
+    expect(css).not.toContain('.ghx-issue.no-visibility');
+  });
+
   it('uses Russian tab title when local settings locale is ru', () => {
     useLocalSettingsStore.getState().updateSettings({ locale: 'ru' });
     const page = createPage();

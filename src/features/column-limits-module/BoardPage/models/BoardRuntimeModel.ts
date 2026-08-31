@@ -12,7 +12,8 @@ import { findGroupByColumnId, generateColorByFirstChars } from '../../shared/uti
 import styles from '../styles.module.css';
 
 const HEADER_GROUP_BG = '#deebff';
-const OVER_LIMIT_CELL_BG = '#ff5630';
+const CLOUD_HEADER_BG = 'var(--ds-surface-raised, var(--ds-surface, #ffffff))';
+const OVER_LIMIT_CELL_BG = '#de350b'; // darker than person-WIP card `#ff5630` so column vs card stay distinct
 
 export class BoardRuntimeModel {
   groupStats: GroupStats[] = [];
@@ -74,11 +75,12 @@ export class BoardRuntimeModel {
   }
 
   applyColumnHeaderStyles(): void {
-    const boardGroups: Record<string, { columns: string[]; customHexColor?: string }> = {};
+    const boardGroups: Record<string, { columns: string[]; customHexColor?: string; ignoredSwimlanes: string[] }> = {};
     this.groupStats.forEach(stat => {
       boardGroups[stat.groupId] = {
         columns: stat.columns,
         customHexColor: stat.color,
+        ignoredSwimlanes: stat.ignoredSwimlanes,
       };
     });
 
@@ -86,11 +88,24 @@ export class BoardRuntimeModel {
 
     columnsInOrder.forEach(columnId => {
       this.pageObject.resetColumnHeaderStyles(columnId);
+      this.pageObject.removeColumnHeaderElements(columnId, '[data-column-limits-stripe]');
     });
 
     columnsInOrder.forEach((columnId, index) => {
       const { name, value } = findGroupByColumnId(columnId, boardGroups);
-      if (!name || !value?.length) return;
+      const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
+      // Reset cleared every header, then group paint skips ignored swimlanes.
+      // Restore an opaque Cloud surface on all columns first so excluded
+      // swimlanes (and columns without a group) are not left translucent.
+      if (isCloudHeader) {
+        this.pageObject.styleColumnHeader(columnId, {
+          backgroundColor: CLOUD_HEADER_BG,
+          zIndex: '20',
+        });
+      }
+      if (!name || !value?.length) {
+        return;
+      }
 
       const leftCol = index > 0 ? columnsInOrder[index - 1] : undefined;
       const rightCol = index < columnsInOrder.length - 1 ? columnsInOrder[index + 1] : undefined;
@@ -98,21 +113,40 @@ export class BoardRuntimeModel {
       const columnByRight = rightCol !== undefined ? findGroupByColumnId(rightCol, boardGroups) : {};
 
       const groupColor = boardGroups[name].customHexColor;
+      const excludedSwimlaneIds = boardGroups[name].ignoredSwimlanes;
       if (!groupColor) return;
 
-      const headerStyles: Partial<CSSStyleDeclaration> = {
-        backgroundColor: HEADER_GROUP_BG,
-        borderTop: `4px solid ${groupColor}`,
-      };
+      const isGroupStart = columnByLeft.name !== name;
+      const isGroupEnd = columnByRight.name !== name;
+      // Cloud: opaque fill + absolute top stripe (paints above header children, no layout growth).
+      // Do not set position: relative (breaks Jira sticky wrappers; sticky is already a containing block).
+      const headerStyles: Partial<CSSStyleDeclaration> = isCloudHeader
+        ? {
+            // Opaque sticky fill + light group tint (readable without padding/border growth).
+            backgroundColor: `color-mix(in srgb, ${groupColor} 28%, ${CLOUD_HEADER_BG})`,
+            // Above neighboring board chrome so badge tooltips are not covered.
+            zIndex: '20',
+          }
+        : {
+            backgroundColor: HEADER_GROUP_BG,
+            borderTop: `4px solid ${groupColor}`,
+          };
 
-      if (columnByLeft.name !== name) {
+      if (!isCloudHeader && isGroupStart) {
         headerStyles.borderTopLeftRadius = '10px';
       }
-      if (columnByRight.name !== name) {
+      if (!isCloudHeader && isGroupEnd) {
         headerStyles.borderTopRightRadius = '10px';
       }
 
-      this.pageObject.styleColumnHeader(columnId, headerStyles);
+      this.pageObject.styleColumnHeader(columnId, headerStyles, excludedSwimlaneIds);
+
+      if (isCloudHeader) {
+        const radiusLeft = isGroupStart ? '10px' : '0';
+        const radiusRight = isGroupEnd ? '10px' : '0';
+        const stripeHtml = `<div data-column-limits-stripe="true" style="position:absolute;top:0;left:0;right:0;height:4px;background:${groupColor};z-index:999999;pointer-events:none;border-top-left-radius:${radiusLeft};border-top-right-radius:${radiusRight}"></div>`;
+        this.pageObject.insertColumnHeaderHtml(columnId, stripeHtml, excludedSwimlaneIds);
+      }
     });
   }
 
@@ -139,14 +173,18 @@ export class BoardRuntimeModel {
       const leftTailColumnId = columnsInOrder[leftTailColumnIndex];
       if (!leftTailColumnId) return;
 
-      const badgeClass = styles.limitColumnBadge ?? 'limitColumnBadge';
+      const isCloudHeader = this.pageObject.columnHeaderRenderMode === 'cloud';
+      const badgeClass = isCloudHeader
+        ? (styles.limitColumnBadgeCloud ?? 'limitColumnBadgeCloud')
+        : (styles.limitColumnBadge ?? 'limitColumnBadge');
       const hintClass = styles.limitColumnBadge__hint ?? 'limitColumnBadge__hint';
+      const badgeStyle = isCloudHeader ? ` style="--column-limit-color: ${stat.color}"` : '';
       const badgeHtml = `
-          <span class="${badgeClass}" data-column-limits-badge="true">
+          <span class="${badgeClass}" data-column-limits-badge="true"${badgeStyle}>
             ${stat.currentCount}/${stat.limit}
             <span class="${hintClass}">Issues per group / Max number of issues per group</span>
           </span>`;
-      this.pageObject.insertColumnHeaderHtml(leftTailColumnId, badgeHtml);
+      this.pageObject.insertColumnHeaderHtml(leftTailColumnId, badgeHtml, stat.ignoredSwimlanes);
     });
   }
 

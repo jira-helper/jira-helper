@@ -25,11 +25,16 @@ export function updatePersonLimit({
 
   const persons =
     formData.persons && formData.persons.length > 0
-      ? formData.persons.map(p => ({
-          name: p.name,
-          displayName: p.displayName,
-          self: p.self,
-        }))
+      ? formData.persons.map(p => {
+          const existingPerson = existingLimit.persons.find(prev => prev.name === p.name);
+          const avatar = p.avatar || existingPerson?.avatar;
+          return {
+            name: p.name,
+            displayName: p.displayName,
+            self: p.self,
+            ...(avatar ? { avatar } : {}),
+          };
+        })
       : existingLimit.persons;
 
   const updatedLimit: PersonLimit = {

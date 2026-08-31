@@ -65,6 +65,16 @@ describe('BoardSettingsComponent', () => {
     expect(tabsNavigation).toHaveStyle({ position: 'sticky', top: '0px' });
   });
 
+  it('keeps modal content from creating horizontal scroll', async () => {
+    render(<BoardSettingsComponent />);
+
+    await userEvent.click(screen.getByRole('img'));
+
+    const modalBody = document.querySelector('.ant-modal-body');
+
+    expect(modalBody).toHaveStyle({ overflowX: 'hidden' });
+  });
+
   describe('Jira 11 board stacking (#32)', () => {
     let host: HTMLElement;
     let boardLayer: HTMLElement;

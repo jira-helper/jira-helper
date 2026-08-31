@@ -36,7 +36,8 @@
         {
             "resources": [
                 "img/*",
-                "jira-helper-comment-insert-bridge.js"
+                "jira-helper-comment-insert-bridge.js",
+                "assets/*.css"
             ],
             "matches": [
                 "*://*/*"
@@ -52,8 +53,9 @@
             "matches": [
                 "*://*/*"
             ],
+            "run_at": "document_start",
             "js": [
-                "src/content.ts"
+                "src/content-loader.ts"
             ]
         }
     ],

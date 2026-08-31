@@ -15,7 +15,7 @@ export function createPersonLimit({
   id,
 }: {
   formData: FormData;
-  persons: Array<Pick<SelectedPerson, 'name' | 'displayName' | 'self'>>;
+  persons: Array<Pick<SelectedPerson, 'name' | 'displayName' | 'self' | 'avatar'>>;
   columns: Column[];
   swimlanes: Swimlane[];
   id: number;
@@ -37,6 +37,7 @@ export function createPersonLimit({
       name: p.name,
       displayName: p.displayName,
       self: p.self,
+      ...(p.avatar ? { avatar: p.avatar } : {}),
     })),
     limit: formData.limit,
     columns: columnObjects,

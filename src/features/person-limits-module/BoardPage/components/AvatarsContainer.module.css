@@ -1,0 +1,27 @@
+/**
+ * Mounted inside Jira Cloud's single-row controls bar (flex, nowrap, often overflow:hidden).
+ * Default flex min-width:auto would force one long row and get clipped — allow shrink + wrap.
+ */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
+  /* ~2 rows for a dense 12–14 badge strip on mid-width boards */
+  max-width: min(320px, 36vw);
+  align-content: center;
+  justify-content: flex-start;
+  column-gap: 0;
+  row-gap: 12px;
+  /* Counter badge sits above the avatar (negative top) */
+  padding-top: 10px;
+  margin-left: 30px;
+}
+
+:global([data-jh-avatars-host='team-managed']) .container {
+  flex: 0 0 auto;
+  min-width: auto;
+  max-width: none;
+  flex-wrap: nowrap;
+  margin-left: 0;
+}

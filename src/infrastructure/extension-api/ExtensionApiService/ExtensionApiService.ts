@@ -33,7 +33,8 @@ export class ExtensionApiService implements IExtensionApiService {
 
   getUrl(resource: string): string {
     const isInlineResource = resource.startsWith('data:');
-    if (isInlineResource) return resource;
+    const hasUrlScheme = /^[a-z][a-z\d+.-]*:/i.test(resource);
+    if (isInlineResource || hasUrlScheme) return resource;
     return this.extensionAPI.runtime.getURL(resource);
   }
 

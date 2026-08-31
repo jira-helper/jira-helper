@@ -1,7 +1,8 @@
-/* eslint-disable local/no-inline-styles -- Legacy inline styles; migrate to CSS classes when touching this file. */
+/* eslint-disable local/no-inline-styles -- Story host mimics Jira controls bar; badges use CSS modules. */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AvatarBadge } from './AvatarBadge';
+import containerStyles from './AvatarsContainer.module.css';
 
 const meta: Meta<typeof AvatarBadge> = {
   title: 'PersonLimitsModule/BoardPage/AvatarBadge',
@@ -110,4 +111,56 @@ export const MultipleAvatars: Story = {
       />
     </div>
   ),
+};
+
+/**
+ * Dense strip: 14 badges. Constrained width mimics Cloud's single-row controls bar
+ * so we can verify wrap instead of horizontal clip.
+ */
+export const FourteenComboAvatars: Story = {
+  parameters: { layout: 'padded' },
+  render: () => {
+    const columns = ['all', 'To Do', 'In Progress', 'Done'];
+    const swimlanes = ['all', 'pri', 'Expedite', 'Everything Else'];
+    const badges = columns.flatMap((col, ci) =>
+      swimlanes.map((sw, si) => ({
+        personName: `maxim.${col}.${sw}`.replace(/\s+/g, '-'),
+        displayName: `Maxim · ${col} · ${sw}`,
+        currentCount: (ci + si) % 6,
+        limit: 1 + ((ci * swimlanes.length + si) % 5),
+        limitId: ci * 10 + si + 1,
+        isActive: ci === 1 && si === 2,
+      }))
+    );
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          overflow: 'hidden',
+          maxWidth: 1100,
+          alignItems: 'center',
+          border: '1px dashed #ccc',
+          padding: 8,
+        }}
+      >
+        <span style={{ marginRight: 12, whiteSpace: 'nowrap' }}>filters…</span>
+        <div id="avatars-limits" className={containerStyles.container}>
+          {badges.slice(0, 14).map(b => (
+            <AvatarBadge
+              key={b.limitId}
+              avatar={defaultAvatar}
+              personName={b.personName}
+              displayName={b.displayName}
+              currentCount={b.currentCount}
+              limit={b.limit}
+              isActive={b.isActive}
+              onClick={() => {}}
+              limitId={b.limitId}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  },
 };

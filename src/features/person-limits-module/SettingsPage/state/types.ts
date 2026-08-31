@@ -20,6 +20,7 @@ export type SelectedPerson = {
   name: string;
   displayName: string;
   self: string;
+  avatar?: string;
 };
 
 /**

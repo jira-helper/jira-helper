@@ -1,0 +1,31 @@
+/* Avatar Indicators - Shared Board Styles */
+
+.avatarIndicatorContainer {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+}
+
+.avatarIndicator {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 6px !important;
+  color: white !important;
+  font-weight: bold !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 0 1px white, 0 0 0 2px var(--indicator-color, #ff0000) !important;
+}
+
+/* CSS Variables */
+:root {
+  --wip-default-color: #808080;
+  --wip-default-r: 128;
+  --wip-default-g: 128;
+  --wip-default-b: 128;
+}

@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BoardRuntimeModel } from './BoardRuntimeModel';
 import type { PropertyModel } from '../../property/PropertyModel';
-import { BoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObject, type IBoardPagePageObject } from 'src/infrastructure/page-objects/BoardPage';
+import { BoardPagePageObject as CloudBoardPagePageObject } from 'src/cloud/shared/BoardPagePageObject';
 import type { Logger } from 'src/infrastructure/logging/Logger';
 import type { PersonLimit } from '../../property/types';
 
@@ -75,7 +76,54 @@ describe('BoardRuntimeModel', () => {
 
     expect(stats).toHaveLength(1);
     expect(stats[0].issues.length).toBe(3);
+    expect(stats[0].matches).toHaveLength(3);
     expect(stats[0].limit).toBe(5);
+  });
+
+  it('should prefer allData matches over DOM when work-data API is available', () => {
+    document.body.innerHTML = `
+      <div id="ghx-pool">
+        <div class="ghx-column" data-column-id="col1">
+          <div class="ghx-issue" aria-label="TRB3-7">
+            <img class="ghx-avatar-img" alt="Assignee: Maxim Sosnov" />
+            <div class="ghx-type" title="Эпик"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const pageObject = {
+      ...BoardPagePageObject,
+      getPersonWipMatchesFromWorkData: vi.fn(() => [
+        { key: 'TRB3-7', assignee: 'acct-maxim' },
+        { key: 'TRB3-8', assignee: 'acct-maxim' },
+        { key: 'TRB3-9', assignee: 'acct-maxim' },
+      ]),
+      getIssueKeyFromIssue: (issue: Element) => issue.getAttribute('aria-label'),
+    };
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'acct-maxim', displayName: 'Maxim Sosnov', self: '', avatar: '' }],
+          limit: 3,
+          columns: [],
+          swimlanes: [{ id: '1', name: 'Expedite' }],
+          includedIssueTypes: ['Эпик'],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(mockPropertyModel, pageObject, mockLogger);
+    model.cssSelectorOfIssues = '.ghx-issue';
+
+    const stats = model.calculateStats();
+
+    expect(stats[0].matches).toHaveLength(3);
+    // Only mounted card is kept as a DOM issue for highlight/filter.
+    expect(stats[0].issues).toHaveLength(1);
+    expect(pageObject.getPersonWipMatchesFromWorkData).toHaveBeenCalled();
   });
 
   it('should filter by column', () => {
@@ -185,6 +233,41 @@ describe('BoardRuntimeModel', () => {
     model.showOnlyChosen();
 
     expect(issue.classList.contains('no-visibility')).toBe(false);
+  });
+
+  it('applyVisibilityToIssues filters only the provided freshly mounted cards', () => {
+    document.body.innerHTML = `
+      <div id="ghx-pool">
+        <div class="ghx-column" data-column-id="col1">
+          <div class="ghx-issue" id="i1">
+            <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+          </div>
+          <div class="ghx-issue" id="i2">
+            <img class="ghx-avatar-img" alt="Assignee: Jane Doe" />
+          </div>
+        </div>
+      </div>
+    `;
+
+    const model = modelWithLimits([
+      {
+        id: 1,
+        persons: [personJohn],
+        limit: 5,
+        columns: [],
+        swimlanes: [],
+        showAllPersonIssues: true,
+      },
+    ]);
+    model.cssSelectorOfIssues = '.ghx-issue';
+    model.calculateStats();
+    model.activePerson = { limitId: model.stats[0].id, personName: 'john.doe' };
+
+    const jane = document.getElementById('i2')!;
+    model.applyVisibilityToIssues([jane]);
+
+    expect(document.getElementById('i1')!.classList.contains('no-visibility')).toBe(false);
+    expect(jane.classList.contains('no-visibility')).toBe(true);
   });
 
   it('showOnlyChosen with active limit and showAllPersonIssues shows only assignee matches', () => {
@@ -367,6 +450,45 @@ describe('BoardRuntimeModel', () => {
 
       model.toggleActivePerson(id, 'john.doe');
       expect(model.activePerson).toBeNull();
+    });
+
+    it('applyHighlightToIssues paints freshly mounted over-limit cards without a full apply', () => {
+      document.body.innerHTML = `
+        <div id="ghx-pool">
+          <div class="ghx-column" data-column-id="col1">
+            <div class="ghx-issue" id="o1" data-issue-key="TRB3-7">
+              <img class="ghx-avatar-img" alt="Assignee: John Doe" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      const model = modelWithLimits([
+        {
+          id: 1,
+          persons: [personJohn],
+          limit: 0,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+          sharedLimit: false,
+        },
+      ]);
+      model.cssSelectorOfIssues = '.ghx-issue';
+      model.apply();
+      expect((document.getElementById('o1') as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
+
+      const fresh = document.createElement('div');
+      fresh.className = 'ghx-issue';
+      fresh.id = 'fresh';
+      fresh.setAttribute('data-issue-key', 'TRB3-7');
+      fresh.innerHTML = '<img class="ghx-avatar-img" alt="Assignee: John Doe" />';
+      document.querySelector('.ghx-column')!.appendChild(fresh);
+      (fresh as HTMLElement).style.backgroundColor = '';
+
+      model.applyHighlightToIssues([fresh]);
+
+      expect((fresh as HTMLElement).style.backgroundColor).toBe(OVER_LIMIT_BG);
     });
 
     it('apply highlights only the offending person in a per-person limit', () => {
@@ -761,6 +883,7 @@ describe('BoardRuntimeModel', () => {
           id: 42,
           persons: [{ name: 'john.doe', displayName: 'John Doe' }],
           limit: 3,
+          matches: [{ key: 'ISSUE-1', assignee: 'john.doe' }],
           issues: [issue],
           columns: [{ id: 'col1', name: 'To Do' }],
           swimlanes: [{ id: 'sw1', name: 'Team A' }],
@@ -806,6 +929,10 @@ describe('BoardRuntimeModel', () => {
           id: 1,
           persons: [{ name: 'john.doe' }, { name: 'jane.doe' }],
           limit: 1,
+          matches: [
+            { key: 'A-1', assignee: 'john.doe' },
+            { key: 'A-2', assignee: 'jane.doe' },
+          ],
           issues: [document.createElement('div'), document.createElement('motion')],
           columns: [],
           swimlanes: [],
@@ -843,6 +970,11 @@ describe('BoardRuntimeModel', () => {
             { name: 'jane.doe', displayName: 'Jane Doe' },
           ],
           limit: 1,
+          matches: [
+            { key: 'J-1', assignee: 'john.doe' },
+            { key: 'J-2', assignee: 'john.doe' },
+            { key: 'J-3', assignee: 'jane.doe' },
+          ],
           issues: [johnIssue1, johnIssue2, janeIssue],
           columns: [],
           swimlanes: [],
@@ -893,5 +1025,66 @@ describe('BoardRuntimeModel', () => {
     model.showOnlyChosen();
 
     expect(document.getElementById('sw-el')!.classList.contains('no-visibility')).toBe(true);
+  });
+
+  it('showOnlyChosen without an active filter does not hide Cloud assignee groups', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper" role="list">
+        <div role="listitem" id="group-maxim">
+          <button type="button">Свернуть группу «Maxim Sosnov»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-M1">
+                <span aria-label="Исполнитель: Maxim Sosnov"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="listitem" id="group-xcredo">
+          <button type="button">Свернуть группу «xCredo»</button>
+          <div data-testid="board.content.swimlane.scroll-container">
+            <div data-testid="board.content.cell">
+              <div data-testid="board.content.cell.column-header">
+                <div data-testid="board.content.cell.column-header.name">To Do</div>
+              </div>
+              <div data-testid="board.content.cell.card" aria-label="KAN-X1">
+                <span aria-label="Исполнитель: xCredo"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    CloudBoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+    CloudBoardPagePageObject.setBoardWorkData(null);
+    CloudBoardPagePageObject.setSwimlanesCache(null);
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'xcredo', displayName: 'xCredo', self: '', avatar: '' }],
+          limit: 1,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(
+      mockPropertyModel,
+      CloudBoardPagePageObject as unknown as IBoardPagePageObject,
+      mockLogger
+    );
+    model.setCssSelectorOfIssues(CloudBoardPagePageObject.selectors.issue);
+    model.calculateStats();
+
+    model.showOnlyChosen();
+
+    expect(document.getElementById('group-maxim')!.classList.contains('no-visibility')).toBe(false);
+    expect(document.getElementById('group-xcredo')!.classList.contains('no-visibility')).toBe(false);
   });
 });

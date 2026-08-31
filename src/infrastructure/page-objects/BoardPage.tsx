@@ -31,6 +31,8 @@ export type ColumnIssueCountOptions = {
   cssFilter?: string;
 };
 
+export type ColumnHeaderRenderMode = 'server' | 'cloud';
+
 const swimlaneRootsStore = new WeakMap<Element, Map<string, Root>>();
 
 type BoardSelectors = Pick<
@@ -146,6 +148,8 @@ class CardPageObject {
 }
 
 export interface IBoardPagePageObject {
+  columnHeaderRenderMode: ColumnHeaderRenderMode;
+
   selectors: {
     pool: string;
     issue: string;
@@ -209,7 +213,7 @@ export interface IBoardPagePageObject {
   getIssueCountInColumn(columnId: string, options?: ColumnIssueCountOptions): number;
 
   /** Apply inline styles to the column header element. */
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void;
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>, excludedSwimlaneIds?: string[]): void;
 
   /**
    * Clear group-limit inline styles on the column header (background, top border, radii).
@@ -218,7 +222,7 @@ export interface IBoardPagePageObject {
   resetColumnHeaderStyles(columnId: string): void;
 
   /** Insert HTML at the end of the column header (`insertAdjacentHTML` `beforeend`). */
-  insertColumnHeaderHtml(columnId: string, html: string): void;
+  insertColumnHeaderHtml(columnId: string, html: string, excludedSwimlaneIds?: string[]): void;
 
   /** Remove descendants of the column header matching `selector`. */
   removeColumnHeaderElements(columnId: string, selector: string): void;
@@ -242,6 +246,20 @@ export interface IBoardPagePageObject {
 
   /** Parse assignee name from issue card's avatar tooltip / alt. */
   getAssigneeFromIssue(issue: Element): string | null;
+
+  /**
+   * Person-WIP matches from board work data (Cloud allData).
+   * Returns `null` when unavailable — callers must fall back to DOM counting.
+   */
+  getPersonWipMatchesFromWorkData?(criteria: {
+    persons: Array<{ name: string; displayName?: string }>;
+    columns: Array<{ id: string; name?: string }>;
+    swimlanes: Array<{ id: string; name?: string }>;
+    includedIssueTypes?: string[];
+  }): Array<{ key: string; assignee: string }> | null;
+
+  /** Issue key from a mounted card (`data-issue-key`, aria-label, or key link). */
+  getIssueKeyFromIssue?(issue: Element): string | null;
 
   /** Issue type from `.ghx-type` title or textContent (person-limits semantics). */
   getIssueTypeFromIssue(issue: Element): string | null;
@@ -295,9 +313,17 @@ export interface IBoardPagePageObject {
    * Optional on the interface so existing mocks do not require the method until they opt in.
    */
   getSelectedIssueKey?(): string | null;
+
+  /**
+   * Runtime issue selector for board features. Jira Server uses `.ghx-issue`;
+   * Jira Cloud adapters can provide their card selector.
+   */
+  getIssueCssSelector?(editData: any): string;
 }
 
 export const BoardPagePageObject: IBoardPagePageObject = {
+  columnHeaderRenderMode: 'server',
+
   selectors: {
     pool: '#ghx-pool',
     issue: '.ghx-issue',
@@ -623,7 +649,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     }).length;
   },
 
-  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>): void {
+  styleColumnHeader(columnId: string, styles: Partial<CSSStyleDeclaration>, excludedSwimlaneIds?: string[]): void {
+    void excludedSwimlaneIds;
     const columnElement = this.getColumnHeaderElement(columnId);
     if (!columnElement) return;
     Object.assign(columnElement.style, styles);
@@ -639,7 +666,8 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     style.removeProperty('border-top-right-radius');
   },
 
-  insertColumnHeaderHtml(columnId: string, html: string): void {
+  insertColumnHeaderHtml(columnId: string, html: string, excludedSwimlaneIds?: string[]): void {
+    void excludedSwimlaneIds;
     const columnElement = this.getColumnHeaderElement(columnId);
     if (!columnElement) return;
     columnElement.insertAdjacentHTML('beforeend', html);
@@ -686,6 +714,14 @@ export const BoardPagePageObject: IBoardPagePageObject = {
     return getNameFromTooltip(label);
   },
 
+  getPersonWipMatchesFromWorkData() {
+    return null;
+  },
+
+  getIssueKeyFromIssue(issue: Element): string | null {
+    return issue.getAttribute('data-issue-key') ?? issue.querySelector('.ghx-key')?.textContent?.trim() ?? null;
+  },
+
   getIssueTypeFromIssue(issue: Element): string | null {
     const typeEl = issue.querySelector(this.selectors.issueType) as HTMLElement | null;
     if (!typeEl) return null;
@@ -725,9 +761,9 @@ export const BoardPagePageObject: IBoardPagePageObject = {
   },
 
   countIssueVisibility(element: Element, cssSelector: string) {
-    const total = element.querySelectorAll(cssSelector).length;
-    const hidden = element.querySelectorAll(`${cssSelector}.${NO_VISIBILITY_CLASS}`).length;
-    return { total, hidden };
+    const issues = Array.from(element.querySelectorAll(cssSelector));
+    const hidden = issues.filter(issue => issue.classList.contains(NO_VISIBILITY_CLASS)).length;
+    return { total: issues.length, hidden };
   },
 
   setIssueBackgroundColor(issue: Element, color: string): void {

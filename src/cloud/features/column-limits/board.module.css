@@ -1,0 +1,55 @@
+/* Column Limits - Board Styles */
+
+.groupHeader {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 32px !important;
+  padding: 0 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+}
+
+.groupHeaderContainer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 55px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+.groupCell {
+  flex: 1 1 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0 8px !important;
+  pointer-events: none !important;
+}
+
+/* Column coloring */
+.columnColored {
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.columnExceeded {
+  box-shadow: 0 0 0 3px var(--exceed-color, #ff0000);
+  border-radius: 8px;
+}
+
+.columnNormal {
+  border-radius: 6px;
+}

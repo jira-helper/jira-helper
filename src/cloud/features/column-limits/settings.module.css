@@ -1,0 +1,120 @@
+/* Column Limits - Settings Styles */
+
+.container {
+  padding: 20px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #172b4d;
+}
+
+.toggleSection {
+  margin-bottom: 20px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.formSection {
+  margin-bottom: 30px;
+  padding: 15px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.formSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #172b4d;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.formRow label {
+  min-width: 120px;
+  font-size: 14px;
+  color: #42526e;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.checkboxItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.colorPickers {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.colorPicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorPicker label {
+  font-size: 11px;
+  min-width: auto;
+}
+
+.colorPreview {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #dfe1e6;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5e6c84;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.table td {
+  padding: 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #ebecf0;
+}
+
+.table td:first-child {
+  font-weight: 500;
+}
+
+.colorCell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
