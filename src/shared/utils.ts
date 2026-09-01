@@ -2,7 +2,9 @@ export const getRandomString = (length: number): string => {
   return Math.random().toString(36).substring(length);
 };
 
-export const isJira: boolean = document.body.id === 'jira';
+export function isJiraPage(doc: { body: { id?: string } | null } = document): boolean {
+  return doc.body?.id === 'jira';
+}
 
 export const waitForElement = (
   selector: string,
