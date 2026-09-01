@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { detectJiraRuntime, type JiraRuntime } from './content-loader';
+import { detectJiraRuntime, startContentLoader, type JiraRuntime } from './content-loader';
 
 function createLocation(overrides: Partial<Location>): Location {
   return {
@@ -82,6 +82,27 @@ describe('detectJiraRuntime', () => {
 
     expect(runtime).toBe('cloud');
     expect(fetchImpl).toHaveBeenCalledWith('/rest/api/3/serverInfo', expect.any(Object));
+  });
+
+  it('waits for body before importing the Server bundle on RapidBoard', async () => {
+    const loadServer = vi.fn().mockResolvedValue(undefined);
+    const { documentRef, dispatch } = createDocument(null);
+
+    const pending = startContentLoader({
+      location: createLocation({ hostname: 'jira.example.com', pathname: '/secure/RapidBoard.jspa' }),
+      documentRef,
+      loadServer,
+      loadCloud: vi.fn(),
+    });
+
+    expect(loadServer).not.toHaveBeenCalled();
+
+    (documentRef as { body: HTMLElement | null }).body = { id: 'jira' } as HTMLElement;
+    dispatch('DOMContentLoaded');
+
+    await pending;
+
+    expect(loadServer).toHaveBeenCalledOnce();
   });
 
   it('falls back to Server when unknown Jira page does not answer Cloud serverInfo', async () => {

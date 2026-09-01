@@ -9,6 +9,11 @@ type RuntimeDetectionOptions = {
   fetchImpl?: typeof fetch;
 };
 
+export type ContentLoaderDeps = RuntimeDetectionOptions & {
+  loadCloud?: () => Promise<unknown>;
+  loadServer?: () => Promise<unknown>;
+};
+
 const BODY_WAIT_TIMEOUT_MS = 3_000;
 const BODY_WAIT_INTERVAL_MS = 50;
 const CLOUD_SERVER_INFO_TIMEOUT_MS = 1_000;
@@ -96,16 +101,19 @@ export async function detectJiraRuntime(options: RuntimeDetectionOptions = {}): 
   return 'server';
 }
 
-async function startContentLoader(): Promise<void> {
-  const runtime = await detectJiraRuntime();
+export async function startContentLoader(deps: ContentLoaderDeps = {}): Promise<void> {
+  const documentRef = deps.documentRef ?? document;
+  await waitForBody(documentRef);
+
+  const runtime = await detectJiraRuntime(deps);
 
   if (runtime === 'cloud') {
-    await import('./cloud/content.cloud');
+    await (deps.loadCloud ?? (() => import('./cloud/content.cloud')))();
     return;
   }
 
   if (runtime === 'server') {
-    await import('./content');
+    await (deps.loadServer ?? (() => import('./content')))();
   }
 }
 

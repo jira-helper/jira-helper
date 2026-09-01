@@ -2,7 +2,7 @@ import './firefoxFixes';
 import { globalContainer } from 'dioma';
 import { setAutoFreeze } from 'immer';
 import { Routes, routingServiceToken } from './infrastructure/routing';
-import { isJira } from './shared/utils';
+import { isJiraPage } from './shared/utils';
 import AddSlaLine, { addSlaLineToken } from './features/charts/AddSlaLine';
 import AddChartGrid, { addChartGridToken } from './features/charts/AddChartGrid';
 import runModifications from './infrastructure/page-modification/runModifications';
@@ -184,7 +184,7 @@ function initDiContainer() {
 }
 
 async function start() {
-  if (!isJira) return;
+  if (!isJiraPage()) return;
 
   initDiContainer();
 
