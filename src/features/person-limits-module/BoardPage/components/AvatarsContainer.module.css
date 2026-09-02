@@ -1,8 +1,14 @@
 /**
- * Mounted inside Jira Cloud's single-row controls bar (flex, nowrap, often overflow:hidden).
- * Default flex min-width:auto would force one long row and get clipped — allow shrink + wrap.
+ * Server Rapid Board (#subnav-title): one row, no wrap width.
+ * Cloud 2-row wrap is scoped to [data-jh-avatars-host='cloud'] only.
  */
 .container {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  margin-left: 30px;
+}
+
+:global([data-jh-avatars-host='cloud']) .container {
   display: flex;
   flex-wrap: wrap;
   flex: 0 1 auto;
@@ -15,7 +21,6 @@
   row-gap: 12px;
   /* Counter badge sits above the avatar (negative top) */
   padding-top: 10px;
-  margin-left: 30px;
 }
 
 :global([data-jh-avatars-host='team-managed']) .container {
