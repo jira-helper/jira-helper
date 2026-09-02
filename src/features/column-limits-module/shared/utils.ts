@@ -15,15 +15,21 @@ interface GroupResult {
 /** Drop column ids absent from the current board; remove groups left with no columns. */
 export function stripUnknownWipColumnIds(
   property: WipLimitsProperty,
-  knownColumnIds: Iterable<string>
+  knownColumnIds: Iterable<string | number>
 ): { cleaned: WipLimitsProperty; changed: boolean } {
-  const known = new Set(knownColumnIds);
+  const knownList = [...knownColumnIds].map(id => String(id));
+  // Empty known list means "board columns unavailable", not "every id is stale".
+  if (knownList.length === 0) {
+    return { cleaned: property, changed: false };
+  }
+
+  const known = new Set(knownList);
   let changed = false;
   const cleaned: WipLimitsProperty = {};
 
   for (const [groupId, group] of Object.entries(property)) {
     const columns = (group.columns ?? []).filter(columnId => {
-      if (known.has(columnId)) return true;
+      if (known.has(String(columnId))) return true;
       changed = true;
       return false;
     });

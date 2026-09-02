@@ -174,7 +174,7 @@ describe('ColumnLimitsBoardPage — registerSettings', () => {
     expect(registerSettings).toHaveBeenCalledTimes(1);
   });
 
-  it('strips unknown column ids on apply and persists cleaned property', () => {
+  it('strips unknown column ids in memory and does not persist on apply', () => {
     const { model: propertyModel } = globalContainer.inject(propertyModelToken);
     const persistSpy = vi.spyOn(propertyModel, 'persist').mockResolvedValue({ ok: true, val: undefined } as never);
 
@@ -201,7 +201,29 @@ describe('ColumnLimitsBoardPage — registerSettings', () => {
       G1: { columns: ['115'], max: 5 },
       G3: { columns: ['116'], max: 2 },
     });
-    expect(persistSpy).toHaveBeenCalledTimes(1);
+    expect(persistSpy).not.toHaveBeenCalled();
     expect(registerSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps stored string column ids when editmodel returns numeric ids and does not persist', () => {
+    const { model: propertyModel } = globalContainer.inject(propertyModelToken);
+    const persistSpy = vi.spyOn(propertyModel, 'persist').mockResolvedValue({ ok: true, val: undefined } as never);
+
+    const page = new ColumnLimitsBoardPage(globalContainer);
+    page.apply([
+      {
+        canEdit: true,
+        rapidListConfig: {
+          mappedColumns: [
+            { id: 115, isKanPlanColumn: false },
+            { id: 116, isKanPlanColumn: false },
+          ],
+        },
+      },
+      { G1: { columns: ['115', '116'], max: 5 } },
+    ]);
+
+    expect(propertyModel.data).toEqual({ G1: { columns: ['115', '116'], max: 5 } });
+    expect(persistSpy).not.toHaveBeenCalled();
   });
 });

@@ -21,7 +21,7 @@ interface EditData {
   canEdit?: boolean;
   rapidListConfig: {
     mappedColumns: Array<{
-      id: string;
+      id: string | number;
       isKanPlanColumn: boolean;
       max?: number;
     }>;
@@ -80,14 +80,11 @@ export default class ColumnLimitsBoardPage extends PageModification<[EditData?, 
     const [editData = { rapidListConfig: { mappedColumns: [] } }, boardGroups = {}] = data;
 
     const { model: propertyModel } = this.container.inject(propertyModelToken);
-    const knownColumnIds = editData.rapidListConfig.mappedColumns
+    const knownColumnIds = (editData.rapidListConfig?.mappedColumns ?? [])
       .filter(col => col.isKanPlanColumn !== true)
       .map(col => col.id);
-    const { cleaned, changed } = stripUnknownWipColumnIds(boardGroups, knownColumnIds);
+    const { cleaned } = stripUnknownWipColumnIds(boardGroups, knownColumnIds);
     (propertyModel as PropertyModel).setData(cleaned);
-    if (changed) {
-      void (propertyModel as PropertyModel).persist();
-    }
 
     // Settings tab is registered regardless of `canEdit`: viewers can inspect and
     // tweak locally (same pattern as person-limits); persistence may fail without edit rights.
