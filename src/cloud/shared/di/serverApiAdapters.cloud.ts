@@ -14,8 +14,9 @@ import {
 import type { JiraUser } from '../../../infrastructure/jira/jiraApi';
 import { getBoardEditDataCloud, getProjectIssueTypesCloud, searchUsersCloud } from '../jiraApi.cloud';
 import type { CloudJiraUser } from '../jiraApi.cloud';
+import { boardPropertyKeyToWriteOnCloud } from '../../../infrastructure/jira/boardPropertyKeys';
 import { SettingsStorage } from '../SettingsStorage';
-import { getBoardPropertyFromApi } from './boardPropertyApi.cloud';
+import { loadCloudBoardProperty } from './boardPropertyApi.cloud';
 import { findCloudAvatarUrlFromDom } from './findCloudAvatarUrlFromDom';
 
 export function registerServerApiCloudAdapters(container: Container): void {
@@ -25,9 +26,10 @@ export function registerServerApiCloudAdapters(container: Container): void {
   container.register({
     token: getBoardPropertyToken,
     value: async <T>(_boardId: string, property: string, _options?: any): Promise<T | undefined> =>
-      getBoardPropertyFromApi<T>({
+      loadCloudBoardProperty<T>({
         property,
-        fetchFromApi: () => storage.get<any>(property),
+        get: key => storage.get<any>(key),
+        set: (key, value) => storage.set(key, value),
       }),
   });
 
@@ -40,14 +42,14 @@ export function registerServerApiCloudAdapters(container: Container): void {
   container.register({
     token: updateBoardPropertyToken,
     value: async (_boardId: string, property: string, value: any, _options?: any) => {
-      await storage.set(property, value);
+      await storage.set(boardPropertyKeyToWriteOnCloud(property), value);
     },
   });
 
   container.register({
     token: deleteBoardPropertyToken,
     value: async (_boardId: string, property: string, _options?: any) => {
-      await storage.delete(property);
+      await storage.delete(boardPropertyKeyToWriteOnCloud(property));
     },
   });
 
