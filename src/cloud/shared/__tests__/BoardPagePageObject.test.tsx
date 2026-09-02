@@ -33,6 +33,16 @@ describe('BoardPagePageObject', () => {
     BoardPagePageObject.setSwimlanesCache(null);
   });
 
+  it('clearRuntimeCaches drops column and swimlane caches', () => {
+    BoardPagePageObject.setCachedColumns([{ id: '115', name: 'To Do' }]);
+    BoardPagePageObject.setSwimlanesCache([{ id: 'sw1', name: 'Default' }]);
+
+    BoardPagePageObject.clearRuntimeCaches?.();
+
+    expect(BoardPagePageObject.getCachedSwimlanes?.()).toEqual([]);
+    expect(BoardPagePageObject.getOrderedColumns()).toEqual([]);
+  });
+
   it('resolves the per-column header instead of the whole column', () => {
     const { header } = renderColumn();
 

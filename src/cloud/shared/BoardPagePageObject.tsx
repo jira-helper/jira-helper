@@ -76,6 +76,7 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   getBoardId(): number | null;
   getIssueCssSelector(editData: any): string;
   setCachedColumns(columns: Array<{ id: string; name: string; statusIds?: string[] }>): void;
+  clearRuntimeCaches(): void;
   setBoardWorkData(data: CloudBoardWorkData | null): void;
   setSwimlanesCache(swimlanes: Array<{ id: string; name: string }> | null): void;
   getCachedSwimlanes?(): Array<{ id: string; name: string }>;
@@ -157,6 +158,12 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
 
   setCachedColumns(columns: Array<{ id: string; name: string; statusIds?: string[] }>) {
     this._columnsCache = columns;
+  },
+
+  clearRuntimeCaches() {
+    this._columnsCache = null;
+    this._boardWorkData = null;
+    this._swimlanesCache = null;
   },
 
   setBoardWorkData(data: CloudBoardWorkData | null) {

@@ -4,9 +4,13 @@ import type { IExtensionApiService } from '../extension-api/ExtensionApiService'
 import { extensionApiServiceToken } from '../extension-api/ExtensionApiService';
 import type { IRoutingService } from './IRoutingService';
 import { Routes, type Route } from './routes';
+import { subscribeToSpaUrlChanges } from './subscribeToSpaUrlChanges';
 import { routingServiceToken } from './tokens';
 
 export class RoutingService implements IRoutingService {
+  private readonly urlChangeListeners: Array<(url: string) => void> = [];
+  private listeningToUrlChanges = false;
+
   constructor(private extensionApi: IExtensionApiService) {}
 
   getSearchParam(param: string): string | null {
@@ -109,12 +113,24 @@ https://mycompany.atlassian.net/jira/software/c/projects/MP/boards/138?config=ro
   }
 
   onUrlChange(cb: (url: string) => void): void {
+    this.urlChangeListeners.push(cb);
+    if (this.listeningToUrlChanges) {
+      return;
+    }
+    this.listeningToUrlChanges = true;
+
     this.extensionApi.onMessage((request: { type: string; url: string }, sender, sendResponse) => {
       if (!sender.tab && request.type === types.TAB_URL_CHANGE) {
-        cb(request.url);
+        this.emitUrlChange(request.url);
         sendResponse({ message: 'change event received' });
       }
     });
+
+    subscribeToSpaUrlChanges(href => this.emitUrlChange(href));
+  }
+
+  private emitUrlChange(url: string): void {
+    this.urlChangeListeners.forEach(listener => listener(url));
   }
 }
 

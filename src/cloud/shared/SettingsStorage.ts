@@ -5,23 +5,25 @@
 import type { IBoardPagePageObject } from './BoardPagePageObject.js';
 
 export class SettingsStorage {
-  private boardId: number | null = null;
-
   constructor(private readonly boardPage: IBoardPagePageObject) {
-    this.boardId = boardPage.getBoardId();
-    console.log('[SettingsStorage] Инициализирован для board ID:', this.boardId);
+    console.log('[SettingsStorage] Инициализирован для board ID:', this.resolveBoardId());
+  }
+
+  private resolveBoardId(): number | null {
+    return this.boardPage.getBoardId();
   }
 
   /**
    * Выполняет запрос к Jira Board Properties API
    */
   private async request<T>(method: string, key: string, body?: unknown): Promise<T | null> {
-    if (!this.boardId) {
+    const boardId = this.resolveBoardId();
+    if (!boardId) {
       console.error('[SettingsStorage] No board ID');
       return null;
     }
 
-    const url = `/rest/agile/1.0/board/${this.boardId}/properties/${key}`;
+    const url = `/rest/agile/1.0/board/${boardId}/properties/${key}`;
     const options: RequestInit = {
       method,
       headers: {
@@ -98,11 +100,12 @@ export class SettingsStorage {
    * Проверяет, доступен ли API
    */
   async isAvailable(): Promise<boolean> {
-    if (!this.boardId) {
+    const boardId = this.resolveBoardId();
+    if (!boardId) {
       return false;
     }
     try {
-      const url = `/rest/agile/1.0/board/${this.boardId}`;
+      const url = `/rest/agile/1.0/board/${boardId}`;
       const response = await fetch(url, { method: 'GET', credentials: 'same-origin' });
       return response.ok;
     } catch {
@@ -114,7 +117,7 @@ export class SettingsStorage {
    * Получает ID доски
    */
   getBoardId(): number | null {
-    return this.boardId;
+    return this.resolveBoardId();
   }
 }
 

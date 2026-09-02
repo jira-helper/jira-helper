@@ -247,6 +247,9 @@ export interface IBoardPagePageObject {
   /** Parse assignee name from issue card's avatar tooltip / alt. */
   getAssigneeFromIssue(issue: Element): string | null;
 
+  /** Cloud SPA: drop columns / work-data caches when the board id changes. */
+  clearRuntimeCaches?(): void;
+
   /**
    * Person-WIP matches from board work data (Cloud allData).
    * Returns `null` when unavailable — callers must fall back to DOM counting.

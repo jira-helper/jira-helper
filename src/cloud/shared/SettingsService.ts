@@ -86,6 +86,15 @@ export class SettingsService {
     }
   }
 
+  async reinitForCurrentBoard(): Promise<void> {
+    this.settings = this.getDefaultSettings();
+    this.isInitialized = false;
+    this.initPromise = this.init();
+    await this.initPromise;
+    this.isInitialized = true;
+    this.notifySettingsChanged();
+  }
+
   // Подписаться на изменения настроек
   onSettingsChanged(callback: () => void): () => void {
     this.onSettingsChangedCallbacks.push(callback);
