@@ -348,6 +348,9 @@ export default class PersonLimitsBoardPage extends PageModification<[any, Person
       wrapper.style.flexShrink = '0';
       wrapper.style.alignItems = 'center';
       wrapper.style.marginRight = '8px';
+    } else if (po.columnHeaderRenderMode === 'cloud') {
+      wrapper.setAttribute('data-jh-avatars-host', 'cloud');
+      wrapper.style.display = 'contents';
     } else {
       wrapper.style.display = 'contents';
     }

@@ -93,6 +93,7 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
   beforeEach(() => {
     useLocalSettingsStore.getState().updateSettings({ locale: 'auto' });
     delete (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget;
+    delete (mockBoardPO as { columnHeaderRenderMode?: string }).columnHeaderRenderMode;
     vi.mocked(mockBoardPO.getIssueCssSelector!).mockClear();
     document.body.innerHTML =
       '<div id="ghx-view-selector"><div id="subnav-title"></div></div>' + '<div id="ghx-pool"></div>';
@@ -114,10 +115,13 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     page.apply([{ canEdit: false, rapidListConfig: { mappedColumns: [] } }, personLimitsWithOne]);
     await flush();
 
-    expect(document.querySelector('#subnav-title [data-jh-person-limits="avatars"]')).not.toBeNull();
+    const host = document.querySelector('#subnav-title [data-jh-person-limits="avatars"]');
+    expect(host).not.toBeNull();
+    expect(host?.getAttribute('data-jh-avatars-host')).toBeNull();
   });
 
   it('renders avatars into the Cloud board header and uses the Cloud issue selector', async () => {
+    (mockBoardPO as { columnHeaderRenderMode?: string }).columnHeaderRenderMode = 'cloud';
     (mockBoardPO.selectors as { boardHeaderTarget?: string }).boardHeaderTarget =
       '[data-testid="software-board.header.controls-bar"]';
     document.body.innerHTML = '<div data-testid="software-board.header.controls-bar"></div>';
@@ -127,9 +131,11 @@ describe('PersonLimitsBoardPage — avatars lifecycle', () => {
     await flush();
 
     const runtime = globalContainer.inject(boardRuntimeModelToken).model;
-    expect(
-      document.querySelector('[data-testid="software-board.header.controls-bar"] [data-jh-person-limits="avatars"]')
-    ).not.toBeNull();
+    const host = document.querySelector(
+      '[data-testid="software-board.header.controls-bar"] [data-jh-person-limits="avatars"]'
+    );
+    expect(host).not.toBeNull();
+    expect(host?.getAttribute('data-jh-avatars-host')).toBe('cloud');
     expect(mockBoardPO.getIssueCssSelector).toHaveBeenCalled();
     expect(runtime.cssSelectorOfIssues).toBe('[data-testid="platform-board-kit.ui.card.card"]');
   });
