@@ -43,6 +43,15 @@ const applyModifications = (modificationsMap: ModificationsMap, routingService: 
   route = routingService.getCurrentRoute();
 
   if (!route) {
+    // SPA left a known Jira surface (Cloud list/table, etc.). Drop board mods;
+    // keep ALL (e.g. settings in the project header).
+    const keepOnUnknownRoute = new Set(modificationsMap[Routes.ALL] || []);
+    for (const instance of currentModifications.keys()) {
+      if (!keepOnUnknownRoute.has(instance)) {
+        instance.clear();
+        currentModifications.delete(instance);
+      }
+    }
     return;
   }
 

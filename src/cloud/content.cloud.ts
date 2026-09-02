@@ -96,6 +96,17 @@ export async function initializeCloudExtension(): Promise<void> {
     [Routes.ALL]: [boardSettingsBoardPage],
   };
 
+  let lastBoardId = routingService.getBoardIdFromURL();
+  routingService.onUrlChange(() => {
+    const nextBoardId = routingService.getBoardIdFromURL();
+    if (nextBoardId === lastBoardId) {
+      return;
+    }
+    lastBoardId = nextBoardId;
+    boardPageObject.clearRuntimeCaches?.();
+    void settingsService.reinitForCurrentBoard();
+  });
+
   runModifications(modificationsMap, routingService);
 
   loadLocalSettings();

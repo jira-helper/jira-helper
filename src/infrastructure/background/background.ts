@@ -1,8 +1,7 @@
 import { types } from '../messages/actions';
 import { extensionApiService } from '../extension-api/ExtensionApiService';
 
-const regexpBoardUrl = /rapidView=(\d*)/im;
-const regexpBoardSettingsTabUrl = /tab=/im;
+const regexpBoardUrl = /rapidView=(\d*)|\/boards\/\d+/im;
 const regexpChartControlChart = /chart=controlChart/im;
 
 interface Response {
@@ -30,7 +29,7 @@ extensionApiService.onTabsUpdated(async (tabId, changeInfo) => {
   }
 
   if (changeInfo.url == null) return;
-  if (regexpBoardUrl.test(changeInfo.url) && regexpBoardSettingsTabUrl.test(changeInfo.url)) {
+  if (regexpBoardUrl.test(changeInfo.url)) {
     extensionApiService.sendMessageToTab(
       tabId,
       {
