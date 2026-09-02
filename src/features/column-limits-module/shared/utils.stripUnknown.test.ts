@@ -86,4 +86,26 @@ describe('stripUnknownWipColumnIds', () => {
     expect(result.changed).toBe(true);
     expect(result.cleaned).toEqual({ G1: { columns: ['115'], max: 5 } });
   });
+
+  it('treats numeric editmodel ids as the same as string property ids', () => {
+    const property: WipLimitsProperty = {
+      G1: { columns: ['115', '116'], max: 5 },
+    };
+
+    const result = stripUnknownWipColumnIds(property, [115, 116]);
+
+    expect(result.changed).toBe(false);
+    expect(result.cleaned).toEqual(property);
+  });
+
+  it('does not strip when the known column list is empty', () => {
+    const property: WipLimitsProperty = {
+      G1: { columns: ['115'], max: 5 },
+    };
+
+    const result = stripUnknownWipColumnIds(property, []);
+
+    expect(result.changed).toBe(false);
+    expect(result.cleaned).toEqual(property);
+  });
 });
