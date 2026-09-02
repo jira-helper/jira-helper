@@ -16,11 +16,11 @@ import { defaultHeaders } from 'src/shared/defaultHeaders';
 import manifest from '../../../manifest.json';
 import { JiraField, JiraIssue, JiraIssueLinkType, JiraStatus } from './types';
 import { getJiraWebBaseUrl } from './jiraWebContext';
+import { boardPropertyKeyToWrite, selectBoardPropertyKey, shouldCopyWipLimitsToV2 } from './boardPropertyKeys';
 
 const PACKAGE_VERSION = manifest.version;
 
-const configVersion = 'v1';
-const getPropName = (property: string): string => `${property}${configVersion}`;
+const getPropName = (property: string): string => boardPropertyKeyToWrite(property);
 
 const boardPropertiesUrl = (boardId: string): string => `agile/1.0/board/${boardId}/properties`;
 
@@ -131,27 +131,6 @@ const getBoardProperties = (boardId: string): Promise<any> => {
   });
 };
 
-// Fetch a specific property of a board
-export const getBoardProperty = async <T>(
-  boardId: string,
-  property: string,
-  params: Record<string, any> = {}
-): Promise<T | undefined> => {
-  const boardProps = await getBoardProperties(boardId);
-  if (!boardProps.keys.find((boardProp: { key: string }) => boardProp.key === getPropName(property))) return undefined;
-
-  const cacheKey = `${boardId}_${property}`;
-  const memoryCacheForce = invalidatedProperties[cacheKey] != null;
-  delete invalidatedProperties[cacheKey];
-
-  return requestJira({
-    url: `${boardPropertiesUrl(boardId)}/${getPropName(property)}`,
-    memoryCacheForce,
-    type: 'json',
-    ...params,
-  }).then(result => result.value as T);
-};
-
 // Update a specific property of a board
 export const updateBoardProperty = (
   boardId: string,
@@ -172,6 +151,35 @@ export const updateBoardProperty = (
   }).catch(() => {
     // ignore error because PUT method does not return JSON
   });
+};
+
+// Fetch a specific property of a board
+export const getBoardProperty = async <T>(
+  boardId: string,
+  property: string,
+  params: Record<string, any> = {}
+): Promise<T | undefined> => {
+  const boardProps = await getBoardProperties(boardId);
+  const existingKeys = (boardProps.keys ?? []).map((boardProp: { key: string }) => boardProp.key);
+  const selectedKey = selectBoardPropertyKey(property, existingKeys);
+  if (!selectedKey) return undefined;
+
+  const cacheKey = `${boardId}_${property}`;
+  const memoryCacheForce = invalidatedProperties[cacheKey] != null;
+  delete invalidatedProperties[cacheKey];
+
+  const value = await requestJira({
+    url: `${boardPropertiesUrl(boardId)}/${selectedKey}`,
+    memoryCacheForce,
+    type: 'json',
+    ...params,
+  }).then(result => result.value as T);
+
+  if (shouldCopyWipLimitsToV2(property, selectedKey, value)) {
+    updateBoardProperty(boardId, property, value, params);
+  }
+
+  return value;
 };
 
 // Delete a specific property of a board
