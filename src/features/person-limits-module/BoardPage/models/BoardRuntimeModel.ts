@@ -187,6 +187,16 @@ export class BoardRuntimeModel {
       const shouldShow = total === 0 || hidden < total;
       this.pageObject.setSwimlaneVisibility(sw.element, shouldShow);
     });
+
+    this.pageObject.getColumnElements().forEach(column => {
+      if (column.getAttribute('data-testid') !== 'board.content.cell') return;
+      if (this.activePerson == null) {
+        this.pageObject.setParentGroupVisibility(column, true);
+        return;
+      }
+      const { total, hidden } = this.pageObject.countIssueVisibility(column, cssSelectorOfIssues);
+      this.pageObject.setParentGroupVisibility(column, total > 0 && hidden < total);
+    });
   }
 
   private shouldShowIssueForActiveFilter(issue: Element): boolean {
@@ -229,7 +239,8 @@ export class BoardRuntimeModel {
    * debounced full apply lets mismatched cards flash visible.
    */
   applyVisibilityToIssues(issues: Element[]): void {
-    issues.forEach(issue => {
+    const targets = issues.flatMap(issue => [issue, ...(this.pageObject.getNestedIssueElements?.(issue) ?? [])]);
+    targets.forEach(issue => {
       this.pageObject.setIssueVisibility(issue, this.shouldShowIssueForActiveFilter(issue));
     });
   }

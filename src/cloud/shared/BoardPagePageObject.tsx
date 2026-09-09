@@ -83,6 +83,7 @@ export interface IBoardPagePageObject extends Omit<ServerBoardPagePageObject, 's
   /** Person-WIP matches from allData; `null` when work data is unavailable (use DOM). */
   getPersonWipMatchesFromWorkData(criteria: PersonWipWorkDataCriteria): PersonWipWorkDataMatch[] | null;
   getIssueKeyFromIssue(issue: Element): string | null;
+  getNestedIssueElements(issue: Element): Element[];
 }
 
 export type CloudBoardWorkIssue = {
@@ -209,7 +210,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
     avatarImg: '[data-testid="platform-board-kit.ui.avatar"]',
     // Newer kit uses type-badge; classic Cloud often only has the issuetype icon <img alt="…">.
     issueType: '[data-testid="platform-board-kit.ui.type-badge"], img[src*="issuetypes/"]',
-    parentGroup: '',
+    parentGroup: '[data-testid="board.content.swimlane.scroll-container"]',
     // Keep primary header target as legacy controls-bar; BoardSettings falls back to
     // horizontal-nav-header.ui.project-header.header when this is absent.
     boardHeaderTarget: '[data-testid="software-board.header.controls-bar"]',
@@ -944,7 +945,36 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getIssueElements(cssSelector: string): Element[] {
-    return Array.from(document.querySelectorAll(cssSelector));
+    const issues = Array.from(document.querySelectorAll(cssSelector));
+    return [...issues, ...issues.flatMap(issue => this.getNestedIssueElements(issue))];
+  },
+
+  getNestedIssueElements(issue: Element): Element[] {
+    const parentKey = this.getIssueKeyFromIssue(issue);
+    if (parentKey == null) return [];
+
+    const rows: Element[] = [];
+    const seen = new Set<Element>();
+    for (const link of Array.from(issue.querySelectorAll('a[href*="/browse/"]'))) {
+      const href = link.getAttribute('href') ?? '';
+      const key = href.match(/\/browse\/([A-Z][A-Z0-9]+-\d+)/i)?.[1];
+      if (key == null || key === parentKey) continue;
+
+      let node: Element | null = link.parentElement;
+      let row: Element | null = null;
+      while (node && node !== issue) {
+        if (node.querySelector('[aria-label*="Исполнитель"], [aria-label*="Assignee"]')) {
+          row = node;
+          break;
+        }
+        node = node.parentElement;
+      }
+      if (row && !seen.has(row)) {
+        seen.add(row);
+        rows.push(row);
+      }
+    }
+    return rows;
   },
 
   getIssueElementsInColumn(column: Element, cssSelector: string): Element[] {
@@ -1032,7 +1062,7 @@ export const BoardPagePageObject: CloudBoardPagePageObjectInternal = {
   },
 
   getParentGroups(): Element[] {
-    return [];
+    return this._getSwimlaneScrollContainers();
   },
 
   countIssueVisibility(element: Element, cssSelector: string) {

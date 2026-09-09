@@ -288,6 +288,12 @@ export interface IBoardPagePageObject {
   /** Parent group elements (subtask grouping). */
   getParentGroups(): Element[];
 
+  /**
+   * Nested subtask rows inside a parent card (Cloud). Server boards expose
+   * subtasks as their own `.ghx-issue` nodes, so this is empty there.
+   */
+  getNestedIssueElements?(issue: Element): Element[];
+
   /** Count issues matching selector; hidden = has `no-visibility` class. */
   countIssueVisibility(
     element: Element,

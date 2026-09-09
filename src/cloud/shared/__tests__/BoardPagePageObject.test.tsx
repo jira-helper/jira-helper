@@ -782,5 +782,43 @@ describe('BoardPagePageObject', () => {
     });
     expect(BoardPagePageObject.getColumnElements()).toHaveLength(6);
   });
+
+  it('treats nested Cloud subtask rows as visibility targets without counting them as extra cards', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.cell">
+          <div data-testid="board.content.cell.card" id="parent-card">
+            <a href="/browse/KAN-4">KAN-4</a>
+            <button type="button" aria-label="Исполнитель: Maxim Sosnov"></button>
+            <div id="nested-subtask">
+              <a href="/browse/KAN-32">KAN-32</a>
+              <button type="button" aria-label="Исполнитель: xCredo"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const parent = document.getElementById('parent-card')!;
+    const nested = document.getElementById('nested-subtask')!;
+    const selector = BoardPagePageObject.selectors.issue;
+
+    expect(BoardPagePageObject.getIssueElements(selector)).toEqual([parent, nested]);
+    expect(BoardPagePageObject.getIssueElementsInColumn(parent.parentElement!, selector)).toEqual([parent]);
+    expect(BoardPagePageObject.getNestedIssueElements?.(parent)).toEqual([nested]);
+    expect(BoardPagePageObject.getAssigneeFromIssue(nested)).toBe('xCredo');
+    expect(BoardPagePageObject.getIssueKeyFromIssue(nested)).toBe('KAN-32');
+  });
+
+  it('exposes Cloud group-by rows as parent groups', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.swimlane.scroll-container" id="group-kan-7"></div>
+        <div data-testid="board.content.swimlane.scroll-container" id="group-kan-4"></div>
+      </div>
+    `;
+
+    expect(BoardPagePageObject.getParentGroups().map(el => el.id)).toEqual(['group-kan-7', 'group-kan-4']);
+  });
 });
 

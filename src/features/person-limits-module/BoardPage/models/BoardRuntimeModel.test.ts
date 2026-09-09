@@ -1087,4 +1087,105 @@ describe('BoardRuntimeModel', () => {
     expect(document.getElementById('group-maxim')!.classList.contains('no-visibility')).toBe(false);
     expect(document.getElementById('group-xcredo')!.classList.contains('no-visibility')).toBe(false);
   });
+
+  it('showOnlyChosen hides nested Cloud subtasks of other people inside a visible parent card', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.cell">
+          <div data-testid="board.content.cell.card" id="parent-card">
+            <a href="/browse/KAN-4">KAN-4</a>
+            <button type="button" aria-label="Исполнитель: Maxim Sosnov"></button>
+            <div id="nested-subtask">
+              <a href="/browse/KAN-32">KAN-32</a>
+              <button type="button" aria-label="Исполнитель: xCredo"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    CloudBoardPagePageObject.setCachedColumns([{ id: '115', name: 'In Progress' }]);
+    CloudBoardPagePageObject.setBoardWorkData(null);
+    CloudBoardPagePageObject.setSwimlanesCache(null);
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'maxim', displayName: 'Maxim Sosnov', self: '', avatar: '' }],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(
+      mockPropertyModel,
+      CloudBoardPagePageObject as unknown as IBoardPagePageObject,
+      mockLogger
+    );
+    model.setCssSelectorOfIssues(CloudBoardPagePageObject.selectors.issue);
+    model.calculateStats();
+    model.activePerson = { limitId: model.stats[0].id, personName: 'maxim' };
+
+    model.showOnlyChosen();
+
+    expect(document.getElementById('parent-card')!.classList.contains('no-visibility')).toBe(false);
+    expect(document.getElementById('nested-subtask')!.classList.contains('no-visibility')).toBe(true);
+  });
+
+  it('showOnlyChosen hides Cloud column cells that have no remaining visible cards', () => {
+    document.body.innerHTML = `
+      <div data-testid="board.content.board-wrapper">
+        <div data-testid="board.content.swimlane.scroll-container" id="group-kan-7">
+          <div data-testid="board.content.cell" id="cell-todo">
+            <div data-testid="board.content.cell.card" id="kan-33">
+              <a href="/browse/KAN-33">KAN-33</a>
+              <button type="button" aria-label="Исполнитель: Maxim Sosnov"></button>
+            </div>
+          </div>
+          <div data-testid="board.content.cell" id="cell-progress">
+            <div data-testid="board.content.cell.card" id="kan-32">
+              <a href="/browse/KAN-32">KAN-32</a>
+              <button type="button" aria-label="Исполнитель: xCredo"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    CloudBoardPagePageObject.setCachedColumns([
+      { id: 'todo', name: 'To Do' },
+      { id: 'progress', name: 'In Progress' },
+    ]);
+    CloudBoardPagePageObject.setBoardWorkData(null);
+    CloudBoardPagePageObject.setSwimlanesCache(null);
+
+    (mockPropertyModel as { data: { limits: PersonLimit[] } }).data = {
+      limits: [
+        {
+          id: 1,
+          persons: [{ name: 'maxim', displayName: 'Maxim Sosnov', self: '', avatar: '' }],
+          limit: 5,
+          columns: [],
+          swimlanes: [],
+          showAllPersonIssues: true,
+        },
+      ],
+    };
+    const model = new BoardRuntimeModel(
+      mockPropertyModel,
+      CloudBoardPagePageObject as unknown as IBoardPagePageObject,
+      mockLogger
+    );
+    model.setCssSelectorOfIssues(CloudBoardPagePageObject.selectors.issue);
+    model.calculateStats();
+    model.activePerson = { limitId: model.stats[0].id, personName: 'maxim' };
+
+    model.showOnlyChosen();
+
+    expect(document.getElementById('kan-33')!.classList.contains('no-visibility')).toBe(false);
+    expect(document.getElementById('kan-32')!.classList.contains('no-visibility')).toBe(true);
+    expect(document.getElementById('cell-todo')!.classList.contains('no-visibility')).toBe(false);
+    expect(document.getElementById('cell-progress')!.classList.contains('no-visibility')).toBe(true);
+  });
 });
