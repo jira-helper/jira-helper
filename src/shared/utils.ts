@@ -6,6 +6,42 @@ export function isJiraPage(doc: { body: { id?: string } | null } = document): bo
   return doc.body?.id === 'jira';
 }
 
+const JIRA_PAGE_WAIT_INTERVAL_MS = 200;
+const JIRA_PAGE_WAIT_TIMEOUT_MS = 20_000;
+
+/**
+ * Some self-hosted Jira setups serve an intermediate shell document first
+ * (e.g. an SSO or user-group bootstrap page) and then replace the document
+ * content with the real Jira page without a new navigation. `isJiraPage` is
+ * false while the shell is showing, so a single-shot check at document start
+ * silently disables the extension for the whole page lifetime. Poll until the
+ * real Jira body shows up, or give up after the timeout.
+ */
+export function waitForJiraPage(
+  doc: { body: { id?: string } | null } = document,
+  timeoutMs: number = JIRA_PAGE_WAIT_TIMEOUT_MS
+): Promise<boolean> {
+  if (isJiraPage(doc)) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise(resolve => {
+    const startedAt = Date.now();
+    const intervalId = setInterval(() => {
+      if (isJiraPage(doc)) {
+        clearInterval(intervalId);
+        resolve(true);
+        return;
+      }
+
+      if (Date.now() - startedAt >= timeoutMs) {
+        clearInterval(intervalId);
+        resolve(false);
+      }
+    }, JIRA_PAGE_WAIT_INTERVAL_MS);
+  });
+}
+
 export const waitForElement = (
   selector: string,
   container: Document | HTMLElement | Element = document
