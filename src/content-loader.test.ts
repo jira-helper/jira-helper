@@ -60,6 +60,15 @@ describe('detectJiraRuntime', () => {
     expect(runtime).toBe('server');
   });
 
+  it('detects Jira Server board configuration urls (RapidView.jspa)', async () => {
+    const runtime = await detectJiraRuntime({
+      location: createLocation({ hostname: 'jira.example.com', pathname: '/secure/RapidView.jspa' }),
+      documentRef: createDocument().documentRef,
+    });
+
+    expect(runtime).toBe('server');
+  });
+
   it('ignores non-Jira pages after body is available', async () => {
     const body = { id: '' } as HTMLElement;
     const runtime = await detectJiraRuntime({
