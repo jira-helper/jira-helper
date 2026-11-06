@@ -2,7 +2,7 @@ import './firefoxFixes';
 import { globalContainer } from 'dioma';
 import { setAutoFreeze } from 'immer';
 import { Routes, routingServiceToken } from './infrastructure/routing';
-import { isJiraPage } from './shared/utils';
+import { waitForJiraPage } from './shared/utils';
 import AddSlaLine, { addSlaLineToken } from './features/charts/AddSlaLine';
 import AddChartGrid, { addChartGridToken } from './features/charts/AddChartGrid';
 import runModifications from './infrastructure/page-modification/runModifications';
@@ -184,7 +184,7 @@ function initDiContainer() {
 }
 
 async function start() {
-  if (!isJiraPage()) return;
+  if (!(await waitForJiraPage())) return;
 
   initDiContainer();
 
@@ -193,7 +193,13 @@ async function start() {
   const blurFeature = container.inject(blurSensitiveFeatureToken);
   blurFeature.init();
   const extensionApi = container.inject(extensionApiServiceToken);
-  extensionApi.sendMessage({ message: 'jira-helper-inited' });
+  // MV3 may race the first navigation against service worker cold start; losing
+  // this optional notification (context menu registration) must not kill the UI
+  /* eslint-disable no-console */
+  extensionApi
+    .sendMessage({ message: 'jira-helper-inited' })
+    .catch(() => console.warn('[jira-helper] background is not reachable, context menu registration skipped'));
+  /* eslint-enable no-console */
 
   await domLoaded();
 

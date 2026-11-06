@@ -26,8 +26,18 @@ function isCloudBoardPath(pathname: string): boolean {
   return pathname.startsWith('/jira/software/');
 }
 
+/*
+  Jira Server boards live at /secure/RapidBoard.jspa; opening the board
+  configuration («Настроить») performs a full navigation to
+  /secure/RapidView.jspa?rapidView=…, so that URL must also be treated as server.
+*/
 function isServerRapidBoardPath(pathname: string): boolean {
-  return pathname.endsWith('/secure/RapidBoard.jspa') || pathname.includes('/secure/RapidBoard.jspa/');
+  return (
+    pathname.endsWith('/secure/RapidBoard.jspa') ||
+    pathname.includes('/secure/RapidBoard.jspa/') ||
+    pathname.endsWith('/secure/RapidView.jspa') ||
+    pathname.includes('/secure/RapidView.jspa/')
+  );
 }
 
 function waitForBody(documentRef: LoaderDocument): Promise<HTMLElement | null> {
